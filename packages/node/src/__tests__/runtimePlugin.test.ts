@@ -12,7 +12,9 @@ import runtimePlugin, {
   setupChunkHandler,
   setupWebpackRequirePatching,
   nodeRuntimeImportCache,
+  CHUNK_WRAPPER_PARAMS,
 } from '../runtimePlugin';
+import { httpEvalStrategy } from '../filesystem/stratagies';
 import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
@@ -28,6 +30,29 @@ declare global {
 jest.mock('fs', () => ({
   existsSync: jest.fn(),
   readFile: jest.fn(),
+}));
+
+jest.mock('@module-federation/sdk', () => ({
+  withSideEffectScope: jest.fn((_scopeId: string, fn: () => any) => fn()),
+  // the plugin compiles fetched chunks through the sdk's Node entry point;
+  // back it with the vm mock above so individual tests can shape the compile
+  compileRemoteCommonJsModule: jest.fn(
+    ({
+      source,
+      filename,
+      parameters,
+      importModuleDynamically,
+    }: {
+      source: string;
+      filename: string;
+      parameters: string[];
+      importModuleDynamically?: any;
+    }) =>
+      new (require('vm').Script)(
+        `(function(${parameters.join(', ')}) {${source}\n})`,
+        { filename, importModuleDynamically },
+      ).runInThisContext(),
+  ),
 }));
 
 jest.mock('vm', () => ({
@@ -318,6 +343,31 @@ describe('runtimePlugin', () => {
       expect(callback).toHaveBeenCalledWith(readError, null);
     });
 
+    it('should associate chunk evaluation with the remote name when args are provided', () => {
+      const { withSideEffectScope } = require('@module-federation/sdk');
+      require('fs').existsSync.mockReturnValue(true);
+      require('fs').readFile.mockImplementationOnce(
+        (
+          path: string,
+          encoding: string,
+          cb: (err: Error | null, content?: string) => void,
+        ) => {
+          cb(null, 'exports.ok = true;');
+        },
+      );
+
+      const callback = jest.fn();
+      loadFromFs('/path/to/chunk.js', callback, {
+        origin: { name: 'test-remote' },
+      });
+
+      expect(withSideEffectScope).toHaveBeenCalledWith(
+        'test-remote',
+        expect.any(Function),
+      );
+      expect(callback).toHaveBeenCalledWith(null, expect.any(Object));
+    });
+
     it('should handle script evaluation errors', () => {
       require('fs').existsSync.mockReturnValue(true);
       require('fs').readFile.mockImplementationOnce(
@@ -438,6 +488,11 @@ describe('runtimePlugin', () => {
         },
       });
       const callback = jest.fn();
+      // compile for real so the broken chunk throws a SyntaxError
+      require('vm').Script.mockImplementationOnce((code: string) => {
+        new Function(`return ${code}`);
+        return { runInThisContext: () => () => undefined };
+      });
       const args = {
         origin: {
           options: {
@@ -659,6 +714,9 @@ describe('runtimePlugin', () => {
             "exports.modules = {'test-module': {}}; exports.ids = ['test-chunk']; exports.runtime = null;",
           ),
       });
+      require('vm').Script.mockImplementationOnce((code: string) => ({
+        runInThisContext: () => new Function(`return ${code}`)(),
+      }));
       const args = {
         origin: {
           options: { name: 'test-host' },
@@ -684,6 +742,21 @@ describe('runtimePlugin', () => {
       });
 
       expect(result).toEqual(mockChunk);
+      // remote chunks go through the sdk compile helper under the cache policy,
+      // with the chunk URL as the script filename, never through direct eval
+      const { compileRemoteCommonJsModule } = require('@module-federation/sdk');
+      expect(compileRemoteCommonJsModule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filename: 'http://example.com/test-chunk',
+          parameters: CHUNK_WRAPPER_PARAMS,
+        }),
+      );
+      expect(require('vm').Script).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '(function(exports, require, __dirname, __filename)',
+        ),
+        expect.objectContaining({ filename: 'http://example.com/test-chunk' }),
+      );
       (global as any).__webpack_require__.p = originalPublicPath;
     });
 
@@ -707,6 +780,21 @@ describe('runtimePlugin', () => {
       });
       (global as any).__webpack_require__.p = originalPublicPath;
       (global as any).__FEDERATION__.__INSTANCES__ = originalInstances;
+    });
+  });
+
+  describe('httpEvalStrategy', () => {
+    it('wraps chunks with the same parameter list as compileChunk', () => {
+      // the strategy is stringified into generated code and cannot import the
+      // constant, so keep its inline parameter list in sync by inspection
+      const match = httpEvalStrategy
+        .toString()
+        .match(/new Function\(([^)]*?),\s*data\)/);
+      expect(match).not.toBeNull();
+      const parameters = match![1]
+        .split(',')
+        .map((parameter) => parameter.trim().replace(/['"]/g, ''));
+      expect(parameters).toEqual(CHUNK_WRAPPER_PARAMS);
     });
   });
 
