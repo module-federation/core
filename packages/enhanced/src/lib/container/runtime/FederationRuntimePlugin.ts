@@ -5,6 +5,7 @@ import type {
   WebpackPluginInstance,
   Compilation,
   Chunk,
+  javascript,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { moduleFederationPlugin } from '@module-federation/sdk';
@@ -16,10 +17,16 @@ import {
   normalizeToPosixPath,
 } from './utils';
 import { TEMP_DIR } from '../constant';
+import {
+  JAVASCRIPT_MODULE_TYPE_AUTO,
+  JAVASCRIPT_MODULE_TYPE_DYNAMIC,
+  JAVASCRIPT_MODULE_TYPE_ESM,
+} from '../../Constants';
 import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+import AsyncEntrypointRuntimeDependency from './AsyncEntrypointRuntimeDependency';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
@@ -328,6 +335,40 @@ class FederationRuntimePlugin {
           FederationRuntimeDependency,
           new ModuleDependency.Template(),
         );
+        compilation.dependencyFactories.set(
+          AsyncEntrypointRuntimeDependency,
+          normalModuleFactory,
+        );
+        compilation.dependencyTemplates.set(
+          AsyncEntrypointRuntimeDependency,
+          new AsyncEntrypointRuntimeDependency.Template(),
+        );
+
+        // addInclude only reaches static entrypoints.
+        const addEntryToAsyncEntrypoints = (
+          parser: javascript.JavascriptParser,
+        ) => {
+          parser.hooks.finish.tap(this.constructor.name, () => {
+            for (const block of parser.state.module.blocks) {
+              if (block.groupOptions?.entryOptions) {
+                block.addDependency(
+                  new AsyncEntrypointRuntimeDependency(
+                    this.getDependency(compiler).request,
+                  ),
+                );
+              }
+            }
+          });
+        };
+        for (const type of [
+          JAVASCRIPT_MODULE_TYPE_AUTO,
+          JAVASCRIPT_MODULE_TYPE_DYNAMIC,
+          JAVASCRIPT_MODULE_TYPE_ESM,
+        ]) {
+          normalModuleFactory.hooks.parser
+            .for(type)
+            .tap(this.constructor.name, addEntryToAsyncEntrypoints);
+        }
       },
     );
     compiler.hooks.make.tapAsync(
