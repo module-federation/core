@@ -258,14 +258,14 @@ importers:
         specifier: ^2.13.4
         version: 2.15.2(eslint@9.39.3(jiti@2.6.1))
       eslint-plugin-import:
-        specifier: 2.31.0
-        version: 2.31.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint@9.39.3(jiti@2.6.1))
+        specifier: 2.32.0
+        version: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint@9.39.3(jiti@2.6.1))
       eslint-plugin-jsx-a11y:
         specifier: 6.10.1
         version: 6.10.1(eslint@9.39.3(jiti@2.6.1))
       eslint-plugin-prettier:
-        specifier: 5.2.1
-        version: 5.2.1(@types/eslint@9.6.1)(eslint-config-prettier@10.1.5(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))(prettier@3.8.1)
+        specifier: 5.5.6
+        version: 5.5.6(@types/eslint@9.6.1)(eslint-config-prettier@10.1.5(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))(prettier@3.8.1)
       eslint-plugin-react:
         specifier: 7.37.2
         version: 7.37.2(eslint@9.39.3(jiti@2.6.1))
@@ -382,7 +382,7 @@ importers:
         version: 10.9.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(@types/node@20.19.5)(typescript@6.0.3)
       tsdown:
         specifier: 0.20.3
-        version: 0.20.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(publint@0.3.18)(typescript@6.0.3)(vue-tsc@2.2.12(typescript@6.0.3))
+        version: 0.20.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(publint@0.3.18)(synckit@0.11.13)(typescript@6.0.3)(vue-tsc@2.2.12(typescript@6.0.3))
       tslib:
         specifier: 2.8.1
         version: 2.8.1
@@ -3858,7 +3858,7 @@ importers:
         version: 9.2.1
       tsdown:
         specifier: 0.20.3
-        version: 0.20.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(publint@0.3.18)(typescript@6.0.3)(vue-tsc@2.2.12(typescript@6.0.3))
+        version: 0.20.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(publint@0.3.18)(synckit@0.11.13)(typescript@6.0.3)(vue-tsc@2.2.12(typescript@6.0.3))
       unplugin:
         specifier: ^1.10.1
         version: 1.10.1
@@ -3960,7 +3960,7 @@ importers:
         version: 18.3.7(@types/react@18.3.28)
       tsdown:
         specifier: 0.20.3
-        version: 0.20.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(publint@0.3.18)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@6.0.3))
+        version: 0.20.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(publint@0.3.18)(synckit@0.11.13)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@6.0.3))
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -9754,9 +9754,9 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@pkgr/core@0.1.2':
-    resolution: {integrity: sha512-fdDH1LSGfZdTH2sxdpVMw31BanV28K/Gry0cVFxaNP77neJSkd82mM8ErPNYs9e+0O7SdHBLTDzDgwUuy18RnQ==}
-    engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
+  '@pkgr/core@0.3.6':
+    resolution: {integrity: sha512-SEeaJLb3qBNF/OaXnaR1NmmBbFYk1zC0ZH/52fATcRPLFg/p791YrcyFFy44Bo9sLaGuSuLp5Q6axbb/O+v/RA==}
+    engines: {node: ^14.18.0 || >=16.0.0}
 
   '@playwright/test@1.57.0':
     resolution: {integrity: sha512-6TyEnHgd6SArQO8UO2OMTxshln3QMWBtPGrOCgs3wVEmQmwyuNtB10IZMfmYDE0riwNR1cu4q+pPcxMVtaG3TA==}
@@ -18862,13 +18862,13 @@ packages:
       eslint-config-prettier:
         optional: true
 
-  eslint-plugin-prettier@5.2.1:
-    resolution: {integrity: sha512-gH3iR3g4JfF+yYPaJYkN7jEl9QbweL/YfkoRlNnuIEHEz1vHVlCmWOS+eGGiRuzHQXdJFCOTxRgvju9b8VUmrw==}
+  eslint-plugin-prettier@5.5.6:
+    resolution: {integrity: sha512-ifetmTcxWfz+4qRW3pH/ujdTq2jQIj59AxJMIN26K5avYgU8dxycUETQonWiW+wPrYXA0j3Try0l1CnwVQtDqQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       '@types/eslint': '>=8.0.0'
       eslint: '>=8.0.0'
-      eslint-config-prettier: '*'
+      eslint-config-prettier: '>= 7.0.0 <10.0.0 || >=10.1.0'
       prettier: '>=3.0.0'
     peerDependenciesMeta:
       '@types/eslint':
@@ -26830,8 +26830,8 @@ packages:
   synchronous-promise@2.0.17:
     resolution: {integrity: sha512-AsS729u2RHUfEra9xJrE39peJcc2stq2+poBXX8bcM08Y6g9j/i/PUzwNQqkaJde7Ntg1TO7bSREbR5sdosQ+g==}
 
-  synckit@0.9.3:
-    resolution: {integrity: sha512-JJoOEKTfL1urb1mDoEblhD9NhEbWmq9jHEMEnxoC4ujUaZ4itA8vKgwkFAyNClgxplLi9tsUKX+EduK0p/l7sg==}
+  synckit@0.11.13:
+    resolution: {integrity: sha512-eNRKgb3z66Yp3D2CixVujOUvXLFUTij/zVnV8KRyvFdQwpz7I5DS8UfRkTeLzb64u+dkzDSdelE24izu+zSSUg==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
   tabbable@6.5.0:
@@ -36794,7 +36794,7 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@pkgr/core@0.1.2': {}
+  '@pkgr/core@0.3.6': {}
 
   '@playwright/test@1.57.0':
     dependencies:
@@ -48971,7 +48971,7 @@ snapshots:
       eslint: 9.26.0(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.1(eslint@9.26.0(jiti@2.7.0))
       eslint-plugin-react: 7.37.2(eslint@9.26.0(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.0.1(eslint@9.26.0(jiti@2.7.0))
@@ -49012,7 +49012,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -49108,7 +49108,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint@9.39.3(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0(jiti@2.7.0)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -49117,11 +49117,11 @@ snapshots:
       array.prototype.flatmap: 1.3.3
       debug: 3.2.7(supports-color@8.1.1)
       doctrine: 2.1.0
-      eslint: 9.39.3(jiti@2.6.1)
+      eslint: 9.26.0(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint-import-resolver-node@0.3.9)(eslint@9.39.3(jiti@2.6.1))
-      hasown: 2.0.2
-      is-core-module: 2.16.1
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0))
+      hasown: 2.0.4
+      is-core-module: 2.17.0
       is-glob: 4.0.3
       minimatch: 3.1.5
       object.fromentries: 2.0.8
@@ -49137,7 +49137,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint@9.39.3(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -49146,11 +49146,11 @@ snapshots:
       array.prototype.flatmap: 1.3.3
       debug: 3.2.7(supports-color@8.1.1)
       doctrine: 2.1.0
-      eslint: 9.26.0(jiti@2.7.0)
+      eslint: 9.39.3(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0)))(eslint@9.26.0(jiti@2.7.0))
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@6.0.3))(eslint-import-resolver-node@0.3.9)(eslint@9.39.3(jiti@2.6.1))
       hasown: 2.0.4
-      is-core-module: 2.16.1
+      is-core-module: 2.17.0
       is-glob: 4.0.3
       minimatch: 3.1.5
       object.fromentries: 2.0.8
@@ -49246,12 +49246,12 @@ snapshots:
     optionalDependencies:
       eslint-config-prettier: 8.10.2(eslint@8.57.1)
 
-  eslint-plugin-prettier@5.2.1(@types/eslint@9.6.1)(eslint-config-prettier@10.1.5(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))(prettier@3.8.1):
+  eslint-plugin-prettier@5.5.6(@types/eslint@9.6.1)(eslint-config-prettier@10.1.5(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))(prettier@3.8.1):
     dependencies:
       eslint: 9.39.3(jiti@2.6.1)
       prettier: 3.8.1
       prettier-linter-helpers: 1.0.1
-      synckit: 0.9.3
+      synckit: 0.11.13
     optionalDependencies:
       '@types/eslint': 9.6.1
       eslint-config-prettier: 10.1.5(eslint@9.39.3(jiti@2.6.1))
@@ -51646,7 +51646,6 @@ snapshots:
   is-core-module@2.17.0:
     dependencies:
       hasown: 2.0.4
-    optional: true
 
   is-data-descriptor@1.0.1:
     dependencies:
@@ -60745,10 +60744,9 @@ snapshots:
 
   synchronous-promise@2.0.17: {}
 
-  synckit@0.9.3:
+  synckit@0.11.13:
     dependencies:
-      '@pkgr/core': 0.1.2
-      tslib: 2.8.1
+      '@pkgr/core': 0.3.6
 
   tabbable@6.5.0: {}
 
@@ -61714,7 +61712,7 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
-  tsdown@0.20.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(publint@0.3.18)(typescript@6.0.3)(vue-tsc@2.2.12(typescript@6.0.3)):
+  tsdown@0.20.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(publint@0.3.18)(synckit@0.11.13)(typescript@6.0.3)(vue-tsc@2.2.12(typescript@6.0.3)):
     dependencies:
       ansis: 4.2.0
       cac: 6.7.14
@@ -61731,7 +61729,7 @@ snapshots:
       tinyglobby: 0.2.15
       tree-kill: 1.2.2
       unconfig-core: 7.5.0
-      unrun: 0.2.32(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)
+      unrun: 0.2.32(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(synckit@0.11.13)
     optionalDependencies:
       publint: 0.3.18
       typescript: 6.0.3
@@ -61744,7 +61742,7 @@ snapshots:
       - synckit
       - vue-tsc
 
-  tsdown@0.20.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(publint@0.3.18)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@6.0.3)):
+  tsdown@0.20.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(publint@0.3.18)(synckit@0.11.13)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@6.0.3)):
     dependencies:
       ansis: 4.2.0
       cac: 6.7.14
@@ -61761,7 +61759,7 @@ snapshots:
       tinyglobby: 0.2.15
       tree-kill: 1.2.2
       unconfig-core: 7.5.0
-      unrun: 0.2.32(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)
+      unrun: 0.2.32(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(synckit@0.11.13)
     optionalDependencies:
       publint: 0.3.18
       typescript: 7.0.2
@@ -62254,9 +62252,11 @@ snapshots:
       '@unrs/resolver-binding-win32-ia32-msvc': 1.11.1
       '@unrs/resolver-binding-win32-x64-msvc': 1.11.1
 
-  unrun@0.2.32(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3):
+  unrun@0.2.32(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(synckit@0.11.13):
     dependencies:
       rolldown: 1.0.0-rc.9(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)
+    optionalDependencies:
+      synckit: 0.11.13
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
