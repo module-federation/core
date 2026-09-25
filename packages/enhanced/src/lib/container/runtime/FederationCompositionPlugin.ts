@@ -206,8 +206,8 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
     return real;
   };
   for (const module of modules) {
-    const { request, resource, resourceResolveData } = module as Module & {
-      request?: unknown;
+    const { userRequest, resource, resourceResolveData } = module as Module & {
+      userRequest?: string;
       resource?: string;
       resourceResolveData?: {
         descriptionFileData?: { name?: unknown };
@@ -219,8 +219,8 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
       continue;
     }
     if (module instanceof compilation.compiler.webpack.ExternalModule) {
-      const first = Array.isArray(request) ? request[0] : request;
-      if (typeof first === 'string') summary.externalRequests.push(first);
+      // request is the external target (e.g. a global name); userRequest is what was imported.
+      if (userRequest) summary.externalRequests.push(userRequest);
       continue;
     }
     const name = resourceResolveData?.descriptionFileData?.name;
