@@ -1,7 +1,9 @@
+import { execFile } from 'child_process';
 import fs from 'fs';
 import { createRequire } from 'module';
 import os from 'os';
 import path from 'path';
+import { promisify } from 'util';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { MIN_RUNTIME_VERSION } from '@module-federation/managers';
 import ModuleFederationPlugin from '../../../src/lib/container/ModuleFederationPlugin';
@@ -47,48 +49,48 @@ function fixture(files: Record<string, string>) {
 
 function compile(context: string, config: Record<string, unknown>) {
   const outputPath = path.join(context, `dist-${dirs.length}-${Math.random()}`);
-  return new Promise<{ stats: any; output: Record<string, string> }>(
-    (resolve, reject) => {
-      webpack(
-        {
-          context,
-          mode: 'production',
-          devtool: false,
-          // Two builds of one checkout can otherwise concatenate around different roots.
-          parallelism: 1,
-          target: 'async-node',
-          entry: './index.js',
-          optimization: { minimize: false },
-          output: { path: outputPath, uniqueName: 'composition-unit' },
-          ...config,
-        },
-        (err, stats) => {
-          if (err) return reject(err);
-          const output = {};
-          const files = fs.existsSync(outputPath)
-            ? fs.readdirSync(outputPath)
-            : [];
-          for (const file of files.sort()) {
-            if (file.endsWith('.js'))
-              output[file] = fs.readFileSync(
-                path.join(outputPath, file),
-                'utf8',
-              );
-          }
-          resolve({
-            stats: stats.toJson({
-              all: false,
-              errors: true,
-              warnings: true,
-              modules: true,
-              nestedModules: true,
-            }),
-            output,
-          });
-        },
-      );
-    },
-  );
+  return new Promise<{
+    stats: any;
+    output: Record<string, string>;
+    outputPath: string;
+  }>((resolve, reject) => {
+    webpack(
+      {
+        context,
+        mode: 'production',
+        devtool: false,
+        // Two builds of one checkout can otherwise concatenate around different roots.
+        parallelism: 1,
+        target: 'async-node',
+        entry: './index.js',
+        optimization: { minimize: false },
+        output: { path: outputPath, uniqueName: 'composition-unit' },
+        ...config,
+      },
+      (err, stats) => {
+        if (err) return reject(err);
+        const output = {};
+        const files = fs.existsSync(outputPath)
+          ? fs.readdirSync(outputPath)
+          : [];
+        for (const file of files.sort()) {
+          if (file.endsWith('.js'))
+            output[file] = fs.readFileSync(path.join(outputPath, file), 'utf8');
+        }
+        resolve({
+          stats: stats.toJson({
+            all: false,
+            errors: true,
+            warnings: true,
+            modules: true,
+            nestedModules: true,
+          }),
+          output,
+          outputPath,
+        });
+      },
+    );
+  });
 }
 
 const moduleNames = (stats) => {
@@ -187,6 +189,46 @@ describe('FederationCompositionPlugin', () => {
     ]);
     expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
   });
+
+  it.each([
+    ['the composed bootstrap', {}],
+    [
+      'the full bootstrap a user alias selects',
+      {
+        resolve: {
+          alias: {
+            '@module-federation/runtime$': path.join(
+              path.dirname(require.resolve('@module-federation/runtime')),
+              'index.js',
+            ),
+          },
+        },
+      },
+    ],
+  ])(
+    'registers the share scope of %s under name:version',
+    async (_, config) => {
+      const previous = process.env['MF_BUILD_VERSION'];
+      process.env['MF_BUILD_VERSION'] = '9.9.9';
+      try {
+        const context = fixture({ 'index.js': 'export default 1;' });
+        const { stats, outputPath } = await compile(context, {
+          ...config,
+          plugins: [host()],
+        });
+        expect(messages(stats.errors)).toEqual([]);
+        const { stdout } = await promisify(execFile)(process.execPath, [
+          '-e',
+          `require(${JSON.stringify(path.join(outputPath, 'main.js'))});
+          console.log(JSON.stringify(Object.keys(globalThis.__FEDERATION__.__SHARE__)));`,
+        ]);
+        expect(JSON.parse(stdout)).toEqual(['composition_host:9.9.9']);
+      } finally {
+        if (previous === undefined) delete process.env['MF_BUILD_VERSION'];
+        else process.env['MF_BUILD_VERSION'] = previous;
+      }
+    },
+  );
 
   it('emits ENV_TARGET but no capability or build-id define', async () => {
     const context = fixture({

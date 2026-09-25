@@ -21,6 +21,7 @@ import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
 import FederationCompositionPlugin, {
+  buildIdOf,
   composedEntryOf,
 } from './FederationCompositionPlugin';
 
@@ -202,6 +203,10 @@ class FederationRuntimePlugin {
       '}',
     ]);
 
+    // createFederation passes the build id to a composed bootstrap.
+    const buildId =
+      composition === undefined ? buildIdOf(compiler, options) : undefined;
+
     return Template.asString([
       composition ??
         `import federation from '${normalizedBundlerRuntimePath}';`,
@@ -209,6 +214,9 @@ class FederationRuntimePlugin {
       embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
       Template.indent([
+        buildId
+          ? `${federationGlobal}.initOptions.id = ${federationGlobal}.initOptions.id || ${JSON.stringify(buildId)};`
+          : '',
         runtimePluginCalls.length
           ? Template.asString([
               `var pluginsToAdd = [`,

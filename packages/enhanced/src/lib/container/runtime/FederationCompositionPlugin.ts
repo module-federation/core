@@ -58,6 +58,21 @@ function slotOf(compiler: Compiler): CompositionSlot {
   return (target[SLOT] ??= { participants: [], sealed: false });
 }
 
+/** The build id both bootstraps pass as options.id: only with one ModuleFederationPlugin. */
+export function buildIdOf(
+  compiler: Compiler,
+  { name }: { name?: string },
+): string | undefined {
+  const federationPlugins = compiler.options.plugins.filter(
+    (plugin) =>
+      !!plugin &&
+      (plugin as { name?: unknown }).name === 'ModuleFederationPlugin',
+  ).length;
+  return name && federationPlugins < 2
+    ? composeKeyWithSeparator(name, utils.getBuildVersion())
+    : undefined;
+}
+
 export const composedEntryOf = (compiler: Compiler) =>
   (compiler as SlotCompiler)[SLOT]?.entry;
 
@@ -136,22 +151,10 @@ class FederationCompositionPlugin {
     const composition = renderComposition(
       plan,
       resolveImports(plan, family),
-      this._buildId(compiler),
+      buildIdOf(compiler, this._options),
     );
     slot.entry = { ...this._createEntry(composition), adapters: plan.adapters };
     return { family, mode, entry: slot.entry };
-  }
-
-  private _buildId(compiler: Compiler): string | undefined {
-    const federationPlugins = compiler.options.plugins.filter(
-      (plugin) =>
-        !!plugin &&
-        (plugin as { name?: unknown }).name === 'ModuleFederationPlugin',
-    ).length;
-    const { name } = this._options;
-    return name && federationPlugins < 2
-      ? composeKeyWithSeparator(name, utils.getBuildVersion())
-      : undefined;
   }
 
   private _check(compilation: Compilation, { family, mode, entry }: Outcome) {

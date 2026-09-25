@@ -22,6 +22,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
     compiler = {
       options: {
         context: '/test/path',
+        plugins: [],
       },
       hooks: {
         thisCompilation: {
