@@ -182,9 +182,9 @@ const CONTAINER_ENTRY_PREFIX = 'container entry ';
 const FAMILY = new Set<string>(FAMILY_PACKAGES);
 
 function summarize(compilation: Compilation, modules: Iterable<Module>) {
-  const summary: { modules: GraphModule[]; externalRequests: string[] } = {
+  const summary: { modules: GraphModule[]; externalUserRequests: string[] } = {
     modules: [],
-    externalRequests: [],
+    externalUserRequests: [],
   };
   // descriptionFileRoot keeps symlinks; the runtime family records real paths.
   const realRoots = new Map<string, string>();
@@ -215,8 +215,7 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
       continue;
     }
     if (module instanceof compilation.compiler.webpack.ExternalModule) {
-      // request is the external target (e.g. a global name); userRequest is what was imported.
-      if (userRequest) summary.externalRequests.push(userRequest);
+      if (userRequest) summary.externalUserRequests.push(userRequest);
       continue;
     }
     const name = resourceResolveData?.descriptionFileData?.name;
