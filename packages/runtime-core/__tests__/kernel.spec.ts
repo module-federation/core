@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { FederationKernel } from '../src/kernel';
 import { remote } from '../src/remote/capability';
+import { shared } from '../src/shared/capability';
+import { CurrentGlobal } from '../src/global';
 import { PLATFORM_UNAVAILABLE_MESSAGE } from '../src/platform/unavailable';
 import { Module, ModuleFederation } from '../src';
 import { Module as RemoteModule } from '../src/module';
@@ -93,6 +95,20 @@ describe('FederationKernel', () => {
     });
 
     expect(kernel.options.remotes).toEqual([]);
+  });
+
+  it('registers its share scope under the id it is given', () => {
+    const kernel = new FederationKernel(
+      { name: 'kernel-share-id', id: 'kernel-share-id:1.0.0' },
+      { shared },
+    );
+
+    expect(
+      CurrentGlobal.__FEDERATION__.__SHARE__['kernel-share-id:1.0.0'],
+    ).toBe(kernel.shareScopeMap);
+    expect(CurrentGlobal.__FEDERATION__.__SHARE__['kernel-share-id']).toBe(
+      undefined,
+    );
   });
 });
 
