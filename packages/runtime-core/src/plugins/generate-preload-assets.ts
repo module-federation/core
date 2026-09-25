@@ -4,8 +4,7 @@ import {
   ProviderModuleInfo,
   isManifestProvider,
   getResourceUrl,
-  isBrowserEnvValue,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import {
   EntryAssets,
   ModuleFederationRuntimePlugin,
@@ -18,7 +17,7 @@ import {
 } from '../type';
 import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
-import { ModuleFederation } from '../core';
+import { FederationKernel } from '../core';
 import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
 import { getRegisteredShare } from '../utils/share';
 import {
@@ -110,7 +109,7 @@ const isExisted = (type: 'link' | 'script', url: string) => {
 
 // eslint-disable-next-line max-lines-per-function
 export function generatePreloadAssets(
-  origin: ModuleFederation,
+  origin: FederationKernel,
   preloadOptions: PreloadOptions[number],
   remote: RemoteInfoOptionalVersion,
   globalSnapshot: GlobalModuleInfo,
@@ -158,7 +157,10 @@ export function generatePreloadAssets(
 
       const remoteEntryUrl = getResourceUrl(
         moduleInfoSnapshot,
-        getRemoteEntryInfoFromSnapshot(moduleInfoSnapshot).url,
+        getRemoteEntryInfoFromSnapshot(
+          moduleInfoSnapshot,
+          origin.platform.isBrowser(),
+        ).url,
       );
 
       if (remoteEntryUrl) {
@@ -323,7 +325,7 @@ export const generatePreloadAssetsPlugin: () => ModuleFederationRuntimePlugin =
           globalSnapshot,
           remoteSnapshot,
         } = args;
-        if (!isBrowserEnvValue) {
+        if (!origin.platform.isBrowser()) {
           return {
             cssAssets: [],
             jsAssetsWithoutEntry: [],
@@ -351,7 +353,11 @@ export const generatePreloadAssetsPlugin: () => ModuleFederationRuntimePlugin =
           };
         }
 
-        assignRemoteInfo(remoteInfo, remoteSnapshot);
+        assignRemoteInfo(
+          remoteInfo,
+          remoteSnapshot,
+          origin.platform.isBrowser(),
+        );
 
         const assets = generatePreloadAssets(
           origin,

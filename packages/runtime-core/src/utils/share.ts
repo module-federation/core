@@ -1,5 +1,5 @@
 import { DEFAULT_SCOPE } from '../constant';
-import { TreeShakingStatus } from '@module-federation/sdk';
+import { TreeShakingStatus } from '@module-federation/sdk/core';
 import { Global, Federation } from '../global';
 import {
   GlobalShareScopeMap,

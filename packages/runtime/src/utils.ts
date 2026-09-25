@@ -1,5 +1,7 @@
-import type { ModuleFederation } from '@module-federation/runtime-core';
-import { CurrentGlobal } from '@module-federation/runtime-core';
+import {
+  CurrentGlobal,
+  type FederationKernel,
+} from '@module-federation/runtime-core/kernel';
 
 // injected by bundler, so it can not use runtime-core stuff
 export function getBuilderId(): string {
@@ -10,33 +12,32 @@ export function getBuilderId(): string {
     : '';
 }
 
+export function isMatchingInstance(
+  instance: FederationKernel,
+  name: string,
+  version: string | undefined,
+): boolean {
+  const buildId = getBuilderId();
+  if (buildId && instance.options.id === buildId) {
+    return true;
+  }
+
+  if (instance.options.name === name && !instance.options.version && !version) {
+    return true;
+  }
+
+  return Boolean(
+    instance.options.name === name &&
+    version &&
+    instance.options.version === version,
+  );
+}
+
 export function getGlobalFederationInstance(
   name: string,
   version: string | undefined,
-): ModuleFederation | undefined {
-  const buildId = getBuilderId();
-  return CurrentGlobal.__FEDERATION__.__INSTANCES__.find(
-    (GMInstance: ModuleFederation) => {
-      if (buildId && GMInstance.options.id === buildId) {
-        return true;
-      }
-
-      if (
-        GMInstance.options.name === name &&
-        !GMInstance.options.version &&
-        !version
-      ) {
-        return true;
-      }
-
-      if (
-        GMInstance.options.name === name &&
-        version &&
-        GMInstance.options.version === version
-      ) {
-        return true;
-      }
-      return false;
-    },
+): FederationKernel | undefined {
+  return CurrentGlobal.__FEDERATION__.__INSTANCES__.find((instance) =>
+    isMatchingInstance(instance, name, version),
   );
 }

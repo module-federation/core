@@ -20,7 +20,7 @@ import {
   SharedLoadContext,
   SharedLoadTrigger,
 } from '../type';
-import { ModuleFederation } from '../core';
+import { FederationKernel } from '../core';
 import {
   PluginSystem,
   AsyncHook,
@@ -49,13 +49,13 @@ import type { LoadRemoteMatch } from '../remote';
 import { createRemoteEntryInitOptions } from '../module';
 
 export class SharedHandler {
-  host: ModuleFederation;
+  host: FederationKernel;
   shareScopeMap: ShareScopeMap;
   hooks = new PluginSystem({
     beforeRegisterShare: new SyncWaterfallHook<{
       pkgName: string;
       shared: Shared;
-      origin: ModuleFederation;
+      origin: FederationKernel;
     }>('beforeRegisterShare'),
     afterRegisterShare: new SyncHook<
       [
@@ -67,7 +67,7 @@ export class SharedHandler {
           registeredShared?: Shared;
           shareScopeMap: ShareScopeMap;
           trigger: SharedLoadTrigger;
-          origin: ModuleFederation;
+          origin: FederationKernel;
         },
       ],
       void
@@ -77,11 +77,11 @@ export class SharedHandler {
       pkgName: string;
       shareInfo?: Shared;
       shared: Options['shared'];
-      origin: ModuleFederation;
+      origin: FederationKernel;
       loadContext?: SharedLoadContext;
     }>('beforeLoadShare'),
     // not used yet
-    loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>(),
+    loadShare: new AsyncHook<[FederationKernel, string, ShareInfos]>(),
     afterLoadShare: new SyncHook<
       [
         {
@@ -92,7 +92,7 @@ export class SharedHandler {
           shareScopeMap: ShareScopeMap;
           lifecycle: 'loadShare' | 'loadShareSync';
           loadContext?: SharedLoadContext;
-          origin: ModuleFederation;
+          origin: FederationKernel;
         },
       ],
       void
@@ -105,7 +105,7 @@ export class SharedHandler {
           shared: Options['shared'];
           shareScopeMap: ShareScopeMap;
           lifecycle: 'loadShare' | 'loadShareSync';
-          origin: ModuleFederation;
+          origin: FederationKernel;
           error?: unknown;
           recovered?: boolean;
           loadContext?: SharedLoadContext;
@@ -127,13 +127,13 @@ export class SharedHandler {
     initContainerShareScopeMap: new SyncWaterfallHook<{
       shareScope: ShareScopeMap[string];
       options: Options;
-      origin: ModuleFederation;
+      origin: FederationKernel;
       scopeName: string;
       hostShareScopeMap?: ShareScopeMap;
     }>('initContainerShareScopeMap'),
   });
   initTokens: InitTokens;
-  constructor(host: ModuleFederation) {
+  constructor(host: FederationKernel) {
     this.host = host;
     this.shareScopeMap = {};
     this.initTokens = {};
@@ -220,6 +220,10 @@ export class SharedHandler {
   }
 
   // register shared in shareScopeMap
+  formatShareInfos(globalOptions: Options, userOptions: UserOptions) {
+    return formatShareConfigs(globalOptions, userOptions).allShareInfos;
+  }
+
   registerShared(globalOptions: Options, userOptions: UserOptions) {
     const { newShareInfos, allShareInfos } = formatShareConfigs(
       globalOptions,

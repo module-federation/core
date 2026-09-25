@@ -5,7 +5,7 @@ import {
   optionsToMFContext,
   composeRemoteRequestId,
 } from '../utils';
-import { safeToString, ModuleInfo } from '@module-federation/sdk';
+import { safeToString, ModuleInfo } from '@module-federation/sdk/core';
 import {
   RUNTIME_002,
   RUNTIME_014,
@@ -13,7 +13,7 @@ import {
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { getRemoteEntry } from '../utils/load';
-import { ModuleFederation } from '../core';
+import { FederationKernel } from '../core';
 import {
   RemoteEntryExports,
   RemoteInfo,
@@ -95,14 +95,14 @@ class Module {
   initPromise?: Promise<void>;
   remoteEntryExports?: RemoteEntryExports;
   lib: RemoteEntryExports | undefined = undefined;
-  host: ModuleFederation;
+  host: FederationKernel;
 
   constructor({
     remoteInfo,
     host,
   }: {
     remoteInfo: RemoteInfo;
-    host: ModuleFederation;
+    host: FederationKernel;
   }) {
     this.remoteInfo = remoteInfo;
     this.host = host;

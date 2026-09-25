@@ -1,10 +1,9 @@
 import {
-  isBrowserEnvValue,
   warn,
   composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
 import {
   Global,
@@ -24,7 +23,7 @@ import {
   RemoteEntryExports,
   CallFrom,
 } from '../type';
-import { ModuleFederation } from '../core';
+import { FederationKernel } from '../core';
 import {
   PluginSystem,
   AsyncHook,
@@ -55,28 +54,28 @@ export interface LoadRemoteMatch {
   expose: string;
   remote: Remote;
   options: Options;
-  origin: ModuleFederation;
+  origin: FederationKernel;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
 }
 
 export class RemoteHandler {
-  host: ModuleFederation;
+  host: FederationKernel;
   idToRemoteMap: Record<string, { name: string; expose: string }>;
 
   hooks = new PluginSystem({
     beforeRegisterRemote: new SyncWaterfallHook<{
       remote: Remote;
-      origin: ModuleFederation;
+      origin: FederationKernel;
     }>('beforeRegisterRemote'),
     registerRemote: new SyncWaterfallHook<{
       remote: Remote;
-      origin: ModuleFederation;
+      origin: FederationKernel;
     }>('registerRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
-      origin: ModuleFederation;
+      origin: FederationKernel;
     }>('beforeRequest'),
     afterMatchRemote: new AsyncHook<
       [
@@ -87,7 +86,7 @@ export class RemoteHandler {
           expose?: string;
           remoteInfo?: RemoteInfo;
           error?: unknown;
-          origin: ModuleFederation;
+          origin: FederationKernel;
         },
       ],
       void
@@ -100,7 +99,7 @@ export class RemoteHandler {
           pkgNameOrAlias: string;
           remote: Remote;
           options: ModuleOptions;
-          origin: ModuleFederation;
+          origin: FederationKernel;
           exposeModule: any;
           exposeModuleFactory: any;
           moduleInstance: Module;
@@ -120,7 +119,7 @@ export class RemoteHandler {
           };
           error?: unknown;
           recovered?: boolean;
-          origin: ModuleFederation;
+          origin: FederationKernel;
         },
       ],
       void
@@ -133,7 +132,7 @@ export class RemoteHandler {
           remote: Remote;
           remoteSnapshot: ModuleInfo;
           preloadConfig: PreloadRemoteArgs;
-          origin: ModuleFederation;
+          origin: FederationKernel;
         },
       ],
       void
@@ -152,7 +151,7 @@ export class RemoteHandler {
             | 'onLoad';
           remote?: RemoteInfo;
           expose?: string;
-          origin: ModuleFederation;
+          origin: FederationKernel;
         },
       ],
       void | unknown
@@ -162,14 +161,14 @@ export class RemoteHandler {
         {
           preloadOps: Array<PreloadRemoteArgs>;
           options: Options;
-          origin: ModuleFederation;
+          origin: FederationKernel;
         },
       ]
     >('beforePreloadRemote'),
     generatePreloadAssets: new AsyncHook<
       [
         {
-          origin: ModuleFederation;
+          origin: FederationKernel;
           preloadOptions: PreloadOptions[number];
           remote: Remote;
           remoteInfo: RemoteInfo;
@@ -184,7 +183,7 @@ export class RemoteHandler {
         {
           preloadOps: Array<PreloadRemoteArgs>;
           options: Options;
-          origin: ModuleFederation;
+          origin: FederationKernel;
           results: PreloadRemoteResult[];
           error?: unknown;
         },
@@ -194,8 +193,8 @@ export class RemoteHandler {
     loadEntry: new AsyncHook<
       [
         {
-          origin: ModuleFederation;
-          loaderHook: ModuleFederation['loaderHook'];
+          origin: FederationKernel;
+          loaderHook: FederationKernel['loaderHook'];
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
           resourceContext?: ResourceLoadContext;
@@ -205,7 +204,7 @@ export class RemoteHandler {
     >(),
   });
 
-  constructor(host: ModuleFederation) {
+  constructor(host: FederationKernel) {
     this.host = host;
     this.idToRemoteMap = {};
   }
@@ -558,7 +557,7 @@ export class RemoteHandler {
       })) as {
         id: string;
         options: Options;
-        origin: ModuleFederation;
+        origin: FederationKernel;
       };
 
       if (!loadRemoteArgs) {
@@ -664,7 +663,7 @@ export class RemoteHandler {
       // Set the remote entry to a complete path
       if ('entry' in remote) {
         if (
-          isBrowserEnvValue &&
+          host.platform.isBrowser() &&
           typeof window !== 'undefined' &&
           !remote.entry.startsWith('http')
         ) {

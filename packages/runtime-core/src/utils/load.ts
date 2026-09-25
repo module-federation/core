@@ -1,11 +1,6 @@
-import {
-  loadScript,
-  loadScriptNode,
-  composeKeyWithSeparator,
-  isBrowserEnvValue,
-} from '@module-federation/sdk';
+import { composeKeyWithSeparator } from '@module-federation/sdk/core';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
-import { ModuleFederation } from '../core';
+import { FederationKernel } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import {
   Remote,
@@ -20,123 +15,16 @@ import {
   runtimeDescMap,
 } from '@module-federation/error-codes';
 
-// Declare the ENV_TARGET constant that will be defined by DefinePlugin
-declare const ENV_TARGET: 'web' | 'node';
-const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
 const remoteEntryLoadingOrigins = new WeakMap<
   Promise<RemoteEntryExports | void>,
-  ModuleFederation
+  FederationKernel
 >();
-
-const esmRemoteEntryLoadErrorMessages = [
-  'Failed to fetch dynamically imported module',
-  'Importing a module script failed',
-  'error loading dynamically imported module',
-];
-
-function isEsmRemoteEntryLoadError(err: unknown): boolean {
-  if (!(err instanceof TypeError)) {
-    return false;
-  }
-
-  return esmRemoteEntryLoadErrorMessages.some((loadErrorMessage) =>
-    err.message.includes(loadErrorMessage),
-  );
-}
 
 export function isEsmRemoteType(type: RemoteInfo['type']): boolean {
   return type === 'esm' || type === 'module';
 }
 
-async function loadEsmEntry({
-  entry,
-  remoteEntryExports,
-  name,
-  getEntryUrl,
-}: {
-  entry: string;
-  remoteEntryExports: RemoteEntryExports | undefined;
-  name: string;
-  getEntryUrl?: (url: string) => string;
-}): Promise<RemoteEntryExports> {
-  return new Promise<RemoteEntryExports>((resolve, reject) => {
-    const rejectEntry = (loadError: unknown) => {
-      if (isEsmRemoteEntryLoadError(loadError)) {
-        const originalMsg =
-          loadError instanceof Error ? loadError.message : String(loadError);
-        try {
-          error(
-            RUNTIME_008,
-            runtimeDescMap,
-            {
-              remoteName: name,
-              resourceUrl: url,
-            },
-            originalMsg,
-          );
-        } catch (runtimeError) {
-          reject(runtimeError);
-          return;
-        }
-      }
-
-      reject(loadError);
-    };
-
-    const url = getEntryUrl ? getEntryUrl(entry) : entry;
-    try {
-      if (!remoteEntryExports) {
-        if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
-          new Function('callbacks', `import("${url}")${importCallback}`)([
-            resolve,
-            rejectEntry,
-          ]);
-        } else {
-          import(/* webpackIgnore: true */ /* @vite-ignore */ url)
-            .then(resolve)
-            .catch(rejectEntry);
-        }
-      } else {
-        resolve(remoteEntryExports);
-      }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      error(`Failed to load ESM entry from "${url}". ${msg}`);
-    }
-  });
-}
-
-async function loadSystemJsEntry({
-  entry,
-  remoteEntryExports,
-}: {
-  entry: string;
-  remoteEntryExports: RemoteEntryExports | undefined;
-}): Promise<RemoteEntryExports> {
-  return new Promise<RemoteEntryExports>((resolve, reject) => {
-    try {
-      if (!remoteEntryExports) {
-        //@ts-ignore
-        if (typeof __system_context__ === 'undefined') {
-          //@ts-ignore
-          System.import(entry).then(resolve).catch(reject);
-        } else {
-          new Function(
-            'callbacks',
-            `System.import("${entry}")${importCallback}`,
-          )([resolve, reject]);
-        }
-      } else {
-        resolve(remoteEntryExports);
-      }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      error(`Failed to load SystemJS entry from "${entry}". ${msg}`);
-    }
-  });
-}
-
-function handleRemoteEntryLoaded(
+export function handleRemoteEntryLoaded(
   name: string,
   globalName: string,
   entry: string,
@@ -157,183 +45,13 @@ function handleRemoteEntryLoaded(
   return entryExports;
 }
 
-async function loadEntryScript({
-  name,
-  globalName,
-  entry,
-  remoteInfo,
-  loaderHook,
-  getEntryUrl,
-  resourceContext,
-}: {
-  name: string;
-  globalName: string;
-  entry: string;
-  remoteInfo: RemoteInfo;
-  loaderHook: ModuleFederation['loaderHook'];
-  getEntryUrl?: (url: string) => string;
-  resourceContext?: ResourceLoadContext;
-}): Promise<RemoteEntryExports> {
-  const { entryExports: remoteEntryExports } = getRemoteEntryExports(
-    name,
-    globalName,
-  );
-
-  if (remoteEntryExports) {
-    return remoteEntryExports;
-  }
-
-  // if getEntryUrl is passed, use the getEntryUrl to get the entry url
-  const url = getEntryUrl ? getEntryUrl(entry) : entry;
-  return loadScript(url, {
-    attrs: {},
-    createScriptHook: (url, attrs) => {
-      const res = loaderHook.lifecycle.createScript.emit({
-        url,
-        attrs,
-        remoteInfo,
-        resourceContext: resourceContext
-          ? {
-              ...resourceContext,
-              url,
-            }
-          : undefined,
-      });
-
-      if (!res) return;
-
-      if (res instanceof HTMLScriptElement) {
-        return res;
-      }
-
-      if ('script' in res || 'timeout' in res) {
-        return res;
-      }
-
-      return;
-    },
-  }).then(
-    () => {
-      // loadScript resolved: script was fetched, executed without throwing, and
-      // did not trigger a ScriptExecutionError listener. Now verify the global was registered.
-      return handleRemoteEntryLoaded(name, globalName, entry);
-    },
-    (loadError: unknown) => {
-      // loadScript rejected — one of three causes, all with descriptive messages:
-      //   ScriptNetworkError  — URL unreachable, 404, CORS, etc.
-      //   ScriptExecutionError — script fetched OK but IIFE threw during execution
-      //   timeout             — script took too long to load
-      // Errors thrown inside handleRemoteEntryLoaded above are NOT caught here.
-      const originalMsg =
-        loadError instanceof Error ? loadError.message : String(loadError);
-      error(
-        RUNTIME_008,
-        runtimeDescMap,
-        {
-          remoteName: name,
-          resourceUrl: url,
-        },
-        originalMsg,
-      );
-    },
-  );
-}
-async function loadEntryDom({
-  remoteInfo,
-  remoteEntryExports,
-  loaderHook,
-  getEntryUrl,
-  resourceContext,
-}: {
-  remoteInfo: RemoteInfo;
-  remoteEntryExports?: RemoteEntryExports;
-  loaderHook: ModuleFederation['loaderHook'];
-  getEntryUrl?: (url: string) => string;
-  resourceContext?: ResourceLoadContext;
-}) {
-  const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
-  if (isEsmRemoteType(type)) {
-    return loadEsmEntry({ entry, remoteEntryExports, name, getEntryUrl });
-  }
-
-  if (type === 'system') {
-    return loadSystemJsEntry({ entry, remoteEntryExports });
-  }
-
-  return loadEntryScript({
-    entry,
-    globalName,
-    name,
-    remoteInfo,
-    loaderHook,
-    getEntryUrl,
-    resourceContext,
-  });
-}
-
-async function loadEntryNode({
-  remoteInfo,
-  loaderHook,
-  resourceContext,
-}: {
-  remoteInfo: RemoteInfo;
-  loaderHook: ModuleFederation['loaderHook'];
-  resourceContext?: ResourceLoadContext;
-}) {
-  const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
-  const { entryExports: remoteEntryExports } = getRemoteEntryExports(
-    name,
-    globalName,
-  );
-
-  if (remoteEntryExports) {
-    return remoteEntryExports;
-  }
-
-  return loadScriptNode(entry, {
-    attrs: { name, globalName, type },
-    loaderHook: {
-      createScriptHook: (url: string, attrs: Record<string, any> = {}) => {
-        const res = loaderHook.lifecycle.createScript.emit({
-          url,
-          attrs,
-          remoteInfo,
-          resourceContext: resourceContext
-            ? {
-                ...resourceContext,
-                url,
-              }
-            : undefined,
-        });
-
-        if (!res) return;
-
-        if ('url' in res) {
-          return res;
-        }
-
-        return;
-      },
-    },
-  })
-    .then(() => {
-      return handleRemoteEntryLoaded(name, globalName, entry);
-    })
-    .catch((e) => {
-      const msg = e instanceof Error ? e.message : String(e);
-      error(
-        `Failed to load Node.js entry for remote "${name}" from "${entry}". ${msg}`,
-      );
-    });
-}
-
 export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
   const { entry, name } = remoteInfo;
   return composeKeyWithSeparator(name, entry);
 }
 
 export async function getRemoteEntry(params: {
-  origin: ModuleFederation;
+  origin: FederationKernel;
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
   getEntryUrl?: (url: string) => string;
@@ -376,20 +94,13 @@ export async function getRemoteEntry(params: {
         if (res) {
           return res;
         }
-        const isWebEnvironment =
-          typeof ENV_TARGET !== 'undefined'
-            ? ENV_TARGET === 'web'
-            : isBrowserEnvValue;
-
-        return isWebEnvironment
-          ? loadEntryDom({
-              remoteInfo,
-              remoteEntryExports,
-              loaderHook,
-              getEntryUrl,
-              resourceContext,
-            })
-          : loadEntryNode({ remoteInfo, loaderHook, resourceContext });
+        return origin.platform.loadEntry({
+          remoteInfo,
+          remoteEntryExports,
+          loaderHook,
+          getEntryUrl,
+          resourceContext,
+        });
       })
       .then(async (res) => {
         await origin.loaderHook.lifecycle.afterLoadEntry.emit({

@@ -2,9 +2,8 @@ import {
   RemoteWithEntry,
   ModuleInfo,
   RemoteEntryType,
-  isBrowserEnvValue,
   isReactNativeEnv,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import { Remote, RemoteInfoOptionalVersion } from '../type';
 import { warn } from './logger';
 
@@ -74,7 +73,10 @@ export function arrayOptions<T>(options: T | Array<T>): Array<T> {
   return Array.isArray(options) ? options : [options];
 }
 
-export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
+export function getRemoteEntryInfoFromSnapshot(
+  snapshot: ModuleInfo,
+  inBrowser: boolean,
+): {
   url: string;
   type: RemoteEntryType;
   globalName: string;
@@ -88,11 +90,7 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
     type: 'global',
     globalName: '',
   };
-  if (
-    isBrowserEnvValue ||
-    isReactNativeEnv() ||
-    !('ssrRemoteEntry' in snapshot)
-  ) {
+  if (inBrowser || isReactNativeEnv() || !('ssrRemoteEntry' in snapshot)) {
     return 'remoteEntry' in snapshot
       ? {
           url: snapshot.remoteEntry,

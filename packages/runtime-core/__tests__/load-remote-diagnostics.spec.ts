@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@rstest/core';
 import { RUNTIME_014 } from '@module-federation/error-codes';
-import { ModuleFederation } from '../src/core';
+import { ModuleFederation } from '../src';
 import { resetFederationGlobalInfo } from '../src/global';
 import type { ModuleFederationRuntimePlugin } from '../src/type';
 import { mockStaticServer, removeScriptTags } from './mock/utils';

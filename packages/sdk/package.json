@@ -40,6 +40,26 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./core": {
+      "import": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.js"
+      },
+      "require": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.cjs"
+      }
+    },
+    "./node": {
+      "import": {
+        "types": "./dist/node.d.ts",
+        "default": "./dist/node.js"
+      },
+      "require": {
+        "types": "./dist/node.d.ts",
+        "default": "./dist/node.cjs"
+      }
+    },
     "./normalize-webpack-path": {
       "import": {
         "types": "./dist/normalize-webpack-path.d.ts",
@@ -55,6 +75,12 @@
     "*": {
       ".": [
         "./dist/index.d.ts"
+      ],
+      "core": [
+        "./dist/core.d.ts"
+      ],
+      "node": [
+        "./dist/node.d.ts"
       ],
       "normalize-webpack-path": [
         "./dist/normalize-webpack-path.d.ts"

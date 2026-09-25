@@ -4,8 +4,7 @@ import {
   ModuleInfo,
   generateSnapshotFromManifest,
   isManifestProvider,
-  isBrowserEnvValue,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import {
   RUNTIME_003,
   RUNTIME_007,
@@ -28,11 +27,11 @@ import {
   getInfoWithoutType,
 } from '../../global';
 import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
-import { ModuleFederation } from '../../core';
+import { FederationKernel } from '../../core';
 
 export function getGlobalRemoteInfo(
   moduleInfo: Remote,
-  origin: ModuleFederation,
+  origin: FederationKernel,
 ): {
   hostGlobalSnapshot: ModuleInfo | undefined;
   globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
@@ -73,7 +72,7 @@ export function getGlobalRemoteInfo(
 
 export class SnapshotHandler {
   loadingHostSnapshot: Promise<GlobalModuleInfo | void> | null = null;
-  HostInstance: ModuleFederation;
+  HostInstance: FederationKernel;
   manifestCache: Map<string, Manifest> = new Map();
   hooks = new PluginSystem({
     beforeLoadRemoteSnapshot: new AsyncHook<
@@ -81,7 +80,7 @@ export class SnapshotHandler {
         {
           options: Options;
           moduleInfo: Remote;
-          origin: ModuleFederation;
+          origin: FederationKernel;
         },
       ],
       void
@@ -103,7 +102,7 @@ export class SnapshotHandler {
     }>('loadRemoteSnapshot'),
     afterLoadSnapshot: new AsyncWaterfallHook<{
       id?: string;
-      host: ModuleFederation;
+      host: FederationKernel;
       options: Options;
       moduleInfo: Remote;
       remoteSnapshot: ModuleInfo;
@@ -117,7 +116,7 @@ export class SnapshotHandler {
             initiator: ResourceLoadInitiator;
             id: string;
           };
-          origin: ModuleFederation;
+          origin: FederationKernel;
         },
       ],
       void
@@ -136,17 +135,17 @@ export class SnapshotHandler {
           error?: unknown;
           cached?: boolean;
           recovered?: boolean;
-          origin: ModuleFederation;
+          origin: FederationKernel;
         },
       ],
       void
     >('afterLoadManifest'),
   });
-  loaderHook: ModuleFederation['loaderHook'];
+  loaderHook: FederationKernel['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
     Global.__FEDERATION__.__MANIFEST_LOADING__;
 
-  constructor(HostInstance: ModuleFederation) {
+  constructor(HostInstance: FederationKernel) {
     this.HostInstance = HostInstance;
     this.loaderHook = HostInstance.loaderHook;
   }
@@ -226,7 +225,7 @@ export class SnapshotHandler {
     // global snapshot includes manifest or module info includes manifest
     if (globalRemoteSnapshot) {
       if (isManifestProvider(globalRemoteSnapshot)) {
-        const remoteEntry = isBrowserEnvValue
+        const remoteEntry = this.HostInstance.platform.isBrowser()
           ? globalRemoteSnapshot.remoteEntry
           : globalRemoteSnapshot.ssrRemoteEntry ||
             globalRemoteSnapshot.remoteEntry ||
