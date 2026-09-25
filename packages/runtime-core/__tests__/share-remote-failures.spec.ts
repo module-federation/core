@@ -119,4 +119,74 @@ describe('version-first sharing with unavailable remotes', () => {
       }),
     );
   });
+
+  it('excludes shares registered before a remote container init throws', async () => {
+    const errors = rs.fn();
+    const host = createHost(
+      [{ name: 'partial', entry: `${base}/load/partial-init-error.js` }],
+      errors,
+    );
+
+    const lodash = await host.loadShare<{ version: string }>('lodash');
+    expect(lodash && lodash()).toEqual({ version: '4.17.21' });
+    expect(host.shareScopeMap.default.lodash['4.17.22']).toBeUndefined();
+    expect(errors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'partial',
+        lifecycle: 'beforeLoadShare',
+        remote: expect.objectContaining({ name: 'partial' }),
+      }),
+    );
+  });
+
+  it('restores a healthy share overwritten by a failing remote init', async () => {
+    const host = createHost([
+      { name: 'partial', entry: `${base}/load/partial-init-error.js` },
+    ]);
+    const healthyShare = {
+      version: '4.17.22',
+      from: 'healthy',
+      scope: ['default'],
+      shareConfig: { singleton: false, requiredVersion: '^4.17.21' },
+      get: () => Promise.resolve(() => ({ version: '4.17.22' })),
+      useIn: [],
+      deps: [],
+      strategy: 'version-first' as const,
+    };
+    host.initShareScopeMap('default', {
+      lodash: { '4.17.22': healthyShare },
+    });
+
+    const lodash = await host.loadShare<{ version: string }>('lodash');
+    expect(lodash && lodash()).toEqual({ version: '4.17.22' });
+    expect(host.shareScopeMap.default.lodash['4.17.22']).toBe(healthyShare);
+  });
+
+  it('preserves a healthy remote share when inits overlap', async () => {
+    let started!: () => void;
+    let release!: () => void;
+    const startedPromise = new Promise<void>((resolve) => {
+      started = resolve;
+    });
+    const waitForHealthy = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    (globalThis as any).__partialInitGate = {
+      started,
+      startedPromise,
+      release,
+      waitForHealthy,
+    };
+    const host = createHost([
+      { name: 'partial', entry: `${base}/load/partial-init-error.js` },
+      { name: 'healthy', entry: `${base}/load/healthy-share.js` },
+    ]);
+
+    try {
+      const lodash = await host.loadShare<{ version: string }>('lodash');
+      expect(lodash && lodash()).toEqual({ version: '4.17.22' });
+    } finally {
+      delete (globalThis as any).__partialInitGate;
+    }
+  });
 });
