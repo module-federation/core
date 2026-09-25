@@ -1,6 +1,9 @@
 import FederationRuntimePlugin, {
   resolveRuntimePaths,
 } from '../../../src/lib/container/runtime/FederationRuntimePlugin';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import type { Compiler } from 'webpack';
 import { rs } from '@rstest/core';
 
@@ -218,6 +221,50 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       expect(normalizePath(paths.runtimeToolsPath)).toMatch(
         /\/runtime-tools\/dist\/bundler\.js$/,
       );
+    });
+
+    it('resolves runtime members from the runtime-tools install', () => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-runtime-tools-'));
+      const writePackage = (dir: string, name: string) => {
+        fs.mkdirSync(path.join(dir, 'dist'), { recursive: true });
+        fs.writeFileSync(
+          path.join(dir, 'package.json'),
+          JSON.stringify({
+            name,
+            exports: { './bundler': './dist/bundler.js' },
+          }),
+        );
+        fs.writeFileSync(path.join(dir, 'dist/bundler.js'), '');
+      };
+      const tools = path.join(
+        root,
+        'node_modules/@module-federation/runtime-tools',
+      );
+      writePackage(tools, '@module-federation/runtime-tools');
+      for (const name of ['runtime', 'webpack-bundler-runtime']) {
+        writePackage(
+          path.join(tools, 'node_modules/@module-federation', name),
+          `@module-federation/${name}`,
+        );
+      }
+      try {
+        const paths = resolveRuntimePaths(path.join(tools, 'dist/bundler.js'));
+        expect(normalizePath(paths.runtimePath)).toBe(
+          normalizePath(
+            fs.realpathSync(
+              path.join(
+                tools,
+                'node_modules/@module-federation/runtime/dist/bundler.js',
+              ),
+            ),
+          ),
+        );
+        expect(normalizePath(paths.bundlerRuntimePath)).toContain(
+          '/runtime-tools/node_modules/@module-federation/webpack-bundler-runtime/',
+        );
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
     });
 
     it('does not replace a missing custom family member from the workspace install', () => {
