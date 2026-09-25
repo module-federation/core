@@ -161,15 +161,13 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
 
     new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
 
-    if (experiments?.composedRuntime) {
-      // DefinePlugin reads its definitions per compilation, after the plan picked a mode.
-      compiler.hooks.compile.tap('ModuleFederationPlugin', () => {
-        if (!composedEntryOf(compiler)) return;
-        for (const key of Object.keys(definePluginOptions)) {
-          if (key !== 'ENV_TARGET') delete definePluginOptions[key];
-        }
-      });
-    }
+    // DefinePlugin reads its definitions per compilation, after the plan picked a mode.
+    compiler.hooks.compile.tap('ModuleFederationPlugin', () => {
+      if (!composedEntryOf(compiler)) return;
+      for (const key of Object.keys(definePluginOptions)) {
+        if (key !== 'ENV_TARGET') delete definePluginOptions[key];
+      }
+    });
   }
 
   /**

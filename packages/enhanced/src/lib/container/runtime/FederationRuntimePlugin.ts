@@ -531,7 +531,7 @@ class FederationRuntimePlugin {
     // dont run multiple times on every apply()
     if (!onceForCompiler.has(compiler)) {
       const options = this.options;
-      if (options?.experiments?.composedRuntime) {
+      if (options) {
         new FederationCompositionPlugin(options, (composition) => {
           const source = FederationRuntimePlugin.getTemplate(
             compiler,

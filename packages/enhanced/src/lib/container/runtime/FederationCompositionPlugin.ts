@@ -196,10 +196,17 @@ class FederationCompositionPlugin {
     compilation: Compilation,
     { family, entry, legacyReason }: Outcome,
   ) {
-    if (legacyReason !== undefined) {
+    const { externalRuntime, provideExternalRuntime } =
+      this._options.experiments ?? {};
+    // An externalized runtime is the full runtime by request; the other reasons are worth a warning.
+    if (
+      legacyReason !== undefined &&
+      !externalRuntime &&
+      !provideExternalRuntime
+    ) {
       compilation.warnings.push(
         new WebpackError(
-          `experiments.composedRuntime is set, but this build uses the full federation runtime because ${legacyReason}.`,
+          `This build uses the full federation runtime because ${legacyReason}.`,
         ),
       );
     }
