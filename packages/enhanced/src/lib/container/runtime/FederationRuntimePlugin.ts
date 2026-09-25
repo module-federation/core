@@ -44,12 +44,12 @@ type RuntimeEntrySpec = {
   cjs: string;
 };
 
-function resolveRuntimeEntry(spec: RuntimeEntrySpec) {
+function resolveRuntimeEntry(spec: RuntimeEntrySpec, from?: string) {
   let lastError: unknown;
 
   for (const candidate of [spec.bundler, spec.esm, spec.cjs]) {
     try {
-      return require.resolve(candidate);
+      return require.resolve(candidate, from ? { paths: [from] } : undefined);
     } catch (error) {
       lastError = error;
     }
@@ -58,23 +58,34 @@ function resolveRuntimeEntry(spec: RuntimeEntrySpec) {
   throw lastError;
 }
 
-export function resolveRuntimePaths() {
+export function resolveRuntimePaths(
+  runtimeToolsPath = resolveRuntimeEntry({
+    bundler: '@module-federation/runtime-tools/bundler',
+    esm: '@module-federation/runtime-tools/dist/index.js',
+    cjs: '@module-federation/runtime-tools/dist/index.cjs',
+  }),
+) {
+  // Enhanced does not depend on the runtime packages directly. They are
+  // dependencies of runtime-tools, so resolve them from its install.
+  const from = path.dirname(runtimeToolsPath);
   return {
-    runtimeToolsPath: resolveRuntimeEntry({
-      bundler: '@module-federation/runtime-tools/bundler',
-      esm: '@module-federation/runtime-tools/dist/index.js',
-      cjs: '@module-federation/runtime-tools/dist/index.cjs',
-    }),
-    bundlerRuntimePath: resolveRuntimeEntry({
-      bundler: '@module-federation/webpack-bundler-runtime/bundler',
-      esm: '@module-federation/webpack-bundler-runtime/dist/index.js',
-      cjs: '@module-federation/webpack-bundler-runtime/dist/index.cjs',
-    }),
-    runtimePath: resolveRuntimeEntry({
-      bundler: '@module-federation/runtime/bundler',
-      esm: '@module-federation/runtime/dist/index.js',
-      cjs: '@module-federation/runtime/dist/index.cjs',
-    }),
+    runtimeToolsPath,
+    bundlerRuntimePath: resolveRuntimeEntry(
+      {
+        bundler: '@module-federation/webpack-bundler-runtime/bundler',
+        esm: '@module-federation/webpack-bundler-runtime/dist/index.js',
+        cjs: '@module-federation/webpack-bundler-runtime/dist/index.cjs',
+      },
+      from,
+    ),
+    runtimePath: resolveRuntimeEntry(
+      {
+        bundler: '@module-federation/runtime/bundler',
+        esm: '@module-federation/runtime/dist/index.js',
+        cjs: '@module-federation/runtime/dist/index.cjs',
+      },
+      from,
+    ),
   };
 }
 
