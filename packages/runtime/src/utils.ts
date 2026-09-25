@@ -19,10 +19,9 @@ export function getGlobalFederationInstance(
   const buildId = getBuilderId();
   return CurrentGlobal.__FEDERATION__.__INSTANCES__.find(
     (GMInstance: ModuleFederation) => {
-      // Older constructors without metadata cannot establish compatibility.
+      // An instance from an older runtime has no capabilities to compare, so it is not reused.
       if (
-        (GMInstance.constructor as typeof ModuleFederation)
-          .runtimeCapabilities !== ModuleFederation.runtimeCapabilities
+        GMInstance.runtimeCapabilities !== ModuleFederation.runtimeCapabilities
       ) {
         return false;
       }
