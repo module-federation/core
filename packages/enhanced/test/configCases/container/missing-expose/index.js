@@ -5,7 +5,7 @@ it('should finish the build and reject get() for an expose that does not resolve
   ).rejects.toEqual(
     expect.objectContaining({
       code: 'MODULE_NOT_FOUND',
-      message: "Cannot find module './does-not-exist.js'",
+      message: "Cannot find module './test, ./does-not-exist.js'",
     }),
   );
   const testFactory = await container.get('./test');
