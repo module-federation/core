@@ -20,4 +20,4 @@ Removed:
 
 `@module-federation/rspack` now needs `@rspack/core` 1.5 or newer, the first release with `experiments.VirtualModulesPlugin`. The wrapper still falls back to the full runtime, with a warning, when the plugin is missing.
 
-A build whose installed runtime packages lack the composition subpath exports now fails with an error that names the release that added them. `ENV_TARGET`, `FEDERATION_ALLOW_NEW_FUNCTION`, and `FEDERATION_DEBUG` are unchanged.
+A build whose installed runtime packages lack the composition subpath exports now fails with an error: `<package> at <root> does not export "<subpath>": the installed runtime family lacks the subpath exports this build needs; update the @module-federation runtime packages to the release that added them (2.10.0)`. The version is `MIN_RUNTIME_VERSION` from `@module-federation/managers`, a placeholder for the release that ships the subpath exports. `ENV_TARGET`, `FEDERATION_ALLOW_NEW_FUNCTION`, and `FEDERATION_DEBUG` are unchanged.
