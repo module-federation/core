@@ -19,6 +19,7 @@ import {
   LoadShareExtraOptions,
   SharedLoadContext,
   SharedLoadTrigger,
+  ResourceLoadContext,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
@@ -46,6 +47,7 @@ import {
 } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
 import type { LoadRemoteMatch } from '../remote';
+import type { Module } from '../module';
 import { createRemoteEntryInitOptions } from '../module';
 
 export class SharedHandler {
@@ -526,17 +528,19 @@ export class SharedHandler {
     };
 
     const initRemoteModule = async (key: string): Promise<void> => {
-      const { module } = await host.remoteHandler.getRemoteModuleAndOptions({
-        id: key,
-      });
+      let module: Module | undefined;
       let remoteEntryExports: RemoteEntryExports | undefined = undefined;
-      const resourceContext = {
-        initiator: 'loadShare' as const,
-        id: key,
-        resourceType: 'remoteEntry' as const,
-        url: module.remoteInfo.entry,
-      };
+      let resourceContext: ResourceLoadContext | undefined;
       try {
+        ({ module } = await host.remoteHandler.getRemoteModuleAndOptions({
+          id: key,
+        }));
+        resourceContext = {
+          initiator: 'loadShare',
+          id: key,
+          resourceType: 'remoteEntry',
+          url: module.remoteInfo.entry,
+        };
         remoteEntryExports = await module.getEntry(undefined, resourceContext);
       } catch (error) {
         remoteEntryExports =
@@ -545,16 +549,14 @@ export class SharedHandler {
             error,
             from: 'runtime',
             lifecycle: 'beforeLoadShare',
-            remote: module.remoteInfo,
+            remote: module?.remoteInfo,
             origin: host,
           })) as RemoteEntryExports;
-        if (!remoteEntryExports) {
-          return;
-        }
-      } finally {
-        // prevent self load loop: when host load self , the initTokens is not the same
-        if (remoteEntryExports?.init && !module.initing) {
-          module.remoteEntryExports = remoteEntryExports;
+      }
+      // prevent self load loop: when host load self , the initTokens is not the same
+      if (module && remoteEntryExports?.init && !module.initing) {
+        module.remoteEntryExports = remoteEntryExports;
+        try {
           await module.init(
             undefined,
             undefined,
@@ -562,6 +564,15 @@ export class SharedHandler {
             undefined,
             resourceContext,
           );
+        } catch (error) {
+          await host.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
+            id: key,
+            error,
+            from: 'runtime',
+            lifecycle: 'beforeLoadShare',
+            remote: module.remoteInfo,
+            origin: host,
+          });
         }
       }
     };
