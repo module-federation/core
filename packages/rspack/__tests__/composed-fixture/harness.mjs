@@ -126,6 +126,8 @@ if (multi) {
   );
 } else {
   for (const b of builds) {
+    if (b.buildVersion) process.env.MF_BUILD_VERSION = b.buildVersion;
+    else delete process.env.MF_BUILD_VERSION;
     const compiler = rspack(config(outRoot, b));
     results.push(...(await (watch ? watchTwice(compiler) : runOnce(compiler))));
   }

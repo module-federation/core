@@ -84,10 +84,7 @@ export class ComposedRuntimePlugin {
       return { family, renderError };
     }
     const name = this._options.name!.replace(/[^\w.-]/g, '_');
-    const hash = createHash('sha256')
-      .update(JSON.stringify(plan))
-      .digest('hex')
-      .slice(0, 12);
+    const hash = createHash('sha256').update(source).digest('hex').slice(0, 12);
     const file = path.resolve(
       compiler.context,
       `node_modules/.federation/rspack/${name}.${hash}.mjs`,

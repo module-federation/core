@@ -43,6 +43,7 @@ interface BuildSpec {
   cacheDir?: string;
   singleChunk?: boolean;
   noVirtualModules?: boolean;
+  buildVersion?: string;
 }
 
 let outRoot: string;
@@ -316,17 +317,27 @@ describe('experiments.composedRuntime', () => {
     });
   });
 
-  it('picks the current plan on every build under the persistent cache (A, B, B, A)', async () => {
+  it('picks the current bootstrap on every build under the persistent cache (A, B, B, A, A at a new version)', async () => {
     const cacheDir = path.join(outRoot, 'cache');
     const plans = { A: { disableShared: true, disableSnapshot: true }, B: {} };
+    const steps = [
+      { plan: 'A' },
+      { plan: 'B' },
+      { plan: 'B' },
+      { plan: 'A' },
+      { plan: 'A', buildVersion: '9.9.9' },
+    ] as const;
     const builds: { entry: string; shared: boolean; built: number }[] = [];
-    for (const [i, key] of (['A', 'B', 'B', 'A'] as const).entries()) {
+    for (const [i, step] of steps.entries()) {
       const [b] = await harness([
         {
           out: `cache/${i}`,
           target: 'web',
           cacheDir,
-          mf: host({ experiments: composed({ optimization: plans[key] }) }),
+          buildVersion: 'buildVersion' in step ? step.buildVersion : undefined,
+          mf: host({
+            experiments: composed({ optimization: plans[step.plan] }),
+          }),
         },
       ]);
       expectComposed(b, 'host');
@@ -336,10 +347,18 @@ describe('experiments.composedRuntime', () => {
         built: b.built,
       });
     }
-    expect(builds.map((b) => b.shared)).toEqual([false, true, true, false]);
+    expect(builds.map((b) => b.shared)).toEqual([
+      false,
+      true,
+      true,
+      false,
+      false,
+    ]);
     expect(builds[0].entry).toBe(builds[3].entry);
     expect(builds[1].entry).toBe(builds[2].entry);
     expect(builds[0].entry).not.toBe(builds[1].entry);
     expect(builds[2].built).toBe(0);
+    expect(builds[4].entry).not.toBe(builds[3].entry);
+    expect(mainCode('cache/4')).toContain("buildId: 'host:9.9.9'");
   });
 });
