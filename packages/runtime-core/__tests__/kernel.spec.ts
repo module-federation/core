@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { FederationKernel, getRemoteEntry } from '../src/kernel';
+import * as kernelExports from '../src/kernel';
+import * as rootExports from '../src';
 import { remote } from '../src/remote/capability';
 import { PLATFORM_UNAVAILABLE_MESSAGE } from '../src/core';
 import { ModuleFederation } from '../src';
@@ -226,5 +228,14 @@ describe('root ModuleFederation', () => {
         loaderHook: instance.loaderHook,
       }),
     ).rejects.toThrow(PLATFORM_UNAVAILABLE_MESSAGE);
+  });
+});
+
+describe('kernel entry', () => {
+  // CommonJS `require` of the `./kernel` subpath resolves to the package root.
+  it('exports nothing the package root lacks', () => {
+    expect(
+      Object.keys(kernelExports).filter((name) => !(name in rootExports)),
+    ).toEqual([]);
   });
 });

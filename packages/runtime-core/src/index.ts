@@ -8,7 +8,7 @@ import {
   unavailablePlatform,
 } from './core';
 
-export { FederationKernel } from './core';
+export { FederationKernel, runtimeCapabilitiesOf } from './core';
 import { shared } from './shared';
 import { remote } from './remote';
 import { snapshot } from './plugins/snapshot';
