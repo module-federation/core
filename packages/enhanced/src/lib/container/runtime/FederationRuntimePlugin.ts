@@ -524,16 +524,9 @@ class FederationRuntimePlugin {
     }
     if (this.options && !this.options?.name) {
       //! the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
-      const uniqueName = compiler.options.output.uniqueName;
       this.options.name =
-        uniqueName ||
+        compiler.options.output.uniqueName ||
         `container_${createHash(`${compiler.options.name ?? ''} ${compiler.context}`).slice(0, 8)}`;
-      if (!uniqueName) {
-        warn(
-          compiler,
-          `The federation runtime has no container name. Set output.uniqueName or the plugin name option. The fallback name ${JSON.stringify(this.options.name)} is derived from the compiler name and context and is not the same on every machine.`,
-        );
-      }
     }
 
     const resolvedPaths = resolveRuntimePaths(this.options?.implementation);
