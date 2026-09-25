@@ -8,6 +8,8 @@ import type { ModuleFederationRuntimePlugin, Platform } from '../src/type';
 declare global {
   // eslint-disable-next-line no-var
   var FEDERATION_OPTIMIZE_NO_REMOTE: boolean | undefined;
+  // eslint-disable-next-line no-var
+  var FEDERATION_OPTIMIZE_NO_SHARED: boolean | undefined;
 }
 
 const remoteInfo = {
@@ -92,6 +94,7 @@ describe('FederationKernel', () => {
 describe('root ModuleFederation', () => {
   afterEach(() => {
     delete globalThis.FEDERATION_OPTIMIZE_NO_REMOTE;
+    delete globalThis.FEDERATION_OPTIMIZE_NO_SHARED;
   });
 
   it('composes shared, remote, snapshot and the universal platform', () => {
@@ -128,5 +131,22 @@ describe('root ModuleFederation', () => {
     await expect(instance.loadRemote('app/Button')).rejects.toThrow(
       'Remote loading is disabled',
     );
+  });
+
+  it('has no platform loader when remote and shared are both disabled', async () => {
+    globalThis.FEDERATION_OPTIMIZE_NO_REMOTE = true;
+    globalThis.FEDERATION_OPTIMIZE_NO_SHARED = true;
+
+    const instance = new ModuleFederation({ name: 'root-all-off' });
+
+    expect(() => instance.loadShareSync('react')).toThrow(
+      'Shared dependency loading is disabled',
+    );
+    await expect(
+      instance.platform.loadEntry({
+        remoteInfo,
+        loaderHook: instance.loaderHook,
+      }),
+    ).rejects.toThrow(PLATFORM_UNAVAILABLE_MESSAGE);
   });
 });

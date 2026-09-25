@@ -3,10 +3,9 @@ import {
   type ModuleFederation,
   type UserOptions,
 } from '@module-federation/runtime-core/kernel';
-import { getGlobalFederationInstance, isMatchingInstance } from './utils';
+import { getGlobalFederationInstance } from './utils';
 
-// The instance this bundle's init created or adopted, shared by the public API and ./compose.
-export let current: ModuleFederation | null = null;
+export let bundleInstance: ModuleFederation | null = null;
 
 export function createInstance<T extends ModuleFederation>(
   options: UserOptions,
@@ -24,18 +23,18 @@ export function initInstance<T extends ModuleFederation>(
   options: UserOptions,
   construct: (options: UserOptions) => T,
 ): T {
-  const { name, version } = options;
-  const instance =
-    current && isMatchingInstance(current, name, version)
-      ? current
-      : getGlobalFederationInstance(name, version);
+  const instance = getGlobalFederationInstance(
+    options.name,
+    options.version,
+    bundleInstance,
+  );
   const normalizedOptions = { ...options, id: options.id || '' };
   if (!instance) {
-    return (current = createInstance(normalizedOptions, construct));
+    return (bundleInstance = createInstance(normalizedOptions, construct));
   }
   instance.initOptions(normalizedOptions);
-  if (!current) {
-    current = instance;
+  if (!bundleInstance) {
+    bundleInstance = instance;
   }
   return instance as T;
 }
