@@ -21,6 +21,7 @@ import {
   RemoteInfo,
   RemoteEntryExports,
   CallFrom,
+  ResourceLoadContext,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
