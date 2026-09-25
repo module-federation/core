@@ -657,13 +657,12 @@ export class FederationRuntimeModule extends RuntimeModule {
     return Template.asString([
       `// Federation Runtime Module`,
       `var ${federationGlobal} = ${federationGlobal} || {};`,
-      `${federationGlobal}.runtime = __bundler_require__("${RUNTIME_PATH}");`,
       `${federationGlobal}.initOptions = ${JSON.stringify(this.initOptions)};`,
 
       // Initialize federation runtime
       `if (!${federationGlobal}.instance) {`,
       Template.indent([
-        `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`
+        `${federationGlobal}.instance = __bundler_require__("${RUNTIME_PATH}").init(${federationGlobal}.initOptions);`
       ]),
       `}`,
 

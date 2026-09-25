@@ -1,4 +1,9 @@
-import { FAMILY_PACKAGES, RUNTIME_FAMILY, type RuntimeFamily } from './family';
+import {
+  FAMILY_PACKAGES,
+  MIN_RUNTIME_VERSION,
+  RUNTIME_FAMILY,
+  type RuntimeFamily,
+} from './family';
 
 type ExternalCallback = (err?: Error | null, value?: unknown) => void;
 type ExternalFunction = (...args: any[]) => unknown;
@@ -25,7 +30,13 @@ export interface ModeInputs {
 
 export type RuntimeMode =
   | { mode: 'composed' }
-  | { mode: 'legacy'; reason: string };
+  | {
+      mode: 'legacy';
+      reason: string;
+      /** Set when experiments.externalRuntime or provideExternalRuntime asks for the full runtime. */
+      requested?: true;
+    }
+  | { mode: 'unsupported'; reason: string };
 
 const hasOwn = (object: object, key: string) =>
   Object.prototype.hasOwnProperty.call(object, key);
@@ -34,9 +45,13 @@ export async function selectMode(
   family: RuntimeFamily,
   inputs: ModeInputs,
 ): Promise<RuntimeMode> {
+  const problem = familyProblem(family);
+  if (problem !== undefined) return { mode: 'unsupported', reason: problem };
+  const requested = experimentProblem(inputs);
+  if (requested !== undefined) {
+    return { mode: 'legacy', reason: requested, requested: true };
+  }
   const reason =
-    familyProblem(family) ??
-    experimentProblem(inputs) ??
     (await externalsProblem(inputs)) ??
     aliasProblem(inputs) ??
     (inputs.virtualModulesPlugin === false
@@ -58,7 +73,9 @@ function familyProblem({ anchor, members }: RuntimeFamily): string | undefined {
     const missing = RUNTIME_FAMILY[pkg].find(
       (key) => !declaresExportKey(member.exports, key),
     );
-    if (missing) return `${pkg} at ${member.root} does not export "${missing}"`;
+    if (missing) {
+      return `${pkg} at ${member.root} does not export "${missing}": the installed runtime family lacks the subpath exports this build needs; update the @module-federation runtime packages to the release that added them (${MIN_RUNTIME_VERSION})`;
+    }
     from = member.root;
   }
   return undefined;

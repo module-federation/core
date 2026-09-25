@@ -23,7 +23,6 @@ module.exports = {
       filename: 'container.js',
       library: { type: 'commonjs-module' },
       exposes: { './Button': './Button' },
-      experiments: { composedRuntime: true },
     }),
   ],
 };

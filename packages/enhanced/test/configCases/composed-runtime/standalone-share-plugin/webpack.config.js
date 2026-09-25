@@ -9,7 +9,6 @@ module.exports = {
       library: { type: 'commonjs-module' },
       exposes: { './Button': './Button' },
       remotes: { self: './container.js' },
-      experiments: { composedRuntime: true },
     }),
     new SharePlugin({
       shared: {

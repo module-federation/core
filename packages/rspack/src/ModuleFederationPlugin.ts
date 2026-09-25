@@ -38,17 +38,6 @@ type RuntimeEntrySpec = {
   cjs: string;
 };
 
-function hasExposes(
-  exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
-): boolean {
-  return Boolean(
-    exposes &&
-    (Array.isArray(exposes)
-      ? exposes.length > 0
-      : Object.keys(exposes).length > 0),
-  );
-}
-
 function resolveRuntimeEntry(
   spec: RuntimeEntrySpec,
   implementation: string | undefined,
@@ -86,22 +75,6 @@ export function resolveRspackRuntimeImplementation(
   );
 }
 
-/** @deprecated The wrapper no longer aliases `@module-federation/runtime$`. */
-export function resolveRspackRuntimeAlias(
-  implementation: string,
-  resolve: ResolveFn = require.resolve,
-) {
-  return resolveRuntimeEntry(
-    {
-      bundler: '@module-federation/runtime/bundler',
-      esm: '@module-federation/runtime/dist/index.js',
-      cjs: '@module-federation/runtime/dist/index.cjs',
-    },
-    implementation,
-    resolve,
-  );
-}
-
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -111,25 +84,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     this._options = options;
   }
 
-  private _patchBundlerConfig(
-    compiler: Compiler,
-  ): Record<string, string | boolean> {
-    const { name, experiments, exposes } = this._options;
+  private _patchBundlerConfig(compiler: Compiler): void {
+    const { experiments } = this._options;
     const definePluginOptions: Record<string, string | boolean> = {};
-    if (name) {
-      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
-        composeKeyWithSeparator(name, utils.getBuildVersion()),
-      );
-    }
-    // Add FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
-    const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
-      disableSnapshot;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_REMOTE'] =
-      experiments?.optimization?.disableRemote ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_SHARED'] =
-      experiments?.optimization?.disableShared ?? false;
-    definePluginOptions['FEDERATION_HAS_EXPOSES'] = hasExposes(exposes);
 
     // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
     if (
@@ -149,10 +106,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
     // No inference for ENV_TARGET. If not manually set and valid, it's not defined.
 
-    if (!experiments?.composedRuntime) {
-      new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
-    }
-    return definePluginOptions;
+    new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
   }
 
   private _checkSingleton(compiler: Compiler): void {
@@ -183,7 +137,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       throw new Error('[ ModuleFederationPlugin ]: name is required');
     }
     this._checkSingleton(compiler);
-    const defines = this._patchBundlerConfig(compiler);
+    this._patchBundlerConfig(compiler);
     const containerManager = new ContainerManager();
     containerManager.init(options);
 
@@ -239,28 +193,36 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }
     }
 
+    const buildId = composeKeyWithSeparator(
+      options.name,
+      utils.getBuildVersion(),
+    );
+    // rspack's native runtime passes no id to init; this plugin sets it before the share scope registers.
+    // A data: module, because @rspack/core before 1.6 takes no runtime plugin params.
+    options.runtimePlugins = [
+      ...(options.runtimePlugins || []),
+      `data:text/javascript,export default function(){return{name:"build-id-plugin",beforeInit(args){args.userOptions.id||=${JSON.stringify(buildId)};return args}}}`,
+    ];
+
     new compiler.webpack.container.ModuleFederationPlugin(
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
 
-    if (options.experiments?.composedRuntime) {
-      new ComposedRuntimePlugin(
-        options,
-        {
-          runtimeTools: implementationPath,
-          // The same resolutions as rspack's native plugin, which imports bundlerRuntime.
-          bundlerRuntime: require.resolve(
-            '@module-federation/webpack-bundler-runtime',
-            { paths: [implementationPath] },
-          ),
-          runtime: require.resolve('@module-federation/runtime', {
-            paths: [implementationPath],
-          }),
-        },
-        composeKeyWithSeparator(options.name, utils.getBuildVersion()),
-        defines,
-      ).apply(compiler);
-    }
+    new ComposedRuntimePlugin(
+      options,
+      {
+        runtimeTools: implementationPath,
+        // The same resolutions as rspack's native plugin, which imports bundlerRuntime.
+        bundlerRuntime: require.resolve(
+          '@module-federation/webpack-bundler-runtime',
+          { paths: [implementationPath] },
+        ),
+        runtime: require.resolve('@module-federation/runtime', {
+          paths: [implementationPath],
+        }),
+      },
+      buildId,
+    ).apply(compiler);
 
     if (!disableManifest) {
       this._statsPlugin = new StatsPlugin(options, {

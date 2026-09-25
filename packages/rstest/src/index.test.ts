@@ -278,6 +278,14 @@ describe('shouldKeepBundledForFederation', () => {
     ).toBe(true);
   });
 
+  it('keeps plain data: javascript requests bundled', () => {
+    expect(
+      shouldKeepBundledForFederation(
+        'data:text/javascript,export default function(){}',
+      ),
+    ).toBe(true);
+  });
+
   it('keeps @module-federation/* requests bundled', () => {
     expect(shouldKeepBundledForFederation('@module-federation/node')).toBe(
       true,
@@ -293,17 +301,16 @@ describe('shouldKeepBundledForFederation', () => {
   });
 
   it('keeps the absolute bundler runtime path that rspack aliases to the composed bootstrap bundled', () => {
-    const paths = [
-      '/app/node_modules/@module-federation/webpack-bundler-runtime/dist/index.cjs',
-      'C:\\app\\node_modules\\@module-federation\\webpack-bundler-runtime\\dist\\index.cjs',
-    ];
-    for (const request of paths) {
-      expect(shouldKeepBundledForFederation(request, undefined, true)).toBe(
-        true,
-      );
-      // Without experiments.composedRuntime, rstest's own externals still decide.
-      expect(shouldKeepBundledForFederation(request)).toBe(false);
-    }
+    expect(
+      shouldKeepBundledForFederation(
+        '/app/node_modules/@module-federation/webpack-bundler-runtime/dist/index.cjs',
+      ),
+    ).toBe(true);
+    expect(
+      shouldKeepBundledForFederation(
+        'C:\\app\\node_modules\\@module-federation\\webpack-bundler-runtime\\dist\\index.cjs',
+      ),
+    ).toBe(true);
   });
 
   it('keeps webpack container reference requests bundled', () => {

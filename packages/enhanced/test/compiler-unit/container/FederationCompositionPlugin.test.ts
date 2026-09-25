@@ -1,8 +1,11 @@
+import { execFile } from 'child_process';
 import fs from 'fs';
 import { createRequire } from 'module';
 import os from 'os';
 import path from 'path';
+import { promisify } from 'util';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { MIN_RUNTIME_VERSION } from '@module-federation/managers';
 import ModuleFederationPlugin from '../../../src/lib/container/ModuleFederationPlugin';
 import ContainerReferencePlugin from '../../../src/lib/container/ContainerReferencePlugin';
 import { COVERED_BY_OPTIONS } from '../../../src/lib/container/runtime/FederationCompositionPlugin';
@@ -46,48 +49,48 @@ function fixture(files: Record<string, string>) {
 
 function compile(context: string, config: Record<string, unknown>) {
   const outputPath = path.join(context, `dist-${dirs.length}-${Math.random()}`);
-  return new Promise<{ stats: any; output: Record<string, string> }>(
-    (resolve, reject) => {
-      webpack(
-        {
-          context,
-          mode: 'production',
-          devtool: false,
-          // Two builds of one checkout can otherwise concatenate around different roots.
-          parallelism: 1,
-          target: 'async-node',
-          entry: './index.js',
-          optimization: { minimize: false },
-          output: { path: outputPath, uniqueName: 'composition-unit' },
-          ...config,
-        },
-        (err, stats) => {
-          if (err) return reject(err);
-          const output = {};
-          const files = fs.existsSync(outputPath)
-            ? fs.readdirSync(outputPath)
-            : [];
-          for (const file of files.sort()) {
-            if (file.endsWith('.js'))
-              output[file] = fs.readFileSync(
-                path.join(outputPath, file),
-                'utf8',
-              );
-          }
-          resolve({
-            stats: stats.toJson({
-              all: false,
-              errors: true,
-              warnings: true,
-              modules: true,
-              nestedModules: true,
-            }),
-            output,
-          });
-        },
-      );
-    },
-  );
+  return new Promise<{
+    stats: any;
+    output: Record<string, string>;
+    outputPath: string;
+  }>((resolve, reject) => {
+    webpack(
+      {
+        context,
+        mode: 'production',
+        devtool: false,
+        // Two builds of one checkout can otherwise concatenate around different roots.
+        parallelism: 1,
+        target: 'async-node',
+        entry: './index.js',
+        optimization: { minimize: false },
+        output: { path: outputPath, uniqueName: 'composition-unit' },
+        ...config,
+      },
+      (err, stats) => {
+        if (err) return reject(err);
+        const output = {};
+        const files = fs.existsSync(outputPath)
+          ? fs.readdirSync(outputPath)
+          : [];
+        for (const file of files.sort()) {
+          if (file.endsWith('.js'))
+            output[file] = fs.readFileSync(path.join(outputPath, file), 'utf8');
+        }
+        resolve({
+          stats: stats.toJson({
+            all: false,
+            errors: true,
+            warnings: true,
+            modules: true,
+            nestedModules: true,
+          }),
+          output,
+          outputPath,
+        });
+      },
+    );
+  });
 }
 
 const moduleNames = (stats) => {
@@ -121,26 +124,28 @@ describe('FederationCompositionPlugin', () => {
       ...extra,
     });
 
-  it('selects the legacy bootstrap, unchanged, for an older runtime family', async () => {
+  it('fails the build for an older runtime family and names the minimum version', async () => {
     const context = fixture({ 'index.js': 'export default 1;' });
-    const implementation = olderRuntimeTools();
-    const off = await compile(context, {
-      plugins: [host(undefined, { implementation })],
-    });
-    const on = await compile(context, {
-      plugins: [host({ composedRuntime: true }, { implementation })],
+    const { stats } = await compile(context, {
+      optimization: { minimize: false, emitOnErrors: true },
+      plugins: [host(undefined, { implementation: olderRuntimeTools() })],
     });
 
-    expect(messages(on.stats.errors)).toEqual([]);
-    expect(messages(on.stats.warnings)).toEqual([
-      expect.stringMatching(
-        /composedRuntime is set, but this build uses the full federation runtime because @module-federation\/webpack-bundler-runtime at .* does not export "\.\/compose"/,
+    expect(messages(stats.errors)).toEqual([
+      expect.stringContaining(
+        `does not export "./compose": the installed runtime family lacks the subpath exports this build needs; update the @module-federation runtime packages to the release that added them (${MIN_RUNTIME_VERSION})`,
       ),
     ]);
-    expect(moduleNames(on.stats).some((name) => COMPOSE.test(name))).toBe(
-      false,
-    );
-    expect(on.output).toEqual(off.output);
+  });
+
+  it('keeps the full bootstrap without a warning for experiments.externalRuntime', async () => {
+    const context = fixture({ 'index.js': 'export default 1;' });
+    const { stats } = await compile(context, {
+      plugins: [host({ externalRuntime: true })],
+    });
+
+    expect(messages(stats.warnings)).toEqual([]);
+    expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
   });
 
   it('selects legacy when a function external names runtime-core', async () => {
@@ -152,7 +157,7 @@ describe('FederationCompositionPlugin', () => {
             ? callback(null, 'var {}')
             : callback(),
       ],
-      plugins: [host({ composedRuntime: true })],
+      plugins: [host()],
     });
 
     expect(messages(stats.warnings)).toEqual([
@@ -174,7 +179,7 @@ describe('FederationCompositionPlugin', () => {
           ),
         },
       },
-      plugins: [host({ composedRuntime: true })],
+      plugins: [host()],
     });
 
     expect(messages(stats.warnings)).toEqual([
@@ -185,25 +190,59 @@ describe('FederationCompositionPlugin', () => {
     expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
   });
 
-  it('emits ENV_TARGET but no capability or build-id define when composed', async () => {
+  it.each([
+    ['the composed bootstrap', {}],
+    [
+      'the full bootstrap a user alias selects',
+      {
+        resolve: {
+          alias: {
+            '@module-federation/runtime$': path.join(
+              path.dirname(require.resolve('@module-federation/runtime')),
+              'index.js',
+            ),
+          },
+        },
+      },
+    ],
+  ])(
+    'registers the share scope of %s under name:version',
+    async (_, config) => {
+      const previous = process.env['MF_BUILD_VERSION'];
+      process.env['MF_BUILD_VERSION'] = '9.9.9';
+      try {
+        const context = fixture({ 'index.js': 'export default 1;' });
+        const { stats, outputPath } = await compile(context, {
+          ...config,
+          plugins: [host()],
+        });
+        expect(messages(stats.errors)).toEqual([]);
+        const { stdout } = await promisify(execFile)(process.execPath, [
+          '-e',
+          `require(${JSON.stringify(path.join(outputPath, 'main.js'))});
+          console.log(JSON.stringify(Object.keys(globalThis.__FEDERATION__.__SHARE__)));`,
+        ]);
+        expect(JSON.parse(stdout)).toEqual(['composition_host:9.9.9']);
+      } finally {
+        if (previous === undefined) delete process.env['MF_BUILD_VERSION'];
+        else process.env['MF_BUILD_VERSION'] = previous;
+      }
+    },
+  );
+
+  it('emits ENV_TARGET but no capability or build-id define', async () => {
     const context = fixture({
       'index.js':
         'export default [typeof FEDERATION_BUILD_IDENTIFIER, typeof FEDERATION_OPTIMIZE_NO_SHARED, ENV_TARGET];',
     });
-    const composed = await compile(context, {
-      plugins: [
-        host({ composedRuntime: true, optimization: { target: 'web' } }),
-      ],
-    });
-    const legacy = await compile(context, {
+    const { stats, output } = await compile(context, {
       plugins: [host({ optimization: { target: 'web' } })],
     });
 
-    expect(messages(composed.stats.errors)).toEqual([]);
-    expect(composed.output['main.js']).toContain(
+    expect(messages(stats.errors)).toEqual([]);
+    expect(output['main.js']).toContain(
       '[typeof FEDERATION_BUILD_IDENTIFIER, typeof FEDERATION_OPTIMIZE_NO_SHARED, "web"]',
     );
-    expect(legacy.output['main.js']).toContain('["string", "boolean", "web"]');
   });
 
   it('plans once across two copies of enhanced', async () => {
@@ -216,7 +255,6 @@ describe('FederationCompositionPlugin', () => {
           exposes: { './index': './index.js' },
           dts: false,
           manifest: false,
-          experiments: { composedRuntime: true },
         }),
         new OtherContainerReferencePlugin({
           remoteType: 'script',
@@ -240,7 +278,7 @@ describe('FederationCompositionPlugin', () => {
     });
     const { stats } = await compile(context, {
       plugins: [
-        host({ composedRuntime: true }),
+        host(),
         {
           apply(compiler) {
             new compiler.webpack.ExternalsPlugin('global', {
@@ -269,7 +307,6 @@ describe('FederationCompositionPlugin', () => {
           exposes: { './index': './index.js' },
           dts: false,
           manifest: false,
-          experiments: { composedRuntime: true },
         }),
         // Claims ModuleFederationPlugin covers it, so nothing registers the remotes need.
         new ContainerReferencePlugin(
@@ -296,7 +333,7 @@ describe('FederationCompositionPlugin', () => {
         {
           apply(compiler) {
             compiler.hooks.afterResolvers.tap('Late', () =>
-              host({ composedRuntime: true }).apply(compiler),
+              host().apply(compiler),
             );
           },
         },
@@ -305,7 +342,7 @@ describe('FederationCompositionPlugin', () => {
 
     expect(messages(stats.warnings)).toEqual([
       expect.stringMatching(
-        /composedRuntime is set, but this build uses the full federation runtime because the federation plan never ran/,
+        /^This build uses the full federation runtime because the federation plan never ran/,
       ),
     ]);
   });
@@ -329,7 +366,7 @@ describe('FederationCompositionPlugin', () => {
     };
 
     await compile(context, {
-      plugins: [host({ composedRuntime: true }), late],
+      plugins: [host(), late],
     });
 
     expect(error?.message).toMatch(
@@ -350,18 +387,15 @@ describe('FederationCompositionPlugin', () => {
     });
     const { stats } = await compile(context, {
       plugins: [
-        host(
-          { composedRuntime: true },
-          {
-            library: { type: 'commonjs-module', name: 'composition_host' },
-            shared: {
-              'ui-lib': {
-                requiredVersion: '*',
-                treeShaking: { mode: 'runtime-infer' },
-              },
+        host(undefined, {
+          library: { type: 'commonjs-module', name: 'composition_host' },
+          shared: {
+            'ui-lib': {
+              requiredVersion: '*',
+              treeShaking: { mode: 'runtime-infer' },
             },
           },
-        ),
+        }),
       ],
     });
 

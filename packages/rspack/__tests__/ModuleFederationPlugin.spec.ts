@@ -1,6 +1,6 @@
+import * as pluginEntry from '../src/plugin';
 import {
   ModuleFederationPlugin,
-  resolveRspackRuntimeAlias,
   resolveRspackRuntimeImplementation,
 } from '../src/ModuleFederationPlugin';
 
@@ -56,21 +56,21 @@ describe('runtime resolution compatibility', () => {
 
         if (
           basedFromLegacy &&
-          request === '@module-federation/runtime/bundler'
+          request === '@module-federation/runtime-tools/bundler'
         ) {
           throw new Error(`Cannot find module '${request}'`);
         }
-        if (request === '@module-federation/runtime/dist/index.js') {
-          return '/legacy/runtime/dist/index.js';
+        if (request === '@module-federation/runtime-tools/dist/index.js') {
+          return '/legacy/runtime-tools/dist/index.js';
         }
 
         throw new Error(`Unexpected request: ${request}`);
       },
     ) as typeof require.resolve;
 
-    expect(resolveRspackRuntimeAlias('/legacy/runtime-tools', resolve)).toBe(
-      '/legacy/runtime/dist/index.js',
-    );
+    expect(
+      resolveRspackRuntimeImplementation('/legacy/runtime-tools', resolve),
+    ).toBe('/legacy/runtime-tools/dist/index.js');
   });
 
   it('falls back to legacy cjs runtime entries when esm legacy builds are unavailable', () => {
@@ -80,56 +80,44 @@ describe('runtime resolution compatibility', () => {
 
         if (
           basedFromLegacy &&
-          (request === '@module-federation/runtime/bundler' ||
-            request === '@module-federation/runtime/dist/index.js')
+          (request === '@module-federation/runtime-tools/bundler' ||
+            request === '@module-federation/runtime-tools/dist/index.js')
         ) {
           throw new Error(`Cannot find module '${request}'`);
         }
-        if (request === '@module-federation/runtime/dist/index.cjs') {
-          return '/legacy/runtime/dist/index.cjs';
+        if (request === '@module-federation/runtime-tools/dist/index.cjs') {
+          return '/legacy/runtime-tools/dist/index.cjs';
         }
 
         throw new Error(`Unexpected request: ${request}`);
       },
     ) as typeof require.resolve;
 
-    expect(resolveRspackRuntimeAlias('/legacy/runtime-tools', resolve)).toBe(
-      '/legacy/runtime/dist/index.cjs',
-    );
+    expect(
+      resolveRspackRuntimeImplementation('/legacy/runtime-tools', resolve),
+    ).toBe('/legacy/runtime-tools/dist/index.cjs');
   });
 });
 
-describe('runtime capability optimization defines', () => {
-  it('keeps all runtime capabilities enabled by default', () => {
-    expect(getOptimizationDefines()).toMatchObject({
-      FEDERATION_OPTIMIZE_NO_REMOTE: false,
-      FEDERATION_OPTIMIZE_NO_SHARED: false,
-      FEDERATION_HAS_EXPOSES: false,
-    });
+describe('@module-federation/rspack/plugin', () => {
+  it('no longer exports resolveRspackRuntimeAlias', () => {
+    expect(pluginEntry).not.toHaveProperty('resolveRspackRuntimeAlias');
+  });
+});
+
+describe('runtime optimization defines', () => {
+  it('defines only ENV_TARGET, from experiments.optimization.target', () => {
+    expect(
+      getOptimizationDefines(
+        { target: 'web', disableRemote: true, disableShared: true },
+        { './Button': './src/Button' },
+      ),
+    ).toEqual({ ENV_TARGET: '"web"' });
   });
 
-  it('derives expose capability from the container configuration', () => {
-    expect(getOptimizationDefines(undefined, {})).toMatchObject({
-      FEDERATION_HAS_EXPOSES: false,
-    });
+  it('defines nothing without a target', () => {
     expect(
-      getOptimizationDefines(undefined, {
-        './Button': './src/Button',
-      }),
-    ).toMatchObject({
-      FEDERATION_HAS_EXPOSES: true,
-    });
-  });
-
-  it('defines each disabled runtime capability independently', () => {
-    expect(
-      getOptimizationDefines({
-        disableRemote: true,
-        disableShared: true,
-      }),
-    ).toMatchObject({
-      FEDERATION_OPTIMIZE_NO_REMOTE: true,
-      FEDERATION_OPTIMIZE_NO_SHARED: true,
-    });
+      getOptimizationDefines({ disableSnapshot: true }, { './Button': './B' }),
+    ).toEqual({});
   });
 });

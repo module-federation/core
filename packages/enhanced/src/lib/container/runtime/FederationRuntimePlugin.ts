@@ -21,6 +21,7 @@ import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
 import FederationCompositionPlugin, {
+  buildIdOf,
   composedEntryOf,
 } from './FederationCompositionPlugin';
 
@@ -188,9 +189,7 @@ class FederationRuntimePlugin {
       });
     }
     const embedRuntimeLines = Template.asString([
-      composition === undefined
-        ? `if(!${federationGlobal}.runtime || !${federationGlobal}.bundlerRuntime){`
-        : `if(!${federationGlobal}.bundlerRuntime){`,
+      `if(!${federationGlobal}.bundlerRuntime){`,
       Template.indent([
         `var prevFederation = ${federationGlobal};`,
         `${federationGlobal} = {}`,
@@ -204,6 +203,10 @@ class FederationRuntimePlugin {
       '}',
     ]);
 
+    // createFederation passes the build id to a composed bootstrap.
+    const buildId =
+      composition === undefined ? buildIdOf(compiler, options) : undefined;
+
     return Template.asString([
       composition ??
         `import federation from '${normalizedBundlerRuntimePath}';`,
@@ -211,6 +214,9 @@ class FederationRuntimePlugin {
       embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
       Template.indent([
+        buildId
+          ? `${federationGlobal}.initOptions.id = ${federationGlobal}.initOptions.id || ${JSON.stringify(buildId)};`
+          : '',
         runtimePluginCalls.length
           ? Template.asString([
               `var pluginsToAdd = [`,
@@ -222,7 +228,6 @@ class FederationRuntimePlugin {
               `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
             ])
           : '',
-        // `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
         `${federationGlobal}.instance = ${federationGlobal}.bundlerRuntime.init({webpackRequire:${RuntimeGlobals.require}});`,
         `if(${federationGlobal}.attachShareScopeMap){`,
         Template.indent([
@@ -529,7 +534,7 @@ class FederationRuntimePlugin {
     // dont run multiple times on every apply()
     if (!onceForCompiler.has(compiler)) {
       const options = this.options;
-      if (options?.experiments?.composedRuntime) {
+      if (options) {
         new FederationCompositionPlugin(
           options,
           (composition) => {

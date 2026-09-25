@@ -22,6 +22,7 @@ export type {
 } from './composition/plan';
 export {
   FAMILY_PACKAGES,
+  MIN_RUNTIME_VERSION,
   RUNTIME_FAMILY,
   resolveRuntimeFamily,
 } from './composition/family';

@@ -53,7 +53,7 @@
 - 是否必填：否
 - 默认值：`false`
 
-当设置为 `true` 时，该选项会在构建期间将全局常量 `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` 定义为 `true`。在 `@module-federation/runtime-core` 中，这会阻止 `snapshotPlugin()` 与 `generatePreloadAssetsPlugin()` 被打包并在 Module Federation 实例中初始化。
+当设置为 `true` 时，插件生成的 federation 启动代码不会导入 `@module-federation/runtime-core` 的 snapshot 能力，因此 `snapshotPlugin()` 与 `generatePreloadAssetsPlugin()` 不会被打包，也不会在 Module Federation 实例中初始化。
 
 **影响：**
 

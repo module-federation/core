@@ -28,7 +28,7 @@ import {
   SnapshotHandlerContract,
   Platform,
 } from './type';
-import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
+import { registerPlugins, getRemoteEntry, error } from './utils';
 import {
   getShortErrorMsg,
   RUNTIME_010,
@@ -298,7 +298,7 @@ export class FederationCore {
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
-      id: userOptions.id || getBuilderId(),
+      id: userOptions.id || '',
       name: userOptions.name,
       plugins,
       remotes: [],

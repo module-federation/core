@@ -30,6 +30,23 @@ describe('runtime/compose', () => {
     expect(host.options.name).toBe('compose-debug');
   });
 
+  it('does not match a page-global instance by a build-id define', () => {
+    (
+      globalThis as { FEDERATION_BUILD_IDENTIFIER?: string }
+    ).FEDERATION_BUILD_IDENTIFIER = 'foreign:1.0.0';
+    const foreign = new FederationKernel({
+      name: 'foreign-build',
+      id: 'foreign:1.0.0',
+    });
+    CurrentGlobal.__FEDERATION__.__INSTANCES__.unshift(foreign);
+    try {
+      expect(init({ name: 'own-build' })).not.toBe(foreign);
+    } finally {
+      delete (globalThis as { FEDERATION_BUILD_IDENTIFIER?: string })
+        .FEDERATION_BUILD_IDENTIFIER;
+    }
+  });
+
   it('reuses the bundle-local instance before a page-global match', () => {
     const first = composeInit({ name: 'compose-reuse' }, {});
     const foreign = registerForeignInstance('compose-reuse');

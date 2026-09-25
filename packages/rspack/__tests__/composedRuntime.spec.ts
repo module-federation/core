@@ -76,11 +76,6 @@ async function harness(
   return results;
 }
 
-const composed = (experiments: Record<string, unknown> = {}) => ({
-  composedRuntime: true,
-  ...experiments,
-});
-
 const remote = (
   target: 'node' | 'web',
   extra: Record<string, unknown> = {},
@@ -117,7 +112,9 @@ function expectComposed(b: Build, name: string) {
     expect.stringMatching(new RegExp(`/${name}\\.[0-9a-f]{12}\\.mjs$`)),
   ]);
   expect(b.modules.filter((m) => LEGACY_ENTRY.test(m))).toEqual([]);
-  expect(b.warnings.filter((w) => w.includes('composedRuntime'))).toEqual([]);
+  expect(
+    b.warnings.filter((w) => w.includes('full federation runtime')),
+  ).toEqual([]);
 }
 
 function serve(root: string): Promise<http.Server> {
@@ -145,13 +142,13 @@ async function runHostAndRemote(out: string, rspackCore?: string) {
           out: `${out}/remote`,
           target: 'node',
           singleChunk: true,
-          mf: remote('node', { shared: SHARED, experiments: composed() }),
+          mf: remote('node', { shared: SHARED }),
         },
         {
           out: `${out}/host`,
           target: 'node',
           mf: host(
-            { shared: SHARED, experiments: composed() },
+            { shared: SHARED },
             `http://127.0.0.1:${port}/${out}/remote/remoteEntry.js`,
           ),
         },
@@ -176,7 +173,7 @@ async function runHostAndRemote(out: string, rspackCore?: string) {
   }
 }
 
-describe('experiments.composedRuntime', () => {
+describe('composed runtime', () => {
   it('runs a composed host against a composed remote with one shared singleton', () =>
     runHostAndRemote('run'));
 
@@ -199,16 +196,14 @@ describe('experiments.composedRuntime', () => {
         out: 'graph/host',
         target: 'web',
         mf: host({
-          experiments: composed({
+          experiments: {
             optimization: { disableShared: true, disableSnapshot: true },
-          }),
+          },
         }),
       },
     ]);
     expectComposed(b, 'host');
-    expect(mainCode('graph/host')).toContain(
-      'typeof FEDERATION_BUILD_IDENTIFIER',
-    );
+    expect(mainCode('graph/host')).not.toContain('FEDERATION_BUILD_IDENTIFIER');
     expect(
       parts(b, [
         'remote',
@@ -235,7 +230,7 @@ describe('experiments.composedRuntime', () => {
       {
         out: 'graph/async-host',
         target: 'node',
-        mf: host({ experiments: composed({ asyncStartup: true }) }),
+        mf: host({ experiments: { asyncStartup: true } }),
       },
     ]);
     expectComposed(b, 'host');
@@ -248,9 +243,9 @@ describe('experiments.composedRuntime', () => {
         out: 'graph/remote',
         target: 'web',
         mf: remote('web', {
-          experiments: composed({
+          experiments: {
             optimization: { disableRemote: true, disableShared: true },
-          }),
+          },
         }),
       },
     ]);
@@ -282,7 +277,7 @@ describe('experiments.composedRuntime', () => {
         {
           out: 'check/externals',
           target: 'node',
-          mf: host({ shared: SHARED, experiments: composed() }),
+          mf: host({ shared: SHARED }),
           externalsPattern: '^@module-federation/runtime-core',
         },
       ],
@@ -301,7 +296,7 @@ describe('experiments.composedRuntime', () => {
         {
           out: 'check/remotes',
           target: 'node',
-          mf: { name: 'host', shared: SHARED, experiments: composed() },
+          mf: { name: 'host', shared: SHARED },
           referenceRemotes: { remoteApp: 'remoteApp@http://localhost/x.js' },
         },
       ],
@@ -320,7 +315,7 @@ describe('experiments.composedRuntime', () => {
         out: 'legacy/host',
         target: 'web',
         noVirtualModules: true,
-        mf: host({ experiments: composed() }),
+        mf: host(),
       },
     ]);
     expect(composedEntries(b)).toEqual([]);
@@ -330,9 +325,35 @@ describe('experiments.composedRuntime', () => {
     );
     expect(b.warnings).toEqual([
       expect.stringContaining(
-        'this @rspack/core has no experiments.VirtualModulesPlugin',
+        'This build uses the full federation runtime because this @rspack/core has no experiments.VirtualModulesPlugin',
       ),
     ]);
+  });
+
+  it.each([
+    ['the composed bootstrap', {}],
+    [
+      'the full bootstrap a user alias selects',
+      {
+        alias: {
+          '@module-federation/runtime-core$': path.resolve(
+            __dirname,
+            '../../runtime-core/dist/index.js',
+          ),
+        },
+      },
+    ],
+  ])('registers the share scope of %s under name:version', async (_, extra) => {
+    const out = `build-id/${Object.keys(extra).length}`;
+    await harness([
+      { out, target: 'node', buildVersion: '9.9.9', mf: host(), ...extra },
+    ]);
+    const { stdout } = await promisify(execFile)(process.execPath, [
+      '-e',
+      'require(process.argv[1]).default.catch(() => {}); console.log(JSON.stringify(Object.keys(globalThis.__FEDERATION__.__SHARE__)))',
+      path.join(outRoot, out, 'main.js'),
+    ]);
+    expect(JSON.parse(stdout)).toEqual(['host:9.9.9']);
   });
 
   it('keeps the full runtime and warns when resolve.alias already maps the bundler runtime', async () => {
@@ -345,7 +366,7 @@ describe('experiments.composedRuntime', () => {
         out: 'user-alias/bundler-runtime',
         target: 'web',
         alias: { [bundlerRuntime]: bundlerRuntime },
-        mf: host({ experiments: composed() }),
+        mf: host(),
       },
     ]);
     expect(composedEntries(b)).toEqual([]);
@@ -365,7 +386,7 @@ describe('experiments.composedRuntime', () => {
         out: 'user-alias/runtime-core',
         target: 'web',
         alias: { '@module-federation/runtime-core$': runtimeCore },
-        mf: host({ experiments: composed() }),
+        mf: host(),
       },
     ]);
     expect(composedEntries(b)).toEqual([]);
@@ -377,10 +398,21 @@ describe('experiments.composedRuntime', () => {
     ]);
   });
 
-  it('keeps the full runtime without the experiment', async () => {
+  it('composes by default', async () => {
     const [b] = await harness([{ out: 'off/host', target: 'web', mf: host() }]);
+    expectComposed(b, 'host');
+    expect(b.warnings).toEqual([]);
+  });
+
+  it('keeps the full runtime, without a warning, for experiments.externalRuntime', async () => {
+    const [b] = await harness([
+      {
+        out: 'external/host',
+        target: 'web',
+        mf: host({ experiments: { externalRuntime: true } }),
+      },
+    ]);
     expect(composedEntries(b)).toEqual([]);
-    expect(mainCode('off/host')).not.toContain('FEDERATION_BUILD_IDENTIFIER');
     expect(b.modules.some((m) => LEGACY_ENTRY.test(m))).toBe(true);
     expect(b.warnings).toEqual([]);
   });
@@ -391,7 +423,7 @@ describe('experiments.composedRuntime', () => {
         {
           out: 'watch/host',
           target: 'web',
-          mf: host({ experiments: composed() }),
+          mf: host(),
         },
       ],
       { watch: true },
@@ -408,18 +440,18 @@ describe('experiments.composedRuntime', () => {
           out: 'multi/host',
           target: 'web',
           mf: host({
-            experiments: composed({
+            experiments: {
               optimization: { disableShared: true, disableSnapshot: true },
-            }),
+            },
           }),
         },
         {
           out: 'multi/remote',
           target: 'web',
           mf: remote('web', {
-            experiments: composed({
+            experiments: {
               optimization: { disableRemote: true, disableShared: true },
-            }),
+            },
           }),
         },
       ],
@@ -456,7 +488,7 @@ describe('experiments.composedRuntime', () => {
           cacheDir,
           buildVersion: 'buildVersion' in step ? step.buildVersion : undefined,
           mf: host({
-            experiments: composed({ optimization: plans[step.plan] }),
+            experiments: { optimization: plans[step.plan] },
           }),
         },
       ]);

@@ -5,7 +5,7 @@
 
 ## Usage
 
-The package needs to be used with webpack/rspack bundler. It will export federation object which includes runtime, instance, bundlerRuntime, initOptions, attachShareScopeMap, bundlerRuntimeOptions.
+The package needs to be used with webpack/rspack bundler. It exports a federation object with instance, bundlerRuntime, initOptions, attachShareScopeMap, and bundlerRuntimeOptions. The root includes every adapter and the full runtime. `@module-federation/webpack-bundler-runtime/compose` exports `createFederation`, which the plugins use to build a federation object from only the adapters and capabilities a build needs.
 
 After referencing, mount it to the corresponding bundler runtime, and then use the corresponding api/instance.
 

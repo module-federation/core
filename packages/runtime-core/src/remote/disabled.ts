@@ -5,12 +5,6 @@ import { DisabledSnapshotHandler } from '../plugins/snapshot/disabled';
 const REMOTE_DISABLED_MESSAGE =
   'Remote loading is disabled by experiments.optimization.disableRemote.';
 
-export class UnavailableRemoteModule {
-  constructor() {
-    throw new Error(REMOTE_DISABLED_MESSAGE);
-  }
-}
-
 export class DisabledRemoteHandler implements RemoteHandlerContract {
   // getRemoteEntry emits loadEntry for shared fallback entries, which load without remotes.
   hooks: RemoteHandlerContract['hooks'] = new PluginSystem({

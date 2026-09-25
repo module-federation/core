@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { FederationKernel, getRemoteEntry } from '../src/kernel';
 import { remote } from '../src/remote/capability';
-import { PLATFORM_UNAVAILABLE_MESSAGE } from '../src/core';
-import { ModuleFederation } from '../src';
 import { shared } from '../src/shared/capability';
 import { CurrentGlobal } from '../src/global';
+import { PLATFORM_UNAVAILABLE_MESSAGE } from '../src/core';
+import { Module, ModuleFederation } from '../src';
+import { Module as RemoteModule } from '../src/module';
 import type { ModuleFederationRuntimePlugin, Platform } from '../src/type';
 
 declare global {
@@ -12,6 +13,8 @@ declare global {
   var FEDERATION_OPTIMIZE_NO_REMOTE: boolean | undefined;
   // eslint-disable-next-line no-var
   var FEDERATION_OPTIMIZE_NO_SHARED: boolean | undefined;
+  // eslint-disable-next-line no-var
+  var FEDERATION_BUILD_IDENTIFIER: string | undefined;
 }
 
 const remoteInfo = {
@@ -28,6 +31,8 @@ const pluginNames = (instance: FederationKernel) =>
 describe('FederationKernel', () => {
   afterEach(() => {
     delete globalThis.FEDERATION_OPTIMIZE_NO_REMOTE;
+    delete globalThis.FEDERATION_OPTIMIZE_NO_SHARED;
+    delete globalThis.FEDERATION_BUILD_IDENTIFIER;
   });
 
   it('has disabled handlers and a platform that rejects loads without capabilities', async () => {
@@ -135,12 +140,35 @@ describe('FederationKernel', () => {
       undefined,
     );
   });
+
+  it('registers its share scope under an id a beforeInit plugin sets', () => {
+    const buildId: ModuleFederationRuntimePlugin = {
+      name: 'build-id',
+      beforeInit(args) {
+        args.userOptions.id ||= 'kernel-plugin-id:1.0.0';
+        return args;
+      },
+    };
+    const kernel = new FederationKernel(
+      { name: 'kernel-plugin-id', plugins: [buildId] },
+      { shared },
+    );
+
+    expect(kernel.options.id).toBe('kernel-plugin-id:1.0.0');
+    expect(
+      CurrentGlobal.__FEDERATION__.__SHARE__['kernel-plugin-id:1.0.0'],
+    ).toBe(kernel.shareScopeMap);
+    expect(CurrentGlobal.__FEDERATION__.__SHARE__['kernel-plugin-id']).toBe(
+      undefined,
+    );
+  });
 });
 
 describe('root ModuleFederation', () => {
   afterEach(() => {
     delete globalThis.FEDERATION_OPTIMIZE_NO_REMOTE;
     delete globalThis.FEDERATION_OPTIMIZE_NO_SHARED;
+    delete globalThis.FEDERATION_BUILD_IDENTIFIER;
   });
 
   it('composes shared, remote, snapshot and the universal platform', () => {
@@ -164,35 +192,28 @@ describe('root ModuleFederation', () => {
     expect(instance.options.inBrowser).toBe(true);
   });
 
-  it('drops remote and snapshot when FEDERATION_OPTIMIZE_NO_REMOTE is set', async () => {
-    globalThis.FEDERATION_OPTIMIZE_NO_REMOTE = true;
-
-    const instance = new ModuleFederation({
-      name: 'root-no-remote',
-      remotes: [{ name: 'app', entry: remoteInfo.entry }],
-    });
-
-    expect(pluginNames(instance)).toEqual([]);
-    expect(instance.options.remotes).toEqual([]);
-    await expect(instance.loadRemote('app/Button')).rejects.toThrow(
-      'Remote loading is disabled',
-    );
-  });
-
-  it('has no platform loader when remote and shared are both disabled', async () => {
+  it('ignores the removed capability and build-id defines', () => {
     globalThis.FEDERATION_OPTIMIZE_NO_REMOTE = true;
     globalThis.FEDERATION_OPTIMIZE_NO_SHARED = true;
+    globalThis.FEDERATION_BUILD_IDENTIFIER = 'root:1.0.0';
 
-    const instance = new ModuleFederation({ name: 'root-all-off' });
+    const instance = new ModuleFederation({
+      name: 'root-defines',
+      remotes: [{ name: 'app', entry: remoteInfo.entry }],
+      shared: {
+        react: { version: '18.0.0', lib: () => ({ root: true }) },
+      },
+    });
 
-    expect(() => instance.loadShareSync('react')).toThrow(
-      'Shared dependency loading is disabled',
-    );
-    await expect(
-      instance.platform.loadEntry({
-        remoteInfo,
-        loaderHook: instance.loaderHook,
-      }),
-    ).rejects.toThrow(PLATFORM_UNAVAILABLE_MESSAGE);
+    expect(pluginNames(instance)).toEqual([
+      'snapshot-plugin',
+      'generate-preload-assets-plugin',
+    ]);
+    expect(instance.options.remotes.map((r) => r.name)).toEqual(['app']);
+    expect(instance.loadShareSync<{ root: boolean }>('react')()).toEqual({
+      root: true,
+    });
+    expect(instance.options.id).toBe('');
+    expect(Module).toBe(RemoteModule);
   });
 });

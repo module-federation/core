@@ -14,7 +14,6 @@ module.exports = [
         library: { type: 'commonjs-module' },
         exposes: { './Button': './Button' },
         experiments: {
-          composedRuntime: true,
           optimization: { disableRemote: true, disableShared: true },
         },
       }),
@@ -27,7 +26,6 @@ module.exports = [
         name: 'exposes_only_host',
         library: { type: 'commonjs-module' },
         remotes: { remote: './remote/remoteEntry.js' },
-        experiments: { composedRuntime: true },
       }),
     ],
   },

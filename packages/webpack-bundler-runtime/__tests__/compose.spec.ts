@@ -199,6 +199,7 @@ describe('createFederation', () => {
     federation.initOptions = { name, remotes: [] };
     federation.instance = federation.runtime.init(federation.initOptions);
     expect(federation.instance.options.id).toBe(`${name}:1.0.0`);
+    expect(federation.runtime).not.toHaveProperty('loadScriptNode');
   });
 });
 

@@ -22,6 +22,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
     compiler = {
       options: {
         context: '/test/path',
+        plugins: [],
       },
       hooks: {
         thisCompilation: {
@@ -192,7 +193,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
   });
 
   describe('runtime bootstrap guards', () => {
-    it('rehydrates bundler runtime when runtime exists but bundlerRuntime is missing', () => {
+    it('rehydrates federation only when bundlerRuntime is missing', () => {
       const template = FederationRuntimePlugin.getTemplate(
         compiler as Compiler,
         mockOptions,
@@ -200,8 +201,9 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       );
 
       expect(template).toContain(
-        'if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime)',
+        'if(!__webpack_require__.federation.bundlerRuntime){',
       );
+      expect(template).not.toContain('__webpack_require__.federation.runtime');
     });
   });
 
