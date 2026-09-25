@@ -46,12 +46,7 @@ export async function selectMode(
   inputs: ModeInputs,
 ): Promise<RuntimeMode> {
   const problem = familyProblem(family);
-  if (problem !== undefined) {
-    return {
-      mode: 'unsupported',
-      reason: `${problem}; the federation runtime packages must be ${MIN_RUNTIME_VERSION} or newer`,
-    };
-  }
+  if (problem !== undefined) return { mode: 'unsupported', reason: problem };
   const requested = experimentProblem(inputs);
   if (requested !== undefined) {
     return { mode: 'legacy', reason: requested, requested: true };
@@ -78,7 +73,9 @@ function familyProblem({ anchor, members }: RuntimeFamily): string | undefined {
     const missing = RUNTIME_FAMILY[pkg].find(
       (key) => !declaresExportKey(member.exports, key),
     );
-    if (missing) return `${pkg} at ${member.root} does not export "${missing}"`;
+    if (missing) {
+      return `${pkg} at ${member.root} does not export "${missing}": the installed runtime family lacks the subpath exports this build needs; update the @module-federation runtime packages to the release that added them (${MIN_RUNTIME_VERSION})`;
+    }
     from = member.root;
   }
   return undefined;

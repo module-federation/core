@@ -48,7 +48,10 @@ describe('selectMode', () => {
     expect(reason).toMatch(
       /@module-federation\/webpack-bundler-runtime at .* does not export "\.\/compose"/,
     );
-    expect(reason).toContain(`${MIN_RUNTIME_VERSION} or newer`);
+    expect(reason).toContain(
+      `the installed runtime family lacks the subpath exports this build needs; update the @module-federation runtime packages to the release that added them (${MIN_RUNTIME_VERSION})`,
+    );
+    expect(reason).not.toContain('or newer');
   });
 
   it('does not count a "./*" pattern as the required key', async () => {
@@ -66,17 +69,19 @@ describe('selectMode', () => {
     const root = composableFamily(tempDir(), {
       '@module-federation/runtime-core': { name: 'runtime-core-fork' },
     });
-    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
-      /is named "runtime-core-fork"/,
-    );
+    const reason = await unsupportedReason(resolveRuntimeFamily(root));
+    expect(reason).toMatch(/is named "runtime-core-fork"/);
+    expect(reason).not.toContain(MIN_RUNTIME_VERSION);
   });
 
   it('rejects a member that does not resolve', async () => {
     const root = composableFamily(tempDir());
     fs.rmSync(packageDir(root, '@module-federation/sdk'), { recursive: true });
-    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
+    const reason = await unsupportedReason(resolveRuntimeFamily(root));
+    expect(reason).toMatch(
       /@module-federation\/sdk could not be resolved from/,
     );
+    expect(reason).not.toContain(MIN_RUNTIME_VERSION);
   });
 
   it('rejects an exports string with no subpath keys', async () => {

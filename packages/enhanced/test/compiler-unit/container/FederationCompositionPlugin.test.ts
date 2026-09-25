@@ -133,7 +133,7 @@ describe('FederationCompositionPlugin', () => {
 
     expect(messages(stats.errors)).toEqual([
       expect.stringContaining(
-        `does not export "./compose"; the federation runtime packages must be ${MIN_RUNTIME_VERSION} or newer`,
+        `does not export "./compose": the installed runtime family lacks the subpath exports this build needs; update the @module-federation runtime packages to the release that added them (${MIN_RUNTIME_VERSION})`,
       ),
     ]);
   });
