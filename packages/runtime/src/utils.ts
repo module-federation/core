@@ -1,5 +1,5 @@
-import type { ModuleFederation } from '@module-federation/runtime-core';
-import { CurrentGlobal } from '@module-federation/runtime-core';
+import type { ModuleFederation } from '@module-federation/runtime-core/kernel';
+import { CurrentGlobal } from '@module-federation/runtime-core/kernel';
 
 // injected by bundler, so it can not use runtime-core stuff
 export function getBuilderId(): string {

@@ -5,7 +5,7 @@ import {
   isManifestProvider,
   getResourceUrl,
   isBrowserEnvValue,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import {
   EntryAssets,
   ModuleFederationRuntimePlugin,

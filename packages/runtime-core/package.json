@@ -19,6 +19,10 @@
     "dist/",
     "README.md"
   ],
+  "sideEffects": [
+    "./dist/global.*",
+    "./dist/index.*"
+  ],
   "exports": {
     ".": {
       "import": {
@@ -28,6 +32,76 @@
       "require": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./kernel": {
+      "import": {
+        "types": "./dist/kernel.d.ts",
+        "default": "./dist/kernel.js"
+      },
+      "require": {
+        "types": "./dist/kernel.d.ts",
+        "default": "./dist/kernel.cjs"
+      }
+    },
+    "./shared": {
+      "import": {
+        "types": "./dist/shared/capability.d.ts",
+        "default": "./dist/shared/capability.js"
+      },
+      "require": {
+        "types": "./dist/shared/capability.d.ts",
+        "default": "./dist/shared/capability.cjs"
+      }
+    },
+    "./remote": {
+      "import": {
+        "types": "./dist/remote/capability.d.ts",
+        "default": "./dist/remote/capability.js"
+      },
+      "require": {
+        "types": "./dist/remote/capability.d.ts",
+        "default": "./dist/remote/capability.cjs"
+      }
+    },
+    "./snapshot": {
+      "import": {
+        "types": "./dist/plugins/snapshot/capability.d.ts",
+        "default": "./dist/plugins/snapshot/capability.js"
+      },
+      "require": {
+        "types": "./dist/plugins/snapshot/capability.d.ts",
+        "default": "./dist/plugins/snapshot/capability.cjs"
+      }
+    },
+    "./platform/web": {
+      "import": {
+        "types": "./dist/platform/web.d.ts",
+        "default": "./dist/platform/web.js"
+      },
+      "require": {
+        "types": "./dist/platform/web.d.ts",
+        "default": "./dist/platform/web.cjs"
+      }
+    },
+    "./platform/node": {
+      "import": {
+        "types": "./dist/platform/node.d.ts",
+        "default": "./dist/platform/node.js"
+      },
+      "require": {
+        "types": "./dist/platform/node.d.ts",
+        "default": "./dist/platform/node.cjs"
+      }
+    },
+    "./platform/universal": {
+      "import": {
+        "types": "./dist/platform/universal.d.ts",
+        "default": "./dist/platform/universal.js"
+      },
+      "require": {
+        "types": "./dist/platform/universal.d.ts",
+        "default": "./dist/platform/universal.cjs"
       }
     },
     "./types": {

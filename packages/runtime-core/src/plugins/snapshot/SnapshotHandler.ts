@@ -5,7 +5,7 @@ import {
   generateSnapshotFromManifest,
   isManifestProvider,
   isBrowserEnvValue,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import {
   RUNTIME_003,
   RUNTIME_007,

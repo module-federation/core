@@ -10,7 +10,7 @@ import {
   GlobalModuleInfo,
   ModuleInfo,
   isDebugMode,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import { warn, error } from './utils/logger';
 import { ModuleFederationRuntimePlugin } from './type/plugin';
 

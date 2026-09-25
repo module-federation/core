@@ -5,7 +5,7 @@ import {
   optionsToMFContext,
   composeRemoteRequestId,
 } from '../utils';
-import { safeToString, ModuleInfo } from '@module-federation/sdk';
+import { safeToString, ModuleInfo } from '@module-federation/sdk/core';
 import {
   RUNTIME_002,
   RUNTIME_014,

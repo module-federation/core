@@ -1,10 +1,10 @@
-import { isBrowserEnvValue } from '@module-federation/sdk';
+import { isBrowserEnvValue } from '@module-federation/sdk/core';
 import type {
   CreateLinkHookReturnDom,
   CreateScriptHookReturn,
   GlobalModuleInfo,
   ModuleInfo,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import {
   Options,
   PreloadRemoteArgs,
@@ -36,42 +36,35 @@ import {
   SyncHook,
   SyncWaterfallHook,
 } from './utils/hooks';
-import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
-import { snapshotPlugin } from './plugins/snapshot';
 import { DEFAULT_SCOPE } from './constant';
-import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
+import type { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { DisabledSnapshotHandler } from './plugins/snapshot/disabled';
-import { SharedHandler } from './shared';
+import type { SharedHandler } from './shared';
 import { DisabledSharedHandler } from './shared/disabled';
-import { RemoteHandler } from './remote';
+import type { RemoteHandler } from './remote';
 import { DisabledRemoteHandler } from './remote/disabled';
-import { formatShareConfigs } from './utils/share';
 
-// Declare the global constant that will be defined by DefinePlugin
-// Default to true if not defined (e.g., when runtime-core is used outside of webpack)
-// so that snapshot functionality is included by default.
-declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
-declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
-declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
+// ponytail: prototype capability shapes, typed loosely on purpose.
+export type Capabilities = {
+  shared?: {
+    create(host: ModuleFederation): any;
+    formatShareConfigs(g: Options, u: UserOptions): { allShareInfos: any };
+  };
+  remote?: { create(host: ModuleFederation): { remote: any; snapshot: any } };
+  snapshot?: { plugins(): any[] };
+  platform?: {
+    name: string;
+    isBrowser(): boolean;
+    loadEntry(ctx: any): Promise<any>;
+    loadScript(url: string, info: any): Promise<unknown>;
+  };
+};
 
 type BridgeHookContext = object;
 type BridgeHookResult = {
   context: BridgeHookContext;
   result?: unknown;
 };
-const USE_SNAPSHOT =
-  typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
-    : true; // Default to true (use snapshot) when not explicitly defined
-const USE_REMOTE =
-  typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_REMOTE
-    : true;
-const USE_SHARED =
-  typeof FEDERATION_OPTIMIZE_NO_SHARED === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_SHARED
-    : true;
-
 export class ModuleFederation {
   options: Options;
   hooks = new PluginSystem({
@@ -306,10 +299,15 @@ export class ModuleFederation {
   });
   moduleInfo?: GlobalModuleInfo[string];
 
-  constructor(userOptions: UserOptions) {
+  capabilities: Capabilities;
+  platform: Capabilities['platform'];
+
+  constructor(userOptions: UserOptions, capabilities: Capabilities = {}) {
+    this.capabilities = capabilities;
+    this.platform = capabilities.platform;
     const plugins =
-      USE_REMOTE && USE_SNAPSHOT
-        ? [snapshotPlugin(), generatePreloadAssetsPlugin()]
+      capabilities.remote && capabilities.snapshot
+        ? capabilities.snapshot.plugins()
         : [];
     // TODO: Validate the details of the options
     // Initialize options with default values
@@ -324,15 +322,13 @@ export class ModuleFederation {
 
     this.name = userOptions.name;
     this.options = defaultOptions;
-    this.snapshotHandler = (
-      USE_REMOTE ? new SnapshotHandler(this) : new DisabledSnapshotHandler()
-    ) as SnapshotHandler;
-    this.sharedHandler = (
-      USE_SHARED ? new SharedHandler(this) : new DisabledSharedHandler()
-    ) as SharedHandler;
-    this.remoteHandler = (
-      USE_REMOTE ? new RemoteHandler(this) : new DisabledRemoteHandler()
-    ) as RemoteHandler;
+    const remote = capabilities.remote?.create(this);
+    this.snapshotHandler = (remote?.snapshot ??
+      new DisabledSnapshotHandler()) as SnapshotHandler;
+    this.sharedHandler = (capabilities.shared?.create(this) ??
+      new DisabledSharedHandler()) as SharedHandler;
+    this.remoteHandler = (remote?.remote ??
+      new DisabledRemoteHandler()) as RemoteHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,
@@ -414,8 +410,9 @@ export class ModuleFederation {
   }
 
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
-    const shared = USE_SHARED
-      ? formatShareConfigs(globalOptions, userOptions).allShareInfos
+    const shared = this.capabilities.shared
+      ? this.capabilities.shared.formatShareConfigs(globalOptions, userOptions)
+          .allShareInfos
       : {};
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({

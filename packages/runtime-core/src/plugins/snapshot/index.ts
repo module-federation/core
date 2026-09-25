@@ -2,7 +2,7 @@ import {
   ModuleInfo,
   getResourceUrl,
   isBrowserEnvValue,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import { ModuleFederationRuntimePlugin } from '../../type/plugin';
 import { RUNTIME_011, runtimeDescMap } from '@module-federation/error-codes';
 import {

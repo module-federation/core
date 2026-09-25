@@ -4,7 +4,7 @@ import {
   composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
 import {
   Global,

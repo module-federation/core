@@ -4,7 +4,7 @@ import {
   RemoteEntryType,
   isBrowserEnvValue,
   isReactNativeEnv,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import { Remote, RemoteInfoOptionalVersion } from '../type';
 import { warn } from './logger';
 

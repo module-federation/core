@@ -1,4 +1,8 @@
-import { createLink, createScript, safeToString } from '@module-federation/sdk';
+import {
+  createLink,
+  createScript,
+  safeToString,
+} from '@module-federation/sdk/core';
 import {
   PreloadAssets,
   PreloadAssetResult,
