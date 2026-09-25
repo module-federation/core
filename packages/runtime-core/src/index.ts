@@ -2,11 +2,12 @@ import helpersDefault, { type IGlobalUtils, type IShareUtils } from './helpers';
 import { Module as RemoteModule } from './module';
 import { UnavailableRemoteModule, disabledRemote } from './remote/disabled';
 import { disabledShared } from './shared/disabled';
-import { unavailablePlatform } from './platform/unavailable';
-import { FederationCore } from './core';
-import { shared } from './shared/capability';
-import { remote } from './remote/capability';
-import { snapshot } from './plugins/snapshot/capability';
+import { FederationCore, unavailablePlatform } from './core';
+
+export { FederationKernel } from './core';
+import { shared } from './shared';
+import { remote } from './remote';
+import { snapshot } from './plugins/snapshot';
 import { universal } from './platform/universal';
 import type { ResolvedCapabilities, UserOptions } from './type';
 
@@ -64,6 +65,7 @@ export {
   setGlobalFederationInstance,
   setGlobalFederationConstructor,
   resetFederationGlobalInfo,
+  getGlobalSnapshotInfoByModuleInfo,
   addGlobalSnapshot,
   getGlobalSnapshot,
   getInfoWithoutType,
