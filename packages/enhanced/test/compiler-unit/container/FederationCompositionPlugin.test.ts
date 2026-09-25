@@ -309,6 +309,27 @@ describe('FederationCompositionPlugin', () => {
     ]);
   });
 
+  it('warns when the plan never ran', async () => {
+    const context = fixture({ 'index.js': 'export default 1;' });
+    const { stats } = await compile(context, {
+      plugins: [
+        {
+          apply(compiler) {
+            compiler.hooks.afterResolvers.tap('Late', () =>
+              host({ composedRuntime: true }).apply(compiler),
+            );
+          },
+        },
+      ],
+    });
+
+    expect(messages(stats.warnings)).toEqual([
+      expect.stringMatching(
+        /composedRuntime is set, but this build uses the full federation runtime because the federation plan never ran/,
+      ),
+    ]);
+  });
+
   it('refuses a participant registered after the plan is sealed', async () => {
     const context = fixture({ 'index.js': 'export default 1;' });
     let error;
