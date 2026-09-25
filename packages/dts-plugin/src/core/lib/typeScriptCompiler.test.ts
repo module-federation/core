@@ -325,6 +325,41 @@ describe('typeScriptCompiler', () => {
       expect(projectPath).not.toContain("'");
     });
 
+    it.each(['linux', 'win32'] as const)(
+      'executes an absolute compilerInstance path directly without a shell on %s',
+      async (platform) => {
+        const execPromise = rs.fn().mockResolvedValue({});
+        rs.spyOn(util, 'promisify').mockReturnValue(
+          execPromise as unknown as ReturnType<typeof util.promisify>,
+        );
+        const compilerDir = join(tmpDir, 'native compiler (x86)', "it's here");
+        const compilerPath = join(compilerDir, 'tsgo');
+        mkdirSync(compilerDir, { recursive: true });
+        writeFileSync(compilerPath, '');
+        const restorePlatform = withProcessPlatform(platform);
+        const filepath = join(__dirname, './typeScriptCompiler.ts');
+        const mapToExpose = {
+          tsCompiler: filepath,
+        };
+
+        try {
+          await compileTs(
+            mapToExpose,
+            { ...tsConfig, files: [filepath] },
+            { ...remoteOptions, compilerInstance: compilerPath },
+          );
+        } finally {
+          restorePlatform();
+        }
+
+        expect(execPromise).toHaveBeenCalledWith(
+          compilerPath,
+          ['--project', expect.any(String)],
+          expect.objectContaining({ cwd: projectRoot, shell: false }),
+        );
+      },
+    );
+
     it('ignores inherited declarationDir', async () => {
       const projectDir = join(tmpDir, 'declarationDirProject');
       const srcDir = join(projectDir, 'src');
