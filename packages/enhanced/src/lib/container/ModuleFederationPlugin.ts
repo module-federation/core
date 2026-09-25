@@ -5,7 +5,11 @@
 
 'use strict';
 import { DtsPlugin } from '@module-federation/dts-plugin';
-import { ContainerManager, utils } from '@module-federation/managers';
+import {
+  ContainerManager,
+  optionsParticipant,
+  utils,
+} from '@module-federation/managers';
 import { StatsPlugin } from '@module-federation/manifest';
 import {
   bindLoggerToCompiler,
@@ -24,7 +28,6 @@ import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import FederationCompositionPlugin, {
   COVERED_BY_OPTIONS,
   composedEntryOf,
-  optionsParticipant,
 } from './runtime/FederationCompositionPlugin';
 import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';

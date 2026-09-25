@@ -2,7 +2,6 @@ import { DEFAULT_SCOPE } from '../constant';
 import { TreeShakingStatus } from '@module-federation/sdk/core';
 import { Global, Federation } from '../global';
 import {
-  GlobalShareScopeMap,
   Shared,
   ShareArgs,
   ShareInfos,
@@ -19,6 +18,8 @@ import { warn, error } from './logger';
 import { satisfy } from './semver';
 import { SyncWaterfallHook } from './hooks';
 import { addUniqueItem, arrayOptions } from './tool';
+
+export { getGlobalShareScope } from '../global';
 
 function formatShare(
   shareArgs: ShareArgs,
@@ -476,10 +477,6 @@ export function getRegisteredShare(
       return resolveShared.resolver();
     }
   }
-}
-
-export function getGlobalShareScope(): GlobalShareScopeMap {
-  return Global.__FEDERATION__.__SHARE__;
 }
 
 export function getTargetSharedOptions(options: {
