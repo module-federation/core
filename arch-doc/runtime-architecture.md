@@ -78,20 +78,19 @@ import { loadScript, loadScriptNode } from '@module-federation/sdk';
 
 The foundation of the runtime system is the `ModuleFederation` class in `@module-federation/runtime-core`:
 
-### Conditional Feature Inclusion
+### Capabilities
 
-The snapshot plugins (`snapshotPlugin()` and `generatePreloadAssetsPlugin()`) are conditionally registered based on the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` build-time flag (the `SnapshotHandler` instance itself is always constructed):
+`ModuleFederation` extends `FederationKernel`, which takes its handlers as capabilities: `shared`, `remote`, `snapshot`, and a `platform` loader. The public root constructs `ModuleFederation` with every capability and the universal platform. A generated bootstrap imports only the capabilities its build uses from the `@module-federation/runtime-core` subpaths and passes them to `@module-federation/runtime/compose`:
 
 ```typescript
-// Declared in core.ts with DefinePlugin
-declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
-const USE_SNAPSHOT =
-  typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
-    : true; // Default to true (use snapshot) when not explicitly defined
+import { init } from '@module-federation/runtime/compose';
+import { remote } from '@module-federation/runtime-core/remote';
+import { web } from '@module-federation/runtime-core/platform/web';
+
+const host = init({ name: 'host', remotes }, { remote, platform: web });
 ```
 
-When `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` is `true`, snapshot functionality is disabled for smaller bundle sizes.
+A capability that is not passed gets a disabled handler. The snapshot plugins (`snapshotPlugin()` and `generatePreloadAssetsPlugin()`) are registered only with the `snapshot` capability, and `snapshot` needs `remote`.
 
 ```mermaid
 classDiagram
@@ -154,7 +153,7 @@ classDiagram
         -getManifestJson(url, moduleInfo, extraOptions): Promise~Manifest~
     }
 
-    note "Snapshot plugins are conditionally registered based on the FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN flag"
+    note "Snapshot plugins are registered only with the snapshot capability"
 
     ModuleFederation --> SharedHandler
     ModuleFederation --> RemoteHandler
@@ -293,38 +292,28 @@ export function loadShare<T>(...args: Parameters<ModuleFederation['loadShare']>)
 ```
 
 ### Build Identifier Integration
-```typescript
-// Build identifier support for instance resolution
-export function getBuilderId(): string {
-  //@ts-ignore
-  return typeof FEDERATION_BUILD_IDENTIFIER !== 'undefined'
-    ? //@ts-ignore
-      FEDERATION_BUILD_IDENTIFIER
-    : '';
-}
 
+The plugins pass `name:version` as `options.id` when a build has one `ModuleFederationPlugin`. The composed bootstrap passes it through `createFederation({ buildId })`, and the full-runtime bootstrap sets `initOptions.id`. The instance registers its share scope in `__FEDERATION__.__SHARE__` under that id.
+
+`init()` reuses the instance this bundle already created. Otherwise it looks for a page-global instance with the same name and version:
+
+```typescript
 export function getGlobalFederationInstance(
   name: string,
   version: string | undefined,
+  preferred?: ModuleFederation | null,
 ): ModuleFederation | undefined {
-  const buildId = getBuilderId();
-  return CurrentGlobal.__FEDERATION__.__INSTANCES__.find((GMInstance) => {
-    // Priority 1: Build ID match (most specific)
-    if (buildId && GMInstance.options.id === buildId) {
-      return true;
-    }
-
-    // Priority 2: Exact name match without version (both undefined)
-    if (GMInstance.options.name === name && !GMInstance.options.version && !version) {
-      return true;
-    }
-
-    // Priority 3: Name + version exact match
-    if (GMInstance.options.name === name && version && GMInstance.options.version === version) {
-      return true;
-    }
-    return false;
-  });
+  return [preferred, ...CurrentGlobal.__FEDERATION__.__INSTANCES__].find(
+    (GMInstance): GMInstance is ModuleFederation => {
+      if (!GMInstance) return false;
+      // Exact name match without version (both undefined)
+      if (GMInstance.options.name === name && !GMInstance.options.version && !version) {
+        return true;
+      }
+      // Name + version exact match
+      return Boolean(GMInstance.options.name === name && version && GMInstance.options.version === version);
+    },
+  );
 }
 ```
 
@@ -334,10 +323,7 @@ The `@module-federation/webpack-bundler-runtime` creates a bridge between webpac
 
 ### Federation Object Structure
 ```typescript
-import * as runtime from '@module-federation/runtime';
-
 const federation: Federation = {
-  runtime,                    // Reference to convenience runtime
   instance: undefined,        // Will hold the ModuleFederation instance
   initOptions: undefined,     // Initialization options
   bundlerRuntime: {          // Webpack-specific implementations
