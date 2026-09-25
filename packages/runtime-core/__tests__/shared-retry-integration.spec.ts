@@ -4,6 +4,7 @@ import { promisify } from 'node:util';
 import { describe, expect, it } from '@rstest/core';
 
 const execFileAsync = promisify(execFile);
+const initialError = 'store request failed: 503';
 
 async function runScenario(scenario: string) {
   const { stdout } = await execFileAsync(process.execPath, [
@@ -13,33 +14,39 @@ async function runScenario(scenario: string) {
   return JSON.parse(stdout);
 }
 
-describe('shared singleton state across an HTTP-loaded webpack remote', () => {
-  for (const retry of [false, true]) {
-    it(`preserves consumed state when the remote arrives${retry ? ' after recovery' : ''}`, async () => {
-      expect(await runScenario(retry ? 'retry-loaded' : 'loaded')).toEqual({
-        ...(retry ? { initialError: 'store request failed: 503' } : {}),
-        localVersion: '1.0.0',
-        remoteVersion: '1.0.0',
-        localBefore: 1,
-        remoteAfter: 2,
-        localAfter: 2,
-      });
-    });
+const sharedAfterHostLoad = {
+  localVersion: '1.0.0',
+  remoteVersion: '1.0.0',
+  localBefore: 1,
+  remoteAfter: 2,
+  localAfter: 2,
+};
 
-    it(`preserves one store when the remote consumes during a pending ${retry ? 'retry' : 'initial load'}`, async () => {
-      const result = await runScenario(
-        retry ? 'retry-pending' : 'initial-pending',
-      );
-      if (retry) {
-        expect(result.initialError).toBe('store request failed: 503');
-      }
-      // The remote increments first. The host must see that state when its
-      // pending load completes, and its increment must remain visible remotely.
-      expect({
-        remoteBefore: result.remoteBefore,
-        localAfter: result.localAfter,
-        remoteAfter: result.remoteAfter,
-      }).toEqual({ remoteBefore: 1, localAfter: 2, remoteAfter: 2 });
+// The remote increments first. With one shared store, the host then reads 2.
+const sharedDuringHostLoad = { remoteBefore: 1, localAfter: 2, remoteAfter: 2 };
+
+describe('shared singleton across an HTTP-loaded webpack remote', () => {
+  it('shares one store when the remote loads after the host', async () => {
+    expect(await runScenario('loaded')).toEqual(sharedAfterHostLoad);
+  });
+
+  it('shares one store when the remote loads after the host retries', async () => {
+    expect(await runScenario('retry-loaded')).toEqual({
+      initialError,
+      ...sharedAfterHostLoad,
     });
-  }
+  });
+
+  it('shares one store when the remote consumes during the initial load', async () => {
+    expect(await runScenario('initial-pending')).toMatchObject(
+      sharedDuringHostLoad,
+    );
+  });
+
+  it('shares one store when the remote consumes during a retry', async () => {
+    expect(await runScenario('retry-pending')).toMatchObject({
+      initialError,
+      ...sharedDuringHostLoad,
+    });
+  });
 });

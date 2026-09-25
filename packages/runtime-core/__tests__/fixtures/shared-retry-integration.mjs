@@ -1,4 +1,3 @@
-import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
@@ -20,7 +19,6 @@ if (
 ) {
   throw new Error(`Unknown scenario: ${scenario}`);
 }
-const revision = process.argv[3];
 const require = createRequire(path.join(repo, 'package.json'));
 const deferred = () => {
   let resolve;
@@ -119,30 +117,6 @@ exports.read = () => count;
       ENV_TARGET: '"node"',
       FEDERATION_DEBUG: '"false"',
     },
-    plugins: revision
-      ? [
-          {
-            name: 'compare-revision',
-            setup(build) {
-              build.onLoad(
-                {
-                  filter:
-                    /packages\/(runtime-core|sdk|error-codes)\/src\/.*\.ts$/,
-                },
-                (args) => ({
-                  contents: execFileSync(
-                    'git',
-                    ['show', `${revision}:${path.relative(repo, args.path)}`],
-                    { cwd: repo, encoding: 'utf8' },
-                  ),
-                  loader: 'ts',
-                  resolveDir: path.dirname(args.path),
-                }),
-              );
-            },
-          },
-        ]
-      : [],
   });
   const module = { exports: {} };
   new Function('require', 'module', 'exports', source.outputFiles[0].text)(
@@ -151,8 +125,9 @@ exports.read = () => count;
     module.exports,
   );
   const { ModuleFederation } = module.exports;
-  let failNext = scenario.startsWith('retry-');
-  let delayed = scenario.endsWith('-pending');
+  const retry = scenario.startsWith('retry-');
+  const pending = scenario.endsWith('-pending');
+  let failNext = retry;
   const requested = deferred();
   const release = deferred();
   server = createServer(async (request, response) => {
@@ -166,7 +141,7 @@ exports.read = () => count;
         return;
       }
       requested.resolve();
-      if (delayed) await release.promise;
+      if (pending) await release.promise;
       response.setHeader('Content-Type', 'application/javascript');
       response.end(`let count = 0;
 export const store = {
@@ -195,8 +170,7 @@ export const store = {
             const response = await fetch(`${origin}/store.mjs`);
             if (!response.ok)
               throw new Error(`store request failed: ${response.status}`);
-            // Node does not import HTTP URLs directly. Evaluate the fetched
-            // ESM through its native loader, preserving normal module caching.
+            // Node cannot import an HTTP URL, so import the fetched source as a data URL.
             const url = `data:text/javascript;base64,${Buffer.from(await response.text()).toString('base64')}`;
             loadedStore = (await import(url)).store;
             return () => loadedStore;
@@ -205,72 +179,48 @@ export const store = {
       },
     },
   });
+  const loadRemoteStore = async () => {
+    mf.registerRemotes([{ name: 'remote', entry: `${origin}/remoteEntry.js` }]);
+    const consumer = await mf.loadRemote('remote/consumer');
+    return consumer.consume();
+  };
+
   let initialError;
-  if (scenario.startsWith('retry-')) {
-    try {
-      await mf.loadShare('store');
-    } catch (error) {
-      initialError = error.message;
-    }
+  if (retry) {
+    initialError = await mf.loadShare('store').then(
+      () => 'first load unexpectedly succeeded',
+      (error) => error.message,
+    );
   }
-  const first = mf.loadShare('store').then(
-    (factory) => ({ store: factory() }),
-    (error) => ({ error: error.message }),
-  );
-  if (delayed) {
-    const outcome = await Promise.race([
-      requested.promise.then(() => 'requested'),
-      first.then(() => 'finished'),
-    ]);
-    if (outcome === 'finished') {
-      console.log(
-        JSON.stringify({ initialError, retryError: (await first).error }),
-      );
-    } else {
-      mf.registerRemotes([
-        { name: 'remote', entry: `${origin}/remoteEntry.js` },
-      ]);
-      const consumer = await mf.loadRemote('remote/consumer');
-      const remote = await consumer.consume();
-      const remoteBefore = remote.increment();
-      delayed = false;
-      release.resolve();
-      const { store: local } = await first;
-      const localAfter = local.increment();
-      console.log(
-        JSON.stringify({
-          initialError,
-          localVersion: local.version,
-          remoteVersion: remote.version,
-          remoteBefore,
-          localAfter,
-          remoteAfter: remote.read(),
-        }),
-      );
-    }
+  const hostLoad = mf.loadShare('store');
+  let result;
+  if (pending) {
+    // Hold the host's store response until the remote has consumed and changed the store.
+    await Promise.race([requested.promise, hostLoad]);
+    const remote = await loadRemoteStore();
+    const remoteBefore = remote.increment();
+    release.resolve();
+    const local = (await hostLoad)();
+    result = {
+      localVersion: local.version,
+      remoteVersion: remote.version,
+      remoteBefore,
+      localAfter: local.increment(),
+      remoteAfter: remote.read(),
+    };
   } else {
-    const { store: local, error } = await first;
-    if (error) {
-      console.log(JSON.stringify({ initialError, retryError: error }));
-    } else {
-      const localBefore = local.increment();
-      mf.registerRemotes([
-        { name: 'remote', entry: `${origin}/remoteEntry.js` },
-      ]);
-      const consumer = await mf.loadRemote('remote/consumer');
-      const remote = await consumer.consume();
-      console.log(
-        JSON.stringify({
-          initialError,
-          localVersion: local.version,
-          remoteVersion: remote.version,
-          localBefore,
-          remoteAfter: remote.increment(),
-          localAfter: local.read(),
-        }),
-      );
-    }
+    const local = (await hostLoad)();
+    const localBefore = local.increment();
+    const remote = await loadRemoteStore();
+    result = {
+      localVersion: local.version,
+      remoteVersion: remote.version,
+      localBefore,
+      remoteAfter: remote.increment(),
+      localAfter: local.read(),
+    };
   }
+  console.log(JSON.stringify({ initialError, ...result }));
 } finally {
   if (server) {
     server.closeAllConnections();
