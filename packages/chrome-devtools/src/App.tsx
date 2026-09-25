@@ -244,6 +244,7 @@ const InnerApp = (props: RootComponentProps) => {
     const bootstrap = async () => {
       const tab = await syncActiveTab();
       setInspectedTab(tab || undefined);
+      if (typeof tab?.id !== 'number') return;
       const detach = await getGlobalModuleInfo((info) =>
         applyModuleUpdate(info),
       );
@@ -380,6 +381,9 @@ const InnerApp = (props: RootComponentProps) => {
   }, [activePanel, applyModuleUpdate]);
 
   const renderContent = () => {
+    if (typeof inspectedTab?.id !== 'number') {
+      return <Empty description={t('app.header.scope.waiting')} />;
+    }
     switch (activePanel) {
       case 'moduleInfo':
         return (
@@ -420,7 +424,7 @@ const InnerApp = (props: RootComponentProps) => {
         return (
           <SharedDepsExplorer
             shareData={JSON.parse(
-              JSON.stringify(window.__FEDERATION__?.__SHARE__),
+              JSON.stringify(window.__FEDERATION__?.__SHARE__ || {}),
             )}
           />
         );
