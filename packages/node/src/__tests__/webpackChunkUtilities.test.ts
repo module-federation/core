@@ -24,13 +24,11 @@ const initRawContainer = (_name: string, _url: string, res: unknown) => ({
 });
 
 describe('generateLoadScript', () => {
-  it('loads through the instance platform when it has loadScriptNode', async () => {
+  it('loads through the instance platform', async () => {
     const container = { get: jest.fn() };
     const calls: unknown[][] = [];
-    const legacyLoader = jest.fn();
 
     const result = await runEmittedLoader({
-      runtime: { loadScriptNode: legacyLoader },
       instance: {
         platform: {
           loadScriptNode: async (...args: unknown[]) => {
@@ -45,23 +43,22 @@ describe('generateLoadScript', () => {
     expect(calls).toEqual([
       ['http://localhost:3001/remoteEntry.js', { attrs: {} }],
     ]);
-    expect(legacyLoader).not.toHaveBeenCalled();
     expect(result).toEqual({ wrapped: container });
   });
 
-  it('falls back to federation.runtime.loadScriptNode without a platform loader', async () => {
-    const container = { get: jest.fn() };
-    const legacyLoader = jest.fn().mockResolvedValue(container);
+  it('fails the load when the instance platform has no Node loader', async () => {
+    const legacyLoader = jest.fn();
 
     const result = await runEmittedLoader({
       runtime: { loadScriptNode: legacyLoader },
-      instance: { initRawContainer },
+      instance: { platform: { isBrowser: () => true }, initRawContainer },
     });
 
-    expect(legacyLoader).toHaveBeenCalledWith(
-      'http://localhost:3001/remoteEntry.js',
-      { attrs: {} },
+    expect(legacyLoader).not.toHaveBeenCalled();
+    expect(result).toEqual(
+      expect.objectContaining({
+        message: expect.stringMatching(/needs a node or universal platform/),
+      }),
     );
-    expect(result).toEqual({ wrapped: container });
   });
 });

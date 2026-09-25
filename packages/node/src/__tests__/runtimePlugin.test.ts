@@ -52,10 +52,10 @@ const mockWebpackRequire = {
   o: jest.fn(),
   l: jest.fn(),
   federation: {
-    runtime: {
-      loadScriptNode: jest.fn().mockResolvedValue({}),
-    },
     instance: {
+      platform: {
+        loadScriptNode: jest.fn().mockResolvedValue({}),
+      },
       initRawContainer: jest.fn().mockReturnValue({}),
     },
     chunkMatcher: jest.fn().mockReturnValue(true),
@@ -788,20 +788,18 @@ describe('runtimePlugin', () => {
       );
 
       expect(
-        (global as any).__webpack_require__.federation.runtime.loadScriptNode,
+        (global as any).__webpack_require__.federation.instance.platform
+          .loadScriptNode,
       ).toHaveBeenCalledWith('http://localhost:3001/remoteEntry.js', {
         attrs: { globalName: 'test-remote' },
       });
     });
 
-    it('loads through the instance platform when it has loadScriptNode', async () => {
+    it('loads through the instance platform', async () => {
       const federation = (global as any).__webpack_require__.federation;
       const calls: unknown[][] = [];
       const container = { get: jest.fn() };
-      const legacyLoader = jest.fn();
       const originalInstance = federation.instance;
-      const originalRuntime = federation.runtime;
-      federation.runtime = { loadScriptNode: legacyLoader };
       federation.instance = {
         platform: {
           loadScriptNode: async (...args: unknown[]) => {
@@ -830,28 +828,20 @@ describe('runtimePlugin', () => {
             { attrs: { globalName: 'platform-remote' } },
           ],
         ]);
-        expect(legacyLoader).not.toHaveBeenCalled();
         expect(done).toHaveBeenCalledWith({ wrapped: container });
       } finally {
         federation.instance = originalInstance;
-        federation.runtime = originalRuntime;
         delete (globalThis as any)['platform-remote'];
       }
     });
 
-    it('falls back to federation.runtime.loadScriptNode without a platform loader', async () => {
+    it('fails the load when the instance platform has no Node loader', async () => {
       const federation = (global as any).__webpack_require__.federation;
-      const container = { get: jest.fn() };
       const originalInstance = federation.instance;
-      const originalRuntime = federation.runtime;
-      federation.runtime = {
-        loadScriptNode: jest.fn().mockResolvedValue(container),
-      };
+      federation.runtime = { loadScriptNode: jest.fn() };
       federation.instance = {
-        platform: { isBrowser: () => false },
-        initRawContainer: (_name: string, _url: string, res: unknown) => ({
-          wrapped: res,
-        }),
+        platform: { isBrowser: () => true },
+        initRawContainer: jest.fn(),
       };
       try {
         setupScriptLoader();
@@ -859,20 +849,22 @@ describe('runtimePlugin', () => {
         (global as any).__webpack_require__.l(
           'http://localhost:3001/remoteEntry.js',
           done,
-          'legacy-remote',
+          'web-remote',
           '',
         );
         await new Promise(process.nextTick);
 
-        expect(federation.runtime.loadScriptNode).toHaveBeenCalledWith(
-          'http://localhost:3001/remoteEntry.js',
-          { attrs: { globalName: 'legacy-remote' } },
+        expect(federation.runtime.loadScriptNode).not.toHaveBeenCalled();
+        expect(done).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: expect.stringMatching(
+              /needs a node or universal platform/,
+            ),
+          }),
         );
-        expect(done).toHaveBeenCalledWith({ wrapped: container });
       } finally {
         federation.instance = originalInstance;
-        federation.runtime = originalRuntime;
-        delete (globalThis as any)['legacy-remote'];
+        delete federation.runtime;
       }
     });
 
@@ -1003,10 +995,10 @@ describe('runtimePlugin', () => {
         ...mockWebpackRequire,
         federation: {
           ...mockWebpackRequire.federation,
-          runtime: {
-            loadScriptNode: jest.fn().mockResolvedValue({}),
-          },
           instance: {
+            platform: {
+              loadScriptNode: jest.fn().mockResolvedValue({}),
+            },
             initRawContainer: jest.fn().mockReturnValue({}),
           },
         },
@@ -1079,10 +1071,10 @@ describe('runtimePlugin', () => {
         ...mockWebpackRequire,
         federation: {
           ...mockWebpackRequire.federation,
-          runtime: {
-            loadScriptNode: jest.fn().mockResolvedValue({}),
-          },
           instance: {
+            platform: {
+              loadScriptNode: jest.fn().mockResolvedValue({}),
+            },
             initRawContainer: jest.fn().mockReturnValue({}),
           },
         },
@@ -1119,7 +1111,8 @@ describe('runtimePlugin', () => {
       );
 
       expect(
-        (global as any).__webpack_require__.federation.runtime.loadScriptNode,
+        (global as any).__webpack_require__.federation.instance.platform
+          .loadScriptNode,
       ).toHaveBeenCalledWith('http://localhost:3001/remoteEntry.js', {
         attrs: { globalName: 'test-remote' },
       });
@@ -1149,8 +1142,11 @@ describe('runtimePlugin', () => {
 
     it('should handle errors in loadScriptNode', async () => {
       // Mock loadScriptNode to reject with an error
-      (global as any).__webpack_require__.federation.runtime.loadScriptNode =
-        jest.fn().mockRejectedValue(new Error('Loading error'));
+      (
+        global as any
+      ).__webpack_require__.federation.instance.platform.loadScriptNode = jest
+        .fn()
+        .mockRejectedValue(new Error('Loading error'));
 
       const doneMock = jest.fn();
 
@@ -1217,10 +1213,10 @@ describe('runtimePlugin', () => {
         ...mockWebpackRequire,
         federation: {
           ...mockWebpackRequire.federation,
-          runtime: {
-            loadScriptNode: jest.fn().mockResolvedValue({}),
-          },
           instance: {
+            platform: {
+              loadScriptNode: jest.fn().mockResolvedValue({}),
+            },
             initRawContainer: jest.fn().mockReturnValue({}),
           },
         },
@@ -1251,10 +1247,11 @@ describe('runtimePlugin', () => {
       expect((global as any).__webpack_require__).toBeDefined();
       expect((global as any).__webpack_require__.federation).toBeDefined();
       expect(
-        (global as any).__webpack_require__.federation.runtime,
+        (global as any).__webpack_require__.federation.instance.platform,
       ).toBeDefined();
       expect(
-        (global as any).__webpack_require__.federation.runtime.loadScriptNode,
+        (global as any).__webpack_require__.federation.instance.platform
+          .loadScriptNode,
       ).toBeDefined();
       expect((global as any).__webpack_require__.l).toBeDefined();
       expect((global as any).__webpack_require__.f).toBeDefined();
@@ -1321,10 +1318,10 @@ describe('runtimePlugin', () => {
         ...mockWebpackRequire,
         federation: {
           ...mockWebpackRequire.federation,
-          runtime: {
-            loadScriptNode: jest.fn().mockResolvedValue({}),
-          },
           instance: {
+            platform: {
+              loadScriptNode: jest.fn().mockResolvedValue({}),
+            },
             initRawContainer: jest.fn().mockReturnValue({}),
           },
         },
@@ -1353,7 +1350,9 @@ describe('runtimePlugin', () => {
 
     it('should load remote entries correctly', () => {
       const loadScriptNodeMock = jest.fn().mockResolvedValue({});
-      (global as any).__webpack_require__.federation.runtime.loadScriptNode =
+      (
+        global as any
+      ).__webpack_require__.federation.instance.platform.loadScriptNode =
         loadScriptNodeMock;
 
       const doneMock = jest.fn();
