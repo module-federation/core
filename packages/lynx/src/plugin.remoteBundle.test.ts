@@ -226,6 +226,12 @@ describe('pluginLynxModuleFederation remote bundles', () => {
         if (name === 'catalog.js') {
           return containerAsset;
         }
+        if (name === 'catalog__main-thread__Card-main-thread.js') {
+          return {
+            source: { source: () => 'main-thread card' },
+            info: { minimized: true },
+          };
+        }
         if (name === 'catalog__background_Card.js') {
           return {
             source: { source: () => 'exports.ids = ["card"];' },
@@ -252,6 +258,11 @@ describe('pluginLynxModuleFederation remote bundles', () => {
     const backgroundIdentityStage = PROCESS_ASSETS_STAGE_ADDITIONS + 1;
     const pairedBundleChunksStage = PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE + 2;
     processAssets.get(backgroundIdentityStage)!();
+    expect(updateAsset).toHaveBeenCalledWith(
+      'catalog__main-thread__Card-main-thread.js',
+      expect.any(Object),
+      { minimized: true, 'lynx:main-thread': true },
+    );
     containerAsset = {
       source: { source: () => 'tt.define("catalog.js", container);' },
       info: {},
@@ -263,7 +274,9 @@ describe('pluginLynxModuleFederation remote bundles', () => {
       pairedBundleChunksStage,
     ]);
     expect(updateAsset).toHaveBeenCalled();
-    const backgroundSource = updateAsset.mock.calls[0][1].source();
+    const backgroundSource = updateAsset.mock.calls
+      .find(([name]) => name === 'catalog__background_Card.js')![1]
+      .source();
     expect(backgroundSource).toContain(
       'exports.__lynx_dynamic_component_entry__ = globDynamicComponentEntry;',
     );

@@ -351,7 +351,23 @@ const createRemoteAssetsPlugin = (
                 backgroundRemoteChunks.has(chunk),
                 mainThreadLayer,
               );
-            if (!containsBackgroundExpose || containsMainThreadModule) {
+            if (containsMainThreadModule) {
+              // RuntimeWrapper wraps every JS asset at stage NONE unless it is
+              // already marked main-thread; its background wrapper cannot run in Lepus.
+              for (const filename of chunk.files) {
+                const asset = filename.endsWith('.js')
+                  ? compilation.getAsset(filename)
+                  : undefined;
+                if (asset && filename !== backgroundEntry) {
+                  compilation.updateAsset(filename, asset.source, {
+                    ...asset.info,
+                    'lynx:main-thread': true,
+                  });
+                }
+              }
+              continue;
+            }
+            if (!containsBackgroundExpose) {
               continue;
             }
 

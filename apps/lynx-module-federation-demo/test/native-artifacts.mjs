@@ -204,6 +204,12 @@ for (const exposed of manifest.exposes) {
     `${lazyName} has no main-thread snapshot section`,
   );
   assert.ok(
+    !Buffer.from(lazyTemplate['custom-sections']['main-thread']).includes(
+      Buffer.from('bundleSupportLoadScript'),
+    ),
+    `${lazyName} main-thread section retained the background runtime wrapper`,
+  );
+  assert.ok(
     !JSON.stringify(exposed).includes('__main_thread'),
     `${exposed.name} contains a main-thread alias`,
   );
