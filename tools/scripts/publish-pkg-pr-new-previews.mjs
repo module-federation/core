@@ -302,6 +302,7 @@ function publishPkgPrNewPreviews(paths) {
 function isRetriablePkgPrFailure(output) {
   return (
     /Publishing failed \((5\d\d|429)\)/.test(output) ||
+    /Check failed \(404\):.*There is no workflow defined for/.test(output) ||
     /Cloudflare|Internal Server Error|Bad Gateway|Gateway Timeout/.test(output)
   );
 }

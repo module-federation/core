@@ -65,7 +65,7 @@ function definePropertyGlobalVal(
 }
 
 function includeOwnProperty(target: typeof CurrentGlobal, key: string) {
-  return Object.hasOwnProperty.call(target, key);
+  return Object.prototype.hasOwnProperty.call(target, key);
 }
 
 // This section is to prevent encapsulation by certain microfrontend frameworks. Due to reuse policies, sandbox escapes.
@@ -99,13 +99,18 @@ function setGlobalDefaultVal(target: typeof CurrentGlobal) {
     definePropertyGlobalVal(target, '__VMOK__', target.__FEDERATION__);
   }
 
-  target.__FEDERATION__.__GLOBAL_PLUGIN__ ??= [];
-  target.__FEDERATION__.__INSTANCES__ ??= [];
-  target.__FEDERATION__.moduleInfo ??= {};
-  target.__FEDERATION__.__SHARE__ ??= {};
-  target.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
-  target.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
-  target.__FEDERATION__.__PRELOADED_ASSETS__ ??= new Set();
+  target.__FEDERATION__.__GLOBAL_PLUGIN__ =
+    target.__FEDERATION__.__GLOBAL_PLUGIN__ || [];
+  target.__FEDERATION__.__INSTANCES__ =
+    target.__FEDERATION__.__INSTANCES__ || [];
+  target.__FEDERATION__.moduleInfo = target.__FEDERATION__.moduleInfo || {};
+  target.__FEDERATION__.__SHARE__ = target.__FEDERATION__.__SHARE__ || {};
+  target.__FEDERATION__.__MANIFEST_LOADING__ =
+    target.__FEDERATION__.__MANIFEST_LOADING__ || {};
+  target.__FEDERATION__.__PRELOADED_MAP__ =
+    target.__FEDERATION__.__PRELOADED_MAP__ || new Map();
+  target.__FEDERATION__.__PRELOADED_ASSETS__ =
+    target.__FEDERATION__.__PRELOADED_ASSETS__ || new Set();
 }
 
 setGlobalDefaultVal(CurrentGlobal);
