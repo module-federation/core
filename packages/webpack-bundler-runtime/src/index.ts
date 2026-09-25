@@ -1,4 +1,4 @@
-import * as runtime from '@module-federation/runtime';
+import { init } from '@module-federation/runtime';
 import type { Adapter, Federation, WebpackRequire } from './types';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { remotes } from './adapters/remotes';
@@ -39,14 +39,13 @@ const bundlerRuntime = Object.assign(
       for (const adapter of adapters) {
         adapter.beforeInit?.(webpackRequire, initOptions);
       }
-      return webpackRequire.federation.runtime!.init(initOptions);
+      return init(initOptions);
     },
   },
   ...adapters.map((adapter) => adapter.bundlerRuntime),
 ) as NonNullable<Federation['bundlerRuntime']>;
 
 const federation: Federation = {
-  runtime,
   instance: undefined,
   initOptions: undefined,
   bundlerRuntime,
@@ -55,7 +54,7 @@ const federation: Federation = {
 };
 
 // Keep CJS interop stable for consumers that iterate required keys directly.
-export { runtime, attachShareScopeMap };
+export { attachShareScopeMap };
 export const instance = federation.instance;
 export const initOptions = federation.initOptions;
 export { bundlerRuntime };

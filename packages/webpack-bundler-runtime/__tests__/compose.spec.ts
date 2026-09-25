@@ -144,8 +144,7 @@ describe('createFederation', () => {
       'S',
       'init',
     ]);
-    expect(Object.keys(federation.runtime)).toEqual(['loadScriptNode']);
-    expect(federation).not.toHaveProperty('runtime.init');
+    expect(federation).not.toHaveProperty('runtime');
   });
 
   test('init passes buildId as the default id', () => {
@@ -183,13 +182,6 @@ describe('createFederation', () => {
     expect(
       federation.instance!.options.plugins.map((plugin) => plugin.name),
     ).not.toContain('tree-shake-plugin');
-  });
-
-  test('runtime.loadScriptNode names the missing node platform', () => {
-    const { federation } = boot({}, []);
-    expect(() => federation.runtime.loadScriptNode('x.js', {})).toThrow(
-      /loadScriptNode/,
-    );
   });
 });
 

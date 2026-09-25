@@ -187,11 +187,8 @@ class FederationRuntimePlugin {
         );
       });
     }
-    // A composed federation object has no runtime namespace, only its bundler runtime.
     const embedRuntimeLines = Template.asString([
-      composition === undefined
-        ? `if(!${federationGlobal}.runtime || !${federationGlobal}.bundlerRuntime){`
-        : `if(!${federationGlobal}.bundlerRuntime){`,
+      `if(!${federationGlobal}.bundlerRuntime){`,
       Template.indent([
         `var prevFederation = ${federationGlobal};`,
         `${federationGlobal} = {}`,
@@ -223,7 +220,6 @@ class FederationRuntimePlugin {
               `${federationGlobal}.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;`,
             ])
           : '',
-        // `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
         `${federationGlobal}.instance = ${federationGlobal}.bundlerRuntime.init({webpackRequire:${RuntimeGlobals.require}});`,
         `if(${federationGlobal}.attachShareScopeMap){`,
         Template.indent([

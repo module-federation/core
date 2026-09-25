@@ -216,7 +216,6 @@ export interface GetSharedFallbackGetterOptions {
 }
 
 export interface Federation {
-  runtime?: typeof runtime;
   instance?: runtime.ModuleFederation;
   initOptions?: InitOptions;
   installInitialConsumes?: (options: InstallInitialConsumesOptions) => any;

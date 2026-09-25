@@ -3,7 +3,6 @@ import * as legacyRoot from '../src/index';
 describe('legacy root keeps the keys rspack copies onto federation', () => {
   test('keeps the default export keys', () => {
     expect(Object.keys(legacyRoot.default)).toEqual([
-      'runtime',
       'instance',
       'initOptions',
       'bundlerRuntime',
@@ -36,13 +35,12 @@ describe('legacy root keeps the keys rspack copies onto federation', () => {
         'default',
         'initOptions',
         'instance',
-        'runtime',
       ].sort(),
     );
   });
 
-  test('keeps federation.runtime as the runtime namespace', () => {
-    expect(typeof legacyRoot.default.runtime!.init).toBe('function');
-    expect(legacyRoot.runtime).toBe(legacyRoot.default.runtime);
+  test('has no federation.runtime namespace', () => {
+    expect(legacyRoot.default).not.toHaveProperty('runtime');
+    expect(legacyRoot).not.toHaveProperty('runtime');
   });
 });
