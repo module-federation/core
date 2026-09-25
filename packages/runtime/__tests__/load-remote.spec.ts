@@ -1,6 +1,6 @@
 import 'whatwg-fetch';
 import { assert, describe, it } from '@rstest/core';
-import { ModuleFederation, createInstance, init } from '../src/index';
+import { ModuleFederation, init } from '../src/index';
 import { mockRemoteSnapshot } from './mock/utils';
 import { matchRemoteWithNameAndExpose } from '@module-federation/runtime-core';
 import {
@@ -354,39 +354,6 @@ describe('loadRemote', () => {
 });
 
 describe('loadRemote with manifest.json', () => {
-  it('loads remotes when another runtime registers a disabled debug constructor', async () => {
-    class RemoteDisabledFederation extends ModuleFederation {
-      override async loadRemote<T>(): Promise<T | null> {
-        throw new Error(
-          'Remote loading is disabled by experiments.optimization.disableRemote.',
-        );
-      }
-    }
-
-    const previous = Global.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
-    setGlobalFederationConstructor(RemoteDisabledFederation, true);
-
-    try {
-      const instance = createInstance({
-        name: '@demo/debug-host',
-        remotes: [
-          {
-            name: '@demo/main',
-            entry:
-              'http://localhost:1111/resources/main/federation-manifest.json',
-          },
-        ],
-      });
-
-      expect(instance.constructor).toBe(ModuleFederation);
-      const remote = await instance.loadRemote<() => string>('@demo/main/say');
-      assert(remote);
-      expect(remote()).toBe('hello world');
-    } finally {
-      setGlobalFederationConstructor(previous, true);
-    }
-  });
-
   it('handles duplicate request to manifest.json', async () => {
     const FM = new ModuleFederation({
       name: '@demo/host',

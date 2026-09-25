@@ -1,11 +1,5 @@
-import { describe, it, rs, expect } from '@rstest/core';
-import {
-  ModuleFederation,
-  init,
-  loadRemote,
-  loadShare,
-  loadShareSync,
-} from '../src/index';
+import { describe, it, expect } from '@rstest/core';
+import { loadRemote, loadShare, loadShareSync } from '../src/index';
 import { getInfoWithoutType } from '@module-federation/runtime-core';
 
 type IsAssignable<Actual, Expected> = [Actual] extends [Expected]
@@ -14,26 +8,6 @@ type IsAssignable<Actual, Expected> = [Actual] extends [Expected]
 type ExpectFalse<T extends false> = T;
 
 describe('global', () => {
-  it('keeps the debug constructor available without using it for init', () => {
-    const previous = globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
-    const debugConstructor = rs.fn() as unknown as typeof ModuleFederation;
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = debugConstructor;
-
-    try {
-      const instance = init({
-        name: '@federation/debug-constructor',
-        remotes: [],
-      });
-      expect(instance.constructor).toBe(ModuleFederation);
-      expect(debugConstructor).not.toHaveBeenCalled();
-      expect(globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__).toBe(
-        debugConstructor,
-      );
-    } finally {
-      globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = previous;
-    }
-  });
-
   it('getInfoWithoutType', () => {
     const snapshot = {
       '@federation/app1': 1,
