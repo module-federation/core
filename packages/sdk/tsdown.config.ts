@@ -36,7 +36,6 @@ export default defineConfig([
         'webpack',
       ]),
       define: {},
-      outExtensions: undefined,
       copyLicense: true,
       unbundle: true,
     }),
