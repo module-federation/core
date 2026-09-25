@@ -9,15 +9,15 @@ import {
   isDataLoaderExpose,
   loadDataFetchModule,
   isServerEnv,
-} from '../utils';
-import logger from '../logger';
+} from './utils';
+import logger from './logger';
 import {
   MF_DATA_FETCH_TYPE,
   MF_DATA_FETCH_STATUS,
   DATA_FETCH_CLIENT_SUFFIX,
-} from '../constant';
+} from './constant';
 
-import type { MF_DATA_FETCH_MAP_VALUE } from '../types';
+import type { MF_DATA_FETCH_MAP_VALUE } from './types';
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
 const autoFetchData: () => ModuleFederationRuntimePlugin = () => {

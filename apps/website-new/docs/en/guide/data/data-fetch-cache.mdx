@@ -2,10 +2,19 @@
 
 The `cache` function allows you to cache the results of data fetching or computations. It provides fine-grained control over data and is suitable for scenarios such as Client-Side Rendering (CSR) and Server-Side Rendering (SSR).
 
+Examples import from `@module-federation/data-fetch`. Bridge packages (`@module-federation/bridge-react/data-fetch`, `@module-federation/bridge-vue3`) still re-export `cache` and related helpers for backward compatibility.
+
+```bash
+npm install @module-federation/data-fetch
+# or: pnpm add @module-federation/data-fetch
+```
+
+If you only import from bridge packages, the re-exports still work without a direct dependency on `@module-federation/data-fetch`.
+
 ## Basic Usage
 
 ```ts
-import { cache } from '@module-federation/bridge-react/data-fetch';
+import { cache } from '@module-federation/data-fetch';
 
 export type Data = {
   data: string;
@@ -59,7 +68,7 @@ This function is only supported for use within a DataLoader.
 After each computation, the framework records the time the data was written to the cache. When the function is called again, it checks if the cache has expired based on the `maxAge` parameter. If it has, the `fn` function is re-executed; otherwise, the cached data is returned.
 
 ```ts
-import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+import { cache, CacheTime } from '@module-federation/data-fetch';
 
 const getDashboardStats = cache(
   async () => {
@@ -78,7 +87,7 @@ The `revalidate` parameter sets a time window for revalidating the cache after i
 In the following example, if `getDashboardStats` is called within the 2-minute non-expired window, it returns cached data. If the cache is expired (between 2 and 3 minutes), incoming requests will first receive the old data, and then a new request will be made in the background to update the cache.
 
 ```ts
-import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+import { cache, CacheTime } from '@module-federation/data-fetch';
 
 const getDashboardStats = cache(
   async () => {
@@ -96,7 +105,7 @@ const getDashboardStats = cache(
 The `tag` parameter is used to identify a cache with a label, which can be a string or an array of strings. This tag can be used to invalidate the cache, and multiple cache functions can share the same tag.
 
 ```ts
-import { cache, revalidateTag } from '@module-federation/bridge-react/data-fetch';
+import { cache, revalidateTag } from '@module-federation/data-fetch';
 
 const getDashboardStats = cache(
   async () => {
@@ -124,7 +133,7 @@ revalidateTag('dashboard-stats'); // This will invalidate the caches for both ge
 The `getKey` parameter allows you to customize how cache keys are generated. For example, you might only need to rely on a subset of the function's parameters to differentiate caches. It is a function that receives the same arguments as the original function and returns a string as the cache key:
 
 ```ts
-import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+import { cache, CacheTime } from '@module-federation/data-fetch';
 import { fetchUserData } from './api';
 
 const getUser = cache(
@@ -156,7 +165,7 @@ The `generateKey` function ensures that a consistent, unique key is generated ev
 :::
 
 ```ts
-import { cache, CacheTime, generateKey } from '@module-federation/bridge-react/data-fetch';
+import { cache, CacheTime, generateKey } from '@module-federation/data-fetch';
 import { fetchUserData } from './api';
 
 const getUser = cache(
@@ -190,7 +199,7 @@ If you only want to derive the cache key from some arguments, use `getKey`. Use 
 The example below demonstrates how `customKey` enables cache sharing across functions:
 
 ```ts
-import { cache } from '@module-federation/bridge-react/data-fetch';
+import { cache } from '@module-federation/data-fetch';
 import { fetchUserData } from './api';
 
 // Different functions, but they can share a cache via customKey.
@@ -246,7 +255,7 @@ const getUserD = cache(
 The `onCache` parameter allows you to track cache statistics, such as hit rates. It is a callback function that receives information about each cache operation, including its status, key, parameters, and result. You can return `false` from `onCache` to prevent a cache hit.
 
 ```ts
-import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+import { cache, CacheTime } from '@module-federation/data-fetch';
 
 // Track cache statistics.
 const stats = {
@@ -314,7 +323,7 @@ Considering that the content cached by the `cache` function is not expected to b
 You can specify the cache storage limit using the `configureCache` function:
 
 ```ts
-import { configureCache, CacheSize } from '@module-federation/bridge-react/data-fetch';
+import { configureCache, CacheSize } from '@module-federation/data-fetch';
 
 configureCache({
   maxSize: CacheSize.MB * 10, // 10MB

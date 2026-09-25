@@ -1,4 +1,4 @@
-# Lazy Carregue e Pré-busca Componentes
+# Carregamento lazy e prefetch de componentes
 
 Este chapter introduces como para usar `createLazyComponent` para carregar remote React componentes on demand em uma aplicação host.
 
@@ -7,6 +7,12 @@ Este chapter introduces como para usar `createLazyComponent` para carregar remot
 - **Declarative carregamento e fallback**: no precisa manually wrap `React.Suspense` e erro boundaries
 - **Dados prefetching**: use `prefetch` para começa dependência requests antes o componente carrega, avoiding request waterfalls onde dados é requested apenas depois o componente é ready
 - **SSR control**: precisely control whether remote componentes render no servidor, helping avoid CSS flickering issues
+
+:::info
+
+Os utilitários de data-fetch em nível de componente (`cache`, `prefetch`, `DataFetchParams` e tipos relacionados) são fornecidos por `@module-federation/data-fetch`. `@module-federation/bridge-react/data-fetch` os reexporta para compatibilidade com versões anteriores e adiciona APIs específicas do React, como `lazyLoadComponentPlugin` e `createLazyComponent`.
+
+:::
 
 ## Instalação
 
