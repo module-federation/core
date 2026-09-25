@@ -196,6 +196,18 @@ describe('composed runtime', () => {
     });
   });
 
+  it('keeps the consumes adapter that the async startup runtime calls', async () => {
+    const [b] = await harness([
+      {
+        out: 'graph/async-host',
+        target: 'node',
+        mf: host({ experiments: { asyncStartup: true } }),
+      },
+    ]);
+    expectComposed(b, 'host');
+    expect(parts(b, ['consumes'])).toEqual({ consumes: true });
+  });
+
   it('builds an exposes-only remote without a remote handler, loader, or share handler', async () => {
     const [b] = await harness([
       {
