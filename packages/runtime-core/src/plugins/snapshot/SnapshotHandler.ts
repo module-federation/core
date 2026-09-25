@@ -27,8 +27,8 @@ import {
   getGlobalSnapshotInfoByModuleInfo,
   getInfoWithoutType,
 } from '../../global';
-import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
 import { ModuleFederation } from '../../core';
+import type { SnapshotHooks } from './hooks';
 
 export function getGlobalRemoteInfo(
   moduleInfo: Remote,
@@ -75,79 +75,14 @@ export class SnapshotHandler {
   loadingHostSnapshot: Promise<GlobalModuleInfo | void> | null = null;
   HostInstance: ModuleFederation;
   manifestCache: Map<string, Manifest> = new Map();
-  hooks = new PluginSystem({
-    beforeLoadRemoteSnapshot: new AsyncHook<
-      [
-        {
-          options: Options;
-          moduleInfo: Remote;
-          origin: ModuleFederation;
-        },
-      ],
-      void
-    >('beforeLoadRemoteSnapshot'),
-    loadSnapshot: new AsyncWaterfallHook<{
-      options: Options;
-      moduleInfo: Remote;
-      hostGlobalSnapshot: GlobalModuleInfo[string] | undefined;
-      globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
-      remoteSnapshot?: GlobalModuleInfo[string] | undefined;
-    }>('loadGlobalSnapshot'),
-    loadRemoteSnapshot: new AsyncWaterfallHook<{
-      options: Options;
-      moduleInfo: Remote;
-      manifestJson?: Manifest;
-      manifestUrl?: string;
-      remoteSnapshot: ModuleInfo;
-      from: 'global' | 'manifest';
-    }>('loadRemoteSnapshot'),
-    afterLoadSnapshot: new AsyncWaterfallHook<{
-      id?: string;
-      host: ModuleFederation;
-      options: Options;
-      moduleInfo: Remote;
-      remoteSnapshot: ModuleInfo;
-    }>('afterLoadSnapshot'),
-    beforeLoadManifest: new AsyncHook<
-      [
-        {
-          manifestUrl: string;
-          moduleInfo: Remote;
-          resourceOptions?: {
-            initiator: ResourceLoadInitiator;
-            id: string;
-          };
-          origin: ModuleFederation;
-        },
-      ],
-      void
-    >('beforeLoadManifest'),
-    afterLoadManifest: new AsyncHook<
-      [
-        {
-          manifestUrl: string;
-          moduleInfo: Remote;
-          resourceOptions?: {
-            initiator: ResourceLoadInitiator;
-            id: string;
-          };
-          manifestJson?: Manifest;
-          response?: Response;
-          error?: unknown;
-          cached?: boolean;
-          recovered?: boolean;
-          origin: ModuleFederation;
-        },
-      ],
-      void
-    >('afterLoadManifest'),
-  });
+  hooks: SnapshotHooks;
   loaderHook: ModuleFederation['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
     Global.__FEDERATION__.__MANIFEST_LOADING__;
 
   constructor(HostInstance: ModuleFederation) {
     this.HostInstance = HostInstance;
+    this.hooks = HostInstance.slots.snapshot.hooks;
     this.loaderHook = HostInstance.loaderHook;
   }
 

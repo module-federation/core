@@ -36,6 +36,8 @@ export function initInstance(
     current = createInstance(normalizedOptions, capabilities, Ctor);
     return current;
   }
+  // Optional call: the registry can hold an instance from an older runtime copy.
+  if (capabilities) instance.attach?.(capabilities);
   instance.initOptions(normalizedOptions);
   if (!current) {
     current = instance;

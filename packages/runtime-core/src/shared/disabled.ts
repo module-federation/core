@@ -1,12 +1,17 @@
-import type { LoadRemoteMatch } from '../remote';
+import type { ModuleFederation } from '../core';
 import type { ShareScopeMap } from '../type';
-import { AsyncWaterfallHook, PluginSystem } from '../utils/hooks';
+
+const SHARED_DISABLED_MESSAGE =
+  'Shared dependency loading is disabled by experiments.optimization.disableShared.';
 
 export class DisabledSharedHandler {
-  shareScopeMap: ShareScopeMap = {};
-  hooks = new PluginSystem({
-    afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
-  });
+  hooks: ModuleFederation['slots']['shared']['hooks'];
+  shareScopeMap: ShareScopeMap;
+
+  constructor(host: ModuleFederation) {
+    this.hooks = host.slots.shared.hooks;
+    this.shareScopeMap = host.slots.shared.shareScopeMap;
+  }
 
   registerShared() {
     return {
@@ -16,15 +21,11 @@ export class DisabledSharedHandler {
   }
 
   loadShare(): never {
-    throw new Error(
-      'Shared dependency loading is disabled by experiments.optimization.disableShared.',
-    );
+    throw new Error(SHARED_DISABLED_MESSAGE);
   }
 
   loadShareSync(): never {
-    throw new Error(
-      'Shared dependency loading is disabled by experiments.optimization.disableShared.',
-    );
+    throw new Error(SHARED_DISABLED_MESSAGE);
   }
 
   initializeSharing(): [] {

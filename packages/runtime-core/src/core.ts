@@ -13,6 +13,7 @@ import {
   Shared,
   ShareInfos,
   UserOptions,
+  ModuleFederationRuntimePlugin,
   RemoteInfo,
   ShareScopeMap,
   InitScope,
@@ -43,6 +44,9 @@ import type { SharedHandler } from './shared';
 import { DisabledSharedHandler } from './shared/disabled';
 import type { RemoteHandler } from './remote';
 import { DisabledRemoteHandler } from './remote/disabled';
+import { createSharedHooks } from './shared/hooks';
+import { createRemoteHooks } from './remote/hooks';
+import { createSnapshotHooks } from './plugins/snapshot/hooks';
 
 // ponytail: prototype capability shapes, typed loosely on purpose.
 export type Capabilities = {
@@ -299,22 +303,25 @@ export class ModuleFederation {
   });
   moduleInfo?: GlobalModuleInfo[string];
 
-  capabilities: Capabilities;
+  capabilities: Capabilities = {};
   platform: Capabilities['platform'];
+  // Each slot owns its handler's hooks and state; enabled and disabled handlers adopt them.
+  slots = {
+    shared: { hooks: createSharedHooks(), shareScopeMap: {} as ShareScopeMap },
+    remote: {
+      hooks: createRemoteHooks(),
+      idToRemoteMap: {} as Record<string, { name: string; expose: string }>,
+    },
+    snapshot: { hooks: createSnapshotHooks() },
+  };
 
   constructor(userOptions: UserOptions, capabilities: Capabilities = {}) {
-    this.capabilities = capabilities;
-    this.platform = capabilities.platform;
-    const plugins =
-      capabilities.remote && capabilities.snapshot
-        ? capabilities.snapshot.plugins()
-        : [];
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
       id: getBuilderId(),
       name: userOptions.name,
-      plugins,
+      plugins: [],
       remotes: [],
       shared: {},
       inBrowser: isBrowserEnvValue,
@@ -322,19 +329,54 @@ export class ModuleFederation {
 
     this.name = userOptions.name;
     this.options = defaultOptions;
-    const remote = capabilities.remote?.create(this);
-    this.snapshotHandler = (remote?.snapshot ??
-      new DisabledSnapshotHandler()) as SnapshotHandler;
-    this.sharedHandler = (capabilities.shared?.create(this) ??
-      new DisabledSharedHandler()) as SharedHandler;
-    this.remoteHandler = (remote?.remote ??
-      new DisabledRemoteHandler()) as RemoteHandler;
-    this.shareScopeMap = this.sharedHandler.shareScopeMap;
+    this.shareScopeMap = this.slots.shared.shareScopeMap;
+    this.snapshotHandler = new DisabledSnapshotHandler(
+      this,
+    ) as unknown as SnapshotHandler;
+    this.sharedHandler = new DisabledSharedHandler(
+      this,
+    ) as unknown as SharedHandler;
+    this.remoteHandler = new DisabledRemoteHandler(
+      this,
+    ) as unknown as RemoteHandler;
     this.registerPlugins([
-      ...defaultOptions.plugins,
+      ...this.fillSlots(capabilities),
       ...(userOptions.plugins || []),
     ]);
     this.options = this.formatOptions(defaultOptions, userOptions);
+  }
+
+  /**
+   * Fill still-disabled slots. Monotonic and idempotent: an enabled slot is
+   * never replaced, so hooks, maps and handler identity survive repeat calls.
+   */
+  attach(capabilities: Capabilities): void {
+    const plugins = this.fillSlots(capabilities);
+    if (plugins.length) {
+      this.registerPlugins(plugins);
+    }
+  }
+
+  // Returns the snapshot plugins to register when remote + snapshot just became enabled.
+  private fillSlots(next: Capabilities): ModuleFederationRuntimePlugin[] {
+    const caps = this.capabilities;
+    caps.platform ??= next.platform;
+    this.platform = caps.platform;
+    if (!caps.shared && next.shared) {
+      caps.shared = next.shared;
+      this.sharedHandler = next.shared.create(this);
+    }
+    if (!caps.remote && next.remote) {
+      caps.remote = next.remote;
+      const remote = next.remote.create(this);
+      this.remoteHandler = remote.remote;
+      this.snapshotHandler = remote.snapshot;
+    }
+    if (!caps.snapshot && caps.remote && next.snapshot) {
+      caps.snapshot = next.snapshot;
+      return next.snapshot.plugins();
+    }
+    return [];
   }
 
   initOptions(userOptions: UserOptions): Options {

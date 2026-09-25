@@ -4,6 +4,7 @@ import {
   CurrentGlobal,
   assert,
   setGlobalFederationConstructor,
+  legacyCapabilities,
 } from '@module-federation/runtime-core';
 import { runtimeDescMap, RUNTIME_009 } from '@module-federation/error-codes';
 import {
@@ -31,8 +32,9 @@ export function createInstance(options: UserOptions): ModuleFederation {
   return createInstanceWith(options, undefined, ModuleFederation);
 }
 
+// The public root composes everything (legacyCapabilities() is the full set when no define is emitted).
 export function init(options: UserOptions): ModuleFederation {
-  return initInstance(options, undefined, ModuleFederation);
+  return initInstance(options, legacyCapabilities(), ModuleFederation);
 }
 
 export function loadRemote<T>(
@@ -82,6 +84,7 @@ export function registerRemotes(
 ): ReturnType<ModuleFederation['registerRemotes']> {
   const FederationInstance = getCurrentInstance();
   assert(FederationInstance, RUNTIME_009, runtimeDescMap);
+  FederationInstance.attach?.(legacyCapabilities());
   // eslint-disable-next-line prefer-spread
   return FederationInstance.registerRemotes.apply(FederationInstance, args);
 }
@@ -112,6 +115,7 @@ export function registerShared(
 ): ReturnType<ModuleFederation['registerShared']> {
   const FederationInstance = getCurrentInstance();
   assert(FederationInstance, RUNTIME_009, runtimeDescMap);
+  FederationInstance.attach?.(legacyCapabilities());
   // eslint-disable-next-line prefer-spread
   return FederationInstance.registerShared.apply(FederationInstance, args);
 }

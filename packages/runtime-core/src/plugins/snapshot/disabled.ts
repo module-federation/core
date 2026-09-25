@@ -1,5 +1,9 @@
-import { PluginSystem } from '../../utils/hooks';
+import type { ModuleFederation } from '../../core';
 
 export class DisabledSnapshotHandler {
-  hooks = new PluginSystem({});
+  hooks: ModuleFederation['slots']['snapshot']['hooks'];
+
+  constructor(host: ModuleFederation) {
+    this.hooks = host.slots.snapshot.hooks;
+  }
 }
