@@ -8,6 +8,7 @@ describe('legacy root keeps the keys rspack copies onto federation', () => {
       'bundlerRuntime',
       'attachShareScopeMap',
       'bundlerRuntimeOptions',
+      'runtime',
     ]);
   });
 
@@ -63,8 +64,19 @@ describe('legacy root keeps the keys rspack copies onto federation', () => {
     );
   });
 
-  test('has no federation.runtime namespace', () => {
-    expect(legacyRoot.default).not.toHaveProperty('runtime');
+  test('keeps only runtime.init, not the runtime namespace', () => {
+    expect(Object.keys(legacyRoot.default.runtime!)).toEqual(['init']);
     expect(legacyRoot).not.toHaveProperty('runtime');
+  });
+
+  test('rspack 1.x initializes through runtime.init on the copied keys', () => {
+    // @rspack/core 1.7.9 moduleFederationDefaultRuntime: copy the keys, then call runtime.init.
+    const federation: any = {};
+    for (const key in legacyRoot.default) {
+      federation[key] = (legacyRoot.default as any)[key];
+    }
+    federation.initOptions = { name: 'legacy-root-rspack1', remotes: [] };
+    federation.instance = federation.runtime.init(federation.initOptions);
+    expect(federation.instance.name).toBe('legacy-root-rspack1');
   });
 });

@@ -14,7 +14,7 @@ The composed federation runtime is the default. `ModuleFederationPlugin` generat
 Removed:
 
 - The `FEDERATION_OPTIMIZE_NO_SHARED`, `FEDERATION_OPTIMIZE_NO_REMOTE`, `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN`, `FEDERATION_HAS_EXPOSES`, and `FEDERATION_BUILD_IDENTIFIER` defines. The plugins no longer emit them and the runtime no longer reads them. Use `experiments.optimization.disable*` with the plugin, or import the capabilities you need from `@module-federation/runtime/compose` when you bundle the runtime yourself.
-- `__webpack_require__.federation.runtime`, and the named `runtime` export and default `runtime` key of `@module-federation/webpack-bundler-runtime` (so also of `@module-federation/runtime-tools/webpack-bundler-runtime`). Use `__webpack_require__.federation.instance`, `instance.platform.loadScriptNode` for the Node loader, or import `@module-federation/runtime` directly.
+- The `@module-federation/runtime` namespace on `__webpack_require__.federation.runtime`, `federation.runtime.loadScriptNode`, and the named `runtime` export of `@module-federation/webpack-bundler-runtime` (so also of `@module-federation/runtime-tools/webpack-bundler-runtime`). `federation.runtime` keeps only `init`, because the native runtime of `@rspack/core` before 2.0.0-beta.1 calls `federation.runtime.init`. Use `__webpack_require__.federation.instance`, `instance.platform.loadScriptNode` for the Node loader, or import `@module-federation/runtime` directly.
 - The fallback in `@module-federation/node` to `federation.runtime.loadScriptNode`.
 - `resolveRspackRuntimeAlias` from `@module-federation/rspack/plugin`. The wrapper no longer aliases `@module-federation/runtime$`, so the helper has no use.
 

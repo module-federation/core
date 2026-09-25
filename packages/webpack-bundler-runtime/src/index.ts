@@ -33,6 +33,8 @@ const federation: Federation = {
   bundlerRuntime,
   attachShareScopeMap,
   bundlerRuntimeOptions: {},
+  // @rspack/core before 2.0.0-beta.1: its native runtime calls federation.runtime.init.
+  runtime: { init },
 };
 
 // Keep CJS interop stable for consumers that iterate required keys directly.
