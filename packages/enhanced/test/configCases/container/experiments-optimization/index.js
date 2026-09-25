@@ -101,6 +101,13 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
     shareScopeMarkers.forEach((marker) => {
       expect(noShared).toContain(marker);
     });
+    // No build here configures shared, so no plan includes the consumes adapter.
+    ['No fallback item found for shareKey', 'tree-shake-plugin'].forEach(
+      (marker) => {
+        expect(fullCapabilities).not.toContain(marker);
+        expect(noShared).not.toContain(marker);
+      },
+    );
   });
 
   it('should eliminate container initialization from the consumer entry without exposes', () => {
