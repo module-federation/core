@@ -62,7 +62,6 @@ export async function loadEntryNode({
 }
 
 export const node: NodePlatform = {
-  target: 'node',
   isBrowser: () => false,
   loadScript: loadScriptNode,
   loadScriptNode,

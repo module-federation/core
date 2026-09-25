@@ -1,4 +1,4 @@
-export { FederationKernel, runtimeCapabilitiesOf } from './core';
+export { FederationKernel } from './core';
 export type { ModuleFederation } from './index';
 export {
   CurrentGlobal,
