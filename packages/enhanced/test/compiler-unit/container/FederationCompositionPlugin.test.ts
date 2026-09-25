@@ -6,6 +6,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import { MIN_RUNTIME_VERSION } from '@module-federation/managers';
 import ModuleFederationPlugin from '../../../src/lib/container/ModuleFederationPlugin';
 import ContainerReferencePlugin from '../../../src/lib/container/ContainerReferencePlugin';
+import { COVERED_BY_OPTIONS } from '../../../src/lib/container/runtime/FederationCompositionPlugin';
 
 const webpack = require(
   normalizeWebpackPath('webpack'),
@@ -64,7 +65,10 @@ function compile(context: string, config: Record<string, unknown>) {
         (err, stats) => {
           if (err) return reject(err);
           const output = {};
-          for (const file of fs.readdirSync(outputPath).sort()) {
+          const files = fs.existsSync(outputPath)
+            ? fs.readdirSync(outputPath)
+            : [];
+          for (const file of files.sort()) {
             if (file.endsWith('.js'))
               output[file] = fs.readFileSync(
                 path.join(outputPath, file),
@@ -243,6 +247,82 @@ describe('FederationCompositionPlugin', () => {
     expect(moduleNames(stats).some((name) => REMOTES_ADAPTER.test(name))).toBe(
       true,
     );
+  });
+
+  it('errors when a plugin externalizes a runtime package in a composed build', async () => {
+    const context = fixture({
+      'index.js':
+        'import("@module-federation/runtime-core"); export default 1;',
+    });
+    const { stats } = await compile(context, {
+      plugins: [
+        host(),
+        {
+          apply(compiler) {
+            new compiler.webpack.ExternalsPlugin('global', {
+              '@module-federation/runtime-core': 'RC',
+            }).apply(compiler);
+          },
+        },
+      ],
+    });
+
+    expect(messages(stats.errors)).toEqual([
+      expect.stringMatching(
+        /^"@module-federation\/runtime-core" is external, but the composed federation bootstrap imports the runtime/,
+      ),
+    ]);
+  });
+
+  it('errors when a remote module is built without the remotes adapter', async () => {
+    const context = fixture({
+      'index.js': 'import("remote/Button"); export default 1;',
+    });
+    const { stats } = await compile(context, {
+      plugins: [
+        new ModuleFederationPlugin({
+          name: 'composition_host',
+          exposes: { './index': './index.js' },
+          dts: false,
+          manifest: false,
+        }),
+        // Claims ModuleFederationPlugin covers it, so nothing registers the remotes need.
+        new ContainerReferencePlugin(
+          {
+            remoteType: 'script',
+            remotes: { remote: 'remote@http://localhost:3001/remoteEntry.js' },
+          },
+          COVERED_BY_OPTIONS,
+        ),
+      ],
+    });
+
+    expect(messages(stats.errors)).toEqual([
+      expect.stringMatching(
+        /^A remote-module is in the graph but the federation bootstrap has no "remotes" adapter/,
+      ),
+    ]);
+  });
+
+  it('warns when the plan never ran', async () => {
+    const context = fixture({ 'index.js': 'export default 1;' });
+    const { stats } = await compile(context, {
+      plugins: [
+        {
+          apply(compiler) {
+            compiler.hooks.afterResolvers.tap('Late', () =>
+              host().apply(compiler),
+            );
+          },
+        },
+      ],
+    });
+
+    expect(messages(stats.warnings)).toEqual([
+      expect.stringMatching(
+        /^This build uses the full federation runtime because the federation plan never ran/,
+      ),
+    ]);
   });
 
   it('refuses a participant registered after the plan is sealed', async () => {

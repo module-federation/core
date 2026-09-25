@@ -54,7 +54,7 @@ export class ComposedRuntimePlugin {
     compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, decide);
     compiler.hooks.watchRun.tapPromise(PLUGIN_NAME, decide);
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-      const { WebpackError } = compiler.rspack;
+      const { WebpackError } = compiler.webpack;
       if (mode?.mode === 'unsupported') {
         compilation.errors.push(
           new WebpackError(
@@ -75,8 +75,7 @@ export class ComposedRuntimePlugin {
 
   private _render(compiler: Compiler): Composition {
     const family = resolveRuntimeFamily(this._native.runtimeTools);
-    const VirtualModulesPlugin =
-      compiler.rspack.experiments.VirtualModulesPlugin;
+    const VirtualModulesPlugin = virtualModulesPluginOf(compiler);
     if (!VirtualModulesPlugin) return { family };
     const participants: Participant[] = [optionsParticipant(this._options)];
     // rspack's async startup runtime installs its consumes handler even without shared modules.
@@ -98,10 +97,7 @@ export class ComposedRuntimePlugin {
       return { family, renderError };
     }
     const name = this._options.name!.replace(/[^\w.-]/g, '_');
-    const hash = createHash('sha256')
-      .update(JSON.stringify(plan))
-      .digest('hex')
-      .slice(0, 12);
+    const hash = createHash('sha256').update(source).digest('hex').slice(0, 12);
     const file = path.resolve(
       compiler.context,
       `node_modules/.federation/rspack/${name}.${hash}.mjs`,
@@ -122,9 +118,7 @@ export class ComposedRuntimePlugin {
       context: compiler.context,
       alias: alias as never,
       aliasExemptions: [this._native.runtimeTools, this._native.runtime],
-      virtualModulesPlugin: Boolean(
-        compiler.rspack.experiments.VirtualModulesPlugin,
-      ),
+      virtualModulesPlugin: Boolean(virtualModulesPluginOf(compiler)),
     });
     if (mode.mode !== 'composed') return mode;
     if (!bootstrapPath) throw renderError;
@@ -145,6 +139,10 @@ export class ComposedRuntimePlugin {
     return mode;
   }
 }
+
+// @rspack/core 0.7 has no compiler.rspack and no experiments export.
+const virtualModulesPluginOf = (compiler: Compiler) =>
+  compiler.webpack.experiments?.VirtualModulesPlugin;
 
 function resolveRuntimeEsm({ members }: RuntimeFamily): string {
   return require.resolve(`${RUNTIME}/bundler`, {

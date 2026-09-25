@@ -27,7 +27,7 @@ describe('checkFederationGraph', () => {
           { type: 'provide-module' },
           core('remote.js'),
         ],
-        externalRequests: ['react'],
+        externalUserRequests: ['react'],
         family,
         composed: { adapters: ['remotes', 'share-scope'], bootstraps: 1 },
       }),
@@ -42,7 +42,7 @@ describe('checkFederationGraph', () => {
   ])('errors on a %s without the %s adapter', (type, adapter) => {
     const { errors, warnings } = checkFederationGraph({
       modules: [{ type }, { type }],
-      externalRequests: [],
+      externalUserRequests: [],
       composed: { adapters: [], bootstraps: 1 },
     });
     expect(errors).toEqual([expect.stringContaining(`"${adapter}" adapter`)]);
@@ -53,7 +53,7 @@ describe('checkFederationGraph', () => {
     expect(
       checkFederationGraph({
         modules: [{ type: 'remote-module' }],
-        externalRequests: [CORE],
+        externalUserRequests: [CORE],
       }),
     ).toEqual({ errors: [], warnings: [] });
   });
@@ -61,7 +61,7 @@ describe('checkFederationGraph', () => {
   it('errors on an external runtime package in composed mode', () => {
     const { errors } = checkFederationGraph({
       modules: [],
-      externalRequests: ['@module-federation/runtime/compose', 'react'],
+      externalUserRequests: ['@module-federation/runtime/compose', 'react'],
       composed: { adapters: [], bootstraps: 1 },
     });
     expect(errors).toEqual([
@@ -71,11 +71,22 @@ describe('checkFederationGraph', () => {
     ]);
   });
 
+  it('errors on an externalRuntime-shaped module by its import name', () => {
+    // ExternalModule for externalRuntime: request '_FEDERATION_RUNTIME_CORE',
+    // userRequest '@module-federation/runtime-core'.
+    const { errors } = checkFederationGraph({
+      modules: [],
+      externalUserRequests: [CORE],
+      composed: { adapters: [], bootstraps: 1 },
+    });
+    expect(errors).toEqual([expect.stringContaining(`"${CORE}" is external`)]);
+  });
+
   it('warns on two bootstraps and errors when an adapter is also missing', () => {
     expect(
       checkFederationGraph({
         modules: [],
-        externalRequests: [],
+        externalUserRequests: [],
         composed: { adapters: [], bootstraps: 2 },
       }),
     ).toEqual({
@@ -85,7 +96,7 @@ describe('checkFederationGraph', () => {
 
     const { errors, warnings } = checkFederationGraph({
       modules: [{ type: 'remote-module' }],
-      externalRequests: [],
+      externalUserRequests: [],
       composed: { adapters: [], bootstraps: 2 },
     });
     expect(errors).toEqual([
@@ -116,7 +127,7 @@ describe('checkFederationGraph', () => {
           package: { name: 'react', root: '/x' },
         },
       ],
-      externalRequests: [],
+      externalUserRequests: [],
       family,
     });
     expect(errors).toEqual([]);
@@ -130,7 +141,7 @@ describe('checkFederationGraph', () => {
   it('warns when one runtime package is resolved as both .cjs and .js', () => {
     const { warnings } = checkFederationGraph({
       modules: [core('remote.js'), core('index.cjs'), core('shared.js')],
-      externalRequests: [],
+      externalUserRequests: [],
       family,
     });
     expect(warnings).toEqual([

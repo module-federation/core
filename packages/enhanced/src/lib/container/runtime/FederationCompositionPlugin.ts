@@ -36,7 +36,7 @@ export interface ComposedEntry {
 }
 
 interface Outcome {
-  family: RuntimeFamily;
+  family?: RuntimeFamily;
   mode: RuntimeMode;
   entry?: ComposedEntry;
 }
@@ -53,14 +53,6 @@ type SlotCompiler = Compiler & { [SLOT]?: CompositionSlot };
 export const COVERED_BY_OPTIONS = Symbol('covered by ModuleFederationPlugin');
 export type CoveredByOptions = typeof COVERED_BY_OPTIONS;
 
-const usesSharedContainerPlugin = (compiler: Compiler) =>
-  compiler.options.plugins.some(
-    (plugin) =>
-      typeof plugin === 'object' &&
-      plugin !== null &&
-      (plugin as { name?: unknown }).name === 'SharedContainerPlugin',
-  );
-
 function slotOf(compiler: Compiler): CompositionSlot {
   const target = compiler as SlotCompiler;
   return (target[SLOT] ??= { participants: [], sealed: false });
@@ -73,7 +65,7 @@ type Options = moduleFederationPlugin.ModuleFederationPluginOptions;
 
 class FederationCompositionPlugin {
   private _plan?: CompositionPlan;
-  private _selecting?: Promise<Outcome | undefined>;
+  private _selecting?: Promise<Outcome>;
   private _outcome?: Outcome;
 
   constructor(
@@ -96,7 +88,6 @@ class FederationCompositionPlugin {
   }
 
   apply(compiler: Compiler): void {
-    if (usesSharedContainerPlugin(compiler)) return;
     const slot = slotOf(compiler);
     if (slot.planner) return;
     slot.planner = this;
@@ -120,9 +111,17 @@ class FederationCompositionPlugin {
   private async _select(
     compiler: Compiler,
     slot: CompositionSlot,
-  ): Promise<Outcome | undefined> {
+  ): Promise<Outcome> {
     const plan = this._plan;
-    if (!plan) return undefined;
+    if (!plan) {
+      return {
+        mode: {
+          mode: 'legacy',
+          reason:
+            'the federation plan never ran: ModuleFederationPlugin was applied after afterResolvers or to a child compiler',
+        },
+      };
+    }
     const family = resolveRuntimeFamily(
       this._options.implementation ?? __dirname,
     );
@@ -192,9 +191,9 @@ const CONTAINER_ENTRY_PREFIX = 'container entry ';
 const FAMILY = new Set<string>(FAMILY_PACKAGES);
 
 function summarize(compilation: Compilation, modules: Iterable<Module>) {
-  const summary: { modules: GraphModule[]; externalRequests: string[] } = {
+  const summary: { modules: GraphModule[]; externalUserRequests: string[] } = {
     modules: [],
-    externalRequests: [],
+    externalUserRequests: [],
   };
   // descriptionFileRoot keeps symlinks; the runtime family records real paths.
   const realRoots = new Map<string, string>();
@@ -212,8 +211,8 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
     return real;
   };
   for (const module of modules) {
-    const { request, resource, resourceResolveData } = module as Module & {
-      request?: unknown;
+    const { userRequest, resource, resourceResolveData } = module as Module & {
+      userRequest?: string;
       resource?: string;
       resourceResolveData?: {
         descriptionFileData?: { name?: unknown };
@@ -225,8 +224,7 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
       continue;
     }
     if (module instanceof compilation.compiler.webpack.ExternalModule) {
-      const first = Array.isArray(request) ? request[0] : request;
-      if (typeof first === 'string') summary.externalRequests.push(first);
+      if (userRequest) summary.externalUserRequests.push(userRequest);
       continue;
     }
     const name = resourceResolveData?.descriptionFileData?.name;

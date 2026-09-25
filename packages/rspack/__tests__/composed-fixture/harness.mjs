@@ -12,19 +12,19 @@ const { ModuleFederationPlugin } = createRequire(import.meta.url)(
 
 const withoutVirtualModules = {
   apply(compiler) {
-    const core = compiler.rspack;
-    Object.defineProperty(compiler, 'rspack', {
-      value: {
-        ...core,
-        experiments: { ...core.experiments, VirtualModulesPlugin: undefined },
-      },
-    });
+    const core = compiler.webpack;
+    const value = {
+      ...core,
+      experiments: { ...core.experiments, VirtualModulesPlugin: undefined },
+    };
+    Object.defineProperty(compiler, 'rspack', { value });
+    Object.defineProperty(compiler, 'webpack', { value });
   },
 };
 
 function config(
   outRoot,
-  { out, target, mf, cacheDir, singleChunk, noVirtualModules },
+  { out, target, mf, cacheDir, singleChunk, noVirtualModules, alias },
 ) {
   const isHost = Boolean(mf.remotes);
   return {
@@ -42,7 +42,9 @@ function config(
       ...(isHost &&
         target === 'node' && { library: { type: 'commonjs-module' } }),
     },
-    resolve: { alias: { 'shared-lib': path.join(FIXTURE, 'shared-lib') } },
+    resolve: {
+      alias: { 'shared-lib': path.join(FIXTURE, 'shared-lib'), ...alias },
+    },
     optimization: { minimize: false },
     infrastructureLogging: { level: 'error' },
     cache: cacheDir
@@ -126,6 +128,8 @@ if (multi) {
   );
 } else {
   for (const b of builds) {
+    if (b.buildVersion) process.env.MF_BUILD_VERSION = b.buildVersion;
+    else delete process.env.MF_BUILD_VERSION;
     const compiler = rspack(config(outRoot, b));
     results.push(...(await (watch ? watchTwice(compiler) : runOnce(compiler))));
   }

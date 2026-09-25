@@ -110,7 +110,7 @@ async function externalsProblem({
           return `${pkg} is externalized`;
         }
       } catch (error) {
-        return `an externals function threw for ${pkg}: ${(error as Error)?.message ?? error}`;
+        return `externals could not be checked for ${pkg}: ${(error as Error)?.message ?? error}`;
       }
     }
   }
@@ -129,12 +129,38 @@ async function matchesExternal(
     const value = await callExternal(item, request, context);
     return value !== undefined && value !== false;
   }
+  const { byLayer } = item;
+  if (typeof byLayer === 'function') {
+    throw new Error(
+      'externals.byLayer is a function, so its layers cannot be listed',
+    );
+  }
+  if (typeof byLayer === 'object' && byLayer !== null) {
+    for (const layer of Object.values(byLayer)) {
+      if (await matchesExternal(layer as ExternalItem, request, context)) {
+        return true;
+      }
+    }
+  }
   return (
     hasOwn(item, request) &&
     item[request] !== false &&
     item[request] !== undefined
   );
 }
+
+const resolveUnavailable = (
+  _context: string,
+  request: string,
+  callback?: ExternalCallback,
+) => {
+  const error = new Error(
+    `externals cannot resolve "${request}" before the compilation exists`,
+  );
+  if (!callback) return Promise.reject(error);
+  callback(error);
+  return undefined;
+};
 
 function callExternal(
   fn: ExternalFunction,
@@ -147,10 +173,25 @@ function callExternal(
     const result =
       fn.length === 3
         ? fn(context, request, callback)
-        : fn({ request, context }, callback);
+        : fn(
+            {
+              request,
+              context,
+              dependencyType: 'esm',
+              contextInfo: {
+                issuer: '',
+                issuerLayer: null,
+                compiler: undefined,
+              },
+              getResolve: () => resolveUnavailable,
+            },
+            callback,
+          );
+    // An undefined return means the answer comes through the callback, as in
+    // webpack; fn.length misses callbacks with default values.
     if (result && typeof (result as Promise<unknown>).then === 'function') {
       (result as Promise<unknown>).then(resolve, reject);
-    } else if (fn.length < 2) {
+    } else if (result !== undefined) {
       resolve(result);
     }
   });

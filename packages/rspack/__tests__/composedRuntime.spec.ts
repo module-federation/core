@@ -4,6 +4,7 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { resolveRspackRuntimeImplementation } from '../src/ModuleFederationPlugin';
 
 jest.setTimeout(120_000);
 
@@ -43,6 +44,8 @@ interface BuildSpec {
   cacheDir?: string;
   singleChunk?: boolean;
   noVirtualModules?: boolean;
+  buildVersion?: string;
+  alias?: Record<string, string>;
 }
 
 let outRoot: string;
@@ -263,6 +266,48 @@ describe('composed runtime', () => {
     ]);
   });
 
+  it('keeps the full runtime and warns when resolve.alias already maps the bundler runtime', async () => {
+    const bundlerRuntime = require.resolve(
+      '@module-federation/webpack-bundler-runtime',
+      { paths: [resolveRspackRuntimeImplementation()] },
+    );
+    const [b] = await harness([
+      {
+        out: 'user-alias/bundler-runtime',
+        target: 'web',
+        alias: { [bundlerRuntime]: bundlerRuntime },
+        mf: host(),
+      },
+    ]);
+    expect(composedEntries(b)).toEqual([]);
+    expect(b.modules.some((m) => LEGACY_ENTRY.test(m))).toBe(true);
+    expect(b.warnings).toEqual([
+      expect.stringContaining(`resolve.alias already maps ${bundlerRuntime}`),
+    ]);
+  });
+
+  it('keeps the full runtime and warns when a user alias names a runtime package', async () => {
+    const runtimeCore = path.resolve(
+      __dirname,
+      '../../runtime-core/dist/index.js',
+    );
+    const [b] = await harness([
+      {
+        out: 'user-alias/runtime-core',
+        target: 'web',
+        alias: { '@module-federation/runtime-core$': runtimeCore },
+        mf: host(),
+      },
+    ]);
+    expect(composedEntries(b)).toEqual([]);
+    expect(b.modules.some((m) => LEGACY_ENTRY.test(m))).toBe(true);
+    expect(b.warnings).toEqual([
+      expect.stringContaining(
+        '@module-federation/runtime-core is aliased by resolve.alias["@module-federation/runtime-core$"]',
+      ),
+    ]);
+  });
+
   it('composes by default', async () => {
     const [b] = await harness([{ out: 'off/host', target: 'web', mf: host() }]);
     expectComposed(b, 'host');
@@ -334,17 +379,27 @@ describe('composed runtime', () => {
     });
   });
 
-  it('picks the current plan on every build under the persistent cache (A, B, B, A)', async () => {
+  it('picks the current bootstrap on every build under the persistent cache (A, B, B, A, A at a new version)', async () => {
     const cacheDir = path.join(outRoot, 'cache');
     const plans = { A: { disableShared: true, disableSnapshot: true }, B: {} };
+    const steps = [
+      { plan: 'A' },
+      { plan: 'B' },
+      { plan: 'B' },
+      { plan: 'A' },
+      { plan: 'A', buildVersion: '9.9.9' },
+    ] as const;
     const builds: { entry: string; shared: boolean; built: number }[] = [];
-    for (const [i, key] of (['A', 'B', 'B', 'A'] as const).entries()) {
+    for (const [i, step] of steps.entries()) {
       const [b] = await harness([
         {
           out: `cache/${i}`,
           target: 'web',
           cacheDir,
-          mf: host({ experiments: { optimization: plans[key] } }),
+          buildVersion: 'buildVersion' in step ? step.buildVersion : undefined,
+          mf: host({
+            experiments: { optimization: plans[step.plan] },
+          }),
         },
       ]);
       expectComposed(b, 'host');
@@ -354,10 +409,18 @@ describe('composed runtime', () => {
         built: b.built,
       });
     }
-    expect(builds.map((b) => b.shared)).toEqual([false, true, true, false]);
+    expect(builds.map((b) => b.shared)).toEqual([
+      false,
+      true,
+      true,
+      false,
+      false,
+    ]);
     expect(builds[0].entry).toBe(builds[3].entry);
     expect(builds[1].entry).toBe(builds[2].entry);
     expect(builds[0].entry).not.toBe(builds[1].entry);
     expect(builds[2].built).toBe(0);
+    expect(builds[4].entry).not.toBe(builds[3].entry);
+    expect(mainCode('cache/4')).toContain("buildId: 'host:9.9.9'");
   });
 });

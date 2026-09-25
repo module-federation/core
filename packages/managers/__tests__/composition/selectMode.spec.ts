@@ -120,6 +120,17 @@ describe('selectMode', () => {
         ) => callback(null, request === RUNTIME ? 'mf' : undefined),
       ],
       [
+        'a callback function with a defaulted callback',
+        (
+          { request }: { request: string },
+          callback: (err?: Error | null, value?: string) => void = () => {},
+        ) => {
+          setTimeout(() =>
+            callback(null, request === RUNTIME ? 'mf' : undefined),
+          );
+        },
+      ],
+      [
         'an async function',
         async ({ request }: { request: string }) =>
           request === RUNTIME ? 'mf' : undefined,
@@ -150,7 +161,13 @@ describe('selectMode', () => {
           return undefined;
         },
       });
-      expect(seen).toContainEqual({ request: RUNTIME, context: '/app' });
+      expect(seen).toContainEqual(
+        expect.objectContaining({
+          request: RUNTIME,
+          context: '/app',
+          contextInfo: { issuer: '', issuerLayer: null, compiler: undefined },
+        }),
+      );
     });
 
     it.each([
@@ -164,6 +181,62 @@ describe('selectMode', () => {
       expect(
         await legacyReason({ externals: externals as ModeInputs['externals'] }),
       ).toBeUndefined();
+    });
+
+    it.each([
+      ['a named layer', { byLayer: { ssr: { [RUNTIME]: 'mf' } } }],
+      [
+        'the default layer',
+        { vue: 'Vue', byLayer: { default: { [RUNTIME]: 'mf' } } },
+      ],
+    ])(
+      'selects legacy when byLayer externalizes a family package in %s',
+      async (_, externals) => {
+        expect(await legacyReason({ externals })).toMatch(/is externalized/);
+      },
+    );
+
+    it('composes when no byLayer layer externalizes a family package', async () => {
+      expect(
+        await legacyReason({
+          externals: { byLayer: { ssr: { react: 'React', [RUNTIME]: false } } },
+        }),
+      ).toBeUndefined();
+    });
+
+    it('selects legacy when byLayer is a function, whose layers cannot be listed', async () => {
+      expect(
+        await legacyReason({ externals: { byLayer: () => ({}) } }),
+      ).toMatch(/byLayer/);
+    });
+
+    it('composes with a function external that reads contextInfo.issuerLayer', async () => {
+      expect(
+        await legacyReason({
+          externals: (
+            { contextInfo }: { contextInfo: { issuerLayer: string | null } },
+            callback: (err?: Error | null, value?: string) => void,
+          ) =>
+            callback(null, contextInfo.issuerLayer === 'rsc' ? 'x' : undefined),
+        }),
+      ).toBeUndefined();
+    });
+
+    it('selects legacy when a function external needs to resolve', async () => {
+      expect(
+        await legacyReason({
+          externals: async ({
+            getResolve,
+            request,
+          }: {
+            getResolve: () => (
+              context: string,
+              request: string,
+            ) => Promise<string>;
+            request: string;
+          }) => getResolve()('/app', request),
+        }),
+      ).toMatch(/cannot resolve/);
     });
 
     it('selects legacy when a function external throws', async () => {
@@ -188,9 +261,12 @@ describe('selectMode', () => {
       ['a scope key', { '@module-federation': '/fork' }],
       ['a false value', { '@module-federation/sdk': false }],
       ['the array form', [{ name: RUNTIME, alias: '/fork/runtime' }]],
-    ])('selects legacy on %s', async (_, alias) => {
-      expect(await legacyReason({ alias })).toMatch(/is aliased/);
-    });
+    ] as [string, ModeInputs['alias']][])(
+      'selects legacy on %s',
+      async (_, alias) => {
+        expect(await legacyReason({ alias })).toMatch(/is aliased/);
+      },
+    );
 
     it('ignores aliases whose value is exempt', async () => {
       expect(

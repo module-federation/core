@@ -15,8 +15,8 @@ export interface GraphModule {
 
 export interface FederationGraphSummary {
   modules: readonly GraphModule[];
-  /** Requests of every ExternalModule in the compilation. */
-  externalRequests: readonly string[];
+  /** `userRequest` of every ExternalModule: the import name, not the external target in `request`. */
+  externalUserRequests: readonly string[];
   family?: RuntimeFamily;
   /** Present when the compilation uses the composed bootstrap. */
   composed?: { adapters: readonly AdapterName[]; bootstraps: number };
@@ -60,7 +60,7 @@ export function checkFederationGraph(
         `A ${type} is in the graph but the federation bootstrap has no "${adapter}" adapter. Register the plugin that creates it with the federation plan.`,
       );
     }
-    for (const request of [...new Set(summary.externalRequests)].sort()) {
+    for (const request of [...new Set(summary.externalUserRequests)].sort()) {
       if (familyPackageOf(request)) {
         errors.push(
           `"${request}" is external, but the composed federation bootstrap imports the runtime. Remove it from externals, or set experiments.externalRuntime to externalize the whole runtime.`,
