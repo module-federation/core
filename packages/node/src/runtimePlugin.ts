@@ -384,11 +384,10 @@ export const setupScriptLoader = (): void => {
   ): void => {
     if (!key || chunkId)
       throw new Error(`__webpack_require__.l name is required for ${url}`);
-    const platform = __webpack_require__.federation.instance
-      .platform as ModuleFederation['platform'] & {
-      loadScriptNode?: LoadScriptNode;
-    };
-    if (!platform.loadScriptNode) {
+    const platform = __webpack_require__.federation.instance?.platform as
+      | (ModuleFederation['platform'] & { loadScriptNode?: LoadScriptNode })
+      | undefined;
+    if (!platform?.loadScriptNode) {
       done(new Error(NO_NODE_LOADER));
       return;
     }

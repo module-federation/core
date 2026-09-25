@@ -20,7 +20,7 @@ import {
   ResourceLoadContext,
   LoadShareExtraOptions,
   SharedLoadContext,
-  Capabilities,
+  ResolvedCapabilities,
   Platform,
   RemoteHandlerContract,
   SharedHandlerContract,
@@ -42,17 +42,13 @@ import {
 } from './utils/hooks';
 import type { ModuleFederation } from './index';
 import { DEFAULT_SCOPE } from './constant';
-import { DisabledSnapshotHandler } from './plugins/snapshot/disabled';
-import { DisabledSharedHandler } from './shared/disabled';
-import { DisabledRemoteHandler } from './remote/disabled';
-import { unavailablePlatform } from './platform/unavailable';
 
 type BridgeHookContext = object;
 type BridgeHookResult = {
   context: BridgeHookContext;
   result?: unknown;
 };
-export class FederationKernel {
+export class FederationCore {
   options: Options;
   hooks = new PluginSystem({
     beforeInit: new SyncWaterfallHook<{
@@ -287,12 +283,11 @@ export class FederationKernel {
   });
   moduleInfo?: GlobalModuleInfo[string];
 
-  constructor(userOptions: UserOptions, capabilities: Capabilities = {}) {
-    const platform = capabilities.platform || unavailablePlatform;
-    const plugins =
-      capabilities.remote && capabilities.snapshot
-        ? capabilities.snapshot.plugins()
-        : [];
+  constructor(
+    userOptions: UserOptions,
+    { shared, remote, snapshot, platform }: ResolvedCapabilities,
+  ) {
+    const plugins = snapshot ? snapshot.plugins() : [];
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
@@ -307,11 +302,10 @@ export class FederationKernel {
     this.name = userOptions.name;
     this.options = defaultOptions;
     this.platform = platform;
-    const remote = capabilities.remote?.create(this);
-    this.snapshotHandler = remote?.snapshot || new DisabledSnapshotHandler();
-    this.sharedHandler =
-      capabilities.shared?.create(this) || new DisabledSharedHandler();
-    this.remoteHandler = remote?.remote || new DisabledRemoteHandler();
+    const handlers = remote.create(this);
+    this.snapshotHandler = handlers.snapshot;
+    this.sharedHandler = shared.create(this);
+    this.remoteHandler = handlers.remote;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,

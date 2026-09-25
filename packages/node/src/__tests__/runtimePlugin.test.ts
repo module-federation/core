@@ -868,6 +868,29 @@ describe('runtimePlugin', () => {
       }
     });
 
+    it('routes a missing instance error to the loader callback', async () => {
+      const federation = (global as any).__webpack_require__.federation;
+      const originalInstance = federation.instance;
+      federation.instance = undefined;
+      try {
+        setupScriptLoader();
+        const done = jest.fn();
+        expect(() =>
+          (global as any).__webpack_require__.l(
+            'http://localhost:3001/remoteEntry.js',
+            done,
+            'no-instance-remote',
+            '',
+          ),
+        ).not.toThrow();
+        await new Promise(process.nextTick);
+
+        expect(done).toHaveBeenCalledWith(expect.any(Error));
+      } finally {
+        federation.instance = originalInstance;
+      }
+    });
+
     it('should throw error when key is missing', () => {
       setupScriptLoader();
 

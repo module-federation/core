@@ -80,7 +80,13 @@ export interface SnapshotCapability {
   plugins(): ModuleFederationRuntimePlugin[];
 }
 
-// A snapshot needs a remote handler, and a remote handler needs a platform to load entries.
+export type ResolvedCapabilities = {
+  shared: SharedCapability;
+  remote: RemoteCapability;
+  snapshot?: SnapshotCapability;
+  platform: Platform;
+};
+
 export type Capabilities =
   | {
       shared?: SharedCapability;

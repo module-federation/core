@@ -1,26 +1,23 @@
 import helpersDefault, { type IGlobalUtils, type IShareUtils } from './helpers';
 import { Module } from './module';
-import { FederationKernel } from './core';
+import { FederationCore } from './core';
 import { shared } from './shared/capability';
 import { remote } from './remote/capability';
 import { snapshot } from './plugins/snapshot/capability';
 import { universal } from './platform/universal';
-import type { Capabilities, UserOptions } from './type';
+import type { ResolvedCapabilities, UserOptions } from './type';
 
 const helpers = helpersDefault;
-const fullCapabilities: Capabilities = {
+const fullCapabilities: ResolvedCapabilities = {
   shared,
   remote,
   snapshot,
   platform: universal,
 };
 
-export class ModuleFederation extends FederationKernel {
-  constructor(
-    userOptions: UserOptions,
-    capabilities: Capabilities = fullCapabilities,
-  ) {
-    super(userOptions, capabilities);
+export class ModuleFederation extends FederationCore {
+  constructor(userOptions: UserOptions) {
+    super(userOptions, fullCapabilities);
   }
 }
 export {

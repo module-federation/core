@@ -1,6 +1,7 @@
 import fs from 'fs';
 import type { Compilation, Compiler, Module } from 'webpack';
 import {
+  FAMILY_PACKAGES,
   checkFederationGraph,
   planComposition,
   renderComposition,
@@ -26,13 +27,10 @@ const WebpackError = require(
 ) as typeof import('webpack/lib/WebpackError');
 
 const PLUGIN_NAME = 'FederationCompositionPlugin';
-// Symbol.for, so every installed copy of enhanced shares one slot per compiler.
 const SLOT = Symbol.for('module-federation.composition/1');
 
 export interface ComposedEntry {
-  /** A file path or data: URL, as FederationRuntimePlugin names its entry. */
   path: string;
-  /** The rendered composition plus the runtime-plugin wiring. */
   source: string;
   adapters: AdapterName[];
 }
@@ -52,7 +50,6 @@ export interface CompositionSlot {
 
 type SlotCompiler = Compiler & { [SLOT]?: CompositionSlot };
 
-/** Passed by ModuleFederationPlugin to the sub-plugins its options participant covers. */
 export const COVERED_BY_OPTIONS = Symbol('covered by ModuleFederationPlugin');
 export type CoveredByOptions = typeof COVERED_BY_OPTIONS;
 
@@ -74,29 +71,6 @@ export const composedEntryOf = (compiler: Compiler) =>
 
 type Options = moduleFederationPlugin.ModuleFederationPluginOptions;
 
-const hasEntries = (value: unknown) =>
-  Boolean(
-    value &&
-    (Array.isArray(value) ? value.length > 0 : Object.keys(value).length > 0),
-  );
-
-export function optionsParticipant(options: Options): Participant {
-  const optimization = options.experiments?.optimization;
-  const disable: Extract<Participant, { kind: 'options' }>['disable'] = {};
-  if (optimization?.disableShared) disable.shared = true;
-  if (optimization?.disableRemote) disable.remote = true;
-  if (optimization?.disableSnapshot) disable.snapshot = true;
-  const needs: AdapterName[] = [];
-  if (hasEntries(options.remotes)) needs.push('remotes');
-  if (options.shared) needs.push('consumes');
-  if (hasEntries(options.exposes)) needs.push('container');
-  return { kind: 'options', disable, needs };
-}
-
-/**
- * Plans the federation bootstrap from the participants every federation plugin registers.
- * The first copy of enhanced applied to a compiler plans; other copies only register.
- */
 class FederationCompositionPlugin {
   private _plan?: CompositionPlan;
   private _selecting?: Promise<Outcome | undefined>;
@@ -107,10 +81,11 @@ class FederationCompositionPlugin {
     private readonly _createEntry: (
       composition: string,
     ) => Omit<ComposedEntry, 'adapters'>,
+    /** The resolve.alias targets FederationRuntimePlugin writes, which are not user aliases. */
+    private readonly _aliasTargets: string[],
   ) {}
 
   static register(compiler: Compiler, participant: Participant): void {
-    if (usesSharedContainerPlugin(compiler)) return;
     const slot = slotOf(compiler);
     if (slot.sealed) {
       throw new Error(
@@ -126,7 +101,6 @@ class FederationCompositionPlugin {
     if (slot.planner) return;
     slot.planner = this;
 
-    // afterResolvers runs after every afterPlugins tap, where ModuleFederationPlugin applies its sub-plugins.
     compiler.hooks.afterResolvers.tap(PLUGIN_NAME, () => {
       slot.sealed = true;
       this._plan = planComposition(
@@ -134,7 +108,6 @@ class FederationCompositionPlugin {
         this._options.experiments?.optimization?.target ?? 'universal',
       );
     });
-    // Mode selection may await function externals, so it runs in the first async hook before make.
     compiler.hooks.beforeCompile.tapPromise(PLUGIN_NAME, async () => {
       this._selecting ??= this._select(compiler, slot);
       this._outcome = await this._selecting;
@@ -158,7 +131,7 @@ class FederationCompositionPlugin {
       externals: compiler.options.externals as never,
       context: compiler.context,
       alias: compiler.options.resolve.alias as never,
-      aliasExemptions: this._ownAliasTargets(compiler),
+      aliasExemptions: this._aliasTargets,
     });
     if (mode.mode !== 'composed') return { family, mode };
     const composition = renderComposition(
@@ -168,17 +141,6 @@ class FederationCompositionPlugin {
     );
     slot.entry = { ...this._createEntry(composition), adapters: plan.adapters };
     return { family, mode, entry: slot.entry };
-  }
-
-  // FederationRuntimePlugin writes these aliases itself; they are not user aliases.
-  private _ownAliasTargets(compiler: Compiler): string[] {
-    const alias = compiler.options.resolve.alias;
-    if (!alias || Array.isArray(alias)) return [];
-    const record = alias as Record<string, unknown>;
-    return [
-      record['@module-federation/runtime$'],
-      record['@module-federation/runtime-tools$'],
-    ].filter((target): target is string => typeof target === 'string');
   }
 
   private _buildId(compiler: Compiler): string | undefined {
@@ -227,6 +189,7 @@ class FederationCompositionPlugin {
 }
 
 const CONTAINER_ENTRY_PREFIX = 'container entry ';
+const FAMILY = new Set<string>(FAMILY_PACKAGES);
 
 function summarize(compilation: Compilation, modules: Iterable<Module>) {
   const summary: { modules: GraphModule[]; externalRequests: string[] } = {
@@ -238,7 +201,12 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
   const realRoot = (root: string) => {
     let real = realRoots.get(root);
     if (real === undefined) {
-      real = fs.realpathSync(root);
+      try {
+        real = fs.realpathSync(root);
+      } catch {
+        // A root outside the real disk (memfs, zip archives) is compared as resolved.
+        real = root;
+      }
       realRoots.set(root, real);
     }
     return real;
@@ -267,7 +235,7 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
       type: module.type,
       resource,
       package:
-        typeof name === 'string' && root
+        typeof name === 'string' && root && FAMILY.has(name)
           ? { name, root: realRoot(root) }
           : undefined,
     });
@@ -278,7 +246,6 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
 const isContainerEntry = (module: Module) =>
   module.identifier().startsWith(CONTAINER_ENTRY_PREFIX);
 
-// Every copy of enhanced includes its bootstrap through a 'federation runtime dependency'.
 function countBootstraps(compilation: Compilation): number {
   const bootstraps = new Set<Module>();
   for (const dependency of compilation.globalEntry.includeDependencies) {
