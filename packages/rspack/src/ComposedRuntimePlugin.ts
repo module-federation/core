@@ -8,6 +8,7 @@ import {
   resolveRuntimeFamily,
   optionsParticipant,
   selectMode,
+  type Participant,
   type RuntimeFamily,
 } from '@module-federation/managers';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
@@ -69,8 +70,13 @@ export class ComposedRuntimePlugin {
     const family = resolveRuntimeFamily(this._native.runtimeTools);
     const VirtualModulesPlugin = virtualModulesPluginOf(compiler);
     if (!VirtualModulesPlugin) return { family };
+    const participants: Participant[] = [optionsParticipant(this._options)];
+    // rspack's async startup runtime installs its consumes handler even without shared modules.
+    if (this._options.experiments?.asyncStartup) {
+      participants.push({ kind: 'needs', needs: ['consumes'] });
+    }
     const plan = planComposition(
-      [optionsParticipant(this._options)],
+      participants,
       this._options.experiments?.optimization?.target ?? 'universal',
     );
     let source: string;
