@@ -530,18 +530,25 @@ class FederationRuntimePlugin {
     if (!onceForCompiler.has(compiler)) {
       const options = this.options;
       if (options?.experiments?.composedRuntime) {
-        new FederationCompositionPlugin(options, (composition) => {
-          const source = FederationRuntimePlugin.getTemplate(
-            compiler,
-            options,
-            undefined,
-            composition,
-          );
-          return {
-            path: FederationRuntimePlugin.entryFilePathFor(options, source),
-            source,
-          };
-        }).apply(compiler);
+        new FederationCompositionPlugin(
+          options,
+          (composition) => {
+            const source = FederationRuntimePlugin.getTemplate(
+              compiler,
+              options,
+              undefined,
+              composition,
+            );
+            return {
+              path: FederationRuntimePlugin.entryFilePathFor(options, source),
+              source,
+            };
+          },
+          [
+            resolvedPaths.runtimePath,
+            options.implementation || resolvedPaths.runtimeToolsPath,
+          ],
+        ).apply(compiler);
       }
       this.prependEntry(compiler);
       this.injectRuntime(compiler);

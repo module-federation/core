@@ -179,6 +179,28 @@ describe('FederationCompositionPlugin', () => {
     expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
   });
 
+  it('selects legacy when the user aliases a runtime package', async () => {
+    const context = fixture({ 'index.js': 'export default 1;' });
+    const { stats } = await compile(context, {
+      resolve: {
+        alias: {
+          '@module-federation/runtime$': path.join(
+            path.dirname(require.resolve('@module-federation/runtime')),
+            'index.js',
+          ),
+        },
+      },
+      plugins: [host({ composedRuntime: true })],
+    });
+
+    expect(messages(stats.warnings)).toEqual([
+      expect.stringMatching(
+        /because @module-federation\/runtime is aliased by resolve\.alias\["@module-federation\/runtime\$"\]/,
+      ),
+    ]);
+    expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
+  });
+
   it('emits ENV_TARGET but no capability or build-id define when composed', async () => {
     const context = fixture({
       'index.js':

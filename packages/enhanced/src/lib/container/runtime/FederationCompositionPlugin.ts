@@ -1,6 +1,7 @@
 import fs from 'fs';
 import type { Compilation, Compiler, Module } from 'webpack';
 import {
+  FAMILY_PACKAGES,
   checkFederationGraph,
   planComposition,
   renderComposition,
@@ -69,25 +70,6 @@ export const composedEntryOf = (compiler: Compiler) =>
 
 type Options = moduleFederationPlugin.ModuleFederationPluginOptions;
 
-const hasEntries = (value: unknown) =>
-  Boolean(
-    value &&
-    (Array.isArray(value) ? value.length > 0 : Object.keys(value).length > 0),
-  );
-
-export function optionsParticipant(options: Options): Participant {
-  const optimization = options.experiments?.optimization;
-  const disable: Extract<Participant, { kind: 'options' }>['disable'] = {};
-  if (optimization?.disableShared) disable.shared = true;
-  if (optimization?.disableRemote) disable.remote = true;
-  if (optimization?.disableSnapshot) disable.snapshot = true;
-  const needs: AdapterName[] = [];
-  if (hasEntries(options.remotes)) needs.push('remotes');
-  if (options.shared) needs.push('consumes');
-  if (hasEntries(options.exposes)) needs.push('container');
-  return { kind: 'options', disable, needs };
-}
-
 class FederationCompositionPlugin {
   private _plan?: CompositionPlan;
   private _selecting?: Promise<Outcome | undefined>;
@@ -98,6 +80,8 @@ class FederationCompositionPlugin {
     private readonly _createEntry: (
       composition: string,
     ) => Omit<ComposedEntry, 'adapters'>,
+    /** The resolve.alias targets FederationRuntimePlugin writes, which are not user aliases. */
+    private readonly _aliasTargets: string[],
   ) {}
 
   static register(compiler: Compiler, participant: Participant): void {
@@ -146,7 +130,7 @@ class FederationCompositionPlugin {
       externals: compiler.options.externals as never,
       context: compiler.context,
       alias: compiler.options.resolve.alias as never,
-      aliasExemptions: this._ownAliasTargets(compiler),
+      aliasExemptions: this._aliasTargets,
     });
     if (mode.mode === 'legacy') return { family, legacyReason: mode.reason };
     const composition = renderComposition(
@@ -156,16 +140,6 @@ class FederationCompositionPlugin {
     );
     slot.entry = { ...this._createEntry(composition), adapters: plan.adapters };
     return { family, entry: slot.entry };
-  }
-
-  private _ownAliasTargets(compiler: Compiler): string[] {
-    const alias = compiler.options.resolve.alias;
-    if (!alias || Array.isArray(alias)) return [];
-    const record = alias as Record<string, unknown>;
-    return [
-      record['@module-federation/runtime$'],
-      record['@module-federation/runtime-tools$'],
-    ].filter((target): target is string => typeof target === 'string');
   }
 
   private _buildId(compiler: Compiler): string | undefined {
@@ -209,6 +183,7 @@ class FederationCompositionPlugin {
 }
 
 const CONTAINER_ENTRY_PREFIX = 'container entry ';
+const FAMILY = new Set<string>(FAMILY_PACKAGES);
 
 function summarize(compilation: Compilation, modules: Iterable<Module>) {
   const summary: { modules: GraphModule[]; externalRequests: string[] } = {
@@ -220,7 +195,12 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
   const realRoot = (root: string) => {
     let real = realRoots.get(root);
     if (real === undefined) {
-      real = fs.realpathSync(root);
+      try {
+        real = fs.realpathSync(root);
+      } catch {
+        // A root outside the real disk (memfs, zip archives) is compared as resolved.
+        real = root;
+      }
       realRoots.set(root, real);
     }
     return real;
@@ -249,7 +229,7 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
       type: module.type,
       resource,
       package:
-        typeof name === 'string' && root
+        typeof name === 'string' && root && FAMILY.has(name)
           ? { name, root: realRoot(root) }
           : undefined,
     });
