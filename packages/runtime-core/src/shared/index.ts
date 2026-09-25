@@ -47,7 +47,8 @@ import {
 } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
 import type { LoadRemoteMatch } from '../remote';
-import { createRemoteEntryInitOptions, type Module } from '../module';
+import { createRemoteEntryInitOptions, Module } from '../module';
+import { getRemoteInfo } from '../utils/load';
 
 export class SharedHandler {
   host: ModuleFederation;
@@ -527,6 +528,8 @@ export class SharedHandler {
     };
 
     const initRemoteModule = async (key: string): Promise<void> => {
+      const remote = host.options.remotes.find(({ name }) => name === key);
+      const remoteInfo = remote && getRemoteInfo(remote);
       let module: Module | undefined;
       let remoteEntryExports: RemoteEntryExports | undefined = undefined;
       let resourceContext: ResourceLoadContext | undefined;
@@ -548,11 +551,21 @@ export class SharedHandler {
             error,
             from: 'runtime',
             lifecycle: 'beforeLoadShare',
-            remote: module?.remoteInfo,
+            remote: module?.remoteInfo || remoteInfo,
             origin: host,
           })) as RemoteEntryExports;
-        if (!module || !remoteEntryExports) {
+        if (!remoteEntryExports) {
           return;
+        }
+        if (!module && remoteInfo) {
+          // Keep the fallback module transient so a later load can retry the manifest.
+          module = new Module({ host, remoteInfo });
+          resourceContext = {
+            initiator: 'loadShare',
+            id: key,
+            resourceType: 'remoteEntry',
+            url: module.remoteInfo.entry,
+          };
         }
       } finally {
         // prevent self load loop: when host load self , the initTokens is not the same
