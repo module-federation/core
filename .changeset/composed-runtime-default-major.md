@@ -18,4 +18,6 @@ Removed:
 - The fallback in `@module-federation/node` to `federation.runtime.loadScriptNode`.
 - `resolveRspackRuntimeAlias` from `@module-federation/rspack/plugin`. The wrapper no longer aliases `@module-federation/runtime$`, so the helper has no use.
 
+`@module-federation/rspack` now needs `@rspack/core` 1.5 or newer, the first release with `experiments.VirtualModulesPlugin`. The wrapper still falls back to the full runtime, with a warning, when the plugin is missing.
+
 A build whose installed runtime packages lack the composition subpath exports now fails with an error that names the release that added them. `ENV_TARGET`, `FEDERATION_ALLOW_NEW_FUNCTION`, and `FEDERATION_DEBUG` are unchanged.
