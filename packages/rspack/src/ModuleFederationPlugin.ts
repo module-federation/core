@@ -197,10 +197,11 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       options.name,
       utils.getBuildVersion(),
     );
+    // rspack's native runtime passes no id to init; this plugin sets it before the share scope registers.
+    // A data: module, because @rspack/core before 1.6 takes no runtime plugin params.
     options.runtimePlugins = [
       ...(options.runtimePlugins || []),
-      // The ESM build: the CommonJS one carries a Node-only import.meta shim.
-      [require.resolve('./buildIdRuntimePlugin.mjs'), { id: buildId }],
+      `data:text/javascript,export default function(){return{name:"build-id-plugin",beforeInit(args){args.userOptions.id||=${JSON.stringify(buildId)};return args}}}`,
     ];
 
     new compiler.webpack.container.ModuleFederationPlugin(
