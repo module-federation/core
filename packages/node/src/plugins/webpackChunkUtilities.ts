@@ -291,9 +291,13 @@ export function generateLoadScript(runtimeTemplate: any): string {
             try {
               const federation = ${RuntimeGlobals.require}.federation;
               const platform = federation.instance.platform;
-              const res = await (platform && platform.loadScriptNode
-                ? platform.loadScriptNode(url, { attrs: {} })
-                : federation.runtime.loadScriptNode(url, { attrs: {} }));
+              const loader = platform && platform.loadScriptNode
+                ? platform
+                : federation.runtime && federation.runtime.loadScriptNode
+                  ? federation.runtime
+                  : null;
+              if (!loader) throw new Error('No Node script loader: the federation instance needs a node or universal platform to load remote entries in Node.');
+              const res = await loader.loadScriptNode(url, { attrs: {} });
               const enhancedRemote = federation.instance.initRawContainer(name, url, res);
               // use normal global assignment
               if(!usesInternalRef && !globalThis[name]) {

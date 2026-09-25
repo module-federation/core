@@ -64,4 +64,13 @@ describe('generateLoadScript', () => {
     );
     expect(result).toEqual({ wrapped: container });
   });
+  it('reports a named error when nothing can load a Node script', async () => {
+    const result = (await runEmittedLoader({
+      runtime: {},
+      instance: { platform: { isBrowser: () => false }, initRawContainer },
+    })) as Error;
+
+    expect(result).toBeInstanceOf(Error);
+    expect(result.message).toMatch(/Node script loader/);
+  });
 });
