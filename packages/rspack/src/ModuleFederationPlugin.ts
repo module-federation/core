@@ -193,6 +193,16 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }
     }
 
+    const buildId = composeKeyWithSeparator(
+      options.name,
+      utils.getBuildVersion(),
+    );
+    options.runtimePlugins = [
+      ...(options.runtimePlugins || []),
+      // The ESM build: the CommonJS one carries a Node-only import.meta shim.
+      [require.resolve('./buildIdRuntimePlugin.mjs'), { id: buildId }],
+    ];
+
     new compiler.webpack.container.ModuleFederationPlugin(
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
@@ -210,7 +220,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
           paths: [implementationPath],
         }),
       },
-      composeKeyWithSeparator(options.name, utils.getBuildVersion()),
+      buildId,
     ).apply(compiler);
 
     if (!disableManifest) {

@@ -266,6 +266,32 @@ describe('composed runtime', () => {
     ]);
   });
 
+  it.each([
+    ['the composed bootstrap', {}],
+    [
+      'the full bootstrap a user alias selects',
+      {
+        alias: {
+          '@module-federation/runtime-core$': path.resolve(
+            __dirname,
+            '../../runtime-core/dist/index.js',
+          ),
+        },
+      },
+    ],
+  ])('registers the share scope of %s under name:version', async (_, extra) => {
+    const out = `build-id/${Object.keys(extra).length}`;
+    await harness([
+      { out, target: 'node', buildVersion: '9.9.9', mf: host(), ...extra },
+    ]);
+    const { stdout } = await promisify(execFile)(process.execPath, [
+      '-e',
+      'require(process.argv[1]).default.catch(() => {}); console.log(JSON.stringify(Object.keys(globalThis.__FEDERATION__.__SHARE__)))',
+      path.join(outRoot, out, 'main.js'),
+    ]);
+    expect(JSON.parse(stdout)).toEqual(['host:9.9.9']);
+  });
+
   it('keeps the full runtime and warns when resolve.alias already maps the bundler runtime', async () => {
     const bundlerRuntime = require.resolve(
       '@module-federation/webpack-bundler-runtime',
