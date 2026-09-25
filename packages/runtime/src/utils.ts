@@ -3,25 +3,11 @@ import {
   type ModuleFederation,
 } from '@module-federation/runtime-core/kernel';
 
-// injected by bundler, so it can not use runtime-core stuff
-export function getBuilderId(): string {
-  //@ts-ignore
-  return typeof FEDERATION_BUILD_IDENTIFIER !== 'undefined'
-    ? //@ts-ignore
-      FEDERATION_BUILD_IDENTIFIER
-    : '';
-}
-
 export function isMatchingInstance(
   instance: ModuleFederation,
   name: string,
   version: string | undefined,
 ): boolean {
-  const buildId = getBuilderId();
-  if (buildId && instance.options.id === buildId) {
-    return true;
-  }
-
   if (instance.options.name === name && !instance.options.version && !version) {
     return true;
   }

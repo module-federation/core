@@ -4,12 +4,6 @@ import { PluginSystem } from '../utils/hooks';
 const REMOTE_DISABLED_MESSAGE =
   'Remote loading is disabled by experiments.optimization.disableRemote.';
 
-export class UnavailableRemoteModule {
-  constructor() {
-    throw new Error(REMOTE_DISABLED_MESSAGE);
-  }
-}
-
 export class DisabledRemoteHandler implements RemoteHandlerContract {
   // No lifecycle: plugins that tap remote hooks register nothing.
   hooks: RemoteHandlerContract['hooks'] = new PluginSystem(

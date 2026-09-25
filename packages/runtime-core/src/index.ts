@@ -1,6 +1,5 @@
 import helpersDefault, { type IGlobalUtils, type IShareUtils } from './helpers';
-import { Module as RemoteModule } from './module';
-import { UnavailableRemoteModule } from './remote/disabled';
+import { Module } from './module';
 import { FederationKernel } from './core';
 import { shared } from './shared/capability';
 import { remote } from './remote/capability';
@@ -8,46 +7,18 @@ import { snapshot } from './plugins/snapshot/capability';
 import { universal } from './platform/universal';
 import type { Capabilities, UserOptions } from './type';
 
-declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
-declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
-declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
-
 const helpers = helpersDefault;
-const Module = (
-  typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean' &&
-  FEDERATION_OPTIMIZE_NO_REMOTE
-    ? UnavailableRemoteModule
-    : RemoteModule
-) as typeof RemoteModule;
-
-// The only reader of the capability defines. Each check stays inline so the
-// bundler folds it at parse time and drops the unused capability import.
-const legacyCapabilities = (): Capabilities =>
-  ({
-    shared:
-      typeof FEDERATION_OPTIMIZE_NO_SHARED === 'boolean' &&
-      FEDERATION_OPTIMIZE_NO_SHARED
-        ? undefined
-        : shared,
-    remote:
-      typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean' &&
-      FEDERATION_OPTIMIZE_NO_REMOTE
-        ? undefined
-        : remote,
-    snapshot:
-      (typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean' &&
-        FEDERATION_OPTIMIZE_NO_REMOTE) ||
-      (typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean' &&
-        FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN)
-        ? undefined
-        : snapshot,
-    platform: universal,
-  }) as Capabilities;
+const fullCapabilities: Capabilities = {
+  shared,
+  remote,
+  snapshot,
+  platform: universal,
+};
 
 export class ModuleFederation extends FederationKernel {
   constructor(
     userOptions: UserOptions,
-    capabilities: Capabilities = legacyCapabilities(),
+    capabilities: Capabilities = fullCapabilities,
   ) {
     super(userOptions, capabilities);
   }

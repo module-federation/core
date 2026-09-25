@@ -26,7 +26,7 @@ import {
   SharedHandlerContract,
   SnapshotHandlerContract,
 } from './type';
-import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
+import { registerPlugins, getRemoteEntry, error } from './utils';
 import {
   getShortErrorMsg,
   RUNTIME_010,
@@ -296,7 +296,6 @@ export class FederationKernel {
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
-      id: getBuilderId(),
       name: userOptions.name,
       plugins,
       remotes: [],

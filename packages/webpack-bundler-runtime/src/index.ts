@@ -6,27 +6,9 @@ import { consumes } from './adapters/consumes';
 import { shareScope } from './adapters/share-scope';
 import { container } from './adapters/container';
 
-declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
-declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
-declare const FEDERATION_HAS_EXPOSES: boolean;
-
 export * from './types';
 
-const USE_REMOTE =
-  typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_REMOTE
-    : true;
-const USE_SHARED =
-  typeof FEDERATION_OPTIMIZE_NO_SHARED === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_SHARED
-    : true;
-const USE_EXPOSES =
-  typeof FEDERATION_HAS_EXPOSES === 'boolean' ? FEDERATION_HAS_EXPOSES : true;
-
-const adapters: Adapter[] = [];
-if (USE_REMOTE) adapters.push(remotes);
-if (USE_SHARED) adapters.push(consumes, shareScope);
-if (USE_EXPOSES) adapters.push(container);
+const adapters: Adapter[] = [remotes, consumes, shareScope, container];
 
 const bundlerRuntime = Object.assign(
   {
