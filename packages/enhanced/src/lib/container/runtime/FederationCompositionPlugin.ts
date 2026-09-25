@@ -35,7 +35,7 @@ export interface ComposedEntry {
 }
 
 interface Outcome {
-  family: RuntimeFamily;
+  family?: RuntimeFamily;
   entry?: ComposedEntry;
   legacyReason?: string;
 }
@@ -72,7 +72,7 @@ type Options = moduleFederationPlugin.ModuleFederationPluginOptions;
 
 class FederationCompositionPlugin {
   private _plan?: CompositionPlan;
-  private _selecting?: Promise<Outcome | undefined>;
+  private _selecting?: Promise<Outcome>;
   private _outcome?: Outcome;
 
   constructor(
@@ -119,9 +119,14 @@ class FederationCompositionPlugin {
   private async _select(
     compiler: Compiler,
     slot: CompositionSlot,
-  ): Promise<Outcome | undefined> {
+  ): Promise<Outcome> {
     const plan = this._plan;
-    if (!plan) return undefined;
+    if (!plan) {
+      return {
+        legacyReason:
+          'the federation plan never ran: ModuleFederationPlugin was applied after afterResolvers or to a child compiler',
+      };
+    }
     const family = resolveRuntimeFamily(
       this._options.implementation ?? __dirname,
     );
