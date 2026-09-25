@@ -129,6 +129,19 @@ async function matchesExternal(
   );
 }
 
+const resolveUnavailable = (
+  _context: string,
+  request: string,
+  callback?: ExternalCallback,
+) => {
+  const error = new Error(
+    `externals cannot resolve "${request}" before the compilation exists`,
+  );
+  if (!callback) return Promise.reject(error);
+  callback(error);
+  return undefined;
+};
+
 function callExternal(
   fn: ExternalFunction,
   request: string,
@@ -140,7 +153,20 @@ function callExternal(
     const result =
       fn.length === 3
         ? fn(context, request, callback)
-        : fn({ request, context }, callback);
+        : fn(
+            {
+              request,
+              context,
+              dependencyType: 'esm',
+              contextInfo: {
+                issuer: '',
+                issuerLayer: null,
+                compiler: undefined,
+              },
+              getResolve: () => resolveUnavailable,
+            },
+            callback,
+          );
     if (result && typeof (result as Promise<unknown>).then === 'function') {
       (result as Promise<unknown>).then(resolve, reject);
     } else if (fn.length < 2) {

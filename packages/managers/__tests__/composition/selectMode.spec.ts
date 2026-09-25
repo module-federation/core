@@ -139,7 +139,13 @@ describe('selectMode', () => {
           return undefined;
         },
       });
-      expect(seen).toContainEqual({ request: RUNTIME, context: '/app' });
+      expect(seen).toContainEqual(
+        expect.objectContaining({
+          request: RUNTIME,
+          context: '/app',
+          contextInfo: { issuer: '', issuerLayer: null, compiler: undefined },
+        }),
+      );
     });
 
     it.each([
@@ -180,6 +186,35 @@ describe('selectMode', () => {
       expect(
         await legacyReason({ externals: { byLayer: () => ({}) } }),
       ).toMatch(/byLayer/);
+    });
+
+    it('composes with a function external that reads contextInfo.issuerLayer', async () => {
+      expect(
+        await legacyReason({
+          externals: (
+            { contextInfo }: { contextInfo: { issuerLayer: string | null } },
+            callback: (err?: Error | null, value?: string) => void,
+          ) =>
+            callback(null, contextInfo.issuerLayer === 'rsc' ? 'x' : undefined),
+        }),
+      ).toBeUndefined();
+    });
+
+    it('selects legacy when a function external needs to resolve', async () => {
+      expect(
+        await legacyReason({
+          externals: async ({
+            getResolve,
+            request,
+          }: {
+            getResolve: () => (
+              context: string,
+              request: string,
+            ) => Promise<string>;
+            request: string;
+          }) => getResolve()('/app', request),
+        }),
+      ).toMatch(/cannot resolve/);
     });
 
     it('selects legacy when a function external throws', async () => {
