@@ -66,8 +66,10 @@ function tryRequireBuiltin<T>(name: string): T | undefined {
   return mod;
 }
 
-function tryGetVm(): typeof import('vm') | undefined {
-  return tryRequireBuiltin<typeof import('vm')>('vm');
+type NodeVm = typeof import('vm');
+
+function tryGetVm(): NodeVm | undefined {
+  return tryRequireBuiltin<NodeVm>('vm');
 }
 
 /** Wrapper shape shared by every CommonJS-style remote compile. */
@@ -98,7 +100,7 @@ export function compileCommonJsModule({
   filename: string;
   parameters: string[];
   importModuleDynamically?: any;
-  vm?: typeof import('vm');
+  vm?: NodeVm;
 }): CompiledCommonJsModule {
   if (vm) {
     return new vm.Script(buildCommonJsWrapper(parameters, source), {
