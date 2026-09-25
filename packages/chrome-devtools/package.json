@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -13,6 +13,7 @@
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern-app dev",
     "build:devtool": "modern-app build && node postpack.js",
+    "build:devtool:popup": "pnpm run build:devtool",
     "build": "npm run build:lib",
     "build:debug": "DEBUG=true modern-app build && node postpack.js",
     "build:lib": "rm -rf dist && modern-module build -c modern.lib.config.ts && tsc -p tsconfig.lib.json",
