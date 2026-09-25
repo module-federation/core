@@ -155,6 +155,33 @@ describe('selectMode', () => {
       ).toBeUndefined();
     });
 
+    it.each([
+      ['a named layer', { byLayer: { ssr: { [RUNTIME]: 'mf' } } }],
+      [
+        'the default layer',
+        { vue: 'Vue', byLayer: { default: { [RUNTIME]: 'mf' } } },
+      ],
+    ])(
+      'selects legacy when byLayer externalizes a family package in %s',
+      async (_, externals) => {
+        expect(await legacyReason({ externals })).toMatch(/is externalized/);
+      },
+    );
+
+    it('composes when no byLayer layer externalizes a family package', async () => {
+      expect(
+        await legacyReason({
+          externals: { byLayer: { ssr: { react: 'React', [RUNTIME]: false } } },
+        }),
+      ).toBeUndefined();
+    });
+
+    it('selects legacy when byLayer is a function, whose layers cannot be listed', async () => {
+      expect(
+        await legacyReason({ externals: { byLayer: () => ({}) } }),
+      ).toMatch(/byLayer/);
+    });
+
     it('selects legacy when a function external throws', async () => {
       expect(
         await legacyReason({

@@ -90,7 +90,7 @@ async function externalsProblem({
           return `${pkg} is externalized`;
         }
       } catch (error) {
-        return `an externals function threw for ${pkg}: ${(error as Error)?.message ?? error}`;
+        return `externals could not be checked for ${pkg}: ${(error as Error)?.message ?? error}`;
       }
     }
   }
@@ -108,6 +108,19 @@ async function matchesExternal(
   if (typeof item === 'function') {
     const value = await callExternal(item, request, context);
     return value !== undefined && value !== false;
+  }
+  const { byLayer } = item;
+  if (typeof byLayer === 'function') {
+    throw new Error(
+      'externals.byLayer is a function, so its layers cannot be listed',
+    );
+  }
+  if (typeof byLayer === 'object' && byLayer !== null) {
+    for (const layer of Object.values(byLayer)) {
+      if (await matchesExternal(layer as ExternalItem, request, context)) {
+        return true;
+      }
+    }
   }
   return (
     hasOwn(item, request) &&
