@@ -15,7 +15,7 @@ const COMPOSED_ENTRY =
 const LEGACY_ENTRY = /webpack-bundler-runtime\/dist\/index\.cjs$/;
 
 const PARTS = {
-  shared: /runtime-core\/dist\/shared(\/(?!disabled)|\.)/,
+  shared: /runtime-core\/dist\/(shared(\/(?!disabled)|\.)|utils\/share\.)/,
   remote: /runtime-core\/dist\/remote(\/(?!disabled)|\.)/,
   snapshot:
     /runtime-core\/dist\/(snapshot\.|plugins\/snapshot\/(index|capability)\.|plugins\/generate-preload-assets\.)/,

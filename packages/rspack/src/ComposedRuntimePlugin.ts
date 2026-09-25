@@ -6,9 +6,8 @@ import {
   renderComposition,
   resolveImports,
   resolveRuntimeFamily,
+  optionsParticipant,
   selectMode,
-  type AdapterName,
-  type Participant,
   type RuntimeFamily,
 } from '@module-federation/managers';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
@@ -17,25 +16,6 @@ const PLUGIN_NAME = 'RspackComposedRuntimePlugin';
 const RUNTIME = '@module-federation/runtime';
 
 type Options = moduleFederationPlugin.ModuleFederationPluginOptions;
-
-const hasEntries = (value: unknown) =>
-  Boolean(
-    value &&
-    (Array.isArray(value) ? value.length > 0 : Object.keys(value).length > 0),
-  );
-
-function optionsParticipant(options: Options): Participant {
-  const optimization = options.experiments?.optimization;
-  const disable: Extract<Participant, { kind: 'options' }>['disable'] = {};
-  if (optimization?.disableShared) disable.shared = true;
-  if (optimization?.disableRemote) disable.remote = true;
-  if (optimization?.disableSnapshot) disable.snapshot = true;
-  const needs: AdapterName[] = [];
-  if (hasEntries(options.remotes)) needs.push('remotes');
-  if (options.shared) needs.push('consumes');
-  if (hasEntries(options.exposes)) needs.push('container');
-  return { kind: 'options', disable, needs };
-}
 
 interface Composition {
   family: RuntimeFamily;
