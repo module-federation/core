@@ -140,6 +140,28 @@ describe('FederationKernel', () => {
       undefined,
     );
   });
+
+  it('registers its share scope under an id a beforeInit plugin sets', () => {
+    const buildId: ModuleFederationRuntimePlugin = {
+      name: 'build-id',
+      beforeInit(args) {
+        args.userOptions.id ||= 'kernel-plugin-id:1.0.0';
+        return args;
+      },
+    };
+    const kernel = new FederationKernel(
+      { name: 'kernel-plugin-id', plugins: [buildId] },
+      { shared },
+    );
+
+    expect(kernel.options.id).toBe('kernel-plugin-id:1.0.0');
+    expect(
+      CurrentGlobal.__FEDERATION__.__SHARE__['kernel-plugin-id:1.0.0'],
+    ).toBe(kernel.shareScopeMap);
+    expect(CurrentGlobal.__FEDERATION__.__SHARE__['kernel-plugin-id']).toBe(
+      undefined,
+    );
+  });
 });
 
 describe('root ModuleFederation', () => {
