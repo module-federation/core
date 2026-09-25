@@ -15,9 +15,7 @@ import type WebpackError from 'webpack/lib/WebpackError';
 import SharedDependency from './SharedDependency';
 import { getFederationGlobalScope } from '../../../container/runtime/utils';
 
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
+import makeSerializable from '../../../makeSerializable';
 const {
   sources: webpackSources,
   Template,

@@ -104,31 +104,11 @@ const moduleNames = (stats) => {
 
 const messages = (list) => list.map(({ message }) => message);
 
-// webpack refuses a second serializer under the same key, so a second installed copy
-// of enhanced cannot load next to the first; skip its duplicate registrations.
-function loadSecondCopy() {
-  const nativeRequire = createRequire(__filename);
-  const id = nativeRequire.resolve(
-    normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-  );
-  const cached =
-    nativeRequire.cache[id] ?? (nativeRequire(id) && nativeRequire.cache[id]);
-  const makeSerializable = cached.exports;
-  cached.exports = (...args) => {
-    try {
-      makeSerializable(...args);
-    } catch (error) {
-      if (!/already registered/.test(error.message)) throw error;
-    }
-  };
-  try {
-    return nativeRequire(
-      '../../../dist/src/lib/container/ContainerReferencePlugin',
-    ).default;
-  } finally {
-    cached.exports = makeSerializable;
-  }
-}
+// The built package is a second copy of enhanced next to the source under test.
+const loadSecondCopy = () =>
+  createRequire(__filename)(
+    '../../../dist/src/lib/container/ContainerReferencePlugin',
+  ).default;
 
 describe('FederationCompositionPlugin', () => {
   const host = (experiments, extra = {}) =>

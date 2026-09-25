@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
-import { FederationKernel } from '../src/kernel';
+import { FederationKernel, getRemoteEntry } from '../src/kernel';
 import { remote } from '../src/remote/capability';
-import { PLATFORM_UNAVAILABLE_MESSAGE } from '../src/platform/unavailable';
+import { PLATFORM_UNAVAILABLE_MESSAGE } from '../src/core';
 import { ModuleFederation } from '../src';
 import type { ModuleFederationRuntimePlugin, Platform } from '../src/type';
 
@@ -71,6 +71,36 @@ describe('FederationKernel', () => {
     expect(platform.loadEntry).toHaveBeenCalledTimes(1);
     expect(entry.get).toHaveBeenCalledWith('./Button');
     expect(pluginNames(kernel)).toEqual([]);
+  });
+
+  it('loads a shared fallback entry through the platform without remote', async () => {
+    const entry = { init: rs.fn(), get: rs.fn() };
+    const platform: Platform = {
+      isBrowser: () => true,
+      loadScript: async () => undefined,
+      loadEntry: rs.fn(async () => entry),
+    };
+    const kernel = new FederationKernel(
+      { name: 'fallback-host' },
+      { platform },
+    );
+
+    await expect(getRemoteEntry({ origin: kernel, remoteInfo })).resolves.toBe(
+      entry,
+    );
+    expect(platform.loadEntry).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets a loadEntry plugin resolve a fallback entry without remote', async () => {
+    const container = { init: rs.fn(), get: rs.fn() };
+    const kernel = new FederationKernel({
+      name: 'fallback-plugin-host',
+      plugins: [{ name: 'custom-entry', loadEntry: () => container }],
+    });
+
+    await expect(getRemoteEntry({ origin: kernel, remoteInfo })).resolves.toBe(
+      container,
+    );
   });
 
   it('ignores remotes a beforeInit plugin injects when remote is not composed', () => {

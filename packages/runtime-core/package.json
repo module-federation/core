@@ -37,7 +37,7 @@
       },
       "require": {
         "types": "./dist/kernel.d.ts",
-        "default": "./dist/kernel.cjs"
+        "default": "./dist/index.cjs"
       }
     },
     "./shared": {
