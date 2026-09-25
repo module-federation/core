@@ -1,10 +1,10 @@
-import type { FederationKernel } from '../core';
+import type { ModuleFederation } from '../index';
 import type { Module } from '../module';
 import type { SnapshotHandler } from '../plugins/snapshot/SnapshotHandler';
 import type { SharedHandler } from '../shared';
 import type { RemoteHandler } from '../remote';
 
-type CoreLifeCycle = FederationKernel['hooks']['lifecycle'];
+type CoreLifeCycle = ModuleFederation['hooks']['lifecycle'];
 type CoreLifeCyclePartial = Partial<{
   [k in keyof CoreLifeCycle]: Parameters<CoreLifeCycle[k]['on']>[0];
 }>;
@@ -46,5 +46,5 @@ export type RuntimePluginHooks = CoreLifeCyclePartial &
 export type ModuleFederationRuntimePlugin = RuntimePluginHooks & {
   name: string;
   version?: string;
-  apply?: (instance: FederationKernel) => void | RuntimePluginHooks;
+  apply?: (instance: ModuleFederation) => void | RuntimePluginHooks;
 };

@@ -1,5 +1,5 @@
 import { loadScriptNode } from '@module-federation/sdk/node';
-import type { FederationKernel } from '../core';
+import type { ModuleFederation } from '../index';
 import { getRemoteEntryExports } from '../global';
 import type { NodePlatform, RemoteInfo, ResourceLoadContext } from '../type';
 import { error } from '../utils/logger';
@@ -11,7 +11,7 @@ export async function loadEntryNode({
   resourceContext,
 }: {
   remoteInfo: RemoteInfo;
-  loaderHook: FederationKernel['loaderHook'];
+  loaderHook: ModuleFederation['loaderHook'];
   resourceContext?: ResourceLoadContext;
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;

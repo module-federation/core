@@ -23,7 +23,7 @@ import {
   RemoteEntryExports,
   CallFrom,
 } from '../type';
-import { FederationKernel } from '../core';
+import type { ModuleFederation } from '../index';
 import {
   PluginSystem,
   AsyncHook,
@@ -54,28 +54,28 @@ export interface LoadRemoteMatch {
   expose: string;
   remote: Remote;
   options: Options;
-  origin: FederationKernel;
+  origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
 }
 
 export class RemoteHandler {
-  host: FederationKernel;
+  host: ModuleFederation;
   idToRemoteMap: Record<string, { name: string; expose: string }>;
 
   hooks = new PluginSystem({
     beforeRegisterRemote: new SyncWaterfallHook<{
       remote: Remote;
-      origin: FederationKernel;
+      origin: ModuleFederation;
     }>('beforeRegisterRemote'),
     registerRemote: new SyncWaterfallHook<{
       remote: Remote;
-      origin: FederationKernel;
+      origin: ModuleFederation;
     }>('registerRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
-      origin: FederationKernel;
+      origin: ModuleFederation;
     }>('beforeRequest'),
     afterMatchRemote: new AsyncHook<
       [
@@ -86,7 +86,7 @@ export class RemoteHandler {
           expose?: string;
           remoteInfo?: RemoteInfo;
           error?: unknown;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -99,7 +99,7 @@ export class RemoteHandler {
           pkgNameOrAlias: string;
           remote: Remote;
           options: ModuleOptions;
-          origin: FederationKernel;
+          origin: ModuleFederation;
           exposeModule: any;
           exposeModuleFactory: any;
           moduleInstance: Module;
@@ -119,7 +119,7 @@ export class RemoteHandler {
           };
           error?: unknown;
           recovered?: boolean;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -132,7 +132,7 @@ export class RemoteHandler {
           remote: Remote;
           remoteSnapshot: ModuleInfo;
           preloadConfig: PreloadRemoteArgs;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -151,7 +151,7 @@ export class RemoteHandler {
             | 'onLoad';
           remote?: RemoteInfo;
           expose?: string;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void | unknown
@@ -161,14 +161,14 @@ export class RemoteHandler {
         {
           preloadOps: Array<PreloadRemoteArgs>;
           options: Options;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ]
     >('beforePreloadRemote'),
     generatePreloadAssets: new AsyncHook<
       [
         {
-          origin: FederationKernel;
+          origin: ModuleFederation;
           preloadOptions: PreloadOptions[number];
           remote: Remote;
           remoteInfo: RemoteInfo;
@@ -183,7 +183,7 @@ export class RemoteHandler {
         {
           preloadOps: Array<PreloadRemoteArgs>;
           options: Options;
-          origin: FederationKernel;
+          origin: ModuleFederation;
           results: PreloadRemoteResult[];
           error?: unknown;
         },
@@ -193,8 +193,8 @@ export class RemoteHandler {
     loadEntry: new AsyncHook<
       [
         {
-          origin: FederationKernel;
-          loaderHook: FederationKernel['loaderHook'];
+          origin: ModuleFederation;
+          loaderHook: ModuleFederation['loaderHook'];
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
           resourceContext?: ResourceLoadContext;
@@ -204,7 +204,7 @@ export class RemoteHandler {
     >(),
   });
 
-  constructor(host: FederationKernel) {
+  constructor(host: ModuleFederation) {
     this.host = host;
     this.idToRemoteMap = {};
   }
@@ -557,7 +557,7 @@ export class RemoteHandler {
       })) as {
         id: string;
         options: Options;
-        origin: FederationKernel;
+        origin: ModuleFederation;
       };
 
       if (!loadRemoteArgs) {

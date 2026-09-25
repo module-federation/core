@@ -40,6 +40,7 @@ import {
   SyncHook,
   SyncWaterfallHook,
 } from './utils/hooks';
+import type { ModuleFederation } from './index';
 import { DEFAULT_SCOPE } from './constant';
 import { DisabledSnapshotHandler } from './plugins/snapshot/disabled';
 import { DisabledSharedHandler } from './shared/disabled';
@@ -57,7 +58,7 @@ export class FederationKernel {
     beforeInit: new SyncWaterfallHook<{
       userOptions: UserOptions;
       options: Options;
-      origin: FederationKernel;
+      origin: ModuleFederation;
       /**
        * @deprecated shareInfo will be removed soon, please use userOptions directly!
        */
@@ -67,7 +68,7 @@ export class FederationKernel {
       [
         {
           options: Options;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -78,7 +79,7 @@ export class FederationKernel {
       initScope: InitScope;
       remoteEntryInitOptions: RemoteEntryInitOptions;
       remoteInfo: RemoteInfo;
-      origin: FederationKernel;
+      origin: ModuleFederation;
     }>('beforeInitContainer'),
     // maybe will change, temporarily for internal use only
     initContainer: new AsyncWaterfallHook<{
@@ -87,7 +88,7 @@ export class FederationKernel {
       remoteEntryInitOptions: RemoteEntryInitOptions;
       remoteInfo: RemoteInfo;
       remoteEntryExports: RemoteEntryExports;
-      origin: FederationKernel;
+      origin: ModuleFederation;
       id?: string;
       remoteSnapshot?: ModuleInfo;
     }>('initContainer'),
@@ -151,7 +152,7 @@ export class FederationKernel {
       [
         {
           getRemoteEntry: typeof getRemoteEntry;
-          origin: FederationKernel;
+          origin: ModuleFederation;
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports | undefined;
           globalLoading: Record<
@@ -166,7 +167,7 @@ export class FederationKernel {
     afterLoadEntry: new AsyncHook<
       [
         {
-          origin: FederationKernel;
+          origin: ModuleFederation;
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports | false | void;
           resourceContext?: ResourceLoadContext;
@@ -183,7 +184,7 @@ export class FederationKernel {
           id?: string;
           remoteInfo: RemoteInfo;
           remoteSnapshot?: ModuleInfo;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -197,7 +198,7 @@ export class FederationKernel {
           remoteEntryExports?: RemoteEntryExports;
           error?: unknown;
           cached?: boolean;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -209,7 +210,7 @@ export class FederationKernel {
           expose: string;
           moduleInfo: RemoteInfo;
           remoteEntryExports: RemoteEntryExports;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -223,7 +224,7 @@ export class FederationKernel {
           remoteEntryExports: RemoteEntryExports;
           moduleFactory?: RemoteModuleFactory;
           error?: unknown;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -235,7 +236,7 @@ export class FederationKernel {
           expose: string;
           moduleInfo: RemoteInfo;
           loadFactory: boolean;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -249,7 +250,7 @@ export class FederationKernel {
           loadFactory: boolean;
           exposeModule?: unknown;
           error?: unknown;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
