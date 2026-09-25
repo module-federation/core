@@ -232,6 +232,7 @@ export async function loadEntryDom({
 }
 
 export const web: Platform = {
+  target: 'web',
   isBrowser: () => true,
   loadScript,
   loadEntry: loadEntryDom,

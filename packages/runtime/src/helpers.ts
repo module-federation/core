@@ -1,5 +1,6 @@
 import {
   helpers,
+  ModuleFederation,
   type IGlobalUtils,
   type IShareUtils,
 } from '@module-federation/runtime-core';
@@ -11,12 +12,20 @@ export type {
 } from '@module-federation/runtime-core';
 
 type RuntimeGlobalUtils = IGlobalUtils & {
-  getGlobalFederationInstance: typeof getGlobalFederationInstance;
+  getGlobalFederationInstance: (
+    name: string,
+    version: string | undefined,
+  ) => ModuleFederation | undefined;
 };
 
 export const global: RuntimeGlobalUtils = {
   ...helpers.global,
-  getGlobalFederationInstance,
+  getGlobalFederationInstance: (name, version) =>
+    getGlobalFederationInstance(
+      name,
+      version,
+      ModuleFederation.runtimeCapabilities,
+    ),
 };
 
 export const share: IShareUtils = helpers.share;
