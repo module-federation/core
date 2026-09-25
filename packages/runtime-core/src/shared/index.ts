@@ -353,22 +353,22 @@ export class SharedHandler {
           });
           return factory;
         } else {
-          let loading: Promise<(() => T) | undefined>;
           const asyncLoadProcess = async () => {
-            try {
-              const factory = await targetShared.get!();
-              addUseIn(targetShared, host.options.name);
-              targetShared.loaded = true;
-              targetShared.lib = factory;
-              return factory as () => T;
-            } catch (e) {
-              if (targetShared.loading === loading) {
-                targetShared.loading = null;
-              }
-              throw e;
-            }
+            const factory = await targetShared.get!();
+            addUseIn(targetShared, host.options.name);
+            targetShared.loaded = true;
+            targetShared.lib = factory;
+            return factory as () => T;
           };
-          loading = Promise.resolve().then(asyncLoadProcess);
+          const loading = asyncLoadProcess();
+          loading.catch(() =>
+            this.forgetFailedLoad(
+              pkgName,
+              registeredShared,
+              useTreesShaking,
+              loading,
+            ),
+          );
           this.setShared({
             pkgName,
             loaded: false,
@@ -404,38 +404,38 @@ export class SharedHandler {
         const _useTreeShaking = shouldUseTreeShaking(
           resolvedShareOptions.treeShaking,
         );
-        let targetShared = directShare(resolvedShareOptions, _useTreeShaking);
+        const targetShared = directShare(resolvedShareOptions, _useTreeShaking);
 
-        let loading: Promise<(() => T) | undefined>;
         const asyncLoadProcess = async () => {
-          try {
-            const factory = await targetShared.get!();
-            targetShared.lib = factory;
-            targetShared.loaded = true;
-            addUseIn(targetShared, host.options.name);
-            const { shared: gShared, useTreesShaking: gUseTreeShaking } =
-              getRegisteredShare(
-                this.shareScopeMap,
-                pkgName,
-                resolvedShareOptions,
-                this.hooks.lifecycle.resolveShare,
-                loadContext,
-              ) || {};
-            if (gShared) {
-              const targetGShared = directShare(gShared, gUseTreeShaking);
-              targetGShared.lib = factory;
-              targetGShared.loaded = true;
-              gShared.from = resolvedShareOptions.from;
-            }
-            return factory as () => T;
-          } catch (e) {
-            if (targetShared.loading === loading) {
-              targetShared.loading = null;
-            }
-            throw e;
+          const factory = await targetShared.get!();
+          targetShared.lib = factory;
+          targetShared.loaded = true;
+          addUseIn(targetShared, host.options.name);
+          const { shared: gShared, useTreesShaking: gUseTreeShaking } =
+            getRegisteredShare(
+              this.shareScopeMap,
+              pkgName,
+              resolvedShareOptions,
+              this.hooks.lifecycle.resolveShare,
+              loadContext,
+            ) || {};
+          if (gShared) {
+            const targetGShared = directShare(gShared, gUseTreeShaking);
+            targetGShared.lib = factory;
+            targetGShared.loaded = true;
+            gShared.from = resolvedShareOptions.from;
           }
+          return factory as () => T;
         };
-        loading = Promise.resolve().then(asyncLoadProcess);
+        const loading = asyncLoadProcess();
+        loading.catch(() =>
+          this.forgetFailedLoad(
+            pkgName,
+            resolvedShareOptions,
+            _useTreeShaking,
+            loading,
+          ),
+        );
         this.setShared({
           pkgName,
           loaded: false,
@@ -447,16 +447,6 @@ export class SharedHandler {
             ? (targetShared as TreeShakingArgs)
             : undefined,
         });
-        const firstScope = Array.isArray(resolvedShareOptions.scope)
-          ? resolvedShareOptions.scope[0]
-          : resolvedShareOptions.scope || 'default';
-        const registeredLoadShared =
-          this.shareScopeMap[firstScope]?.[pkgName]?.[
-            resolvedShareOptions.version
-          ];
-        if (registeredLoadShared) {
-          targetShared = directShare(registeredLoadShared, _useTreeShaking);
-        }
         const factory = await loading;
         this.emitAfterLoadShare({
           lifecycle: 'loadShare',
@@ -801,7 +791,7 @@ export class SharedHandler {
     const { version, scope = 'default', ...shareInfo } = shared;
     const scopes: string[] = Array.isArray(scope) ? scope : [scope];
 
-    const mergeAttrs = (shared: Shared): void => {
+    const mergeAttrs = (shared: Shared) => {
       const merge = <K extends keyof TreeShakingArgs>(
         s: TreeShakingArgs,
         key: K,
@@ -842,6 +832,25 @@ export class SharedHandler {
         registeredShared.from = from;
       }
     });
+  }
+
+  // A rejected load left in the share scope makes every later loadShare fail the same way.
+  // Remove it from each scope, unless a newer load has replaced it.
+  private forgetFailedLoad(
+    pkgName: string,
+    shared: Shared,
+    useTreeShaking: boolean | undefined,
+    loading: Promise<unknown>,
+  ): void {
+    const { version, scope = 'default' } = shared;
+    for (const sc of Array.isArray(scope) ? scope : [scope]) {
+      const registered = this.shareScopeMap[sc]?.[pkgName]?.[version];
+      if (!registered) continue;
+      const target = directShare(registered, useTreeShaking);
+      if (target.loading === loading) {
+        target.loading = null;
+      }
+    }
   }
 
   private _setGlobalShareScopeMap(hostOptions: Options): void {

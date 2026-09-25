@@ -240,6 +240,45 @@ describe('shared lifecycle hooks', () => {
     expect(attempts).toBe(2);
   });
 
+  it('clears a failed load from every scope the resolved shared uses', async () => {
+    const mf = new ModuleFederation({
+      name: 'multi-scope-shared-retry-host',
+      remotes: [],
+      shared: {
+        retryable: {
+          version: '1.0.0',
+          scope: 'custom',
+          get: () => Promise.resolve(() => ({})),
+        },
+      },
+    });
+    const resolver = () => ({
+      version: '2.0.0',
+      scope: ['default', 'other'],
+      strategy: 'version-first' as const,
+      shareConfig: {
+        requiredVersion: '^2.0.0',
+        singleton: false,
+        eager: false,
+        strictVersion: false,
+      },
+      from: 'resolver',
+      deps: [],
+      useIn: [],
+      loading: null,
+      get: () => Promise.reject(new Error('multi-scope failure')),
+    });
+
+    await expect(mf.loadShare('retryable', { resolver })).rejects.toThrow(
+      'multi-scope failure',
+    );
+    expect(
+      ['default', 'other'].map(
+        (scope) => mf.shareScopeMap[scope].retryable['2.0.0'].loading,
+      ),
+    ).toEqual([null, null]);
+  });
+
   it('retries a shared when the provider throws synchronously', async () => {
     let attempts = 0;
     const factory = () => ({ value: 'recovered' });

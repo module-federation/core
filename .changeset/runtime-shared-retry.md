@@ -2,4 +2,4 @@
 "@module-federation/runtime-core": patch
 ---
 
-Allow failed asynchronous shared-module loads to be retried instead of reusing a rejected loading promise.
+`loadShare` retries an async shared module whose previous load failed, instead of returning that load's rejected promise.
