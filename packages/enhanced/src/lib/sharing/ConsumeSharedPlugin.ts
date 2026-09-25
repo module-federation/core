@@ -84,7 +84,7 @@ const PLUGIN_NAME = 'ConsumeSharedPlugin';
 function getPackageVersion(
   fs: InputFileSystem,
   resource: string,
-  packageName: string | undefined,
+  packageName: string,
 ): Promise<string | undefined> {
   return new Promise((resolve) => {
     getDescriptionFile(
@@ -95,7 +95,7 @@ function getPackageVersion(
       (result) =>
         !!result &&
         typeof result.data['version'] === 'string' &&
-        (packageName === undefined || result.data['name'] === packageName),
+        result.data['name'] === packageName,
     );
   });
 }
@@ -327,7 +327,7 @@ class ConsumeSharedPlugin {
 
       const { include, exclude } = config;
       if (include && typeof include.version === 'string') {
-        if (!importResolved) {
+        if (!importResolved || packageName === undefined) {
           return consumedModule;
         }
         const includeVersion = include.version;
@@ -365,7 +365,7 @@ class ConsumeSharedPlugin {
       }
 
       if (exclude && typeof exclude.version === 'string') {
-        if (!importResolved) {
+        if (!importResolved || packageName === undefined) {
           return consumedModule;
         }
         const excludeVersion = exclude.version;

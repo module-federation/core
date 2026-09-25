@@ -2,8 +2,9 @@
 '@module-federation/enhanced': patch
 ---
 
-Apply `include.version` and `exclude.version` on consumed shared modules by the
-version of the package that owns the resolved fallback. Prefix consumes such as
-`'lib/'` matched against `lib/sub`, aliases, relative or absolute requests, and
-nested `package.json` files without a name previously skipped the filter and
-were always consumed.
+Read the version for `include.version` and `exclude.version` on consumed
+shared modules from the `package.json` whose `name` matches the consumed
+package. Prefix consumes such as `'lib/'` matched against `lib/sub`, scoped
+packages, and `node_modules` suffix matches previously skipped the filter
+and were always consumed. Relative, absolute, and aliased consume configs
+are unchanged unless `packageName` is set.
