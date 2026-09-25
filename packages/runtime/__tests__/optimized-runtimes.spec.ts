@@ -61,6 +61,7 @@ describe('independently optimized runtimes', () => {
   for (const [scenario, registeredIds] of [
     ['collision-different-build', ['app@1.0.0', 'app@2.0.0']],
     ['collision-same-build', ['app@1.0.0', 'app@1.0.0']],
+    ['collision-remote-without-snapshot', ['app@1.0.0', 'app@1.0.0']],
   ] as const) {
     it(`skips incompatible instances with ${scenario}`, async () => {
       expect(await runScenario(scenario)).toEqual({
@@ -88,6 +89,14 @@ describe('independently optimized runtimes', () => {
         'Shared dependency loading is disabled by experiments.optimization.disableShared.',
       sharedValue: 'shared-value',
       fullValue: 'remote-value',
+    });
+  });
+
+  it('keeps a Node runtime separate from a same-identity web runtime', async () => {
+    expect(await runScenario('collision-target')).toEqual({
+      separate: true,
+      nodeValue: 'remote-value',
+      nodeModuleValue: 'remote-value',
     });
   });
 

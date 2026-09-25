@@ -1,3 +1,6 @@
+// Bundles independent copies of @module-federation/runtime, each with its own build-time
+// flags, and runs one scenario. Each scenario runs in its own process, so every scenario
+// starts with an empty __FEDERATION__ global.
 import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -6,13 +9,14 @@ import { build } from 'esbuild';
 const runtimeDir = path.resolve(import.meta.dirname, '../..');
 const packageDir = path.resolve(runtimeDir, '..');
 const require = createRequire(path.join(runtimeDir, 'package.json'));
-const scenario = process.argv[2] || 'distinct-last-disabled';
 
-async function bundleRuntime(
-  disableRemote,
+async function bundle({
   buildId,
-  { disableShared = false, disableSnapshot = false } = {},
-) {
+  disableRemote = false,
+  disableShared = false,
+  disableSnapshot = false,
+  target = 'node',
+}) {
   const result = await build({
     entryPoints: [path.join(runtimeDir, 'src/index.ts')],
     bundle: true,
@@ -40,7 +44,7 @@ async function bundleRuntime(
       FEDERATION_OPTIMIZE_NO_SHARED: String(disableShared),
       FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: String(disableSnapshot),
       FEDERATION_BUILD_IDENTIFIER: JSON.stringify(buildId),
-      ENV_TARGET: '"node"',
+      ENV_TARGET: JSON.stringify(target),
     },
   });
   const module = { exports: {} };
@@ -86,127 +90,158 @@ const server = createServer((request, response) => {
   };`);
 });
 
-try {
-  const fullBuildId =
-    scenario === 'compatible-reuse' || scenario === 'collision-same-build'
-      ? 'app@1.0.0'
-      : scenario === 'version-isolated' || scenario.startsWith('collision-')
-        ? 'app@2.0.0'
-        : 'full-app@1.0.0';
-  const disabledBuildId =
-    scenario === 'version-isolated' || scenario.startsWith('collision-')
-      ? 'app@1.0.0'
-      : 'disabled-app@1.0.0';
-  let full;
-  let disabled;
-  if (
-    scenario === 'distinct-last-full' ||
-    scenario === 'collision-full-first'
-  ) {
-    disabled = await bundleRuntime(true, disabledBuildId);
-    full = await bundleRuntime(false, fullBuildId);
-  } else {
-    full = await bundleRuntime(false, fullBuildId);
-    const disableShared = scenario === 'collision-shared';
-    const disableSnapshot = scenario === 'collision-snapshot';
-    disabled = await bundleRuntime(
-      !disableShared && !disableSnapshot,
-      disabledBuildId,
-      { disableShared, disableSnapshot },
-    );
-  }
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const address = server.address();
-  const entry = `http://127.0.0.1:${address.port}/remoteEntry.js`;
-  const options = (name, version, remoteName = 'tiny') => ({
-    name,
-    version,
-    remotes: [{ name: remoteName, entry }],
-  });
-  const value = async (instance, id = 'tiny/value') =>
-    (await instance.loadRemote(id))?.value;
-  const loadError = async (instance) => {
-    try {
-      await instance.loadRemote('tiny/value');
-    } catch (error) {
-      return error.message;
-    }
-    return 'Remote loading unexpectedly succeeded';
-  };
-  let result;
-  if (scenario === 'distinct-last-full') {
+await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+const entry = `http://127.0.0.1:${server.address().port}/remoteEntry.js`;
+
+const options = (name, version, remoteName = 'tiny') => ({
+  name,
+  version,
+  remotes: [{ name: remoteName, entry }],
+});
+const sharedToken = {
+  token: {
+    version: '1.0.0',
+    get: async () => () => ({ value: 'shared-value' }),
+  },
+};
+const value = async (runtime, id = 'tiny/value') =>
+  (await runtime.loadRemote(id))?.value;
+const errorOf = (promise, what) =>
+  promise.then(
+    () => `${what} unexpectedly succeeded`,
+    (error) => error.message,
+  );
+const loadError = (runtime) =>
+  errorOf(
+    Promise.resolve().then(() => runtime.loadRemote('tiny/value')),
+    'Remote loading',
+  );
+const instances = (pick) => globalThis.__FEDERATION__.__INSTANCES__.map(pick);
+
+const scenarios = {
+  async 'distinct-last-disabled'() {
+    const full = await bundle({ buildId: 'full-app@1.0.0' });
+    const disabled = await bundle({
+      buildId: 'disabled-app@1.0.0',
+      disableRemote: true,
+    });
+    const disabledInstance = disabled.createInstance(options('disabled-app'));
+    const created = full.createInstance(options('full-created'));
+    const initialized = full.init(options('full-initialized'));
+    return {
+      disabledError: await loadError(disabledInstance),
+      createdValue: await value(created),
+      initializedValue: await value(initialized),
+      moduleValue: await value(full),
+      instanceNames: instances((instance) => instance.name),
+    };
+  },
+
+  async 'distinct-last-full'() {
+    const disabled = await bundle({
+      buildId: 'disabled-app@1.0.0',
+      disableRemote: true,
+    });
+    const full = await bundle({ buildId: 'full-app@1.0.0' });
     const initialized = full.init(options('full-app'));
     const disabledInstance = disabled.init(options('disabled-app'));
-    result = {
+    return {
       fullValue: await value(initialized),
       fullModuleValue: await value(full),
       disabledError: await loadError(disabledInstance),
       disabledModuleError: await loadError(disabled),
-      instanceNames: globalThis.__FEDERATION__.__INSTANCES__.map(
-        (instance) => instance.name,
-      ),
+      instanceNames: instances((instance) => instance.name),
     };
-  } else if (scenario === 'version-isolated') {
+  },
+
+  async 'version-isolated'() {
+    const full = await bundle({ buildId: 'app@2.0.0' });
+    const disabled = await bundle({
+      buildId: 'app@1.0.0',
+      disableRemote: true,
+    });
     const disabledInstance = disabled.init(options('app', '1.0.0'));
     const initialized = full.init(options('app', '2.0.0'));
-    result = {
+    return {
       disabledError: await loadError(disabledInstance),
       fullValue: await value(initialized),
       fullModuleValue: await value(full),
-      versions: globalThis.__FEDERATION__.__INSTANCES__.map(
-        (instance) => instance.options.version,
-      ),
+      versions: instances((instance) => instance.options.version),
     };
-  } else if (scenario === 'collision-full-first') {
+  },
+
+  async 'compatible-reuse'() {
+    const full = await bundle({ buildId: 'app@1.0.0' });
+    const compatible = await bundle({ buildId: 'app@2.0.0' });
+    const first = full.init({
+      ...options('app', '1.0.0'),
+      shared: sharedToken,
+    });
+    const fresh = full.createInstance(options('app', '1.0.0', 'fresh'));
+    const repeated = compatible.init(options('app', '1.0.0'));
+    const shared = await repeated.loadShare('token');
+    return {
+      firstValue: await value(first),
+      repeatedValue: await value(repeated),
+      moduleValue: await value(full),
+      compatibleModuleValue: await value(compatible),
+      freshValue: await value(fresh, 'fresh/value'),
+      sharedValue: shared?.()?.value,
+      instanceCount: globalThis.__FEDERATION__.__INSTANCES__.length,
+    };
+  },
+
+  'collision-different-build': () =>
+    disabledThenFull({ fullBuildId: 'app@2.0.0' }),
+
+  'collision-same-build': () => disabledThenFull({ fullBuildId: 'app@1.0.0' }),
+
+  // Without snapshot plugins, only the remote capability tells the two builds apart.
+  'collision-remote-without-snapshot': () =>
+    disabledThenFull({ fullBuildId: 'app@1.0.0', disableSnapshot: true }),
+
+  async 'collision-full-first'() {
+    const full = await bundle({ buildId: 'app@2.0.0' });
+    const disabled = await bundle({
+      buildId: 'app@1.0.0',
+      disableRemote: true,
+    });
     const initialized = full.init(options('app', '1.0.0'));
     const disabledInstance = disabled.init(options('app', '1.0.0'));
-    result = {
+    return {
       fullValue: await value(initialized),
       disabledError: await loadError(disabledInstance),
       disabledModuleError: await loadError(disabled),
-      registeredIds: globalThis.__FEDERATION__.__INSTANCES__.map(
-        (instance) => instance.options.id,
-      ),
+      registeredIds: instances((instance) => instance.options.id),
     };
-  } else if (
-    scenario === 'collision-different-build' ||
-    scenario === 'collision-same-build'
-  ) {
-    const disabledInstance = disabled.init(options('app', '1.0.0'));
-    const initialized = full.init(options('app', '1.0.0'));
-    const repeated = full.init(options('app', '1.0.0'));
-    result = {
-      disabledError: await loadError(disabledInstance),
-      fullValue: await value(initialized),
-      fullModuleValue: await value(full),
-      repeatedValue: await value(repeated),
-      registeredIds: globalThis.__FEDERATION__.__INSTANCES__.map(
-        (instance) => instance.options.id,
-      ),
-    };
-  } else if (scenario === 'collision-shared') {
-    const sharedOptions = {
-      ...options('app', '1.0.0'),
-      shared: {
-        token: {
-          version: '1.0.0',
-          get: async () => () => ({ value: 'shared-value' }),
-        },
-      },
-    };
+  },
+
+  async 'collision-shared'() {
+    const full = await bundle({ buildId: 'app@2.0.0' });
+    const disabled = await bundle({
+      buildId: 'app@1.0.0',
+      disableShared: true,
+    });
+    const sharedOptions = { ...options('app', '1.0.0'), shared: sharedToken };
     const disabledInstance = disabled.init(sharedOptions);
     const initialized = full.init(sharedOptions);
-    const disabledError = await disabledInstance.loadShare('token').then(
-      () => 'Shared loading unexpectedly succeeded',
-      (error) => error.message,
-    );
     const shared = await initialized.loadShare('token');
-    result = {
-      disabledError,
+    return {
+      disabledError: await errorOf(
+        disabledInstance.loadShare('token'),
+        'Shared loading',
+      ),
       sharedValue: shared?.()?.value,
       fullValue: await value(initialized),
     };
-  } else if (scenario === 'collision-snapshot') {
+  },
+
+  async 'collision-snapshot'() {
+    const full = await bundle({ buildId: 'app@2.0.0' });
+    const disabled = await bundle({
+      buildId: 'app@1.0.0',
+      disableSnapshot: true,
+    });
     const direct = disabled.init(options('app', '1.0.0'));
     const initialized = full.init({
       name: 'app',
@@ -218,51 +253,46 @@ try {
         },
       ],
     });
-    result = {
+    return {
       directValue: await value(direct),
       manifestValue: await value(initialized, 'manifest-tiny/value'),
       moduleValue: await value(full, 'manifest-tiny/value'),
     };
-  } else if (scenario === 'compatible-reuse') {
-    const compatible = await bundleRuntime(false, 'app@2.0.0');
-    const first = full.init({
-      ...options('app', '1.0.0'),
-      shared: {
-        token: {
-          version: '1.0.0',
-          get: async () => () => ({ value: 'shared-value' }),
-        },
-      },
-    });
-    const fresh = full.createInstance(options('app', '1.0.0', 'fresh'));
-    const repeated = compatible.init(options('app', '1.0.0'));
-    const shared = await repeated.loadShare('token');
-    result = {
-      firstValue: await value(first),
-      repeatedValue: await value(repeated),
-      moduleValue: await value(full),
-      compatibleModuleValue: await value(compatible),
-      freshValue: await value(fresh, 'fresh/value'),
-      sharedValue: shared?.()?.value,
-      instanceCount: globalThis.__FEDERATION__.__INSTANCES__.length,
+  },
+
+  // A web-target runtime loads entries with the DOM loader, which cannot run in Node.
+  async 'collision-target'() {
+    const web = await bundle({ buildId: 'app@1.0.0', target: 'web' });
+    const node = await bundle({ buildId: 'app@1.0.0' });
+    const webInstance = web.init(options('app', '1.0.0'));
+    const nodeInstance = node.init(options('app', '1.0.0'));
+    return {
+      separate: webInstance !== nodeInstance,
+      nodeValue: await value(nodeInstance),
+      nodeModuleValue: await value(node),
     };
-  } else if (scenario === 'distinct-last-disabled') {
-    const disabledInstance = disabled.createInstance(options('disabled-app'));
-    const created = full.createInstance(options('full-created'));
-    const initialized = full.init(options('full-initialized'));
-    result = {
-      disabledError: await loadError(disabledInstance),
-      createdValue: await value(created),
-      initializedValue: await value(initialized),
-      moduleValue: await value(full),
-      instanceNames: globalThis.__FEDERATION__.__INSTANCES__.map(
-        (instance) => instance.name,
-      ),
-    };
-  } else {
-    throw new Error(`Unknown optimized-runtime scenario: ${scenario}`);
-  }
-  console.log(JSON.stringify(result));
+  },
+};
+
+async function disabledThenFull({ fullBuildId, disableSnapshot = false }) {
+  const full = await bundle({ buildId: fullBuildId, disableSnapshot });
+  const disabled = await bundle({ buildId: 'app@1.0.0', disableRemote: true });
+  const disabledInstance = disabled.init(options('app', '1.0.0'));
+  const initialized = full.init(options('app', '1.0.0'));
+  const repeated = full.init(options('app', '1.0.0'));
+  return {
+    disabledError: await loadError(disabledInstance),
+    fullValue: await value(initialized),
+    fullModuleValue: await value(full),
+    repeatedValue: await value(repeated),
+    registeredIds: instances((instance) => instance.options.id),
+  };
+}
+
+const scenario = process.argv[2];
+try {
+  if (!scenarios[scenario]) throw new Error(`Unknown scenario: ${scenario}`);
+  console.log(JSON.stringify(await scenarios[scenario]()));
 } finally {
   await new Promise((resolve) => server.close(resolve));
 }
