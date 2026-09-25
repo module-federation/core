@@ -971,11 +971,6 @@ export default {
           description: 'Enable async startup for the container',
           type: 'boolean',
         },
-        composedRuntime: {
-          description:
-            'Generate a federation bootstrap that imports only the runtime capabilities this build uses. Falls back to the full runtime when the installed runtime cannot be composed.',
-          type: 'boolean',
-        },
         externalRuntime: {
           description:
             "Externalize '@module-federation/runtime-core' and expect global '_FEDERATION_RUNTIME_CORE' at runtime.",

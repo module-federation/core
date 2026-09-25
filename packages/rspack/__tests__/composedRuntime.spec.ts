@@ -66,11 +66,6 @@ async function harness(
   return results;
 }
 
-const composed = (experiments: Record<string, unknown> = {}) => ({
-  composedRuntime: true,
-  ...experiments,
-});
-
 const remote = (
   target: 'node' | 'web',
   extra: Record<string, unknown> = {},
@@ -127,7 +122,7 @@ function serve(root: string): Promise<http.Server> {
   );
 }
 
-describe('experiments.composedRuntime', () => {
+describe('composed runtime', () => {
   it('runs a composed host against a composed remote with one shared singleton', async () => {
     const server = await serve(outRoot);
     try {
@@ -137,13 +132,13 @@ describe('experiments.composedRuntime', () => {
           out: 'run/remote',
           target: 'node',
           singleChunk: true,
-          mf: remote('node', { shared: SHARED, experiments: composed() }),
+          mf: remote('node', { shared: SHARED }),
         },
         {
           out: 'run/host',
           target: 'node',
           mf: host(
-            { shared: SHARED, experiments: composed() },
+            { shared: SHARED },
             `http://127.0.0.1:${port}/run/remote/remoteEntry.js`,
           ),
         },
@@ -172,9 +167,9 @@ describe('experiments.composedRuntime', () => {
         out: 'graph/host',
         target: 'web',
         mf: host({
-          experiments: composed({
+          experiments: {
             optimization: { disableShared: true, disableSnapshot: true },
-          }),
+          },
         }),
       },
     ]);
@@ -207,9 +202,9 @@ describe('experiments.composedRuntime', () => {
         out: 'graph/remote',
         target: 'web',
         mf: remote('web', {
-          experiments: composed({
+          experiments: {
             optimization: { disableRemote: true, disableShared: true },
-          }),
+          },
         }),
       },
     ]);
@@ -241,7 +236,7 @@ describe('experiments.composedRuntime', () => {
         out: 'legacy/host',
         target: 'web',
         noVirtualModules: true,
-        mf: host({ experiments: composed() }),
+        mf: host(),
       },
     ]);
     expect(composedEntries(b)).toEqual([]);
@@ -281,7 +276,7 @@ describe('experiments.composedRuntime', () => {
         {
           out: 'watch/host',
           target: 'web',
-          mf: host({ experiments: composed() }),
+          mf: host(),
         },
       ],
       { watch: true },
@@ -298,18 +293,18 @@ describe('experiments.composedRuntime', () => {
           out: 'multi/host',
           target: 'web',
           mf: host({
-            experiments: composed({
+            experiments: {
               optimization: { disableShared: true, disableSnapshot: true },
-            }),
+            },
           }),
         },
         {
           out: 'multi/remote',
           target: 'web',
           mf: remote('web', {
-            experiments: composed({
+            experiments: {
               optimization: { disableRemote: true, disableShared: true },
-            }),
+            },
           }),
         },
       ],
@@ -337,7 +332,7 @@ describe('experiments.composedRuntime', () => {
           out: `cache/${i}`,
           target: 'web',
           cacheDir,
-          mf: host({ experiments: composed({ optimization: plans[key] }) }),
+          mf: host({ experiments: { optimization: plans[key] } }),
         },
       ]);
       expectComposed(b, 'host');

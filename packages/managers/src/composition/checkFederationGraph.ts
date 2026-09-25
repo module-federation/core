@@ -63,7 +63,7 @@ export function checkFederationGraph(
     for (const request of [...new Set(summary.externalRequests)].sort()) {
       if (familyPackageOf(request)) {
         errors.push(
-          `"${request}" is external, but the composed federation bootstrap imports the runtime. Remove it from externals or disable experiments.composedRuntime.`,
+          `"${request}" is external, but the composed federation bootstrap imports the runtime. Remove it from externals, or set experiments.externalRuntime to externalize the whole runtime.`,
         );
       }
     }

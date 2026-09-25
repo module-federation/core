@@ -19,7 +19,6 @@ module.exports = {
           requiredVersion: '^1.0.0',
         },
       },
-      experiments: { composedRuntime: true },
     }),
   ],
 };
