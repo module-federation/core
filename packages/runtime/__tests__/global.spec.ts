@@ -1,5 +1,11 @@
 import { describe, it, rs, expect } from '@rstest/core';
-import { init, loadRemote, loadShare, loadShareSync } from '../src/index';
+import {
+  ModuleFederation,
+  init,
+  loadRemote,
+  loadShare,
+  loadShareSync,
+} from '../src/index';
 import { getInfoWithoutType } from '@module-federation/runtime-core';
 
 type IsAssignable<Actual, Expected> = [Actual] extends [Expected]
@@ -8,20 +14,24 @@ type IsAssignable<Actual, Expected> = [Actual] extends [Expected]
 type ExpectFalse<T extends false> = T;
 
 describe('global', () => {
-  it('inject mode', () => {
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = rs.fn();
-    const injectArgs = {
-      name: '@federation/inject-mode',
-      remotes: [],
-    };
-    const GM = init(injectArgs);
-    expect(GM.constructor).toBe(
-      globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__,
-    );
-    expect(globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__).toBeCalledWith({
-      ...injectArgs,
-      id: '',
-    });
+  it('keeps the debug constructor available without using it for init', () => {
+    const previous = globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
+    const debugConstructor = rs.fn() as unknown as typeof ModuleFederation;
+    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = debugConstructor;
+
+    try {
+      const instance = init({
+        name: '@federation/debug-constructor',
+        remotes: [],
+      });
+      expect(instance.constructor).toBe(ModuleFederation);
+      expect(debugConstructor).not.toHaveBeenCalled();
+      expect(globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__).toBe(
+        debugConstructor,
+      );
+    } finally {
+      globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = previous;
+    }
   });
 
   it('getInfoWithoutType', () => {
