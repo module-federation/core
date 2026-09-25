@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { FederationKernel } from '../src/kernel';
 import { remote } from '../src/remote/capability';
-import { PLATFORM_UNAVAILABLE_MESSAGE } from '../src/platform/unavailable';
+import { PLATFORM_UNAVAILABLE_MESSAGE } from '../src/core';
 import { ModuleFederation } from '../src';
 import type { ModuleFederationRuntimePlugin, Platform } from '../src/type';
 

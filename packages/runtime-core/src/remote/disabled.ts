@@ -15,7 +15,6 @@ export class DisabledRemoteHandler implements RemoteHandlerContract {
   hooks: RemoteHandlerContract['hooks'] = new PluginSystem(
     {} as RemoteHandlerContract['hooks']['lifecycle'],
   );
-  idToRemoteMap = {};
 
   formatAndRegisterRemote() {
     return [];
