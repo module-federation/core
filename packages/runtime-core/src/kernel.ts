@@ -2,9 +2,15 @@ import { FederationCore } from './core';
 import { disabledRemote } from './remote/disabled';
 import { disabledShared } from './shared/disabled';
 import { unavailablePlatform } from './platform/unavailable';
-import type { Capabilities, UserOptions } from './type';
+import type {
+  Capabilities,
+  RemoteHandlerContract,
+  SharedHandlerContract,
+  SnapshotHandlerContract,
+  UserOptions,
+} from './type';
 
-export class FederationKernel extends FederationCore {
+class Kernel extends FederationCore {
   constructor(userOptions: UserOptions, capabilities: Capabilities = {}) {
     super(userOptions, {
       shared: capabilities.shared || disabledShared,
@@ -14,6 +20,21 @@ export class FederationKernel extends FederationCore {
     });
   }
 }
+
+// Handlers of capabilities the caller left out are disabled, so a kernel
+// promises only the handler contracts.
+export type FederationKernel = Omit<
+  Kernel,
+  'remoteHandler' | 'sharedHandler' | 'snapshotHandler'
+> & {
+  remoteHandler: RemoteHandlerContract;
+  sharedHandler: SharedHandlerContract;
+  snapshotHandler: SnapshotHandlerContract;
+};
+export const FederationKernel = Kernel as new (
+  userOptions: UserOptions,
+  capabilities?: Capabilities,
+) => FederationKernel;
 
 export type { ModuleFederation } from './index';
 export {

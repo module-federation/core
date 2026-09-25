@@ -22,9 +22,6 @@ import {
   SharedLoadContext,
   ResolvedCapabilities,
   Platform,
-  RemoteHandlerContract,
-  SharedHandlerContract,
-  SnapshotHandlerContract,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -41,6 +38,9 @@ import {
   SyncWaterfallHook,
 } from './utils/hooks';
 import type { ModuleFederation } from './index';
+import type { RemoteHandler } from './remote';
+import type { SharedHandler } from './shared';
+import type { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { DEFAULT_SCOPE } from './constant';
 
 type BridgeHookContext = object;
@@ -92,9 +92,9 @@ export class FederationCore {
   version: string = __VERSION__;
   name: string;
   moduleCache: Map<string, Module> = new Map();
-  snapshotHandler: SnapshotHandlerContract;
-  sharedHandler: SharedHandlerContract;
-  remoteHandler: RemoteHandlerContract;
+  snapshotHandler: SnapshotHandler;
+  sharedHandler: SharedHandler;
+  remoteHandler: RemoteHandler;
   platform: Platform;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
@@ -303,9 +303,11 @@ export class FederationCore {
     this.options = defaultOptions;
     this.platform = platform;
     const handlers = remote.create(this);
-    this.snapshotHandler = handlers.snapshot;
-    this.sharedHandler = shared.create(this);
-    this.remoteHandler = handlers.remote;
+    // A disabled capability hands back its contract-only stand-in; the
+    // public type keeps the full handler, as it did before capabilities.
+    this.snapshotHandler = handlers.snapshot as SnapshotHandler;
+    this.sharedHandler = shared.create(this) as SharedHandler;
+    this.remoteHandler = handlers.remote as RemoteHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,
