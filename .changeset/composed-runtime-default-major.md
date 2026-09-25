@@ -6,6 +6,8 @@
 '@module-federation/rspack': major
 '@module-federation/sdk': major
 '@module-federation/node': major
+'@module-federation/managers': major
+'@module-federation/rstest': patch
 ---
 
 The composed federation runtime is the default and only bootstrap. `ModuleFederationPlugin` now always generates a bootstrap that imports only the runtime parts the build uses, and `experiments.composedRuntime` is removed.
