@@ -1,3 +1,4 @@
+import { getRemoteEntry } from '@module-federation/runtime-core/kernel';
 import type { GetSharedFallbackGetterOptions } from './types';
 
 export const getSharedFallbackGetter = ({
@@ -7,8 +8,7 @@ export const getSharedFallbackGetter = ({
   webpackRequire,
   libraryType = 'global',
 }: GetSharedFallbackGetterOptions) => {
-  const { runtime, instance, bundlerRuntime, sharedFallback } =
-    webpackRequire.federation!;
+  const { bundlerRuntime, sharedFallback } = webpackRequire.federation!;
   if (!sharedFallback) {
     return factory;
   }
@@ -26,18 +26,17 @@ export const getSharedFallbackGetter = ({
     );
   }
   return () =>
-    runtime!
-      .getRemoteEntry({
-        origin: webpackRequire.federation.instance!,
-        remoteInfo: {
-          name: fallbackItem[2],
-          entry: `${webpackRequire.p}${fallbackItem[0]}`,
-          type: libraryType,
-          entryGlobalName: fallbackItem[2],
-          // current not used
-          shareScope: 'default',
-        },
-      })
+    getRemoteEntry({
+      origin: webpackRequire.federation.instance!,
+      remoteInfo: {
+        name: fallbackItem[2],
+        entry: `${webpackRequire.p}${fallbackItem[0]}`,
+        type: libraryType,
+        entryGlobalName: fallbackItem[2],
+        // current not used
+        shareScope: 'default',
+      },
+    })
       // @ts-ignore
       .then((shareEntry) => {
         if (!shareEntry) {

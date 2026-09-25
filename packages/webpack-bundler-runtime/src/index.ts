@@ -1,13 +1,10 @@
 import * as runtime from '@module-federation/runtime';
-import { Federation } from './types';
-import { remotes } from './remotes';
-import { consumes } from './consumes';
-import { initializeSharing } from './initializeSharing';
-import { installInitialConsumes } from './installInitialConsumes';
+import type { Adapter, Federation, WebpackRequire } from './types';
 import { attachShareScopeMap } from './attachShareScopeMap';
-import { initContainerEntry } from './initContainerEntry';
-import { init } from './init';
-import { getSharedFallbackGetter } from './getSharedFallbackGetter';
+import { remotes } from './adapters/remotes';
+import { consumes } from './adapters/consumes';
+import { shareScope } from './adapters/share-scope';
+import { container } from './adapters/container';
 
 declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
@@ -26,16 +23,27 @@ const USE_SHARED =
 const USE_EXPOSES =
   typeof FEDERATION_HAS_EXPOSES === 'boolean' ? FEDERATION_HAS_EXPOSES : true;
 
-const bundlerRuntime = {
-  remotes: USE_REMOTE ? remotes : undefined,
-  consumes: USE_SHARED ? consumes : undefined,
-  I: USE_SHARED ? initializeSharing : undefined,
-  S: {},
-  installInitialConsumes: USE_SHARED ? installInitialConsumes : undefined,
-  initContainerEntry: USE_EXPOSES ? initContainerEntry : undefined,
-  init,
-  getSharedFallbackGetter: USE_SHARED ? getSharedFallbackGetter : undefined,
-} as NonNullable<Federation['bundlerRuntime']>;
+const adapters: Adapter[] = [];
+if (USE_REMOTE) adapters.push(remotes);
+if (USE_SHARED) adapters.push(consumes, shareScope);
+if (USE_EXPOSES) adapters.push(container);
+
+const bundlerRuntime = Object.assign(
+  {
+    S: {},
+    init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
+      const { initOptions } = webpackRequire.federation;
+      if (!initOptions) {
+        throw new Error('initOptions is required!');
+      }
+      for (const adapter of adapters) {
+        adapter.beforeInit?.(webpackRequire, initOptions);
+      }
+      return webpackRequire.federation.runtime!.init(initOptions);
+    },
+  },
+  ...adapters.map((adapter) => adapter.bundlerRuntime),
+) as NonNullable<Federation['bundlerRuntime']>;
 
 const federation: Federation = {
   runtime,
@@ -48,9 +56,10 @@ const federation: Federation = {
 
 // Keep CJS interop stable for consumers that iterate required keys directly.
 export { runtime, attachShareScopeMap };
-export const instance = federation.instance;
-export const initOptions = federation.initOptions;
+export const instance: Federation['instance'] = federation.instance;
+export const initOptions: Federation['initOptions'] = federation.initOptions;
 export { bundlerRuntime };
-export const bundlerRuntimeOptions = federation.bundlerRuntimeOptions;
+export const bundlerRuntimeOptions: Federation['bundlerRuntimeOptions'] =
+  federation.bundlerRuntimeOptions;
 
 export default federation;
