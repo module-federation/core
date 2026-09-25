@@ -95,7 +95,12 @@
       "import": "./dist/size-limited-cache.es.js",
       "require": "./dist/size-limited-cache.cjs.js"
     },
-    "./*": "./*"
+    "./*": "./*",
+    "./ssr": {
+      "types": "./dist/ssr.d.ts",
+      "import": "./dist/ssr.es.js",
+      "require": "./dist/ssr.cjs.js"
+    }
   },
   "typesVersions": {
     "*": {
@@ -143,6 +148,9 @@
       ],
       "size-limited-cache": [
         "./dist/size-limited-cache.d.ts"
+      ],
+      "ssr": [
+        "./dist/ssr.d.ts"
       ]
     }
   },

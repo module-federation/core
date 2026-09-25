@@ -9,6 +9,7 @@ import {
   addDataFetchExposes,
 } from '@module-federation/rsbuild-plugin/utils';
 import logger from '../logger';
+import { configureBridgeApplications } from './bridgeApplications';
 import { isDev } from './utils';
 
 import type { InternalModernPluginOptions } from '../types';
@@ -410,6 +411,7 @@ export const moduleFederationConfigPlugin = (
       userConfig.ssrConfig || JSON.parse(JSON.stringify(mfConfig));
     userConfig.ssrConfig = ssrConfig;
     userConfig.csrConfig = csrConfig;
+    configureBridgeApplications(api, userConfig);
     const enableSSR = Boolean(
       userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr),
     );

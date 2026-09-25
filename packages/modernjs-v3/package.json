@@ -85,6 +85,16 @@
     "./server": {
       "types": "./dist/types/server/index.d.ts",
       "default": "./dist/cjs/server/index.js"
+    },
+    "./bridge/application": {
+      "types": "./dist/types/bridge-stream/application.d.ts",
+      "import": "./dist/esm/bridge-stream/application.mjs",
+      "require": "./dist/cjs/bridge-stream/application.js"
+    },
+    "./ssr-bridge-plugin": {
+      "types": "./dist/types/ssr-runtime/bridgeStreamPlugin.d.ts",
+      "import": "./dist/esm/ssr-runtime/bridgeStreamPlugin.mjs",
+      "require": "./dist/cjs/ssr-runtime/bridgeStreamPlugin.js"
     }
   },
   "typesVersions": {
@@ -130,6 +140,12 @@
       ],
       "server": [
         "./dist/types/server/index.d.ts"
+      ],
+      "bridge/application": [
+        "./dist/types/bridge-stream/application.d.ts"
+      ],
+      "ssr-bridge-plugin": [
+        "./dist/types/ssr-runtime/bridgeStreamPlugin.d.ts"
       ]
     }
   },
@@ -149,7 +165,9 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/cli": "workspace:*",
     "@swc/helpers": "0.5.17",
-    "jiti": "2.4.2"
+    "jiti": "2.4.2",
+    "htmlparser2": "10.0.0",
+    "acorn": "8.15.0"
   },
   "devDependencies": {
     "@rsbuild/plugin-react": "1.4.5",
@@ -166,7 +184,8 @@
     "@types/react-dom": "^18.3.0",
     "react": "~18.3.1",
     "react-dom": "~18.3.1",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "jsdom": "20.0.3"
   },
   "peerDependencies": {
     "react": ">=17",
