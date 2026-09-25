@@ -45,7 +45,16 @@ export const reloadPage = () => {
 
 export const validateCustom = (schema: string) => schema?.endsWith('.json');
 
+export const REACT_19_DEV_VERSION = '19.2.4';
+
 export const getUnpkgUrl = (pkg: string, version: string) => {
+  if (
+    /^19\./.test(version) &&
+    ['react', 'react-dom', 'react-dom/client'].includes(pkg)
+  ) {
+    const name = pkg === 'react' ? 'react' : 'react-dom';
+    return `https://unpkg.com/umd-react@${REACT_19_DEV_VERSION}/dist/${name}.development.js`;
+  }
   if (pkg === 'react') {
     return `https://unpkg.com/react@${version}/umd/react.development.js`;
   } else if (pkg === 'react-dom') {

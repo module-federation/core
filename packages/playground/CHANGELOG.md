@@ -1,5 +1,14 @@
 # @module-federation/playground
 
+## 0.1.1
+
+### Patch Changes
+
+- 7ecde91: Defer loading the TypeScript compiler until the sandbox is run and allow the
+  federated build public path to be overridden for pinned or self-hosted assets.
+  - @module-federation/bridge-react@2.9.1
+  - @module-federation/runtime@2.9.1
+
 ## 0.1.0
 
 ### Minor Changes
