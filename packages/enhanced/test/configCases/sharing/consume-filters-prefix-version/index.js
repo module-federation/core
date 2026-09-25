@@ -27,6 +27,12 @@ it('consumes a relative request with include.version because it has no package n
   expect(consumedShareKeys()).toContain('./src/local');
 });
 
+it('does not consume a relative request whose exclude.fallbackVersion matches exclude.version', async () => {
+  const mod = await import('./src/local2');
+  expect(mod.default).toBe('local2');
+  expect(consumedShareKeys()).not.toContain('./src/local2');
+});
+
 it('does not consume an aliased request whose packageName version fails include.version', async () => {
   const mod = await import('my-lib');
   expect(mod.default).toBe('lib');

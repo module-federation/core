@@ -25,6 +25,9 @@ module.exports = {
         './src/local': {
           include: { version: '^2.0.0' },
         },
+        './src/local2': {
+          exclude: { version: '^1.0.0', fallbackVersion: '1.0.0' },
+        },
         'my-lib': {
           packageName: 'lib',
           include: { version: '^2.0.0' },

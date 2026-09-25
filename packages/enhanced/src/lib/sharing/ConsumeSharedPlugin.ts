@@ -365,7 +365,7 @@ class ConsumeSharedPlugin {
       }
 
       if (exclude && typeof exclude.version === 'string') {
-        if (!importResolved || packageName === undefined) {
+        if (!importResolved) {
           return consumedModule;
         }
         const excludeVersion = exclude.version;
@@ -376,6 +376,9 @@ class ConsumeSharedPlugin {
           return satisfy(parseRange(excludeVersion), exclude.fallbackVersion)
             ? undefined
             : consumedModule;
+        }
+        if (packageName === undefined) {
+          return consumedModule;
         }
         return getPackageVersion(
           compilation.inputFileSystem,
