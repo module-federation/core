@@ -20,7 +20,7 @@ type WebpackRequire = {
     chunkId: string,
   ) => void;
   federation: {
-    runtime: { loadScriptNode: LoadScriptNode };
+    runtime?: { loadScriptNode?: LoadScriptNode };
     instance: ModuleFederation;
     chunkMatcher?: (chunkId: string) => boolean;
     rootOutputDir?: string;
@@ -373,6 +373,9 @@ export const deleteChunk = (
 };
 
 // Hoisted function to set up webpack script loader
+const NO_NODE_LOADER_MESSAGE =
+  'No Node script loader: the federation instance needs a node or universal platform to load remote entries in Node.';
+
 export const setupScriptLoader = (): void => {
   __webpack_require__.l = (
     url: string,
@@ -389,7 +392,9 @@ export const setupScriptLoader = (): void => {
     const info = { attrs: { globalName: key } };
     (platform?.loadScriptNode
       ? platform.loadScriptNode(url, info)
-      : runtime.loadScriptNode(url, info)
+      : runtime?.loadScriptNode
+        ? runtime.loadScriptNode(url, info)
+        : Promise.reject(new Error(NO_NODE_LOADER_MESSAGE))
     )
       .then((res) => {
         const enhancedRemote =
