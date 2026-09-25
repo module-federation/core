@@ -312,3 +312,7 @@ export const setPreloadedAsset = (url: string): void => {
     }
   }
 };
+
+export function getGlobalShareScope(): GlobalShareScopeMap {
+  return Global.__FEDERATION__.__SHARE__;
+}
