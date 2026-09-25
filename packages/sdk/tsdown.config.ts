@@ -13,6 +13,8 @@ export default defineConfig([
       packageDir,
       entry: {
         index: 'src/index.ts',
+        core: 'src/core.ts',
+        node: 'src/node.ts',
         'normalize-webpack-path': 'src/normalize-webpack-path.ts',
       },
       external: ['@module-federation/*', 'isomorphic-rslog', 'webpack'],

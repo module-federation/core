@@ -4,7 +4,7 @@ import type {
   Module,
   RemoteEntryType,
   TreeShakingStatus,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import { ModuleFederationRuntimePlugin } from './plugin';
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
