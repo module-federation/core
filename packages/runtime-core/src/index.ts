@@ -1,8 +1,8 @@
 import helpersDefault, { type IGlobalUtils, type IShareUtils } from './helpers';
 import { Module } from './module';
-import { FederationCore, runtimeCapabilitiesOf } from './core';
+import { FederationCore } from './core';
 
-export { FederationKernel, runtimeCapabilitiesOf } from './core';
+export { FederationKernel } from './core';
 import { shared } from './shared';
 import { remote } from './remote';
 import { snapshot } from './plugins/snapshot';
@@ -18,8 +18,6 @@ const fullCapabilities: ResolvedCapabilities = {
 };
 
 export class ModuleFederation extends FederationCore {
-  static readonly runtimeCapabilities = runtimeCapabilitiesOf(fullCapabilities);
-
   constructor(userOptions: UserOptions) {
     super(userOptions, fullCapabilities);
   }
