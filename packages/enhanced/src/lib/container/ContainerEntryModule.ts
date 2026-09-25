@@ -5,9 +5,6 @@
 
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { infrastructureLogger as logger } from '@module-federation/sdk';
-import { buildDescMap, BUILD_001 } from '@module-federation/error-codes';
-import { logAndReport } from '@module-federation/error-codes/node';
 import type { Compilation, Dependency } from 'webpack';
 import type {
   InputFileSystem,
@@ -218,29 +215,9 @@ class ContainerEntryModule extends Module {
 
       let str;
       if (modules.some((m) => !m.module)) {
-        logAndReport(
-          BUILD_001,
-          buildDescMap,
-          {
-            exposeModules: modules.filter((m) => !m.module),
-            FEDERATION_WEBPACK_PATH: process.env['FEDERATION_WEBPACK_PATH'],
-          },
-          logger.error.bind(logger),
-          undefined,
-          {
-            bundler: { name: 'webpack' },
-            mfConfig: {
-              name: this._name,
-              exposes: Object.fromEntries(
-                this._exposes.map(([key, opts]) => [
-                  key,
-                  opts.import[opts.import.length - 1],
-                ]),
-              ),
-            },
-          },
-        );
-        process.exit(1);
+        str = runtimeTemplate.throwMissingModuleErrorBlock({
+          request: modules.map((m) => m.request).join(', '),
+        });
       } else {
         str = `return ${runtimeTemplate.blockPromise({
           block,
