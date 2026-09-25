@@ -289,6 +289,7 @@ export class FederationCore {
     afterBridgeRouteSync: new SyncHook<[BridgeHookResult], void>(),
   });
   moduleInfo?: GlobalModuleInfo[string];
+  readonly runtimeCapabilities: string;
 
   constructor(
     userOptions: UserOptions,
@@ -309,6 +310,12 @@ export class FederationCore {
     this.name = userOptions.name;
     this.options = defaultOptions;
     this.platform = platform;
+    this.runtimeCapabilities = runtimeCapabilitiesOf({
+      shared,
+      remote,
+      snapshot,
+      platform,
+    });
     const handlers = remote.create(this);
     // A disabled capability hands back its contract-only stand-in; the
     // public type keeps the full handler, as it did before capabilities.
@@ -466,10 +473,28 @@ const unavailable = () =>
   Promise.reject(new Error(PLATFORM_UNAVAILABLE_MESSAGE));
 
 export const unavailablePlatform: Platform = {
+  target: 'none',
   isBrowser: () => isBrowserEnvValue,
   loadScript: unavailable,
   loadEntry: unavailable,
 };
+
+export function runtimeCapabilitiesOf({
+  shared,
+  remote,
+  snapshot,
+  platform = unavailablePlatform,
+}: Capabilities | ResolvedCapabilities): string {
+  const hasRemote = !!remote && remote !== disabledRemote;
+  return [
+    hasRemote && 'remote',
+    !!shared && shared !== disabledShared && 'shared',
+    hasRemote && snapshot && 'snapshot',
+    platform.target,
+  ]
+    .filter(Boolean)
+    .join(',');
+}
 
 class Kernel extends FederationCore {
   constructor(userOptions: UserOptions, capabilities: Capabilities = {}) {

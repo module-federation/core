@@ -8,7 +8,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import { infrastructureLogger as logger } from '@module-federation/sdk';
 import { buildDescMap, BUILD_001 } from '@module-federation/error-codes';
 import { logAndReport } from '@module-federation/error-codes/node';
-import type { Compilation, Dependency } from 'webpack';
+import type { Compilation, Dependency, Module as WebpackModule } from 'webpack';
 import type {
   InputFileSystem,
   LibIdentOptions,
@@ -205,22 +205,34 @@ class ContainerEntryModule extends Module {
     for (const block of this.blocks) {
       const { dependencies } = block;
 
-      const modules = dependencies.map((dependency: Dependency) => {
+      const modules: {
+        name: string;
+        module: WebpackModule | null;
+        request: string;
+      }[] = [];
+      let missingModules: typeof modules | undefined;
+      let requests = '';
+      for (const dependency of dependencies) {
         const dep = dependency as unknown as ContainerExposedDependency;
-        return {
+        const exposedModule = {
           name: dep.exposedName,
           module: moduleGraph.getModule(dep),
           request: dep.userRequest,
         };
-      });
+        modules.push(exposedModule);
+        if (!exposedModule.module) {
+          (missingModules ??= []).push(exposedModule);
+        }
+        requests += `${modules.length > 1 ? ', ' : ''}${dep.userRequest}`;
+      }
 
       let str;
-      if (modules.some((m) => !m.module)) {
+      if (missingModules) {
         logAndReport(
           BUILD_001,
           buildDescMap,
           {
-            exposeModules: modules.filter((m) => !m.module),
+            exposeModules: missingModules,
             FEDERATION_WEBPACK_PATH: process.env['FEDERATION_WEBPACK_PATH'],
           },
           logger.error.bind(logger),
@@ -238,7 +250,9 @@ class ContainerEntryModule extends Module {
             },
           },
         );
-        process.exit(1);
+        str = runtimeTemplate.throwMissingModuleErrorBlock({
+          request: requests,
+        });
       } else {
         str = `return ${runtimeTemplate.blockPromise({
           block,
