@@ -73,6 +73,10 @@ const USE_SHARED =
     : true;
 
 export class ModuleFederation {
+  /** @internal Stable feature bits across bundles: remote=1, shared=2, snapshot=4. */
+  static readonly runtimeCapabilities =
+    (USE_REMOTE ? 1 : 0) | (USE_SHARED ? 2 : 0) | (USE_SNAPSHOT ? 4 : 0);
+
   options: Options;
   hooks = new PluginSystem({
     beforeInit: new SyncWaterfallHook<{
