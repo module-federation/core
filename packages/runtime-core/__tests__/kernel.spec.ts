@@ -145,7 +145,7 @@ describe('root ModuleFederation', () => {
     expect(instance.loadShareSync<{ root: boolean }>('react')()).toEqual({
       root: true,
     });
-    expect(instance.options.id).toBeFalsy();
+    expect(instance.options.id).toBe('');
     expect(Module).toBe(RemoteModule);
   });
 });

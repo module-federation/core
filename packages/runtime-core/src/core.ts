@@ -296,6 +296,7 @@ export class FederationKernel {
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
+      id: '',
       name: userOptions.name,
       plugins,
       remotes: [],
