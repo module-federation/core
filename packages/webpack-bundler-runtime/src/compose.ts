@@ -3,6 +3,7 @@ import type {
   Capabilities,
   FederationKernel,
   NodePlatform,
+  UserOptions,
 } from '@module-federation/runtime-core/kernel';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import type {
@@ -21,7 +22,10 @@ export type ComposedFederation = Omit<
     S: BundlerRuntime['S'];
     init(options: { webpackRequire: WebpackRequire }): FederationKernel;
   };
-  runtime: { loadScriptNode: NodePlatform['loadScriptNode'] };
+  runtime: {
+    init(options: UserOptions): FederationKernel;
+    loadScriptNode: NodePlatform['loadScriptNode'];
+  };
 };
 
 export function createFederation({
@@ -34,6 +38,11 @@ export function createFederation({
   adapters: Adapter[];
 }): ComposedFederation {
   let instance: FederationKernel | undefined;
+  const init = (options: UserOptions) =>
+    (instance = composeInit(
+      { ...options, id: options.id || buildId },
+      capabilities,
+    ));
   const federation: ComposedFederation = {
     instance: undefined,
     initOptions: undefined,
@@ -47,15 +56,13 @@ export function createFederation({
         for (const adapter of adapters) {
           adapter.beforeInit?.(webpackRequire, initOptions);
         }
-        return (instance = composeInit(
-          { ...initOptions, id: initOptions.id || buildId },
-          capabilities,
-        ));
+        return init(initOptions);
       },
     },
     attachShareScopeMap,
     bundlerRuntimeOptions: {},
     runtime: {
+      init,
       loadScriptNode(url, info) {
         const platform = instance?.platform as
           | Partial<NodePlatform>
