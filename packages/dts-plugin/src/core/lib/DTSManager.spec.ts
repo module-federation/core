@@ -146,6 +146,9 @@ describe('DTSManager', () => {
                                   name: 'typeScriptCompiler.d.ts',
                                 },
                                 {
+                                  name: 'typeScriptDiagnostics.d.ts',
+                                },
+                                {
                                   name: 'typeScriptResolver.d.ts',
                                 },
                                 {
@@ -271,6 +274,9 @@ describe('DTSManager', () => {
                                     },
                                     {
                                       name: 'typeScriptCompiler.d.ts',
+                                    },
+                                    {
+                                      name: 'typeScriptDiagnostics.d.ts',
                                     },
                                     {
                                       name: 'typeScriptResolver.d.ts',
@@ -511,6 +517,9 @@ describe('DTSManager', () => {
                                   name: 'typeScriptCompiler.d.ts',
                                 },
                                 {
+                                  name: 'typeScriptDiagnostics.d.ts',
+                                },
+                                {
                                   name: 'typeScriptResolver.d.ts',
                                 },
                                 {
@@ -659,6 +668,9 @@ describe('DTSManager', () => {
                                     },
                                     {
                                       name: 'typeScriptCompiler.d.ts',
+                                    },
+                                    {
+                                      name: 'typeScriptDiagnostics.d.ts',
                                     },
                                     {
                                       name: 'typeScriptResolver.d.ts',

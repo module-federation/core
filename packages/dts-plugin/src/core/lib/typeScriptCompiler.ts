@@ -22,6 +22,10 @@ import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { TsConfigJson } from '../interfaces/TsConfigJson';
 import { logger } from '../../server';
 import { getTypeScriptPackageInfo } from './typeScriptResolver';
+import {
+  formatCompilerOutput,
+  preserveTypeScriptDiagnostic,
+} from './typeScriptDiagnostics';
 
 const STARTS_WITH_SLASH = /^\//;
 
@@ -230,16 +234,6 @@ const splitCommandArgs = (value: string): string[] => {
   return args;
 };
 
-const formatCommandForDisplay = (executable: string, args: string[]) => {
-  const formatArg = (arg: string) => {
-    if (/[\s'"]/.test(arg)) {
-      return JSON.stringify(arg);
-    }
-    return arg;
-  };
-  return [executable, ...args].map(formatArg).join(' ');
-};
-
 const getTypeScriptContext = (remoteOptions: Required<RemoteOptions>) => {
   const dtsOptions = remoteOptions.moduleFederationConfig.dts;
   return typeof dtsOptions !== 'boolean' && dtsOptions?.cwd
@@ -268,7 +262,6 @@ const resolveCompilerCommand = (
     return {
       executable: process.execPath,
       args,
-      displayCommand: formatCommandForDisplay(process.execPath, args),
       shell: false,
     };
   }
@@ -278,7 +271,6 @@ const resolveCompilerCommand = (
   return {
     executable,
     args,
-    displayCommand: formatCommandForDisplay(executable, args),
     shell: process.platform === 'win32',
   };
 };
@@ -301,6 +293,7 @@ export const compileTs = async (
       : undefined,
   );
   logger.debug(`tempTsConfigJsonPath: ${tempTsConfigJsonPath}`);
+  let retainTemporaryConfig = false;
   try {
     const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
     const thirdPartyExtractor = new ThirdPartyExtractor({
@@ -329,14 +322,32 @@ export const compileTs = async (
           // noop
         }
       }
+      const typeScriptPackageInfo = getTypeScriptPackageInfo(
+        getTypeScriptContext(remoteOptions),
+      );
+      const compilerOutput = formatCompilerOutput(err);
+      const diagnostics = preserveTypeScriptDiagnostic({
+        command: compilerCommand,
+        compilerOutput,
+        context: remoteOptions.context,
+        stage: 'generate-types',
+        tempTsConfigPath: tempTsConfigJsonPath,
+        typeScriptVersion: typeScriptPackageInfo.version,
+      });
+      retainTemporaryConfig = !diagnostics.copied;
       logAndReport(
         TYPE_001,
         typeDescMap,
-        { cmd: compilerCommand.displayCommand },
+        {
+          cmd: diagnostics.command,
+          diagnosticConfig: diagnostics.diagnosticConfigPath,
+          diagnosticLog: diagnostics.diagnosticLogPath,
+          typeScriptVersion: typeScriptPackageInfo.version,
+        },
         (msg) => {
           throw new Error(msg);
         },
-        undefined,
+        compilerOutput,
       );
     }
 
@@ -375,11 +386,11 @@ export const compileTs = async (
     if (remoteOptions.extractThirdParty) {
       await thirdPartyExtractor.copyDts();
     }
-
-    if (remoteOptions.deleteTsConfig) {
-      await rm(tempTsConfigJsonPath);
-    }
   } catch (err) {
     throw err;
+  } finally {
+    if (remoteOptions.deleteTsConfig && !retainTemporaryConfig) {
+      await rm(tempTsConfigJsonPath, { force: true });
+    }
   }
 };
