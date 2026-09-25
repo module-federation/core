@@ -46,6 +46,8 @@ interface BuildSpec {
   noVirtualModules?: boolean;
   buildVersion?: string;
   alias?: Record<string, string>;
+  externalsPattern?: string;
+  referenceRemotes?: Record<string, string>;
 }
 
 let outRoot: string;
@@ -56,7 +58,12 @@ afterAll(() => fs.rmSync(outRoot, { recursive: true, force: true }));
 
 async function harness(
   builds: BuildSpec[],
-  mode: { multi?: boolean; watch?: boolean; rspackCore?: string } = {},
+  mode: {
+    multi?: boolean;
+    watch?: boolean;
+    rspackCore?: string;
+    allowErrors?: boolean;
+  } = {},
 ): Promise<Build[]> {
   const { stdout } = await promisify(execFile)(
     process.execPath,
@@ -65,7 +72,7 @@ async function harness(
   );
   const line = stdout.split('\n').find((l) => l.startsWith('RESULT '))!;
   const results: Build[] = JSON.parse(line.slice('RESULT '.length));
-  for (const r of results) expect(r.errors).toEqual([]);
+  if (!mode.allowErrors) for (const r of results) expect(r.errors).toEqual([]);
   return results;
 }
 
@@ -267,6 +274,44 @@ describe('experiments.composedRuntime', () => {
       remotes: false,
       consumes: false,
     });
+  });
+
+  it('fails a composed build whose runtime package is externalized by a plugin', async () => {
+    const [b] = await harness(
+      [
+        {
+          out: 'check/externals',
+          target: 'node',
+          mf: host({ shared: SHARED, experiments: composed() }),
+          externalsPattern: '^@module-federation/runtime-core',
+        },
+      ],
+      { allowErrors: true },
+    );
+    expect(b.errors).toEqual([
+      expect.stringContaining(
+        '"@module-federation/runtime-core/kernel" is external, but the composed federation bootstrap imports the runtime.',
+      ),
+    ]);
+  });
+
+  it('fails a composed build with a remote module but no remotes adapter', async () => {
+    const [b] = await harness(
+      [
+        {
+          out: 'check/remotes',
+          target: 'node',
+          mf: { name: 'host', shared: SHARED, experiments: composed() },
+          referenceRemotes: { remoteApp: 'remoteApp@http://localhost/x.js' },
+        },
+      ],
+      { allowErrors: true },
+    );
+    expect(b.errors).toEqual([
+      expect.stringContaining(
+        'A remote-module is in the graph but the federation bootstrap has no "remotes" adapter.',
+      ),
+    ]);
   });
 
   it('keeps the full runtime and warns when @rspack/core has no VirtualModulesPlugin', async () => {

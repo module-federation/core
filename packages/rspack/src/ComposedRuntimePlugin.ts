@@ -1,13 +1,16 @@
 import { createHash } from 'node:crypto';
 import path from 'node:path';
-import type { Compiler } from '@rspack/core';
+import type { Compilation, Compiler, Module } from '@rspack/core';
 import {
+  checkFederationGraph,
   planComposition,
   renderComposition,
   resolveImports,
   resolveRuntimeFamily,
   optionsParticipant,
   selectMode,
+  type AdapterName,
+  type GraphModule,
   type Participant,
   type RuntimeFamily,
 } from '@module-federation/managers';
@@ -21,6 +24,7 @@ type Options = moduleFederationPlugin.ModuleFederationPluginOptions;
 interface Composition {
   family: RuntimeFamily;
   bootstrapPath?: string;
+  adapters?: AdapterName[];
   renderError?: unknown;
 }
 
@@ -40,6 +44,7 @@ export class ComposedRuntimePlugin {
     let composition: Composition | undefined;
     let deciding: Promise<string | undefined> | undefined;
     let legacyReason: string | undefined;
+    let composed = false;
 
     // VirtualModulesPlugin reads its modules in afterEnvironment.
     compiler.hooks.environment.tap(PLUGIN_NAME, () => {
@@ -53,16 +58,22 @@ export class ComposedRuntimePlugin {
         return reason;
       });
       legacyReason = await deciding;
+      composed = legacyReason === undefined;
     };
     compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, decide);
     compiler.hooks.watchRun.tapPromise(PLUGIN_NAME, decide);
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-      if (legacyReason === undefined) return;
-      compilation.warnings.push(
-        new compiler.webpack.WebpackError(
-          `experiments.composedRuntime is set, but this build uses the full federation runtime because ${legacyReason}.`,
-        ),
-      );
+      if (legacyReason !== undefined) {
+        compilation.warnings.push(
+          new compiler.webpack.WebpackError(
+            `experiments.composedRuntime is set, but this build uses the full federation runtime because ${legacyReason}.`,
+          ),
+        );
+      } else if (composed) {
+        compilation.hooks.finishModules.tap(PLUGIN_NAME, (modules) =>
+          checkGraph(compilation, modules, composition!),
+        );
+      }
     });
   }
 
@@ -96,7 +107,7 @@ export class ComposedRuntimePlugin {
       `node_modules/.federation/rspack/${name}.${hash}.mjs`,
     );
     new VirtualModulesPlugin({ [file]: source }).apply(compiler);
-    return { family, bootstrapPath: file };
+    return { family, bootstrapPath: file, adapters: plan.adapters };
   }
 
   private async _decide(
@@ -136,6 +147,39 @@ export class ComposedRuntimePlugin {
     if (ENV_TARGET !== undefined)
       new DefinePlugin({ ENV_TARGET }).apply(compiler);
   }
+}
+
+function checkGraph(
+  compilation: Compilation,
+  modules: Iterable<Module>,
+  { family, bootstrapPath, adapters }: Composition,
+) {
+  const { ExternalModule, WebpackError } = compilation.compiler.webpack;
+  const bootstrapDir = path.dirname(bootstrapPath!) + path.sep;
+  const summary: GraphModule[] = [];
+  const externalUserRequests: string[] = [];
+  let bootstraps = 0;
+  for (const module of modules) {
+    if (module instanceof ExternalModule) {
+      externalUserRequests.push(module.userRequest);
+    } else if (module.identifier().startsWith('container entry ')) {
+      summary.push({ type: 'container-entry' });
+    } else {
+      const { resource } = module as Module & { resource?: string };
+      if (resource?.startsWith(bootstrapDir)) bootstraps++;
+      summary.push({ type: module.type, resource });
+    }
+  }
+  const findings = checkFederationGraph({
+    modules: summary,
+    externalUserRequests,
+    family,
+    composed: { adapters: adapters!, bootstraps },
+  });
+  for (const message of findings.errors)
+    compilation.errors.push(new WebpackError(message));
+  for (const message of findings.warnings)
+    compilation.warnings.push(new WebpackError(message));
 }
 
 // @rspack/core 0.7 has no compiler.rspack and no experiments export.
