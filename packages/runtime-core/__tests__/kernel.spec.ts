@@ -1,9 +1,15 @@
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { FederationKernel, getRemoteEntry } from '../src/kernel';
+import * as kernelExports from '../src/kernel';
+import * as rootExports from '../src';
 import { remote } from '../src/remote/capability';
 import { PLATFORM_UNAVAILABLE_MESSAGE } from '../src/core';
 import { ModuleFederation } from '../src';
 import { shared } from '../src/shared/capability';
+import { snapshot } from '../src/plugins/snapshot/capability';
+import { web } from '../src/platform/web';
+import { node } from '../src/platform/node';
+import { universal } from '../src/platform/universal';
 import { CurrentGlobal } from '../src/global';
 import type { ModuleFederationRuntimePlugin, Platform } from '../src/type';
 
@@ -122,6 +128,25 @@ describe('FederationKernel', () => {
     expect(kernel.options.remotes).toEqual([]);
   });
 
+  it.each([
+    [{}, 'none'],
+    [{ shared }, 'shared,none'],
+    [{ remote, platform: web }, 'remote,web'],
+    [{ remote, snapshot, platform: node }, 'remote,snapshot,node'],
+    [
+      { shared, remote, snapshot, platform: universal },
+      'remote,shared,snapshot,universal',
+    ],
+  ] as const)(
+    'reports the runtime capabilities it received',
+    (capabilities, expected) => {
+      expect(
+        new FederationKernel({ name: 'caps' }, capabilities)
+          .runtimeCapabilities,
+      ).toBe(expected);
+    },
+  );
+
   it('registers its share scope under the id it is given', () => {
     const kernel = new FederationKernel(
       { name: 'kernel-share-id', id: 'kernel-share-id:1.0.0' },
@@ -162,6 +187,12 @@ describe('root ModuleFederation', () => {
     });
     expect(instance.platform.isBrowser()).toBe(true);
     expect(instance.options.inBrowser).toBe(true);
+    expect(instance.runtimeCapabilities).toBe(
+      'remote,shared,snapshot,universal',
+    );
+    expect(ModuleFederation.runtimeCapabilities).toBe(
+      'remote,shared,snapshot,universal',
+    );
   });
 
   it('drops remote and snapshot when FEDERATION_OPTIMIZE_NO_REMOTE is set', async () => {
@@ -174,6 +205,7 @@ describe('root ModuleFederation', () => {
 
     expect(pluginNames(instance)).toEqual([]);
     expect(instance.options.remotes).toEqual([]);
+    expect(instance.runtimeCapabilities).toBe('shared,universal');
     await expect(instance.loadRemote('app/Button')).rejects.toThrow(
       'Remote loading is disabled',
     );
@@ -185,6 +217,8 @@ describe('root ModuleFederation', () => {
 
     const instance = new ModuleFederation({ name: 'root-all-off' });
 
+    expect(instance.runtimeCapabilities).toBe('universal');
+
     expect(() => instance.loadShareSync('react')).toThrow(
       'Shared dependency loading is disabled',
     );
@@ -194,5 +228,14 @@ describe('root ModuleFederation', () => {
         loaderHook: instance.loaderHook,
       }),
     ).rejects.toThrow(PLATFORM_UNAVAILABLE_MESSAGE);
+  });
+});
+
+describe('kernel entry', () => {
+  // CommonJS `require` of the `./kernel` subpath resolves to the package root.
+  it('exports nothing the package root lacks', () => {
+    expect(
+      Object.keys(kernelExports).filter((name) => !(name in rootExports)),
+    ).toEqual([]);
   });
 });

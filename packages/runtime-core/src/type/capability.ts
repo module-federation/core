@@ -42,6 +42,8 @@ export type LoadEntryOptions = {
 };
 
 export interface Platform {
+  /** The entry loader this platform uses. Part of `runtimeCapabilities`. */
+  target: 'web' | 'node' | 'universal' | 'none';
   isBrowser(): boolean;
   loadScript(url: string, info: ScriptInfo): Promise<void>;
   loadEntry(options: LoadEntryOptions): Promise<RemoteEntryExports | void>;

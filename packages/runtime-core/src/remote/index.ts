@@ -24,6 +24,7 @@ import {
   RemoteEntryExports,
   CallFrom,
   RemoteCapability,
+  ResourceLoadContext,
 } from '../type';
 import type { ModuleFederation } from '../index';
 import {
