@@ -4,6 +4,17 @@ import FederationRuntimePlugin, {
 import type { Compiler } from 'webpack';
 import { rs } from '@rstest/core';
 
+const webpack = require('webpack') as typeof import('webpack');
+
+function importSources(template: string): string[] {
+  const { ast } = webpack.javascript.JavascriptParser._parse(template, {
+    sourceType: 'module',
+  });
+  return ast.body
+    .filter((node) => node.type === 'ImportDeclaration')
+    .map((node) => String(node.source.value));
+}
+
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 const mocks = rs.hoisted(() => ({
   mockGetWebpackPath: rs.fn(() => 'webpack'),
@@ -20,6 +31,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
 
   beforeEach(() => {
     compiler = {
+      context: '/test/path',
       options: {
         context: '/test/path',
       },
@@ -133,11 +145,10 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         {},
       );
 
-      // 验证生成的模板中包含正确路径的插件
-      expect(template).toContain("from '/absolute/path/plugin1.js'");
+      expect(importSources(template)).toContain('/absolute/path/plugin1.js');
     });
 
-    it('should handle relative paths in runtimePlugins', () => {
+    it('resolves relative paths in runtimePlugins against compiler.context, not process.cwd()', () => {
       const optionsWithRelativePlugins = {
         ...mockOptions,
         runtimePlugins: ['relative/path/plugin1.js'],
@@ -150,10 +161,22 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         {},
       );
 
-      // 验证生成的模板中包含正确路径的插件
-      expect(template).toContain(
-        "from '/current/working/dir/relative/path/plugin1.js'",
+      expect(importSources(template)).toContain(
+        '/test/path/relative/path/plugin1.js',
       );
+    });
+
+    it('emits paths that contain a quote as valid JS string literals', () => {
+      const bundlerRuntimePath = "/home/o'brien/app/node_modules/bundler.js";
+      const pluginPath = "/home/o'brien/app/plugin.js";
+      const template = FederationRuntimePlugin.getTemplate(
+        compiler as Compiler,
+        { ...mockOptions, runtimePlugins: [pluginPath] },
+        bundlerRuntimePath,
+        {},
+      );
+
+      expect(importSources(template)).toEqual([bundlerRuntimePath, pluginPath]);
     });
 
     it('should filter out false plugins in runtimePluginCalls', () => {
@@ -203,6 +226,32 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       expect(template).toContain(
         'if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime)',
       );
+    });
+  });
+
+  describe('fallback container name', () => {
+    // A context without a package.json gives webpack an empty uniqueName.
+    function applyTo(context: string) {
+      const plugin = new FederationRuntimePlugin({
+        virtualRuntimeEntry: true,
+      } as any);
+      webpack({ mode: 'none', context, plugins: [plugin] });
+      return plugin.options!.name;
+    }
+
+    afterEach(() => {
+      rs.restoreAllMocks();
+    });
+
+    it('does not change between builds and differs between contexts', () => {
+      const now = rs.spyOn(Date, 'now').mockReturnValue(1_000);
+      const first = applyTo('/test/path');
+      now.mockReturnValue(2_000);
+      const second = applyTo('/test/path');
+      const other = applyTo('/test/other');
+
+      expect(second).toBe(first);
+      expect(other).not.toBe(first);
     });
   });
 
