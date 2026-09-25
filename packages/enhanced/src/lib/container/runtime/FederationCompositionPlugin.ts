@@ -40,6 +40,7 @@ interface Outcome {
   family: RuntimeFamily;
   entry?: ComposedEntry;
   legacyReason?: string;
+  unsupportedReason?: string;
 }
 
 export interface CompositionSlot {
@@ -159,6 +160,9 @@ class FederationCompositionPlugin {
       alias: compiler.options.resolve.alias as never,
       aliasExemptions: this._ownAliasTargets(compiler),
     });
+    if (mode.mode === 'unsupported') {
+      return { family, unsupportedReason: mode.reason };
+    }
     if (mode.mode === 'legacy') return { family, legacyReason: mode.reason };
     const composition = renderComposition(
       plan,
@@ -194,8 +198,16 @@ class FederationCompositionPlugin {
 
   private _check(
     compilation: Compilation,
-    { family, entry, legacyReason }: Outcome,
+    { family, entry, legacyReason, unsupportedReason }: Outcome,
   ) {
+    if (unsupportedReason !== undefined) {
+      compilation.errors.push(
+        new WebpackError(
+          `The federation runtime cannot be composed: ${unsupportedReason}.`,
+        ),
+      );
+      return;
+    }
     const { externalRuntime, provideExternalRuntime } =
       this._options.experiments ?? {};
     // An externalized runtime is the full runtime by request; the other reasons are worth a warning.

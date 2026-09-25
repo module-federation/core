@@ -3,6 +3,9 @@ import path from 'node:path';
 import enhancedResolve from 'enhanced-resolve';
 import { findPackageJson } from '../findPackageJson';
 
+/** The first runtime release that exports every subpath in RUNTIME_FAMILY. */
+export const MIN_RUNTIME_VERSION = '2.10.0';
+
 export const RUNTIME_FAMILY = {
   '@module-federation/runtime-tools': [],
   '@module-federation/webpack-bundler-runtime': [

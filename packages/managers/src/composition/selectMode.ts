@@ -1,4 +1,9 @@
-import { FAMILY_PACKAGES, RUNTIME_FAMILY, type RuntimeFamily } from './family';
+import {
+  FAMILY_PACKAGES,
+  MIN_RUNTIME_VERSION,
+  RUNTIME_FAMILY,
+  type RuntimeFamily,
+} from './family';
 
 type ExternalCallback = (err?: Error | null, value?: unknown) => void;
 type ExternalFunction = (...args: any[]) => unknown;
@@ -25,7 +30,8 @@ export interface ModeInputs {
 
 export type RuntimeMode =
   | { mode: 'composed' }
-  | { mode: 'legacy'; reason: string };
+  | { mode: 'legacy'; reason: string }
+  | { mode: 'unsupported'; reason: string };
 
 const hasOwn = (object: object, key: string) =>
   Object.prototype.hasOwnProperty.call(object, key);
@@ -34,8 +40,14 @@ export async function selectMode(
   family: RuntimeFamily,
   inputs: ModeInputs,
 ): Promise<RuntimeMode> {
+  const problem = familyProblem(family);
+  if (problem !== undefined) {
+    return {
+      mode: 'unsupported',
+      reason: `${problem}; the federation runtime packages must be ${MIN_RUNTIME_VERSION} or newer`,
+    };
+  }
   const reason =
-    familyProblem(family) ??
     experimentProblem(inputs) ??
     (await externalsProblem(inputs)) ??
     aliasProblem(inputs) ??
