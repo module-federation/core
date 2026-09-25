@@ -1,7 +1,3 @@
-// @ts-nocheck
-/*
- * @rstest-environment node
- */
 import fs from 'fs';
 import { createRequire } from 'module';
 import os from 'os';
@@ -56,7 +52,7 @@ function compile(context: string, config: Record<string, unknown>) {
           context,
           mode: 'production',
           devtool: false,
-          // Without it webpack can pick a different concatenation root between two builds.
+          // Two builds of one checkout can otherwise concatenate around different roots.
           parallelism: 1,
           target: 'async-node',
           entry: './index.js',

@@ -1,4 +1,4 @@
-const { runtimeFiles, hasPart } = require('../_helpers/graph');
+const { bundledRuntimeFiles, hasPart } = require('../_helpers/graph');
 
 it('loads a module from a remote built without remote and shared handlers', async () => {
   const { default: Button } = await import('remote/Button');
@@ -6,7 +6,7 @@ it('loads a module from a remote built without remote and shared handlers', asyn
 });
 
 it('bundles the remote container with the container adapter and no capability', () => {
-  const files = runtimeFiles(__STATS__.children[0]);
+  const files = bundledRuntimeFiles(__STATS__.children[0]);
   for (const part of ['compose', 'container', 'shareScope'])
     expect([part, hasPart(files, part)]).toEqual([part, true]);
   for (const part of [

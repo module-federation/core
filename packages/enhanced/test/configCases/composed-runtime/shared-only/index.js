@@ -1,4 +1,4 @@
-const { runtimeFiles, hasPart } = require('../_helpers/graph');
+const { bundledRuntimeFiles, hasPart } = require('../_helpers/graph');
 
 const evaluationsBefore = globalThis.__composedSharedLibEvaluations || 0;
 
@@ -12,7 +12,7 @@ it('resolves the shared module through the share scope', async () => {
 });
 
 it('bundles the shared capability and the consumes adapter only', () => {
-  const files = runtimeFiles(__STATS__);
+  const files = bundledRuntimeFiles(__STATS__);
   for (const part of ['compose', 'shared', 'consumes', 'shareScope'])
     expect([part, hasPart(files, part)]).toEqual([part, true]);
   for (const part of [

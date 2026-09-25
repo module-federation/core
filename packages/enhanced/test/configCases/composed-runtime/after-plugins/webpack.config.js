@@ -3,10 +3,9 @@ const {
   ContainerReferencePlugin,
 } = require('../../../../dist/src');
 
-// Applies a remote the way framework plugins do: from afterPlugins, outside the MFP options.
-class LateRemotesPlugin {
+class AfterPluginsRemotesPlugin {
   apply(compiler) {
-    compiler.hooks.afterPlugins.tap('LateRemotesPlugin', () => {
+    compiler.hooks.afterPlugins.tap('AfterPluginsRemotesPlugin', () => {
       new ContainerReferencePlugin({
         remoteType: 'commonjs-module',
         remotes: { self: './container.js' },
@@ -18,7 +17,7 @@ class LateRemotesPlugin {
 module.exports = {
   output: { filename: '[name].js', uniqueName: 'composed-after-plugins' },
   plugins: [
-    new LateRemotesPlugin(),
+    new AfterPluginsRemotesPlugin(),
     new ModuleFederationPlugin({
       name: 'composed_after_plugins',
       filename: 'container.js',

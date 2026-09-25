@@ -1,4 +1,4 @@
-const { runtimeFiles, hasPart } = require('../_helpers/graph');
+const { bundledRuntimeFiles, hasPart } = require('../_helpers/graph');
 
 it('loads the remote module with shared disabled', async () => {
   const { default: Button } = await import('remote/Button');
@@ -6,7 +6,7 @@ it('loads the remote module with shared disabled', async () => {
 });
 
 it('bundles only the remote capability, the web platform, and the remotes adapter', () => {
-  const files = runtimeFiles(__STATS__.children[1]);
+  const files = bundledRuntimeFiles(__STATS__.children[1]);
   for (const part of ['compose', 'remote', 'platform', 'remotes', 'shareScope'])
     expect([part, hasPart(files, part)]).toEqual([part, true]);
   for (const part of [

@@ -10,14 +10,12 @@ function collect(modules, files) {
   }
 }
 
-// Runtime package files, as <package>/<path in dist>, that are in a chunk of the compilation.
-exports.runtimeFiles = (stats) => {
+exports.bundledRuntimeFiles = (stats) => {
   const files = new Set();
   collect(stats.modules, files);
   return [...files].sort();
 };
 
-// Capability and adapter parts, matched by path in each package's dist.
 exports.PARTS = {
   compose: /^webpack-bundler-runtime\/compose\./,
   remotes: /^webpack-bundler-runtime\/adapters\/remotes\./,

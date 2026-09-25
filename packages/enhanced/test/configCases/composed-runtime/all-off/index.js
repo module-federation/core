@@ -1,4 +1,4 @@
-const { runtimeFiles, hasPart } = require('../_helpers/graph');
+const { bundledRuntimeFiles, hasPart } = require('../_helpers/graph');
 
 it('creates a kernel instance without capabilities', () => {
   const { instance } = __webpack_require__.federation;
@@ -7,7 +7,7 @@ it('creates a kernel instance without capabilities', () => {
 });
 
 it('bundles the kernel and no capability or adapter', () => {
-  const files = runtimeFiles(__STATS__);
+  const files = bundledRuntimeFiles(__STATS__);
   expect(hasPart(files, 'compose')).toBe(true);
   for (const part of [
     'shared',

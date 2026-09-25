@@ -187,7 +187,6 @@ class FederationRuntimePlugin {
         );
       });
     }
-    // A composed federation object has no runtime namespace, only its bundler runtime.
     const embedRuntimeLines = Template.asString([
       composition === undefined
         ? `if(!${federationGlobal}.runtime || !${federationGlobal}.bundlerRuntime){`
@@ -314,7 +313,6 @@ class FederationRuntimePlugin {
     if (this.federationRuntimeDependency)
       return this.federationRuntimeDependency;
 
-    // The composed entry is planned after apply(), so it is read here, in make.
     const composed = composedEntryOf(compiler);
     if (composed) this.entryFilePath = composed.path;
     this.ensureFile(compiler, composed?.source);

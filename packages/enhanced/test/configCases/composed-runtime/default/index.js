@@ -1,4 +1,4 @@
-const { runtimeFiles, hasPart } = require('../_helpers/graph');
+const { bundledRuntimeFiles, hasPart } = require('../_helpers/graph');
 
 const evaluationsBefore = globalThis.__composedSharedLibEvaluations || 0;
 
@@ -11,7 +11,7 @@ it('loads the remote module with one shared-lib instance', async () => {
 });
 
 it('bundles the composed bootstrap with every capability and adapter', () => {
-  const files = runtimeFiles(__STATS__);
+  const files = bundledRuntimeFiles(__STATS__);
   for (const part of [
     'compose',
     'remotes',

@@ -1,4 +1,4 @@
-const { runtimeFiles, hasPart } = require('../_helpers/graph');
+const { bundledRuntimeFiles, hasPart } = require('../_helpers/graph');
 
 const evaluationsBefore = globalThis.__composedSharedLibEvaluations || 0;
 
@@ -11,7 +11,7 @@ it('shares one instance through a standalone SharePlugin', async () => {
 });
 
 it('bundles the consumes adapter the standalone SharePlugin needs', () => {
-  const files = runtimeFiles(__STATS__);
+  const files = bundledRuntimeFiles(__STATS__);
   for (const part of [
     'compose',
     'consumes',

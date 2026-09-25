@@ -25,13 +25,10 @@ const WebpackError = require(
 ) as typeof import('webpack/lib/WebpackError');
 
 const PLUGIN_NAME = 'FederationCompositionPlugin';
-// Symbol.for, so every installed copy of enhanced shares one slot per compiler.
 const SLOT = Symbol.for('module-federation.composition/1');
 
 export interface ComposedEntry {
-  /** A file path or data: URL, as FederationRuntimePlugin names its entry. */
   path: string;
-  /** The rendered composition plus the runtime-plugin wiring. */
   source: string;
   adapters: AdapterName[];
 }
@@ -51,7 +48,6 @@ export interface CompositionSlot {
 
 type SlotCompiler = Compiler & { [SLOT]?: CompositionSlot };
 
-/** Passed by ModuleFederationPlugin to the sub-plugins its options participant covers. */
 export const COVERED_BY_OPTIONS = Symbol('covered by ModuleFederationPlugin');
 export type CoveredByOptions = typeof COVERED_BY_OPTIONS;
 
@@ -92,10 +88,6 @@ export function optionsParticipant(options: Options): Participant {
   return { kind: 'options', disable, needs };
 }
 
-/**
- * Plans the federation bootstrap from the participants every federation plugin registers.
- * The first copy of enhanced applied to a compiler plans; other copies only register.
- */
 class FederationCompositionPlugin {
   private _plan?: CompositionPlan;
   private _selecting?: Promise<Outcome | undefined>;
@@ -108,7 +100,6 @@ class FederationCompositionPlugin {
     ) => Omit<ComposedEntry, 'adapters'>,
   ) {}
 
-  // A SharedContainerPlugin compiler gets no planner, so what registers there is never read.
   static register(compiler: Compiler, participant: Participant): void {
     const slot = slotOf(compiler);
     if (slot.sealed) {
@@ -125,7 +116,6 @@ class FederationCompositionPlugin {
     if (slot.planner) return;
     slot.planner = this;
 
-    // afterResolvers runs after every afterPlugins tap, where ModuleFederationPlugin applies its sub-plugins.
     compiler.hooks.afterResolvers.tap(PLUGIN_NAME, () => {
       slot.sealed = true;
       this._plan = planComposition(
@@ -133,7 +123,6 @@ class FederationCompositionPlugin {
         this._options.experiments?.optimization?.target ?? 'universal',
       );
     });
-    // Mode selection may await function externals, so it runs in the first async hook before make.
     compiler.hooks.beforeCompile.tapPromise(PLUGIN_NAME, async () => {
       this._selecting ??= this._select(compiler, slot);
       this._outcome = await this._selecting;
@@ -169,7 +158,6 @@ class FederationCompositionPlugin {
     return { family, entry: slot.entry };
   }
 
-  // FederationRuntimePlugin writes these aliases itself; they are not user aliases.
   private _ownAliasTargets(compiler: Compiler): string[] {
     const alias = compiler.options.resolve.alias;
     if (!alias || Array.isArray(alias)) return [];
@@ -272,7 +260,6 @@ function summarize(compilation: Compilation, modules: Iterable<Module>) {
 const isContainerEntry = (module: Module) =>
   module.identifier().startsWith(CONTAINER_ENTRY_PREFIX);
 
-// Every copy of enhanced includes its bootstrap through a 'federation runtime dependency'.
 function countBootstraps(compilation: Compilation): number {
   const bootstraps = new Set<Module>();
   for (const dependency of compilation.globalEntry.includeDependencies) {
