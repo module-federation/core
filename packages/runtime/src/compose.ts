@@ -1,5 +1,6 @@
 import {
   FederationKernel,
+  runtimeCapabilitiesOf,
   type Capabilities,
   type ModuleFederation,
   type UserOptions,
@@ -26,5 +27,9 @@ export function init(
   options: UserOptions,
   capabilities: Capabilities,
 ): FederationKernel {
-  return initInstance(options, kernelFactory(capabilities));
+  return initInstance(
+    options,
+    runtimeCapabilitiesOf(capabilities),
+    kernelFactory(capabilities),
+  );
 }

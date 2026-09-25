@@ -17,12 +17,19 @@ export function getBuilderId(): string {
 export function getGlobalFederationInstance(
   name: string,
   version: string | undefined,
+  runtimeCapabilities: string,
   preferred?: ModuleFederation | null,
 ): ModuleFederation | undefined {
   const buildId = getBuilderId();
   return [preferred, ...CurrentGlobal.__FEDERATION__.__INSTANCES__].find(
     (GMInstance): GMInstance is ModuleFederation => {
       if (!GMInstance) {
+        return false;
+      }
+      if (
+        GMInstance !== preferred &&
+        GMInstance.runtimeCapabilities !== runtimeCapabilities
+      ) {
         return false;
       }
       if (buildId && GMInstance.options.id === buildId) {
@@ -65,11 +72,13 @@ export function createInstance<T extends ModuleFederation>(
 
 export function initInstance<T extends ModuleFederation>(
   options: UserOptions,
+  runtimeCapabilities: string,
   construct: (options: UserOptions) => T,
 ): T {
   const instance = getGlobalFederationInstance(
     options.name,
     options.version,
+    runtimeCapabilities,
     bundleInstance,
   );
   const normalizedOptions = { ...options, id: options.id || '' };
