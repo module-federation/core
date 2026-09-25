@@ -298,7 +298,7 @@ export class FederationCore {
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
-      id: getBuilderId(),
+      id: userOptions.id || getBuilderId(),
       name: userOptions.name,
       plugins,
       remotes: [],
