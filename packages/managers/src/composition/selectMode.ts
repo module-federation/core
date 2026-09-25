@@ -167,9 +167,11 @@ function callExternal(
             },
             callback,
           );
+    // An undefined return means the answer comes through the callback, as in
+    // webpack; fn.length misses callbacks with default values.
     if (result && typeof (result as Promise<unknown>).then === 'function') {
       (result as Promise<unknown>).then(resolve, reject);
-    } else if (fn.length < 2) {
+    } else if (result !== undefined) {
       resolve(result);
     }
   });

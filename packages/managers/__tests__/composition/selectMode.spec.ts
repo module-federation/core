@@ -109,6 +109,17 @@ describe('selectMode', () => {
         ) => callback(null, request === RUNTIME ? 'mf' : undefined),
       ],
       [
+        'a callback function with a defaulted callback',
+        (
+          { request }: { request: string },
+          callback: (err?: Error | null, value?: string) => void = () => {},
+        ) => {
+          setTimeout(() =>
+            callback(null, request === RUNTIME ? 'mf' : undefined),
+          );
+        },
+      ],
+      [
         'an async function',
         async ({ request }: { request: string }) =>
           request === RUNTIME ? 'mf' : undefined,
