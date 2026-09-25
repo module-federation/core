@@ -1,13 +1,16 @@
 import { createHash } from 'node:crypto';
 import path from 'node:path';
-import type { Compiler } from '@rspack/core';
+import type { Compilation, Compiler, Module } from '@rspack/core';
 import {
+  checkFederationGraph,
   planComposition,
   renderComposition,
   resolveImports,
   resolveRuntimeFamily,
   optionsParticipant,
   selectMode,
+  type AdapterName,
+  type GraphModule,
   type Participant,
   type RuntimeFamily,
   type RuntimeMode,
@@ -22,6 +25,7 @@ type Options = moduleFederationPlugin.ModuleFederationPluginOptions;
 interface Composition {
   family: RuntimeFamily;
   bootstrapPath?: string;
+  adapters?: AdapterName[];
   renderError?: unknown;
 }
 
@@ -70,6 +74,11 @@ export class ComposedRuntimePlugin {
           ),
         );
       }
+      if (mode?.mode === 'composed') {
+        compilation.hooks.finishModules.tap(PLUGIN_NAME, (modules) =>
+          checkGraph(compilation, modules, composition!),
+        );
+      }
     });
   }
 
@@ -103,7 +112,7 @@ export class ComposedRuntimePlugin {
       `node_modules/.federation/rspack/${name}.${hash}.mjs`,
     );
     new VirtualModulesPlugin({ [file]: source }).apply(compiler);
-    return { family, bootstrapPath: file };
+    return { family, bootstrapPath: file, adapters: plan.adapters };
   }
 
   private async _decide(
@@ -138,6 +147,39 @@ export class ComposedRuntimePlugin {
     } as typeof resolve.alias;
     return mode;
   }
+}
+
+function checkGraph(
+  compilation: Compilation,
+  modules: Iterable<Module>,
+  { family, bootstrapPath, adapters }: Composition,
+) {
+  const { ExternalModule, WebpackError } = compilation.compiler.webpack;
+  const bootstrapDir = path.dirname(bootstrapPath!) + path.sep;
+  const summary: GraphModule[] = [];
+  const externalUserRequests: string[] = [];
+  let bootstraps = 0;
+  for (const module of modules) {
+    if (module instanceof ExternalModule) {
+      externalUserRequests.push(module.userRequest);
+    } else if (module.identifier().startsWith('container entry ')) {
+      summary.push({ type: 'container-entry' });
+    } else {
+      const { resource } = module as Module & { resource?: string };
+      if (resource?.startsWith(bootstrapDir)) bootstraps++;
+      summary.push({ type: module.type, resource });
+    }
+  }
+  const findings = checkFederationGraph({
+    modules: summary,
+    externalUserRequests,
+    family,
+    composed: { adapters: adapters!, bootstraps },
+  });
+  for (const message of findings.errors)
+    compilation.errors.push(new WebpackError(message));
+  for (const message of findings.warnings)
+    compilation.warnings.push(new WebpackError(message));
 }
 
 // @rspack/core 0.7 has no compiler.rspack and no experiments export.

@@ -24,9 +24,19 @@ const withoutVirtualModules = {
 
 function config(
   outRoot,
-  { out, target, mf, cacheDir, singleChunk, noVirtualModules, alias },
+  {
+    out,
+    target,
+    mf,
+    cacheDir,
+    singleChunk,
+    noVirtualModules,
+    alias,
+    externalsPattern,
+    referenceRemotes,
+  },
 ) {
-  const isHost = Boolean(mf.remotes);
+  const isHost = Boolean(mf.remotes || referenceRemotes);
   return {
     mode: 'production',
     target: target === 'node' ? 'async-node' : 'web',
@@ -58,6 +68,21 @@ function config(
       ...(noVirtualModules ? [withoutVirtualModules] : []),
       ...(singleChunk
         ? [new rspack.optimize.LimitChunkCountPlugin({ maxChunks: 1 })]
+        : []),
+      ...(externalsPattern
+        ? [
+            new rspack.ExternalsPlugin('commonjs', [
+              new RegExp(externalsPattern),
+            ]),
+          ]
+        : []),
+      ...(referenceRemotes
+        ? [
+            new rspack.container.ContainerReferencePlugin({
+              remoteType: 'script',
+              remotes: referenceRemotes,
+            }),
+          ]
         : []),
       new ModuleFederationPlugin({
         dts: false,
