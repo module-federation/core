@@ -28,7 +28,7 @@ exports.PARTS = {
   shared: /^runtime-core\/shared\/capability\./,
   remote: /^runtime-core\/remote\/capability\./,
   snapshot: /^runtime-core\/plugins\/snapshot\/capability\./,
-  platform: /^runtime-core\/platform\//,
+  platform: /^runtime-core\/platform\/(web|node|universal)\./,
   platformNode: /^runtime-core\/platform\/(node|universal)\./,
   runtimeCoreIndex: /^runtime-core\/index\./,
   sdkNode: /^sdk\/node\./,
