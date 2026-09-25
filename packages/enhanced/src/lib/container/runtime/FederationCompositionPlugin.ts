@@ -108,8 +108,8 @@ class FederationCompositionPlugin {
     ) => Omit<ComposedEntry, 'adapters'>,
   ) {}
 
+  // A SharedContainerPlugin compiler gets no planner, so what registers there is never read.
   static register(compiler: Compiler, participant: Participant): void {
-    if (usesSharedContainerPlugin(compiler)) return;
     const slot = slotOf(compiler);
     if (slot.sealed) {
       throw new Error(
