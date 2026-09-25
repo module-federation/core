@@ -1,8 +1,9 @@
-import type {
-  CreateLinkHookReturnDom,
-  CreateScriptHookReturn,
-  GlobalModuleInfo,
-  ModuleInfo,
+import {
+  isBrowserEnvValue,
+  type CreateLinkHookReturnDom,
+  type CreateScriptHookReturn,
+  type GlobalModuleInfo,
+  type ModuleInfo,
 } from '@module-federation/sdk/core';
 import {
   Options,
@@ -21,6 +22,10 @@ import {
   LoadShareExtraOptions,
   SharedLoadContext,
   ResolvedCapabilities,
+  Capabilities,
+  RemoteHandlerContract,
+  SharedHandlerContract,
+  SnapshotHandlerContract,
   Platform,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
@@ -42,6 +47,8 @@ import type { RemoteHandler } from './remote';
 import type { SharedHandler } from './shared';
 import type { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { DEFAULT_SCOPE } from './constant';
+import { disabledRemote } from './remote/disabled';
+import { disabledShared } from './shared/disabled';
 
 type BridgeHookContext = object;
 type BridgeHookResult = {
@@ -451,3 +458,41 @@ export class FederationCore {
     });
   }
 }
+
+export const PLATFORM_UNAVAILABLE_MESSAGE =
+  'No platform capability: pass capabilities.platform to load entries.';
+
+const unavailable = () =>
+  Promise.reject(new Error(PLATFORM_UNAVAILABLE_MESSAGE));
+
+export const unavailablePlatform: Platform = {
+  isBrowser: () => isBrowserEnvValue,
+  loadScript: unavailable,
+  loadEntry: unavailable,
+};
+
+class Kernel extends FederationCore {
+  constructor(userOptions: UserOptions, capabilities: Capabilities = {}) {
+    super(userOptions, {
+      shared: capabilities.shared || disabledShared,
+      remote: capabilities.remote || disabledRemote,
+      snapshot: capabilities.remote && capabilities.snapshot,
+      platform: capabilities.platform || unavailablePlatform,
+    });
+  }
+}
+
+// Handlers of capabilities the caller left out are disabled, so a kernel
+// promises only the handler contracts.
+export type FederationKernel = Omit<
+  Kernel,
+  'remoteHandler' | 'sharedHandler' | 'snapshotHandler'
+> & {
+  remoteHandler: RemoteHandlerContract;
+  sharedHandler: SharedHandlerContract;
+  snapshotHandler: SnapshotHandlerContract;
+};
+export const FederationKernel = Kernel as new (
+  userOptions: UserOptions,
+  capabilities?: Capabilities,
+) => FederationKernel;

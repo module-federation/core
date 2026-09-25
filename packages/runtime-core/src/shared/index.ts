@@ -19,6 +19,7 @@ import {
   LoadShareExtraOptions,
   SharedLoadContext,
   SharedLoadTrigger,
+  SharedCapability,
 } from '../type';
 import type { ModuleFederation } from '../index';
 import {
@@ -830,3 +831,7 @@ export class SharedHandler {
     }
   }
 }
+
+export const shared: SharedCapability = {
+  create: (host) => new SharedHandler(host),
+};

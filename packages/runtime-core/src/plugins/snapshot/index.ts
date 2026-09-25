@@ -8,7 +8,13 @@ import {
   isRemoteInfoWithEntry,
   getRemoteEntryInfoFromSnapshot,
 } from '../../utils';
-import { PreloadOptions, PreloadRemoteArgs, RemoteInfo } from '../../type';
+import {
+  PreloadOptions,
+  PreloadRemoteArgs,
+  RemoteInfo,
+  SnapshotCapability,
+} from '../../type';
+import { generatePreloadAssetsPlugin } from '../generate-preload-assets';
 import { preloadAssets } from '../../utils/preload';
 
 export function assignRemoteInfo(
@@ -115,3 +121,7 @@ export function snapshotPlugin(): ModuleFederationRuntimePlugin {
     },
   };
 }
+
+export const snapshot: SnapshotCapability = {
+  plugins: () => [snapshotPlugin(), generatePreloadAssetsPlugin()],
+};
