@@ -24,7 +24,7 @@ const withoutVirtualModules = {
 
 function config(
   outRoot,
-  { out, target, mf, cacheDir, singleChunk, noVirtualModules },
+  { out, target, mf, cacheDir, singleChunk, noVirtualModules, alias },
 ) {
   const isHost = Boolean(mf.remotes);
   return {
@@ -42,7 +42,9 @@ function config(
       ...(isHost &&
         target === 'node' && { library: { type: 'commonjs-module' } }),
     },
-    resolve: { alias: { 'shared-lib': path.join(FIXTURE, 'shared-lib') } },
+    resolve: {
+      alias: { 'shared-lib': path.join(FIXTURE, 'shared-lib'), ...alias },
+    },
     optimization: { minimize: false },
     infrastructureLogging: { level: 'error' },
     cache: cacheDir

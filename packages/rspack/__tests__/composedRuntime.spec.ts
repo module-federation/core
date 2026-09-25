@@ -4,6 +4,7 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { resolveRspackRuntimeImplementation } from '../src/ModuleFederationPlugin';
 
 jest.setTimeout(120_000);
 
@@ -44,6 +45,7 @@ interface BuildSpec {
   singleChunk?: boolean;
   noVirtualModules?: boolean;
   buildVersion?: string;
+  alias?: Record<string, string>;
 }
 
 let outRoot: string;
@@ -253,6 +255,48 @@ describe('experiments.composedRuntime', () => {
     expect(b.warnings).toEqual([
       expect.stringContaining(
         'this @rspack/core has no experiments.VirtualModulesPlugin',
+      ),
+    ]);
+  });
+
+  it('keeps the full runtime and warns when resolve.alias already maps the bundler runtime', async () => {
+    const bundlerRuntime = require.resolve(
+      '@module-federation/webpack-bundler-runtime',
+      { paths: [resolveRspackRuntimeImplementation()] },
+    );
+    const [b] = await harness([
+      {
+        out: 'user-alias/bundler-runtime',
+        target: 'web',
+        alias: { [bundlerRuntime]: bundlerRuntime },
+        mf: host({ experiments: composed() }),
+      },
+    ]);
+    expect(composedEntries(b)).toEqual([]);
+    expect(b.modules.some((m) => LEGACY_ENTRY.test(m))).toBe(true);
+    expect(b.warnings).toEqual([
+      expect.stringContaining(`resolve.alias already maps ${bundlerRuntime}`),
+    ]);
+  });
+
+  it('keeps the full runtime and warns when a user alias names a runtime package', async () => {
+    const runtimeCore = path.resolve(
+      __dirname,
+      '../../runtime-core/dist/index.js',
+    );
+    const [b] = await harness([
+      {
+        out: 'user-alias/runtime-core',
+        target: 'web',
+        alias: { '@module-federation/runtime-core$': runtimeCore },
+        mf: host({ experiments: composed() }),
+      },
+    ]);
+    expect(composedEntries(b)).toEqual([]);
+    expect(b.modules.some((m) => LEGACY_ENTRY.test(m))).toBe(true);
+    expect(b.warnings).toEqual([
+      expect.stringContaining(
+        '@module-federation/runtime-core is aliased by resolve.alias["@module-federation/runtime-core$"]',
       ),
     ]);
   });
