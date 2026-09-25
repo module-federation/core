@@ -25,7 +25,8 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "enhanced-resolve": "^5.0.0"
   },
   "devDependencies": {
     "webpack": "5.104.1"

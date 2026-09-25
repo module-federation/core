@@ -16,3 +16,24 @@ export type {
   CompositionPlatform,
   Participant,
 } from './composition/plan';
+export {
+  FAMILY_PACKAGES,
+  RUNTIME_FAMILY,
+  resolveRuntimeFamily,
+} from './composition/family';
+export type {
+  FamilyMember,
+  FamilyPackage,
+  RuntimeFamily,
+} from './composition/family';
+export { selectMode } from './composition/selectMode';
+export type { ModeInputs, RuntimeMode } from './composition/selectMode';
+export { resolveImports } from './composition/resolveImports';
+export type { CompositionImports } from './composition/resolveImports';
+export { renderComposition } from './composition/renderComposition';
+export { checkFederationGraph } from './composition/checkFederationGraph';
+export type {
+  FederationGraphSummary,
+  GraphFindings,
+  GraphModule,
+} from './composition/checkFederationGraph';

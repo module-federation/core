@@ -57,3 +57,55 @@ export function planComposition(
     platform,
   };
 }
+
+const WBR = '@module-federation/webpack-bundler-runtime';
+const CORE = '@module-federation/runtime-core';
+
+const ADAPTER_BINDINGS: Record<AdapterName, string> = {
+  remotes: 'remotes',
+  consumes: 'consumes',
+  container: 'container',
+  'share-scope': 'shareScope',
+};
+
+export interface PlannedImport {
+  binding: string;
+  pkg: typeof WBR | typeof CORE;
+  subpath: string;
+  slot: 'createFederation' | 'adapters' | 'capabilities';
+  /** The capabilities key, when it differs from the binding. */
+  key?: string;
+}
+
+// Bootstrap imports in their rendered order. Snapshot needs remote and remote
+// needs a platform, so a kernel without remote gets no loader at all.
+export function plannedImports(plan: CompositionPlan): PlannedImport[] {
+  const imports: PlannedImport[] = [
+    {
+      binding: 'createFederation',
+      pkg: WBR,
+      subpath: './compose',
+      slot: 'createFederation',
+    },
+    ...plan.adapters.map(
+      (name): PlannedImport => ({
+        binding: ADAPTER_BINDINGS[name],
+        pkg: WBR,
+        subpath: `./adapters/${name}`,
+        slot: 'adapters',
+      }),
+    ),
+  ];
+  const capability = (binding: string, subpath: string, key?: string) =>
+    imports.push({ binding, pkg: CORE, subpath, slot: 'capabilities', key });
+  if (plan.shared) capability('shared', './shared');
+  if (plan.remote) {
+    capability('remote', './remote');
+    if (plan.snapshot) capability('snapshot', './snapshot');
+    capability(plan.platform, `./platform/${plan.platform}`, 'platform');
+  }
+  return imports;
+}
+
+export const importRequest = ({ pkg, subpath }: PlannedImport) =>
+  `${pkg}/${subpath.slice(2)}`;
