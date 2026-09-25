@@ -75,22 +75,6 @@ export function resolveRspackRuntimeImplementation(
   );
 }
 
-/** @deprecated The wrapper no longer aliases `@module-federation/runtime$`. */
-export function resolveRspackRuntimeAlias(
-  implementation: string,
-  resolve: ResolveFn = require.resolve,
-) {
-  return resolveRuntimeEntry(
-    {
-      bundler: '@module-federation/runtime/bundler',
-      esm: '@module-federation/runtime/dist/index.js',
-      cjs: '@module-federation/runtime/dist/index.cjs',
-    },
-    implementation,
-    resolve,
-  );
-}
-
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;

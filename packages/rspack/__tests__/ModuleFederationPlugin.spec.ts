@@ -1,6 +1,6 @@
+import * as pluginEntry from '../src/plugin';
 import {
   ModuleFederationPlugin,
-  resolveRspackRuntimeAlias,
   resolveRspackRuntimeImplementation,
 } from '../src/ModuleFederationPlugin';
 
@@ -56,21 +56,21 @@ describe('runtime resolution compatibility', () => {
 
         if (
           basedFromLegacy &&
-          request === '@module-federation/runtime/bundler'
+          request === '@module-federation/runtime-tools/bundler'
         ) {
           throw new Error(`Cannot find module '${request}'`);
         }
-        if (request === '@module-federation/runtime/dist/index.js') {
-          return '/legacy/runtime/dist/index.js';
+        if (request === '@module-federation/runtime-tools/dist/index.js') {
+          return '/legacy/runtime-tools/dist/index.js';
         }
 
         throw new Error(`Unexpected request: ${request}`);
       },
     ) as typeof require.resolve;
 
-    expect(resolveRspackRuntimeAlias('/legacy/runtime-tools', resolve)).toBe(
-      '/legacy/runtime/dist/index.js',
-    );
+    expect(
+      resolveRspackRuntimeImplementation('/legacy/runtime-tools', resolve),
+    ).toBe('/legacy/runtime-tools/dist/index.js');
   });
 
   it('falls back to legacy cjs runtime entries when esm legacy builds are unavailable', () => {
@@ -80,22 +80,28 @@ describe('runtime resolution compatibility', () => {
 
         if (
           basedFromLegacy &&
-          (request === '@module-federation/runtime/bundler' ||
-            request === '@module-federation/runtime/dist/index.js')
+          (request === '@module-federation/runtime-tools/bundler' ||
+            request === '@module-federation/runtime-tools/dist/index.js')
         ) {
           throw new Error(`Cannot find module '${request}'`);
         }
-        if (request === '@module-federation/runtime/dist/index.cjs') {
-          return '/legacy/runtime/dist/index.cjs';
+        if (request === '@module-federation/runtime-tools/dist/index.cjs') {
+          return '/legacy/runtime-tools/dist/index.cjs';
         }
 
         throw new Error(`Unexpected request: ${request}`);
       },
     ) as typeof require.resolve;
 
-    expect(resolveRspackRuntimeAlias('/legacy/runtime-tools', resolve)).toBe(
-      '/legacy/runtime/dist/index.cjs',
-    );
+    expect(
+      resolveRspackRuntimeImplementation('/legacy/runtime-tools', resolve),
+    ).toBe('/legacy/runtime-tools/dist/index.cjs');
+  });
+});
+
+describe('@module-federation/rspack/plugin', () => {
+  it('no longer exports resolveRspackRuntimeAlias', () => {
+    expect(pluginEntry).not.toHaveProperty('resolveRspackRuntimeAlias');
   });
 });
 

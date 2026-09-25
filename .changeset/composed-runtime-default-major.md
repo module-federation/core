@@ -17,5 +17,6 @@ Removed:
 - The `FEDERATION_OPTIMIZE_NO_SHARED`, `FEDERATION_OPTIMIZE_NO_REMOTE`, `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN`, `FEDERATION_HAS_EXPOSES`, and `FEDERATION_BUILD_IDENTIFIER` defines. The plugins no longer emit them and the runtime no longer reads them. Use `experiments.optimization.disable*` with the plugin, or import the capabilities you need from `@module-federation/runtime/compose` when you bundle the runtime yourself.
 - `__webpack_require__.federation.runtime`. Use `__webpack_require__.federation.instance`, and `instance.platform.loadScriptNode` for the Node loader.
 - The fallback in `@module-federation/node` to `federation.runtime.loadScriptNode`.
+- `resolveRspackRuntimeAlias` from `@module-federation/rspack/plugin`. The wrapper no longer aliases `@module-federation/runtime$`, so the helper has no use.
 
 A build whose installed runtime packages do not export the composition subpaths now fails with an error that names the minimum runtime version. `ENV_TARGET`, `FEDERATION_ALLOW_NEW_FUNCTION`, and `FEDERATION_DEBUG` are unchanged.
