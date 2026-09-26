@@ -70,7 +70,11 @@ interface Manifest {
   exposes: ExposeConfig[];
 }
 
-export const writeRemoteManifest = async (config: any, result: BuildResult) => {
+export const writeRemoteManifest = async (
+  config: any,
+  result: BuildResult,
+  absWorkingDir: string,
+) => {
   if (result.errors && result.errors.length > 0) {
     console.warn('Build errors detected, skipping writeRemoteManifest.');
     return;
@@ -161,7 +165,7 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
             if (!version) {
               try {
                 const packageJsonPath = await resolve(
-                  process.cwd(),
+                  absWorkingDir,
                   `${pkg}/package.json`,
                 );
                 if (packageJsonPath) {
@@ -259,7 +263,8 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
     exposes,
   };
 
-  const manifestPath = path.join(
+  const manifestPath = path.resolve(
+    absWorkingDir,
     path.dirname(outputMap[containerName].chunk),
     'mf-manifest.json',
   );
