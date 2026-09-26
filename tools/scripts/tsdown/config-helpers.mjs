@@ -33,6 +33,24 @@ function createModernOutExtensions(pkgType, preferNonModuleCjs) {
   };
 }
 
+const RE_SELECTOR_IMPORT = /^#mf\//;
+const RE_DTS = /\.d\.[cm]?ts$/;
+
+// JS keeps `#mf/*` external so package `imports` conditions choose the leaf at
+// consumer build time. Declarations inline the legacy leaf through tsconfig
+// `paths`, because node10 resolution cannot read `imports` and the types do not
+// depend on the condition.
+export function externalWithSelectors(patterns) {
+  return (id, importer) => {
+    if (RE_SELECTOR_IMPORT.test(id)) {
+      return !RE_DTS.test(importer ?? '');
+    }
+    return patterns.some((pattern) =>
+      typeof pattern === 'string' ? pattern === id : pattern.test(id),
+    );
+  };
+}
+
 export function createDualFormatConfig({
   name,
   packageDir,

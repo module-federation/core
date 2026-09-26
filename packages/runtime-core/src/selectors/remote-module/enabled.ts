@@ -1,0 +1,1 @@
+export { Module } from '../../module';

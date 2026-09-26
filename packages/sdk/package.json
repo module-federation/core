@@ -51,6 +51,72 @@
       }
     }
   },
+  "imports": {
+    "#mf/env": {
+      "module-federation:target-web": {
+        "types": "./dist/selectors/env/web.d.ts",
+        "import": "./dist/selectors/env/web.js",
+        "require": "./dist/selectors/env/web.cjs",
+        "default": "./dist/selectors/env/web.js"
+      },
+      "module-federation:target-node": {
+        "types": "./dist/selectors/env/node.d.ts",
+        "import": "./dist/selectors/env/node.js",
+        "require": "./dist/selectors/env/node.cjs",
+        "default": "./dist/selectors/env/node.js"
+      },
+      "module-federation:target-worker": {
+        "types": "./dist/selectors/env/worker.d.ts",
+        "import": "./dist/selectors/env/worker.js",
+        "require": "./dist/selectors/env/worker.cjs",
+        "default": "./dist/selectors/env/worker.js"
+      },
+      "module-federation:target-universal": {
+        "types": "./dist/selectors/env/universal.d.ts",
+        "import": "./dist/selectors/env/universal.js",
+        "require": "./dist/selectors/env/universal.cjs",
+        "default": "./dist/selectors/env/universal.js"
+      },
+      "default": {
+        "types": "./dist/selectors/env/legacy.d.ts",
+        "import": "./dist/selectors/env/legacy.js",
+        "require": "./dist/selectors/env/legacy.cjs",
+        "default": "./dist/selectors/env/legacy.js"
+      }
+    },
+    "#mf/platform-loader": {
+      "module-federation:target-web": {
+        "types": "./dist/selectors/platform-loader/web.d.ts",
+        "import": "./dist/selectors/platform-loader/web.js",
+        "require": "./dist/selectors/platform-loader/web.cjs",
+        "default": "./dist/selectors/platform-loader/web.js"
+      },
+      "module-federation:target-node": {
+        "types": "./dist/selectors/platform-loader/node.d.ts",
+        "import": "./dist/selectors/platform-loader/node.js",
+        "require": "./dist/selectors/platform-loader/node.cjs",
+        "default": "./dist/selectors/platform-loader/node.js"
+      },
+      "module-federation:target-worker": {
+        "types": "./dist/selectors/platform-loader/worker.d.ts",
+        "import": "./dist/selectors/platform-loader/worker.js",
+        "require": "./dist/selectors/platform-loader/worker.cjs",
+        "default": "./dist/selectors/platform-loader/worker.js"
+      },
+      "module-federation:target-universal": {
+        "types": "./dist/selectors/platform-loader/universal.d.ts",
+        "import": "./dist/selectors/platform-loader/universal.js",
+        "require": "./dist/selectors/platform-loader/universal.cjs",
+        "default": "./dist/selectors/platform-loader/universal.js"
+      },
+      "default": {
+        "types": "./dist/selectors/platform-loader/legacy.d.ts",
+        "import": "./dist/selectors/platform-loader/legacy.js",
+        "require": "./dist/selectors/platform-loader/legacy.cjs",
+        "default": "./dist/selectors/platform-loader/legacy.js"
+      }
+    }
+  },
   "typesVersions": {
     "*": {
       ".": [

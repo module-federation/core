@@ -54,6 +54,50 @@
     "./bundler": "./dist/bundler.js",
     "./*": "./*"
   },
+  "imports": {
+    "#mf/remotes": {
+      "module-federation:no-remote": {
+        "types": "./dist/selectors/remotes/disabled.d.ts",
+        "import": "./dist/selectors/remotes/disabled.js",
+        "require": "./dist/selectors/remotes/disabled.cjs",
+        "default": "./dist/selectors/remotes/disabled.js"
+      },
+      "default": {
+        "types": "./dist/selectors/remotes/legacy.d.ts",
+        "import": "./dist/selectors/remotes/legacy.js",
+        "require": "./dist/selectors/remotes/legacy.cjs",
+        "default": "./dist/selectors/remotes/legacy.js"
+      }
+    },
+    "#mf/shared-runtime": {
+      "module-federation:no-shared": {
+        "types": "./dist/selectors/shared-runtime/disabled.d.ts",
+        "import": "./dist/selectors/shared-runtime/disabled.js",
+        "require": "./dist/selectors/shared-runtime/disabled.cjs",
+        "default": "./dist/selectors/shared-runtime/disabled.js"
+      },
+      "default": {
+        "types": "./dist/selectors/shared-runtime/legacy.d.ts",
+        "import": "./dist/selectors/shared-runtime/legacy.js",
+        "require": "./dist/selectors/shared-runtime/legacy.cjs",
+        "default": "./dist/selectors/shared-runtime/legacy.js"
+      }
+    },
+    "#mf/container-entry": {
+      "module-federation:no-container-entry": {
+        "types": "./dist/selectors/container-entry/disabled.d.ts",
+        "import": "./dist/selectors/container-entry/disabled.js",
+        "require": "./dist/selectors/container-entry/disabled.cjs",
+        "default": "./dist/selectors/container-entry/disabled.js"
+      },
+      "default": {
+        "types": "./dist/selectors/container-entry/legacy.d.ts",
+        "import": "./dist/selectors/container-entry/legacy.js",
+        "require": "./dist/selectors/container-entry/legacy.cjs",
+        "default": "./dist/selectors/container-entry/legacy.js"
+      }
+    }
+  },
   "typesVersions": {
     "*": {
       ".": [
