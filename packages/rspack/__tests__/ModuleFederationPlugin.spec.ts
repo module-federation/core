@@ -133,3 +133,73 @@ describe('runtime capability optimization defines', () => {
     });
   });
 });
+
+describe('dts plugin loading', () => {
+  function createCompiler() {
+    class NoopPlugin {
+      apply() {}
+    }
+    return {
+      context: __dirname,
+      options: {
+        plugins: [],
+        resolve: { alias: {} },
+      },
+      webpack: {
+        DefinePlugin: NoopPlugin,
+        container: { ModuleFederationPlugin: NoopPlugin },
+      },
+      hooks: {
+        afterPlugins: { tap: jest.fn() },
+      },
+    };
+  }
+
+  function loadPluginWithDtsFactory(
+    dtsPluginFactory: () => Record<string, unknown>,
+  ) {
+    let Plugin!: typeof ModuleFederationPlugin;
+    jest.isolateModules(() => {
+      jest.doMock('@module-federation/dts-plugin', dtsPluginFactory);
+      ({ ModuleFederationPlugin: Plugin } =
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        require('../src/ModuleFederationPlugin') as typeof import('../src/ModuleFederationPlugin'));
+    });
+    return Plugin;
+  }
+
+  afterEach(() => {
+    jest.dontMock('@module-federation/dts-plugin');
+  });
+
+  it('does not load @module-federation/dts-plugin when dts is disabled', () => {
+    const dtsPluginFactory = jest.fn(() => ({ DtsPlugin: jest.fn() }));
+    const Plugin = loadPluginWithDtsFactory(dtsPluginFactory);
+
+    new Plugin({ name: 'host', dts: false, manifest: false }).apply(
+      createCompiler() as any,
+    );
+
+    expect(dtsPluginFactory).not.toHaveBeenCalled();
+  });
+
+  it('loads and applies @module-federation/dts-plugin when dts is enabled', () => {
+    const dtsApply = jest.fn();
+    const addRuntimePlugins = jest.fn();
+    const DtsPlugin = jest.fn(() => ({ apply: dtsApply, addRuntimePlugins }));
+    const dtsPluginFactory = jest.fn(() => ({ DtsPlugin }));
+    const Plugin = loadPluginWithDtsFactory(dtsPluginFactory);
+
+    expect(dtsPluginFactory).not.toHaveBeenCalled();
+
+    const compiler = createCompiler();
+    new Plugin({ name: 'host', manifest: false }).apply(compiler as any);
+
+    expect(dtsPluginFactory).toHaveBeenCalledTimes(1);
+    expect(DtsPlugin).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'host' }),
+    );
+    expect(dtsApply).toHaveBeenCalledWith(compiler);
+    expect(addRuntimePlugins).toHaveBeenCalled();
+  });
+});

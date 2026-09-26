@@ -13,12 +13,13 @@ import {
 
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager, utils } from '@module-federation/managers';
-import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
 import { RemoteEntryPlugin } from './RemoteEntryPlugin';
 import logger from './logger';
+
+declare const __non_webpack_require__: NodeJS.Require | undefined;
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
 type SplitChunks = Compiler['options']['optimization']['splitChunks'];
@@ -215,6 +216,16 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     let disableDts = options.dts === false;
 
     if (!disableDts) {
+      // Load dts-plugin lazily so `dts: false` never pulls in its TypeScript
+      // toolchain. `__non_webpack_require__` keeps the ESM build from hoisting
+      // this into a static import.
+      const { DtsPlugin } = (
+        typeof __non_webpack_require__ === 'function'
+          ? __non_webpack_require__
+          : require
+      )(
+        '@module-federation/dts-plugin',
+      ) as typeof import('@module-federation/dts-plugin');
       const dtsPlugin = new DtsPlugin(options);
       // @ts-ignore
       dtsPlugin.apply(compiler);
