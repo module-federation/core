@@ -1,6 +1,9 @@
 import FederationRuntimePlugin, {
   resolveRuntimePaths,
 } from '../../../src/lib/container/runtime/FederationRuntimePlugin';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import type { Compiler } from 'webpack';
 import { rs } from '@rstest/core';
 
@@ -206,171 +209,79 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
     });
   });
 
-  describe('runtime module resolution compatibility', () => {
+  describe('runtime module resolution', () => {
     const normalizePath = (filePath: string) => filePath.replace(/\\/g, '/');
-    const originalIsEsmBuild = process.env.IS_ESM_BUILD;
 
-    afterEach(() => {
-      if (originalIsEsmBuild === undefined) {
-        delete process.env.IS_ESM_BUILD;
-      } else {
-        process.env.IS_ESM_BUILD = originalIsEsmBuild;
+    it('resolves the default runtime family to bundler entries', () => {
+      const paths = resolveRuntimePaths();
+
+      expect(normalizePath(paths.runtimePath)).toMatch(
+        /\/runtime\/dist\/bundler\.js$/,
+      );
+      expect(normalizePath(paths.runtimeToolsPath)).toMatch(
+        /\/runtime-tools\/dist\/bundler\.js$/,
+      );
+    });
+
+    it('resolves runtime members from the runtime-tools install', () => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-runtime-tools-'));
+      const writePackage = (dir: string, name: string) => {
+        fs.mkdirSync(path.join(dir, 'dist'), { recursive: true });
+        fs.writeFileSync(
+          path.join(dir, 'package.json'),
+          JSON.stringify({
+            name,
+            exports: { './bundler': './dist/bundler.js' },
+          }),
+        );
+        fs.writeFileSync(path.join(dir, 'dist/bundler.js'), '');
+      };
+      const tools = path.join(
+        root,
+        'node_modules/@module-federation/runtime-tools',
+      );
+      writePackage(tools, '@module-federation/runtime-tools');
+      for (const name of ['runtime', 'webpack-bundler-runtime']) {
+        writePackage(
+          path.join(tools, 'node_modules/@module-federation', name),
+          `@module-federation/${name}`,
+        );
+      }
+      try {
+        const paths = resolveRuntimePaths(path.join(tools, 'dist/bundler.js'));
+        expect(normalizePath(paths.runtimePath)).toBe(
+          normalizePath(
+            fs.realpathSync(
+              path.join(
+                tools,
+                'node_modules/@module-federation/runtime/dist/bundler.js',
+              ),
+            ),
+          ),
+        );
+        expect(normalizePath(paths.bundlerRuntimePath)).toContain(
+          '/runtime-tools/node_modules/@module-federation/webpack-bundler-runtime/',
+        );
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
       }
     });
 
-    it('prefers the bundler runtime entry when IS_ESM_BUILD is false', () => {
-      process.env.IS_ESM_BUILD = 'false';
+    it('does not replace a missing custom family member from the workspace install', () => {
       const plugin = new FederationRuntimePlugin({
         implementation: '/legacy/runtime-tools',
       } as any);
-      const runtimePath = plugin.getRuntimeAlias({
-        options: { resolve: { alias: {} }, output: {} },
-      } as unknown as Compiler);
 
-      expect(normalizePath(runtimePath)).toMatch(
-        /\/runtime\/dist\/bundler\.js$/,
+      expect(() =>
+        plugin.prepareRuntime({
+          options: { target: 'web', resolve: { alias: {} }, output: {} },
+        } as unknown as Compiler),
+      ).toThrow(
+        /No package\.json found|missing-anchor|ENOENT|Could not resolve/,
       );
     });
 
-    it('falls back to legacy esm runtime entries for older implementations', () => {
-      const resolve = rs.fn(
-        (request: string, options?: { paths?: string[] }) => {
-          const basedFromLegacy =
-            options?.paths?.[0] === '/legacy/runtime-tools';
-
-          if (request === '@module-federation/runtime-tools/bundler') {
-            return '/workspace/runtime-tools/dist/bundler.js';
-          }
-          if (basedFromLegacy && request.endsWith('/bundler')) {
-            throw new Error(`Cannot find module '${request}'`);
-          }
-          if (request === '@module-federation/runtime/dist/index.js') {
-            return '/legacy/runtime/dist/index.js';
-          }
-          if (
-            request ===
-            '@module-federation/webpack-bundler-runtime/dist/index.js'
-          ) {
-            return '/legacy/webpack-bundler-runtime/dist/index.js';
-          }
-
-          throw new Error(`Unexpected request: ${request}`);
-        },
-      );
-
-      const resolved = resolveRuntimePaths('/legacy/runtime-tools', resolve);
-
-      expect(normalizePath(resolved.runtimeToolsPath)).toBe(
-        '/workspace/runtime-tools/dist/bundler.js',
-      );
-      expect(normalizePath(resolved.runtimePath)).toBe(
-        '/legacy/runtime/dist/index.js',
-      );
-      expect(normalizePath(resolved.bundlerRuntimePath)).toBe(
-        '/legacy/webpack-bundler-runtime/dist/index.js',
-      );
-    });
-
-    it('prefers the provided runtime-tools implementation when available', () => {
-      const resolve = rs.fn(
-        (request: string, options?: { paths?: string[] }) => {
-          const basedFromLegacy =
-            options?.paths?.[0] === '/legacy/runtime-tools';
-
-          if (
-            basedFromLegacy &&
-            request === '@module-federation/runtime-tools/bundler'
-          ) {
-            return '/legacy/runtime-tools/dist/bundler.js';
-          }
-          if (
-            basedFromLegacy &&
-            request === '@module-federation/runtime/bundler'
-          ) {
-            return '/legacy/runtime/dist/bundler.js';
-          }
-          if (
-            basedFromLegacy &&
-            request === '@module-federation/webpack-bundler-runtime/bundler'
-          ) {
-            return '/legacy/webpack-bundler-runtime/dist/bundler.js';
-          }
-
-          throw new Error(`Unexpected request: ${request}`);
-        },
-      );
-
-      const resolved = resolveRuntimePaths('/legacy/runtime-tools', resolve);
-
-      expect(normalizePath(resolved.runtimeToolsPath)).toBe(
-        '/legacy/runtime-tools/dist/bundler.js',
-      );
-      expect(normalizePath(resolved.runtimePath)).toBe(
-        '/legacy/runtime/dist/bundler.js',
-      );
-      expect(normalizePath(resolved.bundlerRuntimePath)).toBe(
-        '/legacy/webpack-bundler-runtime/dist/bundler.js',
-      );
-    });
-
-    it('falls back to legacy cjs runtime entries when esm legacy builds are unavailable', () => {
-      const resolve = rs.fn(
-        (request: string, options?: { paths?: string[] }) => {
-          const basedFromLegacy =
-            options?.paths?.[0] === '/legacy/runtime-tools';
-
-          if (request === '@module-federation/runtime-tools/bundler') {
-            return '/workspace/runtime-tools/dist/bundler.js';
-          }
-          if (
-            basedFromLegacy &&
-            (request.endsWith('/bundler') || request.endsWith('/dist/index.js'))
-          ) {
-            throw new Error(`Cannot find module '${request}'`);
-          }
-          if (request === '@module-federation/runtime/dist/index.cjs') {
-            return '/legacy/runtime/dist/index.cjs';
-          }
-          if (
-            request ===
-            '@module-federation/webpack-bundler-runtime/dist/index.cjs'
-          ) {
-            return '/legacy/webpack-bundler-runtime/dist/index.cjs';
-          }
-
-          throw new Error(`Unexpected request: ${request}`);
-        },
-      );
-
-      const resolved = resolveRuntimePaths('/legacy/runtime-tools', resolve);
-
-      expect(normalizePath(resolved.runtimePath)).toBe(
-        '/legacy/runtime/dist/index.cjs',
-      );
-      expect(normalizePath(resolved.bundlerRuntimePath)).toBe(
-        '/legacy/webpack-bundler-runtime/dist/index.cjs',
-      );
-    });
-
-    it('prefers the bundler runtime entry when IS_ESM_BUILD is true', () => {
-      process.env.IS_ESM_BUILD = 'true';
-      const plugin = new FederationRuntimePlugin({
-        implementation: '/legacy/runtime-tools',
-      } as any);
-      const runtimePath = plugin.getRuntimeAlias({
-        options: {
-          resolve: { alias: {} },
-          output: {},
-        },
-      } as unknown as Compiler);
-
-      expect(normalizePath(runtimePath)).toMatch(
-        /\/runtime\/dist\/bundler\.js$/,
-      );
-    });
-
-    it('resolves runtime-tools alias to esm when IS_ESM_BUILD is false', () => {
-      process.env.IS_ESM_BUILD = 'false';
+    it('keeps a preset runtime alias and aliases runtime-tools to the bundler entry', () => {
       const plugin = new FederationRuntimePlugin({} as any);
       const compiler = {
         options: {
@@ -383,36 +294,11 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
 
       plugin.setRuntimeAlias(compiler);
 
-      expect(
-        normalizePath(
-          (compiler.options.resolve as any).alias[
-            '@module-federation/runtime-tools$'
-          ],
-        ),
-      ).toMatch(/\/runtime-tools\/dist\/bundler\.js$/);
-    });
-
-    it('resolves runtime-tools alias for ESM mode when runtime alias is preset', () => {
-      process.env.IS_ESM_BUILD = 'true';
-      const plugin = new FederationRuntimePlugin({} as any);
-      const compiler = {
-        options: {
-          resolve: {
-            alias: { '@module-federation/runtime$': '/custom/runtime' },
-          },
-          output: {},
-        },
-      } as unknown as Compiler;
-
-      plugin.setRuntimeAlias(compiler);
-
-      expect(
-        normalizePath(
-          (compiler.options.resolve as any).alias[
-            '@module-federation/runtime-tools$'
-          ],
-        ),
-      ).toMatch(/\/runtime-tools\/dist\/bundler\.js$/);
+      const alias = (compiler.options.resolve as any).alias;
+      expect(alias['@module-federation/runtime$']).toBe('/custom/runtime');
+      expect(normalizePath(alias['@module-federation/runtime-tools$'])).toMatch(
+        /\/runtime-tools\/dist\/bundler\.js$/,
+      );
     });
   });
 });
