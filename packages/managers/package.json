@@ -40,12 +40,25 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
+    },
+    "./runtime-selection": {
+      "import": {
+        "types": "./dist/runtime-selection/index.d.mts",
+        "default": "./dist/runtime-selection/index.mjs"
+      },
+      "require": {
+        "types": "./dist/runtime-selection/index.d.ts",
+        "default": "./dist/runtime-selection/index.js"
+      }
     }
   },
   "typesVersions": {
     "*": {
       ".": [
         "./dist/index.d.ts"
+      ],
+      "runtime-selection": [
+        "./dist/runtime-selection/index.d.ts"
       ]
     }
   },
