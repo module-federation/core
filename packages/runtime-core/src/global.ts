@@ -117,11 +117,33 @@ export function resetFederationGlobalInfo(): void {
   CurrentGlobal.__FEDERATION__.moduleInfo = {};
   CurrentGlobal.__FEDERATION__.__SHARE__ = {};
   CurrentGlobal.__FEDERATION__.__MANIFEST_LOADING__ = {};
+  CurrentGlobal.__FEDERATION__.__PRELOADED_MAP__.clear();
   CurrentGlobal.__FEDERATION__.__PRELOADED_ASSETS__.clear();
 
   Object.keys(globalLoading).forEach((key) => {
     delete globalLoading[key];
   });
+}
+
+/**
+ * Drop every federation runtime generation from the global object so the next
+ * bundle that runs starts a fresh one. Use it when the bundles themselves are
+ * re-evaluated, e.g. after a server-side rebuild clears the require cache.
+ *
+ * Besides the global info this clears each instance's module cache and deletes
+ * the container globals (`instance.name` and every remote `entryGlobalName`).
+ * Otherwise the re-evaluated bundle reuses the previous generation's containers
+ * and shared singletons while its own modules are new.
+ */
+export function resetFederationRuntime(): void {
+  for (const instance of CurrentGlobal.__FEDERATION__.__INSTANCES__) {
+    instance.moduleCache.forEach((module) => {
+      Reflect.deleteProperty(CurrentGlobal, module.remoteInfo.entryGlobalName);
+    });
+    instance.moduleCache.clear();
+    Reflect.deleteProperty(CurrentGlobal, instance.name);
+  }
+  resetFederationGlobalInfo();
 }
 
 export function setGlobalFederationInstance(
