@@ -5,6 +5,11 @@ import {
   getGlobalFederationConstructor,
   setGlobalFederationInstance,
   assert,
+  error,
+  assertRuntimeImageCompatible,
+  attachRuntimeImage,
+  readRuntimeImage,
+  type RuntimeImageDescriptorV1,
   setGlobalFederationConstructor,
 } from '@module-federation/runtime-core';
 import { runtimeDescMap, RUNTIME_009 } from '@module-federation/error-codes';
@@ -25,14 +30,34 @@ export {
 
 export { ModuleFederation };
 
+function assertRuntimeFamilyRegistrable(
+  name: string,
+  next: RuntimeImageDescriptorV1,
+): void {
+  for (const registered of CurrentGlobal.__FEDERATION__.__INSTANCES__) {
+    const current = readRuntimeImage(registered);
+    if (current && current.compatibilityId !== next.compatibilityId) {
+      error(
+        `Refusing to register ${name} from runtime family ${next.compatibilityId} beside ${registered.name} from ${current.compatibilityId}.`,
+      );
+    }
+  }
+}
+
 export function createInstance(options: UserOptions) {
   // Retrieve debug constructor
   const ModuleFederationConstructor =
     getGlobalFederationConstructor() || ModuleFederation;
+  if (options.runtimeImage) {
+    assertRuntimeFamilyRegistrable(options.name, options.runtimeImage);
+  }
   const instance = new ModuleFederationConstructor({
     id: `${options.name}@${options.version || Date.now()}`,
     ...options,
   });
+  if (options.runtimeImage) {
+    attachRuntimeImage(instance, options.runtimeImage);
+  }
   setGlobalFederationInstance(instance);
   return instance;
 }
@@ -46,6 +71,10 @@ export function init(options: UserOptions): ModuleFederation {
     FederationInstance = createInstance(normalizedOptions);
     return FederationInstance;
   } else {
+    assertRuntimeImageCompatible(
+      readRuntimeImage(instance),
+      normalizedOptions.runtimeImage,
+    );
     // Merge options
     instance.initOptions(normalizedOptions);
     if (!FederationInstance) {

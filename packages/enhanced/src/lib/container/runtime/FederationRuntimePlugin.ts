@@ -14,6 +14,7 @@ import {
   normalizeRuntimeInitOptionsWithOutShared,
   createHash,
   normalizeToPosixPath,
+  type NormalizedRuntimeInitOptionsWithOutShared,
 } from './utils';
 import {
   expectedEntry,
@@ -118,6 +119,7 @@ class FederationRuntimePlugin {
   bundlerRuntimePath: string;
   runtimePath: string;
   runtimeToolsPath: string;
+  runtimeInitOptions?: NormalizedRuntimeInitOptionsWithOutShared;
   federationRuntimeDependency?: FederationRuntimeDependency; // Add this line
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
@@ -345,6 +347,7 @@ class FederationRuntimePlugin {
     const initOptionsWithoutShared = normalizeRuntimeInitOptionsWithOutShared(
       this.options,
     );
+    this.runtimeInitOptions = initOptionsWithoutShared;
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
@@ -422,6 +425,33 @@ class FederationRuntimePlugin {
     this.runtimeToolsPath =
       expectedEntry(image, '@module-federation/runtime-tools$') ??
       image.family.members['runtime-tools'].entry;
+    if (
+      image.mode === 'conditions' &&
+      selection.profile &&
+      this.runtimeInitOptions
+    ) {
+      const capabilities = [
+        'remote',
+        'shared',
+        'snapshotPlugins',
+        'containerEntry',
+      ] as const;
+      this.runtimeInitOptions.runtimeImage = {
+        contract: 1,
+        compatibilityId: image.family.compatibilityId,
+        required: capabilities.filter(
+          (capability) => selection.profile?.[capability] === 'required',
+        ),
+        forbidden: capabilities.filter(
+          (capability) => selection.profile?.[capability] === 'forbidden',
+        ),
+        available: capabilities.filter(
+          (capability) => selection.profile?.[capability] !== 'forbidden',
+        ),
+        target: selection.profile.target,
+        entryLoadingIdentity: image.entryLoadingIdentity,
+      };
+    }
     this.setRuntimeAlias(compiler);
     this.entryFilePath = this.getFilePath(compiler);
   }

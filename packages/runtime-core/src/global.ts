@@ -26,6 +26,20 @@ export interface Federation {
   __PRELOADED_ASSETS__: Set<string>;
 }
 
+export interface RemoteEntryCacheDescriptorV1 {
+  contract: 1;
+  compatibilityId: string;
+  target: string;
+  entryLoadingIdentity: string;
+  remoteType: string;
+  entryGlobalName: string;
+}
+
+export interface RemoteEntryCacheMetadataV1 {
+  promise: Promise<RemoteEntryExports | void>;
+  descriptor: RemoteEntryCacheDescriptorV1;
+}
+
 const MAX_PRELOADED_ASSETS = 2000;
 export const CurrentGlobal =
   typeof globalThis === 'object' ? globalThis : window;
@@ -50,6 +64,11 @@ declare global {
       string,
       undefined | Promise<RemoteEntryExports | void>
     >;
+  // eslint-disable-next-line no-var
+  var __GLOBAL_LOADING_REMOTE_ENTRY_META__: Record<
+    string,
+    RemoteEntryCacheMetadataV1 | undefined
+  >;
 }
 
 function definePropertyGlobalVal(
@@ -74,8 +93,19 @@ function includeOwnProperty(target: typeof CurrentGlobal, key: string) {
 if (!includeOwnProperty(CurrentGlobal, '__GLOBAL_LOADING_REMOTE_ENTRY__')) {
   definePropertyGlobalVal(CurrentGlobal, '__GLOBAL_LOADING_REMOTE_ENTRY__', {});
 }
+if (
+  !includeOwnProperty(CurrentGlobal, '__GLOBAL_LOADING_REMOTE_ENTRY_META__')
+) {
+  definePropertyGlobalVal(
+    CurrentGlobal,
+    '__GLOBAL_LOADING_REMOTE_ENTRY_META__',
+    {},
+  );
+}
 
 export const globalLoading = CurrentGlobal.__GLOBAL_LOADING_REMOTE_ENTRY__;
+export const globalLoadingMeta =
+  CurrentGlobal.__GLOBAL_LOADING_REMOTE_ENTRY_META__;
 
 function setGlobalDefaultVal(target: typeof CurrentGlobal) {
   if (
@@ -121,6 +151,9 @@ export function resetFederationGlobalInfo(): void {
 
   Object.keys(globalLoading).forEach((key) => {
     delete globalLoading[key];
+  });
+  Object.keys(globalLoadingMeta).forEach((key) => {
+    delete globalLoadingMeta[key];
   });
 }
 

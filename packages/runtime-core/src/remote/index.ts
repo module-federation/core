@@ -9,6 +9,7 @@ import {
   Global,
   getInfoWithoutType,
   globalLoading,
+  globalLoadingMeta,
   CurrentGlobal,
 } from '../global';
 import {
@@ -609,6 +610,7 @@ export class RemoteHandler {
 
         if (globalLoading[remoteEntryUniqueKey]) {
           delete globalLoading[remoteEntryUniqueKey];
+          delete globalLoadingMeta[remoteEntryUniqueKey];
         }
 
         // delete unloaded shared and instance

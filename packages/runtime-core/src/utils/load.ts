@@ -6,7 +6,13 @@ import {
 } from '@module-federation/sdk';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
-import { globalLoading, getRemoteEntryExports } from '../global';
+import {
+  globalLoading,
+  globalLoadingMeta,
+  getRemoteEntryExports,
+  type RemoteEntryCacheDescriptorV1,
+} from '../global';
+import { readRuntimeImage } from '../runtimeImage';
 import {
   Remote,
   RemoteEntryExports,
@@ -20,8 +26,6 @@ import {
   runtimeDescMap,
 } from '@module-federation/error-codes';
 
-// Declare the ENV_TARGET constant that will be defined by DefinePlugin
-declare const ENV_TARGET: 'web' | 'node';
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
 const remoteEntryLoadingOrigins = new WeakMap<
   Promise<RemoteEntryExports | void>,
@@ -332,6 +336,54 @@ export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
   return composeKeyWithSeparator(name, entry);
 }
 
+function getRemoteEntryCacheDescriptor(
+  origin: ModuleFederation,
+  remoteInfo: RemoteInfo,
+): RemoteEntryCacheDescriptorV1 | undefined {
+  const image = readRuntimeImage(origin);
+  if (!image) {
+    return undefined;
+  }
+  return {
+    contract: 1,
+    compatibilityId: image.compatibilityId,
+    target: image.target,
+    entryLoadingIdentity: image.entryLoadingIdentity,
+    remoteType: remoteInfo.type,
+    entryGlobalName: remoteInfo.entryGlobalName,
+  };
+}
+
+const cacheIdentityFields = [
+  'compatibilityId',
+  'target',
+  'entryLoadingIdentity',
+  'remoteType',
+  'entryGlobalName',
+] as const;
+
+function assertRemoteEntryCacheCompatible(
+  uniqueKey: string,
+  promise: Promise<RemoteEntryExports | void>,
+  next: RemoteEntryCacheDescriptorV1,
+): void {
+  const metadata = globalLoadingMeta[uniqueKey];
+  if (!metadata) {
+    return;
+  }
+  if (metadata.promise !== promise) {
+    delete globalLoadingMeta[uniqueKey];
+    return;
+  }
+  for (const field of cacheIdentityFields) {
+    if (metadata.descriptor[field] !== next[field]) {
+      error(
+        `Refusing to reuse remote entry ${uniqueKey}. ${field} changed from ${metadata.descriptor[field]} to ${next[field]}.`,
+      );
+    }
+  }
+}
+
 export async function getRemoteEntry(params: {
   origin: ModuleFederation;
   remoteInfo: RemoteInfo;
@@ -349,6 +401,7 @@ export async function getRemoteEntry(params: {
     _inErrorHandling = false,
   } = params;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+  const cacheDescriptor = getRemoteEntryCacheDescriptor(origin, remoteInfo);
 
   if (remoteEntryExports) {
     await origin.loaderHook.lifecycle.afterLoadEntry.emit({
@@ -359,6 +412,14 @@ export async function getRemoteEntry(params: {
       cached: true,
     });
     return remoteEntryExports;
+  }
+
+  if (cacheDescriptor && globalLoading[uniqueKey]) {
+    assertRemoteEntryCacheCompatible(
+      uniqueKey,
+      globalLoading[uniqueKey],
+      cacheDescriptor,
+    );
   }
 
   if (!globalLoading[uniqueKey]) {
@@ -376,10 +437,7 @@ export async function getRemoteEntry(params: {
         if (res) {
           return res;
         }
-        const isWebEnvironment =
-          typeof ENV_TARGET !== 'undefined'
-            ? ENV_TARGET === 'web'
-            : isBrowserEnvValue;
+        const isWebEnvironment = isBrowserEnvValue;
 
         return isWebEnvironment
           ? loadEntryDom({
@@ -449,12 +507,21 @@ export async function getRemoteEntry(params: {
       });
 
     globalLoading[uniqueKey] = loading;
+    if (cacheDescriptor) {
+      globalLoadingMeta[uniqueKey] = {
+        promise: loading,
+        descriptor: cacheDescriptor,
+      };
+    }
     // Clear rejected entries so a later call can retry. Keep the original
     // promise identity in the cache (do not replace with a cleanup thenable).
     // Identity check: an older rejection must not delete a newer in-flight request.
     loading.then(undefined, () => {
       if (globalLoading[uniqueKey] === loading) {
         delete globalLoading[uniqueKey];
+        if (globalLoadingMeta[uniqueKey]?.promise === loading) {
+          delete globalLoadingMeta[uniqueKey];
+        }
       }
     });
     remoteEntryLoadingOrigins.set(loading, origin);
