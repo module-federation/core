@@ -8,6 +8,11 @@ import type { ScriptRetryOptions } from './types';
 import logger from './logger';
 import { getRetryUrl, combineUrlDomainWithPathQuery } from './utils';
 
+const isScriptExecutionError = (error: unknown): error is Error =>
+  error instanceof Error &&
+  (error.name === 'ScriptExecutionError' ||
+    error.message.includes('ScriptExecutionError'));
+
 export function scriptRetry<T extends Record<string, any>>({
   retryOptions,
   retryFn,
@@ -83,6 +88,10 @@ export function scriptRetry<T extends Record<string, any>>({
           onSuccess({ domains, url: lastRequestUrl, tagName: 'script' });
         break;
       } catch (error) {
+        if (isScriptExecutionError(error)) {
+          throw error;
+        }
+
         lastError = error;
         attempts++;
         if (attempts >= maxAttempts) {

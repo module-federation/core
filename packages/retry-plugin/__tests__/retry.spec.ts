@@ -283,6 +283,31 @@ describe('Retry Plugin', () => {
       expect(mockRetryFn).toHaveBeenCalledTimes(2);
     });
 
+    it('should stop retrying and preserve execution errors', async () => {
+      const executionError = new Error(
+        'ScriptExecutionError: remote entry execution failed',
+      );
+      executionError.name = 'ScriptExecutionError';
+      const mockRetryFn = rs
+        .fn()
+        .mockRejectedValueOnce(new Error('Script load error'))
+        .mockRejectedValueOnce(executionError)
+        .mockResolvedValueOnce({ module: 'loaded' });
+
+      const retryFunction = scriptRetry({
+        retryOptions: {
+          retryTimes: 3,
+          retryDelay: 0,
+        },
+        retryFn: mockRetryFn,
+      });
+
+      await expect(
+        retryFunction({ url: 'https://example.com/script.js' }),
+      ).rejects.toBe(executionError);
+      expect(mockRetryFn).toHaveBeenCalledTimes(2);
+    });
+
     it('should use getRetryUrl for script retries', async () => {
       const mockRetryFn = rs
         .fn()
