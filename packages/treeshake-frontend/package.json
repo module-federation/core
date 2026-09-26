@@ -73,7 +73,7 @@
     "@playwright/test": "^1.57.0",
     "@rsbuild/core": "^2.1.4",
     "@rsbuild/plugin-react": "^2.1.0",
-    "@rslib/core": "^0.23.2",
+    "@rslib/core": "^1.0.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.10.7",
     "@types/react": "^18.3.12",
