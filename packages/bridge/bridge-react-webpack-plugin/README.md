@@ -129,3 +129,18 @@ root.render(
     <App />
 );
 ```
+
+## Plugin options
+
+The React bridge webpack plugin is applied automatically by `ModuleFederationPlugin` when Bridge Router is enabled. You can control its router alias debug logs with `bridge.showBridgeRouterLogs`:
+
+```js
+new ModuleFederationPlugin({
+  name: 'remote1',
+  bridge: {
+    enableBridgeRouter: true,
+    // Off by default. Set to true to print the resolved react-router aliases.
+    showBridgeRouterLogs: true,
+  },
+});
+```

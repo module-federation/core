@@ -70,8 +70,13 @@ const setRouterAlias = (
   }
 };
 
+export type BridgeRouterAliasOptions = {
+  showBridgeRouterLogs?: boolean;
+};
+
 export const getBridgeRouterAlias = (
   originalAlias: string,
+  options: BridgeRouterAliasOptions = {},
 ): Record<string, string> => {
   const userDependencies = getDependencies();
   let reactRouterDomPath = '';
@@ -92,6 +97,12 @@ export const getBridgeRouterAlias = (
     );
   }
 
+  const logAlias = (message: string, alias: Record<string, string>) => {
+    if (options.showBridgeRouterLogs) {
+      console.log(message, alias);
+    }
+  };
+
   // Generate alias based on detected router package
   if (reactRouterDomPath) {
     const packageJsonPath = findPackageJson(reactRouterDomPath);
@@ -104,7 +115,7 @@ export const getBridgeRouterAlias = (
         majorVersion,
         reactRouterDomPath,
       );
-      console.log(
+      logAlias(
         '<<<<<<<<<<<<< bridgeRouterAlias >>>>>>>>>>>>>',
         bridgeRouterAlias,
       );
@@ -116,7 +127,7 @@ export const getBridgeRouterAlias = (
   const bridgeRouterAlias = {
     'react-router-dom$': reactRouterDomV6AliasPath,
   };
-  console.log(
+  logAlias(
     '<<<<<<<<<<<<< default bridgeRouterAlias >>>>>>>>>>>>>',
     bridgeRouterAlias,
   );

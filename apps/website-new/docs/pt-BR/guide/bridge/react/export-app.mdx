@@ -89,6 +89,8 @@ export default {
       bridge: {
         // Enable Bridge Router routing capabilities, default is true
         enableBridgeRouter: true,
+        // Print router alias debug logs during compilation, default is false
+        showBridgeRouterLogs: false,
       }
     }),
   ],
@@ -99,6 +101,8 @@ export default {
 
 - **`enableBridgeRouter: true`** (padrão) - Automatically handles basename e routing coordination, suporta React Router v5, v6, v7
 - **`enableBridgeRouter: false`** - Disables Bridge's padrão routing proxy capabilities, users precisa handle routing integração manually
+- **`showBridgeRouterLogs: true`** - Prints o React bridge webpack plugin's router alias debug logs during compilation
+- **`showBridgeRouterLogs: false`** (padrão) - Hides those debug logs
 
 :::warning Important
 Quando enabling Bridge Router, não configure `react-router-dom` as uma dependência compartilhada, caso contrário it vai cause routing functionality issues.

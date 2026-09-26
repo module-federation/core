@@ -919,6 +919,11 @@
           "description": "[Deprecated] Use `enableBridgeRouter: false` instead. Disables the default alias setting in the bridge. When true, users must manually handle basename through root component props.",
           "type": "boolean",
           "default": false
+        },
+        "showBridgeRouterLogs": {
+          "description": "Prints router alias debug logs emitted by the React bridge webpack plugin when true.",
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false
