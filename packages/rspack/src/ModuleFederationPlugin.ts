@@ -12,7 +12,11 @@ import {
 } from '@module-federation/sdk';
 
 import { StatsPlugin } from '@module-federation/manifest';
-import { ContainerManager, utils } from '@module-federation/managers';
+import {
+  ContainerManager,
+  utils,
+  CanonicalSharedPlugin,
+} from '@module-federation/managers';
 import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
@@ -230,6 +234,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
         logger.warn(err);
         disableManifest = true;
       }
+    }
+
+    if (options.shared) {
+      new CanonicalSharedPlugin(options.shared).apply(compiler);
     }
 
     new compiler.webpack.container.ModuleFederationPlugin(
