@@ -8,6 +8,9 @@
       "#mf/container-entry": ["./src/selectors/container-entry/legacy.ts"],
       "#mf/remotes": ["./src/selectors/remotes/legacy.ts"],
       "#mf/shared-runtime": ["./src/selectors/shared-runtime/legacy.ts"],
+      "#mf/tree-shaking-share-plugin": [
+        "./src/selectors/tree-shaking-share-plugin/legacy.ts"
+      ],
       "*": ["./*"]
     }
   },

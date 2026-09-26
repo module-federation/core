@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
@@ -9,15 +10,6 @@ import { runNodeWithConditions } from '../../../tools/testing/runNodeWithConditi
 
 const packageDir = path.resolve(__dirname, '..');
 type CompilerFactory = typeof webpack;
-type StatsModule = {
-  name?: string;
-  identifier?: string;
-  modules?: StatsModule[];
-};
-
-function runSdk(condition: string, code: string): string {
-  return runNodeWithConditions(packageDir, [condition], code);
-}
 
 function compilerCases(): [string, CompilerFactory][] {
   Object.defineProperties(globalThis, {
@@ -42,26 +34,29 @@ function compilerCases(): [string, CompilerFactory][] {
   ];
 }
 
-function flattenModules(modules: StatsModule[]): StatsModule[] {
-  return modules.flatMap((module) => [
-    module,
-    ...flattenModules(module.modules ?? []),
-  ]);
+interface CompiledRun {
+  output: string;
+  bundle: string;
+  warnings: string[];
 }
 
-function compileSdk(
+const NODE_LOADER_MARKER =
+  'vm.SyntheticModule is required to load Node.js built-in modules in ESM remote entries.';
+
+function runCompiled(
   compilerFactory: CompilerFactory,
   compilerName: string,
   condition: string,
-): Promise<{ modules: string[]; warnings: string[] }> {
+): Promise<CompiledRun> {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-sdk-selector-'));
   fs.writeFileSync(
     path.join(root, 'entry.js'),
-    'import { loadScriptNode } from "@module-federation/sdk";\nexport default loadScriptNode;\n',
+    "import { loadScriptNode } from '@module-federation/sdk'; loadScriptNode('unused', {}).catch((error) => console.log(error.message));",
   );
   return new Promise((resolve, reject) => {
     const compiler = compilerFactory({
       context: packageDir,
+      target: 'node',
       mode: 'none',
       entry: path.join(root, 'entry.js'),
       output: {
@@ -79,23 +74,46 @@ function compileSdk(
       },
     });
     compiler.run((error, stats) => {
-      compiler.close(() => undefined);
-      fs.rmSync(root, { recursive: true, force: true });
+      const finish = (result: CompiledRun | Error) => {
+        compiler.close(() => undefined);
+        fs.rmSync(root, { recursive: true, force: true });
+        if (result instanceof Error) {
+          reject(result);
+          return;
+        }
+        resolve(result);
+      };
       if (error) {
-        reject(error);
+        finish(error);
         return;
       }
-      const info = stats?.toJson({ modules: true, warnings: true });
       if (stats?.hasErrors()) {
-        reject(new Error(info?.errors?.[0]?.message ?? 'compile failed'));
+        finish(
+          new Error(stats.toJson().errors?.[0]?.message ?? 'compile failed'),
+        );
         return;
       }
-      resolve({
-        modules: flattenModules(
-          (info?.modules ?? []) as unknown as StatsModule[],
-        ).map((module) => module.name ?? module.identifier ?? ''),
-        warnings: (info?.warnings ?? []).map((warning) => warning.message),
-      });
+      try {
+        const bundlePath = path.join(root, compilerName, 'out.js');
+        const output = execFileSync(process.execPath, [bundlePath], {
+          encoding: 'utf8',
+          env: {
+            ...process.env,
+            NODE_PATH: path.resolve(packageDir, '../../node_modules'),
+          },
+        });
+        finish({
+          output: output.trim(),
+          bundle: fs.readFileSync(bundlePath, 'utf8'),
+          warnings: (stats?.toJson({ warnings: true }).warnings ?? []).map(
+            (warning) => warning.message,
+          ),
+        });
+      } catch (runError) {
+        finish(
+          runError instanceof Error ? runError : new Error(String(runError)),
+        );
+      }
     });
   });
 }
@@ -108,8 +126,9 @@ describe('platform loader selector', () => {
     ['module-federation:target-universal', 'false'],
   ])('reports the %s environment', (condition, expected) => {
     expect(
-      runSdk(
-        condition,
+      runNodeWithConditions(
+        packageDir,
+        [condition],
         "console.log(require('./dist/index.cjs').isBrowserEnvValue)",
       ),
     ).toBe(expected);
@@ -117,8 +136,9 @@ describe('platform loader selector', () => {
 
   it('rejects Node evaluation in a web runtime', () => {
     expect(
-      runSdk(
-        'module-federation:target-web',
+      runNodeWithConditions(
+        packageDir,
+        ['module-federation:target-web'],
         "require('./dist/index.cjs').loadScriptNode('unused', {}).catch((error) => console.log(error.message))",
       ),
     ).toBe('Node script loading is disabled by module-federation:target-web.');
@@ -126,8 +146,9 @@ describe('platform loader selector', () => {
 
   it('evaluates a classic remote script in a worker runtime', () => {
     expect(
-      runSdk(
-        'module-federation:target-worker',
+      runNodeWithConditions(
+        packageDir,
+        ['module-federation:target-worker'],
         "globalThis.importScripts = () => { globalThis.__worker_remote__ = { value: 42 } }; require('./dist/index.cjs').loadScriptNode('remote.js', { attrs: { globalName: '__worker_remote__' } }).then((value) => console.log(JSON.stringify(value)))",
       ),
     ).toBe('{"value":42}');
@@ -135,23 +156,29 @@ describe('platform loader selector', () => {
 
   it('imports a module remote in a worker runtime', () => {
     expect(
-      runSdk(
-        'module-federation:target-worker',
+      runNodeWithConditions(
+        packageDir,
+        ['module-federation:target-worker'],
         "require('./dist/index.cjs').loadScriptNode('data:text/javascript,export default { value: 42 }', { attrs: { type: 'module' } }).then((value) => console.log(value.default.value))",
       ),
     ).toBe('42');
   });
 
   it.each(compilerCases())(
-    'keeps Node evaluation out of the %s web graph',
+    'rejects Node script loading from a %s web bundle and drops the Node loader',
     async (name, compiler) => {
-      const { modules } = await compileSdk(
+      const web = await runCompiled(
         compiler,
-        name,
+        `${name}-web`,
         'module-federation:target-web',
       );
-      expect(modules).toContain('./dist/selectors/platform-loader/web.js');
-      expect(modules).not.toContain('./dist/node.js');
+      expect(web.output).toBe(
+        'Node script loading is disabled by module-federation:target-web.',
+      );
+      expect(web.bundle).not.toContain(NODE_LOADER_MARKER);
+
+      const legacy = await runCompiled(compiler, `${name}-legacy`, 'import');
+      expect(legacy.bundle).toContain(NODE_LOADER_MARKER);
     },
     60_000,
   );
@@ -159,13 +186,12 @@ describe('platform loader selector', () => {
   it.each(compilerCases())(
     'leaves the worker module import to the %s runtime',
     async (name, compiler) => {
-      const { modules, warnings } = await compileSdk(
+      const worker = await runCompiled(
         compiler,
-        name,
+        `${name}-worker`,
         'module-federation:target-worker',
       );
-      expect(modules).toContain('./dist/selectors/platform-loader/worker.js');
-      expect(warnings).toEqual([]);
+      expect(worker.warnings).toEqual([]);
     },
     60_000,
   );

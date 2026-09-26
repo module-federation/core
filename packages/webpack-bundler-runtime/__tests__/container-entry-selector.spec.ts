@@ -6,26 +6,10 @@ import path from 'node:path';
 import { clearImmediate, setImmediate } from 'node:timers';
 import { TextDecoder, TextEncoder } from 'node:util';
 import type webpack from 'webpack';
+import { runNodeWithConditions } from '../../../tools/testing/runNodeWithConditions';
 
 const packageDir = path.resolve(__dirname, '..');
 type CompilerFactory = typeof webpack;
-type StatsModule = {
-  name?: string;
-  identifier?: string;
-  modules?: StatsModule[];
-};
-
-function containerEntryType(condition?: string): string {
-  return execFileSync(
-    process.execPath,
-    [
-      ...(condition ? [`--conditions=${condition}`] : []),
-      '-e',
-      "console.log(typeof require('#mf/container-entry').initContainerEntry)",
-    ],
-    { cwd: packageDir, encoding: 'utf8' },
-  ).trim();
-}
 
 function compilerCases(): [string, CompilerFactory][] {
   Object.defineProperties(globalThis, {
@@ -50,25 +34,18 @@ function compilerCases(): [string, CompilerFactory][] {
   ];
 }
 
-function flattenModules(modules: StatsModule[]): StatsModule[] {
-  return modules.flatMap((module) => [
-    module,
-    ...flattenModules(module.modules ?? []),
-  ]);
-}
-
-function compileRuntime(
+function runCompiled(
   compilerFactory: CompilerFactory,
   compilerName: string,
-): Promise<string[]> {
+  condition: string,
+  entrySource: string,
+): Promise<string> {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-entry-selector-'));
-  fs.writeFileSync(
-    path.join(root, 'entry.js'),
-    'import federation from "@module-federation/webpack-bundler-runtime";\nexport default federation;\n',
-  );
+  fs.writeFileSync(path.join(root, 'entry.js'), entrySource);
   return new Promise((resolve, reject) => {
     const compiler = compilerFactory({
       context: packageDir,
+      target: 'node',
       mode: 'none',
       entry: path.join(root, 'entry.js'),
       output: {
@@ -82,72 +59,147 @@ function compileRuntime(
             'dist/index.js',
           ),
         },
-        conditionNames: [
-          'module-federation:no-container-entry',
-          'import',
-          '...',
-        ],
+        conditionNames: [condition, 'import', '...'],
       },
       optimization: {
         minimize: false,
       },
-      externals: [
-        (
-          { request }: { request?: string },
-          callback: (error?: Error | null, result?: string) => void,
-        ) => {
-          if (
-            request?.startsWith('@module-federation/') &&
-            request !== '@module-federation/webpack-bundler-runtime'
-          ) {
-            callback(null, `commonjs ${request}`);
-            return;
-          }
-          callback();
-        },
-      ],
     });
     compiler.run((error, stats) => {
-      compiler.close(() => undefined);
-      fs.rmSync(root, { recursive: true, force: true });
+      const finish = (result: string | Error) => {
+        compiler.close(() => undefined);
+        fs.rmSync(root, { recursive: true, force: true });
+        if (result instanceof Error) {
+          reject(result);
+          return;
+        }
+        resolve(result);
+      };
       if (error) {
-        reject(error);
+        finish(error);
         return;
       }
-      const info = stats?.toJson({ modules: true });
       if (stats?.hasErrors()) {
-        reject(new Error(info?.errors?.[0]?.message ?? 'compile failed'));
+        finish(
+          new Error(stats.toJson().errors?.[0]?.message ?? 'compile failed'),
+        );
         return;
       }
-      resolve(
-        flattenModules((info?.modules ?? []) as unknown as StatsModule[]).map(
-          (module) => module.name ?? module.identifier ?? '',
-        ),
-      );
+      try {
+        const output = execFileSync(
+          process.execPath,
+          [path.join(root, compilerName, 'out.js')],
+          {
+            encoding: 'utf8',
+            env: {
+              ...process.env,
+              NODE_PATH: path.resolve(packageDir, '../../node_modules'),
+            },
+          },
+        );
+        finish(output.trim());
+      } catch (runError) {
+        finish(
+          runError instanceof Error ? runError : new Error(String(runError)),
+        );
+      }
     });
   });
 }
 
+const containerEntrySource = `
+import federation from '@module-federation/webpack-bundler-runtime';
+try {
+  console.log(
+    'result:' +
+      String(
+        federation.bundlerRuntime.initContainerEntry({ webpackRequire: {} }),
+      ),
+  );
+} catch (error) {
+  console.log('threw');
+}
+`;
+
+const sharedGetterSource = `
+import federation from '@module-federation/webpack-bundler-runtime';
+const factory = () => 'shared';
+try {
+  const getter = federation.bundlerRuntime.getSharedFallbackGetter({
+    shareKey: 'react',
+    factory,
+    webpackRequire: { federation: {} },
+  });
+  console.log(getter());
+} catch (error) {
+  console.log('threw');
+}
+`;
+
 describe('container entry selector', () => {
-  it('keeps container initialization available by default', () => {
-    expect(containerEntryType()).toBe('function');
+  it('initializes nothing without a share scope, and the disabled leaf has no callable export', () => {
+    const code =
+      "const { initContainerEntry } = require('#mf/container-entry'); console.log(typeof initContainerEntry === 'function' ? 'result:' + String(initContainerEntry({ webpackRequire: {} })) : 'export:' + typeof initContainerEntry);";
+    expect(runNodeWithConditions(packageDir, [], code)).toBe(
+      'result:undefined',
+    );
+    expect(
+      runNodeWithConditions(
+        packageDir,
+        ['module-federation:no-container-entry'],
+        code,
+      ),
+    ).toBe('export:undefined');
   });
 
-  it('removes container initialization for the namespaced condition', () => {
-    expect(containerEntryType('module-federation:no-container-entry')).toBe(
-      'undefined',
+  it('patches tree-shaking status without a bundler runtime, and omits the plugin when shared is disabled', () => {
+    const code =
+      "require('@module-federation/runtime/helpers').default.global.addGlobalSnapshot({ host: { shared: [{ sharedName: 'react', treeShakingStatus: 2 }] } }); const { createTreeShakingSharePlugin } = require('#mf/tree-shaking-share-plugin'); const plugin = createTreeShakingSharePlugin({ webpackRequire: { federation: { sharedFallback: { react: [] } } } }); if (!plugin) { console.log('absent'); } else { const factory = () => 'react'; const react = { get: factory, treeShaking: { status: 1 } }; plugin.beforeInit({ userOptions: { shared: { react } }, origin: { name: 'host' }, options: {} }); console.log(`status:${react.treeShaking.status} getter:${react.get === factory ? 'original' : 'wrapped'}`); }";
+    expect(runNodeWithConditions(packageDir, [], code)).toBe(
+      'status:2 getter:original',
     );
+    expect(
+      runNodeWithConditions(packageDir, ['module-federation:no-shared'], code),
+    ).toBe('absent');
   });
 
   it.each(compilerCases())(
-    'removes the enabled entry from the %s graph',
+    'uses the same container result from a %s bundle',
     async (name, compiler) => {
-      const modules = await compileRuntime(compiler, name);
-      expect(modules).toContain('./dist/selectors/container-entry/disabled.js');
-      expect(modules).not.toContain(
-        './dist/selectors/container-entry/legacy.js',
-      );
-      expect(modules).not.toContain('./dist/initContainerEntry.js');
+      await expect(
+        runCompiled(
+          compiler,
+          `${name}-container`,
+          'import',
+          containerEntrySource,
+        ),
+      ).resolves.toBe('result:undefined');
+      await expect(
+        runCompiled(
+          compiler,
+          `${name}-container-off`,
+          'module-federation:no-container-entry',
+          containerEntrySource,
+        ),
+      ).resolves.toBe('threw');
+    },
+    60_000,
+  );
+
+  it.each(compilerCases())(
+    'uses the same shared fallback result from a %s bundle',
+    async (name, compiler) => {
+      await expect(
+        runCompiled(compiler, `${name}-shared`, 'import', sharedGetterSource),
+      ).resolves.toBe('shared');
+      await expect(
+        runCompiled(
+          compiler,
+          `${name}-shared-off`,
+          'module-federation:no-shared',
+          sharedGetterSource,
+        ),
+      ).resolves.toBe('threw');
     },
     60_000,
   );

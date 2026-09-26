@@ -42,5 +42,7 @@ module.exports = {
       '<rootDir>/src/selectors/container-entry/legacy.ts',
     '^#mf/remotes$': '<rootDir>/src/selectors/remotes/legacy.ts',
     '^#mf/shared-runtime$': '<rootDir>/src/selectors/shared-runtime/legacy.ts',
+    '^#mf/tree-shaking-share-plugin$':
+      '<rootDir>/src/selectors/tree-shaking-share-plugin/legacy.ts',
   },
 };
