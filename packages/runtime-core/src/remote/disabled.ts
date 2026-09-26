@@ -1,4 +1,5 @@
-import { PluginSystem } from '../utils/hooks';
+import type { RemoteHandler } from './index';
+import { AsyncHook, PluginSystem } from '../utils/hooks';
 
 const REMOTE_DISABLED_MESSAGE =
   'Remote loading is disabled by experiments.optimization.disableRemote.';
@@ -10,7 +11,12 @@ export class UnavailableRemoteModule {
 }
 
 export class DisabledRemoteHandler {
-  hooks = new PluginSystem({});
+  // getRemoteEntry emits loadEntry for shared fallback entries, which load without remotes.
+  hooks = new PluginSystem<
+    Pick<RemoteHandler['hooks']['lifecycle'], 'loadEntry'>
+  >({
+    loadEntry: new AsyncHook(),
+  });
 
   formatAndRegisterRemote() {
     return [];
