@@ -6,6 +6,12 @@
 
 用于修改实际 bundler runtime 版本。 值为 `@module-federation/runtime-tools` 的路径。
 
+这个路径必须解析出一整套 runtime family。缺少其中某个包时，编译器不会用插件旁边安装的另一份去补。
+
+`runtime`、`runtime-core`、`webpack-bundler-runtime` 和 `sdk` 都必须从所选 `runtime-tools` 的依赖图里解析。
+
+Vite 尚未覆盖。
+
 ```javascript
 module.exports = {
   // ...other configurations
