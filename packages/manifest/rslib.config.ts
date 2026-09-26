@@ -3,6 +3,12 @@ import { defineConfig } from '@rslib/core';
 
 export default defineConfig({
   plugins: [pluginPublint()],
+  performance: {
+    // CopyRspackPlugin walks the whole package directory to copy LICENSE, and
+    // one lib's persistent cache deletes its .temp directories under
+    // node_modules/.cache while the other lib's walk can be inside them.
+    buildCache: false,
+  },
   lib: [
     {
       format: 'esm',
