@@ -1,20 +1,33 @@
 import { pluginPublint } from 'rsbuild-plugin-publint';
-import { defineConfig } from '@rslib/core';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { defineConfig, type RsbuildPlugin } from '@rslib/core';
+import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+
+const pluginLicense = (): RsbuildPlugin => ({
+  name: 'module-federation:license',
+  setup(api) {
+    const licensePath = resolve(api.context.rootPath, 'LICENSE');
+
+    api.processAssets(
+      { stage: 'additional' },
+      async ({ compilation, sources }) => {
+        compilation.fileDependencies.add(licensePath);
+        compilation.emitAsset(
+          'LICENSE',
+          new sources.RawSource(await readFile(licensePath)),
+        );
+      },
+    );
+  },
+});
 
 const pkg = JSON.parse(
   readFileSync(resolve(__dirname, './package.json'), 'utf-8'),
 );
 
 export default defineConfig({
-  plugins: [pluginPublint()],
-  performance: {
-    // CopyRspackPlugin walks the whole package directory to copy LICENSE, and
-    // one lib's persistent cache deletes its .temp directories under
-    // node_modules/.cache while the other lib's walk can be inside them.
-    buildCache: false,
-  },
+  plugins: [pluginLicense(), pluginPublint()],
   lib: [
     {
       format: 'esm',
@@ -54,11 +67,5 @@ export default defineConfig({
       root: './dist',
     },
     externals: [/@module-federation\//, 'pnpapi'],
-    copy: [
-      {
-        from: './LICENSE',
-        to: '.',
-      },
-    ],
   },
 });
