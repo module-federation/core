@@ -1,6 +1,7 @@
 {
   "name": "@module-federation/observability-plugin",
   "version": "2.6.1",
+  "sideEffects": false,
   "author": "module-federation",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",
@@ -64,17 +65,25 @@
       ]
     }
   },
+  "peerDependencies": {
+    "@divebell/core": ">=0.0.23",
+    "@module-federation/runtime": "^2.5.0"
+  },
+  "peerDependenciesMeta": {
+    "@divebell/core": {
+      "optional": true
+    }
+  },
   "devDependencies": {
-    "@module-federation/runtime": "workspace:*",
-    "@types/semver": "^7.5.8"
+    "@divebell/core": "0.0.23",
+    "@module-federation/runtime": "workspace:*"
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "@divebell/core": "0.0.23",
-    "semver": "^7.7.4"
+    "@module-federation/sdk": "workspace:*"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp *.md dist",
+    "size": "pnpm run build && node ./scripts/browser-size.mjs",
     "test": "rstest -u",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "pre-release": "pnpm run test && pnpm run build"
