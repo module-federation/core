@@ -30,6 +30,7 @@ import {
 } from '../utils/hooks';
 import {
   formatShareConfigs,
+  mergeShareInfos,
   getRegisteredShare,
   getTargetSharedOptions,
   getGlobalShareScope,
@@ -51,6 +52,7 @@ import { createRemoteEntryInitOptions } from '../module';
 export class SharedHandler {
   host: ModuleFederation;
   shareScopeMap: ShareScopeMap;
+  private shareInfos: ShareInfos;
   hooks = new PluginSystem({
     beforeRegisterShare: new SyncWaterfallHook<{
       pkgName: string;
@@ -136,6 +138,7 @@ export class SharedHandler {
   constructor(host: ModuleFederation) {
     this.host = host;
     this.shareScopeMap = {};
+    this.shareInfos = {};
     this.initTokens = {};
     this._setGlobalShareScopeMap(host.options);
   }
@@ -176,7 +179,7 @@ export class SharedHandler {
         pkgName,
         shareInfo,
         selectedShared,
-        shared: this.host.options.shared,
+        shared: this.shareInfos,
         shareScopeMap: this.shareScopeMap,
         lifecycle,
         loadContext,
@@ -206,7 +209,7 @@ export class SharedHandler {
       this.hooks.lifecycle.errorLoadShare.emit({
         pkgName,
         shareInfo,
-        shared: this.host.options.shared,
+        shared: this.shareInfos,
         shareScopeMap: this.shareScopeMap,
         lifecycle,
         origin: this.host,
@@ -225,6 +228,7 @@ export class SharedHandler {
       globalOptions,
       userOptions,
     );
+    this.shareInfos = mergeShareInfos(this.shareInfos, allShareInfos);
 
     const sharedKeys = Object.keys(newShareInfos);
     sharedKeys.forEach((sharedKey) => {
@@ -280,7 +284,7 @@ export class SharedHandler {
     const shareOptions = getTargetSharedOptions({
       pkgName,
       extraOptions,
-      shareInfos: host.options.shared,
+      shareInfos: this.shareInfos,
     });
     let shareOptionsRes: Shared | undefined = shareOptions;
 
@@ -301,7 +305,7 @@ export class SharedHandler {
       const loadShareRes = await this.hooks.lifecycle.beforeLoadShare.emit({
         pkgName,
         shareInfo: shareOptions,
-        shared: host.options.shared,
+        shared: this.shareInfos,
         origin: host,
         loadContext,
       });
@@ -565,8 +569,8 @@ export class SharedHandler {
         }
       }
     };
-    Object.keys(host.options.shared).forEach((shareName) => {
-      const sharedArr = host.options.shared[shareName];
+    Object.keys(this.shareInfos).forEach((shareName) => {
+      const sharedArr = this.shareInfos[shareName];
       sharedArr.forEach((shared) => {
         if (shared.scope.includes(shareScopeName)) {
           register(shareName, shared);
@@ -601,7 +605,7 @@ export class SharedHandler {
     const shareOptions = getTargetSharedOptions({
       pkgName,
       extraOptions,
-      shareInfos: host.options.shared,
+      shareInfos: this.shareInfos,
     });
 
     try {
