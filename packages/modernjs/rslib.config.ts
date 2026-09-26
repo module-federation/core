@@ -8,6 +8,15 @@ const sharedLibOptions = {
   outBase: 'src',
 } as const;
 
+// The CLI entry points use `require.resolve` to locate runtime plugins and the
+// federation runtime. Native ESM has no `require`, so inject a
+// `createRequire(import.meta.url)` shim into the modules that reference it.
+const esmShims = {
+  esm: {
+    require: true,
+  },
+} as const;
+
 export default defineConfig({
   source: {
     entry: {
@@ -44,6 +53,7 @@ export default defineConfig({
       define: {
         'process.env.IS_ESM_BUILD': JSON.stringify('true'),
       },
+      shims: esmShims,
       dts: false,
       output: {
         distPath: {
@@ -58,6 +68,7 @@ export default defineConfig({
       define: {
         'process.env.IS_ESM_BUILD': JSON.stringify('true'),
       },
+      shims: esmShims,
       dts: {
         distPath: './dist/types',
       },
