@@ -155,7 +155,7 @@
     "@rsbuild/plugin-react": "1.4.5",
     "@rstest/core": "^0.10.6",
     "@module-federation/manifest": "workspace:*",
-    "@rslib/core": "0.23.2",
+    "@rslib/core": "1.0.2",
     "@rsbuild/core": "2.1.4",
     "@rspack/core": "2.0.6",
     "@modern-js/app-tools": "3.5.0",

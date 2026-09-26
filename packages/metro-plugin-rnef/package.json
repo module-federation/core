@@ -46,7 +46,7 @@
     "@module-federation/metro": "workspace:*",
     "@rnef/config": "^0.7.18",
     "@rnef/tools": "^0.7.18",
-    "@rslib/core": "^0.23.2",
+    "@rslib/core": "^1.0.2",
     "@typescript-eslint/eslint-plugin": "8.56.1",
     "@typescript-eslint/parser": "8.56.1",
     "@types/node": "^20.0.0",
