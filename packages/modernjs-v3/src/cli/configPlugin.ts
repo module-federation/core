@@ -389,6 +389,10 @@ export function patchBundlerConfig(options: {
       }
     }
 
+    // entries() returns a detached object when splitChunks was built key by key,
+    // so write the constrained config back to the chain.
+    chain.optimization.splitChunks(splitChunkConfig);
+
     if (shouldWarn) {
       logger.warn(
         'Stream SSR requires async-only splitChunks; constraining chunk filters to async chunks',

@@ -30,9 +30,14 @@ const createBundlerChain = (splitChunkConfig: Record<string, unknown>): any => {
     ignoreWarnings: rs.fn(),
     optimization: {
       delete: rs.fn(),
-      splitChunks: {
-        entries: rs.fn(() => splitChunkConfig),
-      },
+      // Like a key-by-key rspack-chain splitChunks map: entries() is a detached
+      // copy, and only splitChunks(value) updates what the chain emits.
+      splitChunks: Object.assign(
+        rs.fn((value: Record<string, unknown>) => {
+          Object.assign(splitChunkConfig, value);
+        }),
+        { entries: rs.fn(() => ({ ...splitChunkConfig })) },
+      ),
       usedExports: rs.fn(),
     },
     output: {
