@@ -158,8 +158,11 @@ export const performReload = async (
       delete gs[i.name];
     }
   });
-  //@ts-ignore
-  __webpack_require__?.federation?.instance?.moduleCache?.clear();
+  // Only inside a bundle: the dev server calls this from plain Node.
+  if (typeof __webpack_require__ !== 'undefined') {
+    //@ts-ignore
+    __webpack_require__.federation?.instance?.moduleCache?.clear();
+  }
   helpers.global.resetFederationGlobalInfo();
   globalThis.moduleGraphDirty = false;
   globalThis.mfHashMap = {};
