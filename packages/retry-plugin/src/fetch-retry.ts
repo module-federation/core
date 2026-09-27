@@ -35,6 +35,7 @@ async function fetchRetry(
     fetchOptions = {},
     retryTimes = defaultRetries,
     retryDelay = defaultRetryDelay,
+    retryStatuses,
     // List of retry domains when resource loading fails. In the domains array, the first item is the default domain for static resources, and the subsequent items are backup domains. When a request to a domain fails, the system will find that domain in the array and replace it with the next domain in the array.
     domains,
     // Whether to add query parameters during resource retry to avoid being affected by browser and CDN cache. When set to true, retry=${times} will be added to the query, requesting in the order of retry=1, retry=2, retry=3.
@@ -68,6 +69,7 @@ async function fetchRetry(
       queryKey: 'retryCount',
     });
   }
+  let retryable = true;
   try {
     if (!isFirstAttempt) {
       const attemptIndex = total - retryTimes;
@@ -82,6 +84,7 @@ async function fetchRetry(
     const response = await fetch(requestUrl, fetchOptions);
     const responseClone = response.clone();
     if (!response.ok) {
+      retryable = !retryStatuses || retryStatuses.includes(response.status);
       throw new Error(
         `${PLUGIN_IDENTIFIER}: Request failed: ${response.status} ${response.statusText || ''} | url: ${requestUrl}`,
       );
@@ -99,6 +102,9 @@ async function fetchRetry(
     }
     return response;
   } catch (error) {
+    if (!retryable) {
+      throw error;
+    }
     if (retryTimes <= 0) {
       const attemptedRetries = total - retryTimes;
       if (!isFirstAttempt && attemptedRetries > 0) {

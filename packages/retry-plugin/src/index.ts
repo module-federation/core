@@ -27,6 +27,7 @@ const RetryPlugin = (
     retryTimes = defaultRetries,
     successTimes = 0,
     retryDelay = defaultRetryDelay,
+    retryStatuses,
     domains = [],
     manifestDomains = [],
     addQuery,
@@ -52,6 +53,7 @@ const RetryPlugin = (
         retryTimes,
         successTimes,
         retryDelay,
+        retryStatuses,
       });
     },
 
