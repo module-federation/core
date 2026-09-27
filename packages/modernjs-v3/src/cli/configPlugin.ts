@@ -365,6 +365,11 @@ export function patchBundlerConfig(options: {
   }
 
   if (isServer && enableSSR) {
+    // Rsbuild 2.2 splits server chunks by default. Splitting the SSR server
+    // bundle makes the CommonJS federation entry resolve asynchronously, so
+    // Modern.js cannot read `requestHandler` from it. Keep it in one chunk.
+    chain.optimization.splitChunks(false);
+
     const uniqueName = mfConfig.name || chain.output.get('uniqueName');
     const chunkFileName = chain.output.get('chunkFilename');
     if (
