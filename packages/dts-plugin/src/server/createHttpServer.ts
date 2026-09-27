@@ -1,6 +1,7 @@
 import http from 'http';
+import type { AddressInfo } from 'net';
 import fs from 'fs';
-import { getFreePort, getIPV4 } from './utils';
+import { getIPV4, listen } from './utils';
 import { DEFAULT_TAR_NAME } from './constant';
 
 interface CreateHttpServerOptions {
@@ -14,7 +15,6 @@ export async function createHttpServer(
   serverAddress: string;
 }> {
   const { typeTarPath } = options;
-  const freeport = await getFreePort();
   const server = http.createServer((req, res) => {
     const requestPath = req.url?.split('?')[0] ?? '/';
     if (requestPath === `/${DEFAULT_TAR_NAME}`) {
@@ -41,10 +41,13 @@ export async function createHttpServer(
     res.end();
   });
 
-  server.listen(freeport);
+  // Let the OS pick the port: probing for a free port and binding it later
+  // races with other processes started at the same time.
+  await listen(server, 0);
+  const { port } = server.address() as AddressInfo;
 
   return {
     server,
-    serverAddress: `http://${getIPV4()}:${freeport}`,
+    serverAddress: `http://${getIPV4()}:${port}`,
   };
 }
