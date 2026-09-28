@@ -1,6 +1,7 @@
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 import { getUnpkgUrl, REACT_19_DEV_VERSION } from '../index';
 import { definePropertyGlobalVal } from '../sdk';
+import { getReact19Development } from '../../vendor/react19-development';
 import {
   __FEDERATION_DEVTOOLS__,
   __EAGER_SHARE__,
@@ -218,27 +219,38 @@ const executeUmdModule = (
   return sandbox[getDefaultGlobalKey(pkgName)];
 };
 
+const loadBundledReact19 = (pkgName: SupportPkg) => {
+  // Lazy initialization lets the page's DevTools hook register first. All scopes
+  // share one React/ReactDOM pair, including the react-dom/client entry.
+  const { React, ReactDOM } = getReact19Development();
+  return pkgName === 'react' ? React : ReactDOM;
+};
+
 const loadUmdModuleSync = (
   pkgName: SupportPkg,
   version: string,
   scopes: Array<string>,
 ) =>
-  executeUmdModule(
-    requestUmdSourceSync(getUnpkgUrl(pkgName, version) as string),
-    pkgName,
-    scopes,
-  );
+  /^19\./.test(version)
+    ? loadBundledReact19(pkgName)
+    : executeUmdModule(
+        requestUmdSourceSync(getUnpkgUrl(pkgName, version) as string),
+        pkgName,
+        scopes,
+      );
 
 const loadUmdModule = async (
   pkgName: SupportPkg,
   version: string,
   scopes: Array<string>,
 ) =>
-  executeUmdModule(
-    await requestUmdSource(getUnpkgUrl(pkgName, version) as string),
-    pkgName,
-    scopes,
-  );
+  /^19\./.test(version)
+    ? loadBundledReact19(pkgName)
+    : executeUmdModule(
+        await requestUmdSource(getUnpkgUrl(pkgName, version) as string),
+        pkgName,
+        scopes,
+      );
 
 const getDevtoolsMessage = () => {
   const devtoolsMessageStr = localStorage.getItem(__FEDERATION_DEVTOOLS__);
