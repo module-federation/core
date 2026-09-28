@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { BridgeSSRPlugin } from '../rspack';
 import type { AppTools, CliPlugin } from '@modern-js/app-tools';
 import type { InternalModernPluginOptions } from '../types';
 
@@ -147,6 +148,8 @@ export function configureBridgeApplications(
     }
   });
   api.modifyBundlerChain((chain) => {
+    chain.plugin('mf-bridge-server-lifecycle').use(BridgeSSRPlugin);
+
     // Linked framework packages resolve peers relative to their source path.
     // Bind all React imports to this application's dependency, not the toolchain's.
     for (const name of [

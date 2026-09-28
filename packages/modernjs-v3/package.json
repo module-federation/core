@@ -95,6 +95,11 @@
       "types": "./dist/types/ssr-runtime/bridgeStreamPlugin.d.ts",
       "import": "./dist/esm/ssr-runtime/bridgeStreamPlugin.mjs",
       "require": "./dist/cjs/ssr-runtime/bridgeStreamPlugin.js"
+    },
+    "./rspack": {
+      "types": "./dist/types/rspack/index.d.ts",
+      "import": "./dist/esm/rspack/index.mjs",
+      "require": "./dist/cjs/rspack/index.js"
     }
   },
   "typesVersions": {
@@ -146,6 +151,9 @@
       ],
       "ssr-bridge-plugin": [
         "./dist/types/ssr-runtime/bridgeStreamPlugin.d.ts"
+      ],
+      "rspack": [
+        "./dist/types/rspack/index.d.ts"
       ]
     }
   },

@@ -14,6 +14,12 @@ export default defineConfig({
     },
   },
   resolve: {
+    alias: {
+      '@module-federation/bridge-react/remote-lifecycle': path.resolve(
+        __dirname,
+        'src/remote/remoteLifecycle.ts',
+      ),
+    },
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
   },
   testEnvironment: 'jsdom',

@@ -100,6 +100,16 @@
       "types": "./dist/ssr.d.ts",
       "import": "./dist/ssr.es.js",
       "require": "./dist/ssr.cjs.js"
+    },
+    "./remote-lifecycle": {
+      "types": "./dist/remote-lifecycle.d.ts",
+      "import": "./dist/remote-lifecycle.es.js",
+      "require": "./dist/remote-lifecycle.cjs.js"
+    },
+    "./remote-lifecycle.server": {
+      "types": "./dist/remote-lifecycle.server.d.ts",
+      "import": "./dist/remote-lifecycle.server.es.js",
+      "require": "./dist/remote-lifecycle.server.cjs.js"
     }
   },
   "typesVersions": {
@@ -151,6 +161,12 @@
       ],
       "ssr": [
         "./dist/ssr.d.ts"
+      ],
+      "remote-lifecycle": [
+        "./dist/remote-lifecycle.d.ts"
+      ],
+      "remote-lifecycle.server": [
+        "./dist/remote-lifecycle.server.d.ts"
       ]
     }
   },

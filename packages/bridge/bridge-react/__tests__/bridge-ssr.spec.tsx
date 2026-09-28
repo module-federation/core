@@ -1,13 +1,42 @@
 import React, { StrictMode, useId, useState } from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import { hydrateRoot, type Root } from 'react-dom/client';
-import { renderToString } from 'react-dom/server';
+import { renderToString as renderBrowserShell } from 'react-dom/server';
 import { createBridgeComponent } from '../src/v18';
 import { RemoteAppWrapper } from '../src/remote/RemoteAppWrapper';
 import { BridgeSSRContext } from '../src/ssr';
 import { ErrorBoundary } from '../src/error-boundary';
 import { federationRuntime } from '../src/provider/plugin';
 import type { BridgeSSRBrowserSnapshot } from '../src/ssr';
+
+// A real build selects the platform once. This mixed Node/browser suite selects
+// the same implementation around each synchronous server render instead.
+jest.mock('@module-federation/bridge-react/remote-lifecycle', () => {
+  const browser = jest.requireActual('../src/remote/remoteLifecycle');
+  const server = jest.requireActual('../src/remote/remoteLifecycle.server');
+  let target = browser;
+  return {
+    useRemoteLifecycle: (...args: unknown[]) =>
+      target.useRemoteLifecycle(...args),
+    useRemoteSSRRegistration: (...args: unknown[]) =>
+      target.useRemoteSSRRegistration(...args),
+    withServerLifecycle: (render: () => string) => {
+      const previous = target;
+      target = server;
+      try {
+        return render();
+      } finally {
+        target = previous;
+      }
+    },
+  };
+});
+
+function renderToString(...args: Parameters<typeof renderBrowserShell>) {
+  return jest
+    .requireMock('@module-federation/bridge-react/remote-lifecycle')
+    .withServerLifecycle(() => renderBrowserShell(...args)) as string;
+}
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -36,6 +65,25 @@ describe('independent Bridge SSR roots', () => {
     host = undefined;
     delete window.__MF_BRIDGE_SSR__;
     document.body.innerHTML = '';
+  });
+
+  it('keeps the default browser entry usable for a Node-rendered CSR shell without registering SSR work', () => {
+    const register = jest.fn();
+    const factory = jest.fn(() => ({ render: jest.fn(), destroy: jest.fn() }));
+    const html = renderBrowserShell(
+      <BridgeSSRContext.Provider value={{ register }}>
+        <RemoteAppWrapper
+          moduleName="products/App"
+          providerInfo={factory}
+          exportName="default"
+          loading={<p>Loading products</p>}
+          fallback={() => null}
+        />
+      </BridgeSSRContext.Provider>,
+    );
+    expect(html).toContain('Loading products');
+    expect(register).not.toHaveBeenCalled();
+    expect(factory).not.toHaveBeenCalled();
   });
 
   it('registers only the loaded expose styles with its stream instead of rendering unmanaged links', () => {

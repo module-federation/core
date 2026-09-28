@@ -1,5 +1,9 @@
 module.exports = {
   displayName: 'bridge-react',
+  moduleNameMapper: {
+    '^@module-federation/bridge-react/remote-lifecycle$':
+      '<rootDir>/src/remote/remoteLifecycle.ts',
+  },
   preset: '../../../jest.preset.js',
   transform: {
     '^.+\\.[tj]sx?$': [

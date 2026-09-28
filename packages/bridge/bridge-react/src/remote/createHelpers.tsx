@@ -1,5 +1,5 @@
-import React, { forwardRef, useContext } from 'react';
-import { BridgeSSRContext, getBridgeSSRRenderParams } from '../ssr';
+import React, { forwardRef } from 'react';
+import { useRemoteSSRRegistration } from '@module-federation/bridge-react/remote-lifecycle';
 import type { BridgeProvider } from '../types';
 import { ErrorBoundary } from '../error-boundary';
 import { LoggerInstance } from '../utils';
@@ -121,21 +121,11 @@ export function createRemoteAppComponentFactory(
       return factory();
     };
     return forwardRef<HTMLDivElement, RemoteComponentProps>((props, ref) => {
-      const ssr = useContext(BridgeSSRContext);
       const reactId = React.useId?.();
       const instanceId = reactId ? `mf-bridge-${reactId}` : undefined;
-      if (ssr) {
-        if (!instanceId)
-          throw new Error(
-            'Independent Bridge SSR requires React 18 or newer in the host.',
-          );
-        ssr.register(
-          instanceId,
-          loadProvider,
-          getBridgeSSRRenderParams(props),
-          { deferRender: true },
-        );
-      }
+      useRemoteSSRRegistration(instanceId, loadProvider, props, {
+        deferRender: true,
+      });
       return (
         <ErrorBoundary
           FallbackComponent={
