@@ -1,4 +1,4 @@
-import type { RuntimePlugin } from '@modern-js/runtime';
+import type { RuntimePluginFuture } from '@modern-js/runtime';
 
 // Module Federation is not applied to web-worker builds (see `skipByTarget`),
 // so the SSR runtime plugins have no federation runtime to attach to there.
@@ -8,10 +8,10 @@ import type { RuntimePlugin } from '@modern-js/runtime';
 
 export const injectDataFetchFunctionPlugin = (_options: {
   fetchServerQuery?: Record<string, unknown>;
-}): RuntimePlugin => ({
+}): RuntimePluginFuture => ({
   name: '@module-federation/inject-data-fetch-function-plugin',
 });
 
-export const mfSSRDevPlugin = (): RuntimePlugin => ({
+export const mfSSRDevPlugin = (): RuntimePluginFuture => ({
   name: '@module-federation/modern-js',
 });
