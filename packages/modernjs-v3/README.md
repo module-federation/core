@@ -105,3 +105,17 @@ A received stream is not proof of success: the protocol must reach its final sna
 - The current adapter executes Node builds locally. HTTP SSR transport and an HTTP-to-local rendering retry chain are not implemented.
 - Streaming completion script isolation has regression coverage with React 18.3.1 and React 19.2.8. It relies on React's internal streaming instructions, so other renderer versions need compatibility validation. The adapter recognizes React instruction shapes; it is not a sandbox for arbitrary JavaScript. React Form Actions' document-wide replay protocol is not supported by this isolation mechanism.
 - Remote stream script replay supports inline classic scripts and forwards the SSR CSP nonce. External or module scripts inside the remote HTML stream are not supported; browser bundles load through Module Federation.
+
+## Planned React compatibility matrix
+
+This is a test requirement recorded on 2026-09-28, not completed coverage or a broader support claim. The current real-renderer regressions cover React 18.3.1 and 19.2.8 only.
+
+- React 19: cover every stable release, including patch releases, rather than only the latest version of each minor. Canary, experimental, alpha, beta, and RC releases are outside this initial matrix.
+- React 18: cover most stable releases, including every minor line and broad patch coverage. When implementing the matrix, check in the exact version list and document any omissions and their reasons; one latest-only case is insufficient.
+- React 17: retain only the latest stable 17.x release. Cover the generic Bridge CSR mount/update/destroy behavior separately. The current Modern independent streaming SSR path uses React 18+ APIs (`renderToPipeableStream`, `hydrateRoot`, and host `useId`); a React 17 test must not be reported as support for that same streaming path. Supporting legacy React 17 SSR would require a separately designed adapter.
+
+Resolve `react` and `react-dom` as matching exact versions for each case and record the versions tested. Refresh the explicit matrix when stable releases are added; do not let a floating `latest` replace historical coverage. React's API transition is documented in the [React 18 upgrade guide](https://react.dev/blog/2022/03/08/react-18-upgrade-guide#updates-to-server-rendering-apis).
+
+Use actual renderer output, not only handwritten `$RC` fixtures. For supported SSR cases, validate byte-boundary framing, nested and multiple Suspense boundaries, both completion orders, errors/abort/truncation, script helper isolation, DOM reuse during hydration, and post-hydration interactions. Include mixed Host/Remote versions, multiple producers, and repeated instances of the same producer; record which combinations were exercised separately from per-version coverage. Generic CSR and instance teardown must remain independently tested.
+
+Unknown React completion instruction shapes currently pass through unchanged. The expanded matrix must expose missed or partial script isolation; a successful check on the two current demo versions is not evidence that untested versions or unsupported document-wide React protocols are safe.
