@@ -100,6 +100,31 @@
       "types": "./dist/types/rspack/index.d.ts",
       "import": "./dist/esm/rspack/index.mjs",
       "require": "./dist/cjs/rspack/index.js"
+    },
+    "./bridge/remote": {
+      "types": "./dist/types/bridge-stream/remote.d.ts",
+      "import": "./dist/esm/bridge-stream/remote.mjs",
+      "require": "./dist/cjs/bridge-stream/remote.js"
+    },
+    "./bridge/remote.server": {
+      "types": "./dist/types/bridge-stream/remote.server.d.ts",
+      "import": "./dist/esm/bridge-stream/remote.server.mjs",
+      "require": "./dist/cjs/bridge-stream/remote.server.js"
+    },
+    "./bridge/service": {
+      "types": "./dist/types/bridge-stream/service.server.d.ts",
+      "import": "./dist/esm/bridge-stream/service.server.mjs",
+      "require": "./dist/cjs/bridge-stream/service.server.js"
+    },
+    "./bridge/client-service": {
+      "types": "./dist/types/bridge-stream/client-service.d.ts",
+      "import": "./dist/esm/bridge-stream/client-service.mjs",
+      "require": "./dist/cjs/bridge-stream/client-service.js"
+    },
+    "./bridge/client-service/server": {
+      "types": "./dist/types/bridge-stream/client-service.server.d.ts",
+      "import": "./dist/esm/bridge-stream/client-service.server.mjs",
+      "require": "./dist/cjs/bridge-stream/client-service.server.js"
     }
   },
   "typesVersions": {
@@ -154,6 +179,21 @@
       ],
       "rspack": [
         "./dist/types/rspack/index.d.ts"
+      ],
+      "bridge/remote": [
+        "./dist/types/bridge-stream/remote.d.ts"
+      ],
+      "bridge/remote.server": [
+        "./dist/types/bridge-stream/remote.server.d.ts"
+      ],
+      "bridge/service": [
+        "./dist/types/bridge-stream/service.server.d.ts"
+      ],
+      "bridge/client-service": [
+        "./dist/types/bridge-stream/client-service.d.ts"
+      ],
+      "bridge/client-service/server": [
+        "./dist/types/bridge-stream/client-service.server.d.ts"
       ]
     }
   },

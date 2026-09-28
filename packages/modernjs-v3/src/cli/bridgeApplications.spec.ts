@@ -164,3 +164,13 @@ describe('independent Modern application configuration', () => {
     expect(options.csrConfig!.exposes).toBeUndefined();
   });
 });
+
+it('allows a CSR-only consumer while requiring SSR for application exposes', () => {
+  const { api, options } = setup('/unused', true);
+  options.originPluginOptions.ssr = false;
+  expect(() => configureBridgeApplications(api as any, options)).not.toThrow();
+  options.originPluginOptions.bridge = { exposes: { './app': true } };
+  expect(() => configureBridgeApplications(api as any, options)).toThrow(
+    'requires server.ssr',
+  );
+});

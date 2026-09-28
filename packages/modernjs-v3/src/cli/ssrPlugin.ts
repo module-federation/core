@@ -259,7 +259,9 @@ export const moduleFederationSSRPlugin = (
           name: 'bridgeStream',
           path: '@module-federation/modern-js-v3/ssr-bridge-plugin',
           config:
-            typeof bridge === 'object' ? { timeoutMs: bridge.timeoutMs } : {},
+            typeof bridge === 'object'
+              ? { timeoutMs: bridge.timeoutMs, services: bridge.services }
+              : {},
         });
       }
       const { fetchServerQuery } = pluginOptions;

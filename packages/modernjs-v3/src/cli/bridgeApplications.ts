@@ -5,18 +5,22 @@ import { BridgeSSRPlugin } from '../rspack';
 import type { AppTools, CliPlugin } from '@modern-js/app-tools';
 import type { InternalModernPluginOptions } from '../types';
 
-export function applicationEntrySource(entryName: string, server: boolean) {
+export function applicationEntrySource(
+  entryName: string,
+  server: boolean,
+  revision?: string,
+) {
   const registry = JSON.stringify(`@modern-js/runtime/registry/${entryName}`);
   return server
     ? `import ${registry};
 import { renderApplication } from '@modern-js/runtime/application/server';
 import { createModernServerBridge } from '@module-federation/modern-js-v3/bridge/application';
-export default createModernServerBridge({ renderApplication });
+export default createModernServerBridge({ renderApplication, revision: ${JSON.stringify(revision)} });
 `
     : `import ${registry};
 import { createApplication } from '@modern-js/runtime/application';
 import { createModernBrowserBridge } from '@module-federation/modern-js-v3/bridge/application';
-export default createModernBrowserBridge({ createApplication });
+export default createModernBrowserBridge({ createApplication, revision: ${JSON.stringify(revision)} });
 `;
 }
 
@@ -29,12 +33,16 @@ export function configureBridgeApplications(
   const bridge = options.originPluginOptions.bridge;
   if (!bridge) return;
   const config = api.getConfig();
-  if (!config.server?.ssr || options.originPluginOptions.ssr === false) {
+  const exposes = typeof bridge === 'object' ? bridge.exposes || {} : {};
+  if (
+    Object.keys(exposes).length &&
+    (!config.server?.ssr || options.originPluginOptions.ssr === false)
+  ) {
     throw new Error(
       'Independent Bridge SSR requires server.ssr and MF SSR to be enabled.',
     );
   }
-  const exposes = typeof bridge === 'object' ? bridge.exposes || {} : {};
+  const revision = typeof bridge === 'object' ? bridge.revision : undefined;
   const { appDirectory, internalDirectory } = api.getAppContext();
   const requireFromApp = createRequire(path.join(appDirectory, 'package.json'));
   const generatedDirectory = path.join(internalDirectory, 'mf-bridge');
@@ -139,11 +147,11 @@ export function configureBridgeApplications(
         );
       await fs.writeFile(
         entry.browser,
-        applicationEntrySource(appEntry.entryName, false),
+        applicationEntrySource(appEntry.entryName, false, revision),
       );
       await fs.writeFile(
         entry.server,
-        applicationEntrySource(appEntry.entryName, true),
+        applicationEntrySource(appEntry.entryName, true, revision),
       );
     }
   });

@@ -18,6 +18,9 @@ export class BridgeSSRPlugin {
     }
     compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (factory) => {
       factory.hooks.beforeResolve.tap(PLUGIN_NAME, (data) => {
+        if (data?.request === '@module-federation/modern-js-v3/bridge/remote') {
+          data.request += '.server';
+        }
         if (data?.request === LIFECYCLE_MODULE) {
           // Keep normal package resolution (including import/require conditions
           // and the issuer's package copy) instead of forcing one absolute file.

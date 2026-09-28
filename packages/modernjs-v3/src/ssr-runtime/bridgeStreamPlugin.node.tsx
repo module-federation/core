@@ -1,4 +1,6 @@
 import React from 'react';
+import { executeBridgeSSR } from '../bridge-stream/executor.server';
+import type { BridgeServiceOptions } from '../types';
 import { randomUUID } from 'node:crypto';
 import { PassThrough, Readable, type Duplex } from 'node:stream';
 import { once } from 'node:events';
@@ -25,6 +27,7 @@ import {
 
 export interface BridgeStreamPluginOptions {
   timeoutMs?: number;
+  services?: Record<string, BridgeServiceOptions>;
 }
 
 type RequestContext = {
@@ -132,23 +135,21 @@ export function bridgeStreamPlugin(
             signal.addEventListener('abort', abortSession, { once: true });
             const render = Promise.resolve()
               .then(async () => {
-                const provider = await factory();
-                if (!provider.renderStream)
-                  throw Error(
-                    `Bridge provider ${params.moduleName || id} does not support SSR`,
-                  );
-                // The lazy wrapper supplies the final router-derived basename after
-                // loading. A rejected/stalled factory is already covered by this job.
+                // Activation provides the final remote identity and router basename.
                 const resolvedParams = await withAbort(renderParams, signal);
-                return provider.renderStream({
-                  ...resolvedParams,
-                  instanceId: id,
-                  identifierPrefix: prefix,
-                  url,
-                  headers,
-                  nonce,
-                  signal,
-                });
+                return executeBridgeSSR(
+                  {
+                    ...resolvedParams,
+                    instanceId: id,
+                    identifierPrefix: prefix,
+                    url,
+                    headers,
+                    nonce,
+                    signal,
+                  },
+                  factory,
+                  options.services?.[resolvedParams.moduleName || ''],
+                );
               })
               .then((value) => {
                 session = value;
@@ -274,7 +275,12 @@ export function bridgeStreamPlugin(
                     type: 'meta',
                     protocol: BRIDGE_STREAM_PROTOCOL,
                     identifierPrefix: job.prefix,
-                    stylesheets: job.stylesheets,
+                    stylesheets: [
+                      ...new Set([
+                        ...job.stylesheets,
+                        ...(result.stylesheets || []),
+                      ]),
+                    ],
                     ...(result.hydration
                       ? { hydration: 'progressive' as const }
                       : {}),

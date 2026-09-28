@@ -64,7 +64,9 @@ function applicationURL(
 /** The generated Node expose runs the producer's real Modern request handler. */
 export function createModernServerBridge({
   renderApplication,
+  revision,
 }: {
+  revision?: string;
   renderApplication: ApplicationRenderer;
 }) {
   return () => ({
@@ -83,10 +85,21 @@ export function createModernServerBridge({
         nonce: info.nonce,
         props: info.props,
       });
+      const stamp = (snapshot: Promise<unknown>) =>
+        revision
+          ? snapshot.then((value) => ({
+              ...(value as object),
+              bridgeRevision: revision,
+            }))
+          : snapshot;
       return {
-        hydration: result.hydration,
+        revision,
+        hydration: result.hydration && {
+          ...result.hydration,
+          snapshot: stamp(result.hydration.snapshot),
+        },
         stream: result.stream,
-        snapshot: result.snapshot,
+        snapshot: stamp(result.snapshot),
         abort: (reason?: unknown) => result.cancel(reason),
       };
     },
@@ -100,7 +113,9 @@ export function createModernServerBridge({
 /** Each Bridge provider owns the instances created by its own Modern runtime. */
 export function createModernBrowserBridge({
   createApplication,
+  revision,
 }: {
+  revision?: string;
   createApplication: () => ApplicationInstance;
 }) {
   return () => {
@@ -195,6 +210,12 @@ export function createModernBrowserBridge({
       },
       async hydrate(info: RenderParams & { snapshot: unknown }) {
         if (info.signal?.aborted) return;
+        if (
+          revision &&
+          (info.snapshot as { bridgeRevision?: string })?.bridgeRevision !==
+            revision
+        )
+          throw new Error('Bridge producer build revision mismatch.');
         if (roots.has(info.dom))
           throw new Error('Bridge application is already mounted.');
         return initialize(info, true);

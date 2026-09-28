@@ -213,3 +213,61 @@ describe('Modern browser Bridge adapter', () => {
     expect(app.mount).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('producer artifact revision', () => {
+  it('tags both progressive and final snapshots without changing the renderer', async () => {
+    const snapshot = { protocol: 'modern-application/1' };
+    const initial = { protocol: 'modern-application/2' };
+    const hydration = {
+      snapshot: Promise.resolve(initial),
+      updates: new ReadableStream(),
+      shellMarker: 'shell',
+    };
+    const provider = createModernServerBridge({
+      revision: 'build-a',
+      renderApplication: async () => ({
+        stream: new ReadableStream(),
+        snapshot: Promise.resolve(snapshot),
+        hydration,
+        cancel() {},
+      }),
+    })();
+    const response = await provider.renderStream({
+      instanceId: 'one',
+      identifierPrefix: 'one-',
+      url: 'https://host.test/',
+      props: {},
+      signal: new AbortController().signal,
+    });
+    expect(response.revision).toBe('build-a');
+    expect(await response.snapshot).toEqual({
+      ...snapshot,
+      bridgeRevision: 'build-a',
+    });
+    expect(await response.hydration!.snapshot).toEqual({
+      ...initial,
+      bridgeRevision: 'build-a',
+    });
+    expect(response.hydration!.updates).toBe(hydration.updates);
+  });
+  it('rejects mismatched SSR HTML before creating a browser application', async () => {
+    browser();
+    const createApplication = rs.fn(application);
+    const provider = createModernBrowserBridge({
+      revision: 'build-a',
+      createApplication,
+    })();
+    await expect(
+      provider.hydrate({
+        dom: {} as HTMLElement,
+        snapshot: { bridgeRevision: 'build-b' },
+      }),
+    ).rejects.toThrow('revision mismatch');
+    expect(createApplication).not.toHaveBeenCalled();
+    await provider.hydrate({
+      dom: {} as HTMLElement,
+      snapshot: { bridgeRevision: 'build-a' },
+    });
+    expect(createApplication).toHaveBeenCalledTimes(1);
+  });
+});

@@ -1,7 +1,20 @@
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import type { StatsAssetResource } from '@module-federation/rsbuild-plugin/utils';
 
+export interface BridgeServiceOptions {
+  /** Trusted deployment endpoint; never derive this from request input. */
+  url: string;
+  /** Expected identity of both producer builds. */
+  revision: string;
+  /** Retry with the producer Node expose only before HTTP metadata is accepted. */
+  localFallback?: boolean;
+  timeoutMs?: number;
+}
+
 export interface BridgeOptions {
+  revision?: string;
+  /** Select an HTTP executor for a remote module; other modules render locally. */
+  services?: Record<string, BridgeServiceOptions>;
   /** Expose a complete Modern application. true selects the main entry. */
   exposes?: Record<string, string | true>;
   /** Maximum duration of an independent SSR application, in milliseconds. */

@@ -175,6 +175,10 @@ export interface BridgeSSRRequest extends BridgeSSRRenderParams {
 }
 
 export interface BridgeSSRResult {
+  /** Build identity shared by the producer Node and browser artifacts. */
+  revision?: string;
+  /** Producer CSS that must load before its HTML is revealed. */
+  stylesheets?: string[];
   /** Optional early hydration; the producer defines snapshot and update contents. */
   hydration?: {
     snapshot: Promise<unknown>;
