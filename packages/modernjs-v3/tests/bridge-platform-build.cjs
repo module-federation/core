@@ -13,7 +13,7 @@ const path = require('node:path');
 const { createRequire } = require('node:module');
 const { rspack } = require('@rspack/core');
 const { JSDOM, VirtualConsole } = require('jsdom');
-const { BridgeSSRPlugin } = require('../dist/cjs/rspack/index.js');
+const { BridgeSSRPlugin } = require('@module-federation/modern-js-v3/rspack');
 const {
   bridgeStreamBootstrap,
 } = require('../dist/cjs/bridge-stream/bootstrap.js');
@@ -149,6 +149,21 @@ window.bridgeFixture = {
   unmount() { root.unmount(); },
 };
 `;
+
+// Check require export conditions as well as normal ESM application imports.
+// These deliberately share the same fixture bodies and JSX-equivalent tree.
+function commonJS(source, exports) {
+  return (
+    source
+      .replace(
+        /import (\{[^}]+\}) from '([^']+)';/g,
+        `const $1 = require('$2');`,
+      )
+      .replace(/import (\w+) from '([^']+)';/g, `const $1 = require('$2');`)
+      .replace(/export (?=(?:async )?function |const )/g, '') +
+    `\nmodule.exports = { ${exports.join(', ')} };\n`
+  );
+}
 
 async function build(directory, requireApp, node, plugin = node) {
   const target = node ? 'server' : 'browser';
@@ -374,10 +389,31 @@ async function browserScenario(browserFile, rendered) {
       const plainNodeFile = await build(directory, requireApp, true, false);
       assert.equal((await require(plainNodeFile).render()).jobs.length, 0);
       const rendered = await require(serverFile).render();
+      const commonJSDirectory = path.join(directory, 'commonjs');
+      await fs.mkdir(commonJSDirectory);
+      await Promise.all([
+        fs.writeFile(
+          path.join(commonJSDirectory, 'shared.js'),
+          commonJS(sharedSource, ['Host', 'RemoteContent', 'calls']),
+        ),
+        fs.writeFile(
+          path.join(commonJSDirectory, 'server.js'),
+          commonJS(serverSource, ['render']),
+        ),
+      ]);
+      const commonJSFile = await build(commonJSDirectory, requireApp, true);
+      const commonJSRendered = await require(commonJSFile).render();
       results.push({
         version,
         scenarios: [
-          await browserScenario(browserFile, rendered),
+          {
+            ...(await browserScenario(browserFile, rendered)),
+            entry: 'import',
+          },
+          {
+            ...(await browserScenario(browserFile, commonJSRendered)),
+            entry: 'require',
+          },
           await browserScenario(browserFile),
         ],
       });
