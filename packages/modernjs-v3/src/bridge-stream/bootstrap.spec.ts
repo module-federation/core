@@ -1,12 +1,16 @@
 import { afterEach, describe, expect, it } from '@rstest/core';
 import { JSDOM } from 'jsdom';
-import { bridgeStreamBootstrap } from './bootstrap';
+import {
+  bridgeStreamBootstrap,
+  type BridgeBootstrapOptions,
+} from './bootstrap';
 import type { BridgeStreamBrowserRuntime } from './protocol';
 
 const documents: JSDOM[] = [];
 function createDocument(
   html = '<div id="a">loading A</div><div id="b">loading B</div>',
   timeoutMs = 1000,
+  options: BridgeBootstrapOptions = {},
 ) {
   const dom = new JSDOM(html, {
     url: 'https://host.example/dashboard?csr=1',
@@ -14,8 +18,9 @@ function createDocument(
   });
   documents.push(dom);
   (dom.window as any).TextEncoder = TextEncoder;
+  (dom.window as any).ReadableStream = ReadableStream;
   dom.window.eval(
-    `(${bridgeStreamBootstrap.toString()})(${JSON.stringify({ instanceIds: ['a', 'b'], nonce: 'test-nonce', timeoutMs })})`,
+    `(${bridgeStreamBootstrap.toString()})(${JSON.stringify({ instanceIds: ['a', 'b'], nonce: 'test-nonce', timeoutMs, ...options })})`,
   );
   return {
     dom,
@@ -346,5 +351,184 @@ describe('Bridge stylesheet readiness', () => {
     expect(dom.window.document.getElementById('a')!.textContent).toBe(
       'loading A',
     );
+  });
+});
+
+describe('Bridge progressive hydration', () => {
+  const prepare = (
+    runtime: BridgeStreamBrowserRuntime,
+    id: string,
+    html = `<!--$?--><template id="${id}-B:0"></template>loading ${id}<!--/$-->`,
+  ) => {
+    runtime.accept(id, { ...meta(`${id}-`), hydration: 'progressive' });
+    runtime.accept(id, { type: 'html', html });
+    const snapshot = { pending: [{ id: '0', path: ['report'] }], report: null };
+    runtime.accept(id, { type: 'ready', snapshot });
+    return snapshot;
+  };
+  const patch = (value: unknown) => ({
+    id: '0',
+    status: 'fulfilled',
+    value,
+    pending: [],
+  });
+
+  it('starts hydration while Suspense is pending and isolates deferred updates by instance', async () => {
+    const { dom, runtime } = createDocument();
+    const initialA = prepare(runtime, 'a');
+    const initialB = prepare(runtime, 'b');
+    const sessionA = runtime.get('a')!;
+    const sessionB = runtime.get('b')!;
+    let doneA = false;
+    let doneB = false;
+    void sessionA.done.then(() => {
+      doneA = true;
+    });
+    void sessionB.done.then(() => {
+      doneB = true;
+    });
+    const readyA = await sessionA.ready!;
+    const readyB = await sessionB.ready!;
+    expect(readyA.snapshot).toEqual(initialA);
+    expect(readyB.snapshot).toEqual(initialB);
+    expect(readyA.identifierPrefix).toBe('a-');
+    expect(readyB.identifierPrefix).toBe('b-');
+    expect(doneA).toBe(false);
+    expect(doneB).toBe(false);
+    expect(dom.window.document.getElementById('a')!.firstChild!.nodeValue).toBe(
+      '$?',
+    );
+
+    const readerA = readyA.updates!.getReader();
+    const readerB = readyB.updates!.getReader();
+    const nextA = readerA.read();
+    const nextB = readerB.read();
+    runtime.accept('b', { type: 'update', value: patch('inventory') });
+    runtime.accept('a', { type: 'update', value: patch('products') });
+    expect(await nextA).toEqual({ done: false, value: patch('products') });
+    expect(await nextB).toEqual({ done: false, value: patch('inventory') });
+    runtime.accept('a', { type: 'done' });
+    runtime.accept('b', { type: 'done' });
+    expect(await readerA.read()).toEqual({ done: true, value: undefined });
+    expect(await readerB.read()).toEqual({ done: true, value: undefined });
+    expect(doneA).toBe(false);
+    expect(doneB).toBe(false);
+
+    dom.window.document.getElementById('b')!.firstChild!.nodeValue = '$';
+    await sessionB.done;
+    expect(doneB).toBe(true);
+    expect(doneA).toBe(false);
+    dom.window.document.getElementById('a')!.firstChild!.nodeValue = '$';
+    await sessionA.done;
+    expect(doneA).toBe(true);
+    expect(
+      dom.window.document.querySelector('#mf-bridge-fatal-error'),
+    ).toBeNull();
+  });
+
+  it('fails the update reader and transport after readiness if the producer errors', async () => {
+    const { dom, runtime } = createDocument();
+    prepare(runtime, 'a');
+    const session = runtime.get('a')!;
+    const ready = await session.ready!;
+    const reader = ready.updates!.getReader();
+    const next = reader.read();
+    runtime.accept('a', { type: 'error', message: 'Deferred renderer failed' });
+    await expect(next).rejects.toThrow('Deferred renderer failed');
+    await expect(session.done).rejects.toThrow('Deferred renderer failed');
+    expect(await session.ready!).toBe(ready);
+    expect(
+      dom.window.document.querySelectorAll('#mf-bridge-fatal-error'),
+    ).toHaveLength(1);
+    runtime.accept('a', { type: 'html', html: '<p>late content</p>' });
+    expect(dom.window.document.getElementById('a')!.textContent).toBe(
+      'loading a',
+    );
+    expect(
+      dom.window.document.querySelectorAll('#mf-bridge-fatal-error'),
+    ).toHaveLength(1);
+  });
+
+  it.each(['release', 'pagehide'] as const)(
+    'rejects pending data and stops accepting frames on %s',
+    async (action) => {
+      const { dom, runtime } = createDocument();
+      prepare(runtime, 'a');
+      const session = runtime.get('a')!;
+      const reader = (await session.ready!).updates!.getReader();
+      const next = reader.read();
+      const container = dom.window.document.getElementById('a')!;
+      const before = container.innerHTML;
+      const message = action === 'release' ? 'unmounted' : 'unloaded';
+      if (action === 'release') runtime.release('a', container);
+      else dom.window.dispatchEvent(new dom.window.Event('pagehide'));
+      await expect(next).rejects.toThrow(message);
+      await expect(session.done).rejects.toThrow(message);
+      runtime.accept('a', { type: 'update', value: patch('late data') });
+      runtime.accept('a', { type: 'html', html: '<p>late content</p>' });
+      runtime.accept('a', { type: 'done' });
+      expect(container.innerHTML).toBe(before);
+      expect(runtime.claim('a', container)).toBeUndefined();
+      expect(
+        dom.window.document.querySelector('#mf-bridge-fatal-error'),
+      ).toBeNull();
+    },
+  );
+
+  it.each(['release', 'pagehide'] as const)(
+    'rejects unread data on %s even after transport completion',
+    async (action) => {
+      const { dom, runtime } = createDocument();
+      prepare(runtime, 'a', '<p>shell</p>');
+      const session = runtime.get('a')!;
+      const reader = (await session.ready!).updates!.getReader();
+      runtime.accept('a', { type: 'update', value: patch('unconsumed') });
+      runtime.accept('a', { type: 'done' });
+      await session.done;
+      const message = action === 'release' ? 'unmounted' : 'unloaded';
+      if (action === 'release')
+        runtime.release('a', dom.window.document.getElementById('a')!);
+      else dom.window.dispatchEvent(new dom.window.Event('pagehide'));
+      await expect(reader.read()).rejects.toThrow(message);
+      expect(
+        dom.window.document.querySelector('#mf-bridge-fatal-error'),
+      ).toBeNull();
+    },
+  );
+
+  it('bounds unread update bytes and releases capacity when the consumer reads', async () => {
+    const update = { type: 'update' as const, value: patch('商品'.repeat(12)) };
+    const bytes = new TextEncoder().encode(JSON.stringify(update)).byteLength;
+    const { dom, runtime } = createDocument(undefined, 1000, {
+      maxQueuedBytes: bytes * 2,
+    });
+    prepare(runtime, 'a', '<p>shell</p>');
+    const session = runtime.get('a')!;
+    const reader = (await session.ready!).updates!.getReader();
+    let completed = false;
+    void session.done.then(
+      () => {
+        completed = true;
+      },
+      () => {},
+    );
+    runtime.accept('a', update);
+    runtime.accept('a', update);
+    expect(await reader.read()).toEqual({ done: false, value: update.value });
+    runtime.accept('a', update);
+    expect(completed).toBe(false);
+    expect(
+      dom.window.document.querySelector('#mf-bridge-fatal-error'),
+    ).toBeNull();
+    runtime.accept('a', update);
+    await expect(session.done).rejects.toThrow(
+      'Bridge pending data exceeds limit',
+    );
+    await expect(reader.read()).rejects.toThrow(
+      'Bridge pending data exceeds limit',
+    );
+    expect(
+      dom.window.document.querySelectorAll('#mf-bridge-fatal-error'),
+    ).toHaveLength(1);
   });
 });

@@ -154,3 +154,15 @@ export function byteStream(
     },
   });
 }
+
+/** A producer-owned marker identifies the complete shell, even across byte chunks. */
+export function containsShellMarker(html: string, id: string): boolean {
+  let found = false;
+  const parser = new Parser({
+    onopentag(name, attributes) {
+      if (name === 'template' && attributes.id === id) found = true;
+    },
+  });
+  parser.end(html);
+  return found;
+}

@@ -152,6 +152,8 @@ export interface RemoteModule {
 }
 
 export interface HydrateParams extends RenderParams {
+  /** Opaque producer data updates received while its HTML is still streaming. */
+  updates?: ReadableStream<unknown>;
   snapshot: unknown;
 }
 
@@ -173,6 +175,12 @@ export interface BridgeSSRRequest extends BridgeSSRRenderParams {
 }
 
 export interface BridgeSSRResult {
+  /** Optional early hydration; the producer defines snapshot and update contents. */
+  hydration?: {
+    snapshot: Promise<unknown>;
+    updates: ReadableStream<unknown>;
+    shellMarker: string;
+  };
   stream: ReadableStream<Uint8Array>;
   snapshot: Promise<unknown>;
   abort(reason?: unknown): void;

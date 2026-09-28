@@ -157,6 +157,9 @@ export function bridgeStreamBootstrap(
     clearTimeout(state.timer);
     releaseStyles(state);
     state.reject(error);
+    state.rejectReady(error);
+    state.updateQueue = [];
+    state.updateController?.error(error);
     fallback(error);
   };
   const expect = (id: string) => {
@@ -168,8 +171,20 @@ export function bridgeStreamBootstrap(
       reject = no;
     });
     done.catch(() => {});
+    let resolveReady: (value: any) => void = () => {};
+    let rejectReady: (reason: unknown) => void = () => {};
+    const ready = new Promise<any>((yes, no) => {
+      resolveReady = yes;
+      rejectReady = no;
+    });
+    ready.catch(() => {});
     const state: any = {
       done,
+      ready,
+      resolveReady,
+      rejectReady,
+      updateQueue: [],
+      updateBytes: 0,
       resolve,
       reject,
       pending: [],
@@ -185,6 +200,19 @@ export function bridgeStreamBootstrap(
       () => fail(state, Error('Bridge stream timed out')),
       timeout,
     );
+  };
+  const pullUpdate = (state: any) => {
+    if (!state.updateController || !state.wantsUpdate) return;
+    if (state.updateQueue.length) {
+      const next = state.updateQueue.shift();
+      state.updateBytes -= next.bytes;
+      state.wantsUpdate = false;
+      state.updateController.enqueue(next.value);
+    } else if (state.streamDone) {
+      state.wantsUpdate = false;
+      state.updateController.close();
+      state.updateController = undefined;
+    }
   };
   const insert = (container: HTMLElement, html: string, state: any) => {
     const template = document.createElement('template');
@@ -260,10 +288,12 @@ export function bridgeStreamBootstrap(
     state.complete = true;
     clearTimeout(state.timer);
     releaseStyles(state);
-    state.resolve({
+    const value = {
       snapshot: state.snapshot,
       identifierPrefix: state.identifierPrefix,
-    });
+    };
+    state.resolve(value);
+    if (!state.progressive) state.resolveReady(value);
   };
   const drain = (id: string) => {
     const state = entries[id];
@@ -273,7 +303,9 @@ export function bridgeStreamBootstrap(
       const frame = next.frame as BridgeStreamFrame;
       const container = document.getElementById(id);
       if (
-        (frame.type === 'html' || frame.type === 'done') &&
+        (frame.type === 'html' ||
+          frame.type === 'ready' ||
+          frame.type === 'done') &&
         (!container || !state.stylesReady)
       )
         return;
@@ -290,6 +322,12 @@ export function bridgeStreamBootstrap(
           ) {
             throw Error('Invalid Bridge stream metadata');
           }
+          if (
+            frame.hydration !== undefined &&
+            frame.hydration !== 'progressive'
+          )
+            throw Error('Unsupported Bridge hydration mode');
+          state.progressive = frame.hydration === 'progressive';
           state.meta = true;
           state.identifierPrefix = frame.identifierPrefix;
           if (
@@ -323,13 +361,54 @@ export function bridgeStreamBootstrap(
           if (state.hasData || typeof frame.html !== 'string')
             throw Error('Invalid Bridge HTML frame');
           insert(container!, frame.html, state);
+        } else if (frame.type === 'ready') {
+          if (!state.progressive || state.hasInitialData || !state.hasHTML)
+            throw Error('Invalid Bridge hydration readiness');
+          state.hasInitialData = true;
+          state.snapshot = frame.snapshot;
+          const updates = new ReadableStream<unknown>(
+            {
+              start(controller) {
+                state.updateController = controller;
+              },
+              pull() {
+                state.wantsUpdate = true;
+                pullUpdate(state);
+              },
+              cancel(reason) {
+                state.updateController = undefined;
+                state.updateQueue = [];
+                state.updateBytes = 0;
+                if (!state.cancelled && !state.complete)
+                  fail(state, reason || Error('Bridge data stream cancelled'));
+              },
+            },
+            { highWaterMark: 0 },
+          );
+          state.resolveReady({
+            snapshot: frame.snapshot,
+            identifierPrefix: state.identifierPrefix,
+            updates,
+          });
+        } else if (frame.type === 'update') {
+          if (!state.hasInitialData || state.hasData)
+            throw Error('Unexpected Bridge data update');
+          state.updateBytes += next.bytes;
+          if (state.updateBytes > limit)
+            throw Error('Bridge pending data exceeds limit');
+          state.updateQueue.push({ value: frame.value, bytes: next.bytes });
+          pullUpdate(state);
         } else if (frame.type === 'data') {
           if (state.hasData) throw Error('Duplicate Bridge snapshot');
           state.snapshot = frame.snapshot;
           state.hasData = true;
         } else if (frame.type === 'done') {
-          if (!state.hasData) throw Error('Missing Bridge snapshot');
+          if (!state.hasData && !state.hasInitialData)
+            throw Error('Missing Bridge snapshot');
+          if (state.progressive && !state.hasInitialData)
+            throw Error('Missing Bridge hydration readiness');
           state.streamDone = true;
+          pullUpdate(state);
           finish(id, state);
         } else throw Error('Unknown Bridge stream frame');
       } catch (error) {
@@ -362,7 +441,15 @@ export function bridgeStreamBootstrap(
       state.queuedBytes = 0;
       clearTimeout(state.timer);
       releaseStyles(state);
-      if (!state.complete) state.reject(Error('Bridge instance unmounted'));
+      const error = Error('Bridge instance unmounted');
+      state.updateController?.error(error);
+      if (!state.complete) {
+        state.reject(error);
+        state.rejectReady(error);
+      }
+      state.updateController = undefined;
+      state.updateQueue = [];
+      state.updateBytes = 0;
     },
     accept(id, frame) {
       expect(id);
@@ -413,6 +500,14 @@ export function bridgeStreamBootstrap(
       Object.keys(entries).forEach((id) => {
         const state = entries[id];
         state.cancelled = true;
+        const error = Error('Bridge document unloaded');
+        state.updateController?.error(error);
+        if (!state.complete) {
+          state.reject(error);
+          state.rejectReady(error);
+        }
+        state.updateController = undefined;
+        state.updateQueue = [];
         clearTimeout(state.timer);
         releaseStyles(state);
       });

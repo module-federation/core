@@ -19,7 +19,9 @@ interface ApplicationInstance {
   hydrate(
     container: HTMLElement,
     snapshot: any,
-    options?: Pick<ApplicationOptions, 'signal' | 'onRecoverableError'>,
+    options?: Pick<ApplicationOptions, 'signal' | 'onRecoverableError'> & {
+      updates?: ReadableStream<unknown>;
+    },
   ): void | Promise<void>;
   mount(
     container: HTMLElement,
@@ -31,8 +33,13 @@ interface ApplicationInstance {
 interface ApplicationRenderer {
   (
     request: Request,
-    options: ApplicationOptions & { signal: AbortSignal; nonce?: string },
+    options: ApplicationOptions & {
+      signal: AbortSignal;
+      nonce?: string;
+      progressiveHydration?: boolean;
+    },
   ): Promise<{
+    hydration?: BridgeSSRResult['hydration'];
     stream: ReadableStream<Uint8Array>;
     snapshot: Promise<unknown>;
     cancel(reason?: unknown): void;
@@ -69,6 +76,7 @@ export function createModernServerBridge({
       });
       const result = await renderApplication(request, {
         url,
+        progressiveHydration: true,
         basename: info.memoryRoute ? '/' : info.basename,
         identifierPrefix: info.identifierPrefix,
         signal: info.signal,
@@ -76,6 +84,7 @@ export function createModernServerBridge({
         props: info.props,
       });
       return {
+        hydration: result.hydration,
         stream: result.stream,
         snapshot: result.snapshot,
         abort: (reason?: unknown) => result.cancel(reason),
@@ -124,6 +133,7 @@ export function createModernBrowserBridge({
               'rootOptions',
               'fallback',
               'snapshot',
+              'updates',
             ].includes(key),
         ),
       ),
@@ -131,7 +141,7 @@ export function createModernBrowserBridge({
       onRecoverableError: info.rootOptions?.onRecoverableError,
     });
     const initialize = (
-      info: RenderParams,
+      info: RenderParams & { updates?: ReadableStream<unknown> },
       hydrate: boolean,
     ): Promise<void> => {
       if (info.signal?.aborted) return Promise.resolve();
@@ -148,6 +158,7 @@ export function createModernBrowserBridge({
             await instance.app.hydrate(info.dom, info.snapshot, {
               signal: info.signal,
               onRecoverableError: info.rootOptions?.onRecoverableError,
+              updates: info.updates,
             });
           } else {
             await instance.app.mount(info.dom, getOptions(info));

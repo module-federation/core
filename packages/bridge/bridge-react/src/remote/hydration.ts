@@ -38,11 +38,13 @@ export async function hydrateRemoteRoot(
       `Bridge provider ${initialParams.moduleName} does not support hydration.`,
     );
   }
-  const { snapshot, identifierPrefix } = await session.done;
+  const { snapshot, identifierPrefix, updates } = await (session.ready ||
+    session.done);
   if (!isActive()) return false;
   await provider.hydrate({
     ...initialParams,
     snapshot,
+    updates,
     rootOptions: {
       ...initialParams.rootOptions,
       identifierPrefix,

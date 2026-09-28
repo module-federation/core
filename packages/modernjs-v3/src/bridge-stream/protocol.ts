@@ -7,18 +7,23 @@ export type BridgeStreamFrame =
       protocol: typeof BRIDGE_STREAM_PROTOCOL;
       identifierPrefix: string;
       stylesheets?: string[];
+      hydration?: 'progressive';
     }
   | { type: 'html'; html: string }
+  | { type: 'ready'; snapshot: unknown }
+  | { type: 'update'; value: unknown }
   | { type: 'data'; snapshot: unknown }
   | { type: 'done' }
   | { type: 'error'; message: string };
 
 export interface BridgeBrowserSnapshot {
+  updates?: ReadableStream<unknown>;
   snapshot: unknown;
   identifierPrefix: string;
 }
 
 export interface BridgeBrowserSession {
+  ready?: Promise<BridgeBrowserSnapshot>;
   identifierPrefix?: string;
   done: Promise<BridgeBrowserSnapshot>;
 }

@@ -17,11 +17,13 @@ export const BridgeSSRContext =
   React.createContext<BridgeSSRContextValue | null>(null);
 
 export interface BridgeSSRBrowserSnapshot {
+  updates?: ReadableStream<unknown>;
   snapshot: unknown;
   identifierPrefix: string;
 }
 
 export interface BridgeSSRBrowserSession {
+  ready?: Promise<BridgeSSRBrowserSnapshot>;
   identifierPrefix?: string;
   done: Promise<BridgeSSRBrowserSnapshot>;
 }

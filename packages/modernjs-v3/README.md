@@ -105,3 +105,11 @@ A received stream is not proof of success: the protocol must reach its final sna
 - The current adapter executes Node builds locally. HTTP SSR transport and an HTTP-to-local rendering retry chain are not implemented.
 - Streaming completion script isolation has regression coverage with React 18.3.1 and React 19.2.8. It relies on React's internal streaming instructions, so other renderer versions need compatibility validation. The adapter recognizes React instruction shapes; it is not a sandbox for arbitrary JavaScript. React Form Actions' document-wide replay protocol is not supported by this isolation mechanism.
 - Remote stream script replay supports inline classic scripts and forwards the SSR CSP nonce. External or module scripts inside the remote HTML stream are not supported; browser bundles load through Module Federation.
+
+### Progressive application hydration
+
+Modern application providers now expose an optional early hydration channel. Once the producer's complete shell marker has passed through the HTML framer, the host sends a `ready` frame containing an initial application snapshot. The browser can hydrate that independent root while subsequent `html` and opaque `update` frames are still arriving. Each instance owns its data stream; even repeated mounts of one producer do not share pending values.
+
+The producer runtime encodes and restores deferred data. MF does not inspect route IDs or loader results. `done` still means the producer's HTML and data transport have finished; it is distinct from `ready` and from a React commit. Providers without the new channel retain the final snapshot / completion-first hydration path. Late errors, timeouts and cancellation remain active after early hydration begins. Known styles must be ready before the shell is exposed.
+
+The integration is tested with React 18.3.1 and 19.2.8. The host keeps the HTTP document stream open until all remote streams finish; streaming pending React markup into an already completed document is not covered. The protocol still depends on the tested React completion instructions and does not add RSC or Form Action replay support.

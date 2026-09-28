@@ -10,7 +10,10 @@ import {
   type BridgeSSRRenderParams,
 } from '@module-federation/bridge-react/ssr';
 import { bridgeStreamBootstrap } from '../bridge-stream/bootstrap';
-import { htmlFrames } from '../bridge-stream/frames.server';
+import {
+  htmlFrames,
+  containsShellMarker,
+} from '../bridge-stream/frames.server';
 import { hostPieces } from '../bridge-stream/host-stream';
 import { isolateReactStreamScripts } from '../bridge-stream/script-isolation.server';
 import {
@@ -151,6 +154,7 @@ export function bridgeStreamPlugin(
                 session = value;
                 // A provider can resolve after the deadline; do not retain its renderer.
                 value.snapshot.catch(() => {});
+                value.hydration?.snapshot.catch(() => {});
                 if (signal.aborted) value.abort(signal.reason);
                 return value;
               });
@@ -244,6 +248,10 @@ export function bridgeStreamPlugin(
                 let source: Readable | undefined;
                 let framed: ReturnType<typeof htmlFrames> | undefined;
                 let complete = false;
+                let updatesReader:
+                  | ReadableStreamDefaultReader<unknown>
+                  | undefined;
+                let updatesTask: Promise<void> | undefined;
                 const abortSource = () => {
                   source?.destroy(Error('Bridge rendering aborted'));
                   framed?.destroy(Error('Bridge rendering aborted'));
@@ -267,7 +275,11 @@ export function bridgeStreamPlugin(
                     protocol: BRIDGE_STREAM_PROTOCOL,
                     identifierPrefix: job.prefix,
                     stylesheets: job.stylesheets,
+                    ...(result.hydration
+                      ? { hydration: 'progressive' as const }
+                      : {}),
                   });
+                  let hydrationStarted = false;
                   for await (const html of framed) {
                     if (signal.aborted) throw signal.reason;
                     await emit(id, {
@@ -278,9 +290,39 @@ export function bridgeStreamPlugin(
                         job.prefix,
                       ),
                     });
+                    const hydration = result.hydration;
+                    if (
+                      hydration &&
+                      !hydrationStarted &&
+                      containsShellMarker(String(html), hydration.shellMarker)
+                    ) {
+                      hydrationStarted = true;
+                      const snapshot = await withAbort(
+                        hydration.snapshot,
+                        signal,
+                      );
+                      await emit(id, { type: 'ready', snapshot });
+                      updatesReader = hydration.updates.getReader();
+                      const reader = updatesReader;
+                      updatesTask = (async () => {
+                        while (true) {
+                          const next = await withAbort(reader.read(), signal);
+                          if (next.done) return;
+                          await emit(id, { type: 'update', value: next.value });
+                        }
+                      })();
+                      // An update transport error must also unblock the HTML reader.
+                      updatesTask.catch((error) => job.controller.abort(error));
+                    }
                   }
-                  const snapshot = await withAbort(result.snapshot, signal);
-                  await emit(id, { type: 'data', snapshot });
+                  if (result.hydration) {
+                    if (!hydrationStarted)
+                      throw Error('Missing Bridge application shell marker');
+                    await updatesTask;
+                  } else {
+                    const snapshot = await withAbort(result.snapshot, signal);
+                    await emit(id, { type: 'data', snapshot });
+                  }
                   await emit(id, { type: 'done' });
                   complete = true;
                 } catch (error) {
@@ -293,6 +335,10 @@ export function bridgeStreamPlugin(
                 } finally {
                   if (!complete)
                     job.controller.abort(Error('Bridge rendering stopped'));
+                  if (updatesReader) {
+                    await updatesReader.cancel().catch(() => {});
+                    updatesReader.releaseLock();
+                  }
                   source?.destroy();
                   framed?.destroy();
                   job.controller.signal.removeEventListener(

@@ -1,4 +1,5 @@
 import React, { StrictMode, useId, useState } from 'react';
+import { ReadableStream } from 'node:stream/web';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { renderToString as renderBrowserShell } from 'react-dom/server';
@@ -231,6 +232,74 @@ describe('independent Bridge SSR roots', () => {
     host = undefined;
     expect(destroy).toHaveBeenCalledTimes(1);
     expect(release).toHaveBeenCalledWith(instanceId, remoteContainer);
+  });
+
+  it('hydrates and handles interactions from readiness before transport finishes, forwarding the same updates stream', async () => {
+    const provider = createBridgeComponent({ rootComponent: Product })();
+    const hydrate = jest.spyOn(provider, 'hydrate');
+    const render = jest.spyOn(provider, 'render');
+    const factory = () => provider;
+    const ready = deferred<BridgeSSRBrowserSnapshot>();
+    const done = deferred<BridgeSSRBrowserSnapshot>();
+    const updates = new ReadableStream<unknown>();
+    const session = { ready: ready.promise, done: done.promise };
+    let finished = false;
+    void done.promise.then(() => {
+      finished = true;
+    });
+    const Fixture = () => (
+      <RemoteAppWrapper
+        moduleName="products/App"
+        ssrInstanceId="early-products"
+        providerInfo={factory}
+        exportName="default"
+        loading={<p>Loading</p>}
+        fallback={() => null}
+        value="商品"
+      />
+    );
+    const container = document.createElement('main');
+    document.body.appendChild(container);
+    container.innerHTML = renderToString(<Fixture />);
+    window.__MF_BRIDGE_SSR__ = {
+      get: () => session,
+      claim: () => session,
+      release: jest.fn(),
+    };
+    await act(async () => {
+      host = hydrateRoot(container, <Fixture />);
+    });
+    expect(hydrate).not.toHaveBeenCalled();
+    const remote = document.getElementById('early-products')!;
+    remote.innerHTML = renderToString(<Product value="商品" />, {
+      identifierPrefix: 'early-products-',
+    });
+    const button = remote.querySelector('button')!;
+    const snapshot = { pending: [{ id: 'report-0' }] };
+    await act(async () =>
+      ready.resolve({
+        snapshot,
+        identifierPrefix: 'early-products-',
+        updates,
+      }),
+    );
+
+    expect(finished).toBe(false);
+    expect(hydrate).toHaveBeenCalledTimes(1);
+    expect(hydrate.mock.calls[0][0].snapshot).toBe(snapshot);
+    expect(hydrate.mock.calls[0][0].updates).toBe(updates);
+    expect(render).not.toHaveBeenCalled();
+    expect(remote.querySelector('button')).toBe(button);
+    fireEvent.click(button);
+    expect(button.textContent).toBe('商品: 1');
+    expect(finished).toBe(false);
+
+    await act(async () =>
+      done.resolve({ snapshot, identifierPrefix: 'early-products-' }),
+    );
+    expect(finished).toBe(true);
+    expect(hydrate).toHaveBeenCalledTimes(1);
+    await updates.cancel();
   });
 
   it('drops hydration when an unfinished remote is unmounted', async () => {
