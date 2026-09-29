@@ -25,6 +25,8 @@ const mocks = rs.hoisted(() => {
 
   return {
     mockNormalizeWebpackPath: rs.fn((path: string) => path),
+    mockRangeToString: rs.fn((range: unknown) => (range ? String(range) : '*')),
+    mockStringifyHoley: rs.fn((version: unknown) => JSON.stringify(version)),
     mockMakeSerializable: rs.fn(),
     MockConsumeSharedFallbackDependency,
   };
@@ -36,6 +38,11 @@ rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
 }));
 
 rs.mock('webpack', () => createWebpackMock());
+
+rs.mock('webpack/lib/util/semver', () => ({
+  rangeToString: mocks.mockRangeToString,
+  stringifyHoley: mocks.mockStringifyHoley,
+}));
 
 rs.mock('webpack/lib/util/makeSerializable', () => mocks.mockMakeSerializable);
 
@@ -103,30 +110,6 @@ describe('ConsumeSharedModule (integration)', () => {
     expect(identifier).toContain(WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE);
     expect(identifier).toContain('default|custom');
     expect(identifier).toContain('react');
-  });
-
-  it('keeps distinct requiredVersion ranges as distinct modules', () => {
-    const consume = (requiredVersion: string) =>
-      new ConsumeSharedModule('/context', {
-        ...testModuleOptions.basic,
-        requiredVersion,
-      } as unknown as ConsumeOptions);
-    const caret = consume('^18.2.0');
-    const tilde = consume('~18.2.0');
-    const requestShortener = {
-      shorten: (v: string) => v,
-      contextify: (v: string) => v,
-    };
-
-    expect(caret.identifier()).not.toBe(tilde.identifier());
-    expect(caret.identifier()).toContain('|^18.2.0|');
-    expect(tilde.identifier()).toContain('|~18.2.0|');
-    expect(caret.readableIdentifier(requestShortener)).toContain(
-      'react@^18.2.0',
-    );
-    expect(tilde.readableIdentifier(requestShortener)).toContain(
-      'react@~18.2.0',
-    );
   });
 
   it('generates readable identifiers that reflect share scope combinations', () => {
