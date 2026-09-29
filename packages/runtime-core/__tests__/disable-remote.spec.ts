@@ -2,6 +2,7 @@ import {
   describe,
   it,
   expect,
+  rs,
   beforeAll,
   beforeEach,
   afterEach,
@@ -90,5 +91,45 @@ describe('experiments.optimization.disableRemote', () => {
     await expect(getRemoteEntry({ origin, remoteInfo })).resolves.toBe(
       container,
     );
+  });
+
+  it('resolves a shared fallback for its consumer with remotes disabled', async () => {
+    const { getSharedFallbackGetter } =
+      await import('../../webpack-bundler-runtime/src/getSharedFallbackGetter');
+    const entry = {
+      init: rs.fn(async () => undefined),
+      get: rs.fn(() => () => ({ value: 'from-fallback' })),
+    };
+    const origin = new ModuleFederation({
+      name: 'no-remote-shared-host',
+      remotes: [],
+      plugins: [{ name: 'shared-fallback-entry', loadEntry: () => entry }],
+    });
+    const bundlerRuntime = {};
+    const webpackRequire = {
+      p: `${BASE}/`,
+      federation: {
+        runtime: { getRemoteEntry },
+        instance: origin,
+        bundlerRuntime,
+        sharedFallback: {
+          'test-shared': [['fallback.js', '1.0.0', 'fallbackEntry', 'var']],
+        },
+      },
+    } as unknown as Parameters<
+      typeof getSharedFallbackGetter
+    >[0]['webpackRequire'];
+
+    const getter = getSharedFallbackGetter({
+      shareKey: 'test-shared',
+      version: '1.0.0',
+      factory: () => () => ({ value: 'local' }),
+      webpackRequire,
+    });
+    const factory = await getter();
+
+    expect(factory()).toEqual({ value: 'from-fallback' });
+    expect(entry.init).toHaveBeenCalledWith(origin, bundlerRuntime);
+    expect(entry.get).toHaveBeenCalledTimes(1);
   });
 });
