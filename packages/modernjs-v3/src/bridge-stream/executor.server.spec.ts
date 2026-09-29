@@ -47,6 +47,21 @@ describe('Bridge execution selection', () => {
     ).toBe(remote);
     expect(localProvider.factory).not.toHaveBeenCalled();
   });
+  it('does not require local artifacts or implicitly fall back when HTTP-only SSR fails', async () => {
+    rs.mocked(fetchBridgeService).mockRejectedValueOnce(
+      Error('service unavailable'),
+    );
+    const factory = rs.fn(() => {
+      throw Error('The Host has no producer Node artifact');
+    });
+    await expect(
+      executeBridgeSSR(request(), factory, {
+        url: service.url,
+        revision: service.revision,
+      }),
+    ).rejects.toThrow('service unavailable');
+    expect(factory).not.toHaveBeenCalled();
+  });
   it('retries a pre-metadata failure using matching local artifacts', async () => {
     rs.mocked(fetchBridgeService).mockRejectedValueOnce(Error('unavailable'));
     const localProvider = local();

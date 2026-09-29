@@ -73,7 +73,7 @@ function withAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   });
 }
 
-/** Modern owns HTTP and its root renderer; this adapter executes independent Node providers. */
+/** Modern owns the Host renderer; this adapter composes local or HTTP provider output. */
 export function bridgeStreamPlugin(
   options: BridgeStreamPluginOptions = {},
 ): RuntimePlugin {

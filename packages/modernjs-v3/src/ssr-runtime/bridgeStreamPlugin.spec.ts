@@ -1,14 +1,29 @@
-import { describe, expect, it } from '@rstest/core';
-import { PassThrough } from 'node:stream';
+import { describe, expect, it, rs } from '@rstest/core';
+import { PassThrough, Readable } from 'node:stream';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import React from 'react';
 import { renderToPipeableStream, renderToString } from 'react-dom/server';
 import { createRemoteAppComponent } from '@module-federation/bridge-react/base';
 import { once } from 'node:events';
-import { bridgeStreamPlugin } from './bridgeStreamPlugin.node';
+import {
+  bridgeStreamPlugin,
+  type BridgeStreamPluginOptions,
+} from './bridgeStreamPlugin.node';
+import { loadRemote } from '@module-federation/runtime';
+import { loadBridgeRemote } from '../bridge-stream/remote.server';
+import { createBridgeServiceHandler } from '../bridge-stream/service-http';
 import type {
   BridgeSSRContextValue,
   BridgeSSRRequest,
 } from '@module-federation/bridge-react/ssr';
+
+rs.mock('@module-federation/runtime', () => ({
+  loadRemote: rs.fn(() => {
+    throw Error('The Host has no producer Node artifact');
+  }),
+  getInstance: () => null,
+}));
 
 const MODERN_SHELL_TEXT = '<!--<?- SHELL_STREAM_END ?>-->';
 const MODERN_SHELL_MARKER = '&lt;!--&lt;?- SHELL_STREAM_END ?&gt;--&gt;';
@@ -16,9 +31,10 @@ const MODERN_SHELL_MARKER = '&lt;!--&lt;?- SHELL_STREAM_END ?&gt;--&gt;';
 function createExtender(
   timeoutMs = 1000,
   url = 'https://host.example/dashboard?tab=goods',
+  services?: BridgeStreamPluginOptions['services'],
 ) {
   let factory: (() => any) | undefined;
-  const plugin = bridgeStreamPlugin({ timeoutMs });
+  const plugin = bridgeStreamPlugin({ timeoutMs, services });
   plugin.setup({
     extendStreamSSR: (callback: () => any) => {
       factory = callback;
@@ -171,6 +187,171 @@ describe('Modern Bridge stream plugin', () => {
     expect(text).toContain(
       '<script nonce="test-nonce">window.__MF_BRIDGE_SSR__',
     );
+  });
+
+  it('composes real HTTP React output and deferred frames without loading a Host Node expose', async () => {
+    rs.mocked(loadRemote).mockClear();
+    const revision = 'service-only-build';
+    let release!: () => void;
+    let resolved = false;
+    const pending = new Promise<void>((resolve) => {
+      release = () => {
+        resolved = true;
+        resolve();
+      };
+    });
+    let updates!: ReadableStreamDefaultController<unknown>;
+    let request: BridgeSSRRequest | undefined;
+    let remoteRendering: ReturnType<typeof renderToPipeableStream> | undefined;
+    const handler = createBridgeServiceHandler({
+      revision,
+      async render(info) {
+        request = info;
+        const stream = new PassThrough();
+        const shellMarker = `${info.identifierPrefix}shell`;
+        function DeferredContent() {
+          if (!resolved) throw pending;
+          return React.createElement(
+            'button',
+            null,
+            'Service deferred content',
+          );
+        }
+        remoteRendering = renderToPipeableStream(
+          React.createElement(
+            React.Fragment,
+            null,
+            React.createElement('h2', null, 'Service shell'),
+            React.createElement(
+              React.Suspense,
+              { fallback: React.createElement('p', null, 'Service pending') },
+              React.createElement(DeferredContent),
+            ),
+            React.createElement('template', { id: shellMarker }),
+          ),
+          {
+            identifierPrefix: info.identifierPrefix,
+            onShellReady() {
+              remoteRendering!.pipe(stream);
+            },
+          },
+        );
+        return {
+          revision,
+          stream: Readable.toWeb(stream) as ReadableStream<Uint8Array>,
+          snapshot: pending.then(() => ({ complete: true })),
+          // Exercise the opaque hydration contract; Modern owns the actual data codec.
+          hydration: {
+            shellMarker,
+            snapshot: Promise.resolve({ pending: 'activity' }),
+            updates: new ReadableStream({
+              start(controller) {
+                updates = controller;
+              },
+            }),
+          },
+          abort: (reason) => remoteRendering!.abort(reason),
+        };
+      },
+    });
+    const server = createServer(async (incoming, outgoing) => {
+      try {
+        const response = await handler(
+          new Request(`http://127.0.0.1${incoming.url}`, {
+            method: incoming.method,
+            headers: incoming.headers as HeadersInit,
+            body: Readable.toWeb(incoming),
+            duplex: 'half',
+          } as RequestInit),
+        );
+        outgoing.writeHead(
+          response.status,
+          Object.fromEntries(response.headers),
+        );
+        Readable.fromWeb(
+          response.body as Parameters<typeof Readable.fromWeb>[0],
+        ).pipe(outgoing);
+      } catch (error) {
+        outgoing.destroy(error as Error);
+      }
+    });
+    await new Promise<void>((resolve) =>
+      server.listen(0, '127.0.0.1', resolve),
+    );
+    const { extender } = createExtender(5000, undefined, {
+      'service/app': {
+        url: `http://127.0.0.1:${(server.address() as AddressInfo).port}/render`,
+        revision,
+        // No localFallback and no usable Host Node artifact.
+      },
+    });
+    const Remote = createRemoteAppComponent({
+      loader: () => loadBridgeRemote('service/app'),
+      loading: React.createElement('p', null, 'Remote module loading'),
+      fallback: () => null,
+    });
+    const input = new PassThrough();
+    const output = extender.processStream(input);
+    let text = '';
+    let shellReady!: () => void;
+    const ready = new Promise<void>((resolve) => {
+      shellReady = resolve;
+    });
+    output.on('data', (chunk: Buffer) => {
+      text += chunk.toString();
+      if (text.includes('"type":"ready"')) shellReady();
+    });
+    const done = once(output, 'end');
+    const hostRendering = renderToPipeableStream(
+      extender.modifyRootElement(
+        React.createElement(
+          React.Fragment,
+          null,
+          React.createElement(Remote),
+          MODERN_SHELL_TEXT,
+        ),
+      ),
+      {
+        identifierPrefix: 'modern-js-',
+        onShellReady() {
+          hostRendering.pipe(input);
+        },
+      },
+    );
+    try {
+      await Promise.race([
+        ready,
+        done.then(() => {
+          throw Error('Host ended before the service shell was ready');
+        }),
+      ]);
+      expect(request?.moduleName).toBe('service/app');
+      expect(text).toContain('Service shell');
+      expect(text).toContain('Service pending');
+      expect(text).not.toContain('Service deferred content');
+      expect(text).not.toContain('"type":"done"');
+      expect(loadRemote).not.toHaveBeenCalled();
+      updates.enqueue({ id: 'activity', value: 'loaded' });
+      updates.close();
+      release();
+      await done;
+      expect(text).toContain('Service deferred content');
+      expect(text).toContain(
+        '"type":"update","value":{"id":"activity","value":"loaded"}',
+      );
+      expect(text).toContain('"type":"done"');
+      expect(text).not.toContain('"type":"error"');
+      expect(text.indexOf('"type":"ready"')).toBeLessThan(
+        text.indexOf('"type":"update"'),
+      );
+      expect(loadRemote).not.toHaveBeenCalled();
+    } finally {
+      hostRendering.abort();
+      remoteRendering?.abort();
+      output.destroy();
+      server.closeAllConnections();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
   });
 
   it('deduplicates known CSS in the head and transports late CSS before that instance HTML', async () => {

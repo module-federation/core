@@ -6,7 +6,7 @@ export interface BridgeServiceOptions {
   url: string;
   /** Expected identity of both producer builds. */
   revision: string;
-  /** Retry with the producer Node expose only before HTTP metadata is accepted. */
+  /** Opt in to a local Node retry before HTTP metadata is accepted. Defaults to false. */
   localFallback?: boolean;
   timeoutMs?: number;
 }

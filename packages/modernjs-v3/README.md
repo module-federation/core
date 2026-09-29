@@ -4,7 +4,7 @@ This plugin integrates Module Federation with Modern.js. See the [Modern.js inte
 
 ## Independent Bridge application SSR
 
-Bridge applications can render in the host's Node process while keeping their own React root, React version, router, and Modern runtime. The host forwards complete HTML fragments as they become available; it does not wait for the entire remote application to become a string. The browser hydrates each application with its own renderer after the shell and initial loader snapshot arrive, while deferred content continues streaming. Legacy providers without a progressive snapshot hydrate after completion.
+Bridge applications can render in the host's Node process or in a producer-owned HTTP service while keeping their own React root, React version, router, and Modern runtime. The host forwards complete HTML fragments as they become available; it does not wait for the entire remote application to become a string. The browser hydrates each application with its own renderer after the shell and initial loader snapshot arrive, while deferred content continues streaming. Legacy providers without a progressive snapshot hydrate after completion.
 
 This integration requires the Modern application APIs `@modern-js/runtime/application` and `@modern-js/runtime/application/server`, plus request context, `shellEndMarker`, and `identifierPrefix` support in Modern's streaming SSR extension. Use a Modern build that includes these APIs; installing this MF plugin alone does not add them to older Modern releases. Generated entries use the producer's actual Modern route tree and loaders through `createApplication` and `renderApplication`.
 
@@ -93,7 +93,7 @@ The component factories and `RemoteAppWrapper` keep one shared implementation of
 
 ## Deployment and failure behavior
 
-Publish the producer's MF manifest, browser assets, and Node SSR entry with all its referenced chunks. The host uses the existing MF Node loader to load and execute that Node build in its own process. A producer SSR HTTP service or an additional per-producer server is not required. Static artifact delivery may still use HTTP; this is separate from calling an HTTP rendering service.
+Publish the producer's MF manifest and browser assets for browser hydration and CSR. For local execution, also make the Node SSR entry and all referenced chunks available to the host: its MF Node loader executes that build in the host process, without an additional server. For HTTP-only execution, deploy the Node build to the producer service instead; the host requests, frames, and forwards that service's rendered output without loading or executing the producer Node expose. Only an explicitly enabled local fallback adds that Node-artifact requirement to an HTTP consumer. Static artifact delivery may itself use HTTP; downloading code is separate from requesting an HTTP rendering service.
 
 The default path is SSR. Loading, rendering, stream completion, and hydration failures trigger a single whole-page navigation that sets `csr=1` and preserves other query parameters and the URL hash. Enable Modern's `server.ssr.forceCSR` on the host so that the next request selects CSR; this plugin does not change that Modern setting automatically. In CSR mode, the browser mounts the producer applications through their normal browser entries. A missing browser artifact can still fail and is shown by the component's error fallback.
 
@@ -103,6 +103,7 @@ A received stream is not proof of success: the protocol must reach its final sna
 
 - Use distinct MF names for the host and producers. Do not share React, ReactDOM, React Router, or the Modern runtime between these applications; the Bridge configuration rejects those shared entries.
 - Streaming completion script isolation has regression coverage with React 18.3.1 and React 19.2.8. It relies on React's internal streaming instructions, so other renderer versions need compatibility validation. The adapter recognizes React instruction shapes; it is not a sandbox for arbitrary JavaScript. React Form Actions' document-wide replay protocol is not supported by this isolation mechanism.
+- React DOM 18 has a separate upstream UTF-8 buffer bug in the Node `renderToPipeableStream` renderer: multibyte characters at a buffer boundary can emit NUL bytes and cause hydration mismatches. See [React issue #31134](https://github.com/facebook/react/issues/31134) and the [official fix #26228](https://github.com/facebook/react/pull/26228). Independent development/production checks reproduced it in 18.1.0, 18.2.0, 18.3.0, and 18.3.1; 18.0.0 did not reproduce it. React 19 includes the fix (19.0.0 and 19.2.8 passed the same checks). The local Service App demo retains a pnpm patch backporting that fix to 18.3.1. MF does not patch React or remove bytes from the stream; a deployment using an affected renderer needs the upstream fix or a patched dependency. This finding is specific to that Node streaming path, not all React 18 rendering or ordinary CSR.
 - Remote stream script replay supports inline classic scripts and forwards the SSR CSP nonce. External or module scripts inside the remote HTML stream are not supported; browser bundles load through Module Federation.
 
 ### Progressive application hydration
@@ -111,13 +112,13 @@ Modern application providers now expose an optional early hydration channel. Onc
 
 The producer runtime encodes and restores deferred data. MF does not inspect route IDs or loader results. `done` still means the producer's HTML and data transport have finished; it is distinct from `ready` and from a React commit. Providers without the new channel retain the final snapshot / completion-first hydration path. Late errors, timeouts and cancellation remain active after early hydration begins. Known styles must be ready before the shell is exposed.
 
-The integration is tested with React 18.3.1 and 19.2.8. The host keeps the HTTP document stream open until all remote streams finish; streaming pending React markup into an already completed document is not covered. The protocol still depends on the tested React completion instructions and does not add RSC or Form Action replay support.
+The local Service App integration is tested with patched React 18.3.1 and unmodified 19.2.8; see the React 18 note above. The host keeps the HTTP document stream open until all remote streams finish; streaming pending React markup into an already completed document is not covered. The protocol still depends on the tested React completion instructions and does not add RSC or Form Action replay support.
 
 ## Service App HTTP execution
 
 Service App and local Bridge SSR use the same producer application, independent React root, Modern loader snapshot, HTML framer, script isolation, stylesheet gate, and browser hydration lifecycle. HTTP only changes how the host obtains the producer output. A Node-only deployment does not need to start another HTTP server.
 
-Use `loadBridgeRemote` in the consumer's `createRemoteAppComponent` loader. The Node build selects its lazy server entry, allowing HTTP SSR to succeed without downloading or evaluating the producer Node expose in the consumer. The browser still loads the producer's real browser expose through MF.
+Use `loadBridgeRemote` in the consumer's `createRemoteAppComponent` loader. In the host's Node build, its server entry supplies the remote module identity and a deferred local provider. Selecting HTTP never invokes that local provider, so a pure Service App host does not need to download, evaluate, or be able to run the producer's Node expose. This replaces the eager Node `loadRemote` dependency of the ordinary Bridge loader. The browser entry still loads the producer's real browser expose through MF for hydration or CSR; no producer Node code runs in the browser.
 
 ```tsx
 import { createRemoteAppComponent } from '@module-federation/bridge-react';
@@ -130,7 +131,7 @@ const Weekend = createRemoteAppComponent({
 });
 ```
 
-Select the executor in the consumer's MF plugin options. Unlisted modules continue to execute their Node expose locally. `localFallback` is opt-in and requires that the same producer Node build is available through the configured MF remote.
+Select the executor in the consumer's MF plugin options. This example is HTTP-only: `localFallback` defaults to `false` and is explicit below for clarity. Unlisted modules continue to execute their Node expose locally. If the service is unavailable, the HTTP-only path uses the existing whole-page CSR recovery without trying to load a producer Node build.
 
 ```ts
 bridge: {
@@ -138,12 +139,14 @@ bridge: {
     'weekend/app': {
       url: 'http://127.0.0.1:4801/services/render',
       revision: 'weekend-demo-v2',
-      localFallback: true,
+      localFallback: false,
       timeoutMs: 15000,
     },
   },
 }
 ```
+
+To opt into HTTP-to-local recovery, set `localFallback: true` for that same module and make its matching Node build available through the configured MF remote. This is a separate deployment capability, not a Service App prerequisite; no extra remote alias or expose is needed to express the policy. The fallback is attempted only before HTTP metadata is accepted.
 
 The producer sets `bridge: { exposes: { './app': true }, revision: 'weekend-demo-v2' }` and installs a Modern server middleware:
 
