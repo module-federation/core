@@ -13,4 +13,6 @@ it('resolves each consumer against its own requiredVersion range', async () => {
 
   expect(require('pkg-a')).toBe('shared-dep@1.1.0');
   expect(require('pkg-b')).toBe('shared-dep@1.0.5');
+  expect(require('shared-dep-explicit-wide')).toBe('shared-dep@1.1.0');
+  expect(require('shared-dep-explicit-narrow')).toBe('shared-dep@1.0.5');
 });
