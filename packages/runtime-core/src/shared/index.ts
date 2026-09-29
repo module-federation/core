@@ -34,7 +34,8 @@ import {
   getTargetSharedOptions,
   getGlobalShareScope,
   directShare,
-  shouldUseTreeShaking,
+  isTreeShakingRequested,
+  hasDisjointTreeShakenExports,
   addUseIn,
 } from '../utils/share';
 import {
@@ -393,7 +394,7 @@ export class SharedHandler {
           });
           return false;
         }
-        const _useTreeShaking = shouldUseTreeShaking(
+        const _useTreeShaking = isTreeShakingRequested(
           resolvedShareOptions.treeShaking,
         );
         const targetShared = directShare(resolvedShareOptions, _useTreeShaking);
@@ -511,7 +512,8 @@ export class SharedHandler {
           !activeVersion.loaded &&
           (Boolean(!eager) !== !activeVersionEager
             ? eager
-            : hostName > versions[version].from)),
+            : hostName > versions[version].from) &&
+          !hasDisjointTreeShakenExports(existingShared, shared)),
       );
       if (shouldReplace) {
         versions[version] = shared;
