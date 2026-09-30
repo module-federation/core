@@ -1,6 +1,5 @@
 /** @jest-environment node */
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import path from 'node:path';
 import type { Stats } from 'webpack';
 import { StatsPlugin } from '../src/StatsPlugin';
@@ -24,7 +23,7 @@ it.each([
 ])(
   'collects %s with multiple runtimes and supports explicit rollback',
   async (mode) => {
-    const directory = await mkdtemp(path.join(tmpdir(), 'mf-graph-'));
+    const directory = await mkdtemp(path.join(__dirname, 'mf-graph-'));
     const prefix = mode === 'enhanced-prefix';
     const shared = mode.includes('shared') || prefix;
     const native = mode === 'native-shared';
@@ -200,3 +199,77 @@ it.each([
   },
   60000,
 );
+
+it('keeps unnamed import groups out of rollback expose assets', async () => {
+  const directory = await mkdtemp(path.join(__dirname, 'mf-unnamed-group-'));
+  try {
+    await writeFile(path.join(directory, 'package.json'), '{}');
+    await writeFile(path.join(directory, 'entry.js'), 'import("./other.js");');
+    await writeFile(
+      path.join(directory, 'other.js'),
+      'import value from "./component.js"; console.log(value);',
+    );
+    await writeFile(
+      path.join(directory, 'component.js'),
+      'export default "component";',
+    );
+    for (const useLegacyStats of [true, false]) {
+      const options = {
+        name: 'fixture',
+        filename: 'remoteEntry.js',
+        dts: false as const,
+        exposes: {
+          './Component': { import: './component.js', name: 'exposed' },
+        },
+        manifest: { useLegacyStats },
+      };
+      const compiler = webpack({
+        context: directory,
+        mode: 'development',
+        devtool: false,
+        entry: './entry.js',
+        output: { path: directory, filename: '[name].js', publicPath: '/' },
+        optimization: { splitChunks: { chunks: 'all', minSize: 0 } },
+        plugins: [new EnhancedPlugin({ ...options, manifest: false })],
+      });
+      new StatsPlugin(options, {
+        pluginVersion: 'test',
+        bundler: 'webpack',
+      }).apply(compiler);
+      const result = await new Promise<Stats>((resolve, reject) => {
+        compiler.run((error, stats) =>
+          compiler.close((closeError) => {
+            if (error || closeError) reject(error || closeError);
+            else if (stats.hasErrors()) reject(new Error(stats.toString()));
+            else resolve(stats);
+          }),
+        );
+      });
+      const exposedChunk = [...result.compilation.chunks].find(
+        (chunk) => chunk.name === 'exposed',
+      );
+      expect(
+        [...exposedChunk.groupsIterable].some(
+          (group) => !group.name && group.getFiles().includes('other_js.js'),
+        ),
+      ).toBe(true);
+      for (const file of ['mf-stats.json', 'mf-manifest.json']) {
+        const artifact = JSON.parse(
+          await readFile(path.join(directory, file), 'utf8'),
+        );
+        expect(artifact.exposes[0].assets).toEqual({
+          js: {
+            // The pre-graph reader excludes the unnamed sibling chunk.
+            sync: useLegacyStats
+              ? ['exposed.js']
+              : ['exposed.js', 'other_js.js'],
+            async: [],
+          },
+          css: { sync: [], async: [] },
+        });
+      }
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

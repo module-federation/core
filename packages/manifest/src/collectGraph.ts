@@ -70,7 +70,7 @@ export function collectGraph(
 
   const addAssets = (target: StatsAssets, chunks: Iterable<Chunk>) => {
     for (const chunk of chunks) {
-      const assets = getAssetsByChunk(chunk, entryNames);
+      const assets = getAssetsByChunk(chunk, entryNames, true);
       for (const type of ['js', 'css'] as const)
         for (const loading of ['sync', 'async'] as const)
           target[type][loading] = [
