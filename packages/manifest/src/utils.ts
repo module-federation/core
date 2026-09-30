@@ -287,6 +287,7 @@ export function getSharedModules(
 export function getAssetsByChunk(
   chunk: Chunk,
   entryPointNames: Array<string>,
+  includeUnnamedGroups = false,
 ): StatsAssets {
   const assesSet = {
     js: {
@@ -304,7 +305,11 @@ export function getAssetsByChunk(
     type: 'sync' | 'async',
   ): void => {
     [...targetChunk.groupsIterable].forEach((chunkGroup) => {
-      if (!chunkGroup.name || !entryPointNames.includes(chunkGroup.name)) {
+      if (
+        chunkGroup.name
+          ? !entryPointNames.includes(chunkGroup.name)
+          : includeUnnamedGroups
+      ) {
         collectAssets(
           chunkGroup.getFiles(),
           assesSet.js[type],
