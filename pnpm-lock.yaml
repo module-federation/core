@@ -3538,9 +3538,12 @@ importers:
       '@module-federation/manifest-legacy':
         specifier: npm:@module-federation/manifest@2.8.2
         version: '@module-federation/manifest@2.8.2(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))'
+      '@module-federation/runtime-tools':
+        specifier: workspace:*
+        version: link:../runtime-tools
       '@rspack/core':
-        specifier: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@3aeb4fe3c7bae11f8c0b607cf5d9566e5047eaf8
-        version: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@3aeb4fe3c7bae11f8c0b607cf5d9566e5047eaf8(@module-federation/runtime-tools@2.9.1)(@swc/helpers@0.5.23)
+        specifier: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@d538c9c
+        version: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@d538c9c(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
       '@rspack/core-legacy':
         specifier: npm:@rspack/core@1.3.9
         version: '@rspack/core@1.3.9(@swc/helpers@0.5.23)'
@@ -28895,6 +28898,30 @@ packages:
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
+
+  '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c':
+    resolution: {integrity: sha512-uGQx6i1QlDolIqe2L0z2mIlcWOwh7A+nXRDEropqug+wpEL7RiAGhTblSFns3M3HbeSNO8XkZgQ/gSwc/oG10g==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c}
+    version: 2.2.7
+    cpu: [x64]
+    os: [linux]
+
+  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c':
+    resolution: {integrity: sha512-AlqC1hDRqkEbq7U7aSpGzePE2XwqHsFEVM3MbtNNWPvcnxrL28dPFJL+yUSElLWjHvuJfhvpQKwtjZ9uV9HE+g==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c}
+    version: 2.2.7
+
+  '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@d538c9c':
+    resolution: {integrity: sha512-bv94eVhNr6KJtAiChNNjk0i1EtWc+U1pp1z5upTtx4KmuEliErND/kgiBOoXGqLIkFJ9M3KpS+F0BLDqJylDiw==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@d538c9c}
+    version: 2.2.7
+    engines: {node: ^20.19.0 || >=22.12.0}
+    peerDependencies:
+      '@module-federation/runtime-tools': ^0.24.1 || ^2.0.0
+      '@swc/helpers': ^0.5.23
+    peerDependenciesMeta:
+      '@module-federation/runtime-tools':
+        optional: true
+      '@swc/helpers':
+        optional: true
+
 
 snapshots:
 
@@ -64901,3 +64928,17 @@ snapshots:
   zwitch@1.0.5: {}
 
   zwitch@2.0.4: {}
+
+  '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c':
+    optional: true
+
+  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c':
+    optionalDependencies:
+      '@rspack/binding-linux-x64-gnu': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c
+
+  '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@d538c9c(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)':
+    dependencies:
+      '@rspack/binding': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c
+    optionalDependencies:
+      '@module-federation/runtime-tools': link:packages/runtime-tools
+      '@swc/helpers': 0.5.23

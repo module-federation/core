@@ -43,18 +43,17 @@ beforeAll(() => {
   const platformRequire = process
     .getBuiltinModule('module')
     .createRequire(bindingPath);
-  const platformDependencies =
-    platformRequire('./package.json').optionalDependencies;
   const nativeBindings = Object.keys(nativeRequire.cache).filter(
     (file) => file.endsWith('.node') && file.includes('@rspack+binding'),
   );
   expect(
     nativeBindings.some((file) => {
-      const { name } = nativeRequire(
+      const { name, version } = nativeRequire(
         path.join(path.dirname(file), 'package.json'),
       );
       return (
-        platformDependencies[name]?.endsWith(revision) &&
+        file.includes(revision) &&
+        version === nativeRequire('@rspack/core/package.json').version &&
         platformRequire.resolve(name) === file
       );
     }),
@@ -64,6 +63,9 @@ beforeAll(() => {
     runtime: toolsRequire('@module-federation/runtime/package.json').version,
     hostTools,
     remote: remotePreview,
+    remoteRuntime: nativeRequire(
+      '@module-federation/runtime-tools/package.json',
+    ).version,
     remotePackage,
   });
 });
@@ -80,7 +82,10 @@ it.each([
     expect(
       toolsRequire('@module-federation/runtime/package.json').version,
     ).toBe('0.13.1');
-    expect(nativeRequire('@rspack/core/package.json').version).toBe('2.2.3');
+    expect(nativeRequire('@rspack/core/package.json').version).toBe('2.2.7');
+    expect(
+      nativeRequire('@module-federation/runtime-tools/package.json').version,
+    ).toBe(nativeRequire('../package.json').version);
     const directory = await mkdtemp(path.join(tmpdir(), 'mf-old-host-'));
     const requests: string[] = [];
     const server = createServer(async (request, response) => {
@@ -153,16 +158,7 @@ it.each([
                   implementation: isHost
                     ? hostTools
                     : nativeRequire.resolve(
-                        '@module-federation/runtime-tools',
-                        {
-                          paths: [
-                            path.dirname(
-                              nativeRequire.resolve(
-                                '@rspack/core/package.json',
-                              ),
-                            ),
-                          ],
-                        },
+                        '@module-federation/runtime-tools/bundler',
                       ),
                   ...(isHost
                     ? {
