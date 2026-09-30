@@ -24,6 +24,7 @@ import {
   RemoteEntryExports,
   CallFrom,
   ShareScopeMap,
+  ResourceLoadContext,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
