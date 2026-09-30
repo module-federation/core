@@ -1,6 +1,7 @@
 import { ModuleFederation } from '@module-federation/runtime-core';
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 import createRuntimePlugin from './runtimePlugin';
+import { createScript as createSdkScript } from '@module-federation/sdk';
 
 type BeforeRequest = NonNullable<
   ModuleFederationRuntimePlugin['beforeRequest']
@@ -375,21 +376,29 @@ describe('next-internal-plugin onLoad', () => {
 describe('next-internal-plugin createScript', () => {
   const originalWindow = global.window;
   const originalDocument = global.document;
+  const originalScriptElement = global.HTMLScriptElement;
   const federationGlobal = globalThis as typeof globalThis & {
     FEDERATION_NEXTJS_SCRIPT_TIMEOUT?: unknown;
   };
 
   beforeEach(() => {
-    global.window = {} as Window & typeof globalThis;
+    global.window = {
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    } as unknown as Window & typeof globalThis;
     global.document = {
-      createElement: () => ({}),
+      createElement: jest.fn(() => ({})),
+      getElementsByTagName: () => [],
     } as unknown as Document;
+    global.HTMLScriptElement = class {} as typeof HTMLScriptElement;
   });
 
   afterEach(() => {
     global.window = originalWindow;
     global.document = originalDocument;
+    global.HTMLScriptElement = originalScriptElement;
     delete federationGlobal.FEDERATION_NEXTJS_SCRIPT_TIMEOUT;
+    jest.useRealTimers();
   });
 
   const createScript = () =>
@@ -407,11 +416,70 @@ describe('next-internal-plugin createScript', () => {
     expect(createScript()).toMatchObject({ timeout: 30000 });
   });
 
-  it.each([0, -1, NaN, null])(
+  it.each([0, -1, NaN, Infinity, -Infinity, null, '30000'])(
     'falls back to 8000ms for an invalid value (%p)',
     (value) => {
       federationGlobal.FEDERATION_NEXTJS_SCRIPT_TIMEOUT = value;
       expect(createScript()).toMatchObject({ timeout: 8000 });
+    },
+  );
+
+  it('preserves script creation and crossorigin handling', () => {
+    const attrs = { crossorigin: 'anonymous' };
+    const result = createRuntimePlugin().createScript!({
+      url: 'https://cdn.example.com/remoteEntry.js',
+      attrs,
+    });
+
+    expect(document.createElement).toHaveBeenCalledWith('script');
+    expect(result).toMatchObject({
+      script: { src: 'https://cdn.example.com/remoteEntry.js', async: true },
+      timeout: 8000,
+    });
+    expect(attrs).not.toHaveProperty('crossorigin');
+  });
+
+  it('leaves server-side loading to the node runtime plugin', () => {
+    delete (global as { window?: unknown }).window;
+    federationGlobal.FEDERATION_NEXTJS_SCRIPT_TIMEOUT = 30000;
+
+    expect(createScript()).toBeUndefined();
+    expect(document.createElement).not.toHaveBeenCalled();
+  });
+
+  it.each([undefined, 30000])(
+    'uses the configured timeout in the SDK loader (%p)',
+    (timeout) => {
+      jest.useFakeTimers();
+      if (timeout !== undefined) {
+        federationGlobal.FEDERATION_NEXTJS_SCRIPT_TIMEOUT = timeout;
+      }
+      const onError = jest.fn();
+      const onLoad = jest.fn();
+      const plugin = createRuntimePlugin();
+      const { script } = createSdkScript({
+        url: 'https://cdn.example.com/remoteEntry.js',
+        onErrorCallback: onError,
+        cb: onLoad,
+        createScriptHook: (url, attrs) => plugin.createScript!({ url, attrs }),
+      });
+
+      jest.advanceTimersByTime(9000);
+
+      if (timeout === undefined) {
+        expect(onError).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: expect.stringContaining('timed out'),
+          }),
+        );
+        expect(onLoad).not.toHaveBeenCalled();
+      } else {
+        expect(onError).not.toHaveBeenCalled();
+        script.onload!({ type: 'load' } as Event);
+        jest.advanceTimersByTime(timeout);
+        expect(onLoad).toHaveBeenCalledTimes(1);
+        expect(onError).not.toHaveBeenCalled();
+      }
     },
   );
 });

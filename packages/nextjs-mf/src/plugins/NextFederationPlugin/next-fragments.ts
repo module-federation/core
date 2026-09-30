@@ -137,6 +137,7 @@ export interface NextFederationPluginExtraOptions {
   skipSharingNextInternals?: boolean;
   automaticPageStitching?: boolean;
   debug?: boolean;
+  /** Browser remote entry timeout in milliseconds. Defaults to 8000. */
   scriptTimeout?: number;
 }
 

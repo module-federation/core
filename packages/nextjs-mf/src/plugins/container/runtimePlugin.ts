@@ -41,6 +41,7 @@ export default function (): ModuleFederationRuntimePlugin {
 
         const timeout =
           typeof FEDERATION_NEXTJS_SCRIPT_TIMEOUT === 'number' &&
+          Number.isFinite(FEDERATION_NEXTJS_SCRIPT_TIMEOUT) &&
           FEDERATION_NEXTJS_SCRIPT_TIMEOUT > 0
             ? FEDERATION_NEXTJS_SCRIPT_TIMEOUT
             : DEFAULT_SCRIPT_TIMEOUT;
