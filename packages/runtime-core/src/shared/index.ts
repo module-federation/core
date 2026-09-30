@@ -812,7 +812,7 @@ export class SharedHandler {
       const versions = getSharedVersions(
         this.shareScopeMap[sc],
         pkgName,
-        shared.shareConfig.layer,
+        shared.shareConfig?.layer,
         true,
       )!;
 
