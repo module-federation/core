@@ -36,6 +36,7 @@ import {
   directShare,
   shouldUseTreeShaking,
   addUseIn,
+  getSharedVersions,
 } from '../utils/share';
 import {
   assert,
@@ -236,7 +237,11 @@ export class SharedHandler {
             pkgName: sharedKey,
             shared: sharedVal,
           });
-          const registeredShared = this.shareScopeMap[sc]?.[sharedKey];
+          const registeredShared = getSharedVersions(
+            this.shareScopeMap[sc],
+            sharedKey,
+            sharedVal.shareConfig.layer,
+          );
           const previousAtVersion = registeredShared?.[sharedVal.version];
           if (!registeredShared) {
             this.setShared({
@@ -252,8 +257,11 @@ export class SharedHandler {
             scope: sc,
             shared: sharedVal,
             previousShared: previousAtVersion,
-            registeredShared:
-              this.shareScopeMap[sc]?.[sharedKey]?.[sharedVal.version],
+            registeredShared: getSharedVersions(
+              this.shareScopeMap[sc],
+              sharedKey,
+              sharedVal.shareConfig.layer,
+            )?.[sharedVal.version],
             trigger: 'runtime',
           });
         });
@@ -495,8 +503,12 @@ export class SharedHandler {
     const scope = shareScope[shareScopeName];
     const register = (name: string, shared: Shared) => {
       const { version, eager } = shared;
-      scope[name] = scope[name] || {};
-      const versions = scope[name];
+      const versions = getSharedVersions(
+        scope,
+        name,
+        shared.shareConfig.layer,
+        true,
+      )!;
       const existingShared = versions[version];
       const activeVersion: Shared =
         existingShared && (directShare(existingShared) as Shared);
@@ -797,12 +809,15 @@ export class SharedHandler {
       if (!this.shareScopeMap[sc]) {
         this.shareScopeMap[sc] = {};
       }
-      if (!this.shareScopeMap[sc][pkgName]) {
-        this.shareScopeMap[sc][pkgName] = {};
-      }
+      const versions = getSharedVersions(
+        this.shareScopeMap[sc],
+        pkgName,
+        shared.shareConfig.layer,
+        true,
+      )!;
 
-      if (!this.shareScopeMap[sc][pkgName][version]) {
-        this.shareScopeMap[sc][pkgName][version] = {
+      if (!versions[version]) {
+        versions[version] = {
           version,
           scope: [sc],
           ...shareInfo,
@@ -810,7 +825,7 @@ export class SharedHandler {
         };
       }
 
-      const registeredShared = this.shareScopeMap[sc][pkgName][version];
+      const registeredShared = versions[version];
       mergeAttrs(registeredShared);
       if (from && registeredShared.from !== from) {
         registeredShared.from = from;
