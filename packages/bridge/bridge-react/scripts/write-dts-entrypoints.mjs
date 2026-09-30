@@ -2,6 +2,10 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
 const entrypoints = {
+  'dist/remote-lifecycle.d.ts': ["export * from './remote/remoteLifecycle';"],
+  'dist/remote-lifecycle.server.d.ts': [
+    "export * from './remote/remoteLifecycle.server';",
+  ],
   'dist/plugin.d.ts': [
     "export { default } from './provider/plugin';",
     "export * from './provider/plugin';",

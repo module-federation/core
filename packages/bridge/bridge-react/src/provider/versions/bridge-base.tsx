@@ -12,6 +12,7 @@ import type {
   RenderParams,
   CreateRootOptions,
   ErrorFallbackProps,
+  HydrateParams,
 } from '../../types';
 import { ErrorBoundary } from '../../error-boundary';
 import { RouterContext } from '../context';
@@ -20,6 +21,7 @@ import { federationRuntime } from '../plugin';
 
 export function createBaseBridgeComponent<T>({
   createRoot,
+  hydrateRoot,
   defaultRootOptions,
   ...bridgeInfo
 }: ProviderFnParams<T>) {
@@ -83,71 +85,105 @@ export function createBaseBridgeComponent<T>({
       </ErrorBoundary>
     );
 
-    return {
-      async render(info: RenderParams) {
-        LoggerInstance.debug(`createBridgeComponent render Info`, info);
-        const {
-          moduleName,
-          dom,
-          basename,
-          memoryRoute,
-          rootOptions,
-          ...propsInfo
-        } = info;
-        const operationContext: BridgeOperationContext = {
-          side: 'producer',
-          framework: 'react',
-          operation: rootMap.has(dom) ? 'update' : 'render',
-          reason: 'direct',
-        };
+    const render = async (info: RenderParams, hydrate = false) => {
+      LoggerInstance.debug(`createBridgeComponent render Info`, info);
+      const {
+        moduleName,
+        dom,
+        basename,
+        memoryRoute,
+        rootOptions,
+        snapshot: _snapshot,
+        signal,
+        ...propsInfo
+      } = info;
+      if (signal?.aborted) return;
+      const operationContext: BridgeOperationContext = {
+        side: 'producer',
+        framework: 'react',
+        operation: rootMap.has(dom) ? 'update' : 'render',
+        reason: 'direct',
+      };
 
-        const mergedRootOptions: CreateRootOptions | undefined = {
-          ...defaultRootOptions,
-          ...(rootOptions as CreateRootOptions),
-        };
+      const mergedRootOptions: CreateRootOptions | undefined = {
+        ...defaultRootOptions,
+        ...(rootOptions as CreateRootOptions),
+      };
 
-        const beforeBridgeRenderRes =
-          instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
-            info,
-            operationContext,
-          ) || {};
+      const beforeBridgeRenderRes =
+        instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+          info,
+          operationContext,
+        ) || {};
 
-        const rootComponentWithErrorBoundary = (
-          <BridgeWrapper
-            basename={basename}
-            moduleName={moduleName}
-            memoryRoute={memoryRoute}
-            propsInfo={
-              {
-                ...omitHostFallback(propsInfo as Record<string, unknown>),
-                basename,
-                ...(beforeBridgeRenderRes as any)?.extraProps,
-              } as T
-            }
-          />
-        );
+      const rootComponentWithErrorBoundary = (
+        <BridgeWrapper
+          basename={basename}
+          moduleName={moduleName}
+          memoryRoute={memoryRoute}
+          propsInfo={
+            {
+              ...omitHostFallback(propsInfo as Record<string, unknown>),
+              basename,
+              ...(beforeBridgeRenderRes as any)?.extraProps,
+            } as T
+          }
+        />
+      );
 
-        if (bridgeInfo.render) {
-          const root = await Promise.resolve(
-            bridgeInfo.render(rootComponentWithErrorBoundary, dom),
+      if (hydrate && !rootMap.has(dom)) {
+        let root: RootType;
+        if (bridgeInfo.hydrate) {
+          root = await bridgeInfo.hydrate(
+            rootComponentWithErrorBoundary,
+            dom,
+            info as HydrateParams,
           );
-          rootMap.set(dom, root as RootType);
+          if (signal?.aborted) {
+            if ('unmount' in root) root.unmount();
+            return;
+          }
+        } else if (hydrateRoot) {
+          root = hydrateRoot(
+            dom,
+            rootComponentWithErrorBoundary,
+            mergedRootOptions,
+          );
         } else {
-          let root = rootMap.get(dom);
-          // Do not call createRoot multiple times
-          if (!root && createRoot) {
-            root = createRoot(dom, mergedRootOptions);
-            rootMap.set(dom, root as any);
-          }
-
-          if (root && 'render' in root) {
-            root.render(rootComponentWithErrorBoundary);
-          }
+          throw new Error(
+            'This Bridge provider does not support hydration. Use the React 18 or React 19 entry point.',
+          );
         }
-        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
-          context: operationContext,
-        }) || {};
-      },
+        rootMap.set(dom, root);
+      } else if (bridgeInfo.render) {
+        const root = await Promise.resolve(
+          bridgeInfo.render(rootComponentWithErrorBoundary, dom),
+        );
+        if (signal?.aborted) {
+          if (root && 'unmount' in root) root.unmount();
+          return;
+        }
+        rootMap.set(dom, root as RootType);
+      } else {
+        let root = rootMap.get(dom);
+        // Do not call createRoot multiple times
+        if (!root && createRoot) {
+          root = createRoot(dom, mergedRootOptions);
+          rootMap.set(dom, root as any);
+        }
+
+        if (root && 'render' in root) {
+          root.render(rootComponentWithErrorBoundary);
+        }
+      }
+      instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
+        context: operationContext,
+      }) || {};
+    };
+
+    return {
+      render,
+      hydrate: (info: HydrateParams) => render(info, true),
 
       destroy(info: DestroyParams) {
         const { dom } = info;

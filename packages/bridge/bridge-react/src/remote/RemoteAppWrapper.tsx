@@ -1,122 +1,46 @@
-/**
- * Shared RemoteAppWrapper component used by both base and router versions
- * This component handles the lifecycle of remote Module Federation apps
- */
-import React, { useEffect, useRef, useState, forwardRef } from 'react';
-import type { BridgeOperationContext } from '@module-federation/bridge-shared';
-import { LoggerInstance, getRootDomDefaultClassName } from '../utils';
-import { federationRuntime } from '../provider/plugin';
-import { RemoteComponentProps, RemoteAppParams } from '../types';
+/** Shared shell for isolated remote roots on both build targets. */
+import React, { useImperativeHandle, useRef, forwardRef } from 'react';
+import { useRemoteLifecycle } from '@module-federation/bridge-react/remote-lifecycle';
+import { getRootDomDefaultClassName } from '../utils';
+import { HydratedStylesheetAssets } from '../lazy/HydratedStylesheetAssets';
+import type { RemoteComponentProps, RemoteAppParams } from '../types';
 
-export const RemoteAppWrapper = forwardRef(function (
-  props: RemoteAppParams & RemoteComponentProps,
-  ref,
-) {
-  const {
-    moduleName,
-    memoryRoute,
-    basename,
-    providerInfo,
-    className,
-    style,
-    fallback,
-    loading,
-    ...resProps
-  } = props;
-
-  const instance = federationRuntime.instance;
-  const rootRef: React.MutableRefObject<HTMLDivElement | null> =
-    ref && 'current' in ref
-      ? (ref as React.MutableRefObject<HTMLDivElement | null>)
-      : useRef(null);
-
-  const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
-  const providerInfoRef = useRef<any>(null);
-  const [initialized, setInitialized] = useState(false);
-
-  LoggerInstance.debug(`RemoteAppWrapper instance from props >>>`, instance);
-
-  // 初始化远程组件
-  useEffect(() => {
-    if (initialized) return;
-    const providerReturn = providerInfo();
-    providerInfoRef.current = providerReturn;
-    setInitialized(true);
-
-    return () => {
-      if (providerInfoRef.current?.destroy) {
-        LoggerInstance.debug(
-          `createRemoteAppComponent LazyComponent destroy >>>`,
-          { moduleName, basename, dom: renderDom.current },
-        );
-
-        const destroyInfo = {
-          moduleName,
-          dom: renderDom.current,
-          basename,
-          memoryRoute,
-          fallback,
-          ...resProps,
-        };
-        const operationContext: BridgeOperationContext = {
-          side: 'consumer',
-          framework: 'react',
-          operation: 'destroy',
-          reason: 'unmount',
-        };
-
-        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
-          destroyInfo,
-          operationContext,
-        );
-        providerInfoRef.current.destroy({
-          moduleName,
-          dom: renderDom.current,
-        });
-        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(destroyInfo, {
-          context: operationContext,
-        });
-      }
-    };
-  }, [moduleName]);
-
-  // trigger render after props updated
-  useEffect(() => {
-    if (!initialized || !providerInfoRef.current) return;
-
-    let renderProps = {
-      moduleName,
-      dom: rootRef.current,
-      basename,
-      memoryRoute,
-      fallback,
-      ...resProps,
-    };
-    renderDom.current = rootRef.current;
-    const operationContext: BridgeOperationContext = {
-      side: 'consumer',
-      framework: 'react',
-      operation: 'render',
-    };
-
-    const beforeBridgeRenderRes =
-      instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
-        renderProps,
-        operationContext,
-      ) || {};
-    // @ts-ignore
-    renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
-    providerInfoRef.current.render(renderProps);
-    instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps, {
-      context: operationContext,
-    });
-  }, [initialized, ...Object.values(props)]);
-
-  // bridge-remote-root
+export const RemoteAppWrapper = forwardRef<
+  HTMLDivElement,
+  RemoteAppParams & RemoteComponentProps
+>(function (props, ref) {
+  const { moduleName, ssrInstanceId, className, style, loading } = props;
+  // React's version is fixed for this consumer. Legacy consumers keep the CSR path.
+  const reactId = React.useId?.();
+  const instanceId =
+    ssrInstanceId || (reactId ? `mf-bridge-${reactId}` : undefined);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  useImperativeHandle(ref, () => rootRef.current!, []);
+  const { serverHTML, stylesheetHrefs } = useRemoteLifecycle(
+    props,
+    instanceId,
+    rootRef,
+  );
   const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;
+  const containerProps = {
+    id: instanceId,
+    'data-mf-bridge-root': instanceId,
+    className: rootComponentClassName,
+    style,
+    ref: rootRef,
+  };
   return (
-    <div className={rootComponentClassName} style={style} ref={rootRef}>
-      {loading}
-    </div>
+    <>
+      <HydratedStylesheetAssets hrefs={stylesheetHrefs} />
+      {serverHTML ? (
+        <div
+          {...containerProps}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={serverHTML}
+        />
+      ) : (
+        <div {...containerProps}>{loading}</div>
+      )}
+    </>
   );
 });

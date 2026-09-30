@@ -21,7 +21,10 @@
     "sourceMap": true,
     "paths": {
       "@/*": ["./src/*"],
-      "*": ["./*"]
+      "*": ["./*"],
+      "@module-federation/bridge-react/remote-lifecycle": [
+        "./src/remote/remoteLifecycle.ts"
+      ]
     },
     "ignoreDeprecations": "6.0"
   },

@@ -63,7 +63,7 @@ const createStaticMiddleware = (options: {
     }
 
     c.header('Content-Type', 'application/javascript');
-    c.header('Content-Length', String(fileResult.content.length));
+    c.header('Content-Length', String(Buffer.byteLength(fileResult.content)));
     return c.body(fileResult.content, 200);
   };
 };

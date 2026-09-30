@@ -10,6 +10,15 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         base: path.resolve(__dirname, 'src/base.ts'),
+        ssr: path.resolve(__dirname, 'src/ssr.ts'),
+        'remote-lifecycle': path.resolve(
+          __dirname,
+          'src/remote/remoteLifecycle.ts',
+        ),
+        'remote-lifecycle.server': path.resolve(
+          __dirname,
+          'src/remote/remoteLifecycle.server.ts',
+        ),
         plugin: path.resolve(__dirname, 'src/provider/plugin.ts'),
         router: path.resolve(__dirname, 'src/router/default.tsx'),
         'router-v5': path.resolve(__dirname, 'src/router/v5.tsx'),
@@ -42,6 +51,8 @@ export default defineConfig({
     rollupOptions: {
       external: [
         ...perDepsKeys,
+        // Keep this boundary selectable by the Modern Node compiler after publishing.
+        '@module-federation/bridge-react/remote-lifecycle',
         '@remix-run/router',
         /react-dom\/.*/,
         'react-router',

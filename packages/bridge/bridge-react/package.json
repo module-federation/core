@@ -95,7 +95,22 @@
       "import": "./dist/size-limited-cache.es.js",
       "require": "./dist/size-limited-cache.cjs.js"
     },
-    "./*": "./*"
+    "./*": "./*",
+    "./ssr": {
+      "types": "./dist/ssr.d.ts",
+      "import": "./dist/ssr.es.js",
+      "require": "./dist/ssr.cjs.js"
+    },
+    "./remote-lifecycle": {
+      "types": "./dist/remote-lifecycle.d.ts",
+      "import": "./dist/remote-lifecycle.es.js",
+      "require": "./dist/remote-lifecycle.cjs.js"
+    },
+    "./remote-lifecycle.server": {
+      "types": "./dist/remote-lifecycle.server.d.ts",
+      "import": "./dist/remote-lifecycle.server.es.js",
+      "require": "./dist/remote-lifecycle.server.cjs.js"
+    }
   },
   "typesVersions": {
     "*": {
@@ -143,6 +158,15 @@
       ],
       "size-limited-cache": [
         "./dist/size-limited-cache.d.ts"
+      ],
+      "ssr": [
+        "./dist/ssr.d.ts"
+      ],
+      "remote-lifecycle": [
+        "./dist/remote-lifecycle.d.ts"
+      ],
+      "remote-lifecycle.server": [
+        "./dist/remote-lifecycle.server.d.ts"
       ]
     }
   },

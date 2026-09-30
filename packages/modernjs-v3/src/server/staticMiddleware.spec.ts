@@ -135,7 +135,7 @@ describe('staticMiddleware', () => {
 
   describe('successful file serving', () => {
     it('should serve file content with correct headers', async () => {
-      const mockFileContent = 'console.log("test");';
+      const mockFileContent = 'console.log("商品库存 📦");';
       const mockFileResult = {
         content: mockFileContent,
         lastModified: Date.now(),
@@ -161,7 +161,7 @@ describe('staticMiddleware', () => {
       );
       expect(mockContext.header).toHaveBeenCalledWith(
         'Content-Length',
-        String(mockFileResult.content.length),
+        String(Buffer.byteLength(mockFileResult.content)),
       );
 
       // Check response
