@@ -79,8 +79,16 @@ interface StatsAssetsInfo {
   async: string[];
 }
 
+export interface StatsSharedRequirement {
+  name: string;
+  layer?: string;
+  shareScope?: string | string[];
+}
+
 export interface StatsShared {
   id: string;
+  layer?: string;
+  shareScope?: string | string[];
   name: string;
   version: string;
   singleton: boolean;
@@ -123,6 +131,8 @@ export interface ManifestModuleInfos {
 
 export interface StatsExpose {
   id: string;
+  layer?: string;
+  requiredShared?: StatsSharedRequirement[];
   name: string;
   path?: string;
   file: string;

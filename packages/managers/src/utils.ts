@@ -16,7 +16,7 @@ function processFn<T, R>(
 ): void {
   const object = (obj: Record<string, string | string[] | T>): void => {
     for (const [key, value] of Object.entries(obj)) {
-      if (typeof value === 'string') {
+      if (typeof value === 'string' || Array.isArray(value)) {
         fn(key, normalizeSimple(value, key));
       } else {
         fn(key, normalizeOptions(value as T, key));

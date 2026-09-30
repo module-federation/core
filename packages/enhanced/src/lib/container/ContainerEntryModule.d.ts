@@ -20,6 +20,7 @@ export type ExposeOptions = {
    * custom chunk name for the exposed module
    */
   name: string;
+  layer?: string;
 };
 declare class ContainerEntryModule extends Module {
   private _name;

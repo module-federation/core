@@ -31,6 +31,10 @@ export interface ExposesConfig {
    * Custom chunk name for the exposed module.
    */
   name?: string;
+  /**
+   * Layer in which to build the exposed module.
+   */
+  layer?: string;
 }
 
 /**

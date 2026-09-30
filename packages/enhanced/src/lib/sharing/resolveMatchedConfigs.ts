@@ -56,7 +56,11 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   await Promise.all(
     configs.map(([request, config]) => {
       const resolveRequest = config.request || request;
-      if (RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
+      if (config.issuerLayer && RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
+        // A layered relative consume is resolved where its issuer imports it.
+        unresolved.set(createCompositeKey(resolveRequest, config), config);
+        return undefined;
+      } else if (RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
         // relative request
         return new Promise<void>((resolve) => {
           resolver.resolve(
@@ -74,14 +78,17 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
                 );
                 return resolve();
               }
-              resolved.set(result as string, config);
+              resolved.set(
+                createCompositeKey(result as string, config),
+                config,
+              );
               resolve();
             },
           );
         });
       } else if (ABSOLUTE_PATH_REGEX.test(resolveRequest)) {
         // absolute path
-        resolved.set(resolveRequest, config);
+        resolved.set(createCompositeKey(resolveRequest, config), config);
         return undefined;
       } else if (resolveRequest.endsWith('/')) {
         // module request prefix
