@@ -27,6 +27,25 @@ const host = (shared: ShareArgs[], name = 'layer-host') =>
   new ModuleFederation({ name, remotes: [], shared: { pkg: shared } });
 
 describe('shared layer selection', () => {
+  for (const asyncFactory of [false, true]) {
+    it(`loads legacy scope entries without shareConfig (async=${asyncFactory})`, async () => {
+      const mf = new ModuleFederation({ name: 'legacy-consumer', remotes: [] });
+      mf.initShareScopeMap('default', {});
+      Object.assign(mf.shareScopeMap.default, {
+        pkg: {
+          '1.0.0': {
+            get: () =>
+              asyncFactory ? Promise.resolve(() => 'legacy') : () => 'legacy',
+          },
+        },
+      });
+      const get = asyncFactory
+        ? await mf.loadShare('pkg', consume())
+        : mf.loadShareSync('pkg', consume());
+      expect(get && get()).toBe('legacy');
+    });
+  }
+
   for (const reverse of [false, true]) {
     for (const asyncFactory of [false, true]) {
       it(`isolates same-version factories (reverse=${reverse}, async=${asyncFactory})`, async () => {
