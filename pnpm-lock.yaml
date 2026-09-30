@@ -3553,6 +3553,9 @@ importers:
       webpack:
         specifier: ^5.0.0
         version: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
+      yaml:
+        specifier: 2.9.0
+        version: 2.9.0
 
   packages/metro-core:
     dependencies:
@@ -28921,6 +28924,7 @@ packages:
         optional: true
       '@swc/helpers':
         optional: true
+
 
 
 snapshots:

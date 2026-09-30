@@ -1,6 +1,5 @@
 /** @jest-environment node */
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import path from 'node:path';
 import type { Stats } from 'webpack';
 import { StatsPlugin } from '../src/StatsPlugin';
@@ -24,7 +23,7 @@ it.each([
 ])(
   'collects %s with multiple runtimes and supports explicit rollback',
   async (mode) => {
-    const directory = await mkdtemp(path.join(tmpdir(), 'mf-graph-'));
+    const directory = await mkdtemp(path.join(__dirname, 'mf-graph-'));
     const prefix = mode === 'enhanced-prefix';
     const shared = mode.includes('shared') || prefix;
     const native = mode === 'native-shared';
