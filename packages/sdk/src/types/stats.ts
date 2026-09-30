@@ -92,7 +92,7 @@ export interface StatsShared {
   name: string;
   version: string;
   singleton: boolean;
-  requiredVersion: string;
+  requiredVersion: string | false | null;
   hash: string;
   assets: StatsAssets;
   deps: string[];
