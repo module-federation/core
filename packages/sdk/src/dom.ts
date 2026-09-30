@@ -28,6 +28,8 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
   return relativeUrl1 === relativeUrl2;
 }
 
+export const DEFAULT_SCRIPT_TIMEOUT = 20000;
+
 export function createScript(info: {
   url: string;
   cb?: (value: void | PromiseLike<void>) => void;
@@ -35,12 +37,17 @@ export function createScript(info: {
   attrs?: Record<string, any>;
   needDeleteScript?: boolean;
   createScriptHook?: CreateScriptHookDom;
+  /** Load timeout in ms; a `createScriptHook` return value still overrides it. `Infinity` disables the timer. */
+  timeout?: number;
 }): { script: HTMLScriptElement; needAttach: boolean } {
   // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
   let needAttach = true;
-  let timeout = 20000;
-  let timeoutId: NodeJS.Timeout;
+  let timeout =
+    typeof info.timeout === 'number' && info.timeout > 0
+      ? info.timeout
+      : DEFAULT_SCRIPT_TIMEOUT;
+  let timeoutId: NodeJS.Timeout | undefined;
   const scripts = document.getElementsByTagName('script');
 
   for (let i = 0; i < scripts.length; i++) {
@@ -162,9 +169,11 @@ export function createScript(info: {
   script.onerror = onScriptComplete.bind(null, script.onerror);
   script.onload = onScriptComplete.bind(null, script.onload);
 
-  timeoutId = setTimeout(() => {
-    onScriptComplete(null, { type: 'error', isTimeout: true });
-  }, timeout);
+  if (Number.isFinite(timeout)) {
+    timeoutId = setTimeout(() => {
+      onScriptComplete(null, { type: 'error', isTimeout: true });
+    }, timeout);
+  }
 
   return { script, needAttach };
 }
@@ -295,9 +304,10 @@ export function loadScript(
   info: {
     attrs?: Record<string, any>;
     createScriptHook?: CreateScriptHookDom;
+    timeout?: number;
   },
 ) {
-  const { attrs = {}, createScriptHook } = info;
+  const { attrs = {}, createScriptHook, timeout } = info;
   return new Promise<void>((resolve, reject) => {
     const { script, needAttach } = createScript({
       url,
@@ -309,6 +319,7 @@ export function loadScript(
       },
       createScriptHook,
       needDeleteScript: true,
+      timeout,
     });
     needAttach && document.head.appendChild(script);
   });
