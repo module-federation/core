@@ -9,13 +9,13 @@ import type { Compiler, Compilation } from 'webpack';
 import { ManifestManager } from '../src/ManifestManager';
 import { StatsManager } from '../src/StatsManager';
 
-// Use Node's loader for the ESM preview, and the root's pinned published host.
+// Use Node's loader for the preview and an explicitly pinned legacy host.
 const nativeRequire = process
   .getBuiltinModule('module')
   .createRequire(__filename);
 const hostRequire = process
   .getBuiltinModule('module')
-  .createRequire(path.resolve(__dirname, '../../../package.json'));
+  .createRequire(nativeRequire.resolve('@rspack/core-legacy/package.json'));
 const host = hostRequire('@rspack/core');
 const remote = nativeRequire('@rspack/core');
 const hostTools = hostRequire.resolve('@module-federation/runtime-tools', {

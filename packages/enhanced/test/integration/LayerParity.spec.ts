@@ -381,23 +381,14 @@ it.each([
         });
         window = browser.window;
       }).finally(() => clearTimeout(timeout));
-      if (layered && !separateScopes) {
-        // A singleton is selected per share scope/key, not per compilation layer.
-        for (const value of result) {
-          expect(value.remote).toMatchObject({ source: 'host' });
-          expect(value.same).toBe(true);
-          expect(value.remote).toBe(result[0].remote);
-        }
-      } else {
-        expect(result).toEqual(
-          variants.map(([, layer]) => ({
-            remote: { source: 'host', layer: layer ?? 'default' },
-            local: { source: 'host', layer: layer ?? 'default' },
-            same: true,
-          })),
-        );
-        if (layered) expect(result[0].remote).not.toBe(result[1].remote);
-      }
+      expect(result).toEqual(
+        variants.map(([, layer]) => ({
+          remote: { source: 'host', layer: layer ?? 'default' },
+          local: { source: 'host', layer: layer ?? 'default' },
+          same: true,
+        })),
+      );
+      if (layered) expect(result[0].remote).not.toBe(result[1].remote);
       if (emitManifest) expect(requests).toContain('/remote/mf-manifest.json');
       expect(requests).toContain('/remote/remoteEntry.js');
     } finally {
