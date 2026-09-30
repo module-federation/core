@@ -1,8 +1,10 @@
 /** @jest-environment node */
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { parse } from 'yaml';
 import type { Stats } from '@module-federation/sdk';
 import type { Stats as RspackStats } from '@rspack/core';
 import type { Compiler, Compilation } from 'webpack';
@@ -43,6 +45,21 @@ beforeAll(() => {
   const platformRequire = process
     .getBuiltinModule('module')
     .createRequire(bindingPath);
+  const lock = parse(
+    readFileSync(path.resolve(__dirname, '../../../pnpm-lock.yaml'), 'utf8'),
+  );
+  const compilerVersion =
+    lock.importers['packages/manifest'].devDependencies['@rspack/core'].version;
+  const bindingVersion =
+    lock.snapshots[`@rspack/core@${compilerVersion}`].dependencies[
+      '@rspack/binding'
+    ];
+  // Single-platform preview publishes replace the wrapper's optional metadata.
+  // The frozen lock preserves the exact binary URLs installed by CI.
+  const binaryVersions = {
+    ...lock.snapshots[`@rspack/binding@${bindingVersion}`].optionalDependencies,
+    ...platformRequire('./package.json').optionalDependencies,
+  };
   const nativeBindings = Object.keys(nativeRequire.cache).filter(
     (file) => file.endsWith('.node') && file.includes('@rspack+binding'),
   );
@@ -52,7 +69,7 @@ beforeAll(() => {
         path.join(path.dirname(file), 'package.json'),
       );
       return (
-        file.includes(revision) &&
+        binaryVersions[name]?.split('@').at(-1)?.startsWith(revision) &&
         version === nativeRequire('@rspack/core/package.json').version &&
         platformRequire.resolve(name) === file
       );
