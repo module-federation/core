@@ -7,11 +7,20 @@ it('retains and selects both same-version singletons in scalar scopes', async ()
   expect(b).toEqual({ scope: 'b' });
   expect(a).not.toBe(b);
 
-  // Imports can succeed through local fallbacks even if registration loses a scope.
+  // A consumer without local fallbacks verifies that both providers registered.
+  const consumer = new __webpack_require__.federation.instance.constructor({
+    name: `scalar_scopes_consumer_${TEST_LAYER ?? 'unlayered'}`,
+    remotes: [],
+  });
   const registered = [];
   for (const scope of ['a', 'b']) {
-    const entry = __webpack_share_scopes__[scope]?.react?.['1.0.0'];
-    const factory = entry && (await entry.get());
+    consumer.initShareScopeMap(scope, __webpack_share_scopes__[scope]);
+    const factory = await consumer.loadShare('react', {
+      customShareInfo: {
+        scope: [scope],
+        shareConfig: { layer: TEST_LAYER, requiredVersion: false },
+      },
+    });
     registered.push(factory?.().default);
   }
   const artifacts = ['mf-stats.json', 'mf.json'].map((filename) => {
