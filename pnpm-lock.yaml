@@ -28909,11 +28909,11 @@ packages:
     os: [linux]
 
   '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c':
-    resolution: {integrity: sha512-AlqC1hDRqkEbq7U7aSpGzePE2XwqHsFEVM3MbtNNWPvcnxrL28dPFJL+yUSElLWjHvuJfhvpQKwtjZ9uV9HE+g==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c}
+    resolution: {integrity: sha512-UKLCvfMxju7JelpGYmyxrNgMMSNBlr/VJFnsIRZ1Qgi3pmSRlZEhu3mkmriSn2rwRbTzsN9xa6dtWoY5LYHDRQ==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@d538c9c5a8aa75dd37d138313fb6ae80c88c7f6c}
     version: 2.2.7
 
   '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@d538c9c':
-    resolution: {integrity: sha512-bv94eVhNr6KJtAiChNNjk0i1EtWc+U1pp1z5upTtx4KmuEliErND/kgiBOoXGqLIkFJ9M3KpS+F0BLDqJylDiw==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@d538c9c}
+    resolution: {integrity: sha512-5pT1aJtjWuc+romuCyJEtq1ElAUanIhDf/7xDCJQncKQUCNAr81qc3KkGDp69NMFPn+uobkY/xxOGywXCBzJjQ==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@d538c9c}
     version: 2.2.7
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
