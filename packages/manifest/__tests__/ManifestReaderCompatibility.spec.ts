@@ -298,7 +298,7 @@ it.each([undefined, null])(
     const module = new ConsumeSharedModule(process.cwd(), {
       shareScope: 'default',
       shareKey: 'react',
-      requiredVersion: [4, 19, 0, 0],
+      requiredVersion: '=19.0.0',
       strictVersion: false,
       singleton: false,
       eager: false,
@@ -329,7 +329,7 @@ it.each(['', 'undefined', 'null'])(
     const module = new ConsumeSharedModule(process.cwd(), {
       shareScope: 'default',
       shareKey: 'react',
-      requiredVersion: [4, 19, 0, 0],
+      requiredVersion: '=19.0.0',
       strictVersion: false,
       singleton: false,
       eager: false,
