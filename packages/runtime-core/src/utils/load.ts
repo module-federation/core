@@ -44,6 +44,22 @@ function isEsmRemoteEntryLoadError(err: unknown): boolean {
   );
 }
 
+function isScriptExecutionError(err: unknown): boolean {
+  return (
+    err instanceof Error &&
+    (err.name === 'ScriptExecutionError' ||
+      err.message.includes('ScriptExecutionError'))
+  );
+}
+
+function isScriptNetworkError(err: unknown): boolean {
+  return (
+    err instanceof Error &&
+    (err.name === 'ScriptNetworkError' ||
+      err.message.includes('ScriptNetworkError'))
+  );
+}
+
 export function isEsmRemoteType(type: RemoteInfo['type']): boolean {
   return type === 'esm' || type === 'module';
 }
@@ -274,10 +290,12 @@ async function loadEntryDom({
 async function loadEntryNode({
   remoteInfo,
   loaderHook,
+  getEntryUrl,
   resourceContext,
 }: {
   remoteInfo: RemoteInfo;
   loaderHook: ModuleFederation['loaderHook'];
+  getEntryUrl?: (url: string) => string;
   resourceContext?: ResourceLoadContext;
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
@@ -290,18 +308,22 @@ async function loadEntryNode({
     return remoteEntryExports;
   }
 
-  return loadScriptNode(entry, {
+  const url = getEntryUrl ? getEntryUrl(entry) : entry;
+  return loadScriptNode(url, {
     attrs: { name, globalName, type },
     loaderHook: {
-      createScriptHook: (url: string, attrs: Record<string, any> = {}) => {
+      createScriptHook: (
+        scriptUrl: string,
+        attrs: Record<string, any> = {},
+      ) => {
         const res = loaderHook.lifecycle.createScript.emit({
-          url,
+          url: scriptUrl,
           attrs,
           remoteInfo,
           resourceContext: resourceContext
             ? {
                 ...resourceContext,
-                url,
+                url: scriptUrl,
               }
             : undefined,
         });
@@ -315,16 +337,34 @@ async function loadEntryNode({
         return;
       },
     },
-  })
-    .then(() => {
+  }).then(
+    () => {
       return handleRemoteEntryLoaded(name, globalName, entry);
-    })
-    .catch((e) => {
-      const msg = e instanceof Error ? e.message : String(e);
+    },
+    (loadError: unknown) => {
+      // Only errors classified by the Node loader as script failures should
+      // enter the runtime's retryable RUNTIME_008 path. Hook/configuration
+      // errors must retain their original error and stay non-retryable.
+      if (
+        !isScriptNetworkError(loadError) &&
+        !isScriptExecutionError(loadError)
+      ) {
+        throw loadError;
+      }
+
+      const originalMsg =
+        loadError instanceof Error ? loadError.message : String(loadError);
       error(
-        `Failed to load Node.js entry for remote "${name}" from "${entry}". ${msg}`,
+        RUNTIME_008,
+        runtimeDescMap,
+        {
+          remoteName: name,
+          resourceUrl: url,
+        },
+        originalMsg,
       );
-    });
+    },
+  );
 }
 
 export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
@@ -389,7 +429,12 @@ export async function getRemoteEntry(params: {
               getEntryUrl,
               resourceContext,
             })
-          : loadEntryNode({ remoteInfo, loaderHook, resourceContext });
+          : loadEntryNode({
+              remoteInfo,
+              loaderHook,
+              getEntryUrl,
+              resourceContext,
+            });
       })
       .then(async (res) => {
         await origin.loaderHook.lifecycle.afterLoadEntry.emit({
@@ -401,13 +446,13 @@ export async function getRemoteEntry(params: {
         return res;
       })
       .catch(async (loadError) => {
-        const isScriptExecutionError =
-          loadError instanceof Error &&
-          loadError.message.includes('ScriptExecutionError');
+        // ScriptExecutionError means the script downloaded fine but its IIFE
+        // threw at runtime — retrying would reproduce the same error, so exclude it.
+        const scriptExecutionError = isScriptExecutionError(loadError);
         const isScriptLoadError =
           loadError instanceof Error &&
           loadError.message.includes(RUNTIME_008) &&
-          !isScriptExecutionError;
+          !scriptExecutionError;
 
         if (isScriptLoadError && !_inErrorHandling) {
           const wrappedGetRemoteEntry = (
@@ -438,7 +483,6 @@ export async function getRemoteEntry(params: {
             return recoveredRemoteEntryExports;
           }
         }
-
         await origin.loaderHook.lifecycle.afterLoadEntry.emit({
           origin,
           remoteInfo,
