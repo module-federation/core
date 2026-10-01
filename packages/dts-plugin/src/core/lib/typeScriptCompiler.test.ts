@@ -3,6 +3,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  readdirSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -21,6 +22,7 @@ import {
   retrieveMfTypesPath,
   retrieveOriginalOutDir,
 } from './typeScriptCompiler';
+import { formatCommandForDisplay } from './typeScriptDiagnostics';
 
 describe('typeScriptCompiler', () => {
   const requireFromTest = createRequire(__filename);
@@ -309,7 +311,7 @@ describe('typeScriptCompiler', () => {
         await compileTs(
           mapToExpose,
           { ...tsConfig, files: [filepath] },
-          remoteOptions,
+          { ...remoteOptions, context: tmpDir },
         );
       } catch {
         // expected to throw because execPromise is rejected
@@ -323,6 +325,94 @@ describe('typeScriptCompiler', () => {
       const projectPath = args[projectIndex + 1];
       expect(projectPath).toBeDefined();
       expect(projectPath).not.toContain("'");
+    });
+
+    it('preserves compiler diagnostics when type generation fails', async () => {
+      const projectDir = join(tmpDir, 'failedTypeGeneration');
+      const srcDir = join(projectDir, 'src');
+      mkdirSync(srcDir, { recursive: true });
+      linkTypeScriptPackage(projectDir, 'typescript');
+
+      const entryFile = join(srcDir, 'button.ts');
+      writeFileSync(entryFile, 'export const button = 1;\n');
+      const compilerError = new Error(
+        'TypeScript compilation failed',
+      ) as Error & {
+        stderr: string;
+      };
+      compilerError.stderr = `${entryFile}(1,1): error TS1005: expected token.`;
+      const execPromise = rs.fn().mockRejectedValue(compilerError);
+      rs.spyOn(util, 'promisify').mockReturnValue(
+        execPromise as unknown as ReturnType<typeof util.promisify>,
+      );
+
+      const outDir = join(
+        projectDir,
+        'typesRemoteFolder',
+        'compiledTypesFolder',
+      );
+      const failedConfig: TsConfigJson = {
+        compilerOptions: {
+          declaration: true,
+          emitDeclarationOnly: true,
+          noEmit: false,
+          outDir,
+          rootDir: projectDir,
+        },
+        files: [entryFile],
+      };
+      const failedOptions: Required<RemoteOptions> = {
+        ...remoteOptions,
+        context: projectDir,
+        moduleFederationConfig: {
+          name: 'failedTypeGeneration',
+        },
+      };
+
+      let compilationError: unknown;
+      try {
+        await compileTs(
+          {
+            './button': entryFile,
+          },
+          failedConfig,
+          failedOptions,
+        );
+      } catch (error) {
+        compilationError = error;
+      }
+      expect(compilationError).toBeInstanceOf(Error);
+      expect(String(compilationError)).toContain('Original Error Message');
+
+      const diagnosticDir = join(
+        projectDir,
+        '.mf/diagnostics/dts/generate-types',
+      );
+      const diagnosticConfigPath = join(diagnosticDir, 'tsconfig.json');
+      const diagnosticLogPath = join(diagnosticDir, 'compiler.log');
+      expect(existsSync(diagnosticConfigPath)).toBe(true);
+      expect(existsSync(diagnosticLogPath)).toBe(true);
+      expect(readFileSync(diagnosticConfigPath, 'utf8')).toContain(entryFile);
+
+      const diagnosticLog = readFileSync(diagnosticLogPath, 'utf8');
+      expect(diagnosticLog).toContain('TypeScript version: 6.0.3');
+      expect(diagnosticLog).toContain('Command:');
+      expect(diagnosticLog).toContain('Fatal compiler diagnostic:');
+      expect(diagnosticLog).toContain('TS1005');
+      const diagnosticCommand = diagnosticLog
+        .split(/\r?\n/)
+        .find((line) => line.startsWith('Command:'));
+      expect(diagnosticCommand).toContain(
+        formatCommandForDisplay('', [diagnosticConfigPath]).trim(),
+      );
+      expect(String(compilationError)).toContain(
+        formatCommandForDisplay('', [diagnosticConfigPath]).trim(),
+      );
+
+      const temporaryConfigs = readdirSync(
+        join(projectDir, 'node_modules/.federation'),
+      ).filter((file) => file.startsWith('tsconfig.'));
+      expect(temporaryConfigs).toHaveLength(0);
     });
 
     it('ignores inherited declarationDir', async () => {
@@ -439,6 +529,9 @@ describe('typeScriptCompiler', () => {
                         children: [
                           {
                             name: 'typeScriptCompiler.d.ts',
+                          },
+                          {
+                            name: 'typeScriptDiagnostics.d.ts',
                           },
                           {
                             name: 'typeScriptResolver.d.ts',
@@ -633,6 +726,11 @@ describe('typeScriptCompiler', () => {
           ),
         ),
       ).toBe(false);
+      expect(
+        readdirSync(join(projectDir, 'node_modules/.federation')).filter(
+          (file) => file.startsWith('tsconfig.'),
+        ),
+      ).toHaveLength(0);
     });
 
     it('with additionalFilesToCompile', async () => {
@@ -722,6 +820,9 @@ describe('typeScriptCompiler', () => {
                           },
                           {
                             name: 'typeScriptCompiler.d.ts',
+                          },
+                          {
+                            name: 'typeScriptDiagnostics.d.ts',
                           },
                           {
                             name: 'typeScriptResolver.d.ts',
