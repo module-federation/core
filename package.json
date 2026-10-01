@@ -202,7 +202,7 @@
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "@rollup/plugin-alias": "5.1.1",
     "@rollup/plugin-replace": "6.0.1",
-    "@rslib/core": "^0.23.2",
+    "@rslib/core": "^1.0.2",
     "@rspack/cli": "2.1.10",
     "@rspack/core": "2.1.10",
     "@rspack/dev-server": "2.2.1",
