@@ -18,6 +18,11 @@ From the repository root:
 pnpm --filter @module-federation/devtools run build:devtool
 ```
 
+The extensions target Chromium 114 or newer (the Chrome side panel API baseline).
+Extension builds use native JavaScript APIs and disable automatic core-js
+polyfills to avoid shipping legacy IE fallbacks that generate inline scripts.
+This does not change the separate npm library build.
+
 One compilation produces two unpacked extensions:
 
 | Directory                               | Interface                                                                 |
