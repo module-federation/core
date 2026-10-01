@@ -56,13 +56,28 @@ class FederationRuntimeModule extends RuntimeModule {
         } else {
           matcher = hasJsMatcher('chunkId');
         }
-        const outputName = this.compilation.getPath(
-          jsModulePlugin.getChunkFilenameTemplate(
-            this.chunk,
-            this.compilation.outputOptions,
-          ),
-          { chunk: this.chunk, contentHashType: 'javascript' },
+        const filenameTemplate = jsModulePlugin.getChunkFilenameTemplate(
+          this.chunk,
+          this.compilation.outputOptions,
         );
+        let outputName: string;
+        try {
+          outputName = this.compilation.getPath(filenameTemplate, {
+            chunk: this.chunk,
+            contentHashType: 'javascript',
+          });
+        } catch (err) {
+          const originalContentHash = this.chunk.contentHash;
+          this.chunk.contentHash = { ...originalContentHash, javascript: 'x' };
+          try {
+            outputName = this.compilation.getPath(filenameTemplate, {
+              chunk: this.chunk,
+              contentHashType: 'javascript',
+            });
+          } finally {
+            this.chunk.contentHash = originalContentHash;
+          }
+        }
         rootOutputDir = getUndoPath(
           outputName,
           this.compilation.outputOptions.path || '',
