@@ -3268,6 +3268,12 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.4(react@19.2.4)
+      react-dom19:
+        specifier: npm:react-dom@19.2.4
+        version: react-dom@19.2.4(react@19.2.4)
+      react19:
+        specifier: npm:react@19.2.4
+        version: react@19.2.4
       rimraf:
         specifier: ~6.0.1
         version: 6.0.1
