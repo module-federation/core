@@ -240,7 +240,7 @@
     "concurrently": "8.2.2",
     "copy-webpack-plugin": "11.0.0",
     "css-loader": "^6.11.0",
-    "cypress": "14.3.3",
+    "cypress": "16.1.0",
     "directory-tree": "3.5.2",
     "esbuild": "0.28.1",
     "eslint": "9.39.3",
