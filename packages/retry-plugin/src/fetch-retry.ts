@@ -103,6 +103,9 @@ async function fetchRetry(
     return response;
   } catch (error) {
     if (!retryable) {
+      if (!isFirstAttempt && total - retryTimes > 0) {
+        onError && onError({ domains, url: requestUrl, tagName: 'fetch' });
+      }
       throw error;
     }
     if (retryTimes <= 0) {
