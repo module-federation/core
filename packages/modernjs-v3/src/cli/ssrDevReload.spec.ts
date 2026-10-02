@@ -1,6 +1,15 @@
 import { describe, expect, it, rs } from '@rstest/core';
 import { createRemoteRevalidateMiddleware } from './ssrDevReload';
 
+rs.mock('@module-federation/node/utils', () => ({
+  usedChunks: new Set<string>(),
+  flushChunks: rs.fn(async () => []),
+}));
+
+rs.mock('@module-federation/bridge-react/data-fetch', () => ({
+  flushDataFetch: rs.fn(),
+}));
+
 const pageRequest = { method: 'GET', headers: { accept: 'text/html' } } as any;
 const assetRequest = { method: 'GET', headers: { accept: '*/*' } } as any;
 
@@ -10,6 +19,24 @@ const run = (
 ) => new Promise<void>((resolve) => middleware(req, {} as any, resolve));
 
 describe('createRemoteRevalidateMiddleware', () => {
+  it('clears stale chunk tracking without collecting assets from reset remotes', async () => {
+    const { usedChunks, flushChunks } =
+      await import('@module-federation/node/utils');
+    const { flushDataFetch } =
+      await import('@module-federation/bridge-react/data-fetch');
+    usedChunks.add('shop/Button');
+    const middleware = createRemoteRevalidateMiddleware(
+      rs.fn(),
+      async () => true,
+    );
+
+    await run(middleware, pageRequest);
+
+    expect(usedChunks.size).toBe(0);
+    expect(flushChunks).not.toHaveBeenCalled();
+    expect(flushDataFetch).toHaveBeenCalledTimes(1);
+  });
+
   it('does not check remotes for non-page requests', async () => {
     const revalidate = rs.fn(async () => true);
     const middleware = createRemoteRevalidateMiddleware(rs.fn(), revalidate);

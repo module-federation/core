@@ -127,7 +127,7 @@ const searchCache = function (
 
 globalThis.moduleGraphDirty = false;
 
-const hashmap = globalThis.mfHashMap || ({} as Record<string, string>);
+const hashmap = (globalThis.mfHashMap ||= {});
 globalThis.moduleGraphDirty = false;
 
 const requireCacheRegex =

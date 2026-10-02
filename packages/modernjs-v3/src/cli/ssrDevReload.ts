@@ -14,18 +14,18 @@ const revalidateRemotes: Revalidate = async () => {
 };
 
 const flushRemoteState: FlushRemoteState = async () => {
-  const [{ flushChunks }, { flushDataFetch }] = await Promise.all([
+  const [{ usedChunks }, { flushDataFetch }] = await Promise.all([
     import('@module-federation/node/utils'),
     import('@module-federation/bridge-react/data-fetch'),
   ]);
-  await flushChunks();
+  usedChunks.clear();
   flushDataFetch();
 };
 
 /**
  * Before each SSR page request, check whether a remote changed. When one did,
- * drop the server-side federation caches so this request renders the new
- * remote, and tell every open page to reload through the dev-server socket.
+ * drop the server-side federation caches and tell every open page to reload
+ * through the dev-server socket.
  */
 export const createRemoteRevalidateMiddleware = (
   sockWrite: RsbuildDevServer['sockWrite'],
