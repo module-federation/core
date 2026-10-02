@@ -14,20 +14,24 @@ type Globals = Record<string, unknown>;
 
 // One server-side build: a host that shares react as a singleton and consumes
 // a remote whose container lives on globalThis, like an SSR bundle does.
-function startGeneration(generation: number) {
-  (CurrentGlobal as unknown as Globals)[HOST] = { generation };
-  (CurrentGlobal as unknown as Globals)[REMOTE_GLOBAL] = {
+function startGeneration(
+  generation: number,
+  hostName = HOST,
+  remoteGlobal = REMOTE_GLOBAL,
+) {
+  (CurrentGlobal as unknown as Globals)[hostName] = { generation };
+  (CurrentGlobal as unknown as Globals)[remoteGlobal] = {
     init: () => undefined,
     get: () => () => ({ generation }),
   };
 
   const host = new ModuleFederation({
-    name: HOST,
+    name: hostName,
     remotes: [
       {
         name: 'remote',
         entry: 'http://localhost:1111/reset/remoteEntry.js',
-        entryGlobalName: REMOTE_GLOBAL,
+        entryGlobalName: remoteGlobal,
       },
     ],
     shared: {
@@ -81,5 +85,39 @@ describe('resetFederationRuntime', () => {
     expect(CurrentGlobal.__FEDERATION__.__PRELOADED_MAP__.size).toBe(0);
 
     expect(await render(startGeneration(2))).toEqual({ react: 2, app: 2 });
+  });
+
+  it('clears writable container globals that cannot be deleted', async () => {
+    const hostName = 'reset_non_configurable_host';
+    const remoteGlobal = 'reset_non_configurable_remote_entry';
+    const globals = CurrentGlobal as unknown as Globals;
+
+    try {
+      for (const name of [hostName, remoteGlobal]) {
+        Object.defineProperty(CurrentGlobal, name, {
+          value: undefined,
+          configurable: false,
+          writable: true,
+        });
+      }
+
+      const first = startGeneration(1, hostName, remoteGlobal);
+      expect(await render(first)).toEqual({ react: 1, app: 1 });
+      expect(first.moduleCache.size).toBe(1);
+
+      resetFederationRuntime();
+
+      expect(globals[hostName]).toBeUndefined();
+      expect(globals[remoteGlobal]).toBeUndefined();
+      expect(first.moduleCache.size).toBe(0);
+      expect(await render(startGeneration(2, hostName, remoteGlobal))).toEqual({
+        react: 2,
+        app: 2,
+      });
+    } finally {
+      // Non-configurable properties remain on this isolated test global.
+      globals[hostName] = undefined;
+      globals[remoteGlobal] = undefined;
+    }
   });
 });

@@ -130,18 +130,24 @@ export function resetFederationGlobalInfo(): void {
  * bundle that runs starts a fresh one. Use it when the bundles themselves are
  * re-evaluated, e.g. after a server-side rebuild clears the require cache.
  *
- * Besides the global info this clears each instance's module cache and deletes
+ * Besides the global info this clears each instance's module cache and clears
  * the container globals (`instance.name` and every remote `entryGlobalName`).
  * Otherwise the re-evaluated bundle reuses the previous generation's containers
  * and shared singletons while its own modules are new.
  */
 export function resetFederationRuntime(): void {
+  const clearContainerGlobal = (name: string): void => {
+    if (!Reflect.deleteProperty(CurrentGlobal, name)) {
+      Reflect.set(CurrentGlobal, name, undefined);
+    }
+  };
+
   for (const instance of CurrentGlobal.__FEDERATION__.__INSTANCES__) {
     instance.moduleCache.forEach((module) => {
-      Reflect.deleteProperty(CurrentGlobal, module.remoteInfo.entryGlobalName);
+      clearContainerGlobal(module.remoteInfo.entryGlobalName);
     });
     instance.moduleCache.clear();
-    Reflect.deleteProperty(CurrentGlobal, instance.name);
+    clearContainerGlobal(instance.name);
   }
   resetFederationGlobalInfo();
 }
