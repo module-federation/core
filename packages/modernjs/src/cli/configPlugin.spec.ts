@@ -147,6 +147,50 @@ describe('patchBundlerConfig', () => {
   const warning =
     'Stream SSR requires async-only splitChunks; constraining chunk filters to async chunks';
 
+  it.each(['', 'g'])(
+    'restricts RegExp chunk filters to async chunks while preserving names (%s)',
+    (flags) => {
+      const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
+      const chunks = new RegExp('^selected$', flags);
+      chunks.lastIndex = 2;
+      const splitChunkConfig = {
+        chunks,
+        cacheGroups: { vendors: { chunks } },
+        fallbackCacheGroup: { chunks },
+      };
+
+      patchClientBundlerConfig(splitChunkConfig);
+
+      for (const constrainedChunks of [
+        splitChunkConfig.chunks,
+        splitChunkConfig.cacheGroups.vendors.chunks,
+        splitChunkConfig.fallbackCacheGroup.chunks,
+      ]) {
+        expect(typeof constrainedChunks).toBe('function');
+        const filter = constrainedChunks as unknown as (chunk: {
+          name?: string;
+          canBeInitial: () => boolean;
+        }) => boolean;
+        expect(filter({ name: 'selected', canBeInitial: () => true })).toBe(
+          false,
+        );
+        expect(filter({ name: 'selected', canBeInitial: () => false })).toBe(
+          true,
+        );
+        expect(filter({ name: 'selected', canBeInitial: () => false })).toBe(
+          true,
+        );
+        expect(filter({ name: 'other', canBeInitial: () => false })).toBe(
+          false,
+        );
+        expect(filter({ canBeInitial: () => false })).toBe(false);
+      }
+      expect(chunks.lastIndex).toBe(2);
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      expect(warnSpy).toHaveBeenCalledWith(warning);
+    },
+  );
+
   it.each([
     { chunks: undefined, warns: false },
     { chunks: 'async', warns: false },

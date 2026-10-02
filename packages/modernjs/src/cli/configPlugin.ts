@@ -354,12 +354,25 @@ export function patchBundlerConfig(options: {
     splitChunkConfig &&
     typeof splitChunkConfig === 'object'
   ) {
+    const constrainRegExp = (chunks: RegExp) => {
+      const matcher = new RegExp(chunks);
+      return (chunk: { name?: string; canBeInitial: () => boolean }) => {
+        matcher.lastIndex = 0;
+        return (
+          !chunk.canBeInitial() &&
+          typeof chunk.name === 'string' &&
+          matcher.test(chunk.name)
+        );
+      };
+    };
     const splitChunksValue = splitChunkConfig.chunks;
     let shouldWarn =
       splitChunksValue !== undefined && splitChunksValue !== 'async';
     if (typeof splitChunksValue === 'function') {
       splitChunkConfig.chunks = (chunk) =>
         !chunk.canBeInitial() && splitChunksValue(chunk);
+    } else if (splitChunksValue instanceof RegExp) {
+      splitChunkConfig.chunks = constrainRegExp(splitChunksValue);
     } else {
       splitChunkConfig.chunks = 'async';
     }
@@ -375,6 +388,9 @@ export function patchBundlerConfig(options: {
             cacheGroup.chunks = (chunk) =>
               !chunk.canBeInitial() && chunks(chunk);
             shouldWarn = true;
+          } else if (chunks instanceof RegExp) {
+            cacheGroup.chunks = constrainRegExp(chunks);
+            shouldWarn = true;
           } else if (typeof chunks === 'string' && chunks !== 'async') {
             cacheGroup.chunks = 'async';
             shouldWarn = true;
@@ -389,6 +405,9 @@ export function patchBundlerConfig(options: {
       if (typeof chunks === 'function') {
         fallbackCacheGroup.chunks = (chunk) =>
           !chunk.canBeInitial() && chunks(chunk);
+        shouldWarn = true;
+      } else if (chunks instanceof RegExp) {
+        fallbackCacheGroup.chunks = constrainRegExp(chunks);
         shouldWarn = true;
       } else if (typeof chunks === 'string' && chunks !== 'async') {
         fallbackCacheGroup.chunks = 'async';
