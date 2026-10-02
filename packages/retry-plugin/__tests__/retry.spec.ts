@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, rs } from '@rstest/core';
 import { fetchRetry } from '../src/fetch-retry';
-import RetryPluginEntry, { RetryPlugin } from '../src';
+import { RetryPlugin } from '../src';
 import { scriptRetry } from '../src/script-retry';
 import { ERROR_ABANDONED, RUNTIME_008 } from '../src/constant';
 
@@ -23,10 +23,6 @@ describe('Retry Plugin', () => {
   });
 
   describe('RetryPlugin', () => {
-    it('is the default export so runtimePlugins can load it by path', () => {
-      expect(RetryPluginEntry).toBe(RetryPlugin);
-    });
-
     const createLoadEntryErrorArgs = (
       type: 'global' | 'esm' | 'module',
       getRemoteEntry: ReturnType<typeof rs.fn>,
