@@ -1,8 +1,67 @@
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   ModuleFederationPlugin,
   resolveRspackRuntimeAlias,
   resolveRspackRuntimeImplementation,
 } from '../src/ModuleFederationPlugin';
+
+describe('emitted module formats', () => {
+  it.each(['js', 'mjs'])(
+    'compiles the emitted %s entry with dts disabled',
+    (ext) => {
+      const output = mkdtempSync(join(tmpdir(), 'mf-rspack-format-'));
+      try {
+        execFileSync(
+          process.execPath,
+          [
+            '--input-type=module',
+            '-e',
+            `
+          import { createRequire, Module } from 'node:module';
+          import { pathToFileURL } from 'node:url';
+          const require = createRequire(import.meta.url);
+          const originalLoad = Module._load;
+          Module._load = function(id, ...args) {
+            if (id.startsWith('@module-federation/dts-plugin')) {
+              throw new Error('DTS must remain unloaded when disabled');
+            }
+            return originalLoad.call(this, id, ...args);
+          };
+          const entry = process.argv[1];
+          const { ModuleFederationPlugin } = entry.endsWith('.mjs')
+            ? await import(pathToFileURL(entry).href) : require(entry);
+          const { rspack } = require('@rspack/core');
+          const compiler = rspack({
+            mode: 'none', entry: {}, output: { path: process.argv[2] },
+            plugins: [new ModuleFederationPlugin({
+              name: 'formatTest', dts: false, manifest: false
+            })]
+          });
+          try {
+            await new Promise((resolve, reject) => compiler.run((error, stats) => {
+              if (error) reject(error);
+              else if (stats.hasErrors()) reject(new Error(stats.toString()));
+              else resolve();
+            }));
+          } finally {
+            await new Promise((resolve, reject) => compiler.close(error => error ? reject(error) : resolve()));
+            Module._load = originalLoad;
+          }
+          `,
+            join(__dirname, '../dist', `index.${ext}`),
+            output,
+          ],
+          { cwd: join(__dirname, '..'), timeout: 30000 },
+        );
+      } finally {
+        rmSync(output, { recursive: true, force: true });
+      }
+    },
+  );
+});
 
 function getOptimizationDefines(
   optimization?: NonNullable<

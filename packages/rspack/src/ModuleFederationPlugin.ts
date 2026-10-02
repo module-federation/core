@@ -21,6 +21,11 @@ import logger from './logger';
 
 declare const __non_webpack_require__: NodeJS.Require | undefined;
 
+const nodeRequire =
+  typeof __non_webpack_require__ === 'function'
+    ? __non_webpack_require__
+    : require;
+
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
 type SplitChunks = Compiler['options']['optimization']['splitChunks'];
 type NonUndefined<T = SplitChunks> = ExcludeFalse<T>;
@@ -52,7 +57,7 @@ function hasExposes(
 function resolveRuntimeEntry(
   spec: RuntimeEntrySpec,
   implementation: string | undefined,
-  resolve: ResolveFn = require.resolve,
+  resolve: ResolveFn = nodeRequire.resolve,
 ) {
   const candidates = [spec.bundler, spec.esm, spec.cjs];
   const modulePaths = implementation ? [implementation] : undefined;
@@ -73,7 +78,7 @@ function resolveRuntimeEntry(
 
 export function resolveRspackRuntimeImplementation(
   implementation?: string,
-  resolve: ResolveFn = require.resolve,
+  resolve: ResolveFn = nodeRequire.resolve,
 ) {
   return resolveRuntimeEntry(
     {
@@ -88,7 +93,7 @@ export function resolveRspackRuntimeImplementation(
 
 export function resolveRspackRuntimeAlias(
   implementation: string,
-  resolve: ResolveFn = require.resolve,
+  resolve: ResolveFn = nodeRequire.resolve,
 ) {
   return resolveRuntimeEntry(
     {
@@ -197,7 +202,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
       const runtimePlugins = options.runtimePlugins || [];
       options.runtimePlugins = runtimePlugins.concat(
-        require.resolve('@module-federation/inject-external-runtime-core-plugin'),
+        nodeRequire.resolve(
+          '@module-federation/inject-external-runtime-core-plugin',
+        ),
       );
     }
 
@@ -219,11 +226,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       // Load dts-plugin lazily so `dts: false` never pulls in its TypeScript
       // toolchain. `__non_webpack_require__` keeps the ESM build from hoisting
       // this into a static import.
-      const { DtsPlugin } = (
-        typeof __non_webpack_require__ === 'function'
-          ? __non_webpack_require__
-          : require
-      )(
+      const { DtsPlugin } = nodeRequire(
         '@module-federation/dts-plugin',
       ) as typeof import('@module-federation/dts-plugin');
       const dtsPlugin = new DtsPlugin(options);
