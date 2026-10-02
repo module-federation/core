@@ -1,34 +1,39 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { execFileSync } = require('child_process');
 
 const packageRoot = path.resolve(__dirname, '../../../..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-duplicate-enhanced-'));
+const tmp =
+  process.argv[2] ||
+  fs.mkdtempSync(path.join(os.tmpdir(), 'mf-duplicate-enhanced-'));
 const secondCopy = path.join(tmp, 'enhanced-copy');
-fs.cpSync(path.join(packageRoot, 'dist'), path.join(secondCopy, 'dist'), {
-  recursive: true,
-});
-fs.copyFileSync(
-  path.join(packageRoot, 'package.json'),
-  path.join(secondCopy, 'package.json'),
-);
-
 const src = path.join(tmp, 'src');
-fs.mkdirSync(src);
-fs.writeFileSync(
-  path.join(src, 'index.js'),
-  'import("remote/thing"); import("shared-dep"); import("./exposed");',
-);
-fs.writeFileSync(path.join(src, 'exposed.js'), 'export default 1;');
-fs.mkdirSync(path.join(src, 'node_modules/shared-dep'), { recursive: true });
-fs.writeFileSync(
-  path.join(src, 'node_modules/shared-dep/package.json'),
-  '{"name":"shared-dep","version":"1.0.0"}',
-);
-fs.writeFileSync(
-  path.join(src, 'node_modules/shared-dep/index.js'),
-  'module.exports = 1;',
-);
+if (!process.argv[2]) {
+  fs.cpSync(path.join(packageRoot, 'dist'), path.join(secondCopy, 'dist'), {
+    recursive: true,
+  });
+  fs.copyFileSync(
+    path.join(packageRoot, 'package.json'),
+    path.join(secondCopy, 'package.json'),
+  );
+
+  fs.mkdirSync(src);
+  fs.writeFileSync(
+    path.join(src, 'index.js'),
+    'import("remote/thing"); import("shared-dep"); import("./exposed");',
+  );
+  fs.writeFileSync(path.join(src, 'exposed.js'), 'export default 1;');
+  fs.mkdirSync(path.join(src, 'node_modules/shared-dep'), { recursive: true });
+  fs.writeFileSync(
+    path.join(src, 'node_modules/shared-dep/package.json'),
+    '{"name":"shared-dep","version":"1.0.0"}',
+  );
+  fs.writeFileSync(
+    path.join(src, 'node_modules/shared-dep/index.js'),
+    'module.exports = 1;',
+  );
+}
 
 const webpack = require(require.resolve('webpack', { paths: [packageRoot] }));
 
@@ -93,18 +98,34 @@ const compile = (ModuleFederationPlugin, name) =>
 (async () => {
   const result = {};
   try {
-    const copies = { first: packageRoot, second: secondCopy };
-    for (const [name, root] of Object.entries(copies)) {
-      const { ModuleFederationPlugin } = require(root);
-      result[name] = {
-        cold: await compile(ModuleFederationPlugin, name),
-        warm: await compile(ModuleFederationPlugin, name),
-      };
+    if (process.argv[2]) {
+      result.pid = process.pid;
+      result.loadOrder = process.argv[3].split(',');
+      const copies = { first: packageRoot, second: secondCopy };
+      for (const name of result.loadOrder) {
+        const { ModuleFederationPlugin } = require(copies[name]);
+        result[name] = { cold: await compile(ModuleFederationPlugin, name) };
+        if (process.argv[4] === 'warm') {
+          result[name].warm = await compile(ModuleFederationPlugin, name);
+        }
+      }
+    } else {
+      const run = (order, phase) =>
+        JSON.parse(
+          execFileSync(process.execPath, [__filename, tmp, order, phase], {
+            encoding: 'utf-8',
+            env: process.env,
+          }),
+        );
+      const initial = run('first,second', 'warm');
+      const restored = run('second,first', 'restore');
+      result.initial = initial;
+      result.restored = restored;
     }
   } catch (error) {
     result.thrown = error.message;
   } finally {
-    fs.rmSync(tmp, { recursive: true, force: true });
+    if (!process.argv[2]) fs.rmSync(tmp, { recursive: true, force: true });
   }
   process.stdout.write(JSON.stringify(result));
 })();
