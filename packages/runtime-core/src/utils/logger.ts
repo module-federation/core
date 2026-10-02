@@ -1,4 +1,4 @@
-import { createLogger } from '@module-federation/sdk';
+import { createLogger } from '@module-federation/sdk/core';
 import type { MFContext } from '@module-federation/error-codes';
 import { logAndReport } from '@module-federation/error-codes/browser';
 

@@ -31,6 +31,7 @@ const buildConfig = {
       types: 'src/types.ts',
       core: 'src/core.ts',
       bundler: 'src/bundler.ts',
+      compose: 'src/compose.ts',
     },
     external: ['@module-federation/*'],
     dts: {

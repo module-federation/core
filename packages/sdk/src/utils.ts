@@ -181,11 +181,20 @@ type ResourceUrlInfo =
   | { getPublicPath: string }
   | { publicPath: string; ssrPublicPath?: string };
 
-function getResourceUrl(module: ModuleInfo, sourceUrl: string): string;
-function getResourceUrl(module: ResourceUrlInfo, sourceUrl: string): string;
+function getResourceUrl(
+  module: ModuleInfo,
+  sourceUrl: string,
+  isBrowser?: boolean,
+): string;
+function getResourceUrl(
+  module: ResourceUrlInfo,
+  sourceUrl: string,
+  isBrowser?: boolean,
+): string;
 function getResourceUrl(
   module: ModuleInfo | ResourceUrlInfo,
   sourceUrl: string,
+  isBrowser = isBrowserEnv(),
 ): string {
   if ('getPublicPath' in module) {
     let publicPath;
@@ -199,7 +208,7 @@ function getResourceUrl(
     return `${publicPath}${sourceUrl}`;
   } else if ('publicPath' in module) {
     if (
-      !isBrowserEnv() &&
+      !isBrowser &&
       !isReactNativeEnv() &&
       'ssrPublicPath' in module &&
       typeof module.ssrPublicPath === 'string'

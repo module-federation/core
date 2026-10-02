@@ -1,5 +1,5 @@
 import { describe, expect, it, rs } from '@rstest/core';
-import { ModuleFederation } from '../src/core';
+import { ModuleFederation } from '../src';
 import { registerGlobalPlugins } from '../src/global';
 import type {
   ModuleFederationRuntimePlugin,
