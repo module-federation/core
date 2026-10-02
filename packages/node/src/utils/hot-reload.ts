@@ -146,21 +146,8 @@ export const performReload = async (
   const entries: Set<string> = gs.entryChunkCache || new Set();
 
   //@ts-ignore
-  gs.__FEDERATION__.__INSTANCES__.map((i: any) => {
-    //@ts-ignore
-    i.moduleCache.forEach((mc: any) => {
-      if (mc.remoteInfo && mc.remoteInfo.entryGlobalName) {
-        delete gs[mc.remoteInfo.entryGlobalName];
-      }
-    });
-    i.moduleCache.clear();
-    if (gs[i.name]) {
-      delete gs[i.name];
-    }
-  });
-  //@ts-ignore
   __webpack_require__?.federation?.instance?.moduleCache?.clear();
-  helpers.global.resetFederationGlobalInfo();
+  helpers.global.resetFederationRuntime();
   globalThis.moduleGraphDirty = false;
   globalThis.mfHashMap = {};
 
