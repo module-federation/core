@@ -1,0 +1,158 @@
+{
+  "app,node": {
+    "order": ["app", "node"],
+    "sameCopy": false,
+    "sameHooks": false,
+    "embedTaps": 1,
+    "embedSubscribers": [
+      ["EmbedFederationRuntimePlugin", "HoistContainerReferences"],
+      ["HoistContainerReferences"]
+    ],
+    "runtimeFactories": 2,
+    "errors": [],
+    "warnings": [
+      "DefinePlugin\nConflicting values for 'FEDERATION_BUILD_IDENTIFIER'",
+      "No required version specified and unable to automatically determine one. Unable to find description file in /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-node-copies-oxNA0N/src.",
+      "No required version specified and unable to automatically determine one. Unable to find description file in /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-node-copies-oxNA0N/src."
+    ],
+    "execution": ["app-dep", "node-dep", "app-remote", "node-remote"],
+    "initialized": ["app"],
+    "serverRequests": ["/app.js", "/node.js"],
+    "assertions": {
+      "remoteExecution": true,
+      "firstRuntimeMarker": true
+    }
+  },
+  "node,app": {
+    "order": ["node", "app"],
+    "sameCopy": false,
+    "sameHooks": false,
+    "embedTaps": 1,
+    "embedSubscribers": [
+      ["HoistContainerReferences"],
+      ["EmbedFederationRuntimePlugin", "HoistContainerReferences"]
+    ],
+    "runtimeFactories": 2,
+    "errors": [],
+    "warnings": [
+      "DefinePlugin\nConflicting values for 'FEDERATION_BUILD_IDENTIFIER'",
+      "No required version specified and unable to automatically determine one. Unable to find description file in /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-node-copies-oxNA0N/src.",
+      "No required version specified and unable to automatically determine one. Unable to find description file in /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-node-copies-oxNA0N/src."
+    ],
+    "execution": ["app-dep", "node-dep", "app-remote", "node-remote"],
+    "initialized": ["node"],
+    "serverRequests": ["/app.js", "/node.js"],
+    "assertions": {
+      "remoteExecution": true,
+      "firstRuntimeMarker": true
+    }
+  },
+  "same-app,node": {
+    "order": ["app", "node"],
+    "sameCopy": true,
+    "sameHooks": true,
+    "embedTaps": 1,
+    "embedSubscribers": [
+      [
+        "EmbedFederationRuntimePlugin",
+        "HoistContainerReferences",
+        "HoistContainerReferences"
+      ],
+      [
+        "EmbedFederationRuntimePlugin",
+        "HoistContainerReferences",
+        "HoistContainerReferences"
+      ]
+    ],
+    "runtimeFactories": 1,
+    "errors": [],
+    "warnings": [
+      "DefinePlugin\nConflicting values for 'FEDERATION_BUILD_IDENTIFIER'",
+      "No required version specified and unable to automatically determine one. Unable to find description file in /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-node-copies-oxNA0N/src.",
+      "No required version specified and unable to automatically determine one. Unable to find description file in /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-node-copies-oxNA0N/src."
+    ],
+    "execution": ["app-dep", "node-dep", "app-remote", "node-remote"],
+    "initialized": ["app"],
+    "serverRequests": ["/app.js", "/node.js"],
+    "assertions": {
+      "remoteExecution": true,
+      "firstRuntimeMarker": true
+    }
+  },
+  "same-node,app": {
+    "order": ["node", "app"],
+    "sameCopy": true,
+    "sameHooks": true,
+    "embedTaps": 1,
+    "embedSubscribers": [
+      [
+        "EmbedFederationRuntimePlugin",
+        "HoistContainerReferences",
+        "HoistContainerReferences"
+      ],
+      [
+        "EmbedFederationRuntimePlugin",
+        "HoistContainerReferences",
+        "HoistContainerReferences"
+      ]
+    ],
+    "runtimeFactories": 1,
+    "errors": [],
+    "warnings": [
+      "DefinePlugin\nConflicting values for 'FEDERATION_BUILD_IDENTIFIER'",
+      "No required version specified and unable to automatically determine one. Unable to find description file in /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-node-copies-oxNA0N/src.",
+      "No required version specified and unable to automatically determine one. Unable to find description file in /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-node-copies-oxNA0N/src."
+    ],
+    "execution": ["app-dep", "node-dep", "app-remote", "node-remote"],
+    "initialized": ["node"],
+    "serverRequests": ["/app.js", "/node.js"],
+    "assertions": {
+      "remoteExecution": true,
+      "firstRuntimeMarker": true
+    }
+  },
+  "app": {
+    "order": ["app"],
+    "sameCopy": false,
+    "sameHooks": false,
+    "embedTaps": 1,
+    "embedSubscribers": [
+      ["EmbedFederationRuntimePlugin", "HoistContainerReferences"],
+      []
+    ],
+    "runtimeFactories": 1,
+    "errors": [],
+    "warnings": [
+      "No required version specified and unable to automatically determine one. Unable to find description file in /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-node-copies-oxNA0N/src."
+    ],
+    "execution": ["app-dep", "node-dep", "app-remote", "node-remote"],
+    "initialized": ["app"],
+    "serverRequests": ["/app.js", "/node.js"],
+    "assertions": {
+      "remoteExecution": true,
+      "firstRuntimeMarker": true
+    }
+  },
+  "node": {
+    "order": ["node"],
+    "sameCopy": false,
+    "sameHooks": false,
+    "embedTaps": 1,
+    "embedSubscribers": [
+      [],
+      ["EmbedFederationRuntimePlugin", "HoistContainerReferences"]
+    ],
+    "runtimeFactories": 1,
+    "errors": [],
+    "warnings": [
+      "No required version specified and unable to automatically determine one. Unable to find description file in /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-node-copies-oxNA0N/src."
+    ],
+    "execution": ["app-dep", "node-dep", "app-remote", "node-remote"],
+    "initialized": ["node"],
+    "serverRequests": ["/app.js", "/node.js"],
+    "assertions": {
+      "remoteExecution": true,
+      "firstRuntimeMarker": true
+    }
+  }
+}
