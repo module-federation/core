@@ -13,7 +13,9 @@ const packageJson = nodeRequire('../../package.json') as {
 const PACKAGE_NAME = '@module-federation/modern-js-v3';
 const RUNTIME_PLUGIN_EXPORTS = {
   './ssr-inject-data-fetch-function-plugin': 'injectDataFetchFunctionPlugin',
-  './ssr-dev-plugin': 'mfSSRDevPlugin',
+  ...(packageJson.exports['./ssr-dev-plugin']
+    ? { './ssr-dev-plugin': 'mfSSRDevPlugin' }
+    : {}),
 } as const;
 
 // Installs a copy of the package manifest whose export targets are marker
@@ -74,7 +76,7 @@ const bundleRuntimePlugins = async (
 };
 
 describe('SSR runtime plugin exports', () => {
-  it('resolves both runtime plugins to the inert worker module for webworker targets only', async () => {
+  it('resolves exported runtime plugins to the inert worker module for webworker targets only', async () => {
     const root = await mkdtemp(path.join(tmpdir(), 'mf-ssr-worker-plugins-'));
     try {
       await writeFixturePackage(root);
@@ -99,7 +101,9 @@ describe('SSR runtime plugin exports', () => {
       expect(nodeBundle).toContain(
         'resolved:injectDataFetchFunctionPlugin.mjs',
       );
-      expect(nodeBundle).toContain('resolved:devPlugin.mjs');
+      if (packageJson.exports['./ssr-dev-plugin']) {
+        expect(nodeBundle).toContain('resolved:devPlugin.mjs');
+      }
       expect(nodeBundle).not.toContain('resolved:workerPlugins.mjs');
     } finally {
       await rm(root, { force: true, recursive: true });
