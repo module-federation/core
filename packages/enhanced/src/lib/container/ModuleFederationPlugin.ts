@@ -26,6 +26,7 @@ import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependencie
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
 import TreeShakingSharedPlugin from '../sharing/tree-shaking/TreeShakingSharedPlugin';
+import { CanonicalSharedPlugin } from '@module-federation/managers';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -274,6 +275,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         }).apply(compiler);
       }
       if (shared) {
+        new CanonicalSharedPlugin(shared).apply(compiler);
         new TreeShakingSharedPlugin({
           mfConfig: options,
         }).apply(compiler);
