@@ -1,9 +1,9 @@
-import { IncomingMessage, createServer } from 'http';
+import { IncomingMessage, Server, createServer } from 'http';
 import { UpdateMode } from '../constant';
 import WebSocket from 'isomorphic-ws';
 import { parse } from 'url';
 import { Publisher } from '../Publisher';
-import { getIdentifier, fileLog, error } from '../utils';
+import { getIdentifier, fileLog, error, listen } from '../utils';
 import { ReloadWebClientAPI } from '../message/API';
 import {
   ConnectionAuthQuery,
@@ -93,6 +93,7 @@ export class Broker {
 
   private _publisherMap: Map<string, Publisher> = new Map();
   private _webClientMap: Map<string, WebSocket> = new Map();
+  private _httpServer?: Server;
   private _webSocketServer?: WebSocket.Server;
   private _secureWebSocketServer?: WebSocket.Server;
   private _tmpSubscriberShelter: TmpSubscriberShelter = new Map();
@@ -100,7 +101,6 @@ export class Broker {
 
   constructor() {
     this._setSchedule();
-    this._startWsServer();
     this._stopWhenSIGTERMOrSIGINT();
     this._handleUnexpectedExit();
   }
@@ -109,7 +109,7 @@ export class Broker {
     return Boolean(this._publisherMap.size);
   }
 
-  private async _startWsServer(): Promise<void> {
+  private async _startWsServer(): Promise<boolean> {
     const wsHandler = (ws: WebSocket, req: IncomingMessage): void => {
       const { url: reqUrl = '' } = req;
       const { query } = parse(reqUrl, true);
@@ -142,13 +142,6 @@ export class Broker {
     this._webSocketServer.on('error', (err) => {
       fileLog(`ws error: \n${err.message}\n ${err.stack}`, 'Broker', 'error');
     });
-    this._webSocketServer.on('listening', () => {
-      fileLog(
-        `WebSocket server is listening on port ${Broker.DEFAULT_WEB_SOCKET_PORT}`,
-        'Broker',
-        'info',
-      );
-    });
     this._webSocketServer.on('connection', wsHandler);
     this._webSocketServer.on('close', (code: any) => {
       fileLog(`WebSocket Server Close with Code ${code}`, 'Broker', 'warn');
@@ -167,30 +160,29 @@ export class Broker {
         }
       }
     });
-    server.listen(Broker.DEFAULT_WEB_SOCKET_PORT);
-
-    // const httpServer = createServer();
-
-    // this._secureWebSocketServer = new WebSocket.Server({ server: httpServer });
-    // this._secureWebSocketServer.on('error', log);
-    // this._secureWebSocketServer.on('listening', () => {
-    //   fileLog(
-    //     `Secure WebSocket server is listening on port ${Broker.DEFAULT_SECURE_WEB_SOCKET_PORT}`,
-    //     'Broker',
-    //     'info'
-    //   );
-    // });
-    // this._secureWebSocketServer.on('close', code => {
-    //   fileLog(
-    //     `Secure WebSocket Server Close with Code ${code}`,
-    //     'Broker',
-    //     'warn'
-    //   );
-    //   this._secureWebSocketServer && this._secureWebSocketServer.close();
-    //   this._secureWebSocketServer = null;
-    // });
-    // this._secureWebSocketServer.on('connection', wsHandler);
-    // httpServer.listen(Broker.DEFAULT_SECURE_WEB_SOCKET_PORT);
+    try {
+      await listen(server, Broker.DEFAULT_WEB_SOCKET_PORT);
+    } catch (err) {
+      this._webSocketServer.close();
+      this._webSocketServer = undefined;
+      if ((err as NodeJS.ErrnoException).code === 'EADDRINUSE') {
+        // Another broker won the race for the port; dev servers connect to it.
+        fileLog(
+          `Port ${Broker.DEFAULT_WEB_SOCKET_PORT} is already used by another broker, this broker will exit`,
+          'Broker',
+          'warn',
+        );
+        return false;
+      }
+      throw err;
+    }
+    this._httpServer = server;
+    fileLog(
+      `WebSocket server is listening on port ${Broker.DEFAULT_WEB_SOCKET_PORT}`,
+      'Broker',
+      'info',
+    );
+    return true;
   }
 
   private async _takeAction(action: Action, client: WebSocket): Promise<void> {
@@ -791,8 +783,12 @@ export class Broker {
     });
   }
 
-  async start(): Promise<void> {
-    // noop
+  /**
+   * Starts the WebSocket server. Resolves to `false` when another broker
+   * already listens on the port, in which case this broker should exit.
+   */
+  start(): Promise<boolean> {
+    return this._startWsServer();
   }
 
   exit(): void {
@@ -803,6 +799,7 @@ export class Broker {
     this._clearTmpSubScriberRelations();
     this._webSocketServer && this._webSocketServer.close();
     this._secureWebSocketServer && this._secureWebSocketServer.close();
+    this._httpServer?.close();
 
     process.exit(0);
   }

@@ -1,4 +1,4 @@
-import net from 'net';
+import type { Server } from 'net';
 import { SEPARATOR } from '@module-federation/sdk';
 
 export * from './logTransform';
@@ -20,17 +20,22 @@ export function fib(n: number): number {
   return res[n];
 }
 
-export function getFreePort(): Promise<number> {
+/**
+ * Binds `server` to `port` and settles once it is listening, rejecting with
+ * the bind error (e.g. EADDRINUSE) instead of emitting an unhandled 'error'.
+ */
+export function listen(server: Server, port: number): Promise<void> {
   return new Promise((resolve, reject) => {
-    const server = net.createServer();
-    server.unref();
-    server.on('error', reject);
-    server.listen(0, () => {
-      // @ts-ignore ignore this line
-      const { port } = server.address();
-      server.close(() => {
-        resolve(port);
-      });
-    });
+    const onError = (err: Error) => {
+      server.off('listening', onListening);
+      reject(err);
+    };
+    const onListening = () => {
+      server.off('error', onError);
+      resolve();
+    };
+    server.once('error', onError);
+    server.once('listening', onListening);
+    server.listen(port);
   });
 }
