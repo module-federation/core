@@ -33,3 +33,14 @@ it('should test a string include filter against the path after node_modules', as
     'lodash/pick.js',
   );
 });
+
+for (const kind of ['relative', 'absolute']) {
+  it(`should apply include/exclude request filters when admitting ${kind} provides`, async () => {
+    await __webpack_init_sharing__('default');
+    const keys = Object.keys(__webpack_share_scopes__.default);
+    expect(keys).toContain(`${kind}-include-pass`);
+    expect(keys).not.toContain(`${kind}-include-fail`);
+    expect(keys).toContain(`${kind}-exclude-pass`);
+    expect(keys).not.toContain(`${kind}-exclude-fail`);
+  });
+}
