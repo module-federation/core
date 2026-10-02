@@ -80,8 +80,14 @@ const createReactRouterV8Alias = (
     'react-router$': reactRouterV8AliasPath,
     'react-router/dom$': reactRouterV8DomAliasPath,
     [reactRouterRuntimeAlias]: reactRouterV8AliasPath,
-    'react-router/dist/development/index.js': routerPackagePath,
-    'react-router/dist/production/index.js': routerPackagePath,
+    'react-router/dist/development/index.js': path.join(
+      routerPackagePath,
+      'dist/development/index.js',
+    ),
+    'react-router/dist/production/index.js': path.join(
+      routerPackagePath,
+      'dist/production/index.js',
+    ),
     'react-router/dist/development/dom-export.js': path.join(
       routerPackagePath,
       'dist/development/dom-export.js',

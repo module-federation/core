@@ -324,7 +324,7 @@ describe('ReactBridgeAliasChangerPlugin router aliases', () => {
       '@module-federation/bridge-react/dist/router-v8-dom.es.js',
     );
     expect(alias['react-router/dist/development/index.js']).toBe(
-      resolveRouterV8,
+      path.join(resolveRouterV8, 'dist/development/index.js'),
     );
     expect(alias['react-router/dist/development/dom-export.js']).toBe(
       resolveRouterV8DomExport,

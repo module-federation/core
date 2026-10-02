@@ -24,10 +24,7 @@ import {
   BrowserRouter as BrowserRouterV8,
   RouterProvider as RootRouterProviderV8,
 } from '../src/router/v8';
-import {
-  BrowserRouter as BrowserRouterV8Dom,
-  RouterProvider as RouterProviderV8,
-} from '../src/router/v8-dom';
+import { RouterProvider as RouterProviderV8 } from '../src/router/v8-dom';
 import { RouterContext } from '../src/provider/context';
 import { getHtml, getWindowImpl } from './util';
 
@@ -167,28 +164,6 @@ describe('react router v8 proxy', () => {
     let { container } = render(
       <RouterContext.Provider value={{ basename: '/test' } as any}>
         <RouterProviderV8 router={router} />
-      </RouterContext.Provider>,
-    );
-    expect(getHtml(container)).toMatch('home page');
-  });
-
-  it('dom BrowserRouter export uses the bridge basename context', async () => {
-    let { container } = render(
-      <RouterContext.Provider value={{ basename: '/test' } as any}>
-        <BrowserRouterV8Dom basename="/" window={getWindowImpl('/test', false)}>
-          <ul>
-            <li>
-              <LinkV8 to="/">Home</LinkV8>
-            </li>
-            <li>
-              <LinkV8 to="/detail">Detail</LinkV8>
-            </li>
-          </ul>
-          <RoutesV8>
-            <RouteV8 path="/" Component={() => <div>home page</div>} />
-            <RouteV8 path="/detail" Component={() => <div>detail page</div>} />
-          </RoutesV8>
-        </BrowserRouterV8Dom>
       </RouterContext.Provider>,
     );
     expect(getHtml(container)).toMatch('home page');

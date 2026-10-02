@@ -52,6 +52,53 @@ describe('react router v8 package layout', () => {
     expect(RouterProvider).toHaveBeenCalled();
   });
 
+  it.each(['v8', 'v8-dom'])(
+    'preserves provider options for %s memory routing',
+    (entry) => {
+      const RouterProvider = jest.fn((_props: Record<string, unknown>) => (
+        <div>memory router provider</div>
+      ));
+      const memoryRouter = { source: 'memory' };
+      const createMemoryRouter = jest.fn(() => memoryRouter);
+      const flushSync = jest.fn();
+      const onError = jest.fn();
+
+      jest.doMock('react', () => React);
+      jest.doMock('react-router', () => ({
+        RouterProvider,
+        createMemoryRouter,
+      }));
+      jest.doMock('react-router/dom', () => ({ RouterProvider }));
+
+      const { RouterProvider: BridgeRouterProvider } = require(
+        `../src/router/${entry}`,
+      );
+      const { RouterContext } = require('../src/provider/context');
+      const router = { routes: [{ path: '/detail' }] };
+
+      render(
+        <RouterContext.Provider
+          value={{ memoryRoute: { entryPath: '/detail' } }}
+        >
+          <BridgeRouterProvider
+            router={router}
+            flushSync={flushSync}
+            onError={onError}
+          />
+        </RouterContext.Provider>,
+      );
+
+      expect(createMemoryRouter).toHaveBeenCalledWith(router.routes, {
+        initialEntries: ['/detail'],
+      });
+      expect(RouterProvider.mock.calls[0][0]).toMatchObject({
+        router: memoryRouter,
+        flushSync,
+        onError,
+      });
+    },
+  );
+
   it('keeps DOM subpath RouterProvider while using root browser constructors', () => {
     const BrowserRouter = jest.fn(({ children }) => <div>{children}</div>);
     const DomRouterProvider = jest.fn(() => <div>dom router provider</div>);
@@ -70,7 +117,6 @@ describe('react router v8 package layout', () => {
     }));
 
     const {
-      BrowserRouter: BridgeBrowserRouter,
       RouterProvider: BridgeRouterProvider,
     } = require('../src/router/v8-dom');
     const { RouterContext } = require('../src/provider/context');
@@ -81,12 +127,10 @@ describe('react router v8 package layout', () => {
 
     render(
       <RouterContext.Provider value={{ basename: '/host' }}>
-        <BridgeBrowserRouter basename="/app">home</BridgeBrowserRouter>
         <BridgeRouterProvider router={router} />
       </RouterContext.Provider>,
     );
 
-    expect(BrowserRouter).toHaveBeenCalled();
     expect(createBrowserRouter).toHaveBeenCalledWith(
       router.routes,
       expect.objectContaining({ basename: '/host' }),

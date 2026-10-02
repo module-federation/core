@@ -53,7 +53,7 @@ function WrapperRouterProvider(props: Record<string, unknown>) {
     const MemoryRouterInstance = createMemoryRouter(routers, {
       initialEntries: [routerContextProps?.memoryRoute.entryPath],
     });
-    return <RouterProvider router={MemoryRouterInstance} />;
+    return <RouterProvider {...propsRes} router={MemoryRouterInstance} />;
   } else {
     const BrowserRouterInstance = createBrowserRouter(routers, {
       // In host app, the routerContextProps is {}, so we should use router.basename as fallback

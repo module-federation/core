@@ -162,8 +162,14 @@ describe('test getBridgeRouterAlias: should return the correct alias for react-r
         '@module-federation/bridge-react/dist/router-v8-dom.es.js',
       '@module-federation/bridge-react/router-runtime$':
         '@module-federation/bridge-react/dist/router-v8.es.js',
-      'react-router/dist/development/index.js': resolveRouterV8,
-      'react-router/dist/production/index.js': resolveRouterV8,
+      'react-router/dist/development/index.js': path.join(
+        resolveRouterV8,
+        'dist/development/index.js',
+      ),
+      'react-router/dist/production/index.js': path.join(
+        resolveRouterV8,
+        'dist/production/index.js',
+      ),
       'react-router/dist/development/dom-export.js': path.join(
         resolveRouterV8,
         'dist/development/dom-export.js',
@@ -193,7 +199,9 @@ describe('test getBridgeRouterAlias: should return the correct alias for react-r
       reactRouterAlias: resolveRouterV8Entry,
     });
 
-    expect(res['react-router/dist/production/index.js']).toBe(resolveRouterV8);
+    expect(res['react-router/dist/production/index.js']).toBe(
+      resolveRouterV8Entry,
+    );
     expect(res['react-router/dist/production/dom-export.js']).toBe(
       path.join(resolveRouterV8, 'dist/production/dom-export.js'),
     );
