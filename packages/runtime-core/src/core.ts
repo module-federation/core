@@ -19,6 +19,8 @@ import {
   RemoteEntryInitOptions,
   CallFrom,
   ResourceLoadContext,
+  LoadShareExtraOptions,
+  SharedLoadContext,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -26,7 +28,7 @@ import {
   RUNTIME_010,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import { Module, type RemoteModuleFactory } from './module';
+import type { Module, RemoteModuleFactory } from './module';
 import {
   AsyncHook,
   AsyncWaterfallHook,
@@ -36,21 +38,39 @@ import {
 } from './utils/hooks';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
 import { snapshotPlugin } from './plugins/snapshot';
-import { getRemoteInfo } from './utils/load';
 import { DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
+import { DisabledSnapshotHandler } from './plugins/snapshot/disabled';
 import { SharedHandler } from './shared';
+import { DisabledSharedHandler } from './shared/disabled';
 import { RemoteHandler } from './remote';
+import { DisabledRemoteHandler } from './remote/disabled';
 import { formatShareConfigs } from './utils/share';
 
 // Declare the global constant that will be defined by DefinePlugin
 // Default to true if not defined (e.g., when runtime-core is used outside of webpack)
 // so that snapshot functionality is included by default.
 declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
+declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
+declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
+
+type BridgeHookContext = object;
+type BridgeHookResult = {
+  context: BridgeHookContext;
+  result?: unknown;
+};
 const USE_SNAPSHOT =
   typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
     ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
     : true; // Default to true (use snapshot) when not explicitly defined
+const USE_REMOTE =
+  typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_REMOTE
+    : true;
+const USE_SHARED =
+  typeof FEDERATION_OPTIMIZE_NO_SHARED === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_SHARED
+    : true;
 
 export class ModuleFederation {
   options: Options;
@@ -169,6 +189,8 @@ export class ModuleFederation {
           origin: ModuleFederation;
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports | false | void;
+          resourceContext?: ResourceLoadContext;
+          cached?: boolean;
           error?: unknown;
           recovered?: boolean;
         },
@@ -265,28 +287,30 @@ export class ModuleFederation {
   });
   bridgeHook = new PluginSystem({
     beforeBridgeRender: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeHookContext?],
       void | Record<string, any>
     >(),
     afterBridgeRender: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeHookResult?],
       void | Record<string, any>
     >(),
     beforeBridgeDestroy: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeHookContext?],
       void | Record<string, any>
     >(),
     afterBridgeDestroy: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeHookResult?],
       void | Record<string, any>
     >(),
+    afterBridgeRouteSync: new SyncHook<[BridgeHookResult], void>(),
   });
   moduleInfo?: GlobalModuleInfo[string];
 
   constructor(userOptions: UserOptions) {
-    const plugins = USE_SNAPSHOT
-      ? [snapshotPlugin(), generatePreloadAssetsPlugin()]
-      : [];
+    const plugins =
+      USE_REMOTE && USE_SNAPSHOT
+        ? [snapshotPlugin(), generatePreloadAssetsPlugin()]
+        : [];
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
@@ -300,9 +324,15 @@ export class ModuleFederation {
 
     this.name = userOptions.name;
     this.options = defaultOptions;
-    this.snapshotHandler = new SnapshotHandler(this);
-    this.sharedHandler = new SharedHandler(this);
-    this.remoteHandler = new RemoteHandler(this);
+    this.snapshotHandler = (
+      USE_REMOTE ? new SnapshotHandler(this) : new DisabledSnapshotHandler()
+    ) as SnapshotHandler;
+    this.sharedHandler = (
+      USE_SHARED ? new SharedHandler(this) : new DisabledSharedHandler()
+    ) as SharedHandler;
+    this.remoteHandler = (
+      USE_REMOTE ? new RemoteHandler(this) : new DisabledRemoteHandler()
+    ) as RemoteHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,
@@ -325,10 +355,7 @@ export class ModuleFederation {
 
   async loadShare<T>(
     pkgName: string,
-    extraOptions?: {
-      customShareInfo?: Partial<Shared>;
-      resolver?: (sharedOptions: ShareInfos[string]) => Shared;
-    },
+    extraOptions?: LoadShareExtraOptions,
   ): Promise<false | (() => T | undefined)> {
     return this.sharedHandler.loadShare(pkgName, extraOptions);
   }
@@ -339,11 +366,7 @@ export class ModuleFederation {
   // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(
     pkgName: string,
-    extraOptions?: {
-      customShareInfo?: Partial<Shared>;
-      from?: 'build' | 'runtime';
-      resolver?: (sharedOptions: ShareInfos[string]) => Shared;
-    },
+    extraOptions?: LoadShareExtraOptions,
   ): () => T | never {
     return this.sharedHandler.loadShareSync(pkgName, extraOptions);
   }
@@ -354,6 +377,7 @@ export class ModuleFederation {
       initScope?: InitScope;
       from?: CallFrom;
       strategy?: Shared['strategy'];
+      context?: SharedLoadContext;
     },
   ): Array<Promise<void>> {
     return this.sharedHandler.initializeSharing(shareScopeName, extraOptions);
@@ -364,13 +388,7 @@ export class ModuleFederation {
     url: string,
     container: RemoteEntryExports,
   ): Module {
-    const remoteInfo = getRemoteInfo({ name, entry: url });
-    const module = new Module({ host: this, remoteInfo });
-
-    module.remoteEntryExports = container;
-    this.moduleCache.set(name, module);
-
-    return module;
+    return this.remoteHandler.initRawContainer(name, url, container);
   }
 
   // eslint-disable-next-line max-lines-per-function
@@ -396,10 +414,9 @@ export class ModuleFederation {
   }
 
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
-    const { allShareInfos: shared } = formatShareConfigs(
-      globalOptions,
-      userOptions,
-    );
+    const shared = USE_SHARED
+      ? formatShareConfigs(globalOptions, userOptions).allShareInfos
+      : {};
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
         origin: this,
@@ -445,15 +462,7 @@ export class ModuleFederation {
   }
 
   registerPlugins(plugins: UserOptions['plugins']) {
-    const pluginRes = registerPlugins(plugins, this);
-    // Merge plugin
-    this.options.plugins = this.options.plugins.reduce((res, plugin) => {
-      if (!plugin) return res;
-      if (res && !res.find((item) => item.name === plugin.name)) {
-        res.push(plugin);
-      }
-      return res;
-    }, pluginRes || []);
+    this.options.plugins = registerPlugins(plugins, this);
   }
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
     return this.remoteHandler.registerRemotes(remotes, options);

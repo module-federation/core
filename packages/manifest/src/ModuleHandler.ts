@@ -25,6 +25,8 @@ type ContainerExposeEntry = [
   { import: string[]; name?: string },
 ];
 
+const REMOTE_REFERENCE_PREFIX = /^(?:webpack|rspack)\/container\/reference\//;
+
 const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === 'string' && value.trim().length > 0;
 };
@@ -378,12 +380,12 @@ class ModuleHandler {
     }
     const remoteManagerNormalizedOptions =
       this._remoteManager.normalizedOptions;
-    // identifier = remote (default) webpack/container/reference/app2 ./Button
+    // identifier = remote (default) [webpack|rspack]/container/reference/app2 ./Button
     const data = identifier.split(' ');
 
     if (data.length === 4) {
       const moduleName = data[3].replace('./', '');
-      const remoteAlias = data[2].replace('webpack/container/reference/', '');
+      const remoteAlias = data[2].replace(REMOTE_REFERENCE_PREFIX, '');
       const normalizedRemote = remoteManagerNormalizedOptions[remoteAlias];
       const basicRemote: StatsRemoteVal = {
         alias: normalizedRemote.alias,

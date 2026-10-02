@@ -1,18 +1,30 @@
 # Module Federation SDK Reference
 
-This document provides a comprehensive reference for the Module Federation SDK, including all interfaces, types, and utilities needed to implement Module Federation in your bundler.
+This document provides a reference for the current `@module-federation/sdk` role in the monorepo. The SDK is the foundation package used by runtime-core, runtime, enhanced/rspack, rsbuild/rspress, metro, manifest, managers, dts-plugin, webpack-bundler-runtime, utilities, devtools, and platform adapters.
 
 ## Table of Contents
+
 - [Core Interfaces](#core-interfaces)
 - [Plugin Types](#plugin-types)
 - [Runtime Types](#runtime-types)
-- [SDK Utility Functions](#sdk-utility-functions)
-- [Manifest Types](#manifest-types)
-- [Snapshot Types](#snapshot-types)
-- [Stats Types](#stats-types)
-- [Usage Examples](#usage-examples)
-- [Best Practices](#best-practices)
-- [SDK Exports](#sdk-exports)
+- [SDK Utilities, Manifests, Snapshots, Stats, and Exports](#sdk-utilities-manifests-snapshots-stats-and-exports)
+
+## SDK Ownership
+
+The SDK exports the shared vocabulary for the rest of the architecture:
+
+Use `architecture-overview.md` for the canonical repo-wide package taxonomy. This section only describes SDK-owned contracts and helper surfaces.
+
+| Export area | Source files | Used by |
+| --- | --- | --- |
+| Constants and common utilities | `constant.ts`, `utils.ts` | Runtime packages, build plugins, managers, utilities, manifests, and tests. |
+| Typed contracts | `types/common.ts`, `types/hooks.ts`, `types/manifest.ts`, `types/snapshot.ts`, `types/stats.ts`, `types/plugins/*` | Plugin option schemas, manifest/stat/snapshot data, runtime plugin hooks, container/share plugin contracts. |
+| Environment loaders | `env.ts`, `dom.ts`, `node.ts` | Browser and Node remote entry loading, script/link creation, environment detection. |
+| Manifest/snapshot helpers | `generateSnapshotFromManifest.ts` | Runtime snapshot loading, manifest consumers, preload and asset decisions. |
+| Config normalization helpers | `normalizeOptions.ts`, `createModuleFederationConfig.ts` | User-facing config helpers and build integration normalization. |
+| Webpack path normalization | `normalize-webpack-path.ts` | Repo code that needs webpack internals without hard-coded bare webpack paths. |
+
+Architecturally, packages should depend on SDK for shared types and primitives, not on each other for incidental utility code. If a helper is needed by runtime, manifest, and multiple build integrations, it belongs in SDK only when it is stable and not tied to a specific bundler lifecycle.
 
 ## Core Interfaces
 
@@ -86,10 +98,6 @@ interface ModuleFederationPluginOptions {
    * TypeScript declaration generation options.
    */
   dts?: boolean | PluginDtsOptions;
-  /**
-   * Enable Data Prefetch
-   */
-  dataPrefetch?: DataPrefetch;
   /**
    * Virtual runtime entry configuration.
    */
@@ -474,6 +482,7 @@ interface DtsRemoteOptions {
   tsConfigPath?: string;
   typesFolder?: string;
   compiledTypesFolder?: string;
+  outputDir?: string;
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compileInChildProcess?: boolean;
@@ -502,6 +511,7 @@ interface DtsHostOptions {
   runtimePkgs?: string[];
   remoteTypeUrls?: (() => Promise<RemoteTypeUrls>) | RemoteTypeUrls;
   timeout?: number;
+  family?: 0 | 4 | 6;
   typesOnBuild?: boolean;
 }
 
@@ -570,17 +580,10 @@ interface PluginManifestOptions {
 
 interface AdditionalDataOptions {
   stats: Stats;
-  manifest?: Manifest;
-  pluginOptions: ModuleFederationPluginOptions;
-  compiler: any; // webpack.Compiler
-  compilation: any; // webpack.Compilation
+  compiler: webpack.Compiler;
+  compilation: webpack.Compilation;
   bundler: 'webpack' | 'rspack';
 }
-
-/**
- * Enable Data Prefetch
- */
-type DataPrefetch = boolean;
 
 /**
  * Async boundary options
@@ -716,11 +719,11 @@ Runtime plugin interface that extends multiple lifecycle partials:
 
 ```typescript
 type ModuleFederationRuntimePlugin = CoreLifeCyclePartial &
-  SnapshotLifeCyclePartial &
-  SharedLifeCyclePartial &
-  RemoteLifeCyclePartial &
-  ModuleLifeCyclePartial &
-  ModuleBridgeLifeCyclePartial & {
+  SnapshotLifeCycleCyclePartial &
+  SharedLifeCycleCyclePartial &
+  RemoteLifeCycleCyclePartial &
+  ModuleLifeCycleCyclePartial &
+  ModuleBridgeLifeCycleCyclePartial & {
     name: string;
     version?: string;
     apply?: (instance: ModuleFederation) => void;
@@ -731,366 +734,16 @@ type CoreLifeCyclePartial = Partial<{
 }>;
 
 // Similar partial types exist for:
-// - SnapshotLifeCyclePartial
-// - SharedLifeCyclePartial  
-// - RemoteLifeCyclePartial
-// - ModuleLifeCyclePartial
-// - ModuleBridgeLifeCyclePartial
+// - SnapshotLifeCycleCyclePartial
+// - SharedLifeCycleCyclePartial
+// - RemoteLifeCycleCyclePartial
+// - ModuleLifeCycleCyclePartial
+// - ModuleBridgeLifeCycleCyclePartial
 ```
 
-## SDK Utility Functions
+## SDK Utilities, Manifests, Snapshots, Stats, and Exports
 
-The Module Federation SDK provides these utility functions:
-
-### generateSnapshotFromManifest
-
-Generate snapshot data from manifest information:
-
-```typescript
-function generateSnapshotFromManifest(
-  manifest: Manifest,
-  options?: GenerateSnapshotOptions
-): ModuleInfo | ProviderModuleInfo;
-```
-
-### isManifestProvider
-
-Check if a module info is a manifest provider:
-
-```typescript
-function isManifestProvider(
-  moduleInfo: ModuleInfo
-): moduleInfo is ManifestProvider;
-```
-
-### simpleJoinRemoteEntry
-
-Join remote entry path and name with proper handling:
-
-```typescript
-function simpleJoinRemoteEntry(
-  rPath: string,
-  rName: string
-): string;
-```
-
-### inferAutoPublicPath
-
-Infer public path automatically:
-
-```typescript
-function inferAutoPublicPath(
-  remoteEntry: string
-): string;
-```
-
-### parseEntry
-
-Parse entry string into remote info:
-
-```typescript
-function parseEntry(
-  str: string,
-  devVerOrUrl?: string,
-  separator?: string
-): RemoteEntryInfo;
-
-type RemoteEntryInfo = RemoteWithEntry | RemoteWithVersion;
-
-interface RemoteWithEntry {
-  name: string;
-  entry: string;
-}
-
-interface RemoteWithVersion {
-  name: string;
-  version: string;
-}
-```
-
-### createLogger
-
-Create a logger instance:
-
-```typescript
-function createLogger(
-  prefix: string
-): Logger;
-
-interface Logger {
-  prefix: string;
-  setPrefix: (prefix: string) => void;
-  log: (...args: any[]) => void;
-  warn: (...args: any[]) => void;
-  error: (...args: any[]) => void;
-  success: (...args: any[]) => void;
-  info: (...args: any[]) => void;
-  ready: (...args: any[]) => void;
-  debug: (...args: any[]) => void;
-}
-```
-
-### createModuleFederationConfig
-
-Create normalized Module Federation configuration:
-
-```typescript  
-function createModuleFederationConfig(
-  options: ModuleFederationPluginOptions
-): ModuleFederationPluginOptions;
-```
-
-## Manifest Types
-
-Manifest types from the actual SDK:
-
-```typescript
-interface Manifest<
-  T = BasicStatsMetaData,
-  K = ManifestRemoteCommonInfo,
-> {
-  id: string;
-  name: string;
-  metaData: StatsMetaData<T>;
-  shared: ManifestShared[];
-  remotes: ManifestRemote<K>[];
-  exposes: ManifestExpose[];
-}
-
-interface ManifestShared {
-  id: string;
-  name: string;
-  version: string;
-  singleton: boolean;
-  requiredVersion: string;
-  hash: string;
-  assets: StatsAssets;
-}
-
-interface ManifestRemoteCommonInfo {
-  federationContainerName: string;
-  moduleName: string;
-  alias: string;
-}
-
-type ManifestRemote<T = ManifestRemoteCommonInfo> =
-  | (Omit<RemoteWithEntry, 'name'> & T)
-  | (Omit<RemoteWithVersion, 'name'> & T);
-
-type ManifestExpose = Pick<
-  StatsExpose,
-  'assets' | 'id' | 'name' | 'path'
->;
-```
-
-## Snapshot Types
-
-Snapshot types from the actual SDK:
-
-```typescript
-interface BasicProviderModuleInfo {
-  version: string;
-  buildVersion: string;
-  remoteTypes: string;
-  remoteTypesZip: string;
-  remoteTypesAPI?: string;
-  remotesInfo: Record<string, { matchedVersion: string }>;
-  shared: Array<{
-    sharedName: string;
-    version?: string;
-    assets: StatsAssets;
-  }>;
-  remoteEntry: string;
-  remoteEntryType: RemoteEntryType;
-  ssrRemoteEntry?: string;
-  ssrRemoteEntryType?: RemoteEntryType;
-  globalName: string;
-  modules: Array<{
-    moduleName: string;
-    modulePath?: string;
-    assets: StatsAssets;
-  }>;
-  prefetchInterface?: boolean;
-}
-
-type ProviderModuleInfo =
-  | (BasicProviderModuleInfo & { publicPath: string; ssrPublicPath?: string })
-  | (BasicProviderModuleInfo & { getPublicPath: string });
-
-type ModuleInfo =
-  | ConsumerModuleInfo
-  | PureConsumerModuleInfo
-  | ProviderModuleInfo;
-
-type GlobalModuleInfo = {
-  [key: string]: ModuleInfo | ManifestProvider | PureEntryProvider | undefined;
-};
-```
-
-## Stats Types
-
-Statistics and assets types:
-
-```typescript
-/**
- * Webpack/bundler statistics object
- */
-interface Stats {
-  [key: string]: any;
-}
-
-/**
- * JavaScript module object
- */
-interface Module {
-  [key: string]: any;
-}
-
-/**
- * Core lifecycle interfaces (implementation details)
- */
-interface CoreLifeCycle {
-  [key: string]: {
-    on: (callback: (...args: any[]) => void) => void;
-  };
-}
-
-/**
- * Module Federation runtime instance
- */
-interface ModuleFederation {
-  [key: string]: any;
-}
-
-/**
- * Generation options for snapshots
- */
-interface GenerateSnapshotOptions {
-  [key: string]: any;
-}
-
-/**
- * Consumer module information
- */
-interface ConsumerModuleInfo {
-  [key: string]: any;
-}
-
-/**
- * Pure consumer module information
- */
-interface PureConsumerModuleInfo {
-  [key: string]: any;
-}
-
-/**
- * Manifest provider type
- */
-interface ManifestProvider {
-  [key: string]: any;
-}
-
-/**
- * Pure entry provider
- */
-interface PureEntryProvider {
-  [key: string]: any;
-}
-```
-
-```typescript
-type StatsAssets = {
-  js: {
-    sync: string[];
-    async: string[];
-  };
-  css: {
-    sync: string[];
-    async: string[];
-  };
-};
-
-interface StatsExpose {
-  id: string;
-  name: string;
-  path: string;
-  assets: StatsAssets;
-}
-
-interface BasicStatsMetaData {
-  [key: string]: any;
-}
-
-interface StatsMetaData<T = BasicStatsMetaData> {
-  version: string;
-  buildVersion: string;
-  name: string;
-  remoteTypesAPI?: string;
-  buildHash?: string;
-  types?: T;
-}
-```
-
-## Usage Examples
-
-### Basic Configuration
-
-```typescript
-import { ModuleFederationPluginOptions } from '@module-federation/sdk';
-
-const config: ModuleFederationPluginOptions = {
-  name: 'host-app',
-  remotes: {
-    mf1: 'mf1@http://localhost:3001/mf-manifest.json'
-  },
-  shared: {
-    react: {
-      singleton: true,
-      requiredVersion: '^18.0.0'
-    }
-  }
-};
-```
-
-### Runtime Usage
-
-```typescript
-import { init, loadRemote } from '@module-federation/runtime';
-
-// Initialize federation
-const federation = init({
-  name: 'host',
-  remotes: [
-    {
-      name: 'remote1',
-      entry: 'http://localhost:3001/remoteEntry.js'
-    }
-  ]
-});
-
-// Load a remote module
-const RemoteComponent = await loadRemote<React.ComponentType>('remote1/Component');
-```
-
-## Best Practices
-
-1. **Type Safety**: Always use TypeScript interfaces for configuration
-2. **Version Management**: Use specific version ranges for shared modules  
-3. **Error Handling**: Implement comprehensive error handling with try-catch
-4. **Manifest Usage**: Prefer manifest-based remotes for better reliability
-5. **Documentation**: Document custom types and extensions
-
-## SDK Exports
-
-The Module Federation SDK exports these key utilities:
-
-- `generateSnapshotFromManifest` - Generate snapshot from manifest
-- `isManifestProvider` - Check if module info is manifest provider
-- `simpleJoinRemoteEntry` - Join remote entry URLs
-- `inferAutoPublicPath` - Auto infer public path
-- `parseEntry` - Parse entry strings
-- `createLogger` - Create logger instances
-- `createModuleFederationConfig` - Create normalized config
+Utility functions, manifest/snapshot/stat types, usage examples, best practices, and export inventory live in [sdk-utilities-manifests.md](./sdk-utilities-manifests.md).
 
 ## Related Documentation
 

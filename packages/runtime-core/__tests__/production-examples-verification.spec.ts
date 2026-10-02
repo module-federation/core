@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, rs, afterEach } from '@rstest/core';
 import { ModuleFederation } from '../src/core';
 import type { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
@@ -41,11 +41,11 @@ describe('Production-Ready Examples Verification', () => {
   beforeEach(() => {
     removeScriptTags();
     resetFederationGlobalInfo();
-    vi.clearAllMocks();
+    rs.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    rs.restoreAllMocks();
   });
 
   describe('Enhanced Offline Fallback Plugin (building-custom-retry-plugin.mdx)', () => {
@@ -544,7 +544,7 @@ describe('Production-Ready Examples Verification', () => {
 
       // Mock fetch for backup manifest
       const originalFetch = global.fetch;
-      global.fetch = vi.fn().mockResolvedValue({
+      global.fetch = rs.fn().mockResolvedValue({
         ok: true,
         json: () =>
           Promise.resolve({
@@ -663,7 +663,7 @@ describe('Production-Ready Examples Verification', () => {
       // Test the fallback error component structure
       const mockErrorInfo = {
         error: { message: 'Test error message' },
-        resetErrorBoundary: vi.fn(),
+        resetErrorBoundary: rs.fn(),
       };
 
       const result = FallbackErrorComp(mockErrorInfo);

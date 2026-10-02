@@ -1,3 +1,5 @@
+/* eslint-env node */
+
 const path = require('path');
 const swcLoader = require.resolve('swc-loader');
 const styleLoader = require.resolve('style-loader');

@@ -23,7 +23,7 @@ export function HomeHero({ hero }: { hero: Hero }) {
     <div
       className="m-auto px-6 pb-12 sm:pt-0 sm:px-8  md:px-16 md:pb-16"
       style={{
-        height: 'calc(100vh - var(--rp-nav-height)))',
+        height: 'calc(100vh - var(--rp-nav-height))',
       }}
     >
       <div className="max-w-6xl m-auto flex flex-col md:flex-row">
@@ -62,7 +62,14 @@ export function HomeHero({ hero }: { hero: Hero }) {
         {hasImage ? (
           <div className="modern-doc-home-hero-image m-auto justify-center items-center md:none lg:flex order-1 md:order-2">
             <div className={styles.imgMask}></div>
-            <img src="/svg.svg" alt={hero.image?.alt} />
+            <img
+              src="/svg.svg"
+              alt={hero.image?.alt}
+              width={43}
+              height={40}
+              loading="eager"
+              fetchPriority="high"
+            />
           </div>
         ) : null}
       </div>

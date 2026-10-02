@@ -1,4 +1,9 @@
 [
+  {
+    "type": "file",
+    "name": "runtime-size-optimization",
+    "label": "Optimize Runtime Size"
+  },
   "shared-tree-shaking",
   "multiple-shared-scope",
   {

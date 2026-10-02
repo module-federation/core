@@ -4,7 +4,7 @@ import dirTree from 'directory-tree';
 import { rm } from 'fs/promises';
 import { join, resolve } from 'path';
 import { UnpluginOptions } from 'unplugin';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, rs } from '@rstest/core';
 
 import {
   NativeFederationTestsHost,
@@ -176,7 +176,7 @@ describe('index', () => {
       const zip = new AdmZip();
       zip.addLocalFolder(distFolder);
 
-      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+      axios.get = rs.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       const unplugin = NativeFederationTestsHost.rollup(
         options,

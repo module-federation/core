@@ -3,7 +3,7 @@
   "description": "Create a new Module Federation project",
   "public": true,
   "sideEffects": false,
-  "version": "2.6.0",
+  "version": "2.9.2",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -39,12 +39,12 @@
     "minimist": "1.2.8",
     "rslog": "1.2.3",
     "glob": "7.2.0",
-    "handlebars": "4.7.7"
+    "handlebars": "4.7.9"
   },
   "devDependencies": {
     "@types/glob": "7.2.0",
     "@types/minimist": "^1.2.5",
-    "@rslib/core": "^0.9.0",
+    "@rslib/core": "^0.23.2",
     "rsbuild-plugin-publint": "^0.2.1"
   }
 }

@@ -21,6 +21,7 @@ import { TEMP_DIR } from '@module-federation/sdk';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { TsConfigJson } from '../interfaces/TsConfigJson';
 import { logger } from '../../server';
+import { getTypeScriptPackageInfo } from './typeScriptResolver';
 
 const STARTS_WITH_SLASH = /^\//;
 
@@ -239,6 +240,49 @@ const formatCommandForDisplay = (executable: string, args: string[]) => {
   return [executable, ...args].map(formatArg).join(' ');
 };
 
+const getTypeScriptContext = (remoteOptions: Required<RemoteOptions>) => {
+  const dtsOptions = remoteOptions.moduleFederationConfig.dts;
+  return typeof dtsOptions !== 'boolean' && dtsOptions?.cwd
+    ? dtsOptions.cwd
+    : remoteOptions.context;
+};
+
+const resolveCompilerCommand = (
+  remoteOptions: Required<RemoteOptions>,
+  tempTsConfigJsonPath: string,
+) => {
+  const compilerArgs = splitCommandArgs(remoteOptions.compilerInstance);
+  const resolvedCompilerArgs =
+    compilerArgs.length > 0 ? compilerArgs : [remoteOptions.compilerInstance];
+
+  if (resolvedCompilerArgs[0] === 'tsc') {
+    const typeScriptPackageInfo = getTypeScriptPackageInfo(
+      getTypeScriptContext(remoteOptions),
+    );
+    const args = [
+      typeScriptPackageInfo.tscBinPath,
+      ...resolvedCompilerArgs.slice(1),
+      '--project',
+      tempTsConfigJsonPath,
+    ];
+    return {
+      executable: process.execPath,
+      args,
+      displayCommand: formatCommandForDisplay(process.execPath, args),
+      shell: false,
+    };
+  }
+
+  const executable = resolvePackageManagerExecutable();
+  const args = [...resolvedCompilerArgs, '--project', tempTsConfigJsonPath];
+  return {
+    executable,
+    args,
+    displayCommand: formatCommandForDisplay(executable, args),
+    shell: process.platform === 'win32',
+  };
+};
+
 export const compileTs = async (
   mapComponentsToExpose: Record<string, string>,
   tsConfig: TsConfigJson,
@@ -268,23 +312,14 @@ export const compileTs = async (
           : undefined,
     });
     const execPromise = util.promisify(execFile);
-    const pmExecutable = resolvePackageManagerExecutable();
-    const compilerArgs = splitCommandArgs(remoteOptions.compilerInstance);
-    const resolvedCompilerArgs =
-      compilerArgs.length > 0 ? compilerArgs : [remoteOptions.compilerInstance];
-    const cmdArgs = [
-      ...resolvedCompilerArgs,
-      '--project',
+    const compilerCommand = resolveCompilerCommand(
+      remoteOptions,
       tempTsConfigJsonPath,
-    ];
-    const cmd = formatCommandForDisplay(pmExecutable, cmdArgs);
+    );
     try {
-      await execPromise(pmExecutable, cmdArgs, {
-        cwd:
-          typeof remoteOptions.moduleFederationConfig.dts !== 'boolean'
-            ? (remoteOptions.moduleFederationConfig.dts?.cwd ?? undefined)
-            : undefined,
-        shell: process.platform === 'win32',
+      await execPromise(compilerCommand.executable, compilerCommand.args, {
+        cwd: getTypeScriptContext(remoteOptions),
+        shell: compilerCommand.shell,
       });
     } catch (err) {
       if (compilerOptions.tsBuildInfoFile) {
@@ -297,7 +332,7 @@ export const compileTs = async (
       logAndReport(
         TYPE_001,
         typeDescMap,
-        { cmd },
+        { cmd: compilerCommand.displayCommand },
         (msg) => {
           throw new Error(msg);
         },

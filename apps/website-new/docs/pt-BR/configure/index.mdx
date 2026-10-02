@@ -1,0 +1,38 @@
+# Visão geral da configuração
+
+Esta página lista todas as opções de configuração do `Module Federation`. Para instalação de pacotes e configuração de plugins em diferentes tipos de projeto, consulte Integrações.
+
+```ts
+type ModuleFederationOptions = {
+  // Nome para module federation
+  name: string;
+  // Escopo(s) de compartilhamento para a aplicação atual (padrão: 'default')
+  shareScope?: string | string[];
+  // Nome do arquivo remoteEntry
+  filename?: string;
+  // Configuração de módulos remotos e informações de entrada em module federation
+  remotes?: Array<RemoteInfo>;
+  // Informações de módulos expostos por module federation
+  exposes?: PluginExposesOptions;
+  // Configuração de dependências compartilhadas
+  shared?: ShareInfos;
+  // publicPath dinâmico
+  getPublicPath?: string;
+  // Plugins de runtime
+  runtimePlugins?: Array<string | [string, Record<string, unknown>]>;
+  // Implementação de runtime a ser usada
+  implementation?: string;
+  // Configuração de manifest
+  manifest?: boolean | PluginManifestOptions;
+  // Controla liveReload da página e hot reload de tipos
+  dev?: boolean | PluginDevOptions;
+  // Controla tipos
+  dts?: boolean | PluginDtsOptions;
+  // Usa um ponto de entrada de runtime virtual em vez de gravar um arquivo temporário em disco
+  virtualRuntimeEntry?: boolean;
+  injectTreeShakingUsedExports?: boolean;
+  treeShakingDir?: string;
+  treeShakingSharedPlugins?: Array<string>;
+  treeShakingSharedExcludePlugins?: Array<string>;
+};
+```

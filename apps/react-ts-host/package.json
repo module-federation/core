@@ -15,7 +15,8 @@
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
-    "react-refresh": "0.14.2"
+    "react-refresh": "0.14.2",
+    "typescript": "7.0.2"
   },
   "scripts": {
     "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --mode production",

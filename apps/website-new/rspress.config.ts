@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { withZephyr } from 'zephyr-rspress-plugin';
 import { defineConfig } from '@rspress/core';
 import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
 // import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
@@ -6,38 +7,62 @@ import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginModuleFederation } from '@module-federation/rspress-plugin';
 import mfConfig from './module-federation.config';
 
+const canonicalSiteOrigin = 'https://module-federation.io'.replace(/\/$/, '');
+const siteIcon = '/svg.svg';
+const socialImageUrl = `${canonicalSiteOrigin}/module-federation-social.svg`;
+const socialImageAlt = 'Module Federation icon';
+const googleAnalyticsMeasurementId = 'G-DRPXW0EEVT';
+const enableZephyr = Boolean(process.env.CI || process.env.ZE_SECRET_TOKEN);
+
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
   llms: true,
   title: 'Module federation',
   description:
     'Module Federation is a concept that allows developers to share code and resources across multiple JavaScript applications',
-  icon: '/svg.svg',
+  icon: siteIcon,
   lang: 'en',
+  locales: [
+    {
+      lang: 'zh',
+      title: 'Module federation',
+      description: '将你的 Web 应用微前端架构化',
+      label: '简体中文',
+    },
+    {
+      lang: 'en',
+      title: 'Module federation',
+      description: "Architecture your web application's micro-front end",
+      label: 'English',
+    },
+    {
+      lang: 'pt-BR',
+      title: 'Module federation',
+      description: 'Arquiteture o micro-frontend da sua aplicação web',
+      label: 'Português (Brasil)',
+    },
+  ],
   logo: {
     light: '/module-federation.svg',
     dark: '/module-federation-logo-white.svg',
   },
+  head: [
+    ['meta', { property: 'og:site_name', content: 'module-federation.io' }],
+    ['meta', { property: 'og:image', content: socialImageUrl }],
+    ['meta', { property: 'og:image:type', content: 'image/svg+xml' }],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+    ['meta', { property: 'og:image:alt', content: socialImageAlt }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:image', content: socialImageUrl }],
+    ['meta', { name: 'twitter:image:alt', content: socialImageAlt }],
+  ],
   markdown: {
     image: {
       checkDeadImages: false,
     },
   },
   themeConfig: {
-    locales: [
-      {
-        lang: 'zh',
-        title: 'Module federation',
-        description: '将你的 Web 应用微前端架构化',
-        label: '简体中文',
-      },
-      {
-        lang: 'en',
-        title: 'Module federation',
-        description: "Architecture your web application's micro-front end",
-        label: 'English',
-      },
-    ],
     editLink: {
       docRepoBaseUrl:
         'https://github.com/module-federation/core/tree/main/apps/website-new/docs',
@@ -60,19 +85,52 @@ export default defineConfig({
     //   wordsMapPath: 'words-map.json',
     // }),
     pluginModuleFederation(mfConfig),
+    ...(enableZephyr ? [withZephyr()] : []),
   ],
   builderConfig: {
+    html: {
+      tags: [
+        {
+          tag: 'script',
+          attrs: {
+            async: true,
+            src: `https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsMeasurementId}`,
+          },
+          append: false,
+        },
+        {
+          tag: 'script',
+          children: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${googleAnalyticsMeasurementId}');
+`,
+          append: false,
+        },
+      ],
+    },
     plugins: [moduleFederationPluginOverview, pluginSass()],
     output: {
-      assetPrefix:
-        process.env.CONTEXT === 'deploy-preview'
-          ? process.env.DEPLOY_PRIME_URL
-          : 'https://module-federation.io/',
+      assetPrefix: '/',
+    },
+    environments: {
+      node: {
+        output: {
+          // The federated SSG build requires an absolute public path.
+          assetPrefix: `${canonicalSiteOrigin}/`,
+        },
+      },
     },
     dev: {
       assetPrefix: true,
       writeToDisk: true,
       lazyCompilation: false,
+    },
+    server: {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
     },
     performance: {
       buildCache: false,
@@ -80,6 +138,24 @@ export default defineConfig({
     tools: {
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);
+      },
+      rspack: (config, { environment }) => {
+        if (
+          environment.name === 'web' &&
+          config.optimization?.splitChunks &&
+          typeof config.optimization.splitChunks === 'object'
+        ) {
+          const splitChunks = config.optimization.splitChunks;
+          splitChunks.cacheGroups ??= {};
+          splitChunks.cacheGroups.reactSharedFallback = {
+            test: /[\\/]node_modules[\\/]\.pnpm[\\/](?:cookie|react(?:-dom|-router(?:-dom)?)?|scheduler|set-cookie-parser)@/,
+            name: 'react-shared-fallback',
+            chunks: 'async',
+            enforce: true,
+            priority: 50,
+            reuseExistingChunk: true,
+          };
+        }
       },
       // rspack: {
       //   optimization: {

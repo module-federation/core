@@ -889,6 +889,14 @@
               "description": "Enable optimization to skip snapshot plugin",
               "type": "boolean"
             },
+            "disableRemote": {
+              "description": "Disable remote loading code in runtime-core",
+              "type": "boolean"
+            },
+            "disableShared": {
+              "description": "Disable shared dependency code in runtime-core",
+              "type": "boolean"
+            },
             "target": {
               "description": "Target environment for the build",
               "enum": ["web", "node"]

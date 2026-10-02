@@ -1,5 +1,9 @@
 import * as React from 'react';
-import { ErrorBoundaryPropsWithComponent } from 'react-error-boundary';
+
+export type ErrorFallbackProps = {
+  error: unknown;
+  resetErrorBoundary: (...args: unknown[]) => void;
+};
 
 /**
  * Options for creating a React root
@@ -143,5 +147,5 @@ export interface RemoteAppParams extends ProviderParams {
   moduleName: string;
   providerInfo: NonNullable<RemoteModule['provider']>;
   exportName: string | number | symbol;
-  fallback: ErrorBoundaryPropsWithComponent['FallbackComponent'];
+  fallback: React.ComponentType<ErrorFallbackProps>;
 }

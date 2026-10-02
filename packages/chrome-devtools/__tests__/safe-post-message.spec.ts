@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from '@rstest/core';
 
 import { sanitizePostMessagePayload } from '../src/utils/chrome/safe-post-message';
 

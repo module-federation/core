@@ -1,8 +1,9 @@
 import type { ModuleFederation, getInstance } from '@module-federation/runtime';
 import type { BasicProviderModuleInfo } from '@module-federation/sdk';
-import React, { ReactNode, useState, useEffect } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import type { ErrorInfo } from './AwaitDataFetch';
 import type { DataFetchParams, NoSSRRemoteInfo } from './types';
+import { HydratedStylesheetAssets } from './HydratedStylesheetAssets';
 
 import logger from './logger';
 import {
@@ -16,6 +17,7 @@ import {
   getDataFetchMapKey,
   getDataFetchInfo,
   getLoadedRemoteInfos,
+  resetDataFetchResult,
   setDataFetchItemLoadedStatus,
   wrapDataFetchId,
 } from './utils';
@@ -48,6 +50,11 @@ export type CreateLazyComponentOptions<T, E extends keyof T> = {
 };
 
 type ReactKey = { key?: React.Key | null };
+
+type SSRAssetDescriptors = {
+  scriptSrcs: string[];
+  stylesheetHrefs: string[];
+};
 
 function getTargetModuleInfo(
   id: string,
@@ -98,61 +105,62 @@ function getTargetModuleInfo(
   };
 }
 
-export function collectSSRAssets(options: IProps) {
+function collectSSRAssetDescriptors(options: IProps): SSRAssetDescriptors {
   const {
     id,
     injectLink = true,
     injectScript = false,
   } = typeof options === 'string' ? { id: options } : options;
-  const links: React.ReactNode[] = [];
-  const scripts: React.ReactNode[] = [];
+  const stylesheetHrefs: string[] = [];
+  const scriptSrcs: string[] = [];
   const instance = options.instance;
   if (!instance || (!injectLink && !injectScript)) {
-    return [...scripts, ...links];
+    return { scriptSrcs, stylesheetHrefs };
   }
 
   const moduleAndPublicPath = getTargetModuleInfo(id, instance);
   if (!moduleAndPublicPath) {
-    return [...scripts, ...links];
+    return { scriptSrcs, stylesheetHrefs };
   }
   const { module: targetModule, publicPath, remoteEntry } = moduleAndPublicPath;
   if (injectLink) {
+    const seenStylesheetHrefs = new Set<string>();
     [...targetModule.assets.css.sync, ...targetModule.assets.css.async]
       .sort()
-      .forEach((file, index) => {
-        links.push(
-          <link
-            key={`${file.split('.')[0]}_${index}`}
-            href={`${publicPath}${file}`}
-            rel="stylesheet"
-            type="text/css"
-          />,
-        );
+      .forEach((file) => {
+        const href = `${publicPath}${file}`;
+        if (seenStylesheetHrefs.has(href)) {
+          return;
+        }
+        seenStylesheetHrefs.add(href);
+        stylesheetHrefs.push(href);
       });
   }
 
   if (injectScript) {
-    scripts.push(
-      <script
-        async={true}
-        key={remoteEntry.split('.')[0]}
-        src={`${publicPath}${remoteEntry}`}
-        crossOrigin="anonymous"
-      />,
-    );
-    [...targetModule.assets.js.sync].sort().forEach((file, index) => {
-      scripts.push(
-        <script
-          key={`${file.split('.')[0]}_${index}`}
-          async={true}
-          src={`${publicPath}${file}`}
-          crossOrigin="anonymous"
-        />,
-      );
+    scriptSrcs.push(`${publicPath}${remoteEntry}`);
+    [...targetModule.assets.js.sync].sort().forEach((file) => {
+      scriptSrcs.push(`${publicPath}${file}`);
     });
   }
 
-  return [...scripts, ...links];
+  return { scriptSrcs, stylesheetHrefs };
+}
+
+function renderScriptAssets(scriptSrcs: string[]) {
+  return scriptSrcs.map((src) => (
+    <script key={src} async={true} src={src} crossOrigin="anonymous" />
+  ));
+}
+
+export function collectSSRAssets(options: IProps): React.ReactNode[] {
+  const { scriptSrcs, stylesheetHrefs } = collectSSRAssetDescriptors(options);
+  return [
+    ...renderScriptAssets(scriptSrcs),
+    ...stylesheetHrefs.map((href) => (
+      <link key={href} href={href} rel="stylesheet" type="text/css" />
+    )),
+  ];
 }
 
 function getServerNeedRemoteInfo(
@@ -219,17 +227,35 @@ export function createLazyComponent<T, E extends keyof T>(
       ? ReactKey
       : Parameters<T[E]>[0] & ReactKey
     : ReactKey;
+  type LoadedModule = Record<string, React.FC> & Record<symbol, string>;
+  type NoSSRState =
+    | { status: 'loading' }
+    | {
+        status: 'loaded';
+        Component: React.FC<Omit<ComponentType, 'key'> & { mfData?: unknown }>;
+        data: unknown;
+      }
+    | { status: 'error'; error: ErrorInfo };
+  type NoSSRLoadedState = Extract<NoSSRState, { status: 'loaded' }>;
   const exportName = options?.export || 'default';
+  let loaderPromise: Promise<LoadedModule> | undefined;
 
-  const callLoader = async () => {
-    logger.debug('callLoader start', Date.now());
-    const m = (await options.loader()) as Record<string, React.FC> &
-      Record<symbol, string>;
-    logger.debug('callLoader end', Date.now());
-    if (!m) {
-      throw new Error('load remote failed');
+  const callLoader = () => {
+    if (!loaderPromise) {
+      logger.debug('callLoader start', Date.now());
+      loaderPromise = (async () => {
+        const m = (await options.loader()) as LoadedModule;
+        logger.debug('callLoader end', Date.now());
+        if (!m) {
+          throw new Error('load remote failed');
+        }
+        return m;
+      })().catch((error) => {
+        loaderPromise = undefined;
+        throw error;
+      });
     }
-    return m;
+    return loaderPromise;
   };
 
   const getData = async (noSSR?: boolean) => {
@@ -280,11 +306,19 @@ export function createLazyComponent<T, E extends keyof T>(
       const errMsg = `${DATA_FETCH_ERROR_PREFIX}${wrapDataFetchId(dataFetchMapKey)}${err}`;
       logger.debug(errMsg);
       throw new Error(errMsg);
+    } finally {
+      if (noSSR && dataFetchMapKey) {
+        resetDataFetchResult(dataFetchMapKey);
+      }
     }
   };
 
-  const LazyComponent = React.lazy(async () => {
-    const m = await callLoader();
+  const getNoSSRData = () =>
+    getData(true).catch((error) => {
+      throw error instanceof Error ? error.message : error;
+    });
+
+  const createLoadedComponent = (m: LoadedModule) => {
     const moduleId = m && m[Symbol.for('mf_module_id')];
     const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, instance);
     loadedRemoteInfo?.snapshot;
@@ -301,34 +335,36 @@ export function createLazyComponent<T, E extends keyof T>(
       : undefined;
     logger.debug('LazyComponent dataFetchMapKey: ', dataFetchMapKey);
 
-    const assets = collectSSRAssets({
+    const { scriptSrcs, stylesheetHrefs } = collectSSRAssetDescriptors({
       id: moduleId,
       instance,
       injectLink,
       injectScript,
     });
+    const assets = [
+      ...renderScriptAssets(scriptSrcs),
+      <HydratedStylesheetAssets key="stylesheets" hrefs={stylesheetHrefs} />,
+    ];
 
     const Com = m[exportName] as React.FC<ComponentType>;
     if (exportName in m && typeof Com === 'function') {
-      return {
-        default: (props: Omit<ComponentType, 'key'> & { mfData?: unknown }) => (
-          <>
-            {globalThis.FEDERATION_SSR && dataFetchMapKey && (
-              <script
-                suppressHydrationWarning
-                dangerouslySetInnerHTML={{
-                  __html: String.raw`
+      return (props: Omit<ComponentType, 'key'> & { mfData?: unknown }) => (
+        <>
+          {globalThis.FEDERATION_SSR && dataFetchMapKey && (
+            <script
+              suppressHydrationWarning
+              dangerouslySetInnerHTML={{
+                __html: String.raw`
                   globalThis['${DATA_FETCH_FUNCTION}'] = globalThis['${DATA_FETCH_FUNCTION}'] || [];
                   globalThis['${DATA_FETCH_FUNCTION}'].push(['${dataFetchMapKey}',${JSON.stringify(props.mfData)}]);
                   `,
-                }}
-              ></script>
-            )}
-            {globalThis.FEDERATION_SSR && assets}
-            <Com {...props} />
-          </>
-        ),
-      };
+              }}
+            ></script>
+          )}
+          {globalThis.FEDERATION_SSR && assets}
+          <Com {...props} />
+        </>
+      );
       // eslint-disable-next-line max-lines
     } else {
       throw Error(
@@ -337,6 +373,13 @@ export function createLazyComponent<T, E extends keyof T>(
         )}`,
       );
     }
+  };
+
+  const LazyComponent = React.lazy(async () => {
+    const m = await callLoader();
+    return {
+      default: createLoadedComponent(m),
+    };
   });
 
   return (props: ComponentType) => {
@@ -355,39 +398,41 @@ export function createLazyComponent<T, E extends keyof T>(
         </AwaitDataFetch>
       );
     } else {
-      // Client-side rendering logic
-      const [data, setData] = useState<unknown>(null);
-      const [loading, setLoading] = useState<boolean>(true);
-      const [error, setError] = useState<ErrorInfo | null>(null);
+      const [state, setState] = useState<NoSSRState>({ status: 'loading' });
+      const loadPromiseRef = useRef<Promise<NoSSRLoadedState>>();
 
       useEffect(() => {
         let isMounted = true;
-        const fetchDataAsync = async () => {
-          try {
-            setLoading(true);
-            const result = await getData(options.noSSR);
-            if (isMounted) {
-              setData(result);
-            }
-          } catch (e) {
-            if (isMounted) {
-              setError(transformError(e as Error));
-            }
-          } finally {
-            if (isMounted) {
-              setLoading(false);
-            }
-          }
-        };
 
-        fetchDataAsync();
+        loadPromiseRef.current ??= (async () => {
+          const data = await getNoSSRData();
+          const m = await callLoader();
+          const Component = createLoadedComponent(m);
+          return { status: 'loaded', Component, data };
+        })();
+
+        loadPromiseRef.current.then(
+          (loadedState) => {
+            if (isMounted) {
+              setState(loadedState);
+            }
+          },
+          (error) => {
+            if (isMounted) {
+              setState({
+                status: 'error',
+                error: transformError(error as Error),
+              });
+            }
+          },
+        );
 
         return () => {
           isMounted = false;
         };
       }, []);
 
-      if (loading) {
+      if (typeof window === 'undefined') {
         return (
           <DelayedLoading delayLoading={options.delayLoading}>
             {options.loading}
@@ -395,17 +440,26 @@ export function createLazyComponent<T, E extends keyof T>(
         );
       }
 
-      if (error) {
+      if (state.status === 'error') {
         return (
           <>
             {typeof options.fallback === 'function'
-              ? options.fallback(error)
+              ? options.fallback(state.error)
               : options.fallback}
           </>
         );
       }
-      // @ts-expect-error ignore
-      return <LazyComponent {...args} mfData={data} />;
+
+      if (state.status === 'loading') {
+        return (
+          <DelayedLoading delayLoading={options.delayLoading}>
+            {options.loading}
+          </DelayedLoading>
+        );
+      }
+
+      const LoadedComponent = state.Component;
+      return <LoadedComponent {...args} mfData={state.data} />;
     }
   };
 }

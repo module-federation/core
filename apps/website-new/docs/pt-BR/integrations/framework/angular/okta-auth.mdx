@@ -1,0 +1,253 @@
+---
+title: "Authentication com Okta"
+---
+import {Steps} from '@theme';
+
+# Integrating Authentication com OpenID Connect em Module Federation
+
+## Introduction
+
+Module Federation enhances o management de shared code e estado across micro-frontends. Este guia vai walk você por meio de adding authentication para seu projeto usando OpenID Connect com Okta. By o end de este documentation, your aplicação vai ser able para tratar authenticated states both within o existente aplicação e uma newly integrated micro-frontend.
+
+## Prerequisites
+
+- Uma free Okta developer account. Se você não have one, você pode sign up usando o Okta CLI.
+- Okta CLI installed on your machine.
+
+## Setting Up Okta Authentication
+
+### Crie um Okta Aplicação
+
+<Steps>
+### Register ou Log In para Okta:
+- To register para uma nova account, execute `okta register` em your terminal.
+- Se você já have um account, log em by running `okta login`.
+
+### Crie Your Aplicação:
+- Execute `okta apps create`.
+- Quando prompted, accept o padrãa aplicação name ou forneça uma nova one.
+- Select *Single-Page App (SPA)* e confirm by pressing Enter.
+- For *Redirect URI*, use `http://localhost:4200/login/callback` e definir o Logout *Redirect URI* para `http://localhost:4200`.
+</Steps>
+
+### Configure Aplicação em Okta
+
+O Okta CLI cria um OIDC SPA em your Okta Org, configures redirect URIs, grants access para o Everyone group, e adds `http://localhost:4200` as uma trusted origin.
+
+:::tip NOTE
+O *Okta Admin Console* pode também ser usado for app creation. For Angular apps, refer para o Okta documentation on criação um Angular aplicação.
+:::
+
+**Okta Aplicação Configuração Exemplo:**
+
+- *Issuer:* `https://dev-12345.okta.com/oauth2/default`
+- *Cliente ID:* `0oab12345CDEF`
+
+:::tip NOTE
+Ensure você note down o *Issuer* e *Cliente ID*; these são crucial for your aplicação's configuração.
+:::
+
+### Instale Obrigatório Libraries
+
+Add Okta Angular e Okta Auth JS libraries para seu projeto:
+
+```bash
+npm install @okta/okta-angular@5.2 @okta/okta-auth-js@6.4
+```
+
+### Configure Okta em Angular Módulo
+
+Importe e configure `OktaAuthModule` e `OktaAuth` em your shell projeto's `AppModule`. Replace `{yourOktaDomain}` e `{yourClientID}` com your specific Okta domain e cliente ID.
+
+```typescript
+import { NgModule } from '@angular/core';
+import { OKTA_CONFIG, OktaAuthModule } from '@okta/okta-angular';
+import { OktaAuth } from '@okta/okta-auth-js';
+
+const oktaAuth = new OktaAuth({
+  issuer: 'https://{yourOktaDomain}/oauth2/default',
+  clientId: '{yourClientID}',
+  redirectUri: window.location.origin + '/login/callback',
+  scopes: ['openid', 'profile', 'email']
+});
+
+@NgModule({
+  imports: [
+    OktaAuthModule,
+    // other imports
+  ],
+  providers: [
+    { provide: OKTA_CONFIG, useValue: { oktaAuth } }
+  ],
+  // other module properties
+})
+```
+
+### Configure Routing for Authentication
+
+Update o `app-routing.module.ts` para include o login callback rota.
+
+```typescript
+import { Routes } from '@angular/router';
+import { OktaCallbackComponent } from '@okta/okta-angular';
+
+const routes: Routes = [
+  { path: '', component: ProductsComponent },
+  { path: 'basket', loadChildren: () => import('mfeBasket/Module').then(m => m.BasketModule) },
+  { path: 'login/callback', component: OktaCallbackComponent }
+];
+```
+
+## Implementing Authentication Logic
+
+### Update Aplicação Componente
+
+Modify `app.component.ts` para include sign-em e sign-out logic, utilizing o Okta libraries. Update o authentication estado variables accordingly.
+
+```typescript
+import { Component, Inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { filter, map, shareReplay } from 'rxjs/operators';
+import { OKTA_AUTH, OktaAuthStateService } from '@okta/okta-angular';
+import { OktaAuth } from '@okta/okta-auth-js';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+  public isAuthenticated$: Observable<boolean>;
+  public name$: Observable<string>;
+
+  constructor(private oktaStateService: OktaAuthStateService, @Inject(OKTA_AUTH) private oktaAuth: OktaAuth) {
+    this.isAuthenticated$ = this.oktaStateService.authState$
+      .pipe(
+        filter(authState => !!authState),
+        map(authState => authState.isAuthenticated ?? false),
+        shareReplay()
+      );
+
+    this.name$ = this.oktaStateService.authState$
+      .pipe(
+        filter(authState => !!authState && !!authState.isAuthenticated),
+        map(authState => authState.idToken?.claims.name ?? '')
+      );
+  }
+
+  public async signIn(): Promise<void> {
+    await this.oktaAuth.signInWithRedirect();
+  }
+
+  public async signOut(): Promise<void> {
+    await this.oktaAuth.signOut();
+  }
+}
+```
+
+### Handle Sign-In e Sign-Out no UI
+
+In `app.component.html`, adicione o UI logic for sign-em e sign-out buttons.
+
+```html
+<li>
+  <button *ngIf="(isAuthenticated$ | async) === false; else logout" (click)="signIn()">
+    Sign In
+  </button>
+
+  <ng-template #logout>
+    <button (click)="signOut()">
+      Sign Out
+    </button>
+  </ng-template>
+</li>
+```
+
+### Testing o Aplicação
+
+Run o projeto usando npm run começa (ou o appropriate comando for your configuração) para test authentication functionality. Successful implementation allows users para sign em e out, com o profile information being accessible upon signing em.
+
+## Adding User Profiles com Module Federation
+
+Este section expands on incorporating Module Federation para compartilhar authenticated estado across o principal aplicação e o micro-frontend. We'll explore como para definir up uma nova Angular aplicação, configure routing, e update componentes para include profile details.
+
+<Steps>
+### Generate uma New Angular Aplicação
+Stop o projeto atual execution e run o seguintes comando para criar uma nova Angular aplicação chamado `mfe-profile`:
+
+```bash
+ng generate application mfe-profile --routing --style css --inline-style --skip-tests
+```
+
+Este comando accomplishes several tasks:
+- Generates uma nova aplicação com um módulo e componente.
+- Adds uma separate routing módulo.
+- Defines CSS styles para ser inline within componentes.
+- Skips o criação de test arquivos para o initial componente.
+
+### Generate HomeComponent e ProfileModule
+
+Execute o seguintes comandos para criar uma `HomeComponent` e uma `ProfileModule` within o `mfe-profile` aplicação:
+```bash
+ng generate component home --project mfe-profile
+ng generate module profile --project mfe-profile --module app --routing --route profile
+```
+
+Esses comandos crie:
+- Uma `HomeComponent` para o padrão rota.
+- Uma `ProfileModule` com routing e uma padrão `ProfileComponent`, added as uma lazy-carregado rota para o `AppModule`.
+</Steps>
+
+### Updating o Aplicação Code
+<Steps>
+### Configure Routing:
+
+Update `projects/mfe-profile/src/app/app-routing.module.ts` para include uma rota for `HomeComponent` e uma lazy-carregado rota for `ProfileModule`:
+
+```typescript
+const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'profile', loadChildren: () => import('./profile/profile.module').then(m => m.ProfileModule) }
+];
+```
+
+### Update AppComponent e HomeComponent Templates
+
+- For `app.component.html`, replace o content com uma message de your choice e uma `router-outlet` for navigation.
+- For `home.component.html`, forneça uma message guiding users para o Profile page com uma router link para `/profile`.
+
+</Steps>
+
+### Profile Componente Configuração
+<Steps>
+ ### Implement Profile Logic
+Update `projects/mfe-profile/src/app/profile/profile.component.ts` para include propriedades for user profile information e authentication estado, utilizing `OktaAuthStateService`.
+
+### Update Profile Template
+Modify o template para display user profile details, such as name e email, e o último sign-em time.
+</Steps>
+
+### Integrating Module Federation
+<Steps>
+### Add Module Federation para `mfe-profile`
+Use o `@angular-architects/module-federation` schematic para prepare `mfe-profile` for Module Federation, specifying port 4202.
+
+```bash
+ng add @angular-architects/module-federation --project mfe-profile --port 4202
+```
+
+### Configure `mfe-profile` as uma Remote
+Update `webpack.config.js` em `mfe-profile` para exponha `ProfileModule` para a aplicação host.
+
+### Update Host Aplicação Configuração
+Modify o shell aplicação's `webpack.config.js` para include `mfe-profile` as uma remote, enabling o host para acessar o Profile micro-frontend.
+
+### Compartilhe Authenticated Estado
+- Update `webpack.config.js` no shell aplicação para compartilhar Okta libraries as singletons.
+- Ensure `mfe-profile` também shares o Okta libraries para utilizar o authenticated estado.
+</Steps>
+### Running o Integrated Aplicação
+
+Depois configuring Module Federation e updating both o shell e micro-frontend aplicações, você pode run o projeto usando `npm run run:all`.
+
+Este configuração allows você para log em, view your profile, log out, e interact com other parts do aplicação seamlessly across o principal e micro-frontend parts.
+

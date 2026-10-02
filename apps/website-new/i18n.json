@@ -1,0 +1,99 @@
+{
+  "languagesText": {
+    "pt-BR": "Idiomas"
+  },
+  "themeText": {
+    "pt-BR": "Tema"
+  },
+  "versionsText": {
+    "pt-BR": "Versões"
+  },
+  "menuTitle": {
+    "pt-BR": "Menu"
+  },
+  "outlineTitle": {
+    "pt-BR": "Nesta página"
+  },
+  "scrollToTopText": {
+    "pt-BR": "Voltar ao topo"
+  },
+  "lastUpdatedText": {
+    "pt-BR": "Última atualização"
+  },
+  "prevPageText": {
+    "pt-BR": "Página anterior"
+  },
+  "nextPageText": {
+    "pt-BR": "Próxima página"
+  },
+  "sourceCodeText": {
+    "pt-BR": "Código-fonte"
+  },
+  "searchPlaceholderText": {
+    "pt-BR": "Buscar"
+  },
+  "searchPanelCancelText": {
+    "pt-BR": "Cancelar"
+  },
+  "searchNoResultsText": {
+    "pt-BR": "Nenhum resultado encontrado"
+  },
+  "searchSuggestedQueryText": {
+    "pt-BR": "Tente buscar por palavras-chave diferentes"
+  },
+  "overview.filterNameText": {
+    "pt-BR": "Filtro"
+  },
+  "overview.filterPlaceholderText": {
+    "pt-BR": "Buscar API"
+  },
+  "overview.filterNoResultText": {
+    "pt-BR": "Nenhuma API correspondente encontrada"
+  },
+  "openInText": {
+    "pt-BR": "Abrir em {{name}}"
+  },
+  "copyMarkdownText": {
+    "pt-BR": "Copiar Markdown"
+  },
+  "copyMarkdownLinkText": {
+    "pt-BR": "Copiar link Markdown"
+  },
+  "editLinkText": {
+    "pt-BR": "Editar esta página"
+  },
+  "codeButtonGroupCopyButtonText": {
+    "pt-BR": "Copiar código"
+  },
+  "codeButtonGroupWrapButtonText": {
+    "en": "Toggle line wrap",
+    "zh": "切换自动换行",
+    "pt-BR": "Alternar quebra de linha"
+  },
+  "notFoundText": {
+    "pt-BR": "PÁGINA NÃO ENCONTRADA"
+  },
+  "takeMeHomeText": {
+    "pt-BR": "Voltar para a página inicial"
+  },
+  "promptCopyText": {
+    "en": "Copy prompt",
+    "zh": "复制提示词",
+    "pt-BR": "Copiar prompt"
+  },
+  "promptCopiedText": {
+    "en": "Copied",
+    "zh": "已复制",
+    "pt-BR": "Copiado"
+  },
+  "promptExpandText": {
+    "en": "Expand",
+    "zh": "展开",
+    "pt-BR": "Expandir"
+  },
+  "promptCollapseText": {
+    "en": "Collapse",
+    "zh": "收起",
+    "pt-BR": "Recolher"
+  }
+}

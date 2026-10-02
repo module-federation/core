@@ -1,4 +1,5 @@
 name: Release
+run-name: Release ${{ inputs.version }} from ${{ inputs.branch }}
 on:
   workflow_dispatch:
     inputs:
@@ -14,22 +15,57 @@ on:
         description: 'Release Branch (confirm release branch)'
         required: true
         default: 'main'
+      previous_tag:
+        description: 'Previous release tag for generated notes (empty = GitHub automatic selection)'
+        required: false
+        type: string
+      package:
+        description: 'Package scope'
+        type: choice
+        required: true
+        default: all
+        options:
+          - all
+          - '@module-federation/typescript'
+
+# Serialize publishing and draft updates, including dispatches from different refs.
+concurrency:
+  group: mf-release
+  cancel-in-progress: false
 
 permissions:
-  id-token: write
+  contents: read
 
 jobs:
   release:
-    name: Release
+    name: Release ${{ inputs.version }} from ${{ inputs.branch }}
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+      artifact_name: ${{ steps.source.outputs.artifact_name }}
     steps:
+      - name: Validate package release channel
+        if: inputs.package == '@module-federation/typescript' && inputs.version != 'latest'
+        run: |
+          echo 'The TypeScript package release supports latest only.' >&2
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 25
           ref: ${{ github.event.inputs.branch }}
+
+      - name: Capture release source
+        id: source
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "artifact_name=mf-browser-release-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
 
       - name: Cache Tool Downloads
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
@@ -45,14 +81,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: 20
+          node-version: 24
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      # Update npm to the latest version to enable OIDC
+      # npm 12.0.0 omits its bundled sigstore dependency and breaks OIDC
+      # provenance publishing. Keep npm 11 until the upstream fix ships.
+      # https://github.com/npm/cli/issues/9722
       - name: Update npm
         run: |
-          npm install -g npm@latest
+          npm install -g npm@^11
           npm --version
 
       - name: Install deps
@@ -69,22 +107,114 @@ jobs:
 
       - name: Generate preview version
         if: github.event.inputs.version == 'next'
+        env:
+          RELEASE_BRANCH: ${{ inputs.branch }}
         run: |
-          SAFE_BRANCH=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g' | tr '[:upper:]' '[:lower:]')
+          SAFE_BRANCH=$(echo "$RELEASE_BRANCH" | sed 's/[^a-zA-Z0-9-]/-/g' | tr '[:upper:]' '[:lower:]')
           npx changeset version --snapshot "$SAFE_BRANCH"
 
       - name: Build and test Packages
+        if: inputs.package != '@module-federation/typescript'
         run: |
           git fetch origin main
           pnpm run build:packages
           ls -l packages/*/dist packages/*/package.json
 
-      - name: Publish latest version
-        if: github.event.inputs.version == 'latest'
+      - name: Build and test TypeScript package
+        if: inputs.package == '@module-federation/typescript'
         run: |
-          pnpm -r publish --tag ${{ github.event.inputs.version }} --publish-branch ${{ github.event.inputs.branch }}
+          pnpm --filter @module-federation/typescript run pre-release
+          pnpm --filter @module-federation/typescript exec publint
+
+      # Prepare the downloadable extension before npm publishing. Move extension
+      # output out of dist so the existing npm library tarball is not enlarged.
+      - name: Build Browser release asset
+        if: inputs.version == 'latest' && inputs.package != '@module-federation/typescript'
+        env:
+          RELEASE_CHANNEL: ${{ inputs.version }}
+        run: |
+          pnpm --filter @module-federation/devtools run build:devtool
+          node tools/scripts/prepare-browser-release.mjs "$RUNNER_TEMP/mf-release-assets"
+          mkdir -p "$RUNNER_TEMP/mf-extension-build"
+          mv packages/chrome-devtools/dist/{browser,chrome,.extension-build} "$RUNNER_TEMP/mf-extension-build/"
+
+      - name: Save Browser release asset
+        if: inputs.version == 'latest' && inputs.package != '@module-federation/typescript'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ steps.source.outputs.artifact_name }}
+          path: ${{ runner.temp }}/mf-release-assets/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish latest version
+        if: inputs.version == 'latest' && inputs.package != '@module-federation/typescript'
+        env:
+          RELEASE_BRANCH: ${{ inputs.branch }}
+        run: pnpm -r publish --tag latest --publish-branch "$RELEASE_BRANCH"
+
+      - name: Publish TypeScript package
+        if: inputs.version == 'latest' && inputs.package == '@module-federation/typescript'
+        env:
+          RELEASE_BRANCH: ${{ inputs.branch }}
+        run: pnpm --filter @module-federation/typescript publish --tag latest --publish-branch "$RELEASE_BRANCH"
 
       - name: Publish preview version
         if: github.event.inputs.version == 'next'
         run: |
           pnpm -r publish --tag next --no-git-checks
+
+      - name: Latest release summary
+        if: inputs.version == 'latest' && inputs.package != '@module-federation/typescript'
+        run: |
+          node --input-type=module <<'JS'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          const release = JSON.parse(readFileSync(`${process.env.RUNNER_TEMP}/mf-release-assets/release.json`, 'utf8'));
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            `## npm release\n\n- Channel: ${release.channel}\n- Version: ${release.version}\n- Commit: ${release.sha}\n\nThe following job prepares the GitHub Release draft.\n`);
+          JS
+
+      - name: Preview release summary
+        if: inputs.version == 'next'
+        run: |
+          VERSION=$(node -p "require('./packages/runtime/package.json').version")
+          {
+            echo "## npm preview release"
+            echo ""
+            echo "- **Channel:** \`next\`"
+            echo "- **Version:** \`$VERSION\`"
+            echo "- **Commit:** \`$(git rev-parse HEAD)\`"
+            echo ""
+            echo "Preview releases do not create GitHub Release drafts or Browser extension assets."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  release-draft:
+    name: Prepare GitHub Release draft
+    needs: release
+    if: inputs.version == 'latest' && inputs.package != '@module-federation/typescript'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout exact published source
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          ref: ${{ needs.release.outputs.sha }}
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+
+      - name: Download Browser release asset
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ needs.release.outputs.artifact_name }}
+          path: ${{ runner.temp }}/mf-release-assets
+
+      - name: Create draft and attach Browser extension
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIOUS_TAG: ${{ inputs.previous_tag }}
+        run: node tools/scripts/create-release-draft.mjs "$RUNNER_TEMP/mf-release-assets"

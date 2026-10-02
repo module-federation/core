@@ -1,28 +1,10 @@
 import { defineConfig } from 'vite';
 import path from 'path';
-import dts from 'vite-plugin-dts';
 import packageJson from './package.json';
 
 const perDepsKeys = Object.keys(packageJson.peerDependencies);
 
 export default defineConfig({
-  plugins: [
-    // 添加我们的自定义插件
-    dts({
-      rollupTypes: true,
-      bundledPackages: [
-        '@module-federation/bridge-shared',
-        'react-error-boundary',
-      ],
-      afterDiagnostic(diagnostics) {
-        if (diagnostics.length > 0) {
-          throw new Error(
-            `Declaration generation failed with ${diagnostics.length} TypeScript diagnostic(s).`,
-          );
-        }
-      },
-    }),
-  ],
   build: {
     lib: {
       entry: {
@@ -49,6 +31,10 @@ export default defineConfig({
           'src/lazy/data-fetch/index.ts',
         ),
         'data-fetch': path.resolve(__dirname, 'src/data-fetch.ts'),
+        'size-limited-cache': path.resolve(
+          __dirname,
+          'src/shared/size-limited-cache.ts',
+        ),
       },
       formats: ['cjs', 'es'],
       fileName: (format, entryName) => `${entryName}.${format}.js`,

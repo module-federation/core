@@ -1,0 +1,116 @@
+# Manifest e Snapshot
+
+`mf-manifest.json` é uma runtime manifest generated por uma producer depois build. Ele descreve que módulos o producer exposes, onde o remote entry é, que assets those módulos need, que dependências compartilhadas são disponível, e onde o tipo arquivos são.
+
+Snapshot é uma condensed e pre-resolved result de informações do Manifest; o runtime pode request Manifest e generate Snapshot on demand. Se você have uma serviço de implantação, ele pode também generate Snapshot ahead de time e deliver it para o consumer, so o consumer pode obter o remote entry e assets que podem ser pré-carregados diretamente.
+
+Este documento apenas explains o concepts e onde they são usado. For configuração, consulte [manifest configuração](/configure/manifest.html). For complete fields, consulte [mf-manifest.json fields](/guide/advanced/manifest-fields.html).
+
+## Why Manifest
+
+Com apenas `remoteEntry.js`, o consumer pode carregar módulos remotos, but it cannot easily know o assets, tipos, e dependência compartilhada information behind those módulos remotos ahead de time.
+
+Com `mf-manifest.json`, o consumer pode obter mais information antes carregamento o módulo remoto:
+
+- Remote entry URL e carregamento tipo
+- Exposto módulos e asset lists
+- JavaScript e CSS esse pode ser preloaded
+- Shared dependência names, versões, e assets
+- Tipo arquivo URLs
+
+So Manifest é não just another entry URL. It é closer para uma runtime instruction arquivo esse o producer fornece para o consumer.
+
+## Manifest e Stats
+
+Depois enabling [manifest configuração](/configure/manifest.html), o plugin de build generates both `mf-manifest.json` e `mf-stats.json`.
+
+| Arquivo | Purpose |
+| --- | --- |
+| `mf-manifest.json` | Read by o consumer runtime. Its fields são mais stable e compact |
+| `mf-stats.json` | Usado for build analysis, diagnostics, e tooling. Its fields são mais complete |
+
+Se você apenas precisa consuma módulos remotos, você geralmente apenas need `mf-manifest.json`. Se você são building analysis tools, diagnostics, ou platform integrações, then inspect `mf-stats.json`.
+
+## What Snapshot Is
+
+Snapshot pode ser understood as o módulo information esse o runtime actually consome.
+
+Manifest é uma build artifact de uma single producer e é closer para uma source manifest. Snapshot reorganizes esse information em uma structure esse é easier para o runtime para consuma, such as:
+
+- O final `remoteEntry` para o producer
+- Assets for módulo expostos
+- Assets esse pode ser preloaded
+- Shared dependência information
+- Other módulos remotos esse o producer depends on
+
+Sem uma serviço de implantação, o consumer requests `mf-manifest.json` primeiro, e o runtime generates Snapshot de it.
+
+```txt
+Host configures remotes
+  -> request mf-manifest.json
+  -> parse Manifest
+  -> generate Snapshot
+  -> load remoteEntry, expose, shared, and preload assets
+```
+
+Com uma serviço de implantação, o service pode consuma Manifest ahead de time, generate Snapshot, e deliver it para o consumer.
+
+```txt
+Producer builds Manifest
+  -> deployment service parses Manifest ahead of time
+  -> generate Snapshot
+  -> Host gets remoteEntry and preload assets directly
+```
+
+Este pode avoid one extra Manifest request em runtime e move asset resolution para o lado do servidor.
+
+## Onde We Use It
+
+### Remote Carregamento
+
+Quando `remotes` points para `mf-manifest.json`, o runtime reads Manifest, generates Snapshot, e then resolves o final `remoteEntry` URL de Snapshot. Consulte [remotes](/configure/remotes.html) for configuração.
+
+### Asset Preloading
+
+Manifest contains asset information for exposes e dependências compartilhadas. Depois Snapshot é generated, o runtime pode usar essas informações para preload o JavaScript e CSS obrigatório by módulos remotos.
+
+### Chrome DevTools
+
+[Chrome DevTools](/guide/debug/chrome-devtool.html) usa Manifest / Snapshot para understand que módulos federados exist no current page, como módulos depend on each other, como dependências compartilhadas são reused, e que remote entry é needed for proxying.
+
+### Local Proxying
+
+Quando debugging uma production page, proxy tools pode use Snapshot para identify o target producer e replace it com uma locally running Manifest ou remote entry.
+
+### Runtime Diagnostics
+
+Quando carregamento de remote fails, Manifest / Snapshot pode help identify onde o falha happens:
+
+- Whether o Manifest URL é reachable
+- Whether Manifest fields são complete
+- Whether o target producer exists em Snapshot
+- Whether Snapshot pode resolve `remoteEntry`
+- Whether `remoteEntry` carrega successfully
+- Whether o exponha exists
+
+Este helps distinguish Manifest request falhas, Snapshot misses, e later remote entry carregamento falhas.
+
+## What Você Can Build Com It
+
+Manifest / Snapshot é suitable as input for runtime plugins, debugging tools, e implantação platforms.
+
+Você pode build:
+
+- **Preload optimization**: get o JS e CSS associated com módulos remotos earlier e reduce waiting time depois user interaction.
+- **Módulo graph visualization**: show que producers, consumers, e dependências compartilhadas são carregado no current page.
+- **Local proxy debugging**: replace uma producer on uma production page com uma locally running producer.
+- **Carregamento diagnostics**: tell whether uma falha happens at o Manifest, Snapshot, remoteEntry, ou exponha stage.
+- **Shared analysis**: check whether dependências compartilhadas são reused, duplicated, ou matched against o expected versão.
+
+Business code deve não modify global Snapshot diretamente. Prefer consuming este information por meio de Runtime Plugin, DevTools, ou uma serviço de implantação.
+
+## Impact de disableSnapshot
+
+Se [`optimization.disableSnapshot`](/configure/experiments.html#disablesnapshot) é habilitado, Snapshot e preload-related runtime capabilities são removed para reduce runtime size.
+
+Este affects capabilities esse depend on Manifest / Snapshot, such as remote tipo hints, preloading, DevTools visualization, e proxying.

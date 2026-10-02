@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, rs } from '@rstest/core';
 import { ModuleFederation, Module } from '../src/index';
 import type { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 
@@ -11,10 +11,35 @@ describe('ModuleFederation', () => {
     });
   });
 
+  it('caches shared factories returned by synchronous getters', () => {
+    const factory = () => ({ value: 'shared' });
+    const getShared = rs.fn(() => factory);
+    const federation = new ModuleFederation({
+      name: '@federation/sync-shared-cache',
+      remotes: [],
+      shared: {
+        'sync-shared': {
+          version: '1.0.0',
+          get: getShared,
+        },
+      },
+    });
+
+    const firstFactory = federation.loadShareSync('sync-shared');
+    const secondFactory = federation.loadShareSync('sync-shared');
+
+    expect(firstFactory).toBe(factory);
+    expect(secondFactory).toBe(factory);
+    expect(getShared).toHaveBeenCalledTimes(1);
+    expect(federation.shareScopeMap.default['sync-shared']['1.0.0'].lib).toBe(
+      factory,
+    );
+  });
+
   it('deduplicates concurrent remote module init', async () => {
     let beforeInitContainerCalls = 0;
     let initContainerCalls = 0;
-    const initSpy = vi.fn(
+    const initSpy = rs.fn(
       () => new Promise<void>((resolve) => setTimeout(resolve, 10)),
     );
 
@@ -51,7 +76,7 @@ describe('ModuleFederation', () => {
 
     module.remoteEntryExports = {
       init: initSpy,
-      get: vi.fn(),
+      get: rs.fn(),
     } as any;
 
     const firstInit = module.init('first');

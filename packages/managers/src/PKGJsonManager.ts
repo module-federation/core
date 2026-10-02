@@ -1,8 +1,7 @@
 import path from 'path';
-// @ts-ignore this pkg miss types
-import finder from 'find-pkg';
 import fs from 'fs';
 import { MFModuleType, logger } from '@module-federation/sdk';
+import { findPackageJson } from './findPackageJson';
 
 export class PKGJsonManager {
   private _pkg?: Record<string, any>;
@@ -24,7 +23,11 @@ export class PKGJsonManager {
       return pkg;
     } catch (_err) {
       try {
-        const pkg = finder.sync(root);
+        const pkgPath = findPackageJson(root);
+        if (!pkgPath) {
+          return {};
+        }
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
         this._pkg = pkg;
         return pkg;
       } catch (err) {

@@ -1,8 +1,8 @@
-import { ModuleFederation } from '../core';
-import { Module } from '../module';
-import { SnapshotHandler } from '../plugins/snapshot/SnapshotHandler';
-import { SharedHandler } from '../shared';
-import { RemoteHandler } from '../remote';
+import type { ModuleFederation } from '../core';
+import type { Module } from '../module';
+import type { SnapshotHandler } from '../plugins/snapshot/SnapshotHandler';
+import type { SharedHandler } from '../shared';
+import type { RemoteHandler } from '../remote';
 
 type CoreLifeCycle = ModuleFederation['hooks']['lifecycle'];
 type CoreLifeCyclePartial = Partial<{
@@ -36,13 +36,15 @@ type RemoteLifeCycleCyclePartial = Partial<{
   [k in keyof RemoteLifeCycle]: Parameters<RemoteLifeCycle[k]['on']>[0];
 }>;
 
-export type ModuleFederationRuntimePlugin = CoreLifeCyclePartial &
+export type RuntimePluginHooks = CoreLifeCyclePartial &
   SnapshotLifeCycleCyclePartial &
   SharedLifeCycleCyclePartial &
   RemoteLifeCycleCyclePartial &
   ModuleLifeCycleCyclePartial &
-  ModuleBridgeLifeCycleCyclePartial & {
-    name: string;
-    version?: string;
-    apply?: (instance: ModuleFederation) => void;
-  };
+  ModuleBridgeLifeCycleCyclePartial;
+
+export type ModuleFederationRuntimePlugin = RuntimePluginHooks & {
+  name: string;
+  version?: string;
+  apply?: (instance: ModuleFederation) => void | RuntimePluginHooks;
+};

@@ -6,6 +6,8 @@ import type {
   Module,
 } from 'webpack';
 
+const REMOTE_REFERENCE_PREFIX = /^(?:webpack|rspack)\/container\/reference/;
+
 class DelegateModulesPlugin {
   options: { debug: boolean; [key: string]: any };
   _delegateModules: Map<string, NormalModule>;
@@ -88,9 +90,8 @@ class DelegateModulesPlugin {
               if (normalModule) {
                 const mid = normalModule.identifier();
                 if (
-                  normalModule?.userRequest?.startsWith(
-                    'webpack/container/reference',
-                  )
+                  normalModule?.userRequest &&
+                  REMOTE_REFERENCE_PREFIX.test(normalModule.userRequest)
                 ) {
                   this._delegateModules.set(mid, normalModule);
                 }

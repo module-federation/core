@@ -1,5 +1,3 @@
-// @ts-ignore this pkg miss types
-import findPkg from 'find-pkg';
 import path from 'path';
 import fs from 'fs';
 import {
@@ -10,6 +8,7 @@ import {
 import { NormalizedSharedOptions } from './types';
 import { BasicPluginOptionsManager } from './BasicPluginOptionsManager';
 import { parseOptions } from './utils';
+import { findPackageJson } from './findPackageJson';
 
 class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.ModuleFederationPluginOptions> {
   normalizedOptions: NormalizedSharedOptions = {};
@@ -70,7 +69,10 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
         }
       }
       pkgPath = pkgPath || require.resolve(depName, { paths: [this.root] });
-      const pkgJsonPath = findPkg.sync(pkgPath);
+      const pkgJsonPath = findPackageJson(path.dirname(pkgPath));
+      if (!pkgJsonPath) {
+        throw new Error(`Unable to find package.json for ${depName}`);
+      }
       return {
         pkg: JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')),
         path: '',

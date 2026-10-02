@@ -5,10 +5,10 @@
     "module": "commonjs",
     "types": ["@rstest/core/globals", "node"],
     "noEmit": true,
-    "baseUrl": ".",
     "paths": {
       "webpack": ["../../webpack/types.d.ts"],
-      "webpack/*": ["../../webpack/lib/*.d.ts", "../../webpack/*"]
+      "webpack/*": ["../../webpack/lib/*.d.ts", "../../webpack/*"],
+      "*": ["./*"]
     }
   },
   "include": [

@@ -1,0 +1,140 @@
+# Rsbuild
+
+Help users quickly build Module Federation products em **Rsbuild App**.
+
+## Início rápido
+
+### Instalação
+
+Você pode instale o plugin usando o seguintes comando:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rsbuild-plugin --save-dev',
+    yarn: 'yarn add @module-federation/rsbuild-plugin --save-dev',
+    pnpm: 'pnpm add @module-federation/rsbuild-plugin --save-dev',
+    bun: 'bun add @module-federation/rsbuild-plugin --save-dev',
+  }}
+/>
+
+### Register plugin
+#### Rsbuild App
+```ts title='rsbuild.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+
+export default defineConfig({
+  server: {
+    port: 2000,
+  },
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'federation_consumer',
+      remotes: {
+        remote1: 'remote1@http://localhost:2001/mf-manifest.json',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
+});
+```
+
+### Note
+Se você precisa use o Module Federation runtime capabilities, please instale [@module-federation/enhanced](/guide/runtime/index.html)
+
+## Configuração
+
+* Tipo:
+
+```ts
+export declare const pluginModuleFederation: (moduleFederationOptions: ModuleFederationOptions, rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS) => RsbuildPlugin;
+
+type RSBUILD_PLUGIN_OPTIONS = {
+  target?: 'web' | 'node' | 'dual';
+  ssr?: boolean;
+  ssrDir?: string;
+  environment?: string;
+}
+```
+
+### moduleFederationOptions
+
+[Module Federation Configuration](/configure/index.html)
+
+### rsbuildOptions
+
+Additional configuração para o Rsbuild plugin.
+
+
+#### target
+
+:::tip
+
+`target: 'dual'` é apenas compatível quando usado as uma global plugin em Rslib/Rspress.
+
+:::
+
+* Tipo: `'web' | 'node' | 'dual'`
+* Padrão: `'web'`
+
+Usado para specify o target runtime environment para o output. Quando definir para `dual`, it builds both Web (navegador) output e Node.js (SSR) output.
+
+Depois generating SSR output com `target: 'dual'`, você pode refer para [Criar a Modern.js Consumer](/integrations/framework/modernjs/quick-start.html), crie uma consumer, e integrate o corresponding Rslib SSR producer for desenvolvimento.
+
+For Rsbuild app SSR, use `target: 'node'` com `environment` para apply Module Federation para uma specific app environment.
+
+```ts title='rsbuild.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+
+export default defineConfig({
+  environments: {
+    client: {},
+    ssr: {},
+  },
+  plugins: [
+    pluginModuleFederation(
+      {
+        name: 'host',
+        remotes: {
+          remote: 'remote@http://localhost:3001/mf-manifest.json',
+        },
+      },
+      {
+        target: 'node',
+        environment: 'ssr',
+      },
+    ),
+  ],
+});
+```
+
+#### environment
+
+* Tipo: `string`
+* Padrão: auto-detected by caller/tooling:
+  * Rslib: `'mf'`
+  * Rsbuild app + `target: 'web'`: `'web'`
+  * Rsbuild app + `target: 'node'`: `'node'`
+  * Rspress + `target: 'web'`: `'web'`
+  * Rspress + `target: 'node'`: `'node'`
+
+Environment name usado by `target: 'node'` para select que environment configuração receives Node-target federation behavior.
+
+
+#### ssr
+
+:::danger Deprecated Warning
+
+Este opção é deprecated. Please use [target: 'dual'](#target) para habilite SSR.
+
+:::
+
+* Tipo: `boolean`
+* Padrão: `false`
+
+Quando habilitado, it generates SSR output.

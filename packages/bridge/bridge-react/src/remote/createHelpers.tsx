@@ -1,7 +1,8 @@
 import React, { forwardRef } from 'react';
-import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
+import { ErrorBoundary } from '../error-boundary';
 import { LoggerInstance } from '../utils';
 import {
+  ErrorFallbackProps,
   RemoteComponentParams,
   RemoteComponentProps,
   RemoteModule,
@@ -91,8 +92,6 @@ export function createLazyRemoteComponentFactory(
 export function createRemoteAppComponentFactory(
   RemoteApp: React.ComponentType<any>,
 ) {
-  const ErrorBoundaryComponent =
-    ErrorBoundary as unknown as React.ComponentType<any>;
   const createLazyRemoteComponent = createLazyRemoteComponentFactory(RemoteApp);
 
   return function createRemoteAppComponent<
@@ -102,15 +101,15 @@ export function createRemoteAppComponentFactory(
     const LazyComponent = createLazyRemoteComponent(info);
     return forwardRef<HTMLDivElement, RemoteComponentProps>((props, ref) => {
       return (
-        <ErrorBoundaryComponent
+        <ErrorBoundary
           FallbackComponent={
-            info.fallback as React.ComponentType<FallbackProps>
+            info.fallback as React.ComponentType<ErrorFallbackProps>
           }
         >
           <React.Suspense fallback={info.loading}>
             <LazyComponent {...props} ref={ref} />
           </React.Suspense>
-        </ErrorBoundaryComponent>
+        </ErrorBoundary>
       );
     });
   };

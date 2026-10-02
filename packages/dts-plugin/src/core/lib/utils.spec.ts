@@ -1,4 +1,4 @@
-import { it, describe, expect, vi } from 'vitest';
+import { it, describe, expect, rs } from '@rstest/core';
 import { nativeFetch, cloneDeepOptions } from './utils';
 import type { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 
@@ -6,13 +6,13 @@ it('nativeFetch should merge MF_ENV_HEADERS into request headers', async () => {
   const prevEnv = process.env['MF_ENV_HEADERS'];
   process.env['MF_ENV_HEADERS'] = JSON.stringify({ 'x-test': '1' });
 
-  const fetchMock = vi.fn().mockResolvedValue({
+  const fetchMock = rs.fn().mockResolvedValue({
     ok: true,
     status: 200,
     headers: new Headers({ 'content-type': 'text/plain' }),
-    text: vi.fn().mockResolvedValue('ok'),
+    text: rs.fn().mockResolvedValue('ok'),
   });
-  vi.stubGlobal('fetch', fetchMock);
+  rs.stubGlobal('fetch', fetchMock);
 
   const res = await nativeFetch('http://localhost');
 
@@ -24,7 +24,7 @@ it('nativeFetch should merge MF_ENV_HEADERS into request headers', async () => {
   );
   expect(res.data).toBe('ok');
 
-  vi.unstubAllGlobals();
+  rs.unstubAllGlobals();
   process.env['MF_ENV_HEADERS'] = prevEnv;
 });
 
@@ -32,13 +32,13 @@ it('nativeFetch should return arraybuffer when responseType is arraybuffer', asy
   const buf = Buffer.from('hello');
   const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
-  const fetchMock = vi.fn().mockResolvedValue({
+  const fetchMock = rs.fn().mockResolvedValue({
     ok: true,
     status: 200,
     headers: new Headers({ 'content-type': 'application/zip' }),
-    arrayBuffer: vi.fn().mockResolvedValue(ab),
+    arrayBuffer: rs.fn().mockResolvedValue(ab),
   });
-  vi.stubGlobal('fetch', fetchMock);
+  rs.stubGlobal('fetch', fetchMock);
 
   const res = await nativeFetch('http://localhost/file.zip', {
     responseType: 'arraybuffer',
@@ -46,7 +46,7 @@ it('nativeFetch should return arraybuffer when responseType is arraybuffer', asy
 
   expect(res.data).toBeInstanceOf(ArrayBuffer);
 
-  vi.unstubAllGlobals();
+  rs.unstubAllGlobals();
 });
 
 describe('cloneDeepOptions', () => {

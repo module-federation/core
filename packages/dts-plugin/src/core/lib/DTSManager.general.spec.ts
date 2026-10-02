@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, rs, beforeEach } from '@rstest/core';
 import { DTSManager } from './DTSManager';
 import fs from 'fs';
 import path from 'path';
@@ -9,19 +9,38 @@ import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { downloadTypesArchive } from './archiveHandler';
 import * as utils from './utils';
 
-vi.mock('fs/promises');
-vi.mock('fs');
-vi.mock('./archiveHandler');
-vi.mock('@module-federation/third-party-dts-extractor', () => ({
-  ThirdPartyExtractor: vi.fn().mockImplementation(() => ({
-    collectTypeImports: vi.fn().mockReturnValue([]),
+const fsMocks = rs.hoisted(() => ({
+  existsSync: rs.fn(() => false),
+  rmSync: rs.fn(),
+  writeFileSync: rs.fn(),
+  readFileSync: rs.fn(),
+}));
+
+const fsPromisesMocks = rs.hoisted(() => ({
+  cp: rs.fn().mockResolvedValue(undefined),
+  mkdir: rs.fn().mockResolvedValue(undefined),
+  rm: rs.fn().mockResolvedValue(undefined),
+}));
+
+rs.mock('fs/promises', () => fsPromisesMocks);
+rs.mock('fs', () => ({
+  default: fsMocks,
+  ...fsMocks,
+}));
+rs.mock('./archiveHandler', () => ({
+  createTypesArchive: rs.fn().mockResolvedValue(undefined),
+  downloadTypesArchive: rs.fn(),
+}));
+rs.mock('@module-federation/third-party-dts-extractor', () => ({
+  ThirdPartyExtractor: rs.fn().mockImplementation(() => ({
+    collectTypeImports: rs.fn().mockReturnValue([]),
   })),
 }));
 
 const projectRoot = path.join(__dirname, '../../..');
 
-vi.mock('../configurations/hostPlugin', () => ({
-  retrieveHostConfig: vi.fn().mockImplementation((options) => ({
+rs.mock('../configurations/hostPlugin', () => ({
+  retrieveHostConfig: rs.fn().mockImplementation((options) => ({
     hostOptions: {
       ...options,
       context: projectRoot,
@@ -44,7 +63,7 @@ vi.mock('../configurations/hostPlugin', () => ({
       },
     },
   })),
-  retrieveRemoteInfo: vi.fn().mockImplementation(({ remoteAlias, remote }) => ({
+  retrieveRemoteInfo: rs.fn().mockImplementation(({ remoteAlias, remote }) => ({
     name: remoteAlias,
     url: remote,
     alias: remoteAlias,
@@ -55,7 +74,7 @@ describe('DTSManager General Tests', () => {
   let dtsManager: DTSManager;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    rs.clearAllMocks();
     const remoteOptions: RemoteOptions = {
       moduleFederationConfig: {
         name: 'testRemote',
@@ -87,12 +106,12 @@ describe('DTSManager General Tests', () => {
     dtsManager = new DTSManager({ remote: remoteOptions });
 
     // Add mock implementations
-    vi.spyOn(dtsManager, 'consumeArchiveTypes').mockResolvedValue(undefined);
-    vi.spyOn(dtsManager, 'consumeAPITypes').mockResolvedValue(undefined);
+    rs.spyOn(dtsManager, 'consumeArchiveTypes').mockResolvedValue(undefined);
+    rs.spyOn(dtsManager, 'consumeAPITypes').mockResolvedValue(undefined);
 
     // Add mock for fs.writeFileSync
-    vi.spyOn(fs, 'writeFileSync').mockImplementation(() => undefined);
-    vi.spyOn(fs, 'readFileSync').mockReturnValue(`
+    rs.spyOn(fs, 'writeFileSync').mockImplementation(() => undefined);
+    rs.spyOn(fs, 'readFileSync').mockReturnValue(`
       import type { PackageType as PackageType_0, RemoteKeys as RemoteKeys_0 } from './existing/apis.d.ts';
     `);
   });
@@ -142,7 +161,7 @@ describe('DTSManager General Tests', () => {
         },
       };
 
-      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+      rs.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: manifestResponse.data,
         status: 200,
         headers: {},
@@ -173,7 +192,7 @@ describe('DTSManager General Tests', () => {
         },
       };
 
-      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+      rs.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: manifestResponse.data,
         status: 200,
         headers: {},
@@ -185,7 +204,7 @@ describe('DTSManager General Tests', () => {
         alias: 'test-alias',
       };
 
-      const joinSpy = vi
+      const joinSpy = rs
         .spyOn(path, 'join')
         .mockImplementation(path.win32.join as typeof path.join);
 
@@ -212,7 +231,7 @@ describe('DTSManager General Tests', () => {
         },
       };
 
-      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+      rs.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: manifestResponse.data,
         status: 200,
         headers: {},
@@ -231,7 +250,7 @@ describe('DTSManager General Tests', () => {
     });
 
     it('should handle manifest fetch errors', async () => {
-      vi.spyOn(utils, 'nativeFetch').mockRejectedValueOnce(
+      rs.spyOn(utils, 'nativeFetch').mockRejectedValueOnce(
         new Error('Network error'),
       );
 
@@ -259,7 +278,7 @@ describe('DTSManager General Tests', () => {
         },
       };
 
-      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+      rs.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: manifestResponse.data,
         status: 200,
         headers: {},
@@ -306,10 +325,10 @@ describe('DTSManager General Tests', () => {
         apiTypeUrl: 'http://example.com/api.d.ts',
       };
 
-      const mockDownloader = vi
+      const mockDownloader = rs
         .fn()
         .mockResolvedValue(['test-alias', '/tmp/types']);
-      vi.mocked(downloadTypesArchive).mockReturnValue(mockDownloader);
+      rs.mocked(downloadTypesArchive).mockReturnValue(mockDownloader);
 
       const result = await dtsManager.consumeTargetRemotes(
         baseHostOptions,
@@ -340,7 +359,7 @@ describe('DTSManager General Tests', () => {
 
   describe('updateTypes', () => {
     it('should handle positive update mode for host', async () => {
-      const generateTypesSpy = vi
+      const generateTypesSpy = rs
         .spyOn(dtsManager, 'generateTypes')
         .mockResolvedValue(undefined);
       dtsManager.options.host = {
@@ -399,18 +418,18 @@ describe('DTSManager General Tests', () => {
         type PackageType<T> = T extends 'REMOTE_ALIAS_IDENTIFIER/Component' ? typeof import('REMOTE_ALIAS_IDENTIFIER/Component') : any;
       `;
 
-      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+      rs.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: apiTypeContent,
         status: 200,
         headers: {},
       } as any);
-      vi.spyOn(fs, 'writeFileSync');
+      rs.spyOn(fs, 'writeFileSync');
 
       // @ts-expect-error only need timeout, which is not required
       await dtsManager.downloadAPITypes(remoteInfo, '/tmp/types', {});
 
       expect(fs.writeFileSync).toHaveBeenCalled();
-      const writeCall = vi.mocked(fs.writeFileSync).mock.calls[0];
+      const writeCall = rs.mocked(fs.writeFileSync).mock.calls[0];
       const content = writeCall[1] as string;
 
       expect(content).toContain('test-alias/Component');
@@ -430,7 +449,7 @@ describe('DTSManager General Tests', () => {
         apiTypeUrl: '',
       };
 
-      vi.spyOn(fs, 'writeFileSync');
+      rs.spyOn(fs, 'writeFileSync');
 
       await dtsManager.downloadAPITypes(remoteInfo, '/tmp/types');
 
@@ -447,10 +466,10 @@ describe('DTSManager General Tests', () => {
         apiTypeUrl: 'http://example.com/api.d.ts',
       };
 
-      vi.spyOn(utils, 'nativeFetch').mockRejectedValueOnce(
+      rs.spyOn(utils, 'nativeFetch').mockRejectedValueOnce(
         new Error('Network error'),
       );
-      vi.spyOn(fs, 'writeFileSync');
+      rs.spyOn(fs, 'writeFileSync');
 
       await dtsManager.downloadAPITypes(remoteInfo, '/tmp/types');
 
@@ -481,7 +500,7 @@ describe('DTSManager General Tests', () => {
     };
 
     it('should handle no loaded remote API aliases', () => {
-      vi.spyOn(fs, 'writeFileSync');
+      rs.spyOn(fs, 'writeFileSync');
 
       dtsManager.consumeAPITypes(baseHostOptions);
 
@@ -492,12 +511,12 @@ describe('DTSManager General Tests', () => {
       const existingContent = `
         import type { PackageType as PackageType_0, RemoteKeys as RemoteKeys_0 } from './existing/apis.d.ts';
       `;
-      vi.spyOn(fs, 'readFileSync').mockReturnValue(existingContent);
-      vi.spyOn(fs, 'writeFileSync');
+      rs.spyOn(fs, 'readFileSync').mockReturnValue(existingContent);
+      rs.spyOn(fs, 'writeFileSync');
 
       // Mock the ThirdPartyExtractor to return the existing import
-      vi.mocked(ThirdPartyExtractor).mockImplementation(() => ({
-        collectTypeImports: vi.fn().mockReturnValue(['./existing/apis.d.ts']),
+      rs.mocked(ThirdPartyExtractor).mockImplementation(() => ({
+        collectTypeImports: rs.fn().mockReturnValue(['./existing/apis.d.ts']),
         pkgs: {} as Record<string, string>,
         pattern: /.*/,
         context: '',
@@ -505,10 +524,10 @@ describe('DTSManager General Tests', () => {
         tsConfigPath: '',
         typesFolder: '',
         implementation: 'webpack',
-        addPkgs: vi.fn(),
-        inferPkgDir: vi.fn(),
-        collectPkgs: vi.fn(),
-        copyDts: vi.fn().mockResolvedValue(undefined),
+        addPkgs: rs.fn(),
+        inferPkgDir: rs.fn(),
+        collectPkgs: rs.fn(),
+        copyDts: rs.fn().mockResolvedValue(undefined),
         exclude: [],
       }));
 

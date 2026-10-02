@@ -1,5 +1,5 @@
 import 'whatwg-fetch';
-import { assert, describe, it } from 'vitest';
+import { assert, describe, it } from '@rstest/core';
 import { ModuleFederation, init } from '../src/index';
 import { mockRemoteSnapshot } from './mock/utils';
 import { matchRemoteWithNameAndExpose } from '@module-federation/runtime-core';

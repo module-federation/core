@@ -10,7 +10,7 @@ appId: com.mf.example.host
 - copyTextFrom:
     id: 'host-lodash'
 - assertTrue:
-    condition: ${maestro.copiedText === "4.17.23"}
+    condition: ${maestro.copiedText === "4.18.1"}
 
 # Check Mini App Info
 - assertNotVisible:
@@ -28,7 +28,7 @@ appId: com.mf.example.host
 - copyTextFrom:
     id: 'mini-lodash'
 - assertTrue:
-    condition: ${maestro.copiedText === "4.17.23"}
+    condition: ${maestro.copiedText === "4.18.1"}
 
 # Check Nested Mini App Info
 - assertVisible:
@@ -36,4 +36,4 @@ appId: com.mf.example.host
 - copyTextFrom:
     id: 'nested-mini-lodash'
 - assertTrue:
-    condition: ${maestro.copiedText === "4.17.23"}
+    condition: ${maestro.copiedText === "4.18.1"}

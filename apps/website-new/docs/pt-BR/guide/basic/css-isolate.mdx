@@ -1,0 +1,170 @@
+# Style Isolation
+
+In Module Federation, o host e aplicação remotes run no mesmo page e compartilhe uma single global CSS escopo, so styles de one side pode easily leak em another e cause unintended "style pollution". Module Federation does não ship built-em style isolation (see o [FAQ](#why-doesnt-module-federation-diretamente-handle-css-style-isolation) below para o reasoning), so producers deve pick o estratégia esse fits their scenario.
+
+## BEM (Block Element Modifier)
+
+BEM é uma naming convention esse achieves style isolation by adding prefixes e suffixes para class names. O structure de BEM é as follows:
+
+- **Block**: Represents um independent functional block, e.g., `.button`
+- **Element**: Represents uma part do block, e.g., `.button__text`
+- **Modifier**: Represents diferente states ou versões do block ou element, e.g., `.button--primary`
+
+```html
+<div class="button">
+  <span class="button__text">Button</span>
+</div>
+```
+
+```css
+.button {
+  background-color: blue;
+  color: white;
+}
+
+.button__text {
+  font-size: 16px;
+}
+
+.button--primary {
+  background-color: green;
+}
+```
+
+## CSS Módulos
+
+CSS Módulos achieve style isolation by treating each CSS arquivo as um módulo, onde each class name é transformed em uma unique identifier during compilation. [Using CSS Modules in Rsbuild](https://v2.rsbuild.rs/guide/styling/css-modules)
+
+
+1. Crie uma CSS arquivo chamado `styles.module.css`:
+
+```css
+/* styles.module.css */
+.button {
+  background-color: blue;
+  color: white;
+}
+```
+
+2. Importe e use it em uma React componente:
+
+```javascript
+import React from 'react';
+import styles from './styles.module.css';
+
+function App() {
+  return <button className={styles.button}>Button</button>;
+}
+
+export default App;
+```
+
+## CSS-em-JS
+
+CSS-em-JS writes styles diretamente em JavaScript arquivos. Common libraries include [styled-components](https://styled-components.com/) e [emotion](https://github.com/emotion-js/emotion). [Using CSS-in-JS in Rsbuild](https://rsbuild.rs/guide/styling/css-in-js)
+
+
+1. Instale styled-componentes:
+
+```bash
+npm install styled-components
+```
+
+2. Use it em uma React componente:
+
+```javascript
+import React from 'react';
+import styled from 'styled-components';
+
+const Button = styled.button`
+  background: blue;
+  color: white;
+`;
+
+function App() {
+  return <Button>Button</Button>;
+}
+
+export default App;
+```
+
+## Shadow DOM
+
+Shadow DOM é part do Web Componentes technology, criação um isolated DOM tree para achieve style isolation. React pode use Shadow DOM via [react-shadow](https://www.npmjs.com/package/react-shadow).
+
+
+1. Crie um HTML template:
+
+```html
+<template id="my-component">
+  <style>
+    .button {
+      background: blue;
+      color: white;
+    }
+  </style>
+  <button class="button">Button</button>
+</template>
+```
+
+2. Define uma custom element e attach Shadow DOM:
+
+```javascript
+class MyComponent extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const template = document.getElementById('my-component').content;
+    shadow.appendChild(template.cloneNode(true));
+  }
+}
+
+customElements.define('my-component', MyComponent);
+```
+
+3. Use o custom element em HTML:
+
+```html
+<my-component></my-component>
+```
+
+## Vue Scoped Styles
+
+In Vue, o `scoped` attribute pode ser usado para achieve componente-level style isolation.
+
+
+1. Define styles em uma Vue componente:
+
+```vue
+<template>
+  <button class="button">Button</button>
+</template>
+
+<style scoped>
+.button {
+  background: blue;
+  color: white;
+}
+</style>
+```
+
+Each método has its own applicable scenarios e limitations. Developers pode choose o appropriate style isolation solution baseado em projeto requirements.
+
+## FAQ
+
+### Why doesn't Module Federation diretamente handle CSS style isolation?
+
+O principal reasons for não diretamente incorporating CSS isolation em Module Federation são:
+
+* CSS isolation pode conflict significantly com dependências compartilhadas. Shared dependências aim para reuse comum dependências as much as possible, que pode lead para some dependências compartilhadas escaping o sandbox, making isolation uncontrollable e potentially affected by carregue order.
+
+* Runtime handling de CSS isolation pode have many edge cases e solução de problemas issues pode ser very difficult, leading para decreased business stability. Common issues include:
+  * Shadow DOM: Este método pode cause compatibility issues com various componente libraries, e solução de problemas online issues pode ser long e complex, com no guarantee de resolution.
+  * Collecting e clearing CSS: Due para o isolation e shared reuse issues mentioned above, CSS might ser unintentionally cleared.
+  * Upgrading o sandbox no consumer: O impact on business é uncontrollable.
+
+> Suggested handling métodos:
+
+* Process CSS at o módulo ou sub-aplicação producer level para garantir esse o módulo ou aplicação runs as expected em any environment.
+* Use CSS módulos, componente library prefixes, e unified componente library versões para solve o problem.
+* Directly exporte Shadow DOM componentes para uso por other businesses.

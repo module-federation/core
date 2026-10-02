@@ -3,6 +3,7 @@
  * This file contains bridge component logic shared across all React versions
  */
 import * as React from 'react';
+import type { BridgeOperationContext } from '@module-federation/bridge-shared';
 import type {
   ProviderParams,
   ProviderFnParams,
@@ -10,8 +11,9 @@ import type {
   DestroyParams,
   RenderParams,
   CreateRootOptions,
+  ErrorFallbackProps,
 } from '../../types';
-import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
+import { ErrorBoundary } from '../../error-boundary';
 import { RouterContext } from '../context';
 import { LoggerInstance } from '../../utils';
 import { federationRuntime } from '../plugin';
@@ -43,15 +45,14 @@ export function createBaseBridgeComponent<T>({
       );
     };
 
-    const DefaultFallback = ({ error }: FallbackProps) => (
+    const DefaultFallback = ({ error }: ErrorFallbackProps) => (
       <div role="alert">
         <p>Something went wrong:</p>
-        <pre style={{ color: 'red' }}>{error.message}</pre>
+        <pre style={{ color: 'red' }}>
+          {error instanceof Error ? error.message : String(error)}
+        </pre>
       </div>
     );
-
-    const ErrorBoundaryComponent =
-      ErrorBoundary as unknown as React.ComponentType<any>;
 
     const omitHostFallback = <P extends Record<string, unknown>>(props: P) => {
       const nextProps = { ...props };
@@ -70,7 +71,7 @@ export function createBaseBridgeComponent<T>({
       memoryRoute?: any;
       propsInfo: T;
     }) => (
-      <ErrorBoundaryComponent FallbackComponent={DefaultFallback}>
+      <ErrorBoundary FallbackComponent={DefaultFallback}>
         <RawComponent
           appInfo={{
             moduleName,
@@ -79,7 +80,7 @@ export function createBaseBridgeComponent<T>({
           }}
           propsInfo={propsInfo}
         />
-      </ErrorBoundaryComponent>
+      </ErrorBoundary>
     );
 
     return {
@@ -93,6 +94,12 @@ export function createBaseBridgeComponent<T>({
           rootOptions,
           ...propsInfo
         } = info;
+        const operationContext: BridgeOperationContext = {
+          side: 'producer',
+          framework: 'react',
+          operation: rootMap.has(dom) ? 'update' : 'render',
+          reason: 'direct',
+        };
 
         const mergedRootOptions: CreateRootOptions | undefined = {
           ...defaultRootOptions,
@@ -100,7 +107,10 @@ export function createBaseBridgeComponent<T>({
         };
 
         const beforeBridgeRenderRes =
-          instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
+          instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+            info,
+            operationContext,
+          ) || {};
 
         const rootComponentWithErrorBoundary = (
           <BridgeWrapper
@@ -118,9 +128,10 @@ export function createBaseBridgeComponent<T>({
         );
 
         if (bridgeInfo.render) {
-          await Promise.resolve(
+          const root = await Promise.resolve(
             bridgeInfo.render(rootComponentWithErrorBoundary, dom),
-          ).then((root: RootType) => rootMap.set(dom, root));
+          );
+          rootMap.set(dom, root as RootType);
         } else {
           let root = rootMap.get(dom);
           // Do not call createRoot multiple times
@@ -133,13 +144,26 @@ export function createBaseBridgeComponent<T>({
             root.render(rootComponentWithErrorBoundary);
           }
         }
-        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
+        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
+          context: operationContext,
+        }) || {};
       },
 
       destroy(info: DestroyParams) {
         const { dom } = info;
         LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
         const root = rootMap.get(dom);
+        const operationContext: BridgeOperationContext = {
+          side: 'producer',
+          framework: 'react',
+          operation: 'destroy',
+          reason: 'direct',
+        };
+
+        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
+          info,
+          operationContext,
+        );
         if (root) {
           if ('unmount' in root) {
             root.unmount();
@@ -148,7 +172,9 @@ export function createBaseBridgeComponent<T>({
           }
           rootMap.delete(dom);
         }
-        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
+          context: operationContext,
+        });
       },
     };
   };

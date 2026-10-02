@@ -28,10 +28,7 @@ export default defineConfig([
         'react-dom',
         'webpack',
       ],
-      dts: {
-        resolver: 'tsc',
-        eager: true,
-      },
+      dts: false,
       copyLicense: true,
       unbundle: true,
       define: {},

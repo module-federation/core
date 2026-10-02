@@ -1,0 +1,99 @@
+# Benefits de Module Federation em uma Monorepo
+
+Module Federation é uma powerful tool esse allows você para compartilhar code entre aplicações. It enables você para build aplicações esse são mais modular, maintainable, e scalable. In este guia, nós vai explore o benefits de usando Module Federation em uma monorepo.
+
+Polyrepos (multiple repositories) have long since been o de facto choice for developing micro-frontends, para combat organizational issues, however, they introduce mais organizational challenges around code compartilhamento, dependência management, versioning e team autonomy.
+
+Enabling team autonomy via Micro Frontends inadvertently pushed teams towards uma polyrepo structure. Each team would have their own repository e would ser responsible for maintaining their own codebase. Este approach led para uma lack de collaboration e uma lack de transparency among other challenges.
+
+Você pode get all o benefits de Module Federation sem o hassle de managing multiple repositories quando você choose uma monorepo, including some additional benefits around code compartilhamento e dependência management.
+Este guia vai help você understand o benefits de usando Module Federation em uma monorepo e como they address organizational challenges.
+
+## Potential Drawbacks de uma Polyrepo Approach
+
+Total isolation pode ser very desirable for teams but it comes com its own definir de caveats e issues, especialmente com Module Federation. It's easy para forget esse quando working com uma Module Federation system, o end result esse o user experiences é uma single aplicação.
+As such, o total isolation e autonomy over tech decisions for polyrepos esse comprise portions do single aplicação pode actually lead para inconsistencies no final experience para o user.
+
+Let's take uma look at some do other challenges esse arise com o polyrepo approach.
+
+### Feedback Loops
+
+O polyrepo approach pode lead para uma lack de transparency e feedback loops. Este pode ser especialmente problematic quando working com uma Module Federation system.
+
+Quando one team makes uma change para their portion do aplicação, ele pode ser difficult para understand como it vai affect o other parts do aplicação. Notification de runtime issues e breaking changes cannot ser encontrada until depois uma implantação has occurred.
+
+Even se there é uma quality assurance process em place para garantir esse changes são safe antes reaching production, o feedback loop é slow e pode ser disruptive, forcing teams para either roll back changes ou quickly fix issues esse arise instead de adding novo features.
+
+### Shared Code Estratégias
+
+Compartilhamento code entre polyrepos é difficult. It tends para involve criação e maintaining uma private pacote registry de some form. Shared code gets built e deployed para este registry e consumido pelo other polyrepos. Se uma change é made para o shared code, it deve ser released para o registry.
+
+Este pode ser time-consuming e erro-prone! It introduces o risk de blockers para feature work se any do teams rely no PR para o shared code para ser released para o registry.
+
+It também circles back para o feedback loops issue, as teams deve wait para o registry para ser updated antes eles podem see o impact de their changes, se they ever see o impact at all porque do isolated teams. They could ser inadvertently introducing breaking changes esse affect other teams.
+
+O teams consuming o shared code deve também actively update o versões do shared pacotes they são usando para garantir compatibility across o módulo federated system, ou risk breaking changes em runtime.
+
+### Dependência Management
+
+Polyrepos pode também lead para dependência management issues. Quando teams são working em isolation em their own repository, they may have diferente dependências ou diferente versões de dependências. Este pode lead para conflicts, versioning issues ou worse, increased bundle sizes porque de duplicated dependências.
+
+Por exemplo, se one team é usando React 18 e another team decides they want para usar React 19 so they update their dependência, then once o changes são deployed para production there é uma high risk de incompatible code e runtime erros, especialmente se other portions do aplicação não suporte React 19.
+
+Em uma polyrepo configuração, o update de React 19 does não immediately inform o team esse by doing so they vai ser breaking o other teams. Este pode lead para uma lot de frustration e rolling back de changes.
+
+### Testing Estratégias
+
+Quando teams são working em isolation, they may não have o mesmo testing estratégias ou tools. Este pode lead para inconsistent testing across o system, que pode ser uma problem para o overall quality do aplicação.
+
+It também adds difficulty para o QA process. Either they test each micro-frontend separadamente ou they test all de them together.
+
+Testing individual micro-frontends does não forneça o mesmo level de confidence no overall quality do aplicação porque it does não test o integração points nor any shared context entre them.
+
+It também means having para build some kind de test framework esse pode mock certain layers do full aplicação que introduces uma maintenance tax esse deve ser paid para garantir esse o test framework stays up para date com o other portions do aplicação.
+
+Testing o full aplicação vai forneça uma higher level de confidence overall, however, em uma polyrepo configuração it requires setting up configurable test environments esse pode deploy o mais recente versões de each micro-frontend.
+Este é time consuming, costs money on cloud recursos e means esse feedback on issues esse arise during testing é delayed, reducing overall iteration speed.
+
+## How does uma Monorepo address these drawbacks?
+
+Uma monorepo é uma single repository esse contains all o code para uma projeto. It é uma single source de truth para o entire projeto.
+Let's take uma closer look at each do challenges above e como uma monorepo pode address them.
+
+### Feedback Loops
+
+Em uma monorepo, o feedback loop é simplified porque all o code é no mesmo repository. Este means esse changes esse são made by individual teams vai present immediate feedback on como they impact o other teams e micro-frontends. Este eliminates o need for manual releases e reduces o risk de breaking changes.
+
+It informs o developer do impact de their change at o time de making it, allowing them para make o necessário changes para garantir esse o impact é minimal.
+
+### Shared Code Estratégias
+
+Com monorepo tooling such as [Nx](https://nx.dev), teams pode compartilhe code sem o need para uma central pacote registry. Este eliminates o need for teams para manually release changes para o registry e reduces o risk de conflicts e versioning issues.
+
+It também greatly improves o speed de desenvolvimento as it cuts out o process de updating uma separate repo de shared code, waiting para uma nova release para o central registry e then installing o novo versão no consumers.
+
+Any changes para shared code pode ser made no mesmo repository as o code esse consome it. Este increases collaboration e transparency across teams enquanto improving quality (changes vai forneça immediate feedback) e decreasing o risk de breaking changes.
+
+Observability no que é usando o shared code é também increased com help de dependência graphs e IDE suporte. Este pode help developers make informed decision about como impactful their changes vai ser.
+
+### Dependência Management
+
+Em uma monorepo single versão bumps de major dependências such as React ou Angular são applied para all consumers. Este ensures maximum compatibility across o system e reduces o risk de breaking changes.
+
+It _does_ require teams para collaborate e align on quando para perform these upgrades, but it results em mais confidence e compatibility para o end user.
+
+Teams pode still choose para usar their own versões de other minor dependências such as `date-fns` ou `lodash` se they choose para do so by defining those dependências em their own `package.json`, ou by aliasing them no root `package.json`.
+
+### Testing Estratégias
+
+Testing estratégias são também simplified em uma monorepo. Este é porque all parts do system são no mesmo repo, so testing é easier e mais consistent. Coordinating local serves para run automated e2e e integração tests against o system é easier porque o repository vai have o mais recente de each micro-frontend at all times.
+
+Esses automated tests pode ser run em uma CI/CD pipeline, que pode ser triggered by changes para o monorepo. Este ensures esse o full system é always tested e esse any issues esse were previously difficult para identify (integração points entre micro-frontends) são caught early.
+
+O test suites pode também ser written closer para como o user would actually use o final deployed aplicação improving o quality do final product.
+
+## Onde does Nx fit?
+
+Nx é uma powerful open-source build system esse fornece tools e techniques for enhancing developer productivity, optimizing CI performance, e maintaining code quality It works especialmente well com monorepos e comes com built-em suporte for Module Federation for Angular e React projetos.
+
+[Learn more about why Nx is the best choice for Module Federation tooling](/integrations/framework/monorepos/nx-for-module-federation.html)

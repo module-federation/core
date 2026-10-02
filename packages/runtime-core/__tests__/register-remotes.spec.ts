@@ -1,4 +1,4 @@
-import { assert, describe, it, expect, vi } from 'vitest';
+import { assert, describe, it, expect, rs } from '@rstest/core';
 import { ModuleFederation } from '../src/index';
 
 describe('ModuleFederation', () => {
@@ -155,7 +155,7 @@ describe('ModuleFederation', () => {
         exposes: [],
       },
     ];
-    const manifestFetch = vi.fn((url: string) => {
+    const manifestFetch = rs.fn((url: string) => {
       if (url === manifestUrl) {
         return Promise.resolve(
           new Response(
