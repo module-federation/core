@@ -53,9 +53,7 @@ const resolvePackageFile = (
   return requireFromPlugin.resolve(
     path.join(
       packageRoot,
-      process.env['IS_ESM_BUILD'] === 'true'
-        ? esmRelativePath
-        : cjsRelativePath,
+      process.env.IS_ESM_BUILD === 'true' ? esmRelativePath : cjsRelativePath,
     ),
   );
 };
