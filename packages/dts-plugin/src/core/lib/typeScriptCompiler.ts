@@ -247,10 +247,35 @@ const getTypeScriptContext = (remoteOptions: Required<RemoteOptions>) => {
     : remoteOptions.context;
 };
 
+const isDirectCompilerExecutable = (compilerInstance: string) => {
+  if (!isAbsolute(compilerInstance) || !existsSync(compilerInstance)) {
+    return false;
+  }
+  // Windows batch shims cannot be spawned without a shell.
+  return !(
+    process.platform === 'win32' && /\.(cmd|bat)$/i.test(compilerInstance)
+  );
+};
+
 const resolveCompilerCommand = (
   remoteOptions: Required<RemoteOptions>,
   tempTsConfigJsonPath: string,
 ) => {
+  // An absolute path to an existing compiler binary (for example a native
+  // `tsgo` executable) is a single executable, not a command line: splitting
+  // it would break paths containing spaces or Windows backslashes, and routing
+  // it through the package manager or a shell is unnecessary.
+  if (isDirectCompilerExecutable(remoteOptions.compilerInstance)) {
+    const executable = remoteOptions.compilerInstance;
+    const args = ['--project', tempTsConfigJsonPath];
+    return {
+      executable,
+      args,
+      displayCommand: formatCommandForDisplay(executable, args),
+      shell: false,
+    };
+  }
+
   const compilerArgs = splitCommandArgs(remoteOptions.compilerInstance);
   const resolvedCompilerArgs =
     compilerArgs.length > 0 ? compilerArgs : [remoteOptions.compilerInstance];
