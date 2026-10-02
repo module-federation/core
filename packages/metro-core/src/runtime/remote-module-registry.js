@@ -55,6 +55,9 @@ export async function loadSharedToRegistryAsync(id) {
     registry[id] = {};
     loading[id] = (async () => {
       const factory = await loadShare(id);
+      if (!factory) {
+        return;
+      }
       const sharedModule = factory();
       cloneModule(sharedModule, registry[id]);
     })();
@@ -67,7 +70,9 @@ export function loadSharedToRegistrySync(id) {
     return;
   }
   loading[id] = loadShareSync(id);
-  registry[id] = loading[id]();
+  if (loading[id]) {
+    registry[id] = loading[id]();
+  }
 }
 
 export function getModuleFromRegistry(id) {
