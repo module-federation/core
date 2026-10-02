@@ -52,10 +52,12 @@
     },
     "./ssr-dev-plugin": {
       "types": "./dist/types/ssr-runtime/devPlugin.d.ts",
+      "worker": "./dist/esm/ssr-runtime/workerPlugins.mjs",
       "default": "./dist/esm/ssr-runtime/devPlugin.mjs"
     },
     "./ssr-inject-data-fetch-function-plugin": {
       "types": "./dist/types/ssr-runtime/injectDataFetchFunctionPlugin.d.ts",
+      "worker": "./dist/esm/ssr-runtime/workerPlugins.mjs",
       "default": "./dist/esm/ssr-runtime/injectDataFetchFunctionPlugin.mjs"
     },
     "./config-plugin": {
