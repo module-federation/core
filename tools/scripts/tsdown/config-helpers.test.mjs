@@ -8,7 +8,7 @@ import {
   rm,
   writeFile,
 } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import test from 'node:test';
 import { build } from 'tsdown';
 import ts from 'typescript';
@@ -18,6 +18,16 @@ const runtimePluginPackageJson = JSON.parse(
   await readFile(
     new URL(
       '../../../packages/runtime-plugins/inject-external-runtime-core-plugin/package.json',
+      import.meta.url,
+    ),
+    'utf8',
+  ),
+);
+
+const releasePlanPackageJson = JSON.parse(
+  await readFile(
+    new URL(
+      '../../../packages/assemble-release-plan/package.json',
       import.meta.url,
     ),
     'utf8',
@@ -38,22 +48,11 @@ const cases = [
     requireTypes: 'index.d.cts',
   },
   {
-    name: 'commonjs-fixture',
+    name: 'assemble-release-plan',
     packageJson: {
-      name: '@module-federation/commonjs-fixture',
+      name: releasePlanPackageJson.name,
       version: '0.0.0',
-      exports: {
-        '.': {
-          import: {
-            types: './dist/index.d.mts',
-            default: './dist/index.mjs',
-          },
-          require: {
-            types: './dist/index.d.cts',
-            default: './dist/index.cjs',
-          },
-        },
-      },
+      exports: releasePlanPackageJson.exports,
     },
     files: ['index.cjs', 'index.d.cts', 'index.d.mts', 'index.mjs'],
     importTypes: 'index.d.mts',
@@ -68,12 +67,7 @@ test('dual-format packages emit and resolve separate declarations', async (t) =>
   for (const fixture of cases) {
     const packageName = fixture.packageJson.name;
     const packageDir = join(root, 'packages', fixture.name);
-    const installedDir = join(
-      root,
-      'node_modules',
-      '@module-federation',
-      fixture.name,
-    );
+    const installedDir = join(root, 'node_modules', ...packageName.split('/'));
     await mkdir(join(packageDir, 'src'), { recursive: true });
     await writeFile(
       join(packageDir, 'package.json'),
@@ -114,7 +108,7 @@ test('dual-format packages emit and resolve separate declarations', async (t) =>
     assert.deepEqual((await readdir(join(packageDir, 'dist'))).sort(), [
       ...fixture.files,
     ]);
-    await mkdir(join(root, 'node_modules', '@module-federation'), {
+    await mkdir(dirname(installedDir), {
       recursive: true,
     });
     await cp(packageDir, installedDir, { recursive: true });
