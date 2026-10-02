@@ -1,6 +1,8 @@
 import { it, expect, describe, rs, afterEach } from '@rstest/core';
+import { createRsbuild } from '@rsbuild/core';
 import {
   moduleFederationConfigPlugin,
+  patchBundlerConfig,
   patchMFConfig,
   setDefaultOptimizationTarget,
 } from './configPlugin';
@@ -162,6 +164,49 @@ describe('setDefaultOptimizationTarget', () => {
     setDefaultOptimizationTarget(config, true, true, false);
 
     expect(config).toStrictEqual({ name: 'host' });
+  });
+});
+
+describe('patchBundlerConfig', () => {
+  const getServerSplitChunks = async (enableSSR: boolean) => {
+    const rsbuild = await createRsbuild({
+      cwd: __dirname,
+      rsbuildConfig: {
+        source: { entry: { index: './configPlugin.ts' } },
+        output: { target: 'node' },
+        // Opt the server environment into chunk splitting, as Rsbuild 2.2
+        // does by default.
+        splitChunks: { chunks: 'all' },
+        plugins: [
+          {
+            name: 'patch-bundler-config',
+            setup(api) {
+              api.modifyBundlerChain((chain) => {
+                patchBundlerConfig({
+                  chain,
+                  isServer: true,
+                  modernjsConfig: {},
+                  mfConfig,
+                  enableSSR,
+                });
+              });
+            },
+          },
+        ],
+      },
+    });
+    const [config] = await rsbuild.initConfigs();
+    return config.optimization?.splitChunks;
+  };
+
+  it('disables server splitChunks when SSR is enabled', async () => {
+    expect(await getServerSplitChunks(true)).toBe(false);
+  });
+
+  it('keeps server splitChunks when SSR is disabled', async () => {
+    expect(await getServerSplitChunks(false)).toMatchObject({
+      chunks: 'all',
+    });
   });
 });
 
