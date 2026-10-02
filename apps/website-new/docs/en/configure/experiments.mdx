@@ -84,9 +84,9 @@ The options can be combined. Calling an API for a disabled capability throws an 
 
 - Type: `'web' | 'node'`
 - Required: No
-- Default: Inferred from Webpack's `target` option (usually `'web'`)
+- Default: Not set; not inferred from Webpack or Rspack's `target` option
 
-This option defines the `ENV_TARGET` global constant during the build, specifying the intended execution environment.
+This option defines the `ENV_TARGET` global constant during the build, specifying the intended execution environment. It is only applied when explicitly set; the plugin does not infer it from the bundler's `target` option.
 
 **Impact:**
 
@@ -97,7 +97,7 @@ This option defines the `ENV_TARGET` global constant during the build, specifyin
   - Ensures Node.js-specific remote entry loading mechanisms are used (`loadEntryNode`).
   - Includes the necessary Node.js-specific functions from the SDK (`createScriptNode`, `loadScriptNode`) in the bundle, allowing the federated application to function correctly in Node.js.
 
-Explicitly setting this value is recommended to ensure the intended optimizations are applied, especially in universal or server-side rendering scenarios.
+Explicitly setting this value is recommended to ensure the intended optimizations are applied. For web builds, set `target: 'web'` to enable compile-time elimination of Node.js-specific loader code; set `target: 'node'` for Node.js builds, especially in universal or server-side rendering scenarios.
 
 ### Impact of Optimization Flags on `remoteEntry.js` Size
 
