@@ -90,10 +90,22 @@ if (!process.argv[2]) {
       }
     }
     process.stdout.write(JSON.stringify(results, null, 2));
+    const passed = Object.values(results).every(
+      (result) =>
+        result.assertions?.remoteExecution === true &&
+        result.assertions?.firstRuntimeMarker === true &&
+        Array.isArray(result.errors) &&
+        result.errors.length === 0 &&
+        !result.harnessError &&
+        !result.thrown &&
+        !result.executionError,
+    );
+    if (!passed) process.exitCode = 1;
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
   }
 } else {
+  let workerServer;
   (async () => {
     const sameCopy = process.argv[3].startsWith('same-');
     const order = process.argv[3].replace('same-', '').split(',');
@@ -118,13 +130,13 @@ if (!process.argv[2]) {
       path.join(fixture, 'node/dist/src/plugins/NodeFederationPlugin.js'),
     ).default;
     const requests = [];
-    const server = require('http').createServer((req, res) => {
+    const server = (workerServer = require('http').createServer((req, res) => {
       requests.push(req.url);
       const name = req.url.includes('app') ? 'app' : 'node';
       res.end(
         `module.exports = { get: () => Promise.resolve(() => '${name}-remote'), init: () => undefined };`,
       );
-    });
+    }));
     await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
     const port = server.address().port;
     const opts = (name) => ({
@@ -229,7 +241,9 @@ if (!process.argv[2]) {
           initOptions: code.match(/initOptions: (.*),/)?.[1],
         };
       });
-    await new Promise((resolve) => compiler.close(resolve));
+    await new Promise((resolve, reject) =>
+      compiler.close((error) => (error ? reject(error) : resolve())),
+    );
     if (!result.errors.length) {
       try {
         result.execution = await require(path.join(output, 'main.js'));
@@ -262,7 +276,9 @@ if (!process.argv[2]) {
     }
     await new Promise((resolve) => server.close(resolve));
     process.stdout.write(JSON.stringify(result));
-  })().catch((error) =>
-    process.stdout.write(JSON.stringify({ thrown: error.stack })),
-  );
+  })().catch((error) => {
+    workerServer?.close();
+    process.stdout.write(JSON.stringify({ thrown: error.stack }));
+    process.exitCode = 1;
+  });
 }
