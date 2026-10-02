@@ -193,6 +193,49 @@ describe('staticMiddleware', () => {
       expect(result).toBe('empty-response');
       expect(nextSpy).not.toHaveBeenCalled();
     });
+
+    it('should set Content-Length in bytes for non-ASCII content', async () => {
+      // Multi-byte characters make byte length differ from string length.
+      // Using the string length here truncates the response body.
+      const mockFileContent = 'console.log("中文注释");';
+      const mockFileResult = {
+        content: mockFileContent,
+        lastModified: Date.now(),
+      };
+
+      mockContext.req.path = '/bundles/non-ascii.js';
+      (access as any).mockResolvedValue(undefined);
+      (fileCache.getFile as any).mockResolvedValue(mockFileResult);
+
+      await middleware(mockContext, nextSpy);
+
+      expect(Buffer.byteLength(mockFileContent)).toBeGreaterThan(
+        mockFileContent.length,
+      );
+      expect(mockContext.header).toHaveBeenCalledWith(
+        'Content-Length',
+        String(Buffer.byteLength(mockFileContent)),
+      );
+    });
+
+    it('should set Content-Length in bytes for ASCII content', async () => {
+      const mockFileContent = 'console.log("ascii only");';
+      const mockFileResult = {
+        content: mockFileContent,
+        lastModified: Date.now(),
+      };
+
+      mockContext.req.path = '/bundles/ascii.js';
+      (access as any).mockResolvedValue(undefined);
+      (fileCache.getFile as any).mockResolvedValue(mockFileResult);
+
+      await middleware(mockContext, nextSpy);
+
+      expect(mockContext.header).toHaveBeenCalledWith(
+        'Content-Length',
+        String(mockFileContent.length),
+      );
+    });
   });
 
   describe('asset prefix handling', () => {
