@@ -33,7 +33,12 @@ export type DescriptionFileResolver = (
   callback: (
     err: Error | null,
     result?: { data?: { name?: string; version?: string }; path?: string },
+    checkedDescriptionFilePaths?: string[],
   ) => void,
+  satisfiesDescriptionFileData?: (data?: {
+    data?: Record<string, unknown>;
+    path?: string;
+  }) => boolean,
 ) => void;
 
 export type ConsumeEntry = [
