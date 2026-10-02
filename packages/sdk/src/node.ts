@@ -247,6 +247,9 @@ export const loadScriptNode =
       };
 
 const esmModuleCache = new Map<string, any>();
+// Only a root load calls link(); Node recursively links the unlinked modules
+// the linker returns. This lets a second root load await one already in flight.
+const esmRootLinking = new Map<string, Promise<unknown>>();
 
 type LoadModuleOptions = {
   vm: typeof import('vm') & {
@@ -368,13 +371,12 @@ async function loadNodeBuiltinModule(
   return createSyntheticModuleFromExports(cacheKey, moduleExports, vm);
 }
 
-async function loadResolvedModule(
+async function resolveModuleSpecifier(
   specifier: string,
   parentUrl: string,
-  options: LoadModuleOptions,
-) {
+): Promise<{ builtin: true } | { builtin: false; url: string }> {
   if (await isNodeBuiltinSpecifier(specifier)) {
-    return loadNodeBuiltinModule(specifier, options.vm);
+    return { builtin: true };
   }
 
   if (isBareModuleSpecifier(specifier)) {
@@ -390,7 +392,38 @@ async function loadResolvedModule(
     );
   }
 
-  return loadModule(resolvedUrl, options);
+  return { builtin: false, url: resolvedUrl };
+}
+
+// Must not link what it returns: a nested link() instantiates its subgraph
+// while a sibling may still be resolving requests inside it.
+async function linkModuleRequest(
+  specifier: string,
+  referencingModule: any,
+  options: LoadModuleOptions,
+) {
+  const parentUrl = referencingModule.identifier;
+  const resolved = await resolveModuleSpecifier(specifier, parentUrl);
+
+  if (resolved.builtin) {
+    return loadNodeBuiltinModule(specifier, options.vm);
+  }
+
+  return getOrCreateModule(resolved.url, options);
+}
+
+async function loadResolvedModule(
+  specifier: string,
+  parentUrl: string,
+  options: LoadModuleOptions,
+) {
+  const resolved = await resolveModuleSpecifier(specifier, parentUrl);
+
+  if (resolved.builtin) {
+    return loadNodeBuiltinModule(specifier, options.vm);
+  }
+
+  return loadModule(resolved.url, options);
 }
 
 async function evaluateDynamicModule(module: any) {
@@ -405,10 +438,10 @@ async function evaluateDynamicModule(module: any) {
   return module;
 }
 
-async function loadModule(url: string, options: LoadModuleOptions) {
-  // Check cache to prevent infinite recursion in ESM loading
-  if (esmModuleCache.has(url)) {
-    return esmModuleCache.get(url)!;
+async function getOrCreateModule(url: string, options: LoadModuleOptions) {
+  const cached = esmModuleCache.get(url);
+  if (cached) {
+    return cached;
   }
 
   const { fetch, vm } = options;
@@ -435,12 +468,31 @@ async function loadModule(url: string, options: LoadModuleOptions) {
     },
   });
 
-  // Cache the module before linking to prevent cycles
   esmModuleCache.set(url, sourceTextModule);
 
-  await sourceTextModule.link(async (specifier: string) => {
-    return loadResolvedModule(specifier, url, options);
-  });
+  return sourceTextModule;
+}
+
+async function loadModule(url: string, options: LoadModuleOptions) {
+  const sourceTextModule = await getOrCreateModule(url, options);
+
+  const inFlight = esmRootLinking.get(url);
+  if (inFlight) {
+    await inFlight;
+    return sourceTextModule;
+  }
+
+  if (sourceTextModule.status === 'unlinked') {
+    const linking = sourceTextModule
+      .link((specifier: string, referencingModule: any) =>
+        linkModuleRequest(specifier, referencingModule, options),
+      )
+      .finally(() => {
+        esmRootLinking.delete(url);
+      });
+    esmRootLinking.set(url, linking);
+    await linking;
+  }
 
   return sourceTextModule;
 }
