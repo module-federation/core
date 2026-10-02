@@ -360,6 +360,53 @@ describe('typeScriptCompiler', () => {
       },
     );
 
+    it.skipIf(process.platform === 'win32')(
+      'runs a compiler executable at a path with spaces and quotes',
+      async () => {
+        const projectDir = join(tmpDir, 'directCompilerProject');
+        const compilerDir = join(projectDir, 'compiler (x86)', "it's here");
+        mkdirSync(compilerDir, { recursive: true });
+        linkTypeScriptPackage(projectDir, 'typescript');
+        const compilerPath = join(compilerDir, 'tsc');
+        writeFileSync(
+          compilerPath,
+          `#!/usr/bin/env node\nrequire(${JSON.stringify(requireFromTest.resolve('typescript/bin/tsc'))});\n`,
+          { mode: 0o755 },
+        );
+        const entryFile = join(projectDir, 'hello.ts');
+        writeFileSync(entryFile, 'export const hello = 1;\n');
+        const outDir = join(
+          projectDir,
+          'typesRemoteFolder',
+          'compiledTypesFolder',
+        );
+
+        await compileTs(
+          { './hello': entryFile },
+          {
+            compilerOptions: {
+              declaration: true,
+              emitDeclarationOnly: true,
+              module: 'nodenext',
+              types: [],
+              rootDir: projectDir,
+              outDir,
+            },
+            files: [entryFile],
+          },
+          {
+            ...remoteOptions,
+            context: projectDir,
+            compilerInstance: compilerPath,
+          },
+        );
+
+        expect(readFileSync(join(outDir, 'hello.d.ts'), 'utf8')).toContain(
+          'export declare const hello = 1;',
+        );
+      },
+    );
+
     it('ignores inherited declarationDir', async () => {
       const projectDir = join(tmpDir, 'declarationDirProject');
       const srcDir = join(projectDir, 'src');
