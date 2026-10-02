@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import ObservabilityDemo from './ObservabilityDemo';
 import ObservabilityShowcase from './ObservabilityShowcase';
+import EsmRetryDemo from './EsmRetryDemo';
 import Root from './Root';
 import Remote1 from './Remote1';
 import Remote2 from './Remote2';
@@ -37,6 +38,9 @@ const AppRoutes = () => {
             <li>
               <Link to={'/observability-showcase'}>observability showcase</Link>
             </li>
+            <li>
+              <Link to={'/esm-retry'}>ESM retry</Link>
+            </li>
           </ul>
         </>
       ) : null}
@@ -49,6 +53,7 @@ const AppRoutes = () => {
           path="/observability-showcase/*"
           element={<ObservabilityShowcase />}
         />
+        <Route path="/esm-retry" element={<EsmRetryDemo />} />
       </Routes>
     </>
   );

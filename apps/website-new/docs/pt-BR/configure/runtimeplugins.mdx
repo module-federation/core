@@ -1,0 +1,101 @@
+# runtimePlugins
+
+- Type: `string[] | Array<[string, Record<string, unknown>]>`
+- Obrigatório: No
+- Padrão: `undefined`
+
+O `runtimePlugins` configuração é usado para adicionar additional plugins needed em runtime. O valor pode ser:
+- Uma string representing o caminho para o specific plugin (absolute / relative caminho ou pacote name)
+- Um array onde each element pode ser either uma string ou uma tuple com [string caminho, objeto opções]
+
+For uma task-oriented guia para choosing Hooks e building plugins, consulte [Runtime Plugins](/guide/runtime/runtime-plugins.html). For o full Hook reference, consulte [Runtime Hooks](/guide/runtime/runtime-hooks.html). For lower-level plugin authoring details, see o [Plugin System](/plugin/dev/index.html).
+
+Once definir, runtime plugins vai ser automatically injected e usado during o build process.
+
+**Básico uso:**
+To crie uma runtime plugin arquivo, você pode name it `custom-runtime-plugin.ts`:
+
+```ts title="custom-runtime-plugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (): ModuleFederationRuntimePlugin {
+  return {
+    name: 'custom-plugin-build',
+    beforeInit(args) {
+      console.log('[build time inject] beforeInit: ', args);
+      return args;
+    },
+    beforeLoadShare(args) {
+      console.log('[build time inject] beforeLoadShare: ', args);
+      return args;
+    },
+  };
+}
+```
+
+Then, apply este plugin em your build configuração:
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+      },
+      runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
+    }),
+  ],
+};
+```
+
+**Com opções:**
+Você pode também forneça opções para runtime plugins by usando uma tuple format:
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+      },
+      runtimePlugins: [
+        path.resolve(__dirname, './custom-runtime-plugin.ts'),
+        [
+          path.resolve(__dirname, './another-plugin.ts'),
+          {
+            debug: true,
+            timeout: 5000,
+            customConfig: 'value'
+          }
+        ]
+      ],
+    }),
+  ],
+};
+```
+
+O plugin pode then access these opções:
+
+```ts title="another-plugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (options: any): ModuleFederationRuntimePlugin {
+  console.log('Plugin options:', options);
+
+  return {
+    name: 'another-plugin',
+    beforeInit(args) {
+      if (options.debug) {
+        console.log('[debug] beforeInit: ', args);
+      }
+      return args;
+    },
+  };
+}
+```

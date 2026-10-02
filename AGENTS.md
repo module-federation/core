@@ -21,7 +21,7 @@ If prose docs conflict with workflows (for example `README.md` or `CONTRIBUTING.
 
 ## Environment Parity
 
-- Node.js: `20` (from `.nvmrc` and workflow setup)
+- Node.js: `24` (from `.nvmrc` and workflow setup)
 - pnpm: `10.28.0` (from `package.json` `packageManager`)
 - Package manager: pnpm only
 
@@ -280,6 +280,12 @@ const webpack = require(normalizeWebpackPath('webpack')) as typeof import('webpa
 - Avoid introducing new direct bare-path requires such as `require('webpack/lib/...')` when the normalized path pattern is available.
 - Avoid introducing new direct webpack package imports for internals when the existing module uses normalized `require(...)` conventions.
 - When editing an existing file, preserve the local webpack-loading style already used there unless there is a deliberate reason to migrate the file consistently.
+
+## Sokra Mode
+
+When asked to use Sokra mode, invoke `$sokra-mode` from
+`.agents/skills/sokra-mode/SKILL.md`. It loads the shared guidance in
+`.claude/skills/sokra-mode/SKILL.md`. The skill is opt-in in both clients.
 
 ## Operating Rules
 

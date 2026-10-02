@@ -5,6 +5,7 @@
   "devDependencies": {
     "@module-federation/core": "workspace:*",
     "@module-federation/observability-plugin": "workspace:*",
+    "@module-federation/retry-plugin": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/typescript": "workspace:*",
     "@module-federation/enhanced": "workspace:*",

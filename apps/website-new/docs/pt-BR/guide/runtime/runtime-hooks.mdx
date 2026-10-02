@@ -1,0 +1,1066 @@
+# Hooks de runtime
+
+O Module Federation runtime exposes hooks at key stages — carregamento módulos remotos, initializing containers, registering e resolving dependências compartilhadas, e mais. They são useful for diagnostics e tracing, erro fallbacks, rewriting dependências compartilhadas, customizing recurso carregamento, e similar scenarios.
+
+## Hook retornar valores
+
+For `SyncHook` e `AsyncHook`, returning `undefined` means o plugin apenas observes o event. It does não clear uma valor retornado por um earlier plugin. Uma later plugin pode still replace esse valor by returning another non-`undefined` valor.
+
+For `SyncWaterfallHook` e `AsyncWaterfallHook`, retornar o full updated args objeto quando você precisa change o payload. Returning `undefined` keeps o current args e passes them para o next plugin.
+
+## beforeInit
+
+`SyncWaterfallHook`
+
+Updates o corresponding init configuração antes o MF instance é initialized.
+
+```ts
+function beforeInit(args: BeforeInitOptions): BeforeInitOptions;
+
+type BeforeInitOptions = {
+  userOptions: UserOptions;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
+  shareInfo: ShareInfos;
+};
+
+interface ModuleFederationRuntimeOptions {
+  id?: string;
+  name: string;
+  version?: string;
+  remotes: Array<Remote>;
+  shared: ShareInfos;
+  plugins: Array<ModuleFederationRuntimePlugin>;
+  inBrowser: boolean;
+}
+```
+
+## init
+
+`SyncHook`
+
+Called depois o MF instance é initialized.
+
+```ts
+function init(args: InitOptions): void;
+
+type InitOptions = {
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
+};
+```
+
+## beforeRequest
+
+`AsyncWaterfallHook`
+
+Called antes resolving o remote caminho, useful for updating something antes lookup.
+
+```ts
+async function beforeRequest(
+  args: BeforeRequestOptions,
+): Promise<BeforeRequestOptions>;
+
+type BeforeRequestOptions = {
+  id: string;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
+};
+```
+
+## afterMatchRemote
+
+`AsyncHook`
+
+Called depois o runtime matches uma `loadRemote` request para uma configured remote. Se matching fails, o hook é still chamada com `error`. It é useful for diagnostics, request tracing, e checking whether uma falha happened antes manifest ou remoteEntry carregamento.
+
+```ts
+async function afterMatchRemote(args: AfterMatchRemoteOptions): Promise<void>;
+
+type AfterMatchRemoteOptions = {
+  id: string;
+  options: ModuleFederationRuntimeOptions;
+  remote?: Remote;
+  expose?: string;
+  remoteInfo?: RemoteInfo;
+  error?: unknown;
+  origin: ModuleFederation;
+};
+```
+
+## afterResolve
+
+`AsyncWaterfallHook`
+
+Called depois resolving o remote caminho, allowing modification do resolved content.
+
+```ts
+async function afterResolve(
+  args: AfterResolveOptions,
+): Promise<AfterResolveOptions>;
+
+type AfterResolveOptions = {
+  id: string;
+  pkgNameOrAlias: string;
+  expose: string;
+  remote: Remote;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+};
+```
+
+## onLoad
+
+`AsyncHook`
+
+Triggered depois uma remote é carregado, allowing access para e modification do carregado arquivo's exposto exporta.
+
+```ts
+async function onLoad(args: OnLoadOptions): Promise<void>;
+
+type OnLoadOptions = {
+  id: string;
+  expose: string;
+  pkgNameOrAlias: string;
+  remote: Remote;
+  options: ModuleOptions;
+  origin: ModuleFederation;
+  exposeModule: any;
+  exposeModuleFactory: any;
+  moduleInstance: Module;
+};
+
+type ModuleOptions = {
+  remoteInfo: RemoteInfo;
+  host: ModuleFederation;
+};
+
+interface RemoteInfo {
+  name: string;
+  version?: string;
+  buildVersion?: string;
+  entry: string;
+  type: RemoteEntryType;
+  entryGlobalName: string;
+  shareScope: string;
+}
+```
+
+## afterLoadRemote
+
+`AsyncHook`
+
+Called depois uma `loadRemote` request finishes. It runs for successful carrega, falhou carrega, e carrega recovered by `errorLoadRemote`. Use it para record o final carregamento de remote status.
+
+`onLoad` runs antes `afterLoadRemote` on uma successful carregue. Se uma carregue fails e `errorLoadRemote` retorna uma fallback, `afterLoadRemote` receives o original `error` e `recovered: true`.
+
+```ts
+async function afterLoadRemote(args: AfterLoadRemoteOptions): Promise<void>;
+
+type AfterLoadRemoteOptions = {
+  id: string;
+  expose?: string;
+  remote?: RemoteInfo;
+  options?: {
+    loadFactory?: boolean;
+    from?: 'build' | 'runtime';
+  };
+  error?: unknown;
+  recovered?: boolean;
+  origin: ModuleFederation;
+};
+```
+
+## beforeInitContainer
+
+`AsyncWaterfallHook`
+
+Triggered antes o host calls `remoteEntry.init(...)`. Useful for dinamicamente rewriting o `shareScope` / `initScope` usado em este initialization e o `remoteEntryInitOptions` passed para o remote.
+
+```ts
+async function beforeInitContainer(
+  args: BeforeInitContainerOptions,
+): Promise<BeforeInitContainerOptions>;
+
+type BeforeInitContainerOptions = {
+  shareScope: ShareScopeMap[string];
+  initScope: InitScope;
+  remoteEntryInitOptions: RemoteEntryInitOptions;
+  remoteInfo: RemoteInfo;
+  origin: ModuleFederation;
+};
+```
+
+## initContainer
+
+`AsyncWaterfallHook`
+
+Triggered depois `remoteEntry.init(...)` completes successfully. Useful for metrics, observability, ou post-initialization customization.
+
+```ts
+async function initContainer(
+  args: InitContainerOptions,
+): Promise<InitContainerOptions>;
+
+type InitContainerOptions = {
+  shareScope: ShareScopeMap[string];
+  initScope: InitScope;
+  remoteEntryInitOptions: RemoteEntryInitOptions;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports: RemoteEntryExports;
+  origin: ModuleFederation;
+  id?: string;
+  remoteSnapshot?: ModuleInfo;
+};
+```
+
+## handlePreloadModule
+
+`SyncHook`
+
+Handles o preloading logic for remotes.
+
+```ts
+function handlePreloadModule(args: HandlePreloadModuleOptions): void;
+
+type HandlePreloadModuleOptions = {
+  id: string;
+  name: string;
+  remote: Remote;
+  remoteSnapshot: ModuleInfo;
+  preloadConfig: PreloadRemoteArgs;
+  origin: ModuleFederation;
+};
+```
+
+## errorLoadRemote
+
+`AsyncHook`
+
+Called se carregamento remotes fails, enabling custom tratamento de erros. Can retornar uma custom fallback logic.
+
+```ts
+async function errorLoadRemote(
+  args: ErrorLoadRemoteOptions,
+): Promise<void | unknown>;
+
+type ErrorLoadRemoteOptions = {
+  id: string;
+  error: unknown;
+  options?: any;
+  from: 'build' | 'runtime';
+  lifecycle: 'beforeRequest' | 'beforeLoadShare' | 'afterResolve' | 'onLoad';
+  remote?: RemoteInfo;
+  expose?: string;
+  origin: ModuleFederation;
+};
+```
+
+O `lifecycle` parameter indicates o stage onde o erro occurred:
+
+- `beforeRequest`: Erro during initial request processing
+- `afterResolve`: Erro during manifest carregamento (mais comum for network falhas)
+- `onLoad`: Erro during módulo carregamento e execution
+- `beforeLoadShare`: Erro enquanto carregamento uma remoteEntry during dependência compartilhada initialization
+
+Se este hook retorna uma fallback módulo, o runtime usa esse valor para continue. Se uma diagnostics ou logging plugin retorna `undefined`, it does não clear uma fallback retornado by another plugin.
+
+```ts
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const fallbackPlugin: () => ModuleFederationRuntimePlugin =
+  function () {
+    return {
+      name: 'fallback-plugin',
+      errorLoadRemote(args) {
+        const { lifecycle, id, error } = args;
+
+        if (error) {
+          console.warn(\`Failed to load remote \${id} at \${lifecycle}:\`, error?.message || error);
+        }
+
+        switch (lifecycle) {
+          case 'afterResolve':
+            return {
+              id: id || 'fallback',
+              name: id || 'fallback',
+              metaData: { /* fallback manifest */ },
+              shared: [],
+              remotes: [],
+              exposes: []
+            };
+
+          case 'beforeRequest':
+            console.warn(\`Request processing failed for \${id}\`);
+            return void 0;
+
+          case 'onLoad':
+            return () => ({
+              __esModule: true,
+              default: () => 'Fallback Component'
+            });
+
+          case 'beforeLoadShare':
+            console.warn(\`Shared dependency loading failed for \${id}\`);
+            return () => ({
+              __esModule: true,
+              default: {}
+            });
+
+          default:
+            console.warn(\`Unknown lifecycle \${lifecycle} for \${id}\`);
+            return void 0;
+        }
+      },
+    };
+  };
+
+const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+        {
+            name: "remote",
+            alias: "app1",
+            entry: "http://localhost:2001/mf-manifest.json"
+        }
+    ],
+    plugins: [fallbackPlugin()]
+});
+
+mf.loadRemote('app1/un-existed-module').then(mod=>{
+  expect(mod).toEqual('fallback');
+});
+```
+
+## beforeLoadShare
+
+`AsyncWaterfallHook`
+
+Called antes carregamento shared, pode ser usado para modificar o corresponding shared configuração.
+
+```ts
+async function beforeLoadShare(
+  args: BeforeLoadShareOptions,
+): Promise<BeforeLoadShareOptions>;
+
+type BeforeLoadShareOptions = {
+  pkgName: string;
+  shareInfo?: Shared;
+  shared: Options['shared'];
+  origin: ModuleFederation;
+};
+```
+
+## afterLoadShare
+
+`SyncHook`
+
+Called depois uma dependência compartilhada é successfully resolved by `loadShare` ou `loadShareSync`. Use it para observe que provider e versão were selected.
+
+```ts
+function afterLoadShare(args: AfterLoadShareOptions): void;
+
+type AfterLoadShareOptions = {
+  pkgName: string;
+  shareInfo?: Partial<Shared>;
+  selectedShared?: Partial<Shared>;
+  shared: Options['shared'];
+  shareScopeMap: ShareScopeMap;
+  lifecycle: 'loadShare' | 'loadShareSync';
+  origin: ModuleFederation;
+};
+```
+
+## errorLoadShare
+
+`SyncHook`
+
+Called quando dependência compartilhada resolution fails ou cannot select uma valid dependência compartilhada. It é useful for diagnostics around dependências ausentes compartilhadas, versão mismatch, e eager configuração erros.
+
+```ts
+function errorLoadShare(args: ErrorLoadShareOptions): void;
+
+type ErrorLoadShareOptions = {
+  pkgName: string;
+  shareInfo?: Partial<Shared>;
+  shared: Options['shared'];
+  shareScopeMap: ShareScopeMap;
+  lifecycle: 'loadShare' | 'loadShareSync';
+  origin: ModuleFederation;
+  error?: unknown;
+  recovered?: boolean;
+};
+```
+
+## initContainerShareScopeMap
+
+`SyncWaterfallHook`
+
+Triggered quando o host aligns uma remote’s compartilhe-escopo mapping. Useful for redirecting one escopo para another (por exemplo, aliasing `scope1` para `default` so they compartilhe o mesmo pool).
+
+```ts
+function initContainerShareScopeMap(
+  args: InitContainerShareScopeMapOptions,
+): InitContainerShareScopeMapOptions;
+
+type InitContainerShareScopeMapOptions = {
+  shareScope: ShareScopeMap[string];
+  options: Options;
+  origin: ModuleFederation;
+  scopeName: string;
+  hostShareScopeMap?: ShareScopeMap;
+};
+```
+
+## resolveShare
+
+`SyncWaterfallHook`
+
+Allows overriding o final shared módulo selection result.
+
+`resolveShare` runs depois o runtime has já picked o candidate escopo e versão. At este point, changing fields like `scope` ou `version` on `args` does não change o final result by itself. To switch para uma diferente shared módulo, replace `args.resolver` e retornar o shared record você quiser use.
+
+```ts
+function resolveShare(args: ResolveShareOptions): ResolveShareOptions;
+
+type ResolveShareOptions = {
+  shareScopeMap: ShareScopeMap;
+  scope: string;
+  pkgName: string;
+  version: string;
+  shareInfo: Shared;
+  GlobalFederation: Federation;
+  resolver: () =>
+    | {
+        shared: Shared;
+        useTreesShaking: boolean;
+      }
+    | undefined;
+};
+```
+
+```ts
+import {
+  createInstance,
+  loadRemote,
+} from '@module-federation/enhanced/runtime';
+
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const customSharedPlugin: () => ModuleFederationRuntimePlugin = function () {
+  return {
+    name: 'custom-shared-plugin',
+    resolveShare(args) {
+      const { pkgName, shareScopeMap } = args;
+
+      if (pkgName !== 'react') {
+        return args;
+      }
+
+      const fallbackShared = shareScopeMap.default?.react?.['17.0.0'];
+      if (!fallbackShared) {
+        return args;
+      }
+
+      args.resolver = function () {
+        return {
+          shared: fallbackShared,
+          useTreesShaking: false,
+        };
+      };
+      return args;
+    },
+  };
+};
+
+const mf = createInstance({
+  name: 'mf_host',
+  shared: {
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+  },
+  plugins: [customSharedPlugin()],
+});
+
+mf.loadShare('react').then((reactFactory) => {
+  expect(reactFactory()).toEqual(React);
+});
+```
+
+## beforePreloadRemote
+
+`AsyncHook`
+
+Called antes o preload handler executes any preload logic.
+
+```ts
+async function beforePreloadRemote(
+  args: BeforePreloadRemoteOptions,
+): Promise<void>;
+
+type BeforePreloadRemoteOptions = {
+  preloadOps: Array<PreloadRemoteArgs>;
+  options: Options;
+  origin: ModuleFederation;
+};
+```
+
+## generatePreloadAssets
+
+`AsyncHook`
+
+Usado para control o generation de recursos esse precisa ser preloaded.
+
+```ts
+async function generatePreloadAssets(
+  args: GeneratePreloadAssetsOptions,
+): Promise<PreloadAssets>;
+
+type GeneratePreloadAssetsOptions = {
+  origin: ModuleFederation;
+  preloadOptions: PreloadOptions[number];
+  remote: Remote;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot: ModuleInfo;
+  globalSnapshot: GlobalModuleInfo;
+};
+
+interface PreloadAssets {
+  cssAssets: Array<string>;
+  jsAssetsWithoutEntry: Array<string>;
+  entryAssets: Array<EntryAssets>;
+}
+```
+
+## loaderHook
+
+`loaderHook` é usado para intercept recurso carregamento e módulo-factory resolution.
+
+## beforeInitRemote
+
+`AsyncHook`
+
+Called antes initializing o remote container com `remoteEntry.init(...)`.
+
+```ts
+async function beforeInitRemote(args: BeforeInitRemoteOptions): Promise<void>;
+
+type BeforeInitRemoteOptions = {
+  id?: string;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+  origin: ModuleFederation;
+};
+```
+
+## afterInitRemote
+
+`AsyncHook`
+
+Called depois remote container initialization succeeds ou fails. Quando o remote was já initialized, `cached` é definir para `true`.
+
+```ts
+async function afterInitRemote(args: AfterInitRemoteOptions): Promise<void>;
+
+type AfterInitRemoteOptions = {
+  id?: string;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  error?: unknown;
+  cached?: boolean;
+  origin: ModuleFederation;
+};
+```
+
+## beforeGetExpose
+
+`AsyncHook`
+
+Called antes `remoteEntry.get(expose)`.
+
+```ts
+async function beforeGetExpose(args: BeforeGetExposeOptions): Promise<void>;
+
+type BeforeGetExposeOptions = {
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  remoteEntryExports: RemoteEntryExports;
+  origin: ModuleFederation;
+};
+```
+
+## afterGetExpose
+
+`AsyncHook`
+
+Called depois `remoteEntry.get(expose)` succeeds ou fails.
+
+```ts
+async function afterGetExpose(args: AfterGetExposeOptions): Promise<void>;
+
+type AfterGetExposeOptions = {
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  remoteEntryExports: RemoteEntryExports;
+  moduleFactory?: () => unknown | Promise<unknown>;
+  error?: unknown;
+  origin: ModuleFederation;
+};
+```
+
+## beforeExecuteFactory
+
+`AsyncHook`
+
+Called antes executing o módulo exposto factory. It é skipped quando `loadRemote` é chamada com `loadFactory: false`.
+
+```ts
+async function beforeExecuteFactory(
+  args: BeforeExecuteFactoryOptions,
+): Promise<void>;
+
+type BeforeExecuteFactoryOptions = {
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  loadFactory: boolean;
+  origin: ModuleFederation;
+};
+```
+
+## afterExecuteFactory
+
+`AsyncHook`
+
+Called depois o módulo exposto factory succeeds ou fails. It é skipped quando `loadRemote` é chamada com `loadFactory: false`.
+
+```ts
+async function afterExecuteFactory(
+  args: AfterExecuteFactoryOptions,
+): Promise<void>;
+
+type AfterExecuteFactoryOptions = {
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  loadFactory: boolean;
+  exposeModule?: unknown;
+  error?: unknown;
+  origin: ModuleFederation;
+};
+```
+
+## createScript
+
+`SyncHook`
+
+Usado para modificar o script quando carregamento recursos.
+
+```ts
+function createScript(args: CreateScriptOptions): CreateScriptHookReturn;
+
+type CreateScriptOptions = {
+  url: string;
+  attrs?: Record<string, any>;
+  remoteInfo?: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
+};
+
+type CreateScriptHookReturn =
+  | HTMLScriptElement
+  | { script?: HTMLScriptElement; timeout?: number }
+  | void;
+
+type ResourceLoadContext = {
+  initiator: 'loadRemote' | 'preloadRemote';
+  id: string;
+  resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+  url?: string;
+};
+```
+
+`timeout` é measured em milliseconds e controls o script carregamento timeout. O padrão valor é `20000`.
+`resourceContext` tells whether este recurso carregue came de `loadRemote` ou
+`preloadRemote`, plus o recurso tipo e id.
+Você pode combine `timeout` e `resourceContext` para definir diferente timeouts for
+remoteEntry carrega e preload carrega.
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
+  function () {
+    return {
+      name: 'change-script-attribute',
+      createScript({ url }) {
+        if (url === 'http://localhost:3001/remoteEntry.js') {
+          let script = document.createElement('script');
+          script.src = url;
+          script.setAttribute('loader-hooks', 'isTrue');
+          script.setAttribute('crossorigin', 'anonymous');
+          return {
+            script,
+            timeout: 30000,
+          };
+        }
+      },
+    };
+  };
+```
+
+## buscar
+
+`AsyncHook`
+
+O `fetch` função allows customizing o request esse fetches o manifest JSON. Uma successful `Response` deve yield uma valid JSON.
+
+```typescript
+function fetch(
+  manifestUrl: string,
+  requestInit: RequestInit,
+  remoteInfo?: RemoteInfo,
+  resourceContext?: ResourceLoadContext,
+): Promise<Response> | void | false;
+```
+
+`resourceContext` pode tell whether este manifest request came de `loadRemote`
+ou `preloadRemote`.
+
+- Exemplo for including o credentials quando fetching o manifest JSON:
+
+```ts
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+// fetch-manifest-with-credentials-plugin.ts
+export default function (): FederationRuntimePlugin {
+  return {
+    name: 'fetch-manifest-with-credentials-plugin',
+    fetch(manifestUrl, requestInit) {
+      return fetch(manifestUrl, {
+        ...requestInit,
+        credentials: 'include',
+      });
+    },
+  };
+}
+```
+
+## createLink
+
+`SyncHook`
+
+Usado para customize o link element criado for preload/style carregamento.
+
+```ts
+function createLink(args: CreateLinkOptions): HTMLLinkElement | void;
+
+type CreateLinkOptions = {
+  url: string;
+  attrs?: Record<string, any>;
+  remoteInfo?: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
+};
+
+type CreateLinkHookReturn =
+  | HTMLLinkElement
+  | { link?: HTMLLinkElement; timeout?: number }
+  | void;
+```
+
+`resourceContext` has o mesmo shape as em `createScript`. Ele pode distinguish
+preloaded JS/CSS, actual remoteEntry carregamento, e o related recurso id.
+`timeout` é measured em milliseconds e controls o link carregamento timeout. O
+padrão valor é `20000`.
+
+Exemplo: use uma shorter timeout for low-priority preload recursos, enquanto keeping
+normal carregamento de remote mais tolerant.
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const resourceTimeoutPlugin = (): ModuleFederationRuntimePlugin => ({
+  name: 'resource-timeout-plugin',
+  createScript({ resourceContext }) {
+    if (
+      resourceContext?.initiator === 'loadRemote' &&
+      resourceContext.resourceType === 'remoteEntry'
+    ) {
+      return {
+        timeout: 30000,
+      };
+    }
+  },
+  createLink({ resourceContext }) {
+    if (resourceContext?.initiator === 'preloadRemote') {
+      return {
+        timeout: 5000,
+      };
+    }
+  },
+});
+```
+
+## loadEntryError
+
+`AsyncHook`
+
+Triggered quando carregamento remoteEntry fails (typically script carregamento erros). Useful for retries ou custom fallback estratégias.
+
+```ts
+async function loadEntryError(
+  args: LoadEntryErrorOptions,
+): Promise<Promise<RemoteEntryExports | undefined> | undefined>;
+
+type LoadEntryErrorOptions = {
+  getRemoteEntry: typeof getRemoteEntry;
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  globalLoading: Record<string, Promise<void | RemoteEntryExports> | undefined>;
+  uniqueKey: string;
+};
+```
+
+## afterLoadEntry
+
+`AsyncHook`
+
+Called depois carregamento uma remoteEntry succeeds, fails, ou é recovered by `loadEntryError`.
+
+```ts
+async function afterLoadEntry(args: AfterLoadEntryOptions): Promise<void>;
+
+type AfterLoadEntryOptions = {
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports | false | void;
+  error?: unknown;
+  recovered?: boolean;
+};
+```
+
+## getModuleFactory
+
+`AsyncHook`
+
+Triggered antes chamar `remoteEntry.get(expose)`, allowing custom módulo-factory resolution.
+
+```ts
+async function getModuleFactory(
+  args: GetModuleFactoryOptions,
+): Promise<(() => Promise<Module>) | undefined>;
+
+type GetModuleFactoryOptions = {
+  remoteEntryExports: RemoteEntryExports;
+  expose: string;
+  moduleInfo: RemoteInfo;
+};
+```
+
+## loadEntry
+
+`asyncHook`
+
+O `loadEntry` função allows for full customization de remotes, enabling você para extend e crie novo remote tipos. O seguinte two simple exemplos demonstrate carregamento JSON dados e módulo delegation.
+
+```typescript
+function loadEntry(args: LoadEntryOptions): RemoteEntryExports | void;
+
+type LoadEntryOptions = {
+  createScriptHook: SyncHook;
+  remoteEntryExports?: RemoteEntryExports;
+  remoteInfo: RemoteInfo;
+};
+interface RemoteInfo {
+  name: string;
+  version?: string;
+  buildVersion?: string;
+  entry: string;
+  type: RemoteEntryType;
+  entryGlobalName: string;
+  shareScope: string;
+}
+export type RemoteEntryExports = {
+  get: (id: string) => () => Promise<Module>;
+  init: (
+    shareScope: ShareScopeMap[string],
+    initScope?: InitScope,
+    remoteEntryInitOPtions?: RemoteEntryInitOptions,
+  ) => void | Promise<void>;
+};
+```
+
+- Exemplo Carregamento JSON Dados
+
+```ts
+import { init } from '@module-federation/enhanced/runtime';
+
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+// load-json-data-plugin.ts
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'load-json-data-plugin',
+    loadEntry({ remoteInfo }) {
+      if (remoteInfo.jsonA === 'jsonA') {
+        return {
+          init(shareScope, initScope, remoteEntryInitOPtions) {},
+          async get(path) {
+            const json = await fetch(remoteInfo.entry + '.json').then((res) =>
+              res.json(),
+            );
+            return () => ({
+              path,
+              json,
+            });
+          },
+        };
+      }
+    },
+  };
+};
+```
+
+```ts
+// module-federation-config
+{
+  remotes: {
+    jsonA: "jsonA@https://cdn.jsdelivr.net/npm/@module-federation/runtime/package";
+  }
+}
+```
+
+```ts
+// src/bootstrap.js
+import jsonA from 'jsonA';
+jsonA; // {...json data}
+```
+
+- Exemplo Delegate Módulos
+
+```ts
+import { init } from '@module-federation/enhanced/runtime';
+
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+// delegate-modules-plugin.ts
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'delegate-modules-plugin',
+    loadEntry({ remoteInfo }) {
+      if (remoteInfo.name === 'delegateModulesA') {
+        return {
+          init(shareScope, initScope, remoteEntryInitOPtions) {},
+          async get(path) {
+            path = path.replace('./', '');
+            const { [path]: factory } = await import('./delegateModulesA.js');
+            const result = await factory();
+            return () => result;
+          },
+        };
+      }
+    },
+  };
+};
+```
+
+```ts
+// ./src/delegateModulesA.js
+export async function test1() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve('test1 value');
+    }, 3000);
+  });
+}
+export async function test2() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve('test2 value');
+    }, 3000);
+  });
+}
+```
+
+```ts
+// module-federation-config
+{
+  remotes: {
+    delegateModulesA: 'delegateModulesA@https://delegateModulesA.js';
+  }
+}
+```
+
+```ts
+// src/bootstrap.js
+import test1 from 'delegateModulesA/test1';
+import test2 from 'delegateModulesA/test2';
+test1; // "test1 value"
+test2; // "test2 value"
+```
+
+## bridgeHook
+
+`bridgeHook` é usado para extend context across bridge render/destroy stages (por exemplo, React/Vue bridge).
+
+## beforeBridgeRender
+
+`SyncHook`
+
+Triggered antes bridge renderização. Você pode retornar um objeto para augment render arguments (por exemplo, `extraProps`).
+
+```ts
+function beforeBridgeRender(
+  args: Record<string, any>,
+): void | Record<string, any>;
+```
+
+## afterBridgeRender
+
+`SyncHook`
+
+Triggered depois bridge renderização.
+
+```ts
+function afterBridgeRender(
+  args: Record<string, any>,
+): void | Record<string, any>;
+```
+
+## beforeBridgeDestroy
+
+`SyncHook`
+
+Triggered antes bridge teardown.
+
+```ts
+function beforeBridgeDestroy(
+  args: Record<string, any>,
+): void | Record<string, any>;
+```
+
+## afterBridgeDestroy
+
+`SyncHook`
+
+Triggered depois bridge teardown.
+
+```ts
+function afterBridgeDestroy(
+  args: Record<string, any>,
+): void | Record<string, any>;
+```

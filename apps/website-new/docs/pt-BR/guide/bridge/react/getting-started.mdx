@@ -1,0 +1,64 @@
+# React Bridge Visão geral
+
+`@module-federation/bridge-react` é uma powerful micro-frontend solution designed specifically for React aplicações. By providing cross-framework renderização e routing coordination capabilities, você pode easily exporte e carregue React aplicações ou módulos as standalone aplicações.
+
+## Core Features
+
+### Básico Capabilities
+
+- **🚀 Aplicação-level Módulo Exporte**: Use `createBridgeComponent` para wrap complete React aplicações as remotely loadable módulos
+- **📦 Aplicação-level Módulo Carregamento**: Seamlessly integrate remote React aplicações em aplicação hosts por meio de `createRemoteAppComponent`
+- **🎯 Componente-level Lazy Carregamento**: Suporte `createLazyComponent` for fine-grained componente-level carregamento lazy
+
+### Features
+
+- **🔄 Cross-framework Rendering**: Suporte cross-framework renderização entre diferente frameworks (React, Vue, Angular, etc.)
+- **🛣️ Routing Coordination**: Automatically handle React Router basename injection e routing context passing
+- **🔗 Versão Compatibility**: Full suporte for React 16-19, automatically handling renderização differences e lifecycle across versões
+- **⚡ Pré-busca de dados**: Built-em recurso dados pré-busca mechanism, supporting aplicação, componente, e dependência pré-busca optimization
+
+### Why Este Matters?
+
+- **Progressive Upgrade**: Allow diferente teams para upgrade React versões at their own pace
+- **Zero-disruption Integração**: New e legacy aplicações pode work together seamlessly sem synchronized upgrades
+- **Technical Debt Management**: Avoid integração issues caused by versão inconsistencies
+- **Team Autonomy**: Each team pode independently choose o mais suitable React versão
+
+## Key API Visão geral
+
+### Producer API
+
+`createBridgeComponent`: wraps uma React aplicação as uma Bridge componente (aplicação componente) so consumers pode carregue it remotely. Choose o importe caminho esse matches o React versão usado pelo producer projeto:
+
+| React Versão | Importe Caminho |
+| ------------- | ----------- |
+| React 19      | `@module-federation/bridge-react/v19` |
+| React 18      | `@module-federation/bridge-react/v18` |
+| React 16 / 17 | `@module-federation/bridge-react/react` |
+
+:::warning Important
+
+`@module-federation/bridge-react/v18` e `/v19` importe `createRoot` de `react-dom/client`.
+
+Se você apenas configure `"react-dom"` as uma dependência compartilhada, `react-dom/client` vai não ser shared e pode cause React versão mismatch erros. Garanta para usar o trailing-slash prefix form:
+
+```ts
+shared: {
+  'react-dom/': {
+    singleton: true,
+  },
+}
+```
+
+:::
+
+### Consumer API
+
+| API                        | Description                                                                                         | Importe Caminho                              |
+| -------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `createRemoteAppComponent` | Carrega e renders uma remote Bridge componente em o host, automatically handling rendering context e router integração | `@module-federation/bridge-react/react` |
+| `lazyLoadComponentPlugin`  | Pré-busca e lazy-carregamento plugin                                                                    | `@module-federation/bridge-react/react` |
+
+### 💡 Exemplos
+
+[Complete Examples](https://github.com/module-federation/core/tree/main/apps/router-demo) - Complete micro-frontend projeto containing multiple React aplicações

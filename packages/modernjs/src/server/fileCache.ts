@@ -1,5 +1,5 @@
 import { access, lstat, readFile } from 'fs/promises';
-import { LRUCache } from 'lru-cache';
+import { SizeLimitedCache } from '@module-federation/bridge-react/size-limited-cache';
 
 const pathExists = async (filepath: string): Promise<boolean> => {
   try {
@@ -16,9 +16,11 @@ export interface FileResult {
 }
 
 export class FileCache {
-  private cache = new LRUCache<string, FileResult>({
-    maxSize: 200 * 1024 * 1024, // 200MB
-  });
+  private cache: SizeLimitedCache<string, FileResult>;
+
+  constructor(maxSize = 200 * 1024 * 1024) {
+    this.cache = new SizeLimitedCache({ maxSize });
+  }
 
   /**
    * Check if file exists and return file info

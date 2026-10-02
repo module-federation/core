@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { vi } from 'vitest';
+import { rstest as vi } from '@rstest/core';
 import ReactBridgeAliasChangerPlugin from '../src';
 
 const resolveRouterV8 = path.resolve(

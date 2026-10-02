@@ -31,6 +31,7 @@ import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { bindLoggerToCompiler } from '@module-federation/sdk';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import logger from '../../logger';
+import { normalizeManifestOptions } from './manifest-options';
 
 const resolveRuntimePluginPath = (): string =>
   process.env.IS_ESM_BUILD === 'true'
@@ -198,6 +199,13 @@ export class NextFederationPlugin {
     if (this._extraOptions.debug) {
       compiler.options.devtool = false;
     }
+    if (this._extraOptions.scriptTimeout !== undefined) {
+      new compiler.webpack.DefinePlugin({
+        FEDERATION_NEXTJS_SCRIPT_TIMEOUT: JSON.stringify(
+          this._extraOptions.scriptTimeout,
+        ),
+      }).apply(compiler);
+    }
 
     if (isServer) {
       configureServerCompilerOptions(compiler);
@@ -219,7 +227,6 @@ export class NextFederationPlugin {
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
       : retrieveDefaultShared(isServer);
-
     return {
       ...this._options,
       runtime: false,
@@ -241,12 +248,9 @@ export class NextFederationPlugin {
       },
       shared: {
         ...defaultShared,
-        ...this._options.shared,
+        ...(this._options.shared as Record<string, unknown>),
       },
-      manifest: {
-        ...(this._options.manifest ?? {}),
-        filePath: isServer ? '' : '/static/chunks',
-      },
+      manifest: normalizeManifestOptions(this._options.manifest, isServer),
       // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update
       dts: this._options.dts ?? false,
       shareStrategy: this._options.shareStrategy ?? 'loaded-first',

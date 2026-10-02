@@ -1,5 +1,17 @@
 # @module-federation/typescript
 
+## 3.1.10
+
+### Patch Changes
+
+- Publish the Axios 1.18.0 security update already present in the package source.
+
+## 3.1.9
+
+### Patch Changes
+
+- 6b22938: chore(typescript): drop `lodash.get` dependency in favor of optional chaining in `normalizeOptions`.
+
 ## 3.1.8
 
 ### Patch Changes

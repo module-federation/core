@@ -173,6 +173,7 @@ module.exports = (_env, argv = {}) => {
           response.setHeader('Content-Type', 'application/javascript');
           response.end(body);
         };
+        let esmRetryRequestCount = 0;
         const createManifest = ({ name, globalName, publicPath }) => ({
           id: name,
           name,
@@ -218,6 +219,35 @@ module.exports = (_env, argv = {}) => {
             },
           ],
         });
+
+        devServer.app.post('/esm-retry-fixture/reset', (_request, response) => {
+          esmRetryRequestCount = 0;
+          response.statusCode = 204;
+          response.end();
+        });
+        devServer.app.get(
+          '/esm-retry-fixture/remoteEntry.js',
+          (_request, response) => {
+            esmRetryRequestCount += 1;
+            response.setHeader('Cache-Control', 'no-store');
+
+            if (esmRetryRequestCount === 1) {
+              response.statusCode = 503;
+              response.end('ESM remote unavailable');
+              return;
+            }
+
+            sendJs(
+              response,
+              [
+                'export function init() {}',
+                'export function get() {',
+                "  return Promise.resolve(function() { return { default: 'ESM retry recovered' }; });",
+                '}',
+              ].join('\n'),
+            );
+          },
+        );
 
         devServer.app.get(
           '/observability-fixtures/missing-fields/mf-manifest.json',

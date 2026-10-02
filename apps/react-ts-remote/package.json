@@ -12,7 +12,8 @@
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
     "file-loader": "6.2.0",
-    "react-refresh": "0.14.2"
+    "react-refresh": "0.14.2",
+    "typescript": "7.0.2"
   },
   "scripts": {
     "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config rspack.config.js --mode production",

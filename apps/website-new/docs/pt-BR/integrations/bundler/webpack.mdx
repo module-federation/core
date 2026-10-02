@@ -1,0 +1,43 @@
+# Webpack
+
+- Capable de building módulos esse meet o {props.brandName || props.name || 'Module Federation'} carregamento specification.
+- Capable de consuming módulos do {props.brandName || props.name || 'Module Federation'} specification usando aliases.
+- Capable de setting o dependência compartilhada configuração for módulos. Quando o host environment onde o módulo é carregado já has o corresponding dependência, it vai não ser carregado repeatedly.
+- Quando um módulo has uma remote tipo, o tipo do módulo remoto vai ser automatically baixadas for consumption.
+- Hot-reloading capability quando consuming módulos remotos.
+
+{props.tip}
+
+## Início rápido
+
+{props.demo}
+
+### Instalação
+
+Você pode instale o plugin com o seguintes comando:
+
+import InstallKit from '@docs/_snippets/install-kit';
+
+<InstallKit
+  pkgName={props.enhancedPackage || props.pkgName}
+/>
+
+### Crie {props.configName || 'module-federation.configuração.js'}
+
+Crie uma {props.configName || 'module-federation.configuração.js'} arquivo com o seguintes content:
+
+import CreateConfig from '@docs/_snippets/webpack/create-config';
+
+{props.createConfig || <CreateConfig />}
+
+### Register Plugin
+
+In `Webpack`, você pode adicione o plugin por meio do `plugins` configuração item no `webpack.config.js` configuração arquivo:
+
+import RegisterPlugin from '@docs/_snippets/webpack/register-plugin';
+
+{props.registerPlugin || <RegisterPlugin />}
+
+## Configuração
+
+Você pode find detailed descriptions de all configuração items no [Config Overview](/configure/index.html) page.

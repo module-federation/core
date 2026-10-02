@@ -1,8 +1,8 @@
 import path from 'node:path';
 import { vol } from 'memfs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 
-vi.mock('node:fs', () => {
+rs.mock('node:fs', () => {
   const memfs = require('memfs').fs;
   return { ...memfs, default: memfs };
 });
@@ -48,7 +48,7 @@ function getShared() {
 describe('normalizeOptions', () => {
   afterEach(() => {
     vol.reset();
-    vi.restoreAllMocks();
+    rs.restoreAllMocks();
   });
 
   it('defaults dts to false and does not inject type-hints plugin', () => {
@@ -113,8 +113,8 @@ describe('normalizeOptions', () => {
     const metroCorePluginPath =
       require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
-      path.relative(tmpDirPath, metroCorePluginPath),
-      path.relative(tmpDirPath, runtimePluginPath),
+      toPosixPath(path.relative(tmpDirPath, metroCorePluginPath)),
+      toPosixPath(path.relative(tmpDirPath, runtimePluginPath)),
     ]);
   });
 
@@ -139,8 +139,8 @@ describe('normalizeOptions', () => {
     const metroCorePluginPath =
       require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
-      path.relative(tmpDirPath, metroCorePluginPath),
-      path.relative(tmpDirPath, runtimePluginPath),
+      toPosixPath(path.relative(tmpDirPath, metroCorePluginPath)),
+      toPosixPath(path.relative(tmpDirPath, runtimePluginPath)),
     ]);
   });
 
@@ -161,7 +161,7 @@ describe('normalizeOptions', () => {
     const metroCorePluginPath =
       require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
-      path.relative(tmpDirPath, metroCorePluginPath),
+      toPosixPath(path.relative(tmpDirPath, metroCorePluginPath)),
       '@scope/pkg/plugin',
       'pkg-name',
     ]);

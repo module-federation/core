@@ -3,7 +3,7 @@ import axios from 'axios';
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
 import os from 'os';
 import { join } from 'path';
-import { afterAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, describe, expect, it, rs } from '@rstest/core';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
@@ -40,7 +40,7 @@ describe('archiveHandler', () => {
     });
 
     it('throws for unexisting outDir', async () => {
-      expect(
+      await expect(
         createTypesArchive({ ...tsConfig, outDir: '/foo' }, remoteOptions),
       ).rejects.toThrowError();
     });
@@ -62,7 +62,7 @@ describe('archiveHandler', () => {
       const zip = new AdmZip();
       zip.addLocalFolder(tmpDir);
 
-      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+      axios.get = rs.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       await downloadTypesArchive(hostOptions)([
         destinationFolder,
@@ -81,7 +81,7 @@ describe('archiveHandler', () => {
       const zip = new AdmZip();
       zip.addLocalFolder(tmpDir);
 
-      axios.get = vi.fn().mockResolvedValue({ data: zip.toBuffer() });
+      axios.get = rs.fn().mockResolvedValue({ data: zip.toBuffer() });
 
       const downloader = downloadTypesArchive(hostOptions);
 
@@ -107,7 +107,7 @@ describe('archiveHandler', () => {
     it('correctly handles exception', async () => {
       const message = 'Rejected value';
 
-      axios.get = vi.fn().mockRejectedValue(new Error(message));
+      axios.get = rs.fn().mockRejectedValue(new Error(message));
 
       await expect(() =>
         downloadTypesArchive(hostOptions)([destinationFolder, fileToDownload]),

@@ -1,0 +1,49 @@
+# Pré-busca de dados
+
+O `prefetch` função é usado para pre-buscar recursos e **dados** for módulos remotos, thereby improving aplicação performance e user experience. By pre-carregamento obrigatório content antes uma user accesses uma feature, waiting times pode ser significantly reduced.
+
+import React from 'react';
+import PrefetchTip from '@docs/en/_components/data-fetch/prefetch-tip';
+
+{props.prefetchTip || React.createElement(PrefetchTip)}
+
+## Quando para Use
+
+`prefetch` é um ideal choice quando você quiser pre-carregue associated JavaScript, CSS, ou dados para um componente sem immediately renderização it. Por exemplo, você pode trigger `prefetch` quando uma user hovers over uma link ou button, so esse quando o user actually clicks, o componente pode ser rendered faster.
+
+## API
+
+```typescript
+interface ModuleFederation {
+  prefetch(options: {
+    id: string;
+    dataFetchParams?: Record<string, any>;
+    preloadComponentResource?: boolean;
+  }): void;
+}
+```
+
+### Parameters
+
+```ts
+type PrefetchOptions = {
+  // Unique identifier for the remote module, in the format '<remoteName>/<exposedModule>', e.g. 'shop/Button'.
+  id: string;
+
+  // If the remote component has a data fetch function, this object will be passed to it.
+  dataFetchParams?: Record<string, any>;
+
+  // Whether to preload the component's resources, including JavaScript chunks and associated CSS files. Defaults to false.
+  preloadComponentResource?: boolean;
+};
+```
+
+## Uso Exemplos
+
+Suppose nós have uma aplicação remote `shop` esse exposes uma `Button` componente, e este componente é associated com uma dados buscar função.
+
+import PrefetchDemo from '@docs/en/_components/data-fetch/prefetch-demo';
+
+{props.prefetchDemo || React.createElement(PrefetchDemo)}
+
+By usando `prefetch` flexibly, você pode finely control o timing de recurso carregamento baseado em your aplicação's specific scenarios e user behavior, thereby optimizing aplicação performance.

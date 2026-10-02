@@ -16,6 +16,7 @@ import LanguageSwitch from './component/LanguageSwitch';
 import ThemeToggle from './component/ThemeToggle';
 import {
   getGlobalModuleInfo,
+  normalizeModuleInfoPayload,
   refreshModuleInfo,
   RootComponentProps,
   separateType,
@@ -31,10 +32,10 @@ import btnStyles from './component/ThemeToggle.module.scss';
 
 const cloneModuleInfo = (info?: GlobalModuleInfo | null): GlobalModuleInfo => {
   try {
-    return JSON.parse(JSON.stringify(info || {}));
+    return normalizeModuleInfoPayload(info);
   } catch (error) {
     console.warn('[MF Devtools] cloneModuleInfo failed', error);
-    return info || {};
+    return {};
   }
 };
 
@@ -243,6 +244,7 @@ const InnerApp = (props: RootComponentProps) => {
     const bootstrap = async () => {
       const tab = await syncActiveTab();
       setInspectedTab(tab || undefined);
+      if (typeof tab?.id !== 'number') return;
       const detach = await getGlobalModuleInfo((info) =>
         applyModuleUpdate(info),
       );
@@ -379,6 +381,9 @@ const InnerApp = (props: RootComponentProps) => {
   }, [activePanel, applyModuleUpdate]);
 
   const renderContent = () => {
+    if (typeof inspectedTab?.id !== 'number') {
+      return <Empty description={t('app.header.scope.waiting')} />;
+    }
     switch (activePanel) {
       case 'moduleInfo':
         return (
@@ -419,7 +424,7 @@ const InnerApp = (props: RootComponentProps) => {
         return (
           <SharedDepsExplorer
             shareData={JSON.parse(
-              JSON.stringify(window.__FEDERATION__?.__SHARE__),
+              JSON.stringify(window.__FEDERATION__?.__SHARE__ || {}),
             )}
           />
         );

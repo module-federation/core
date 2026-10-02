@@ -936,7 +936,7 @@ export default {
                       type: 'number',
                     },
                     family: {
-                      enum: [0, 4, 6],
+                      enum: [4, 6],
                     },
                     typesOnBuild: {
                       type: 'boolean',
@@ -987,6 +987,14 @@ export default {
           properties: {
             disableSnapshot: {
               description: 'Enable optimization to skip snapshot plugin',
+              type: 'boolean',
+            },
+            disableRemote: {
+              description: 'Disable remote loading code in runtime-core',
+              type: 'boolean',
+            },
+            disableShared: {
+              description: 'Disable shared dependency code in runtime-core',
               type: 'boolean',
             },
             target: {

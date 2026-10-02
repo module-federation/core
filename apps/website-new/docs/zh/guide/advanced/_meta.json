@@ -1,4 +1,9 @@
 [
+  {
+    "type": "file",
+    "name": "runtime-size-optimization",
+    "label": "优化运行时体积"
+  },
   "shared-tree-shaking",
   "multiple-shared-scope",
   {

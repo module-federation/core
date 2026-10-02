@@ -227,7 +227,10 @@ function resolveModule(moduleName: string): string {
 
 function replaceModule(from: RegExp, to: string | null) {
   return (resolved: Resolution): Resolution => {
-    if (resolved.type === 'sourceFile' && from.test(resolved.filePath)) {
+    if (
+      resolved.type === 'sourceFile' &&
+      from.test(toPosixPath(resolved.filePath))
+    ) {
       if (to === null) return { type: 'empty' };
       return { type: 'sourceFile', filePath: to };
     }

@@ -1,17 +1,11 @@
 {
   "compilerOptions": {
     "useDefineForClassFields": true,
-
-    /* Bundler mode */
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
-
-    "declarationDir": "./dist/types",
     "rootDir": "./src",
     "module": "esnext",
     "target": "es2015",
-
-    /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
@@ -26,13 +20,14 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
+      "*": ["./*"],
       "@module-federation/bridge-react/router-runtime": [
-        "src/remote/router-component/router-runtime.ts"
+        "./src/remote/router-component/router-runtime.ts"
       ]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src/**/*.ts",
@@ -41,5 +36,9 @@
     "src/remoteApp.tsx",
     "src/create.ts"
   ],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

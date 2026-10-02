@@ -1,0 +1,212 @@
+import { PackageManagerTabs } from '@theme';
+
+# Guia de início rápido
+
+Este guia conduz você passo a passo no uso do Module Federation. Vamos criar duas Single Page Applications independentes (SPAs) que compartilharão componentes usando Module Federation. Se encontrar termos desconhecidos no texto a seguir, consulte o [Glossário](/guide/start/glossary.html).
+
+## Requisitos
+
+Ao usar o plugin de build do Module Federation, garanta que sua versão do Node.js seja 20 ou superior.
+
+```bash
+node -v
+```
+
+Se você estiver adicionando Module Federation a um projeto existente, comece por [Integrações](/integrations/index.html) e escolha o pacote para seu framework ou bundler.
+
+## Criando um novo projeto
+
+Module Federation fornece uma ferramenta `create-module-federation` para criar projetos. Você não precisa instalá-la globalmente; você pode usar diretamente `npx` para executá-la sob demanda.
+
+Você pode usar `create-module-federation` para criar um projeto Module Federation executando o comando a seguir:
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm create module-federation@latest',
+    yarn: 'yarn create module-federation',
+    pnpm: 'pnpm create module-federation@latest',
+  }}
+/>
+
+Basta seguir os prompts passo passo. Durante o processo de criação, você pode selecionar o tipo de projeto, o tipo de papel etc.
+
+### Templates
+
+Ao criar um projeto, você pode escolher entre os seguintes templates fornecidos por `create-module-federation`:
+
+| Template                  | Descrição                                                                              |
+| ------------------------- | -------------------------------------------------------------------------------------- |
+| provider-modern           | Um provider usando [Modern.js](https://modernjs.dev/)                                  |
+| provider-rsbuild          | Um provider usando [Rsbuild](https://rsbuild.dev/)                                     |
+| provider-rslib            | Um provider usando [Rslib](https://lib.rsbuild.dev/)                                   |
+| provider-rslib-storybook  | Um provider usando [Rslib](https://lib.rsbuild.dev/) com o recurso Storybook habilitado |
+| consumer-modern           | Um consumer usando [Modern.js](https://modernjs.dev/)                                  |
+| consumer-rsbuild          | Um consumer usando [Rsbuild](https://rsbuild.dev/)                                     |
+
+### Criação rápida
+
+[`create-module-federation`](https://www.npmjs.com/package/create-module-federation) fornece algumas opções de CLI. Ao definir essas opções, você pode pular as etapas interativas e criar um projeto com um único comando.
+
+Por exemplo, para criar um projeto provider Modern.js chamado `provider` no diretório `my-project` com um clique:
+
+```bash
+npx create-module-federation --dir my-project --template provider-modern --name provider
+
+# Use abbreviations
+npx create-module-federation -d my-project -t provider-modern -n provider
+```
+
+As opções completas da CLI para `create-module-federation` são as seguintes:
+
+```text
+Usage: create-module-federation [options]
+
+Options:
+
+  -h, --help       display help for command
+  -d, --dir        create project in specified directory
+  -t, --template   specify the template to use
+  -n, --name       specify the mf name
+  -r, --role       specify the mf role type: provider or consumer
+  --override       override files in target directory
+
+Templates:
+
+  provider-modern, provider-rsbuild, provider-rslib, provider-rslib-storybook, consumer-modern, consumer-rsbuild
+```
+
+### Crie uma provider
+
+Execute o comando `create-module-federation`, selecione o framework e o tipo necessários de acordo com suas necessidades, e selecione o papel provider para criar um projeto.
+
+Aqui usamos a criação de um projeto provider com Rsbuild como exemplo:
+
+```bash
+➜  ~  ✗ npm create module-federation@latest
+
+> npx
+> create-module-federation
+
+◆  Create Module Federation Project
+│
+◇  Please input Module Federation name:
+│  mf_provider
+│
+◇  Please select the type of project you want to create:
+│  Application
+│
+◇  Select template
+│  Rsbuild
+│
+◇  Please select the role of project you want to create:
+│  Provider
+│
+◇  Next steps ─────╮
+│                  │
+│  cd mf_provider  │
+│  npm install     │
+│  npm run dev     │
+│                  │
+├──────────────────╯
+│
+└  Done.
+```
+
+### Crie uma consumer
+
+Execute o comando `create-module-federation`, selecione o framework e o tipo necessários de acordo com suas necessidades, e selecione o papel consumer para criar um projeto.
+
+Aqui está um exemplo de criação de um projeto consumer com Rsbuild:
+
+```bash
+➜  ~  ✗ npm create module-federation@latest
+
+> npx
+> create-module-federation
+
+◆  Create Module Federation Project
+│
+◇  Please input Module Federation name:
+│  mf_consumer
+│
+◇  Please select the type of project you want to create:
+│  Application
+│
+◇  Select template
+│  Rsbuild
+│
+◇  Please select the role of project you want to create:
+│  Consumer
+│
+◇  Next steps ─────╮
+│                  │
+│  cd mf_consumer  │
+│  npm install     │
+│  npm run dev     │
+│                  │
+├──────────────────╯
+│
+└  Done.
+```
+
+#### Substituir provider
+
+O projeto consumer criado por padrão consome um provider publicado. Se você quiser substituir o provider, modifique a configuração `remotes` em `module-federation.config.ts`.
+
+```diff title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
+
+export default createModuleFederationConfig({
+  name: 'mf_consumer',
+  remotes: {
+-   'provider': 'rslib_provider@https://unpkg.com/module-federation-rslib-provider@latest/dist/mf/mf-manifest.json',
++   'provider': 'rslib_provider@http://localhost:3000/mf-manifest.json',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+
+```
+
+## Integração com projeto existente
+
+Se você quiser integrar Module Federation a um projeto existente, comece por [Integrações](/integrations/index.html). Esse guia explica qual pacote instalar para Rsbuild, Rspack, Webpack, Modern.js, Next.js, Vite e outros tipos de projeto.
+
+## Resumo
+
+Com o processo acima, você concluiu a exportação de um componente de um `provider` para uso por um `consumer` baseado em Module Federation. Ao longo do caminho, você teve um primeiro contato com as configurações `remotes`, `exposes` e `shared` no plugin do Module Federation.
+
+Se você quiser adicionar Module Federation a um projeto existente, comece por [Integrações](/integrations/index.html) e escolha o caminho correspondente.
+
+## Próximos passos
+
+import NextSteps from '@components/NextSteps';
+import Step from '@components/Step';
+
+Você talvez queira:
+
+<NextSteps>
+  <Step
+    href="/integrations"
+    title="Integrações"
+    description="Escolha o pacote para seu projeto"
+  />
+  <Step
+    href="/configure"
+    title="Revisar configuração"
+    description="Aprenda a configurar Module Federation"
+  />
+  <Step
+    href="/guide/start/glossary"
+    title="Glossário de termos"
+    description="Entenda os conceitos relacionados ao Module Federation"
+  />
+</NextSteps>
+
+## Siga-nos
+
+* [GitHub - dê uma estrela no GitHub](https://github.com/module-federation/core)
+* [Discord](https://discord.com/channels/1055442562959290389/1055442563718467637)
+* [Grupo Feishu (comunidade chinesa)](https://applink.larkoffice.com/client/chat/chatter/add_by_link?link_token=a41s8f79-741f-41ba-8349-395d9a0e9662)

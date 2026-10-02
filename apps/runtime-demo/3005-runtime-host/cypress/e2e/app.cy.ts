@@ -123,6 +123,25 @@ describe('3005-runtime-host/', () => {
     });
   });
 
+  describe('ESM remote retry', () => {
+    it('re-requests a failed module entry with the default retry config', () => {
+      const requestUrls: string[] = [];
+      cy.intercept('GET', '**/esm-retry-fixture/remoteEntry.js*', (request) => {
+        requestUrls.push(request.url);
+      });
+      cy.visit('/esm-retry');
+
+      cy.get('[data-testid="esm-retry-load"]').click();
+      cy.get('[data-testid="esm-retry-status"]')
+        .should('contain', 'ESM retry recovered')
+        .then(() => {
+          expect(requestUrls).to.have.length(2);
+          expect(requestUrls[0]).not.to.contain('retryCount');
+          expect(requestUrls[1]).to.contain('retryCount=1');
+        });
+    });
+  });
+
   describe('observability demo fixture', () => {
     beforeEach(() => {
       cy.visit('/observability');
@@ -318,7 +337,7 @@ describe('3005-runtime-host/', () => {
       cy.get('[data-testid="observability-load-status"]').contains('success');
       cy.get('[data-testid="observability-report"]')
         .should('contain', 'observability-retry-recovered/Button')
-        .should('contain', 'remoteEntry:load-recovered')
+        .should('contain', 'resource:remoteEntry:recovered')
         .should('contain', '"recovered": true');
       cy.window().then((win) => {
         const latestReport = getObservabilityReader(win).getLatestReport();
@@ -568,6 +587,12 @@ describe('3005-runtime-host/', () => {
         const analyticsSharedReports = reader.findReports({
           shared: 'observability-analytics-sdk',
         });
+        const checkoutSharedReport = (
+          checkoutSharedReports as ObservabilityTestReport[]
+        ).find((report) => report.shared?.provider);
+        const analyticsSharedReport = (
+          analyticsSharedReports as ObservabilityTestReport[]
+        ).find((report) => report.shared?.provider);
         const cachedRemoteReport = (
           profileReports as ObservabilityTestReport[]
         ).find((report) => report.summary.flags.cached === true);
@@ -584,20 +609,20 @@ describe('3005-runtime-host/', () => {
         expect(reports.length).to.be.greaterThan(4);
         expect(profileReports.length).to.be.greaterThan(1);
         expect(analyticsReports.length).to.equal(1);
-        expect(
-          (checkoutSharedReports[0] as ObservabilityTestReport).shared
-            ?.provider,
-        ).to.equal('observability_consumer_checkout');
-        expect(
-          (analyticsSharedReports[0] as ObservabilityTestReport).shared
-            ?.provider,
-        ).to.equal('observability_consumer_analytics');
+        expect(checkoutSharedReport?.shared?.provider).to.equal(
+          'observability_consumer_checkout',
+        );
+        expect(analyticsSharedReport?.shared?.provider).to.equal(
+          'observability_consumer_analytics',
+        );
         expect(cachedRemoteReport?.summary.flags.cached).to.equal(true);
         expect(
-          checkoutComponentReport?.events.some(
-            (event) =>
-              event.metadata?.sharedTraceId ===
-              (checkoutSharedReports[0] as ObservabilityTestReport).traceId,
+          (checkoutSharedReports as ObservabilityTestReport[]).some(
+            (sharedReport) =>
+              checkoutComponentReport?.events.some(
+                (event) =>
+                  event.metadata?.sharedTraceId === sharedReport.traceId,
+              ),
           ),
         ).to.equal(true);
       });
@@ -740,8 +765,12 @@ describe('3005-runtime-host/', () => {
           ),
         ).to.equal(true);
         expect(
-          (insightSharedReports[0] as ObservabilityTestReport).shared?.provider,
-        ).to.equal('observability_showcase_expansion_desk');
+          (insightSharedReports as ObservabilityTestReport[]).some(
+            (report) =>
+              report.shared?.provider ===
+              'observability_showcase_expansion_desk',
+          ),
+        ).to.equal(true);
         expect(handoffProfileReport?.summary.componentLoaded).to.equal(true);
       });
       cy.get('[data-testid="observability-showcase-load"]').click();
@@ -769,7 +798,8 @@ describe('3005-runtime-host/', () => {
         const reports = getObservabilityReader(win).getReports();
         const customerSdkReport = reports.find(
           (report: ObservabilityTestReport) =>
-            report.shared?.name === 'observability-customer-sdk',
+            report.shared?.name === 'observability-customer-sdk' &&
+            report.summary.outcome === 'recovered',
         );
 
         expect(

@@ -1,0 +1,909 @@
+# Global variables
+
+In {props.name || 'Module Federation'}, the main global variables are `__FEDERATION__`, <code>{props.shareVar || 'SHARE'}</code> and <code>{props.instanceVar || 'INSTANCES'}</code>. They record the module federation info, shared module info, and instance info of the current aplicação, and help us understand and debug the runtime behavior of module federation.
+
+:::warning Note
+Global variables são read-apenas — não modify them.
+:::
+
+## **FEDERATION**
+
+Depois initialization, o `__FEDERATION__` variable vai ser injected globally. Este variable é um objeto esse contains all o módulo federation information do current aplicação.
+
+### moduleInfo
+
+import Collapse from '@components/Collapse';
+
+:::tip
+It é recomendado para usar [chrome devtools](/guide/debug/chrome-devtool.html) para view o processed `moduleInfo`.
+:::
+
+Record all módulo information do current aplicação. Based on este information, você pode get o módulo's dependências.
+
+O `moduleInfo` structure é um objeto whose key consists de two parts: `{moduleName}(:{moduleVersion})`.
+
+- `moduleName` é o name do módulo, e `moduleVersion` é o versão do módulo ou its `url`.
+
+- `moduleVersion` apenas exists for producer módulos.
+
+O seguinte exemplo shows como para usar `moduleInfo` para get dependências, assuming o seguintes `moduleInfo`:
+
+<Collapse title='moduleInfo'>
+
+```json
+moduleInfo: {
+  "manifest_host": {
+    "version": "",
+    "remoteEntry": "",
+    "remotesInfo": {
+      "webpack_provider": {
+        "matchedVersion": "http://localhost:3009/mf-manifest.json"
+      },
+      "rspack_manifest_provider": {
+        "matchedVersion": "http://localhost:3011/mf-manifest.json"
+      },
+      "app1": {
+        "matchedVersion": "http://127.0.0.1:4001/mf-manifest.json"
+      },
+      "rspack_provider": {
+        "matchedVersion": "http://localhost:3010/mf-manifest.json"
+      }
+    }
+  },
+  "rspack_manifest_provider:http://localhost:3011/mf-manifest.json": {
+    "version": "http://localhost:3011/mf-manifest.json",
+    "buildVersion": "0.0.0",
+    "globalName": "rspack_manifest_provider",
+    "remoteEntry": "remoteEntry.js",
+    "remoteEntryType": "global",
+    "remoteTypes": "",
+    "remoteTypesZip": "@mf-types.zip",
+    "remoteTypesAPI": "@mf-types.d.ts",
+    "remotesInfo": {},
+    "shared": [
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "node_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_client_js-_9b5b0.js",
+              "node_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_client_js-_9b5b1.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react-dom/client",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "node_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_index_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react-dom",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "node_modules_pnpm_react_18_3_1_node_modules_react_index_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react",
+        "version": "18.3.1"
+      }
+    ],
+    "modules": [
+      {
+        "moduleName": "Component",
+        "modulePath": "./Component",
+        "assets": {
+          "js": {
+            "sync": [
+              "__federation_expose_Component.js"
+            ],
+            "async": [
+              "src_asyncFile_ts.js"
+            ]
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      }
+    ],
+    "publicPath": "http://localhost:3011/"
+  },
+  "webpack_provider:http://localhost:3009/mf-manifest.json": {
+    "version": "http://localhost:3009/mf-manifest.json",
+    "buildVersion": "0.0.0",
+    "globalName": "webpack_provider",
+    "remoteEntry": "remoteEntry.js",
+    "remoteEntryType": "global",
+    "remoteTypes": "",
+    "remoteTypesZip": "@mf-types.zip",
+    "remoteTypesAPI": "@mf-types.d.ts",
+    "remotesInfo": {},
+    "shared": [
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "node_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_client_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react-dom/client",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "node_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_index_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react-dom",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react/jsx-dev-runtime",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "node_modules_pnpm_react_18_3_1_node_modules_react_index_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react",
+        "version": "18.3.1"
+      }
+    ],
+    "modules": [
+      {
+        "moduleName": "useCustomRemoteHook",
+        "modulePath": "./useCustomRemoteHook",
+        "assets": {
+          "js": {
+            "sync": [
+              "__federation_expose_useCustomRemoteHook.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "WebpackSvg",
+        "modulePath": "./WebpackSvg",
+        "assets": {
+          "js": {
+            "sync": [
+              "__federation_expose_WebpackSvg.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "WebpackPng",
+        "modulePath": "./WebpackPng",
+        "assets": {
+          "js": {
+            "sync": [
+              "__federation_expose_WebpackPng.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      }
+    ],
+    "publicPath": "http://localhost:3009/"
+  },
+  "app1:http://127.0.0.1:4001/mf-manifest.json": {
+    "version": "http://127.0.0.1:4001/mf-manifest.json",
+    "buildVersion": "0.1.94",
+    "globalName": "app1",
+    "remoteEntry": "remoteEntry.js",
+    "remoteEntryType": "global",
+    "remoteTypes": "",
+    "remoteTypesZip": "@mf-types.zip",
+    "remoteTypesAPI": "@mf-types.d.ts",
+    "remotesInfo": {},
+    "shared": [
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "static/js/lib-react.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react-dom/client",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "static/js/lib-react.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react-dom",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "static/js/lib-react.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react/jsx-dev-runtime",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "static/js/lib-react.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react/jsx-runtime",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "static/js/lib-react.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react",
+        "version": "18.3.1"
+      }
+    ],
+    "modules": [
+      {
+        "moduleName": "thing",
+        "modulePath": "./thing",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/__federation_expose_thing.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "react-component",
+        "modulePath": "./react-component",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/lib-router.js",
+              "static/js/async/vendors-node_modules_pnpm_babel_runtime_7_26_0_node_modules_babel_runtime_helpers_asyncToGene-ca0e7f.js",
+              "static/js/async/src_components_react-component_tsx.js",
+              "static/js/async/__federation_expose_react_component.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      }
+    ],
+    "publicPath": "http://127.0.0.1:4001/"
+  },
+  "rspack_provider:http://localhost:3010/mf-manifest.json": {
+    "version": "http://localhost:3010/mf-manifest.json",
+    "buildVersion": "0.0.0",
+    "globalName": "rspack_provider",
+    "remoteEntry": "remoteEntry.js",
+    "remoteEntryType": "global",
+    "remoteTypes": "",
+    "remoteTypesZip": "@mf-types.zip",
+    "remoteTypesAPI": "@mf-types.d.ts",
+    "remotesInfo": {},
+    "shared": [
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "node_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_client_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react-dom/client",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "node_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_index_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react-dom",
+        "version": "18.3.1"
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "node_modules_pnpm_react_18_3_1_node_modules_react_index_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react",
+        "version": "18.3.1"
+      }
+    ],
+    "modules": [
+      {
+        "moduleName": "ButtonOldAnt",
+        "modulePath": "./ButtonOldAnt",
+        "assets": {
+          "js": {
+            "sync": [
+              "__federation_expose_ButtonOldAnt.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [
+              "__federation_expose_ButtonOldAnt.css"
+            ],
+            "async": []
+          }
+        }
+      }
+    ],
+    "publicPath": "http://localhost:3010/"
+  }
+}
+```
+
+</Collapse>
+
+No above exemplo, `moduleInfo` contains information about 5 módulos, among que `manifest_host` does não have uma versão number depois it, indicating esse it é uma consumer módulo.
+
+O `remotesInfo` field em `manifest_host` records o information de all producer módulos it depends on, e o corresponding `matchedVersion` field records o versão ou `url` it matches.
+
+O corresponding producer módulo information pode ser obtained por meio do key + `matchedVersion` no consumer `remotesInfo` field, such as `webpack_provider:http://localhost:3009/mf-manifest.json`.
+
+#### versão
+
+> Only exists em producers, o valor de consumers é um empty string
+
+O versão ou url do current módulo.
+
+#### buildVersion
+
+O build versão do current módulo, geralmente taken do `version` field em `package.json`.
+
+#### globalName
+
+> Only exists no producer
+
+O global variable name do current producer módulo. Você pode get o producer's container por meio de globalThis[globalName], que é geralmente taken do `name` field em `package.json`.
+
+#### publicPath
+
+O publicPath do current módulo.
+
+#### getPublicPath
+
+> Este field e `publicPath` são mutually exclusive
+
+O getPublicPath do current módulo, get o final publicPath por meio de `new Function(getPublicPath)()` call.
+
+#### ssrPublicPath
+
+O publicPath do servidor arquivo do current módulo.
+
+#### remoteEntry
+
+> Only exists no producer
+
+O name do arquivo de entrada do current producer módulo.
+
+#### remoteEntryTipo
+
+> Only exists no producer
+
+O arquivo de entrada tipo do current producer módulo.
+
+#### remoteTypesZip
+
+> Only exists no producer
+
+O name do compressed pacote do tipo declaration arquivo do current producer módulo.
+
+#### remoteTypesAPI
+
+> Only exists no producer
+
+O name do tipo API declaration arquivo do current producer módulo.
+
+#### shared
+
+All shared módulo information esse o current módulo depends on. O tipo definition é as follows:
+
+```ts
+type Shared = Array<{
+  sharedName: string;
+  version?: string;
+  assets: {
+    js: {
+      sync: string[];
+      async: string[];
+    };
+    css: {
+      sync: string[];
+      async: string[];
+    };
+  };
+}>;
+```
+
+#### módulos
+
+> Only exists no producer
+
+All módulo information exported pelo current módulo. O tipo definition é as follows:
+
+```ts
+type Modules = Array<{
+  moduleName: string;
+  modulePath: string;
+  assets: {
+    js: {
+      sync: string[];
+      async: string[];
+    };
+    css: {
+      sync: string[];
+      async: string[];
+    };
+  };
+}>;
+```
+
+### **COMPARTILHE**
+
+All shared módulo information currently registered (carregado), o tipo definition é as follows:
+
+<Collapse>
+
+```ts
+type GlobalShareScopeMap = {
+  [instanceName: string]: {
+    [scope: string]: {
+      [pkgName: string]: {
+        [sharedVersion: string]: {
+          version: string;
+          get: (() => () => Module) | (() => Promise<() => Module>);
+          shareConfig: {
+            singleton?: boolean;
+            requiredVersion: false | string;
+            eager?: boolean;
+            strictVersion?: boolean;
+            layer?: string | null;
+          };
+          scope: Array<string>;
+          useIn: Array<string>;
+          from: string;
+          deps: Array<string>;
+          lib?: () => Module;
+          loaded?: boolean;
+          loading?: null | Promise<any>;
+          // compatibility with previous shared
+          eager?: boolean;
+          /**
+           * @deprecated set in initOptions.shareStrategy instead
+           */
+          strategy: 'version-first' | 'loaded-first';
+        };
+      };
+    };
+  };
+};
+```
+
+</Collapse>
+
+We pode use `__SHARE__` para query o carregamento status de uma specific `shared`. Por exemplo, se o seguintes `__SHARE__` exists:
+
+<Collapse title='__SHARE__'>
+
+```json
+"__SHARE__": {
+  "manifest_host:0.0.0": {
+    "default": {
+      "react-dom/client": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": [],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react-dom": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["webpack_provider", "rspack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react/jsx-dev-runtime": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["app1", "webpack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["webpack_provider", "app1", "rspack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react/jsx-runtime": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": [],
+          "from": "app1",
+          "loading": null,
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "strategy": "loaded-first"
+        }
+      }
+    }
+  },
+  "app1:0.1.94": {
+    "default": {
+      "react-dom/client": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": [],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react-dom": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["webpack_provider", "rspack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react/jsx-dev-runtime": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["app1", "webpack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["webpack_provider", "app1", "rspack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react/jsx-runtime": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": [],
+          "from": "app1",
+          "loading": null,
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "strategy": "loaded-first"
+        }
+      }
+    }
+  }
+}
+```
+
+</Collapse>
+
+No dados above, você pode see o shared módulo information para o two módulos `manifest_host` e `app1`. Por exemplo, para inspecionar como o `react` módulo was carregado, follow these steps:
+
+1. `react` has apenas one versão, `18.3.1`.
+2. Check `__SHARE__["app1:0.1.94"].default.react["18.3.1"]` — `loaded` é `true`, indicating o módulo has been carregado.
+3. O `from` field é `webpack_provider`, meaning o `react` módulo was fornecido by esse módulo.
+4. Finally, look at o `useIn` field: it contains `webpack_provider` e `app1`, meaning este versão de `react` é consumido by both módulos.
+
+### **INSTANCES**
+
+O currently carregado MF instance. It stores uma list de all carregado MF módulos. Every list entry has o seguintes structure:
+
+#### bridgeHook
+
+Contains metadata about o MF bridge que é usado para habilite cross-aplicação use-cases (React, Vue) para carregar properly.
+
+#### hooks
+
+Contains metadata about o MF hooks que são usado para tap no MF lifecycle.
+
+#### loaderHook
+
+Contains metadata about o MF loaderHook.
+
+#### moduleCache
+
+Contains uma Map storing all MF módulos com their metadata disponível no moduleCache.
+
+#### name
+
+O name do MF módulo.
+
+#### opções
+
+> Useful for debugging your módulos.
+
+Vital dados about o MF módulo, such as carregado plugins, connected remotes, shareStrategy e o dependência compartilhada objeto.
+
+#### remoteHandler
+
+Contains metadata about o MF remoteHandler including o idToRemoteMap que stores all bindings para connected remote componentes exposto pelo connected MF remotes.
+
+#### shareScopeMap
+
+Contains metadata about o MF shared escopo including dados about every connected dependência compartilhada.
+
+#### sharedHandler
+
+Contains metadata about o MF sharedHandler.
+
+#### snapshotHandler
+
+> Useful para check o mf-manifest.json structure e status.
+
+Contains metadata about o MF snapshotHandler including o manifestCache objeto e o manifestLoading objeto.
+
+#### versão
+
+O versão do Mf módulo.
+
+### **PRELOADED_MAP**
+
+O key-valor-map de all preloaded módulos (build-time). `key` represents o módulo name, e `value` represents o boolean valor do carregado status.
+
+### **MANIFEST_LOADING**
+
+Contains metadata about o manifestLoading objeto. Este é o mesmo as o `snapshotHandler.manifestLoading` em `__INSTANCES__`.

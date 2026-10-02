@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { vi } from 'vitest';
+import { rstest as vi } from '@rstest/core';
 import { checkVersion, findPackageJson } from '../src/utils';
 import { getBridgeRouterAlias } from '../src/router-alias';
 
@@ -92,6 +92,15 @@ describe('test checkVersion: should return the correct major version for react-r
 
   it('should return 8', () => {
     expect(checkVersion('^8.0.0')).toBe(8);
+  });
+
+  it('should normalize newer major versions to 8', () => {
+    expect(checkVersion('^10.2.1')).toBe(8);
+  });
+
+  it('should return 0 for missing or unsupported versions', () => {
+    expect(checkVersion('latest')).toBe(0);
+    expect(checkVersion('^4.9.0')).toBe(0);
   });
 });
 

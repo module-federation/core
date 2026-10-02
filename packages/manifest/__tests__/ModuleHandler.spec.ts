@@ -84,7 +84,21 @@ jest.mock(
     },
     RemoteManager: class {
       statsRemoteWithEmptyUsedIn: unknown[] = [];
-      init() {}
+      normalizedOptions: Record<
+        string,
+        { alias: string; name: string; entry: string }
+      > = {};
+
+      init(options: { remotes?: Record<string, string> }) {
+        this.normalizedOptions = Object.entries(options.remotes || {}).reduce(
+          (normalizedOptions, [alias, remote]) => {
+            const [name, entry] = remote.split('@');
+            normalizedOptions[alias] = { alias, name, entry };
+            return normalizedOptions;
+          },
+          {} as Record<string, { alias: string; name: string; entry: string }>,
+        );
+      }
     },
     SharedManager: class {
       normalizedOptions: Record<string, { requiredVersion?: string }> = {};
@@ -175,4 +189,38 @@ describe('ModuleHandler', () => {
     expect(exposesMap['./src/Button']?.path).toBe('./Button');
     expect(exposesMap['./src/Card']?.path).toBe('./Card');
   });
+
+  it.each(['webpack', 'rspack'] as const)(
+    'parses %s remote reference identifiers',
+    (bundler) => {
+      const modules: StatsModule[] = [
+        {
+          identifier: `remote (default) ${bundler}/container/reference/app2 ./Button`,
+          nameForCondition: './src/App.tsx',
+        } as StatsModule,
+      ];
+
+      const moduleHandler = new ModuleHandler(
+        {
+          name: 'host',
+          remotes: {
+            app2: 'app2@http://localhost:3002/remoteEntry.js',
+          },
+        },
+        modules,
+        { bundler },
+      );
+
+      const { remotes } = moduleHandler.collect();
+
+      expect(remotes).toHaveLength(1);
+      expect(remotes[0]).toMatchObject({
+        alias: 'app2',
+        consumingFederationContainerName: 'host',
+        federationContainerName: 'app2',
+        moduleName: 'Button',
+        entry: 'http://localhost:3002/remoteEntry.js',
+      });
+    },
+  );
 });

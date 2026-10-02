@@ -1,0 +1,266 @@
+import React from 'react';
+import ShareScopeAlignmentPlayground from '@components/common/ShareScopeAlignmentPlayground';
+
+# Shared Dependência Isolation: Multiple Compartilhe Escopos
+
+In {props.name || 'Module Federation'}, `shared` dependências são registered no `default` Compartilhe Escopo por padrão. Uma single Escopo é often não enough quando:
+
+* Você quiser isolate part de your dependências compartilhadas do padrão pool (por exemplo, running two React ecosystems side-by-side, gradual upgrades, ou domain isolation em micro-frontends).
+* Você want o mesmo pacote para usar diferente versões ou estratégias em diferente domains, enquanto still being shared within each domain (singleton/reuse still works within uma domain).
+
+O ideia principal de multiple Compartilhe Escopos é: **move dependência compartilhada registration e resolution em diferente namespaces (Escopos)**, so você pode isolate shared pools e layer policies.
+
+## Configuração Quick Map
+
+O simplest way para understand multiple Compartilhe Escopos é para focus no que você configure no producer, o consumer, e each shared entry. Você don't precisa learn runtime internal dados structures ou variable names.
+
+* **Producer**: use [shareScope](/configure/shareScope.html) para declare que Compartilhe Escopos este provider initializes (padrão: `default`, suporta `string | string[]`).
+* **Consumer**: use [remotes[remote].shareScope](/configure/remotes.html#sharescope) para declare que Compartilhe Escopos o consumer aligns com uma given provider (padrão: `default`).
+* **Shared entry**: use `shared[pkg].shareScope` para decide que pool uma dependência é registered / resolved em (consulte [shared.shareScope](/configure/shared.html#sharescope)).
+
+## What Happens for Different Combinations
+
+Quando o consumer initializes uma provider, it primeiro aligns o Compartilhe Escopos baseado em both sides' `shareScope` settings — so o provider knows que shared pools para reuse — then o provider initializes dependências compartilhadas according para its own `shareScope`.
+
+To make o alignment e initialization relationship easier para describe, nós use:
+
+- **HostShareScope** for `remotes[remote].shareScope` configured no consumer side
+- **RemoteShareScope** for `shareScope` configured no provider side
+
+:::warning Note
+
+Do não configure `shareScope` / `remotes[remote].shareScope` as `['default']` ou `[]`:
+
+* **Single Escopo**: use uma string, não um array. O two follow diferente internal branches for compartilhe-pool alignment / initialization. Se o consumer usa um array e o provider usa uma string, o provider aligns Escopos usando o consumer's list; se o provider usa um array, it apenas processes o provider's list.
+* **Empty array `[]`**: results no Escopos being initialized (no `default`, no alignment) — este é uma misconfiguration.
+
+:::
+
+| HostShareScope | RemoteShareScope | Compartilhe Pool Behavior |
+| --- | --- | --- |
+| `'default'` | `'default'` | `default` é fully shared. |
+| `['default','scope1']` | `'default'` | Only `default` é shared; `scope1` é não initialized by o provider (o provider deve também ser configured com multiple Compartilhe Escopos). |
+| `'default'` | `['default','scope1']` | `default` é shared; o consumer does não forneça `scope1` (it becomes `{}`), so deps under it cannot ser reused de o consumer e fall back para local deps. |
+| `['scope1','default']` | `['scope1','scope2']` | `scope1` é shared; o consumer does não forneça `scope2` (it becomes `{}`), so deps under it cannot ser reused de o consumer. |
+
+:::tip Rule of thumb
+
+**Compartilhe pools são fornecido pelo consumer e initialized pelo provider.** Escopos o consumer does não list são filled em as `{}` (so missing escopo names never crash); Escopos o provider does não list não são initialized. Both sides deve list uma Escopo antes uma shared dep pode really ser reused under it.
+
+:::
+
+### Playground
+
+{props.shareScopeAlignmentPlayground ||
+  React.createElement(ShareScopeAlignmentPlayground)}
+
+## Plugin de build Configuração
+
+### Producer
+
+```ts title="remote/rspack.config.ts"
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+
+export default {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'app_remote',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Button': './src/Button',
+      },
+      shareScope: ['default', 'scope1'],
+      shared: {
+        react: {
+          singleton: true,
+          requiredVersion: false,
+          shareScope: 'default',
+        },
+        'react-dom': {
+          singleton: true,
+          requiredVersion: false,
+          shareScope: 'default',
+        },
+        '@company/design-system': {
+          singleton: true,
+          requiredVersion: false,
+          shareScope: 'scope1',
+        },
+      },
+    }),
+  ],
+};
+```
+
+Key points:
+
+* `shareScope: ['default','scope1']` controls que Escopos o provider's remoteEntry initializes em runtime.
+* `shared[pkg].shareScope` decides que Escopo uma dependência registers / resolves under. Se `@company/design-system` é em `scope1`, it apenas participates em versão selection e reuse within o `scope1` pool.
+
+### Consumer
+
+```ts title="host/rspack.config.ts"
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+
+export default {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'app_host',
+      remotes: {
+        app_remote: {
+          external: 'app_remote@http://localhost:2001/remoteEntry.js',
+          shareScope: ['default', 'scope1'],
+        },
+      },
+    }),
+  ],
+};
+```
+
+Key points:
+
+* `remotes[remote].shareScope` controls que Escopos o consumer aligns quando initializing uma provider — they são passed para o provider as `shareScopeKeys`.
+* Se o consumer é configured com multiple Escopos but o provider é single-Escopo, o scopeMap é aligned but o provider apenas initializes compartilhamento for its single Escopo (see o combination table above). For multi-pool reuse para "really work", both consumer e provider geralmente precisa agree no mesmo Escopos.
+
+## Runtime puro (API de runtime)
+
+Se você não declare providers e dependências compartilhadas por meio do plugin de build (por exemplo, você quiser register them dinamicamente em runtime), você pode use o API de runtime para o mesmo multi-Compartilhe-Escopo effect. Two key APIs:
+
+* **Register providers**: `registerRemotes` ou `createInstance({ remotes })`, declaring o Compartilhe Escopos para align via `shareScope: string | string[]` em each provider configuração.
+* **Register dependências compartilhadas**: `registerShared` ou `createInstance({ shared })`, deciding que Compartilhe Escopo uma dependência lands em via `scope: string | string[]` em each entry.
+
+:::warning Field-name difference
+O field name quando registering dependências compartilhadas é **`scope`**, não `shareScope` (diferente do plugin de build's `shared[pkg].shareScope`).
+:::
+
+```ts title="host/runtime.ts"
+import React from 'react';
+import { registerRemotes, registerShared } from '@module-federation/enhanced/runtime';
+
+registerRemotes([
+  {
+    name: 'app_remote',
+    alias: 'remote',
+    entry: 'http://localhost:2001/mf-manifest.json',
+    shareScope: ['default', 'scope1'],
+  },
+]);
+
+registerShared({
+  react: {
+    version: '18.0.0',
+    scope: 'default',
+    lib: () => React,
+    shareConfig: {
+      singleton: true,
+      requiredVersion: '^18.0.0',
+    },
+  },
+  '@company/design-system': {
+    version: '1.2.3',
+    scope: 'scope1',
+    lib: () => require('@company/design-system'),
+    shareConfig: {
+      singleton: true,
+      requiredVersion: false,
+    },
+  },
+});
+```
+
+## Fine-grained Control com Hooks de runtime
+
+Multiple Compartilhe Escopos essentially group shared pools by name. Se você need finer control over Escopo selection, alignment, e fallback estratégias, você pode use Hooks de runtime para intervene during o init phase ou shared resolution.
+
+### 1. Rewrite shareScopeKeys per provider (beforeInitContainer)
+
+O exemplo below forces `legacy_remote` para always use o `legacy` Escopo (even se uma diferente shareScope was definir at build time ou runtime registration):
+
+```ts title="multi-scope-policy-plugin.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export function multiScopePolicyPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'multi-scope-policy',
+    async beforeInitContainer(args) {
+      if (args.remoteInfo.name !== 'legacy_remote') return args;
+
+      const hostShareScopeMap = args.origin.shareScopeMap;
+      if (!hostShareScopeMap.legacy) hostShareScopeMap.legacy = {};
+
+      args.remoteEntryInitOptions.shareScopeKeys = ['legacy'];
+
+      return {
+        ...args,
+        shareScope: hostShareScopeMap.legacy,
+      };
+    },
+  };
+}
+```
+
+### 2. Alias / fallback quando uma Escopo é missing (initContainerShareScopeMap / resolveShare)
+
+* `initContainerShareScopeMap`: adjust each Escopo's `shareScope` mapping during o provider's compartilhe-pool initialization.
+* `resolveShare`: override o final selection result by replacing `args.resolver`. Returning `{ ...args, scope: 'default' }` alone é não enough no current runtime implementation.
+
+Exemplo: se uma pacote é não encontrada em `scope1`, fall back para o `default` Escopo:
+
+```ts title="scope-fallback-plugin.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export function scopeFallbackPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'scope-fallback',
+    resolveShare(args) {
+      const current =
+        args.shareScopeMap[args.scope]?.[args.pkgName]?.[args.version];
+      if (current) return args;
+
+      args.resolver = () => {
+        const fallbackVersionMap = args.shareScopeMap.default?.[args.pkgName];
+        if (!fallbackVersionMap) {
+          return undefined;
+        }
+
+        const fallbackShared =
+          fallbackVersionMap[args.version] ??
+          Object.values(fallbackVersionMap)[0];
+
+        if (!fallbackShared) {
+          return undefined;
+        }
+
+        return {
+          shared: fallbackShared,
+          useTreesShaking: false,
+        };
+      };
+
+      return args;
+    },
+  };
+}
+```
+
+Você pode também alias one Escopo para another em `initContainerShareScopeMap` (so two Escopos compartilhe o mesmo pool objeto):
+
+```ts title="scope-alias-plugin.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export function scopeAliasPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'scope-alias',
+    initContainerShareScopeMap(args) {
+      if (args.scopeName !== 'scope1') return args;
+      if (!args.hostShareScopeMap?.default) return args;
+
+      args.hostShareScopeMap.scope1 = args.hostShareScopeMap.default;
+      return {
+        ...args,
+        shareScope: args.hostShareScopeMap.default,
+      };
+    },
+  };
+}
+```

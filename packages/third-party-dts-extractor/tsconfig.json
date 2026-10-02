@@ -3,9 +3,11 @@
     "target": "es2017",
     "module": "esnext",
     "lib": ["esnext"],
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": ["node"]
+    "types": ["node"],
+    "strict": false,
+    "skipLibCheck": true,
+    "ignoreDeprecations": "6.0"
   }
 }

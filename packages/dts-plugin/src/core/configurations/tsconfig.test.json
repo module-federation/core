@@ -3,11 +3,11 @@
     "target": "es2017",
     "module": "esnext",
     "lib": ["esnext"],
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "strict": true,
     "strictNullChecks": true,
     "resolveJsonModule": true,
-    "declarationDir": "dts-dist"
+    "declarationDir": "dts-dist",
+    "ignoreDeprecations": "6.0"
   }
 }

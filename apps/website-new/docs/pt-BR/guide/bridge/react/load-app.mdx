@@ -1,0 +1,307 @@
+# Carregamento Aplicações
+
+Este chapter introduces como para usar `createRemoteAppComponent` para carregar e integrate remote React aplicações em uma aplicação host.
+
+## What é createRemoteAppComponent?
+
+`createRemoteAppComponent` é o core React Bridge API for carregamento remote React aplicações. It fornece:
+
+- **Automatic Lazy Carregamento**: Carrega remotes apenas quando needed
+- **Lifecycle Management**: Handles mount/unmount automatically
+- **Router Integração**: Integrates com React Router e suporta basename injection
+- **Erro Handling**: Built-em carregamento/runtime erro fallback suporte
+- **Styling**: Suporta `className` / `style` no wrapper componente
+
+## Instalação
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
+
+## Básico Uso
+
+### Step 1: Configure Remote Módulos
+
+Add remote configuração para a aplicação host's Module Federation configuração.
+
+:::tip Build Tool Support
+
+O seguinte exemplo usa Rsbuild configuração. Please adjust according para your ferramenta de build:
+
+- **Rsbuild**: `@module-federation/rsbuild-plugin`
+- **Rspack**: `@module-federation/enhanced/rspack`
+- **Webpack**: `@module-federation/enhanced/webpack`
+- **Vite**: `@module-federation/vite`
+:::
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation({
+      name: 'host-app',
+      remotes: {
+        remote1: 'remote1@http://localhost:3001/remoteEntry.js',
+      },
+    }),
+  ],
+});
+```
+
+:::tip
+Se o remote usa React 18/19 bridge, garanta para também configure o `shared` section com o trailing-slash prefix form (`'react-dom/'`) so esse `react-dom/client` é correctly shared.
+:::
+
+### Step 2: Crie Remote Componentes
+
+#### Define Carregamento e Erro Componentes
+
+```tsx
+// ./src/components/RemoteComponents.tsx
+import React from 'react';
+
+export const LoadingComponent = () => (
+  <div style={{ padding: '20px', textAlign: 'center' }}>
+    <div>Loading remote application...</div>
+  </div>
+);
+
+export const ErrorFallback = ({ error }: { error: Error }) => (
+  <div style={{ padding: '20px', border: '1px solid #ff6b6b', borderRadius: '8px' }}>
+    <h3>Remote Application Load Failed</h3>
+    <p>Error details: {error.message}</p>
+    <button onClick={() => window.location.reload()}>Reload Page</button>
+  </div>
+);
+```
+
+#### Crie Remote Aplicação Componente
+
+```tsx
+// ./src/remotes/Remote1App.tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/runtime';
+import { LoadingComponent, ErrorFallback } from '../components/RemoteComponents';
+
+export const Remote1App = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  loading: <LoadingComponent />,
+  fallback: ErrorFallback,
+});
+```
+
+#### Main Aplicação Router Configuração
+
+```tsx
+// ./src/App.tsx
+import React, { useRef } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Remote1App } from './remotes/Remote1App';
+
+const HomePage = () => (
+  <div style={{ padding: '20px' }}>
+    <h1>Host Application Home</h1>
+    <p>This is the home content of the host application</p>
+  </div>
+);
+
+const App = () => {
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/remote1/*"
+          Component={() => (
+            <Remote1App
+              className="remote1"
+              style={{ color: 'red' }}
+              name="Ming"
+              age={12}
+              ref={ref}
+            />
+          )}
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;
+```
+
+## Remote Componente Props
+
+### Router Props
+
+- `basename`: Set o base caminho para a aplicação remote
+- `memoryRoute`: Memory router configuração
+
+### Style Props
+
+- `style`: `React.CSSProperties`
+- `className`: `string`
+
+### Ref Suporte
+
+- `ref`: `React.Ref<HTMLDivElement>` (forwarded to the internal container)
+
+### Dados Passing
+
+- Pass props diretamente (e.g. `userId="123"`) ou via o `props` objeto.
+
+## createRemoteAppComponent API Reference
+
+### Função Signature
+
+```tsx
+function createRemoteAppComponent<T = Record<string, unknown>, E extends keyof T = keyof T>(
+  config: RemoteComponentParams<T, E>
+): React.ForwardRefExoticComponent<
+  Omit<RemoteComponentProps<T>, "ref"> & React.RefAttributes<HTMLDivElement>
+>
+```
+
+### RemoteComponentParams\<T, E\>
+
+```tsx
+interface RemoteComponentParams<T = Record<string, unknown>, E extends keyof T = keyof T> {
+  loader: () => Promise<T>;
+  loading: React.ReactNode;
+  fallback: React.ComponentType<{ error: Error }>;
+  export?: E;
+  props?: T;
+}
+```
+
+### RemoteComponentProps\<T\>
+
+```tsx
+interface RemoteComponentProps<T = Record<string, unknown>> {
+  props?: T;
+  fallback?: React.ComponentType<{ error: Error }>;
+  loading?: React.ReactNode;
+  basename?: string;
+  memoryRoute?: {
+    entryPath: string;
+    initialState?: Record<string, unknown>;
+  };
+  style?: React.CSSProperties;
+  className?: string;
+  [key: string]: unknown;
+}
+```
+
+### Parameter Details
+
+### loader
+
+- Type: `() => Promise<T>`
+- Obrigatório: Yes
+- Description: Carrega o módulo remoto objeto
+- Exemplos:
+  ```tsx
+  loader: () => loadRemote('remote1/export-app')
+  loader: () => import('remote1/export-app')
+  ```
+
+### carregamento
+
+- Tipo: `React.ReactNode`
+- Obrigatório: Yes
+- Description: UI shown enquanto o remote é carregamento
+- Exemplos:
+  ```tsx
+  loading: <div>Loading...</div>
+  loading: 'Loading remote app...'
+  loading: <Spinner />
+  ```
+
+### fallback
+
+- Tipo: `React.ComponentType<{ error: Error }>`
+- Obrigatório: Yes
+- Description: UI shown quando carregamento/renderização fails; receives `error`
+- Exemplos:
+  ```tsx
+  fallback: ({ error }) => <div>Error: {error.message}</div>
+  fallback: ErrorBoundaryComponent
+  ```
+
+### exporte
+
+- Tipo: `E extends keyof T`
+- Obrigatório: No
+- Padrão: `'default'`
+- Description: Selects que exporte para render do carregado módulo remoto
+
+Exemplo: se your módulo remoto exporta:
+
+```tsx
+export default App;
+export const dashboard = Dashboard;
+```
+
+Host uso:
+
+```tsx
+createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+})
+
+createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  export: 'dashboard',
+})
+```
+
+## Bundle Size Optimization
+
+### React Router Dependência Explanation
+
+Por padrão, `@module-federation/bridge-react` includes `react-router-dom` em your bundle para forneça:
+
+- Automatic basename injection
+- Router context passing
+- Nested routing suporte
+
+Se você don't need React Router integração (ou você use uma diferente router), disable `enableBridgeRouter` para reduce bundle size (about ~3KB gzipped) e avoid unnecessary router integração.
+
+### How para Disable Router Dependência
+
+```ts title="rsbuild.config.ts"
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'host-app',
+      remotes: {
+        remote1: 'remote1@http://localhost:3001/mf-manifest.json',
+      },
+      bridge: {
+        enableBridgeRouter: false,
+      },
+    }),
+  ],
+};
+```
+
+Por padrão, Bridge enables router suporte para forneça o best experiência de desenvolvimento e compatibility. Quando você definir `enableBridgeRouter: false`, o plugin automatically switches para uma build esse does não include `react-router-dom`, reducing your bundle size.
+
+:::info How It Works
+
+O plugin automatically resolves importa de `@module-federation/bridge-react` para `@module-federation/bridge-react/base`. Esse entry does não bundle `react-router-dom`, so no code changes são obrigatório.
+
+:::

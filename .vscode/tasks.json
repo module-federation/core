@@ -4,7 +4,7 @@
     {
       "label": "pnpm-build-enhanced",
       "type": "shell",
-      "command": "source $HOME/.nvm/nvm.sh && nvm use 20 && pnpm --filter @module-federation/enhanced run build",
+      "command": "source $HOME/.nvm/nvm.sh && nvm use 24 && pnpm --filter @module-federation/enhanced run build",
       "problemMatcher": [],
       "options": {
         "shell": {
@@ -17,7 +17,7 @@
         "panel": "dedicated",
         "clear": true
       },
-      "detail": "Sources NVM, uses Node v20, then builds the enhanced package."
+      "detail": "Sources NVM, uses Node v24, then builds the enhanced package."
     }
   ]
 }

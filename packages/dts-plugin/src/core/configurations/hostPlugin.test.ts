@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from '@rstest/core';
 import path from 'path';
 
 import { retrieveHostConfig } from './hostPlugin';

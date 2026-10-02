@@ -1,0 +1,59 @@
+# remoteType
+
+`remoteType` specifies o external módulo tipo for remote containers, determining como o runtime carrega remote entries.
+
+- Tipo: `ExternalsType`
+- Obrigatório: No
+- Padrão: `'script'`
+
+```ts
+type ExternalsType =
+  | 'var' | 'module' | 'assign'
+  | 'this' | 'window' | 'self' | 'global'
+  | 'commonjs' | 'commonjs2' | 'commonjs-module' | 'commonjs-static'
+  | 'amd' | 'amd-require'
+  | 'umd' | 'umd2'
+  | 'jsonp' | 'system'
+  | 'promise' | 'import' | 'module-import'
+  | 'script' | 'node-commonjs';
+```
+
+## Uso
+
+`remoteType` controls como webpack/rspack carrega remote container scripts em runtime. Common valores:
+
+| Valor | Description |
+|---|---|
+| `'script'` | Loads via `<script>` tag (default for browser) |
+| `'var'` | Remote container é exposto as uma global variable |
+| `'commonjs2'` | Carrega via `require()` (Node.js) |
+| `'node-commonjs'` | Node.js CommonJS format |
+| `'import'` | Carrega via dynamic `import()` |
+| `'promise'` | Carrega via uma Promise wrapper |
+| `'module'` | ESM módulo carregamento |
+
+:::tip
+In mais cases você não precisa definir `remoteType` manually — o padrão `'script'` works for navegador environments. Node.js do lado do servidor scenarios typically require `'commonjs2'` ou `'node-commonjs'`.
+:::
+
+## Exemplo
+
+```ts
+// Browser (default)
+new ModuleFederationPlugin({
+  name: '@demo/host',
+  remoteType: 'script',
+  remotes: {
+    provider: 'provider@http://localhost:3001/remoteEntry.js',
+  },
+});
+
+// Node.js server-side
+new ModuleFederationPlugin({
+  name: '@demo/node-host',
+  remoteType: 'commonjs2',
+  remotes: {
+    provider: 'provider@http://localhost:3001/remoteEntry.js',
+  },
+});
+```

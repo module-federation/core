@@ -4,11 +4,10 @@
     "strict": false,
     "module": "ES2022",
     "target": "ES2022",
-    "moduleResolution": "Node",
-    "baseUrl": ".",
     "jsx": "react",
     "paths": {
-      "shared-lib": ["libs/shared-lib/index.ts"]
+      "shared-lib": ["libs/shared-lib/index.ts"],
+      "*": ["./*"]
     }
   }
 }
