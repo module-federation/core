@@ -1,23 +1,30 @@
 import type { IncomingMessage, ServerResponse } from 'http';
+import { createRequire } from 'node:module';
 import type { RsbuildDevServer, RsbuildPlugin } from '@rsbuild/core';
 import logger from '../logger';
 
 type Revalidate = () => Promise<boolean>;
 type FlushRemoteState = () => Promise<void>;
 
+const nodeRequire = createRequire(import.meta.url);
+
 const isPageRequest = (req: IncomingMessage) =>
   req.method === 'GET' && Boolean(req.headers.accept?.includes('text/html'));
 
 const revalidateRemotes: Revalidate = async () => {
-  const { revalidate } = await import('@module-federation/node/utils');
+  // Revalidation needs the CommonJS require cache, including in an ESM CLI.
+  const { revalidate } = nodeRequire(
+    '@module-federation/node/utils',
+  ) as typeof import('@module-federation/node/utils');
   return revalidate();
 };
 
 const flushRemoteState: FlushRemoteState = async () => {
-  const [{ usedChunks }, { flushDataFetch }] = await Promise.all([
-    import('@module-federation/node/utils'),
-    import('@module-federation/bridge-react/data-fetch'),
-  ]);
+  const { usedChunks } = nodeRequire(
+    '@module-federation/node/utils',
+  ) as typeof import('@module-federation/node/utils');
+  const { flushDataFetch } =
+    await import('@module-federation/bridge-react/data-fetch');
   usedChunks.clear();
   flushDataFetch();
 };

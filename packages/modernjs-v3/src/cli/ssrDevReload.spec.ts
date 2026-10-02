@@ -1,10 +1,6 @@
 import { describe, expect, it, rs } from '@rstest/core';
+import { createRequire } from 'node:module';
 import { createRemoteRevalidateMiddleware } from './ssrDevReload';
-
-rs.mock('@module-federation/node/utils', () => ({
-  usedChunks: new Set<string>(),
-  flushChunks: rs.fn(async () => []),
-}));
 
 rs.mock('@module-federation/bridge-react/data-fetch', () => ({
   flushDataFetch: rs.fn(),
@@ -19,9 +15,30 @@ const run = (
 ) => new Promise<void>((resolve) => middleware(req, {} as any, resolve));
 
 describe('createRemoteRevalidateMiddleware', () => {
+  it('uses the CommonJS revalidation helper that can clear the Node require cache', async () => {
+    const nodeRequire = createRequire(import.meta.url);
+    const nodeUtils = nodeRequire(
+      '@module-federation/node/utils',
+    ) as typeof import('@module-federation/node/utils');
+    const revalidate = rs
+      .spyOn(nodeUtils, 'revalidate')
+      .mockResolvedValue(true);
+    const sockWrite = rs.fn();
+    try {
+      await run(
+        createRemoteRevalidateMiddleware(sockWrite, undefined, async () => {}),
+        pageRequest,
+      );
+
+      expect(revalidate).toHaveBeenCalledTimes(1);
+      expect(sockWrite).toHaveBeenCalledWith('full-reload');
+    } finally {
+      revalidate.mockRestore();
+    }
+  });
+
   it('clears stale chunk tracking without collecting assets from reset remotes', async () => {
-    const { usedChunks, flushChunks } =
-      await import('@module-federation/node/utils');
+    const { usedChunks } = await import('@module-federation/node/utils');
     const { flushDataFetch } =
       await import('@module-federation/bridge-react/data-fetch');
     usedChunks.add('shop/Button');
@@ -30,11 +47,16 @@ describe('createRemoteRevalidateMiddleware', () => {
       async () => true,
     );
 
-    await run(middleware, pageRequest);
+    const error = rs.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await run(middleware, pageRequest);
 
-    expect(usedChunks.size).toBe(0);
-    expect(flushChunks).not.toHaveBeenCalled();
-    expect(flushDataFetch).toHaveBeenCalledTimes(1);
+      expect(usedChunks.size).toBe(0);
+      expect(error).not.toHaveBeenCalled();
+      expect(flushDataFetch).toHaveBeenCalledTimes(1);
+    } finally {
+      error.mockRestore();
+    }
   });
 
   it('does not check remotes for non-page requests', async () => {
