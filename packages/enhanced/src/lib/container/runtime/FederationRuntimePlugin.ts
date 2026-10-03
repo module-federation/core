@@ -39,6 +39,39 @@ type RuntimeEntrySpec = {
   cjs: string;
 };
 
+function isLocalRuntimePluginPath(
+  runtimePluginEntry: string,
+  cwd = process.cwd(),
+) {
+  const isRelativePath =
+    runtimePluginEntry.startsWith('./') ||
+    runtimePluginEntry.startsWith('../') ||
+    runtimePluginEntry.startsWith('.\\') ||
+    runtimePluginEntry.startsWith('..\\');
+
+  return (
+    path.isAbsolute(runtimePluginEntry) ||
+    isRelativePath ||
+    fs.existsSync(path.resolve(cwd, runtimePluginEntry))
+  );
+}
+
+function resolveRuntimePluginPath(
+  runtimePluginEntry: string,
+  cwd = process.cwd(),
+  resolve: ResolveFn = require.resolve,
+) {
+  if (path.isAbsolute(runtimePluginEntry)) {
+    return runtimePluginEntry;
+  }
+
+  try {
+    return resolve(runtimePluginEntry, { paths: [cwd] });
+  } catch {
+    return path.resolve(cwd, runtimePluginEntry);
+  }
+}
+
 function resolveRuntimeEntry(
   spec: RuntimeEntrySpec,
   implementation: string | undefined,
@@ -169,9 +202,9 @@ class FederationRuntimePlugin {
           ? runtimePlugin[0]
           : runtimePlugin;
         const runtimePluginPath = normalizeToPosixPath(
-          path.isAbsolute(runtimePluginEntry)
-            ? runtimePluginEntry
-            : path.join(process.cwd(), runtimePluginEntry),
+          isLocalRuntimePluginPath(runtimePluginEntry)
+            ? resolveRuntimePluginPath(runtimePluginEntry)
+            : runtimePluginEntry,
         );
         const paramsStr =
           Array.isArray(runtimePlugin) && runtimePlugin.length > 1
