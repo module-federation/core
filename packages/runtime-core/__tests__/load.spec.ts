@@ -5,6 +5,7 @@ import {
   getRemoteInfo,
 } from '../src/utils/load';
 import { ModuleFederation } from '../src';
+import { FederationKernel } from '../src/kernel';
 import { globalLoading, resetFederationGlobalInfo } from '../src/global';
 import {
   RUNTIME_001,
@@ -13,6 +14,7 @@ import {
 } from '@module-federation/error-codes';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
 import type { ModuleFederationRuntimePlugin } from '../src/type/plugin';
+import type { Platform } from '../src/type';
 
 // All fixture URLs are served via two complementary mechanisms both pointing to __tests__/:
 //   1. mockScriptDomResponse (setup.ts) — patches Element.prototype.appendChild, executes
@@ -335,25 +337,31 @@ describe('getRemoteEntry - script load error discrimination', () => {
     const firstRecorder = createResourceRecorder();
     const secondRecorder = createResourceRecorder();
     const container = { get: rs.fn(), init: rs.fn() };
-    const firstOrigin = new ModuleFederation({
-      name: 'resource-concurrent-first',
-      remotes: [],
-      plugins: [
-        firstRecorder.plugin,
-        {
-          name: 'delayed-entry',
-          async loadEntry() {
-            await Promise.resolve();
-            return container;
-          },
-        },
-      ],
-    });
-    const secondOrigin = new ModuleFederation({
-      name: 'resource-concurrent-second',
-      remotes: [],
-      plugins: [secondRecorder.plugin],
-    });
+    const platform: Platform = {
+      isBrowser: () => true,
+      loadScript: async () => undefined,
+      async loadEntry(args) {
+        firstRecorder.starts.push(args);
+        await Promise.resolve();
+        return container;
+      },
+    };
+    const firstOrigin = new FederationKernel(
+      {
+        name: 'resource-concurrent-first',
+        remotes: [],
+        plugins: [{ ...firstRecorder.plugin, loadEntry: undefined }],
+      },
+      { platform },
+    );
+    const secondOrigin = new FederationKernel(
+      {
+        name: 'resource-concurrent-second',
+        remotes: [],
+        plugins: [{ ...secondRecorder.plugin, loadEntry: undefined }],
+      },
+      { platform },
+    );
     const remoteInfo = getRemoteInfo({
       name: 'shared-concurrent-remote',
       entry: 'https://remote.test/shared-concurrent.js',
@@ -482,7 +490,7 @@ describe('getRemoteEntry - globalLoading rejection cache', () => {
       name: 'cached-success-remote',
       entry: 'https://remote.test/cached-success.js',
     });
-    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo, origin);
 
     const first = await getRemoteEntry({ origin, remoteInfo });
     const cached = globalLoading[uniqueKey];
@@ -518,7 +526,7 @@ describe('getRemoteEntry - globalLoading rejection cache', () => {
       name: 'concurrent-cache-remote',
       entry: 'https://remote.test/concurrent-cache.js',
     });
-    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo, origin);
 
     const firstPromise = getRemoteEntry({ origin, remoteInfo });
     const secondPromise = getRemoteEntry({ origin, remoteInfo });
@@ -562,7 +570,7 @@ describe('getRemoteEntry - globalLoading rejection cache', () => {
       name: 'retry-after-reject-remote',
       entry: 'https://remote.test/retry-after-reject.js',
     });
-    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo, origin);
 
     const firstError = await getRemoteEntry({ origin, remoteInfo }).catch(
       (error) => error,
@@ -596,7 +604,7 @@ describe('getRemoteEntry - globalLoading rejection cache', () => {
       name: 'permanent-failure-remote',
       entry: 'https://remote.test/permanent-failure.js',
     });
-    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo, origin);
 
     const firstError = await getRemoteEntry({ origin, remoteInfo }).catch(
       (error) => error,
@@ -654,7 +662,7 @@ describe('getRemoteEntry - globalLoading rejection cache', () => {
       name: 'identity-check-remote',
       entry: 'https://remote.test/identity-check.js',
     });
-    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo, origin);
 
     const firstError = await getRemoteEntry({ origin, remoteInfo }).catch(
       (error) => error,
