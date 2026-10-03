@@ -1,0 +1,101 @@
+{
+  "implementationSha": "84cee419c5c7dc2bb87d1a92cd7fb8e15e409aec",
+  "node": "24.15.0",
+  "pnpm": "10.28.0",
+  "distinctInstalledEnhancedCopies": true,
+  "command": "node /Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-composition-proof/run.cjs installed-before",
+  "note": "Proof-directory prefixes in diagnostic paths normalized to <proof>. Baseline runtime instance identity was not executed in the original capture.",
+  "cases": [
+    {
+      "case": "control-same-family-ab",
+      "expected": "successful compatible composition",
+      "errors": [],
+      "warnings": [],
+      "selectedFamily": ["/family-a/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    },
+    {
+      "case": "control-same-family-ba",
+      "expected": "successful compatible composition",
+      "errors": [],
+      "warnings": [],
+      "selectedFamily": ["/family-a/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    },
+    {
+      "case": "conflict-family-ab",
+      "expected": "reject incompatible compiler composition",
+      "errors": [],
+      "warnings": [],
+      "selectedFamily": ["/family-a/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    },
+    {
+      "case": "conflict-family-ba",
+      "expected": "reject incompatible compiler composition",
+      "errors": [],
+      "warnings": [],
+      "selectedFamily": ["/family-b/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    },
+    {
+      "case": "conflict-target-web-node",
+      "expected": "reject incompatible compiler composition",
+      "errors": [],
+      "warnings": ["DefinePlugin\nConflicting values for 'ENV_TARGET'"],
+      "selectedFamily": ["/family-a/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    },
+    {
+      "case": "conflict-target-node-web",
+      "expected": "reject incompatible compiler composition",
+      "errors": [],
+      "warnings": ["DefinePlugin\nConflicting values for 'ENV_TARGET'"],
+      "selectedFamily": ["/family-a/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    },
+    {
+      "case": "invalid-slot-null",
+      "expected": "reject invalid compiler composition slot",
+      "errors": [],
+      "warnings": [],
+      "selectedFamily": ["/family-a/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    },
+    {
+      "case": "invalid-slot-primitive",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Cannot read properties of undefined (reading 'push')"
+    },
+    {
+      "case": "invalid-slot-missing-shape",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Cannot read properties of undefined (reading 'push')"
+    },
+    {
+      "case": "invalid-slot-missing-version",
+      "expected": "reject invalid compiler composition slot",
+      "errors": [],
+      "warnings": [],
+      "selectedFamily": ["/family-a/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    },
+    {
+      "case": "invalid-slot-invalid-version",
+      "expected": "reject invalid compiler composition slot",
+      "errors": [],
+      "warnings": [],
+      "selectedFamily": ["/family-a/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    }
+  ]
+}

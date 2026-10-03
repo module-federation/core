@@ -160,6 +160,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -221,6 +222,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -282,6 +284,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -347,6 +350,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -412,6 +416,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -477,6 +482,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -539,6 +545,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -598,6 +605,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -663,6 +671,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -728,6 +737,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -791,6 +801,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (
@@ -849,6 +860,7 @@ describe('ProvideSharedPlugin', () => {
 
         plugin.apply({
           hooks: {
+            afterResolvers: { tap: rs.fn() },
             compilation: {
               tap: rs.fn(
                 (

@@ -19,6 +19,8 @@ describe('hooks', () => {
   });
   beforeEach(() => {
     removeScriptTags();
+    Reflect.deleteProperty(globalThis, '@loader-hooks/app2');
+    Reflect.deleteProperty(globalThis, '@loader-hooks/app3');
   });
 
   it('core hooks args', async () => {

@@ -132,6 +132,9 @@ export function plannedImports(plan: CompositionPlan): PlannedImport[] {
   if (plan.remote) {
     capability('remote', './remote');
     if (plan.snapshot) capability('snapshot', './snapshot');
+  }
+  // Shared fallback entries use the platform loader without remote consumption.
+  if (plan.shared || plan.remote) {
     capability(plan.platform, `./platform/${plan.platform}`, 'platform');
   }
   return imports;

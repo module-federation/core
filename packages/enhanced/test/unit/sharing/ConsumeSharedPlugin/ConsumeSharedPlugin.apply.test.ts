@@ -136,6 +136,7 @@ describe('ConsumeSharedPlugin', () => {
       mockCompiler = {
         context: '/test/context',
         hooks: {
+          afterResolvers: { tap: rs.fn() },
           thisCompilation: mockThisCompilationHook,
         },
       };

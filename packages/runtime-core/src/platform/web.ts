@@ -1,12 +1,17 @@
 import { loadScript } from '@module-federation/sdk/core';
 import { RUNTIME_008, runtimeDescMap } from '@module-federation/error-codes';
 import type { ModuleFederation } from '../index';
-import { getRemoteEntryExports } from '../global';
+import {
+  browserEntryLoading,
+  getRemoteEntryExports,
+  getEntryLoadingIdentity,
+} from '../global';
 import type {
   Platform,
   RemoteEntryExports,
   RemoteInfo,
   ResourceLoadContext,
+  LoadEntryOptions,
 } from '../type';
 import { error } from '../utils/logger';
 import { handleRemoteEntryLoaded, isEsmRemoteType } from '../utils/load';
@@ -125,6 +130,7 @@ async function loadEntryScript({
   loaderHook,
   getEntryUrl,
   resourceContext,
+  entryLoadingContext,
 }: {
   name: string;
   globalName: string;
@@ -133,11 +139,37 @@ async function loadEntryScript({
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
   resourceContext?: ResourceLoadContext;
+  entryLoadingContext?: LoadEntryOptions['entryLoadingContext'];
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
     globalName,
   );
+
+  const context = entryLoadingContext ?? {
+    key: `${entry}:${getEntryLoadingIdentity(loaderHook)}`,
+    custom:
+      Boolean(getEntryUrl) ||
+      loaderHook.lifecycle.createScript.listeners.size > 0 ||
+      loaderHook.lifecycle.fetch.listeners.size > 0 ||
+      loaderHook.lifecycle.loadEntryError.listeners.size > 0,
+  };
+  const previous = browserEntryLoading.get(globalName);
+  if (
+    previous &&
+    (previous.pending || remoteEntryExports) &&
+    previous.key !== context.key &&
+    (previous.custom || context.custom)
+  ) {
+    error(
+      `Unsupported browser global entry isolation: remote "${name}" uses global "${globalName}" already owned by another entry evaluator. Use distinct global names or an ESM entry.`,
+    );
+  }
+  if (!previous && remoteEntryExports && context.custom) {
+    error(
+      `Unsupported browser global entry isolation: global "${globalName}" has exports from an unknown entry evaluator. Use distinct global names or an ESM entry.`,
+    );
+  }
 
   if (remoteEntryExports) {
     return remoteEntryExports;
@@ -145,6 +177,8 @@ async function loadEntryScript({
 
   // if getEntryUrl is passed, use the getEntryUrl to get the entry url
   const url = getEntryUrl ? getEntryUrl(entry) : entry;
+  const owner = { ...context, pending: true };
+  browserEntryLoading.set(globalName, owner);
   return loadScript(url, {
     attrs: {},
     createScriptHook: (url, attrs) => {
@@ -172,31 +206,41 @@ async function loadEntryScript({
 
       return;
     },
-  }).then(
-    () => {
-      // loadScript resolved: script was fetched, executed without throwing, and
-      // did not trigger a ScriptExecutionError listener. Now verify the global was registered.
-      return handleRemoteEntryLoaded(name, globalName, entry);
-    },
-    (loadError: unknown) => {
-      // loadScript rejected — one of three causes, all with descriptive messages:
-      //   ScriptNetworkError  — URL unreachable, 404, CORS, etc.
-      //   ScriptExecutionError — script fetched OK but IIFE threw during execution
-      //   timeout             — script took too long to load
-      // Errors thrown inside handleRemoteEntryLoaded above are NOT caught here.
-      const originalMsg =
-        loadError instanceof Error ? loadError.message : String(loadError);
-      error(
-        RUNTIME_008,
-        runtimeDescMap,
-        {
-          remoteName: name,
-          resourceUrl: url,
-        },
-        originalMsg,
-      );
-    },
-  );
+  })
+    .then(
+      () => {
+        // loadScript resolved: script was fetched, executed without throwing, and
+        // did not trigger a ScriptExecutionError listener. Now verify the global was registered.
+        return handleRemoteEntryLoaded(name, globalName, entry);
+      },
+      (loadError: unknown) => {
+        // loadScript rejected — one of three causes, all with descriptive messages:
+        //   ScriptNetworkError  — URL unreachable, 404, CORS, etc.
+        //   ScriptExecutionError — script fetched OK but IIFE threw during execution
+        //   timeout             — script took too long to load
+        // Errors thrown inside handleRemoteEntryLoaded above are NOT caught here.
+        const originalMsg =
+          loadError instanceof Error ? loadError.message : String(loadError);
+        error(
+          RUNTIME_008,
+          runtimeDescMap,
+          {
+            remoteName: name,
+            resourceUrl: url,
+          },
+          originalMsg,
+        );
+      },
+    )
+    .finally(() => {
+      owner.pending = false;
+      if (
+        !getRemoteEntryExports(name, globalName).entryExports &&
+        browserEntryLoading.get(globalName) === owner
+      ) {
+        browserEntryLoading.delete(globalName);
+      }
+    });
 }
 export async function loadEntryDom({
   remoteInfo,
@@ -204,13 +248,8 @@ export async function loadEntryDom({
   loaderHook,
   getEntryUrl,
   resourceContext,
-}: {
-  remoteInfo: RemoteInfo;
-  remoteEntryExports?: RemoteEntryExports;
-  loaderHook: ModuleFederation['loaderHook'];
-  getEntryUrl?: (url: string) => string;
-  resourceContext?: ResourceLoadContext;
-}) {
+  entryLoadingContext,
+}: LoadEntryOptions) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   if (isEsmRemoteType(type)) {
     return loadEsmEntry({ entry, remoteEntryExports, name, getEntryUrl });
@@ -228,6 +267,7 @@ export async function loadEntryDom({
     loaderHook,
     getEntryUrl,
     resourceContext,
+    entryLoadingContext,
   });
 }
 
