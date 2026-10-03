@@ -944,6 +944,8 @@ type LoadEntryErrorOptions = {
 };
 ```
 
+The remote-entry cache key is still `name` plus `entry`. Reuse checks only run when both the cached entry and the new request carry runtime-image metadata, which no build emits by default. When both sides carry it and disagree on compatibility, target, remote type, or global name, reuse throws; otherwise it behaves as before.
+
 ## afterLoadEntry
 
 `AsyncHook`

@@ -898,6 +898,8 @@ type LoadEntryErrorOptions = {
 };
 ```
 
+远程入口的缓存键仍是 `name` 加 `entry`。只有缓存条目和新请求两边都带 runtime-image 元数据时才会做兼容检查，而默认情况下没有任何构建会产出这份元数据。两边都带元数据且在 compatibility、target、remote type 或 global name 上不一致时，复用会抛错；否则行为和之前一样。
+
 ## afterLoadEntry
 
 `AsyncHook`
