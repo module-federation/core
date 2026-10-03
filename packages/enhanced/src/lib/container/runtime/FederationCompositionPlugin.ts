@@ -1,6 +1,7 @@
 import fs from 'fs';
 import type { Compilation, Compiler, Module } from 'webpack';
 import {
+  ADAPTERS,
   FAMILY_PACKAGES,
   checkFederationGraph,
   planComposition,
@@ -11,6 +12,7 @@ import {
   utils,
   type AdapterName,
   type CompositionPlan,
+  type CompositionPlatform,
   type GraphModule,
   type Participant,
   type RuntimeFamily,
@@ -40,25 +42,96 @@ interface Outcome {
   legacyReason?: string;
 }
 
+interface RuntimeRequest {
+  anchor: string;
+  platform: CompositionPlatform;
+}
+
+type CompositionParticipant =
+  | Extract<Participant, { kind: 'needs' }>
+  | (Extract<Participant, { kind: 'options' }> & RuntimeRequest);
+
 export interface CompositionSlot {
-  participants: Participant[];
+  version: 1;
+  participants: CompositionParticipant[];
   sealed: boolean;
-  planner?: object;
+  planner?: RuntimeRequest;
   entry?: ComposedEntry;
 }
 
-type SlotCompiler = Compiler & { [SLOT]?: CompositionSlot };
+type SlotCompiler = Compiler & { [SLOT]?: unknown };
 
 export const COVERED_BY_OPTIONS = Symbol('covered by ModuleFederationPlugin');
 export type CoveredByOptions = typeof COVERED_BY_OPTIONS;
 
 function slotOf(compiler: Compiler): CompositionSlot {
   const target = compiler as SlotCompiler;
-  return (target[SLOT] ??= { participants: [], sealed: false });
+  const value = target[SLOT];
+  if (value === undefined) {
+    const slot: CompositionSlot = {
+      version: 1,
+      participants: [],
+      sealed: false,
+    };
+    target[SLOT] = slot;
+    return slot;
+  }
+  if (!isCompositionSlot(value)) {
+    throw new Error(
+      'Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol.',
+    );
+  }
+  return value;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isAdapters = (value: unknown): value is AdapterName[] =>
+  Array.isArray(value) &&
+  value.every((name) => ADAPTERS.some((adapter) => adapter === name));
+
+const isRuntimeRequest = (value: unknown): value is RuntimeRequest =>
+  isRecord(value) &&
+  typeof value.anchor === 'string' &&
+  (value.platform === 'web' ||
+    value.platform === 'node' ||
+    value.platform === 'universal');
+
+function isParticipant(value: unknown): value is CompositionParticipant {
+  if (!isRecord(value) || !isAdapters(value.needs)) return false;
+  return (
+    value.kind === 'needs' ||
+    (value.kind === 'options' &&
+      isRuntimeRequest(value) &&
+      isRecord(value.disable) &&
+      Object.entries(value.disable).every(
+        ([key, flag]) =>
+          ['shared', 'remote', 'snapshot'].includes(key) && flag === true,
+      ))
+  );
+}
+
+function isCompositionSlot(value: unknown): value is CompositionSlot {
+  return (
+    isRecord(value) &&
+    value.version === 1 &&
+    Array.isArray(value.participants) &&
+    value.participants.every(isParticipant) &&
+    typeof value.sealed === 'boolean' &&
+    (value.planner === undefined || isRuntimeRequest(value.planner)) &&
+    (value.entry === undefined ||
+      (isRecord(value.entry) &&
+        typeof value.entry.path === 'string' &&
+        typeof value.entry.source === 'string' &&
+        isAdapters(value.entry.adapters)))
+  );
 }
 
 export const composedEntryOf = (compiler: Compiler) =>
-  (compiler as SlotCompiler)[SLOT]?.entry;
+  (compiler as SlotCompiler)[SLOT] === undefined
+    ? undefined
+    : slotOf(compiler).entry;
 
 type Options = moduleFederationPlugin.ModuleFederationPluginOptions;
 
@@ -76,7 +149,10 @@ class FederationCompositionPlugin {
     private readonly _aliasTargets: string[],
   ) {}
 
-  static register(compiler: Compiler, participant: Participant): void {
+  static register(
+    compiler: Compiler,
+    participant: CompositionParticipant,
+  ): void {
     const slot = slotOf(compiler);
     if (slot.sealed) {
       throw new Error(
@@ -89,9 +165,17 @@ class FederationCompositionPlugin {
   apply(compiler: Compiler): void {
     const slot = slotOf(compiler);
     if (slot.planner) return;
-    slot.planner = this;
+    slot.planner = {
+      anchor: this._options.implementation ?? __dirname,
+      platform: this._options.experiments?.optimization?.target ?? 'universal',
+    };
 
     compiler.hooks.afterResolvers.tap(PLUGIN_NAME, () => {
+      checkRuntimeRequests(
+        slot.participants.filter(
+          (participant) => participant.kind === 'options',
+        ),
+      );
       slot.sealed = true;
       this._plan = planComposition(
         slot.participants,
@@ -175,6 +259,28 @@ class FederationCompositionPlugin {
       for (const message of findings.warnings)
         compilation.warnings.push(new WebpackError(message));
     });
+  }
+}
+
+function checkRuntimeRequests(requests: readonly RuntimeRequest[]): void {
+  const [first, ...rest] = requests;
+  if (!first) return;
+  const family = resolveRuntimeFamily(first.anchor);
+  for (const request of rest) {
+    if (request.platform !== first.platform) {
+      throw new Error(
+        `Federation composition participants request incompatible targets "${first.platform}" and "${request.platform}". Use one optimization.target per compiler.`,
+      );
+    }
+    const other = resolveRuntimeFamily(request.anchor);
+    const different = FAMILY_PACKAGES.find(
+      (pkg) => family.members[pkg]?.root !== other.members[pkg]?.root,
+    );
+    if (different) {
+      throw new Error(
+        `Federation composition participants request incompatible runtime families: ${different} resolves to "${family.members[different]?.root}" from "${first.anchor}" and "${other.members[different]?.root}" from "${request.anchor}". Use one runtime family per compiler.`,
+      );
+    }
   }
 }
 

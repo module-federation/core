@@ -5,6 +5,7 @@ import path from 'path';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import ModuleFederationPlugin from '../../../src/lib/container/ModuleFederationPlugin';
 import ContainerReferencePlugin from '../../../src/lib/container/ContainerReferencePlugin';
+import { FAMILY_PACKAGES } from '@module-federation/managers';
 import { COVERED_BY_OPTIONS } from '../../../src/lib/container/runtime/FederationCompositionPlugin';
 
 const webpack = require(
@@ -108,6 +109,44 @@ const messages = (list) => list.map(({ message }) => message);
 const loadSecondCopy = () =>
   createRequire(__filename)(
     '../../../dist/src/lib/container/ContainerReferencePlugin',
+  ).default;
+
+// Copy built package artifacts so custom implementations have genuinely distinct
+// package roots, while keeping unrelated dependencies from the locked install.
+function copyRuntimeFamily(context: string, name: string): string {
+  const family = path.join(context, name, 'node_modules');
+  for (const pkg of FAMILY_PACKAGES) {
+    const source = fs.realpathSync(
+      path.resolve(__dirname, '../../../../', pkg.split('/')[1]),
+    );
+    const target = path.join(family, pkg);
+    fs.mkdirSync(target, { recursive: true });
+    fs.copyFileSync(
+      path.join(source, 'package.json'),
+      path.join(target, 'package.json'),
+    );
+    fs.cpSync(path.join(source, 'dist'), path.join(target, 'dist'), {
+      recursive: true,
+    });
+    const { dependencies = {} } = JSON.parse(
+      fs.readFileSync(path.join(source, 'package.json'), 'utf8'),
+    );
+    for (const dependency of Object.keys(dependencies)) {
+      if (FAMILY_PACKAGES.some((pkg) => pkg === dependency)) continue;
+      const link = path.join(target, 'node_modules', dependency);
+      fs.mkdirSync(path.dirname(link), { recursive: true });
+      fs.symlinkSync(
+        fs.realpathSync(path.join(source, 'node_modules', dependency)),
+        link,
+      );
+    }
+  }
+  return path.join(family, '@module-federation/runtime-tools');
+}
+
+const loadOtherFederationPlugin = () =>
+  createRequire(__filename)(
+    '../../../dist/src/lib/container/ModuleFederationPlugin',
   ).default;
 
 describe('FederationCompositionPlugin', () => {
@@ -230,6 +269,128 @@ describe('FederationCompositionPlugin', () => {
     expect(messages(stats.warnings)).toEqual([]);
     expect(moduleNames(stats).some((name) => REMOTES_ADAPTER.test(name))).toBe(
       true,
+    );
+  });
+
+  it.each([false, true])(
+    'rejects two enhanced copies requesting different custom families (reverse=%s)',
+    async (reverse) => {
+      const OtherPlugin = loadOtherFederationPlugin();
+      const context = fixture({ 'index.js': 'export default 1;' });
+      const implementations = ['family-a', 'family-b'].map((name) =>
+        copyRuntimeFamily(context, name),
+      );
+      const plugins = [ModuleFederationPlugin, OtherPlugin].map(
+        (Plugin, index) =>
+          new Plugin({
+            name: `family_host_${index}`,
+            dts: false,
+            manifest: false,
+            implementation: implementations[index],
+            experiments: { composedRuntime: true },
+          }),
+      );
+      if (reverse) plugins.reverse();
+      await expect(compile(context, { plugins })).rejects.toThrow(
+        /incompatible runtime families/,
+      );
+    },
+  );
+
+  it.each([false, true])(
+    'rejects two enhanced copies requesting different targets (reverse=%s)',
+    async (reverse) => {
+      const OtherPlugin = loadOtherFederationPlugin();
+      const context = fixture({ 'index.js': 'export default 1;' });
+      const plugins = [
+        new ModuleFederationPlugin({
+          name: 'web_host',
+          dts: false,
+          manifest: false,
+          experiments: {
+            composedRuntime: true,
+            optimization: { target: 'web' },
+          },
+        }),
+        new OtherPlugin({
+          name: 'node_host',
+          dts: false,
+          manifest: false,
+          experiments: {
+            composedRuntime: true,
+            optimization: { target: 'node' },
+          },
+        }),
+      ];
+      if (reverse) plugins.reverse();
+      await expect(compile(context, { plugins })).rejects.toThrow(
+        /incompatible targets/,
+      );
+    },
+  );
+
+  it.each([false, true])(
+    'uses one custom family across compatible enhanced copies (reverse=%s)',
+    async (reverse) => {
+      const OtherPlugin = loadOtherFederationPlugin();
+      const context = fixture({ 'index.js': 'export default 1;' });
+      const implementation = copyRuntimeFamily(context, 'family-a');
+      const plugins = [ModuleFederationPlugin, OtherPlugin].map(
+        (Plugin, index) =>
+          new Plugin({
+            name: `compatible_host_${index}`,
+            dts: false,
+            manifest: false,
+            implementation,
+            experiments: { composedRuntime: true },
+          }),
+      );
+      if (reverse) plugins.reverse();
+      const { stats } = await compile(context, { plugins });
+      expect(messages(stats.errors)).toEqual([]);
+      expect(messages(stats.warnings)).toEqual([]);
+      const composeModules = moduleNames(stats).filter((name) =>
+        COMPOSE.test(name),
+      );
+      expect(composeModules).toHaveLength(1);
+      expect(composeModules[0]).toContain(path.join(context, 'family-a'));
+    },
+  );
+
+  it.each([
+    null,
+    true,
+    {},
+    { participants: [], sealed: false },
+    { version: 2, participants: [], sealed: false },
+    { version: 1, participants: [], sealed: 'no' },
+    { version: 1, participants: [], sealed: false, planner: {} },
+    { version: 1, participants: [], sealed: false, entry: { source: 1 } },
+    {
+      version: 1,
+      participants: [{ kind: 'options', needs: [], disable: {} }],
+      sealed: false,
+    },
+    {
+      version: 1,
+      participants: [{ kind: 'needs', needs: ['unknown'] }],
+      sealed: false,
+    },
+  ])('rejects an invalid shared compiler slot: %j', async (slot) => {
+    const context = fixture({ 'index.js': 'export default 1;' });
+    await expect(
+      compile(context, {
+        plugins: [
+          {
+            apply(compiler) {
+              compiler[Symbol.for('module-federation.composition/1')] = slot;
+            },
+          },
+          host({ composedRuntime: true }),
+        ],
+      }),
+    ).rejects.toThrow(
+      /Invalid module-federation\.composition\/1 compiler slot/,
     );
   });
 
