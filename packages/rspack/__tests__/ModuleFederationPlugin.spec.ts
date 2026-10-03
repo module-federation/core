@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
-import { rspack, type Compiler } from '@rspack/core';
+import type { Compiler } from '@rspack/core';
+import { loadNativeRspack } from '../../../tools/testing/loadNativeRspack';
 import { getSelectionSlot } from '@module-federation/managers/runtime-selection';
 import {
   ModuleFederationPlugin,
@@ -11,6 +12,7 @@ import {
 } from '../src/ModuleFederationPlugin';
 
 type PluginOptions = ConstructorParameters<typeof ModuleFederationPlugin>[0];
+const { rspack } = loadNativeRspack();
 
 const definesEntry = `module.exports = {
   noRemote: FEDERATION_OPTIMIZE_NO_REMOTE,
