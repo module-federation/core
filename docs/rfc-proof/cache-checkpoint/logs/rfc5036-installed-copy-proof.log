@@ -1,0 +1,33 @@
+PASS shared compiler slot installed copies 0,1
+PASS split-family conflict installed copies 0,1
+PASS target conflict installed copies 0,1
+PASS child inheritance installed copies 0,1
+PASS invalid slot installed copy 0: false
+PASS invalid slot installed copy 0: {"participants":[],"finalized":false,"installed":false}
+PASS invalid slot installed copy 0: {"version":2,"participants":[],"finalized":false,"installed":false}
+PASS invalid slot installed copy 0: {"version":1,"participants":null,"finalized":false,"installed":false}
+PASS invalid slot installed copy 0: {"version":1,"participants":[],"finalized":true,"installed":true}
+PASS shared compiler slot installed copies 1,0
+PASS split-family conflict installed copies 1,0
+PASS target conflict installed copies 1,0
+PASS child inheritance installed copies 1,0
+PASS invalid slot installed copy 1: false
+PASS invalid slot installed copy 1: {"participants":[],"finalized":false,"installed":false}
+PASS invalid slot installed copy 1: {"version":2,"participants":[],"finalized":false,"installed":false}
+PASS invalid slot installed copy 1: {"version":1,"participants":null,"finalized":false,"installed":false}
+PASS invalid slot installed copy 1: {"version":1,"participants":[],"finalized":true,"installed":true}
+PASS installed evaluators isolated sequential+concurrent 0,1
+PASS installed rejection retry 0,1
+PASS installed identical callbacks scoped by host 0,1
+PASS installed equivalent factories succeed 0,1
+PASS installed actual Node createScript evaluators 0,1
+PASS installed actual same-host Node URL transforms 0,1
+PASS installed default Node loader dedupes 0,1
+PASS installed evaluators isolated sequential+concurrent 1,0
+PASS installed rejection retry 1,0
+PASS installed identical callbacks scoped by host 1,0
+PASS installed equivalent factories succeed 1,0
+PASS installed actual Node createScript evaluators 1,0
+PASS installed actual same-host Node URL transforms 1,0
+PASS installed default Node loader dedupes 1,0
+RESULT 32 passed, 0 skipped

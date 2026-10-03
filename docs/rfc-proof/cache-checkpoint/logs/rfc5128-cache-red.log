@@ -1,0 +1,360 @@
+
+---
+tool: "@rstest/core@0.10.6"
+timestamp: "2026-10-03T00:28:22.990Z"
+runtime: {"node":"v24.15.0","platform":"darwin","cwd":"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache/packages/runtime-core"}
+---
+
+# Rstest Test Execution Report
+
+## Summary
+
+```json
+{
+  "status": "fail",
+  "counts": {
+    "testFiles": 1,
+    "failedFiles": 1,
+    "tests": 8,
+    "failedTests": 5,
+    "passedTests": 3,
+    "skippedTests": 0,
+    "todoTests": 0
+  },
+  "durationMs": {
+    "total": 2579,
+    "build": 465,
+    "tests": 2114
+  },
+  "snapshot": {
+    "added": 0,
+    "updated": 0,
+    "unmatched": 0,
+    "removed": 0,
+    "unchecked": 0
+  }
+}
+```
+
+## Failures
+
+### [F01] __tests__/entry-evaluator-cache.spec.ts :: evaluated entry cache identity through loadRemote > isolates A then B, concurrent=false
+
+repro:
+
+```bash
+pnpm exec rstest '__tests__/entry-evaluator-cache.spec.ts' --testNamePattern 'evaluated entry cache identity through loadRemote > isolates A then B, concurrent=false'
+```
+
+details:
+
+```json
+{
+  "testPath": "__tests__/entry-evaluator-cache.spec.ts",
+  "project": "rstest",
+  "fullName": "evaluated entry cache identity through loadRemote > isolates A then B, concurrent=false",
+  "status": "fail",
+  "duration": 28,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "expected [ 'A:./Button', 'A:./Button' ] to deeply equal [ 'A:./Button', 'B:./Button' ]",
+      "topFrame": {
+        "file": "__tests__/entry-evaluator-cache.spec.ts",
+        "line": 60,
+        "column": 23,
+        "method": "<unknown>"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "__tests__/entry-evaluator-cache.spec.ts",
+      "line": 60
+    }
+  ]
+}
+```
+
+diff:
+
+```diff
+- Expected
++ Received
+
+  [
+    "A:./Button",
+-   "B:./Button",
++   "A:./Button",
+  ]
+```
+
+codeFrame (error 1):
+
+```text
+58 |             ];
+59 | 
+60 |         expect(loads).toEqual([
+   |                       ^
+61 |           `${firstName}:./Button`,
+62 |           `${secondName}:./Button`,
+```
+
+### [F02] __tests__/entry-evaluator-cache.spec.ts :: evaluated entry cache identity through loadRemote > isolates A then B, concurrent=true
+
+repro:
+
+```bash
+pnpm exec rstest '__tests__/entry-evaluator-cache.spec.ts' --testNamePattern 'evaluated entry cache identity through loadRemote > isolates A then B, concurrent=true'
+```
+
+details:
+
+```json
+{
+  "testPath": "__tests__/entry-evaluator-cache.spec.ts",
+  "project": "rstest",
+  "fullName": "evaluated entry cache identity through loadRemote > isolates A then B, concurrent=true",
+  "status": "fail",
+  "duration": 10,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "expected [ 'A:./Button', 'A:./Button' ] to deeply equal [ 'A:./Button', 'B:./Button' ]",
+      "topFrame": {
+        "file": "__tests__/entry-evaluator-cache.spec.ts",
+        "line": 60,
+        "column": 23,
+        "method": "<unknown>"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "__tests__/entry-evaluator-cache.spec.ts",
+      "line": 60
+    }
+  ]
+}
+```
+
+diff:
+
+```diff
+- Expected
++ Received
+
+  [
+    "A:./Button",
+-   "B:./Button",
++   "A:./Button",
+  ]
+```
+
+codeFrame (error 1):
+
+```text
+58 |             ];
+59 | 
+60 |         expect(loads).toEqual([
+   |                       ^
+61 |           `${firstName}:./Button`,
+62 |           `${secondName}:./Button`,
+```
+
+### [F03] __tests__/entry-evaluator-cache.spec.ts :: evaluated entry cache identity through loadRemote > isolates B then A, concurrent=false
+
+repro:
+
+```bash
+pnpm exec rstest '__tests__/entry-evaluator-cache.spec.ts' --testNamePattern 'evaluated entry cache identity through loadRemote > isolates B then A, concurrent=false'
+```
+
+details:
+
+```json
+{
+  "testPath": "__tests__/entry-evaluator-cache.spec.ts",
+  "project": "rstest",
+  "fullName": "evaluated entry cache identity through loadRemote > isolates B then A, concurrent=false",
+  "status": "fail",
+  "duration": 4,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "expected [ 'B:./Button', 'B:./Button' ] to deeply equal [ 'B:./Button', 'A:./Button' ]",
+      "topFrame": {
+        "file": "__tests__/entry-evaluator-cache.spec.ts",
+        "line": 60,
+        "column": 23,
+        "method": "<unknown>"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "__tests__/entry-evaluator-cache.spec.ts",
+      "line": 60
+    }
+  ]
+}
+```
+
+diff:
+
+```diff
+- Expected
++ Received
+
+  [
+    "B:./Button",
+-   "A:./Button",
++   "B:./Button",
+  ]
+```
+
+codeFrame (error 1):
+
+```text
+58 |             ];
+59 | 
+60 |         expect(loads).toEqual([
+   |                       ^
+61 |           `${firstName}:./Button`,
+62 |           `${secondName}:./Button`,
+```
+
+### [F04] __tests__/entry-evaluator-cache.spec.ts :: evaluated entry cache identity through loadRemote > isolates B then A, concurrent=true
+
+repro:
+
+```bash
+pnpm exec rstest '__tests__/entry-evaluator-cache.spec.ts' --testNamePattern 'evaluated entry cache identity through loadRemote > isolates B then A, concurrent=true'
+```
+
+details:
+
+```json
+{
+  "testPath": "__tests__/entry-evaluator-cache.spec.ts",
+  "project": "rstest",
+  "fullName": "evaluated entry cache identity through loadRemote > isolates B then A, concurrent=true",
+  "status": "fail",
+  "duration": 4,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "expected [ 'B:./Button', 'B:./Button' ] to deeply equal [ 'B:./Button', 'A:./Button' ]",
+      "topFrame": {
+        "file": "__tests__/entry-evaluator-cache.spec.ts",
+        "line": 60,
+        "column": 23,
+        "method": "<unknown>"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "__tests__/entry-evaluator-cache.spec.ts",
+      "line": 60
+    }
+  ]
+}
+```
+
+diff:
+
+```diff
+- Expected
++ Received
+
+  [
+    "B:./Button",
+-   "A:./Button",
++   "B:./Button",
+  ]
+```
+
+codeFrame (error 1):
+
+```text
+58 |             ];
+59 | 
+60 |         expect(loads).toEqual([
+   |                       ^
+61 |           `${firstName}:./Button`,
+62 |           `${secondName}:./Button`,
+```
+
+### [F05] __tests__/entry-evaluator-cache.spec.ts :: evaluated entry cache identity through loadRemote > retries a rejected evaluator without borrowing another successful entry
+
+repro:
+
+```bash
+pnpm exec rstest '__tests__/entry-evaluator-cache.spec.ts' --testNamePattern 'evaluated entry cache identity through loadRemote > retries a rejected evaluator without borrowing another successful entry'
+```
+
+details:
+
+```json
+{
+  "testPath": "__tests__/entry-evaluator-cache.spec.ts",
+  "project": "rstest",
+  "fullName": "evaluated entry cache identity through loadRemote > retries a rejected evaluator without borrowing another successful entry",
+  "status": "fail",
+  "duration": 9,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "expected 'other:./Button' to be 'retry:./Button' // Object.is equality",
+      "topFrame": {
+        "file": "__tests__/entry-evaluator-cache.spec.ts",
+        "line": 100,
+        "column": 5,
+        "method": "<unknown>"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "__tests__/entry-evaluator-cache.spec.ts",
+      "line": 100
+    }
+  ]
+}
+```
+
+diff:
+
+```diff
+- Expected
++ Received
+
+- retry:./Button
++ other:./Button
+```
+
+codeFrame (error 1):
+
+```text
+ 98 |       'other:./Button',
+ 99 |     );
+100 |     await expect(retryHost.loadRemote('app/Button')).resolves.toBe(
+    |     ^
+101 |       'retry:./Button',
+102 |     );
+```
+
+undefined
+/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache/packages/runtime-core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: rstest __tests__/entry-evaluator-cache.spec.ts

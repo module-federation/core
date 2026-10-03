@@ -1,0 +1,43 @@
+
+---
+tool: "@rstest/core@0.10.6"
+timestamp: "2026-10-03T00:58:01.032Z"
+runtime: {"node":"v24.15.0","platform":"darwin","cwd":"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache/packages/runtime-core"}
+---
+
+# Rstest Test Execution Report
+
+## Summary
+
+```json
+{
+  "status": "pass",
+  "counts": {
+    "testFiles": 18,
+    "failedFiles": 0,
+    "tests": 176,
+    "failedTests": 0,
+    "passedTests": 176,
+    "skippedTests": 0,
+    "todoTests": 0
+  },
+  "durationMs": {
+    "total": 4366,
+    "build": 278,
+    "tests": 4088
+  },
+  "snapshot": {
+    "added": 0,
+    "updated": 0,
+    "unmatched": 0,
+    "removed": 0,
+    "unchecked": 0
+  }
+}
+```
+
+## Failures
+
+No test failures reported.
+
+Note: all tests passed. Lists omitted for brevity.

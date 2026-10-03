@@ -1,0 +1,170 @@
+
+---
+tool: "@rstest/core@0.10.6"
+timestamp: "2026-10-03T00:25:56.555Z"
+runtime: {"node":"v24.15.0","platform":"darwin","cwd":"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5036"}
+---
+
+# Rstest Test Execution Report
+
+## Summary
+
+```json
+{
+  "status": "fail",
+  "counts": {
+    "testFiles": 1,
+    "failedFiles": 1,
+    "tests": 28,
+    "failedTests": 2,
+    "passedTests": 26,
+    "skippedTests": 0,
+    "todoTests": 0
+  },
+  "durationMs": {
+    "total": 1122,
+    "build": 148,
+    "tests": 974
+  },
+  "snapshot": {
+    "added": 0,
+    "updated": 0,
+    "unmatched": 0,
+    "removed": 0,
+    "unchecked": 0
+  }
+}
+```
+
+## Failures
+
+### [F01] packages/runtime-core/__tests__/load.spec.ts :: getRemoteEntry - globalLoading rejection cache > rejects distinct host evaluators with matching image metadata (reverse=false)
+
+repro:
+
+```bash
+pnpm exec rstest 'packages/runtime-core/__tests__/load.spec.ts' --testNamePattern 'getRemoteEntry - globalLoading rejection cache > rejects distinct host evaluators with matching image metadata (reverse=false)'
+```
+
+details:
+
+```json
+{
+  "testPath": "packages/runtime-core/__tests__/load.spec.ts",
+  "project": "rstest",
+  "fullName": "getRemoteEntry - globalLoading rejection cache > rejects distinct host evaluators with matching image metadata (reverse=false)",
+  "status": "fail",
+  "duration": 15,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "promise resolved \"{ get: [Function spy], …(1) }\" instead of rejecting",
+      "topFrame": {
+        "file": "packages/runtime-core/__tests__/load.spec.ts",
+        "line": 595,
+        "column": 71,
+        "method": "<unknown>"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "packages/runtime-core/__tests__/load.spec.ts",
+      "line": 595
+    }
+  ]
+}
+```
+
+diff:
+
+```diff
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "get": [Function spy],
++   "init": [Function spy],
+  }
+```
+
+codeFrame (error 1):
+
+```text
+593 |       });
+594 |       await expect(getRemoteEntry({ origin: hosts[first], remoteInfo })).resolves.toBe(containers[first]);
+595 |       await expect(getRemoteEntry({ origin: hosts[second], remoteInfo })).rejects.toThrow('entry evaluator');
+    |                                                                       ^
+596 |       expect(evaluators[second].loadEntry).not.toHaveBeenCalled();
+597 |     },
+```
+
+### [F02] packages/runtime-core/__tests__/load.spec.ts :: getRemoteEntry - globalLoading rejection cache > rejects distinct host evaluators with matching image metadata (reverse=true)
+
+repro:
+
+```bash
+pnpm exec rstest 'packages/runtime-core/__tests__/load.spec.ts' --testNamePattern 'getRemoteEntry - globalLoading rejection cache > rejects distinct host evaluators with matching image metadata (reverse=true)'
+```
+
+details:
+
+```json
+{
+  "testPath": "packages/runtime-core/__tests__/load.spec.ts",
+  "project": "rstest",
+  "fullName": "getRemoteEntry - globalLoading rejection cache > rejects distinct host evaluators with matching image metadata (reverse=true)",
+  "status": "fail",
+  "duration": 1,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "promise resolved \"{ get: [Function spy], …(1) }\" instead of rejecting",
+      "topFrame": {
+        "file": "packages/runtime-core/__tests__/load.spec.ts",
+        "line": 595,
+        "column": 71,
+        "method": "<unknown>"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "packages/runtime-core/__tests__/load.spec.ts",
+      "line": 595
+    }
+  ]
+}
+```
+
+diff:
+
+```diff
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "get": [Function spy],
++   "init": [Function spy],
+  }
+```
+
+codeFrame (error 1):
+
+```text
+593 |       });
+594 |       await expect(getRemoteEntry({ origin: hosts[first], remoteInfo })).resolves.toBe(containers[first]);
+595 |       await expect(getRemoteEntry({ origin: hosts[second], remoteInfo })).rejects.toThrow('entry evaluator');
+    |                                                                       ^
+596 |       expect(evaluators[second].loadEntry).not.toHaveBeenCalled();
+597 |     },
+```
+

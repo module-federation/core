@@ -1,0 +1,13 @@
+PASS createScript A->B concurrent=false
+PASS getEntryUrl A->B concurrent=false
+PASS createScript A->B concurrent=true
+PASS getEntryUrl A->B concurrent=true
+PASS createScript B->A concurrent=false
+PASS getEntryUrl B->A concurrent=false
+PASS createScript B->A concurrent=true
+PASS getEntryUrl B->A concurrent=true
+PASS default loader cross-host dedupe
+PASS custom same-origin concurrent dedupe
+PASS rejection, other evaluator, then successful retry
+PASS invalid SDK payload is rejected at external boundary
+SUMMARY passed=12 failed=0 skipped=0

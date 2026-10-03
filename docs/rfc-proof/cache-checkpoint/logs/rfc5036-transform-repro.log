@@ -1,0 +1,162 @@
+
+---
+tool: "@rstest/core@0.10.6"
+timestamp: "2026-10-03T00:40:32.270Z"
+runtime: {"node":"v24.15.0","platform":"darwin","cwd":"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5036"}
+---
+
+# Rstest Test Execution Report
+
+## Summary
+
+```json
+{
+  "status": "fail",
+  "counts": {
+    "testFiles": 1,
+    "failedFiles": 1,
+    "tests": 40,
+    "failedTests": 2,
+    "passedTests": 0,
+    "skippedTests": 38,
+    "todoTests": 0
+  },
+  "durationMs": {
+    "total": 727,
+    "build": 83,
+    "tests": 644
+  },
+  "snapshot": {
+    "added": 0,
+    "updated": 0,
+    "unmatched": 0,
+    "removed": 0,
+    "unchecked": 0
+  }
+}
+```
+
+## Failures
+
+### [F01] packages/runtime-core/__tests__/load.spec.ts :: getRemoteEntry - globalLoading rejection cache > isolates same-host URL transforms for actual ESM evaluation (reverse=false)
+
+repro:
+
+```bash
+pnpm exec rstest 'packages/runtime-core/__tests__/load.spec.ts' --testNamePattern 'getRemoteEntry - globalLoading rejection cache > isolates same-host URL transforms for actual ESM evaluation (reverse=false)'
+```
+
+details:
+
+```json
+{
+  "testPath": "packages/runtime-core/__tests__/load.spec.ts",
+  "project": "rstest",
+  "fullName": "getRemoteEntry - globalLoading rejection cache > isolates same-host URL transforms for actual ESM evaluation (reverse=false)",
+  "status": "fail",
+  "duration": 17,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "expected 'literal-first' to be 'literal-second' // Object.is equality",
+      "topFrame": {
+        "file": "packages/runtime-core/__tests__/load.spec.ts",
+        "line": 795,
+        "column": 47,
+        "method": "<unknown>"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "packages/runtime-core/__tests__/load.spec.ts",
+      "line": 795
+    }
+  ]
+}
+```
+
+diff:
+
+```diff
+- Expected
++ Received
+
+- literal-second
++ literal-first
+```
+
+codeFrame (error 1):
+
+```text
+793 |       expect(result).toBeTruthy();
+794 |       if (!result) throw new Error('ESM entry did not load');
+795 |       expect((await result.get('./value'))()).toBe(transform.label);
+    |                                               ^
+796 |     }
+797 |   });
+```
+
+### [F02] packages/runtime-core/__tests__/load.spec.ts :: getRemoteEntry - globalLoading rejection cache > isolates same-host URL transforms for actual ESM evaluation (reverse=true)
+
+repro:
+
+```bash
+pnpm exec rstest 'packages/runtime-core/__tests__/load.spec.ts' --testNamePattern 'getRemoteEntry - globalLoading rejection cache > isolates same-host URL transforms for actual ESM evaluation (reverse=true)'
+```
+
+details:
+
+```json
+{
+  "testPath": "packages/runtime-core/__tests__/load.spec.ts",
+  "project": "rstest",
+  "fullName": "getRemoteEntry - globalLoading rejection cache > isolates same-host URL transforms for actual ESM evaluation (reverse=true)",
+  "status": "fail",
+  "duration": 1,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "expected 'literal-second' to be 'literal-first' // Object.is equality",
+      "topFrame": {
+        "file": "packages/runtime-core/__tests__/load.spec.ts",
+        "line": 795,
+        "column": 47,
+        "method": "<unknown>"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "packages/runtime-core/__tests__/load.spec.ts",
+      "line": 795
+    }
+  ]
+}
+```
+
+diff:
+
+```diff
+- Expected
++ Received
+
+- literal-first
++ literal-second
+```
+
+codeFrame (error 1):
+
+```text
+793 |       expect(result).toBeTruthy();
+794 |       if (!result) throw new Error('ESM entry did not load');
+795 |       expect((await result.get('./value'))()).toBe(transform.label);
+    |                                               ^
+796 |     }
+797 |   });
+```
+

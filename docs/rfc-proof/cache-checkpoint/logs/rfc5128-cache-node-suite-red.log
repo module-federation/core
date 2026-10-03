@@ -1,0 +1,103 @@
+PASS default loader cross-host dedupe
+PASS custom same-origin concurrent dedupe
+SUMMARY passed=2 failed=10 skipped=0
+FAIL createScript A->B concurrent=false: AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    'A:./Button',
++   'A:./Button'
+-   'B:./Button'
+  ]
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:31:14
+    at async check (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:19:9)
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:24:5
+FAIL getEntryUrl A->B concurrent=false: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'original:./Button'
+- 'A:./Button'
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:42:14
+    at async check (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:19:9)
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:34:5
+FAIL createScript A->B concurrent=true: AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+-   'A:./Button',
+    'B:./Button',
++   'B:./Button'
+  ]
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:31:14
+    at async check (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:19:9)
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:24:5
+FAIL getEntryUrl A->B concurrent=true: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'original:./Button'
+- 'A:./Button'
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:42:14
+    at async check (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:19:9)
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:34:5
+FAIL createScript B->A concurrent=false: AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    'B:./Button',
++   'B:./Button'
+-   'A:./Button'
+  ]
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:31:14
+    at async check (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:19:9)
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:24:5
+FAIL getEntryUrl B->A concurrent=false: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'original:./Button'
+- 'B:./Button'
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:42:14
+    at async check (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:19:9)
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:34:5
+FAIL createScript B->A concurrent=true: AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+-   'B:./Button',
+    'A:./Button',
++   'A:./Button'
+  ]
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:31:14
+    at async check (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:19:9)
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:24:5
+FAIL getEntryUrl B->A concurrent=true: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'original:./Button'
+- 'B:./Button'
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:42:14
+    at async check (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:19:9)
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:34:5
+FAIL rejection, other evaluator, then successful retry: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'other:./Button'
+- 'retry:./Button'
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:66:10
+    at async check (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:19:9)
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:61:1
+FAIL invalid SDK payload is rejected at external boundary: AssertionError [ERR_ASSERTION]: The input did not match the regular expression /did not return callable get\/init exports/. Input:
+
+'TypeError: remoteEntryExports.get is not a function'
+
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:71:3
+    at async check (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:19:9)
+    at async file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-cache-node-proof.mjs:69:1

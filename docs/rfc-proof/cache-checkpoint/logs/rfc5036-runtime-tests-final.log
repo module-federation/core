@@ -1,0 +1,43 @@
+
+---
+tool: "@rstest/core@0.10.6"
+timestamp: "2026-10-03T00:52:31.704Z"
+runtime: {"node":"v24.15.0","platform":"darwin","cwd":"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5036"}
+---
+
+# Rstest Test Execution Report
+
+## Summary
+
+```json
+{
+  "status": "pass",
+  "counts": {
+    "testFiles": 17,
+    "failedFiles": 0,
+    "tests": 161,
+    "failedTests": 0,
+    "passedTests": 161,
+    "skippedTests": 0,
+    "todoTests": 0
+  },
+  "durationMs": {
+    "total": 4314,
+    "build": 91,
+    "tests": 4223
+  },
+  "snapshot": {
+    "added": 0,
+    "updated": 0,
+    "unmatched": 0,
+    "removed": 0,
+    "unchecked": 0
+  }
+}
+```
+
+## Failures
+
+No test failures reported.
+
+Note: all tests passed. Lists omitted for brevity.

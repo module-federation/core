@@ -1,0 +1,7 @@
+expected=transformed actual=original
+Expected values to be strictly equal:
++ actual - expected
+
++ 'original'
+- 'transformed'
+
