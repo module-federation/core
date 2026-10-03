@@ -19,6 +19,49 @@ describe('selectMode', () => {
     expect(await selectMode(composable(), {})).toEqual({ mode: 'composed' });
   });
 
+  it('selects legacy when a declared composition export only supports require', async () => {
+    const root = composableFamily(tempDir());
+    const file = path.join(
+      packageDir(root, '@module-federation/webpack-bundler-runtime'),
+      'package.json',
+    );
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+    data.exports['./compose'] = { require: './dist/compose.cjs' };
+    fs.writeFileSync(file, JSON.stringify(data));
+
+    expect(await legacyReason({}, resolveRuntimeFamily(root))).toMatch(
+      /compose.*ESM/,
+    );
+  });
+
+  it.each([
+    [
+      'an invalid ESM target',
+      { import: '../outside.js', require: './dist/compose.cjs' },
+      /Invalid.*target|Export should|not exported|Can't resolve/,
+    ],
+    [
+      'a missing declared ESM file',
+      { import: './dist/missing.js', require: './dist/compose.cjs' },
+      /Can't resolve/,
+    ],
+  ])(
+    'reports %s instead of silently selecting the full runtime',
+    async (_, entry, error) => {
+      const root = composableFamily(tempDir());
+      const file = path.join(
+        packageDir(root, '@module-federation/webpack-bundler-runtime'),
+        'package.json',
+      );
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      data.exports['./compose'] = entry;
+      fs.writeFileSync(file, JSON.stringify(data));
+      await expect(selectMode(resolveRuntimeFamily(root), {})).rejects.toThrow(
+        error,
+      );
+    },
+  );
+
   it('selects legacy for the older runtime-tools in the pnpm store', async () => {
     const store = path.resolve(__dirname, '../../../../node_modules/.pnpm');
     const [older] = fs
@@ -92,6 +135,14 @@ describe('selectMode', () => {
     const cases: [string, ModeInputs['externals']][] = [
       ['a string', RUNTIME],
       ['an object key', { [RUNTIME]: 'mf' }],
+      [
+        'a composition subpath object key',
+        { '@module-federation/runtime-core/kernel': 'kernel' },
+      ],
+      [
+        'a composition subpath regexp',
+        /^@module-federation\/runtime-core\/kernel$/,
+      ],
       ['a RegExp', /^@module-federation\/runtime-core$/],
       ['an array item', ['react', { '@module-federation/sdk': 'sdk' }]],
       [
