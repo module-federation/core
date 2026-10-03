@@ -13,6 +13,16 @@ import {
 
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager, utils } from '@module-federation/managers';
+import {
+  capabilityDefines,
+  expectedEntry,
+  finalizeRuntimeSelection,
+  getSelectionSlot,
+  inheritRuntimeSelection,
+  participantFromOptions,
+  registerRuntimeParticipant,
+  resolveRuntimeImplementation,
+} from '@module-federation/managers/runtime-selection';
 import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
@@ -36,17 +46,6 @@ type RuntimeEntrySpec = {
   esm: string;
   cjs: string;
 };
-
-function hasExposes(
-  exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
-): boolean {
-  return Boolean(
-    exposes &&
-    (Array.isArray(exposes)
-      ? exposes.length > 0
-      : Object.keys(exposes).length > 0),
-  );
-}
 
 function resolveRuntimeEntry(
   spec: RuntimeEntrySpec,
@@ -85,18 +84,11 @@ export function resolveRspackRuntimeImplementation(
   );
 }
 
-export function resolveRspackRuntimeAlias(
-  implementation: string,
-  resolve: ResolveFn = require.resolve,
-) {
-  return resolveRuntimeEntry(
-    {
-      bundler: '@module-federation/runtime/bundler',
-      esm: '@module-federation/runtime/dist/index.js',
-      cjs: '@module-federation/runtime/dist/index.cjs',
-    },
-    implementation,
-    resolve,
+export function resolveRspackRuntimeAlias(implementation: string) {
+  const family = resolveRuntimeImplementation(implementation);
+  return (
+    expectedEntry(family, '@module-federation/runtime$') ??
+    family.family.members.runtime.entry
   );
 }
 
@@ -109,43 +101,65 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     this._options = options;
   }
 
-  private _patchBundlerConfig(compiler: Compiler): void {
-    const { name, experiments, exposes } = this._options;
-    const definePluginOptions: Record<string, string | boolean> = {};
-    if (name) {
-      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
-        composeKeyWithSeparator(name, utils.getBuildVersion()),
-      );
+  private installSelection(compiler: Compiler, anchor: string): void {
+    registerRuntimeParticipant(
+      compiler,
+      participantFromOptions(PLUGIN_NAME, this._options),
+    );
+    const slot = getSelectionSlot(compiler);
+    if (slot.installed) {
+      return;
     }
-    // Add FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
-    const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
-      disableSnapshot;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_REMOTE'] =
-      experiments?.optimization?.disableRemote ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_SHARED'] =
-      experiments?.optimization?.disableShared ?? false;
-    definePluginOptions['FEDERATION_HAS_EXPOSES'] = hasExposes(exposes);
-
-    // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
-    if (
-      experiments?.optimization &&
-      typeof experiments.optimization === 'object' &&
-      experiments.optimization !== null &&
-      'target' in experiments.optimization
-    ) {
-      const manualTarget = experiments.optimization.target as
-        | 'web'
-        | 'node'
-        | undefined;
-      // Ensure the target is one of the expected values before setting
-      if (manualTarget === 'web' || manualTarget === 'node') {
-        definePluginOptions['ENV_TARGET'] = JSON.stringify(manualTarget);
+    slot.installed = true;
+    const finalize = () => {
+      let result: ReturnType<typeof finalizeRuntimeSelection>;
+      try {
+        result = finalizeRuntimeSelection(
+          compiler,
+          compiler.options.target,
+          anchor,
+        );
+      } catch (err) {
+        const detail = err instanceof Error ? err.message : String(err);
+        throw new Error(
+          `[ ModuleFederationPlugin ]: Unable to resolve runtime family (paths: [${anchor}]): ${detail}`,
+        );
       }
-    }
-    // No inference for ENV_TARGET. If not manually set and valid, it's not defined.
+      new compiler.webpack.DefinePlugin(
+        capabilityDefines(result.profile!),
+      ).apply(compiler);
+      const image = result.image!;
+      compiler.options.resolve.alias = {
+        ...compiler.options.resolve.alias,
+        '@module-federation/runtime$':
+          expectedEntry(image, '@module-federation/runtime$') ??
+          image.family.members.runtime.entry,
+      };
+    };
+    compiler.hooks.afterResolvers.tap('FederationSelectionPlugin', finalize);
+    compiler.hooks.compilation.tap(
+      'FederationSelectionPlugin',
+      (compilation) => {
+        compilation.hooks.childCompiler.tap(
+          'FederationSelectionPlugin',
+          (child) => {
+            inheritRuntimeSelection(compiler, child);
+          },
+        );
+      },
+    );
+  }
 
-    new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
+  private _patchBundlerConfig(compiler: Compiler): void {
+    const { name } = this._options;
+    if (!name) {
+      return;
+    }
+    new compiler.webpack.DefinePlugin({
+      FEDERATION_BUILD_IDENTIFIER: JSON.stringify(
+        composeKeyWithSeparator(name, utils.getBuildVersion()),
+      ),
+    }).apply(compiler);
   }
 
   private _checkSingleton(compiler: Compiler): void {
@@ -211,6 +225,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       ? options.implementation
       : resolveRspackRuntimeImplementation();
     options.implementation = implementationPath;
+    this.installSelection(compiler, implementationPath);
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
 
@@ -235,23 +250,6 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     new compiler.webpack.container.ModuleFederationPlugin(
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
-
-    let runtimePath: string;
-    try {
-      runtimePath = resolveRspackRuntimeAlias(implementationPath);
-    } catch (err) {
-      const detail = err instanceof Error ? err.message : String(err);
-      throw new Error(
-        `[ ModuleFederationPlugin ]: Unable to resolve runtime entry (paths: [${implementationPath}]): ${detail}`,
-      );
-    }
-
-    compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
-      compiler.options.resolve.alias = {
-        ...compiler.options.resolve.alias,
-        '@module-federation/runtime$': runtimePath,
-      };
-    });
 
     if (!disableManifest) {
       this._statsPlugin = new StatsPlugin(options, {
