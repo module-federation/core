@@ -68,7 +68,7 @@ All recorded RFC5036 runs are terminal. #5093 has 24 successful checks and one f
 
 ## Independent draft and initial focused follow-ups
 
-#5180’s **validation work is complete; the draft PR remains open and unmerged** at `dc61543814fd4a4706608e8b3d3fe34169f7532b`. The parent independently reviewed the corrected literal zero-async-chunk fixture and CI. This is a state statement, not authorization to merge. [Read-only state](final/PR5180_FINAL_STATE.json).
+#5180’s **validation work is complete; the draft PR remains open and unmerged** at `dc61543814fd4a4706608e8b3d3fe34169f7532b`. The parent independently reviewed the corrected literal zero-async-chunk fixture and CI. This is a state statement, not authorization to merge. The final read-only aggregate rollup additionally records a `CodeQL` failure at this head ([check](https://github.com/module-federation/core/runs/111091889764)); it is not described as all-green CI, and no source change, rerun or waiver was performed here. [Read-only state](final/PR5180_FINAL_STATE.json).
 
 The initial review follow-ups remain separate: PR5143’s minimal real loadEntry/Pick fix is unchanged; draft #5179 contains actual-source negative type tests and the shared-handler contract proposal, with no production cast replacement. PR5121 has eight real relative/absolute admission fixtures; PR5144 restores persistent caches in a fresh process with reversed copy order. [Initial commands and limits](final/REVIEW_RESULTS.md). Existing unrelated checkout work and Open Tap were untouched.
 
