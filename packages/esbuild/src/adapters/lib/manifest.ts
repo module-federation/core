@@ -73,7 +73,7 @@ interface Manifest {
 export const writeRemoteManifest = async (
   config: any,
   result: BuildResult,
-  cwd: string,
+  absWorkingDir: string,
 ) => {
   if (result.errors && result.errors.length > 0) {
     console.warn('Build errors detected, skipping writeRemoteManifest.');
@@ -165,7 +165,7 @@ export const writeRemoteManifest = async (
             if (!version) {
               try {
                 const packageJsonPath = await resolve(
-                  process.cwd(),
+                  absWorkingDir,
                   `${pkg}/package.json`,
                 );
                 if (packageJsonPath) {
@@ -264,8 +264,9 @@ export const writeRemoteManifest = async (
   };
 
   const manifestPath = path.resolve(
-    cwd,
-    path.join(path.dirname(outputMap[containerName].chunk), 'mf-manifest.json'),
+    absWorkingDir,
+    path.dirname(outputMap[containerName].chunk),
+    'mf-manifest.json',
   );
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
 };
