@@ -169,6 +169,7 @@ async function loadEntryScript({
   loaderHook,
   getEntryUrl,
   resourceContext,
+  ignoreGlobalExports,
 }: {
   name: string;
   globalName: string;
@@ -177,13 +178,14 @@ async function loadEntryScript({
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
   resourceContext?: ResourceLoadContext;
+  ignoreGlobalExports?: boolean;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
     globalName,
   );
 
-  if (remoteEntryExports) {
+  if (remoteEntryExports && !ignoreGlobalExports) {
     return remoteEntryExports;
   }
 
@@ -248,12 +250,14 @@ async function loadEntryDom({
   loaderHook,
   getEntryUrl,
   resourceContext,
+  ignoreGlobalExports,
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
   resourceContext?: ResourceLoadContext;
+  ignoreGlobalExports?: boolean;
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   if (isEsmRemoteType(type)) {
@@ -272,17 +276,33 @@ async function loadEntryDom({
     loaderHook,
     getEntryUrl,
     resourceContext,
+    ignoreGlobalExports,
   });
+}
+
+function isRemoteEntryExports(value: unknown): value is RemoteEntryExports {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'get' in value &&
+    typeof value.get === 'function' &&
+    'init' in value &&
+    typeof value.init === 'function'
+  );
 }
 
 async function loadEntryNode({
   remoteInfo,
   loaderHook,
   resourceContext,
+  ignoreGlobalExports,
+  getEntryUrl,
 }: {
   remoteInfo: RemoteInfo;
   loaderHook: ModuleFederation['loaderHook'];
   resourceContext?: ResourceLoadContext;
+  ignoreGlobalExports?: boolean;
+  getEntryUrl?: (url: string) => string;
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
@@ -290,11 +310,12 @@ async function loadEntryNode({
     globalName,
   );
 
-  if (remoteEntryExports) {
+  if (remoteEntryExports && !ignoreGlobalExports) {
     return remoteEntryExports;
   }
 
-  return loadScriptNode(entry, {
+  const url = getEntryUrl ? getEntryUrl(entry) : entry;
+  return loadScriptNode(url, {
     attrs: { name, globalName, type },
     loaderHook: {
       createScriptHook: (url: string, attrs: Record<string, any> = {}) => {
@@ -320,7 +341,12 @@ async function loadEntryNode({
       },
     },
   })
-    .then(() => {
+    .then((entryExports: unknown) => {
+      // The SDK resolves the container evaluated by this attempt. Validate the
+      // callback boundary before using it instead of rereading mutable globals.
+      if (isRemoteEntryExports(entryExports)) {
+        return entryExports;
+      }
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
     .catch((e) => {
@@ -339,6 +365,7 @@ export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
 function getRemoteEntryCacheDescriptor(
   origin: ModuleFederation,
   remoteInfo: RemoteInfo,
+  getEntryUrl?: (url: string) => string,
 ): RemoteEntryCacheDescriptorV1 | undefined {
   const image = readRuntimeImage(origin);
   if (!image) {
@@ -351,6 +378,21 @@ function getRemoteEntryCacheDescriptor(
     entryLoadingIdentity: image.entryLoadingIdentity,
     remoteType: remoteInfo.type,
     entryGlobalName: remoteInfo.entryGlobalName,
+    remoteEntryKey: getRemoteEntryUniqueKey(remoteInfo),
+    entryUrlTransform: getEntryUrl,
+    evaluatorOrigin:
+      origin.remoteHandler.hooks.lifecycle.loadEntry.listeners.size ||
+      origin.loaderHook.lifecycle.createScript.listeners.size ||
+      origin.loaderHook.lifecycle.loadEntryError.listeners.size ||
+      origin.loaderHook.lifecycle.fetch.listeners.size
+        ? origin
+        : undefined,
+    entryEvaluators: {
+      loadEntry: [...origin.remoteHandler.hooks.lifecycle.loadEntry.listeners],
+      createScript: [...origin.loaderHook.lifecycle.createScript.listeners],
+      loadEntryError: [...origin.loaderHook.lifecycle.loadEntryError.listeners],
+      fetch: [...origin.loaderHook.lifecycle.fetch.listeners],
+    },
   };
 }
 
@@ -384,6 +426,80 @@ function assertRemoteEntryCacheCompatible(
   }
 }
 
+// Callback identity scopes cached evaluations; it does not claim semantic incompatibility.
+function sameEntryEvaluator(
+  current: RemoteEntryCacheDescriptorV1,
+  next: RemoteEntryCacheDescriptorV1,
+): boolean {
+  if (
+    current.evaluatorOrigin !== next.evaluatorOrigin ||
+    current.entryUrlTransform !== next.entryUrlTransform
+  )
+    return false;
+  return (
+    ['loadEntry', 'createScript', 'loadEntryError', 'fetch'] as const
+  ).every((hook) => {
+    const currentCallbacks = current.entryEvaluators?.[hook] ?? [];
+    const nextCallbacks = next.entryEvaluators?.[hook] ?? [];
+    return (
+      currentCallbacks.length === nextCallbacks.length &&
+      currentCallbacks.every(
+        (callback, index) => callback === nextCallbacks[index],
+      )
+    );
+  });
+}
+
+function selectRemoteEntryCacheKey(
+  uniqueKey: string,
+  descriptor: RemoteEntryCacheDescriptorV1 | undefined,
+): string {
+  if (!descriptor) return uniqueKey;
+  const keys = new Set([
+    uniqueKey,
+    ...Object.entries(globalLoadingMeta)
+      .filter(
+        ([, metadata]) => metadata?.descriptor.remoteEntryKey === uniqueKey,
+      )
+      .map(([key]) => key),
+  ]);
+  let compatibleKey: string | undefined;
+  for (const key of keys) {
+    const loading = globalLoading[key];
+    const remoteEntryKey = globalLoadingMeta[key]?.descriptor.remoteEntryKey;
+    if (
+      !loading ||
+      (remoteEntryKey !== undefined && remoteEntryKey !== uniqueKey)
+    )
+      continue;
+    assertRemoteEntryCacheCompatible(key, loading, descriptor);
+    const current = globalLoadingMeta[key]?.descriptor;
+    // An unannotated legacy cache entry retains its existing reuse policy.
+    if (!current || sameEntryEvaluator(current, descriptor)) {
+      compatibleKey ??= key;
+    }
+  }
+  if (compatibleKey) return compatibleKey;
+  if (!globalLoading[uniqueKey]) return uniqueKey;
+  let scope = 1;
+  while (globalLoading[`${uniqueKey}:evaluator:${scope}`]) scope += 1;
+  return `${uniqueKey}:evaluator:${scope}`;
+}
+
+export function clearRemoteEntryCache(remoteInfo: RemoteInfo): void {
+  const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+  for (const key of new Set([uniqueKey, ...Object.keys(globalLoadingMeta)])) {
+    const remoteEntryKey = globalLoadingMeta[key]?.descriptor.remoteEntryKey;
+    if (
+      remoteEntryKey === uniqueKey ||
+      (key === uniqueKey && remoteEntryKey === undefined)
+    ) {
+      delete globalLoading[key];
+      delete globalLoadingMeta[key];
+    }
+  }
+}
+
 export async function getRemoteEntry(params: {
   origin: ModuleFederation;
   remoteInfo: RemoteInfo;
@@ -400,9 +516,6 @@ export async function getRemoteEntry(params: {
     resourceContext,
     _inErrorHandling = false,
   } = params;
-  const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
-  const cacheDescriptor = getRemoteEntryCacheDescriptor(origin, remoteInfo);
-
   if (remoteEntryExports) {
     await origin.loaderHook.lifecycle.afterLoadEntry.emit({
       origin,
@@ -413,6 +526,17 @@ export async function getRemoteEntry(params: {
     });
     return remoteEntryExports;
   }
+
+  const cacheDescriptor = getRemoteEntryCacheDescriptor(
+    origin,
+    remoteInfo,
+    getEntryUrl,
+  );
+  const baseUniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+  const uniqueKey = selectRemoteEntryCacheKey(baseUniqueKey, cacheDescriptor);
+  // Image-backed cache misses must evaluate the selected entry instead of
+  // accepting exports left in a process-wide global by another evaluator.
+  const ignoreGlobalExports = cacheDescriptor !== undefined;
 
   if (cacheDescriptor && globalLoading[uniqueKey]) {
     assertRemoteEntryCacheCompatible(
@@ -438,6 +562,29 @@ export async function getRemoteEntry(params: {
           return res;
         }
         const isWebEnvironment = isBrowserEnvValue;
+        if (
+          isWebEnvironment &&
+          cacheDescriptor &&
+          !isEsmRemoteType(remoteInfo.type) &&
+          remoteInfo.type !== 'system'
+        ) {
+          for (const [key, metadata] of Object.entries(globalLoadingMeta)) {
+            if (
+              metadata &&
+              metadata.promise === globalLoading[key] &&
+              metadata.descriptor !== cacheDescriptor &&
+              metadata.descriptor.browserScript &&
+              metadata.descriptor.entryGlobalName ===
+                cacheDescriptor.entryGlobalName &&
+              !sameEntryEvaluator(metadata.descriptor, cacheDescriptor)
+            ) {
+              error(
+                `Refusing to evaluate remote entry ${baseUniqueKey}. Distinct browser script evaluators share physical global ${cacheDescriptor.entryGlobalName}.`,
+              );
+            }
+          }
+          cacheDescriptor.browserScript = true;
+        }
 
         return isWebEnvironment
           ? loadEntryDom({
@@ -446,8 +593,15 @@ export async function getRemoteEntry(params: {
               loaderHook,
               getEntryUrl,
               resourceContext,
+              ignoreGlobalExports,
             })
-          : loadEntryNode({ remoteInfo, loaderHook, resourceContext });
+          : loadEntryNode({
+              remoteInfo,
+              loaderHook,
+              resourceContext,
+              ignoreGlobalExports,
+              getEntryUrl,
+            });
       })
       .then(async (res) => {
         await origin.loaderHook.lifecycle.afterLoadEntry.emit({
