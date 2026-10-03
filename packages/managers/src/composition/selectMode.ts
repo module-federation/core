@@ -93,14 +93,18 @@ async function externalsProblem({
 }: ModeInputs): Promise<string | undefined> {
   if (externals === undefined) return undefined;
   const items = Array.isArray(externals) ? externals : [externals];
-  for (const pkg of FAMILY_PACKAGES) {
+  const requests = FAMILY_PACKAGES.flatMap((pkg) => [
+    pkg,
+    ...RUNTIME_FAMILY[pkg].map((key) => `${pkg}/${key.slice(2)}`),
+  ]);
+  for (const request of requests) {
     for (const item of items) {
       try {
-        if (await matchesExternal(item, pkg, context)) {
-          return `${pkg} is externalized`;
+        if (await matchesExternal(item, request, context)) {
+          return `${request} is externalized`;
         }
       } catch (error) {
-        return `externals could not be checked for ${pkg}: ${(error as Error)?.message ?? error}`;
+        return `externals could not be checked for ${request}: ${(error as Error)?.message ?? error}`;
       }
     }
   }
