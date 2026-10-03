@@ -5,7 +5,10 @@ import { node } from '../src/platform/node';
 import { web } from '../src/platform/web';
 import { getRemoteEntry, getRemoteInfo } from '../src/utils/load';
 import { removeScriptTags } from './mock/utils';
-import type { RemoteEntryExports } from '../src/type';
+import type {
+  ModuleFederationRuntimePlugin,
+  RemoteEntryExports,
+} from '../src/type';
 
 const nodeGlobal = 'cacheProofNodeEntry';
 const browserGlobal = 'cacheProofBrowserEntry';
@@ -70,11 +73,134 @@ describe('actual platform entry evaluators', () => {
 
   afterEach(() => {
     delete globalThis.cacheProofNodeEntry;
+    delete globalThis.cacheProofNodeDefaults;
     delete globalThis.cacheProofBrowserEntry;
     delete globalThis.cacheProofBrowserEvaluations;
     Reflect.deleteProperty(globalThis, 'cacheProofBrowserA');
     Reflect.deleteProperty(globalThis, 'cacheProofBrowserB');
     removeScriptTags();
+  });
+
+  for (const customFirst of [true, false]) {
+    for (const concurrent of [false, true]) {
+      it(`isolates actual Node custom/default loads customFirst=${customFirst}, concurrent=${concurrent}`, async () => {
+        globalThis.cacheProofNodeDefaults = 0;
+        const entry = data(
+          `globalThis.cacheProofNodeDefaults += 1; module.exports={init(){},get(expose){return()=> 'B:'+expose}};`,
+        );
+        let customCalls = 0;
+        let announce = () => {};
+        let release = () => {};
+        const evaluated = new Promise<void>((resolve) => {
+          announce = resolve;
+        });
+        const gate = new Promise<void>((resolve) => {
+          release = resolve;
+        });
+        const make = (custom: boolean, observe: boolean) => {
+          const plugins: ModuleFederationRuntimePlugin[] = [];
+          if (custom) {
+            plugins.push({
+              name: 'custom-A',
+              createScript() {
+                customCalls += 1;
+                return { url: nodeEntry('A') };
+              },
+            });
+          }
+          if (observe) {
+            plugins.push({
+              name: 'hold-evaluated-entry',
+              async afterLoadEntry() {
+                announce();
+                await gate;
+              },
+            });
+          }
+          return new FederationKernel(
+            {
+              name: 'same-host',
+              remotes: [{ name: 'app', entry, entryGlobalName: nodeGlobal }],
+              plugins,
+            },
+            { remote, platform: node },
+          );
+        };
+        const first = make(customFirst, concurrent);
+        const second = make(!customFirst, false);
+        let actual;
+        if (concurrent) {
+          const pending = first.loadRemote('app/Button');
+          // The first SDK evaluation has published its global, while its
+          // entry promise remains pending. Exercise the second evaluator then.
+          await evaluated;
+          let later;
+          try {
+            later = await second.loadRemote('app/Button');
+          } finally {
+            release();
+          }
+          actual = [await pending, later];
+        } else {
+          actual = [
+            await first.loadRemote('app/Button'),
+            await second.loadRemote('app/Button'),
+          ];
+        }
+        expect(actual).toEqual(
+          customFirst
+            ? ['A:./Button', 'B:./Button']
+            : ['B:./Button', 'A:./Button'],
+        );
+        expect(customCalls).toBe(1);
+        expect(globalThis.cacheProofNodeDefaults).toBe(1);
+      });
+    }
+  }
+
+  it('deduplicates actual Node defaults across hosts and later requests', async () => {
+    globalThis.cacheProofNodeDefaults = 0;
+    const entry = data(
+      `globalThis.cacheProofNodeDefaults += 1; module.exports={init(){},get(expose){return()=> 'default:'+expose}};`,
+    );
+    const make = () =>
+      new FederationKernel(
+        {
+          name: 'same-host',
+          remotes: [{ name: 'app', entry, entryGlobalName: nodeGlobal }],
+        },
+        { remote, platform: node },
+      );
+    expect(
+      await Promise.all([
+        make().loadRemote('app/Button'),
+        make().loadRemote('app/Button'),
+      ]),
+    ).toEqual(['default:./Button', 'default:./Button']);
+    expect(await make().loadRemote('app/Button')).toBe('default:./Button');
+    expect(globalThis.cacheProofNodeDefaults).toBe(1);
+  });
+
+  it('preserves direct legacy Node platform reuse without a loading context', async () => {
+    const cached: RemoteEntryExports = {
+      init() {},
+      get: () => async () => 'legacy',
+    };
+    globalThis.cacheProofNodeEntry = cached;
+    const origin = new FederationKernel(
+      { name: 'legacy-host' },
+      { platform: node },
+    );
+    const loaded = await node.loadEntry({
+      remoteInfo: getRemoteInfo({
+        name: 'app',
+        entry: nodeEntry('unexpected'),
+        entryGlobalName: nodeGlobal,
+      }),
+      loaderHook: origin.loaderHook,
+    });
+    expect(loaded).toBe(cached);
+    expect(loaded && (await (await loaded.get('./Button'))())).toBe('legacy');
   });
 
   for (const [a, b] of [
@@ -264,6 +390,8 @@ describe('actual platform entry evaluators', () => {
 declare global {
   // eslint-disable-next-line no-var
   var cacheProofNodeEntry: RemoteEntryExports | undefined;
+  // eslint-disable-next-line no-var
+  var cacheProofNodeDefaults: number | undefined;
   // eslint-disable-next-line no-var
   var cacheProofBrowserEntry: RemoteEntryExports | undefined;
   // eslint-disable-next-line no-var
