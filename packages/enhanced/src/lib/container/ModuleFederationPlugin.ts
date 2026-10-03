@@ -218,7 +218,11 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
 
     // federation hooks
     new FederationModulesPlugin().apply(compiler);
-    FederationCompositionPlugin.register(compiler, optionsParticipant(options));
+    FederationCompositionPlugin.register(compiler, {
+      ...optionsParticipant(options),
+      anchor: options.implementation ?? __dirname,
+      platform: options.experiments?.optimization?.target ?? 'universal',
+    });
 
     if (experiments?.asyncStartup) {
       new StartupChunkDependenciesPlugin({
