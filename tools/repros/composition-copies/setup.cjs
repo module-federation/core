@@ -34,12 +34,12 @@ function setup(stage) {
     ],
     { cwd: repo, stdio: 'inherit' },
   );
+  const pkg = require(path.join(repo, 'packages/enhanced/package.json'));
   for (const copy of ['a', 'b'])
     fs.copyFileSync(
-      path.join(stage, 'module-federation-enhanced-2.9.1.tgz'),
+      path.join(stage, `module-federation-enhanced-${pkg.version}.tgz`),
       path.join(stage, `enhanced-${copy}.tgz`),
     );
-  const pkg = require(path.join(repo, 'packages/enhanced/package.json'));
   const overrides = Object.fromEntries(
     Object.keys(pkg.dependencies).map((name) => [
       name,
