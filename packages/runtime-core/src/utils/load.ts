@@ -343,6 +343,11 @@ async function loadEntryNode({
       if (isRemoteEntryExports(entryExports)) {
         return entryExports;
       }
+      if (ignoreGlobalExports) {
+        throw new Error(
+          'Node.js entry evaluator did not return callable get and init exports',
+        );
+      }
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
     .catch((e) => {
