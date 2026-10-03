@@ -1,0 +1,40 @@
+Scope: 16 of 104 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+.                                        |    +2377 ++++++++++++++++++++++++++++
+Progress: resolved 2377, reused 1205, downloaded 0, added 0
+Progress: resolved 2377, reused 1892, downloaded 0, added 0
+Progress: resolved 2377, reused 2342, downloaded 0, added 81
+Progress: resolved 2377, reused 2345, downloaded 0, added 316
+Progress: resolved 2377, reused 2345, downloaded 0, added 530
+Progress: resolved 2377, reused 2345, downloaded 0, added 614
+Progress: resolved 2377, reused 2345, downloaded 0, added 747
+Progress: resolved 2377, reused 2345, downloaded 0, added 823
+Progress: resolved 2377, reused 2345, downloaded 0, added 917
+Progress: resolved 2377, reused 2345, downloaded 0, added 1110
+Progress: resolved 2377, reused 2345, downloaded 0, added 1303
+Progress: resolved 2377, reused 2345, downloaded 0, added 1370
+Progress: resolved 2377, reused 2345, downloaded 0, added 1417
+Progress: resolved 2377, reused 2345, downloaded 0, added 1445
+Progress: resolved 2377, reused 2345, downloaded 0, added 1467
+Progress: resolved 2377, reused 2345, downloaded 0, added 1523
+Progress: resolved 2377, reused 2345, downloaded 0, added 1556
+Progress: resolved 2377, reused 2345, downloaded 0, added 1681
+Progress: resolved 2377, reused 2345, downloaded 0, added 1687
+Progress: resolved 2377, reused 2345, downloaded 0, added 1688
+Progress: resolved 2377, reused 2345, downloaded 0, added 1808
+Progress: resolved 2377, reused 2345, downloaded 0, added 1891
+Progress: resolved 2377, reused 2345, downloaded 0, added 1985
+Progress: resolved 2377, reused 2345, downloaded 0, added 2061
+Progress: resolved 2377, reused 2345, downloaded 0, added 2084
+Progress: resolved 2377, reused 2345, downloaded 0, added 2187
+Progress: resolved 2377, reused 2345, downloaded 0, added 2334
+Progress: resolved 2377, reused 2345, downloaded 0, added 2370
+Progress: resolved 2377, reused 2345, downloaded 0, added 2371
+Progress: resolved 2377, reused 2345, downloaded 0, added 2372
+Progress: resolved 2377, reused 2345, downloaded 0, added 2373
+Progress: resolved 2377, reused 2345, downloaded 0, added 2374
+Progress: resolved 2377, reused 2345, downloaded 0, added 2375
+Progress: resolved 2377, reused 2345, downloaded 0, added 2376
+Progress: resolved 2377, reused 2345, downloaded 0, added 2377, done
+Done in 41.1s using pnpm v10.28.0

@@ -1,0 +1,1 @@
+{"label":"5036-compiler__5036-runtime__legacy","outcome":{"kind":"passed","shared":"actual-compiled-shared","remote":"actual-data-url-remote","startupInstances":{"count":2,"nonnull":true,"same":true},"runtimeVersion":"2.9.2","metadata":null,"fetchCalls":1,"remoteEvaluations":1,"remoteFactoryCalls":1},"errors":[],"warnings":[]}

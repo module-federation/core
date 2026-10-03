@@ -1,0 +1,1 @@
+{"label":"5036","artifacts":"built","mode":"loader","status":"rejected","message":"[ Federation Runtime ]: Refusing to reuse entry loader rspack-async-node-file-v1 with different-loader.","providerUnchanged":true}

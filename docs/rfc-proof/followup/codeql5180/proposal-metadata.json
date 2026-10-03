@@ -1,0 +1,16 @@
+{
+  "base": "dc61543814fd4a4706608e8b3d3fe34169f7532b",
+  "commit": "663c8f39274ebd1198cdae57702b62066a697778",
+  "branch": "proof/publicpath-codeql-local",
+  "worktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/publicpath-codeql-proposal",
+  "changedFile": "tools/repros/composed-shared-fallback.cjs",
+  "insertions": 3,
+  "deletions": 2,
+  "proposalWorktreeClean": true,
+  "originalPublicpathWorktreeClean": true,
+  "listenerActivated": false,
+  "offlineProposedHandlerCasesPassed": 8,
+  "compilerAndAssertionsSuffixByteIdentical": true,
+  "remoteCodeQLRerun": false,
+  "pushed": false
+}

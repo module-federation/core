@@ -1,0 +1,22 @@
+[
+  {
+    "name": "old",
+    "directory": "packed-enhanced-baseline",
+    "head": "94aa846311eeaa5cdb33afd6894b09c1ba9c791c",
+    "built": "fresh isolated Turbo --force plus enhanced package build"
+  },
+  {
+    "name": "5036",
+    "directory": "stack5107",
+    "head": "8643b69633039571cac171d1595645b75e62cf95",
+    "runtimeArtifacts": "packed-final-audit/5036",
+    "built": "existing final source-matched output"
+  },
+  {
+    "name": "5128-minor",
+    "directory": "stack5141",
+    "head": "83134b63016cd237bad96f7797706bfd8dd565c5",
+    "runtimeArtifacts": "packed-final-corrected-audit/5128-minor",
+    "built": "existing final source-matched output"
+  }
+]

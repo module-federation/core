@@ -1,0 +1,338 @@
+[
+  {
+    "family": "old",
+    "head": "94aa846311eeaa5cdb33afd6894b09c1ba9c791c",
+    "package": "@module-federation/sdk",
+    "tarball": "packed-enhanced-bootstrap/compilers/old/tarballs/sdk.tgz",
+    "tarballSHA256": "767bb355da0392a6af8f75b9472821ef3ac6dea80899317126e4fbd94a948ac0",
+    "extractedDistFiles": 117,
+    "extractedDistTreeSHA256": "99cb8c44a0c764c9858ae437bcec248da1c0e7da41411827917bf379b88ddcb7",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "old",
+    "head": "94aa846311eeaa5cdb33afd6894b09c1ba9c791c",
+    "package": "@module-federation/error-codes",
+    "tarball": "packed-enhanced-bootstrap/compilers/old/tarballs/error-codes.tgz",
+    "tarballSHA256": "65ec4594444c57326a6ad0114d89252ac7a7865fd68f4275a462b1e0715a4c46",
+    "extractedDistFiles": 37,
+    "extractedDistTreeSHA256": "d9b88b4eeabe38cd6e27922074d386f5ec11b374b16b3c2a34771a681eeb8839",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "old",
+    "head": "94aa846311eeaa5cdb33afd6894b09c1ba9c791c",
+    "package": "@module-federation/runtime-core",
+    "tarball": "packed-enhanced-bootstrap/compilers/old/tarballs/runtime-core.tgz",
+    "tarballSHA256": "a3f0fc6d0e31861c9a62c7318226c29865614eb712e93ccec121a8984fd70219",
+    "extractedDistFiles": 202,
+    "extractedDistTreeSHA256": "733099edc66cb263cd11da4488f1e3b4ae346b55576a5a77f37253cd3f99b11f",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "old",
+    "head": "94aa846311eeaa5cdb33afd6894b09c1ba9c791c",
+    "package": "@module-federation/runtime",
+    "tarball": "packed-enhanced-bootstrap/compilers/old/tarballs/runtime.tgz",
+    "tarballSHA256": "4fb2bdb20e40b59ed23e45d672569b86996c9f1f7aca40f69e267f5c509e25a2",
+    "extractedDistFiles": 34,
+    "extractedDistTreeSHA256": "639cbae35a9f79fa1c1f8e2f3636a6dcb226ea5dd6216d8ade625afcde56088e",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "old",
+    "head": "94aa846311eeaa5cdb33afd6894b09c1ba9c791c",
+    "package": "@module-federation/webpack-bundler-runtime",
+    "tarball": "packed-enhanced-bootstrap/compilers/old/tarballs/webpack-bundler-runtime.tgz",
+    "tarballSHA256": "76c4dec113797e7cc7272dcbb31c601f70abc4d4ed1c14198e88e0d4fef1a278",
+    "extractedDistFiles": 110,
+    "extractedDistTreeSHA256": "35b6018b862ee06141cf68b11b8ceeb6c8eb36a4496a0b5333f247802e342680",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "old",
+    "head": "94aa846311eeaa5cdb33afd6894b09c1ba9c791c",
+    "package": "@module-federation/runtime-tools",
+    "tarball": "packed-enhanced-bootstrap/compilers/old/tarballs/runtime-tools.tgz",
+    "tarballSHA256": "57f8dd469de3870e9eed875909a59fd9fcc122ab9600b4481da024098b11d2fa",
+    "extractedDistFiles": 27,
+    "extractedDistTreeSHA256": "3b5408391f55b432630b4cf57b32eedfe157b5d90286bdf55ad6e20d83a72c44",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "old",
+    "head": "94aa846311eeaa5cdb33afd6894b09c1ba9c791c",
+    "package": "@module-federation/inject-external-runtime-core-plugin",
+    "tarball": "packed-enhanced-bootstrap/compilers/old/tarballs/inject-external-runtime-core-plugin.tgz",
+    "tarballSHA256": "412b13b3466667cc2581dff46363a6d2f2268855c4b851b91203de178c1752b1",
+    "extractedDistFiles": 8,
+    "extractedDistTreeSHA256": "56ba29a632b058b65e72dfd8427a4a378e430a7cbadca7f463ff74ee39b32b10",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5036",
+    "head": "8643b69633039571cac171d1595645b75e62cf95",
+    "package": "@module-federation/sdk",
+    "tarball": "packed-final-audit/5036/tarballs/sdk.tgz",
+    "tarballSHA256": "de4c3e20c832fee1b3a8265fdae428f1d23393fab1b882911e994dbe1a4f3283",
+    "extractedDistFiles": 171,
+    "extractedDistTreeSHA256": "0bd93c966a12ad512496a75385572e50e6d16ad34e290653e062452cee4e3990",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5036",
+    "head": "8643b69633039571cac171d1595645b75e62cf95",
+    "package": "@module-federation/error-codes",
+    "tarball": "packed-final-audit/5036/tarballs/error-codes.tgz",
+    "tarballSHA256": "fde1c97991b8441068bde7f72b0f8ec3e2525c0316affd0c3db67253e8a9dd2e",
+    "extractedDistFiles": 37,
+    "extractedDistTreeSHA256": "d9b88b4eeabe38cd6e27922074d386f5ec11b374b16b3c2a34771a681eeb8839",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5036",
+    "head": "8643b69633039571cac171d1595645b75e62cf95",
+    "package": "@module-federation/runtime-core",
+    "tarball": "packed-final-audit/5036/tarballs/runtime-core.tgz",
+    "tarballSHA256": "528fdbb708228ae47b3ea669dcca75e41a127bbd4a04890513e385f08a367ac1",
+    "extractedDistFiles": 358,
+    "extractedDistTreeSHA256": "cab5acf6dc90c42ecd3af9ba879c2a134bdb2bb3f59caa9b144b3fea97470459",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5036",
+    "head": "8643b69633039571cac171d1595645b75e62cf95",
+    "package": "@module-federation/runtime",
+    "tarball": "packed-final-audit/5036/tarballs/runtime.tgz",
+    "tarballSHA256": "7d33a2c636ecabd59de9aa9bfc81e26aefdf5635c9ba19bbccb12022617d3907",
+    "extractedDistFiles": 34,
+    "extractedDistTreeSHA256": "66d2a565ec6a00c277006489d1bfa8841d0389715898e438a9a873ca344b06f5",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5036",
+    "head": "8643b69633039571cac171d1595645b75e62cf95",
+    "package": "@module-federation/webpack-bundler-runtime",
+    "tarball": "packed-final-audit/5036/tarballs/webpack-bundler-runtime.tgz",
+    "tarballSHA256": "5bce5a2a7d7d958f63633c4ee56b57bd189d486d46033bd04a762997e5ee254c",
+    "extractedDistFiles": 208,
+    "extractedDistTreeSHA256": "2540bd6102fc4b396fd6e2a05893d9da3ea707e8d5d4cc10ff8a5febe2a746a9",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5036",
+    "head": "8643b69633039571cac171d1595645b75e62cf95",
+    "package": "@module-federation/runtime-tools",
+    "tarball": "packed-final-audit/5036/tarballs/runtime-tools.tgz",
+    "tarballSHA256": "20ed66bc53246552df48f699d169c8b2ab4fb36d97547d5774fce6c84567c684",
+    "extractedDistFiles": 33,
+    "extractedDistTreeSHA256": "ad2e4f70de570f40fa7cbe17f6411564edbf0e81a91b8288bdceb99168adf0d3",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5036",
+    "head": "8643b69633039571cac171d1595645b75e62cf95",
+    "package": "@module-federation/inject-external-runtime-core-plugin",
+    "tarball": "packed-final-audit/5036/tarballs/inject-external-runtime-core-plugin.tgz",
+    "tarballSHA256": "e4e2755bcb93e95f67a5bffc04cde63a1188b65452763348b8d774c15969821b",
+    "extractedDistFiles": 8,
+    "extractedDistTreeSHA256": "c17c12ff9c8998715a0af056088b4b6281d96c06de846089c04a2813655e347d",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "head": "83134b63016cd237bad96f7797706bfd8dd565c5",
+    "package": "@module-federation/sdk",
+    "tarball": "packed-final-corrected-audit/5128-minor/tarballs/sdk.tgz",
+    "tarballSHA256": "afa9196f131740a1d3579d901f2c347b505c54301482a3c84041363c3a4330a7",
+    "extractedDistFiles": 96,
+    "extractedDistTreeSHA256": "9cb4cb7880b3cc581c18897e48f01d924d3b1fd057f54c9ee35c4667034fe36d",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "head": "83134b63016cd237bad96f7797706bfd8dd565c5",
+    "package": "@module-federation/error-codes",
+    "tarball": "packed-final-corrected-audit/5128-minor/tarballs/error-codes.tgz",
+    "tarballSHA256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+    "extractedDistFiles": 37,
+    "extractedDistTreeSHA256": "c111f8f70311757986d215a6e96c5d75aec5d9350f661f1cc872024bfc3cbb0c",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "head": "83134b63016cd237bad96f7797706bfd8dd565c5",
+    "package": "@module-federation/runtime-core",
+    "tarball": "packed-final-corrected-audit/5128-minor/tarballs/runtime-core.tgz",
+    "tarballSHA256": "6a155b0d13ff03a611b232a3a8a64bd2c24fd29ab1faf91834f5b2e5b1c9a94b",
+    "extractedDistFiles": 203,
+    "extractedDistTreeSHA256": "e7f17a65a16144117d8f7f7b8438654d654cd78c1703f120976e336b1c4e337a",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "head": "83134b63016cd237bad96f7797706bfd8dd565c5",
+    "package": "@module-federation/runtime",
+    "tarball": "packed-final-corrected-audit/5128-minor/tarballs/runtime.tgz",
+    "tarballSHA256": "29502d199aa10cb93a4c67439136cd5783d10c31e7bd7aef7755346e47021b96",
+    "extractedDistFiles": 33,
+    "extractedDistTreeSHA256": "977d1678e820e114c50965b734a337f1fc6f188ba12bf93944a0a624d34440e7",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "head": "83134b63016cd237bad96f7797706bfd8dd565c5",
+    "package": "@module-federation/webpack-bundler-runtime",
+    "tarball": "packed-final-corrected-audit/5128-minor/tarballs/webpack-bundler-runtime.tgz",
+    "tarballSHA256": "e2a76a476ff096008ccc3822ab7969228ecdc8c7380eef18061e8f53943663ea",
+    "extractedDistFiles": 92,
+    "extractedDistTreeSHA256": "7da7544d664340c2dbc8063c1ff0bcee1a0c0287479b49645c5bb035b11bc0b0",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "head": "83134b63016cd237bad96f7797706bfd8dd565c5",
+    "package": "@module-federation/runtime-tools",
+    "tarball": "packed-final-corrected-audit/5128-minor/tarballs/runtime-tools.tgz",
+    "tarballSHA256": "d2532e759d2abad65c3c672fcb16e5d8cab82c6b8b3a70c5105bd855b6861d1c",
+    "extractedDistFiles": 22,
+    "extractedDistTreeSHA256": "e90d8addcb8b7633146f9298e93e90202ff3da3d566949be02ce35134f7c3e69",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "head": "83134b63016cd237bad96f7797706bfd8dd565c5",
+    "package": "@module-federation/inject-external-runtime-core-plugin",
+    "tarball": "packed-final-corrected-audit/5128-minor/tarballs/inject-external-runtime-core-plugin.tgz",
+    "tarballSHA256": "4267571f2b64fd9fb78473c9049872a9803f215cdc7bac76a9440835a7adf0d7",
+    "extractedDistFiles": 7,
+    "extractedDistTreeSHA256": "0fd4bad95d0cd3c8a995ec00c3cbdd8f8c164b0c3619aebb506ccea1b4645eea",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-major",
+    "head": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+    "package": "@module-federation/sdk",
+    "tarball": "packed-final-corrected-audit/5128-major/tarballs/sdk.tgz",
+    "tarballSHA256": "c17c585a0a8a8be376f46cd95b1810684af83348f775d19803d783345c62888c",
+    "extractedDistFiles": 96,
+    "extractedDistTreeSHA256": "63c7c349e3be6d2d9ba9ccdc78af99fccf955f0fb00cee7bd2b02792b6786d36",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-major",
+    "head": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+    "package": "@module-federation/error-codes",
+    "tarball": "packed-final-corrected-audit/5128-major/tarballs/error-codes.tgz",
+    "tarballSHA256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+    "extractedDistFiles": 37,
+    "extractedDistTreeSHA256": "c111f8f70311757986d215a6e96c5d75aec5d9350f661f1cc872024bfc3cbb0c",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-major",
+    "head": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+    "package": "@module-federation/runtime-core",
+    "tarball": "packed-final-corrected-audit/5128-major/tarballs/runtime-core.tgz",
+    "tarballSHA256": "4a2f85f9a21077509acf0f5e8d6dc83de0de826f96b058f89dd73cf549300f98",
+    "extractedDistFiles": 201,
+    "extractedDistTreeSHA256": "17134715b8b0761650522efe0a53a117361c3e640b7eeb27caee7b3cc7ad344e",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-major",
+    "head": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+    "package": "@module-federation/runtime",
+    "tarball": "packed-final-corrected-audit/5128-major/tarballs/runtime.tgz",
+    "tarballSHA256": "c73c8f7775b8e510ee5b8456d3d1aa23c44bc2bc4e3b7ed4508db45e163b9208",
+    "extractedDistFiles": 33,
+    "extractedDistTreeSHA256": "39ff3a9a7a32c499ff7467c29226f3e16c9c8c76bd91a5fa8bc56964516f6d22",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-major",
+    "head": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+    "package": "@module-federation/webpack-bundler-runtime",
+    "tarball": "packed-final-corrected-audit/5128-major/tarballs/webpack-bundler-runtime.tgz",
+    "tarballSHA256": "71ab77a57be0c91da515b20500269cac8b4a94f834c9870703be60a159060bcc",
+    "extractedDistFiles": 91,
+    "extractedDistTreeSHA256": "37e4f3ad0b36e320d0ebb6eaf90d05f0979e27e217fbc71eb9ca00456a87b218",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-major",
+    "head": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+    "package": "@module-federation/runtime-tools",
+    "tarball": "packed-final-corrected-audit/5128-major/tarballs/runtime-tools.tgz",
+    "tarballSHA256": "d2532e759d2abad65c3c672fcb16e5d8cab82c6b8b3a70c5105bd855b6861d1c",
+    "extractedDistFiles": 22,
+    "extractedDistTreeSHA256": "e90d8addcb8b7633146f9298e93e90202ff3da3d566949be02ce35134f7c3e69",
+    "outcome": {
+      "kind": "passed"
+    }
+  },
+  {
+    "family": "5128-major",
+    "head": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+    "package": "@module-federation/inject-external-runtime-core-plugin",
+    "tarball": "packed-final-corrected-audit/5128-major/tarballs/inject-external-runtime-core-plugin.tgz",
+    "tarballSHA256": "4267571f2b64fd9fb78473c9049872a9803f215cdc7bac76a9440835a7adf0d7",
+    "extractedDistFiles": 7,
+    "extractedDistTreeSHA256": "0fd4bad95d0cd3c8a995ec00c3cbdd8f8c164b0c3619aebb506ccea1b4645eea",
+    "outcome": {
+      "kind": "passed"
+    }
+  }
+]

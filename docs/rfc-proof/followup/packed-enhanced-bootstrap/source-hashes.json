@@ -1,0 +1,22 @@
+[
+  {
+    "path": "packed-enhanced-prepare.mjs",
+    "sha256": "523f8adeb16b5447a8fb9a80df643f39cce860dd1d0ccb0239e2816195ca7379"
+  },
+  {
+    "path": "packed-enhanced-artifact-audit.mjs",
+    "sha256": "235ba7fa70bb9a20670943b5271774d2b06e8759a361a4f6ce3e4001818d3648"
+  },
+  {
+    "path": "packed-enhanced-bootstrap-worker.mjs",
+    "sha256": "4aef05f365f2c6bb503d8bb72078760c9d511c417d37fa995350120dd7aede06"
+  },
+  {
+    "path": "packed-enhanced-bootstrap-proof.mjs",
+    "sha256": "b76ea1e06743bf22b7572118869aee7ce6e5a93a92c6b6b553cc1c6cd4e34bda"
+  },
+  {
+    "path": "packed-enhanced-bootstrap-proof-report.md",
+    "sha256": "236b31efd4ae6aef5f7f50a5bf8ad08aba642221587666eda989dec1ef1175a5"
+  }
+]

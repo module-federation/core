@@ -1,0 +1,367 @@
+{
+  "analysisId": 1884539322,
+  "results": [
+    {
+      "ruleId": "js/path-injection",
+      "message": {
+        "text": "This path depends on a [user-provided value](1)."
+      },
+      "locations": [
+        {
+          "physicalLocation": {
+            "artifactLocation": {
+              "index": 0,
+              "uri": "tools/repros/composed-shared-fallback.cjs"
+            },
+            "region": {
+              "endColumn": 26,
+              "endLine": 20,
+              "startColumn": 22,
+              "startLine": 20
+            }
+          }
+        }
+      ],
+      "codeFlows": [
+        {
+          "threadFlows": [
+            {
+              "locations": [
+                {
+                  "location": {
+                    "message": {
+                      "text": "req.url"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 46,
+                        "endLine": 19,
+                        "startColumn": 39,
+                        "startLine": 19
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "message": {
+                      "text": "req.url.split('?')"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 57,
+                        "endLine": 19,
+                        "startColumn": 39,
+                        "startLine": 19
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "message": {
+                      "text": "req.url ... '?')[0]"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 60,
+                        "endLine": 19,
+                        "startColumn": 39,
+                        "startLine": 19
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "message": {
+                      "text": "path.jo ... ?')[0])"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 61,
+                        "endLine": 19,
+                        "startColumn": 16,
+                        "startLine": 19
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "message": {
+                      "text": "file"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 13,
+                        "endLine": 19,
+                        "startColumn": 9,
+                        "startLine": 19
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "message": {
+                      "text": "file"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 26,
+                        "endLine": 20,
+                        "startColumn": 22,
+                        "startLine": 20
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "relatedLocations": [
+        {
+          "id": 1,
+          "message": {
+            "text": "user-provided value"
+          },
+          "physicalLocation": {
+            "artifactLocation": {
+              "index": 0,
+              "uri": "tools/repros/composed-shared-fallback.cjs"
+            },
+            "region": {
+              "endColumn": 46,
+              "endLine": 19,
+              "startColumn": 39,
+              "startLine": 19
+            }
+          }
+        },
+        {
+          "message": {},
+          "physicalLocation": {
+            "artifactLocation": {
+              "index": 0,
+              "uri": "tools/repros/composed-shared-fallback.cjs"
+            },
+            "region": {
+              "endColumn": 46,
+              "endLine": 19,
+              "startColumn": 39,
+              "startLine": 19
+            }
+          }
+        }
+      ]
+    },
+    {
+      "ruleId": "js/path-injection",
+      "message": {
+        "text": "This path depends on a [user-provided value](1)."
+      },
+      "locations": [
+        {
+          "physicalLocation": {
+            "artifactLocation": {
+              "index": 0,
+              "uri": "tools/repros/composed-shared-fallback.cjs"
+            },
+            "region": {
+              "endColumn": 31,
+              "endLine": 25,
+              "startColumn": 27,
+              "startLine": 25
+            }
+          }
+        }
+      ],
+      "codeFlows": [
+        {
+          "threadFlows": [
+            {
+              "locations": [
+                {
+                  "location": {
+                    "message": {
+                      "text": "req.url"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 46,
+                        "endLine": 19,
+                        "startColumn": 39,
+                        "startLine": 19
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "message": {
+                      "text": "req.url.split('?')"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 57,
+                        "endLine": 19,
+                        "startColumn": 39,
+                        "startLine": 19
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "message": {
+                      "text": "req.url ... '?')[0]"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 60,
+                        "endLine": 19,
+                        "startColumn": 39,
+                        "startLine": 19
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "message": {
+                      "text": "path.jo ... ?')[0])"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 61,
+                        "endLine": 19,
+                        "startColumn": 16,
+                        "startLine": 19
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "message": {
+                      "text": "file"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 13,
+                        "endLine": 19,
+                        "startColumn": 9,
+                        "startLine": 19
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "message": {
+                      "text": "file"
+                    },
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "index": 0,
+                        "uri": "tools/repros/composed-shared-fallback.cjs"
+                      },
+                      "region": {
+                        "endColumn": 31,
+                        "endLine": 25,
+                        "startColumn": 27,
+                        "startLine": 25
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "relatedLocations": [
+        {
+          "id": 1,
+          "message": {
+            "text": "user-provided value"
+          },
+          "physicalLocation": {
+            "artifactLocation": {
+              "index": 0,
+              "uri": "tools/repros/composed-shared-fallback.cjs"
+            },
+            "region": {
+              "endColumn": 46,
+              "endLine": 19,
+              "startColumn": 39,
+              "startLine": 19
+            }
+          }
+        },
+        {
+          "message": {},
+          "physicalLocation": {
+            "artifactLocation": {
+              "index": 0,
+              "uri": "tools/repros/composed-shared-fallback.cjs"
+            },
+            "region": {
+              "endColumn": 46,
+              "endLine": 19,
+              "startColumn": 39,
+              "startLine": 19
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

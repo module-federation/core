@@ -1,0 +1,314 @@
+{
+  "label": "old-compiler__old-runtime__legacy",
+  "compilerFamily": "old",
+  "runtimeFamily": "old",
+  "mode": "legacy",
+  "runtimeVersion": "2.9.1",
+  "remoteTransport": "native SDK fetch(data: URL) and VM evaluation; no hook replacement or HTTP service",
+  "options": {
+    "name": "actual_packed_bootstrap_host",
+    "dts": false,
+    "manifest": false,
+    "implementation": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/runtime-tools",
+    "remotes": {
+      "proof_remote": "proof_remote@data:text/javascript,globalThis.__packedRemoteEvaluations%3D(globalThis.__packedRemoteEvaluations%7C%7C0)%2B1%3B%0Amodule.exports%3D%7Binit()%7B%7D%2Cget(expose)%7Bif(expose!%3D%3D'.%2Fliteral')throw%20Error('wrong%20expose%20'%2Bexpose)%3BglobalThis.__packedRemoteGets%3D(globalThis.__packedRemoteGets%7C%7C0)%2B1%3Breturn%20Promise.resolve(()%3D%3E(%7Bvalue%3A'actual-data-url-remote'%7D))%3B%7D%7D%3B"
+    },
+    "shared": {
+      "proof-shared": {
+        "import": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/shared.cjs",
+        "version": "1.0.0",
+        "requiredVersion": "*",
+        "singleton": true
+      }
+    },
+    "experiments": {
+      "optimization": {
+        "target": "node"
+      }
+    }
+  },
+  "outcome": {
+    "kind": "failed",
+    "name": "Error",
+    "message": "[{\"moduleIdentifier\":\"javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/node_modules/.federation/entry.c04eb8b7d4b4d2ba571a49c7c1e46361.js\",\"moduleName\":\"../../../node_modules/.federation/entry.c04eb8b7d4b4d2ba571a49c7c1e46361.js\",\"loc\":\"1:0\",\"message\":\"Module parse failed: 'import' and 'export' may appear only with 'sourceType: module' (1:0)\\nYou may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders\\n> import federation from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/webpack-bundler-runtime/dist/bundler.js';\\n| \\n| if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime){\"}]",
+    "stack": "Error: [{\"moduleIdentifier\":\"javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/node_modules/.federation/entry.c04eb8b7d4b4d2ba571a49c7c1e46361.js\",\"moduleName\":\"../../../node_modules/.federation/entry.c04eb8b7d4b4d2ba571a49c7c1e46361.js\",\"loc\":\"1:0\",\"message\":\"Module parse failed: 'import' and 'export' may appear only with 'sourceType: module' (1:0)\\nYou may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders\\n> import federation from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/webpack-bundler-runtime/dist/bundler.js';\\n| \\n| if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime){\"}]\n    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs:67:32"
+  },
+  "errors": [
+    {
+      "moduleIdentifier": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/node_modules/.federation/entry.c04eb8b7d4b4d2ba571a49c7c1e46361.js",
+      "moduleName": "../../../node_modules/.federation/entry.c04eb8b7d4b4d2ba571a49c7c1e46361.js",
+      "loc": "1:0",
+      "message": "Module parse failed: 'import' and 'export' may appear only with 'sourceType: module' (1:0)\nYou may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders\n> import federation from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/webpack-bundler-runtime/dist/bundler.js';\n| \n| if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime){"
+    }
+  ],
+  "warnings": [],
+  "modules": [
+    {
+      "type": "runtime modules",
+      "moduleType": "runtime",
+      "filteredChildren": 15,
+      "size": 13230,
+      "sizes": {
+        "runtime": 13230
+      }
+    },
+    {
+      "type": "module",
+      "moduleType": "javascript/dynamic",
+      "layer": null,
+      "size": 397,
+      "sizes": {
+        "javascript": 397
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/first.cjs",
+      "name": "./first.cjs",
+      "nameForCondition": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/first.cjs",
+      "index": 0,
+      "preOrderIndex": 0,
+      "index2": 0,
+      "postOrderIndex": 0,
+      "cacheable": true,
+      "optional": false,
+      "orphan": false,
+      "issuer": null,
+      "issuerName": null,
+      "issuerPath": null,
+      "failed": false,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "type": "module",
+      "moduleType": "javascript/dynamic",
+      "layer": null,
+      "size": 85,
+      "sizes": {
+        "javascript": 85
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/second.cjs",
+      "name": "./second.cjs",
+      "nameForCondition": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/second.cjs",
+      "index": 1,
+      "preOrderIndex": 1,
+      "index2": 1,
+      "postOrderIndex": 1,
+      "cacheable": true,
+      "optional": false,
+      "orphan": false,
+      "issuer": null,
+      "issuerName": null,
+      "issuerPath": null,
+      "failed": false,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "type": "module",
+      "moduleType": "javascript/dynamic",
+      "layer": null,
+      "size": 1001,
+      "sizes": {
+        "javascript": 1001
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/node_modules/.federation/entry.c04eb8b7d4b4d2ba571a49c7c1e46361.js",
+      "name": "../../../node_modules/.federation/entry.c04eb8b7d4b4d2ba571a49c7c1e46361.js",
+      "nameForCondition": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/node_modules/.federation/entry.c04eb8b7d4b4d2ba571a49c7c1e46361.js",
+      "index": 2,
+      "preOrderIndex": 2,
+      "index2": 2,
+      "postOrderIndex": 2,
+      "cacheable": true,
+      "optional": false,
+      "orphan": false,
+      "issuer": null,
+      "issuerName": null,
+      "issuerPath": null,
+      "failed": true,
+      "errors": 1,
+      "warnings": 0
+    },
+    {
+      "type": "module",
+      "moduleType": "provide-module",
+      "layer": null,
+      "size": 42,
+      "sizes": {
+        "share-init": 42
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "provide module (default) proof-shared@1.0.0 = /Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/shared.cjs",
+      "name": "provide shared module (default) proof-shared@1.0.0 = ./shared.cjs",
+      "nameForCondition": null,
+      "index": 3,
+      "preOrderIndex": 3,
+      "index2": 3,
+      "postOrderIndex": 3,
+      "optional": false,
+      "orphan": false,
+      "issuer": null,
+      "issuerName": null,
+      "issuerPath": null,
+      "failed": false,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "type": "module",
+      "moduleType": "consume-shared-module",
+      "layer": null,
+      "size": 42,
+      "sizes": {
+        "consume-shared": 42
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "consume-shared-module|default|proof-shared|*|false|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/shared.cjs|true|false|undefined",
+      "name": "consume shared module (default) proof-shared@* (singleton) (fallback: ./shared.cjs)",
+      "nameForCondition": null,
+      "index": 4,
+      "preOrderIndex": 4,
+      "index2": 4,
+      "postOrderIndex": 4,
+      "cacheable": true,
+      "optional": false,
+      "orphan": false,
+      "issuer": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/first.cjs",
+      "issuerName": "./first.cjs",
+      "issuerPath": [
+        {
+          "identifier": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/first.cjs",
+          "name": "./first.cjs"
+        }
+      ],
+      "failed": false,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "type": "module",
+      "moduleType": "remote-module",
+      "layer": null,
+      "size": 6,
+      "sizes": {
+        "remote": 6,
+        "share-init": 6
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "remote (default) webpack/container/reference/proof_remote ./literal",
+      "name": "remote proof_remote/literal",
+      "nameForCondition": "proof_remote/literal",
+      "index": 5,
+      "preOrderIndex": 5,
+      "index2": 6,
+      "postOrderIndex": 6,
+      "optional": false,
+      "orphan": false,
+      "issuer": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/first.cjs",
+      "issuerName": "./first.cjs",
+      "issuerPath": [
+        {
+          "identifier": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/first.cjs",
+          "name": "./first.cjs"
+        }
+      ],
+      "failed": false,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "type": "module",
+      "moduleType": "javascript/dynamic",
+      "layer": null,
+      "size": 49,
+      "sizes": {
+        "javascript": 49
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/shared.cjs",
+      "name": "./shared.cjs",
+      "nameForCondition": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/shared.cjs",
+      "index": 7,
+      "preOrderIndex": 7,
+      "index2": 7,
+      "postOrderIndex": 7,
+      "cacheable": true,
+      "optional": false,
+      "orphan": false,
+      "issuer": "consume-shared-module|default|proof-shared|*|false|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/shared.cjs|true|false|undefined",
+      "issuerName": "consume shared module (default) proof-shared@* (singleton) (fallback: ./shared.cjs)",
+      "issuerPath": [
+        {
+          "identifier": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/first.cjs",
+          "name": "./first.cjs"
+        },
+        {
+          "identifier": "consume-shared-module|default|proof-shared|*|false|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/shared.cjs|true|false|undefined",
+          "name": "consume shared module (default) proof-shared@* (singleton) (fallback: ./shared.cjs)"
+        }
+      ],
+      "failed": false,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "type": "module",
+      "moduleType": "javascript/dynamic",
+      "layer": null,
+      "size": 42,
+      "sizes": {
+        "javascript": 42
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "external script \"proof_remote@data:text/javascript,globalThis.__packedRemoteEvaluations%3D(globalThis.__packedRemoteEvaluations%7C%7C0)%2B1%3B%0Amodule.exports%3D%7Binit()%7B%7D%2Cget(expose)%7Bif(expose!%3D%3D'.%2Fliteral')throw%20Error('wrong%20expose%20'%2Bexpose)%3BglobalThis.__packedRemoteGets%3D(globalThis.__packedRemoteGets%7C%7C0)%2B1%3Breturn%20Promise.resolve(()%3D%3E(%7Bvalue%3A'actual-data-url-remote'%7D))%3B%7D%7D%3B\"",
+      "name": "external \"proof_remote@data:text/javascript,globalThis.__packedRemoteEvaluations%3D(globalThis.__packedRemoteEvaluations%7C%7C0)%2B1%3B%0Amodule.exports%3D%7Binit()%7B%7D%2Cget(expose)%7Bif(expose!%3D%3D'.%2Fliteral')throw%20Error('wrong%20expose%20'%2Bexpose)%3BglobalThis.__packedRemoteGets%3D(globalThis.__packedRemoteGets%7C%7C0)%2B1%3Breturn%20Promise.resolve(()%3D%3E(%7Bvalue%3A'actual-data-url-remote'%7D))%3B%7D%7D%3B\"",
+      "nameForCondition": null,
+      "index": 6,
+      "preOrderIndex": 6,
+      "index2": 5,
+      "postOrderIndex": 5,
+      "optional": false,
+      "orphan": false,
+      "issuer": "remote (default) webpack/container/reference/proof_remote ./literal",
+      "issuerName": "remote proof_remote/literal",
+      "issuerPath": [
+        {
+          "identifier": "javascript/dynamic|/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/first.cjs",
+          "name": "./first.cjs"
+        },
+        {
+          "identifier": "remote (default) webpack/container/reference/proof_remote ./literal",
+          "name": "remote proof_remote/literal"
+        }
+      ],
+      "failed": false,
+      "errors": 0,
+      "warnings": 0
+    }
+  ]
+}

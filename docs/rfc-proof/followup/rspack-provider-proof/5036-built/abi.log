@@ -1,0 +1,1 @@
+{"label":"5036","artifacts":"built","mode":"abi","status":"rejected","message":"[ Federation Runtime ]: Refusing to reuse runtime state from rspack-file-proof-v1 with different-abi.","providerUnchanged":true}

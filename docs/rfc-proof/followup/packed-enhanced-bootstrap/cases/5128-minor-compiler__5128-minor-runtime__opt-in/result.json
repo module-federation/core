@@ -1,0 +1,152 @@
+{
+  "label": "5128-minor-compiler__5128-minor-runtime__opt-in",
+  "compilerFamily": "5128-minor",
+  "runtimeFamily": "5128-minor",
+  "mode": "opt-in",
+  "runtimeVersion": "2.9.2",
+  "remoteTransport": "native SDK fetch(data: URL) and VM evaluation; no hook replacement or HTTP service",
+  "options": {
+    "name": "actual_packed_bootstrap_host",
+    "dts": false,
+    "manifest": false,
+    "implementation": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-tools",
+    "remotes": {
+      "proof_remote": "proof_remote@data:text/javascript,globalThis.__packedRemoteEvaluations%3D(globalThis.__packedRemoteEvaluations%7C%7C0)%2B1%3B%0Amodule.exports%3D%7Binit()%7B%7D%2Cget(expose)%7Bif(expose!%3D%3D'.%2Fliteral')throw%20Error('wrong%20expose%20'%2Bexpose)%3BglobalThis.__packedRemoteGets%3D(globalThis.__packedRemoteGets%7C%7C0)%2B1%3Breturn%20Promise.resolve(()%3D%3E(%7Bvalue%3A'actual-data-url-remote'%7D))%3B%7D%7D%3B"
+    },
+    "shared": {
+      "proof-shared": {
+        "import": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/5128-minor-compiler__5128-minor-runtime__opt-in/shared.cjs",
+        "version": "1.0.0",
+        "requiredVersion": "*",
+        "singleton": true
+      }
+    },
+    "experiments": {
+      "optimization": {
+        "target": "node"
+      },
+      "composedRuntime": true
+    }
+  },
+  "outcome": {
+    "kind": "passed",
+    "shared": "actual-compiled-shared",
+    "remote": "actual-data-url-remote",
+    "startupInstances": {
+      "count": 2,
+      "nonnull": true,
+      "same": true
+    },
+    "runtimeVersion": "2.9.2",
+    "metadata": null,
+    "fetchCalls": 1,
+    "remoteEvaluations": 1,
+    "remoteFactoryCalls": 1
+  },
+  "errors": [],
+  "warnings": [],
+  "actualRuntimeModules": [
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/compose.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/adapters/remotes.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/adapters/consumes.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/adapters/share-scope.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/shared/capability.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/remote/capability.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/platform/node.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/plugins/snapshot/capability.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/remotes.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/attachShareScopeMap.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/consumes.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/getSharedFallbackGetter.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/treeShakingSharePlugin.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/initializeSharing.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/installInitialConsumes.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/shared/index.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/remote/index.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/global.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/plugins/snapshot/index.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/logger.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/load.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/constant.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/updateOptions.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/getUsedExports.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/kernel.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/constant.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/share.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/context.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/index.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/tool.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/manifest.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/preload.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/plugins/snapshot/SnapshotHandler.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/plugins/generate-preload-assets.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/hooks/syncHook.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/hooks/syncWaterfallHook.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/hooks/asyncHook.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/hooks/pluginSystem.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/hooks/asyncWaterfallHooks.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/hooks/index.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/error-codes/dist/error-codes.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/error-codes/dist/getShortErrorMsg.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime/dist/compose.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/module/index.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/core.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/node.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/core.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/env.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/plugin.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/semver/index.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime/dist/instance.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/env.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/constant.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/generateSnapshotFromManifest.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/utils.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/logger.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/dom.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/normalizeOptions.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/createModuleFederationConfig.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/remote/disabled.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/shared/disabled.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/error-codes/dist/index.mjs",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/error-codes/dist/browser.mjs",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/semver/utils.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/semver/parser.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/semver/compare.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/types/plugins/ContainerPlugin.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/types/plugins/ProvideSharedPlugin.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/types/plugins/SharePlugin.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/types/plugins/ModuleFederationPlugin.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/types/plugins/ContainerReferencePlugin.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/types/plugins/ConsumeSharedPlugin.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/error-codes/dist/error-codes.mjs",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/error-codes/dist/getShortErrorMsg.mjs",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/plugins/snapshot/disabled.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/error-codes/dist/desc.mjs",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/utils/semver/constants.js",
+    "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk/dist/_virtual/_rolldown/runtime.js"
+  ],
+  "composition": {
+    "entry": {
+      "source": "import { createFederation } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/compose.js';\nimport { remotes } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/adapters/remotes.js';\nimport { consumes } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/adapters/consumes.js';\nimport { shareScope } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/adapters/share-scope.js';\nimport { shared } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/shared/capability.js';\nimport { remote } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/remote/capability.js';\nimport { snapshot } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/plugins/snapshot/capability.js';\nimport { node } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/platform/node.js';\n\nvar federation = createFederation({\n\tbuildId: 'actual_packed_bootstrap_host:local',\n\tcapabilities: { shared, remote, snapshot, platform: node },\n\tadapters: [remotes, consumes, shareScope],\n});\nexport default federation;\n\n\nif(!__webpack_require__.federation.bundlerRuntime){\n\tvar prevFederation = __webpack_require__.federation;\n\t__webpack_require__.federation = {}\n\tfor(var key in federation){\n\t\t__webpack_require__.federation[key] = federation[key];\n\t}\n\tfor(var key in prevFederation){\n\t\t__webpack_require__.federation[key] = prevFederation[key];\n\t}\n}\nif(!__webpack_require__.federation.instance){\n\n\t__webpack_require__.federation.instance = __webpack_require__.federation.bundlerRuntime.init({webpackRequire:__webpack_require__});\n\tif(__webpack_require__.federation.attachShareScopeMap){\n\t\t__webpack_require__.federation.attachShareScopeMap(__webpack_require__)\n\t}\n\tif(__webpack_require__.federation.installInitialConsumes){\n\t\t__webpack_require__.federation.installInitialConsumes()\n\t}\n}",
+      "adapters": [
+        "remotes",
+        "consumes",
+        "share-scope"
+      ]
+    },
+    "composeModules": [
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/compose.js"
+    ],
+    "kernelModules": [
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/kernel.js"
+    ]
+  },
+  "_publishedProjection": {
+    "omittedFields": [
+      "modules"
+    ],
+    "originalSHA256": "285e12fca1166174b3fb627a648cf94c27db19d85c08f503873646c577292c2b",
+    "originalWorkspacePath": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/cases/5128-minor-compiler__5128-minor-runtime__opt-in/result.json",
+    "reason": "Full compiler module stats remain in the workspace; all other fields retained."
+  }
+}

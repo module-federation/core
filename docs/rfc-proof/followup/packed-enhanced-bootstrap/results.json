@@ -1,0 +1,361 @@
+[
+  {
+    "label": "old-compiler__old-runtime__legacy",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs",
+      "old",
+      "old",
+      "legacy"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "exitCode": 0,
+    "outcome": {
+      "kind": "passed",
+      "shared": "actual-compiled-shared",
+      "remote": "actual-data-url-remote",
+      "startupInstances": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "runtimeVersion": "2.9.1",
+      "metadata": null,
+      "fetchCalls": 1,
+      "remoteEvaluations": 1,
+      "remoteFactoryCalls": 1
+    },
+    "evidence": "packed-enhanced-bootstrap/cases/old-compiler__old-runtime__legacy/result.json",
+    "warnings": [],
+    "composition": {
+      "entry": null,
+      "composeModules": [],
+      "kernelModules": []
+    }
+  },
+  {
+    "label": "old-compiler__5036-runtime__legacy",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs",
+      "old",
+      "5036",
+      "legacy"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "exitCode": 0,
+    "outcome": {
+      "kind": "passed",
+      "shared": "actual-compiled-shared",
+      "remote": "actual-data-url-remote",
+      "startupInstances": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "runtimeVersion": "2.9.2",
+      "metadata": null,
+      "fetchCalls": 1,
+      "remoteEvaluations": 1,
+      "remoteFactoryCalls": 1
+    },
+    "evidence": "packed-enhanced-bootstrap/cases/old-compiler__5036-runtime__legacy/result.json",
+    "warnings": [],
+    "composition": {
+      "entry": null,
+      "composeModules": [],
+      "kernelModules": []
+    }
+  },
+  {
+    "label": "5036-compiler__old-runtime__legacy",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs",
+      "5036",
+      "old",
+      "legacy"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "exitCode": 0,
+    "outcome": {
+      "kind": "passed",
+      "shared": "actual-compiled-shared",
+      "remote": "actual-data-url-remote",
+      "startupInstances": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "runtimeVersion": "2.9.1",
+      "metadata": null,
+      "fetchCalls": 1,
+      "remoteEvaluations": 1,
+      "remoteFactoryCalls": 1
+    },
+    "evidence": "packed-enhanced-bootstrap/cases/5036-compiler__old-runtime__legacy/result.json",
+    "warnings": [],
+    "composition": {
+      "entry": null,
+      "composeModules": [],
+      "kernelModules": []
+    }
+  },
+  {
+    "label": "old-compiler__5128-minor-runtime__legacy",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs",
+      "old",
+      "5128-minor",
+      "legacy"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "exitCode": 0,
+    "outcome": {
+      "kind": "passed",
+      "shared": "actual-compiled-shared",
+      "remote": "actual-data-url-remote",
+      "startupInstances": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "runtimeVersion": "2.9.2",
+      "metadata": null,
+      "fetchCalls": 1,
+      "remoteEvaluations": 1,
+      "remoteFactoryCalls": 1
+    },
+    "evidence": "packed-enhanced-bootstrap/cases/old-compiler__5128-minor-runtime__legacy/result.json",
+    "warnings": [],
+    "composition": {
+      "entry": null,
+      "composeModules": [],
+      "kernelModules": [
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/kernel.js"
+      ]
+    }
+  },
+  {
+    "label": "5128-minor-compiler__old-runtime__legacy",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs",
+      "5128-minor",
+      "old",
+      "legacy"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "exitCode": 0,
+    "outcome": {
+      "kind": "passed",
+      "shared": "actual-compiled-shared",
+      "remote": "actual-data-url-remote",
+      "startupInstances": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "runtimeVersion": "2.9.1",
+      "metadata": null,
+      "fetchCalls": 1,
+      "remoteEvaluations": 1,
+      "remoteFactoryCalls": 1
+    },
+    "evidence": "packed-enhanced-bootstrap/cases/5128-minor-compiler__old-runtime__legacy/result.json",
+    "warnings": [],
+    "composition": {
+      "entry": null,
+      "composeModules": [],
+      "kernelModules": []
+    }
+  },
+  {
+    "label": "5036-compiler__old-runtime__opt-in",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs",
+      "5036",
+      "old",
+      "opt-in"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "exitCode": 0,
+    "outcome": {
+      "kind": "passed",
+      "shared": "actual-compiled-shared",
+      "remote": "actual-data-url-remote",
+      "startupInstances": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "runtimeVersion": "2.9.1",
+      "metadata": null,
+      "fetchCalls": 1,
+      "remoteEvaluations": 1,
+      "remoteFactoryCalls": 1
+    },
+    "evidence": "packed-enhanced-bootstrap/cases/5036-compiler__old-runtime__opt-in/result.json",
+    "warnings": [],
+    "composition": {
+      "entry": null,
+      "composeModules": [],
+      "kernelModules": []
+    }
+  },
+  {
+    "label": "5128-minor-compiler__old-runtime__opt-in",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs",
+      "5128-minor",
+      "old",
+      "opt-in"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "exitCode": 0,
+    "outcome": {
+      "kind": "passed",
+      "shared": "actual-compiled-shared",
+      "remote": "actual-data-url-remote",
+      "startupInstances": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "runtimeVersion": "2.9.1",
+      "metadata": null,
+      "fetchCalls": 1,
+      "remoteEvaluations": 1,
+      "remoteFactoryCalls": 1
+    },
+    "evidence": "packed-enhanced-bootstrap/cases/5128-minor-compiler__old-runtime__opt-in/result.json",
+    "warnings": [
+      {
+        "message": "experiments.composedRuntime is set, but this build uses the full federation runtime because @module-federation/webpack-bundler-runtime at /Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/webpack-bundler-runtime does not export \"./compose\"."
+      }
+    ],
+    "composition": {
+      "entry": null,
+      "composeModules": [],
+      "kernelModules": []
+    }
+  },
+  {
+    "label": "5036-compiler__5036-runtime__legacy",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs",
+      "5036",
+      "5036",
+      "legacy"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "exitCode": 0,
+    "outcome": {
+      "kind": "passed",
+      "shared": "actual-compiled-shared",
+      "remote": "actual-data-url-remote",
+      "startupInstances": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "runtimeVersion": "2.9.2",
+      "metadata": null,
+      "fetchCalls": 1,
+      "remoteEvaluations": 1,
+      "remoteFactoryCalls": 1
+    },
+    "evidence": "packed-enhanced-bootstrap/cases/5036-compiler__5036-runtime__legacy/result.json",
+    "warnings": [],
+    "composition": {
+      "entry": null,
+      "composeModules": [],
+      "kernelModules": []
+    }
+  },
+  {
+    "label": "5128-minor-compiler__5128-minor-runtime__opt-in",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs",
+      "5128-minor",
+      "5128-minor",
+      "opt-in"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "exitCode": 0,
+    "outcome": {
+      "kind": "passed",
+      "shared": "actual-compiled-shared",
+      "remote": "actual-data-url-remote",
+      "startupInstances": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "runtimeVersion": "2.9.2",
+      "metadata": null,
+      "fetchCalls": 1,
+      "remoteEvaluations": 1,
+      "remoteFactoryCalls": 1
+    },
+    "evidence": "packed-enhanced-bootstrap/cases/5128-minor-compiler__5128-minor-runtime__opt-in/result.json",
+    "warnings": [],
+    "composition": {
+      "entry": {
+        "source": "import { createFederation } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/compose.js';\nimport { remotes } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/adapters/remotes.js';\nimport { consumes } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/adapters/consumes.js';\nimport { shareScope } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/adapters/share-scope.js';\nimport { shared } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/shared/capability.js';\nimport { remote } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/remote/capability.js';\nimport { snapshot } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/plugins/snapshot/capability.js';\nimport { node } from '/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/platform/node.js';\n\nvar federation = createFederation({\n\tbuildId: 'actual_packed_bootstrap_host:local',\n\tcapabilities: { shared, remote, snapshot, platform: node },\n\tadapters: [remotes, consumes, shareScope],\n});\nexport default federation;\n\n\nif(!__webpack_require__.federation.bundlerRuntime){\n\tvar prevFederation = __webpack_require__.federation;\n\t__webpack_require__.federation = {}\n\tfor(var key in federation){\n\t\t__webpack_require__.federation[key] = federation[key];\n\t}\n\tfor(var key in prevFederation){\n\t\t__webpack_require__.federation[key] = prevFederation[key];\n\t}\n}\nif(!__webpack_require__.federation.instance){\n\n\t__webpack_require__.federation.instance = __webpack_require__.federation.bundlerRuntime.init({webpackRequire:__webpack_require__});\n\tif(__webpack_require__.federation.attachShareScopeMap){\n\t\t__webpack_require__.federation.attachShareScopeMap(__webpack_require__)\n\t}\n\tif(__webpack_require__.federation.installInitialConsumes){\n\t\t__webpack_require__.federation.installInitialConsumes()\n\t}\n}",
+        "adapters": [
+          "remotes",
+          "consumes",
+          "share-scope"
+        ]
+      },
+      "composeModules": [
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime/dist/compose.js"
+      ],
+      "kernelModules": [
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core/dist/kernel.js"
+      ]
+    }
+  },
+  {
+    "label": "old-compiler__5128-major-runtime__legacy",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap-worker.mjs",
+      "old",
+      "5128-major",
+      "legacy"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "exitCode": 0,
+    "outcome": {
+      "kind": "passed",
+      "shared": "actual-compiled-shared",
+      "remote": "actual-data-url-remote",
+      "startupInstances": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "runtimeVersion": "2.9.2",
+      "metadata": null,
+      "fetchCalls": 1,
+      "remoteEvaluations": 1,
+      "remoteFactoryCalls": 1
+    },
+    "evidence": "packed-enhanced-bootstrap/cases/old-compiler__5128-major-runtime__legacy/result.json",
+    "warnings": [],
+    "composition": {
+      "entry": null,
+      "composeModules": [],
+      "kernelModules": [
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-major/node_modules/@module-federation/runtime-core/dist/kernel.js"
+      ]
+    }
+  }
+]

@@ -1,0 +1,254 @@
+{
+  "compiles": 18,
+  "startups": 24,
+  "successfulExecution": 16,
+  "expectedRejections": 8,
+  "unsupportedContractGapExecutions": 2,
+  "matrix": [
+    {
+      "label": "5036",
+      "head": "8643b69633039571cac171d1595645b75e62cf95",
+      "compiler": "@rspack/core@2.1.10",
+      "artifacts": [
+        {
+          "artifacts": "packed",
+          "compiles": 3,
+          "startups": [
+            {
+              "mode": "compatible",
+              "status": "executed"
+            },
+            {
+              "mode": "target",
+              "status": "rejected",
+              "message": "[ Federation Runtime ]: Refusing to reuse a node runtime image for web."
+            },
+            {
+              "mode": "loader",
+              "status": "rejected",
+              "message": "[ Federation Runtime ]: Refusing to reuse entry loader rspack-async-node-file-v1 with different-loader."
+            },
+            {
+              "mode": "abi",
+              "status": "rejected",
+              "message": "[ Federation Runtime ]: Refusing to reuse runtime state from rspack-file-proof-v1 with different-abi."
+            },
+            {
+              "mode": "capability",
+              "status": "rejected",
+              "message": "[ Federation Runtime ]: Runtime image is missing capability unsupported-proof-capability."
+            },
+            {
+              "mode": "unknown-contract",
+              "status": "executed"
+            }
+          ],
+          "coreModules": [
+            {
+              "build": "provider",
+              "count": 48
+            },
+            {
+              "build": "remote",
+              "count": 0
+            },
+            {
+              "build": "consumer",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "artifacts": "built",
+          "compiles": 3,
+          "startups": [
+            {
+              "mode": "compatible",
+              "status": "executed"
+            },
+            {
+              "mode": "target",
+              "status": "rejected",
+              "message": "[ Federation Runtime ]: Refusing to reuse a node runtime image for web."
+            },
+            {
+              "mode": "loader",
+              "status": "rejected",
+              "message": "[ Federation Runtime ]: Refusing to reuse entry loader rspack-async-node-file-v1 with different-loader."
+            },
+            {
+              "mode": "abi",
+              "status": "rejected",
+              "message": "[ Federation Runtime ]: Refusing to reuse runtime state from rspack-file-proof-v1 with different-abi."
+            },
+            {
+              "mode": "capability",
+              "status": "rejected",
+              "message": "[ Federation Runtime ]: Runtime image is missing capability unsupported-proof-capability."
+            },
+            {
+              "mode": "unknown-contract",
+              "status": "executed"
+            }
+          ],
+          "coreModules": [
+            {
+              "build": "provider",
+              "count": 48
+            },
+            {
+              "build": "remote",
+              "count": 0
+            },
+            {
+              "build": "consumer",
+              "count": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "5128-minor",
+      "head": "83134b63016cd237bad96f7797706bfd8dd565c5",
+      "compiler": "@rspack/core@2.1.10",
+      "artifacts": [
+        {
+          "artifacts": "packed",
+          "compiles": 3,
+          "startups": [
+            {
+              "mode": "compatible",
+              "status": "executed"
+            },
+            {
+              "mode": "target",
+              "status": "executed"
+            },
+            {
+              "mode": "loader",
+              "status": "executed"
+            }
+          ],
+          "coreModules": [
+            {
+              "build": "provider",
+              "count": 40
+            },
+            {
+              "build": "remote",
+              "count": 40
+            },
+            {
+              "build": "consumer",
+              "count": 40
+            }
+          ]
+        },
+        {
+          "artifacts": "built",
+          "compiles": 3,
+          "startups": [
+            {
+              "mode": "compatible",
+              "status": "executed"
+            },
+            {
+              "mode": "target",
+              "status": "executed"
+            },
+            {
+              "mode": "loader",
+              "status": "executed"
+            }
+          ],
+          "coreModules": [
+            {
+              "build": "provider",
+              "count": 40
+            },
+            {
+              "build": "remote",
+              "count": 40
+            },
+            {
+              "build": "consumer",
+              "count": 40
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "5128-major",
+      "head": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+      "compiler": "@rspack/core@2.1.10",
+      "artifacts": [
+        {
+          "artifacts": "packed",
+          "compiles": 3,
+          "startups": [
+            {
+              "mode": "compatible",
+              "status": "executed"
+            },
+            {
+              "mode": "target",
+              "status": "executed"
+            },
+            {
+              "mode": "loader",
+              "status": "executed"
+            }
+          ],
+          "coreModules": [
+            {
+              "build": "provider",
+              "count": 40
+            },
+            {
+              "build": "remote",
+              "count": 40
+            },
+            {
+              "build": "consumer",
+              "count": 40
+            }
+          ]
+        },
+        {
+          "artifacts": "built",
+          "compiles": 3,
+          "startups": [
+            {
+              "mode": "compatible",
+              "status": "executed"
+            },
+            {
+              "mode": "target",
+              "status": "executed"
+            },
+            {
+              "mode": "loader",
+              "status": "executed"
+            }
+          ],
+          "coreModules": [
+            {
+              "build": "provider",
+              "count": 40
+            },
+            {
+              "build": "remote",
+              "count": 40
+            },
+            {
+              "build": "consumer",
+              "count": 40
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

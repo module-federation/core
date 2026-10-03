@@ -1,0 +1,16 @@
+diff --git a/tools/repros/composed-shared-fallback.cjs b/tools/repros/composed-shared-fallback.cjs
+index ae10e0ccd..e02d587e8 100644
+--- a/tools/repros/composed-shared-fallback.cjs
++++ b/tools/repros/composed-shared-fallback.cjs
+@@ -16,8 +16,9 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-shared-platform-'));
+ const requests = [];
+ const server = http.createServer((req, res) => {
+   requests.push(req.url);
+-  const file = path.join(dir, 'dist', req.url.split('?')[0]);
+-  if (!fs.existsSync(file)) {
++  const asset = 'independent-packages/shared_lib/1.0.0/share-entry.js';
++  const file = path.join(dir, 'dist', asset);
++  if (req.url?.split('?')[0] !== `/${asset}` || !fs.existsSync(file)) {
+     res.writeHead(404);
+     res.end();
+     return;

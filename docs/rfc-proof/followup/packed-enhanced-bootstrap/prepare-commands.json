@@ -1,0 +1,2083 @@
+[
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "94aa846311eeaa5cdb33afd6894b09c1ba9c791c\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "status",
+      "--porcelain"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "ls-files",
+      "packages/**/package.json"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "packages/assemble-release-plan/package.json\npackages/bridge/bridge-react-webpack-plugin/__tests__/mockRouterDir/router-v5/react-router-dom/package.json\npackages/bridge/bridge-react-webpack-plugin/__tests__/mockRouterDir/router-v6/react-router-dom/package.json\npackages/bridge/bridge-react-webpack-plugin/__tests__/mockRouterDir/router-v7/react-router/package.json\npackages/bridge/bridge-react-webpack-plugin/package.json\npackages/bridge/bridge-react/package.json\npackages/bridge/bridge-shared/package.json\npackages/bridge/vue3-bridge/package.json\npackages/chrome-devtools/package.json\npackages/cli/package.json\npackages/core/package.json\npackages/create-module-federation/package.json\npackages/dts-plugin/package.json\npackages/enhanced/package.json\npackages/enhanced/test/configCases/build-version/package-json-version/package.json\npackages/enhanced/test/configCases/container/1-container-full/node_modules/package.json\npackages/enhanced/test/configCases/container/1-container-full/package.json\npackages/enhanced/test/configCases/container/2-container-full/node_modules/package.json\npackages/enhanced/test/configCases/container/2-container-full/package.json\npackages/enhanced/test/configCases/container/3-container-full/package.json\npackages/enhanced/test/configCases/container/exposed-overridables/node_modules/package.json\npackages/enhanced/test/configCases/container/exposed-overridables/package.json\npackages/enhanced/test/configCases/container/manifest-disable-assets-analyze/node_modules/package.json\npackages/enhanced/test/configCases/container/manifest-disable-assets-analyze/package.json\npackages/enhanced/test/configCases/container/manifest-file-name/node_modules/package.json\npackages/enhanced/test/configCases/container/manifest-file-name/package.json\npackages/enhanced/test/configCases/container/manifest/node_modules/package.json\npackages/enhanced/test/configCases/container/manifest/package.json\npackages/enhanced/test/configCases/container/module-federation-with-shareScope/node_modules/package.json\npackages/enhanced/test/configCases/container/module-federation-with-shareScope/package.json\npackages/enhanced/test/configCases/container/multiple-runtime-chunk/node_modules/package.json\npackages/enhanced/test/configCases/container/multiple-runtime-chunk/package.json\npackages/enhanced/test/configCases/container/remote-array-share-scope/node_modules/@scope-sc/ui-lib/package.json\npackages/enhanced/test/configCases/container/remote-array-share-scope/node_modules/@scope-sc/ui-lib2/package.json\npackages/enhanced/test/configCases/container/remote-array-share-scope/node_modules/@scope-sc/ui-lib3/package.json\npackages/enhanced/test/configCases/layers/3-layers-full/package.json\npackages/enhanced/test/configCases/layers/4-layers-full/package.json\npackages/enhanced/test/configCases/layers/5-layers-full/package.json\npackages/enhanced/test/configCases/layers/6-layers-full/package.json\npackages/enhanced/test/configCases/layers/7-layers-full/node_modules/package.json\npackages/enhanced/test/configCases/layers/7-layers-full/package.json\npackages/enhanced/test/configCases/layers/8-layers-full/node_modules/package.json\npackages/enhanced/test/configCases/layers/8-layers-full/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/singleton-filter/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-exclude-fail/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-exclude/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-include-fail/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-include/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/package.json\npackages/enhanced/test/configCases/sharing/consume-module-ignore-warnings/package.json\npackages/enhanced/test/configCases/sharing/consume-module/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module2/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module3/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module4/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module2/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module3/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module4/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/node_modules/package-1/esm/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/node_modules/package-1/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/node_modules/package-2/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/package.json\npackages/enhanced/test/configCases/sharing/consume-self-reference/node_modules/my-middleware/package.json\npackages/enhanced/test/configCases/sharing/consume-self-reference/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/consume-self-reference/package.json\npackages/enhanced/test/configCases/sharing/layers-consume-entry/package.json\npackages/enhanced/test/configCases/sharing/layers-consume-loader/package.json\npackages/enhanced/test/configCases/sharing/layers-provides-loader/package.json\npackages/enhanced/test/configCases/sharing/layers-share-plugin/package.json\npackages/enhanced/test/configCases/sharing/no-override-loaded/node_modules/package/package.json\npackages/enhanced/test/configCases/sharing/no-override-loaded/package.json\npackages/enhanced/test/configCases/sharing/provide-eager-module/node_modules/common/package.json\npackages/enhanced/test/configCases/sharing/provide-eager-module/node_modules/uncommon/package.json\npackages/enhanced/test/configCases/sharing/provide-eager-module/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/singleton-filter/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-exclude-fail/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-exclude/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-include-fail/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-include/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/package.json\npackages/enhanced/test/configCases/sharing/provide-module/node_modules/package/package.json\npackages/enhanced/test/configCases/sharing/provide-module/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/node_modules/my-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/node_modules/unused-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/package.json\npackages/enhanced/test/configCases/sharing/provide-shared-with-runtime-chunk/node_modules/x/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/my-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/unused-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/my-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/unused-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/cjs/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/node_modules/lib/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/node_modules/transitive_lib/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/app1/node_modules/lib2/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/app1/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/node_modules/lib1/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/node_modules/lib2/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/node_modules/lib1/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/node_modules/lib3/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/node_modules/store/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/package.json\npackages/enhanced/test/configCases/sharing/shared-strategy/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-dynamic-default-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-dynamic-specific-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-es/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-side-effect/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/legacy-nanoid-v3/node_modules/nanoid/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/legacy-nanoid-v3/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/nanoid/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-dynamic-default-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-dynamic-specific-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-es/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-side-effect/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/package.json\npackages/enhanced/test/configCases/tree-shaking-share/reshake-share/node_modules/ui-lib-dep/package.json\npackages/enhanced/test/configCases/tree-shaking-share/reshake-share/node_modules/ui-lib/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-dynamic-default-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-dynamic-specific-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-es/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-side-effect/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib/package.json\npackages/error-codes/package.json\npackages/esbuild/package.json\npackages/esbuild/src/resolve/package.json\npackages/managers/package.json\npackages/manifest/package.json\npackages/metro-core/package.json\npackages/metro-plugin-rnc-cli/package.json\npackages/metro-plugin-rnef/package.json\npackages/metro-plugin-rock/package.json\npackages/modernjs-v3/package.json\npackages/modernjs/package.json\npackages/native-federation-tests/package.json\npackages/native-federation-typescript/package.json\npackages/nextjs-mf/package.json\npackages/node/package.json\npackages/observability-plugin/package.json\npackages/playground/package.json\npackages/retry-plugin/package.json\npackages/rsbuild-plugin/package.json\npackages/rspack/package.json\npackages/rspress-plugin/package.json\npackages/rstest/package.json\npackages/runtime-core/package.json\npackages/runtime-plugins/inject-external-runtime-core-plugin/package.json\npackages/runtime-tools/package.json\npackages/runtime/package.json\npackages/sdk/package.json\npackages/storybook-addon/package.json\npackages/third-party-dts-extractor/package.json\npackages/treeshake-frontend/package.json\npackages/treeshake-server/package.json\npackages/treeshake-server/template/re-shake-share/package.json\npackages/typescript/package.json\npackages/utilities/package.json\npackages/webpack-bundler-runtime/package.json\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/enhanced/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "4829003b434c536f1d1ff431d1fde2a1ebcd676d\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/enhanced",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/enhanced.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/enhanced@2.9.1\nTarball Contents\nbin/mf.js\ndist/CHANGELOG.md\ndist/README.md\ndist/rstestmigrate.md\ndist/src/_virtual/_rolldown/runtime.js\ndist/src/index.d.ts\ndist/src/index.js\ndist/src/index.js.map\ndist/src/lib/Constants.d.ts\ndist/src/lib/Constants.js\ndist/src/lib/Constants.js.map\ndist/src/lib/container/AsyncBoundaryPlugin.d.ts\ndist/src/lib/container/AsyncBoundaryPlugin.js\ndist/src/lib/container/AsyncBoundaryPlugin.js.map\ndist/src/lib/container/constant.d.ts\ndist/src/lib/container/constant.js\ndist/src/lib/container/constant.js.map\ndist/src/lib/container/ContainerEntryDependency.d.ts\ndist/src/lib/container/ContainerEntryDependency.js\ndist/src/lib/container/ContainerEntryDependency.js.map\ndist/src/lib/container/ContainerEntryModule.d.ts\ndist/src/lib/container/ContainerEntryModule.js\ndist/src/lib/container/ContainerEntryModule.js.map\ndist/src/lib/container/ContainerEntryModuleFactory.d.ts\ndist/src/lib/container/ContainerEntryModuleFactory.js\ndist/src/lib/container/ContainerEntryModuleFactory.js.map\ndist/src/lib/container/ContainerExposedDependency.d.ts\ndist/src/lib/container/ContainerExposedDependency.js\ndist/src/lib/container/ContainerExposedDependency.js.map\ndist/src/lib/container/ContainerPlugin.d.ts\ndist/src/lib/container/ContainerPlugin.js\ndist/src/lib/container/ContainerPlugin.js.map\ndist/src/lib/container/ContainerReferencePlugin.d.ts\ndist/src/lib/container/ContainerReferencePlugin.js\ndist/src/lib/container/ContainerReferencePlugin.js.map\ndist/src/lib/container/FallbackDependency.d.ts\ndist/src/lib/container/FallbackDependency.js\ndist/src/lib/container/FallbackDependency.js.map\ndist/src/lib/container/FallbackItemDependency.d.ts\ndist/src/lib/container/FallbackItemDependency.js\ndist/src/lib/container/FallbackItemDependency.js.map\ndist/src/lib/container/FallbackModule.d.ts\ndist/src/lib/container/FallbackModule.js\ndist/src/lib/container/FallbackModule.js.map\ndist/src/lib/container/FallbackModuleFactory.d.ts\ndist/src/lib/container/FallbackModuleFactory.js\ndist/src/lib/container/FallbackModuleFactory.js.map\ndist/src/lib/container/HoistContainerReferencesPlugin.d.ts\ndist/src/lib/container/HoistContainerReferencesPlugin.js\ndist/src/lib/container/HoistContainerReferencesPlugin.js.map\ndist/src/lib/container/ModuleFederationPlugin.d.ts\ndist/src/lib/container/ModuleFederationPlugin.js\ndist/src/lib/container/ModuleFederationPlugin.js.map\ndist/src/lib/container/options.d.ts\ndist/src/lib/container/options.js\ndist/src/lib/container/options.js.map\ndist/src/lib/container/RemoteModule.d.ts\ndist/src/lib/container/RemoteModule.js\ndist/src/lib/container/RemoteModule.js.map\ndist/src/lib/container/RemoteRuntimeModule.d.ts\ndist/src/lib/container/RemoteRuntimeModule.js\ndist/src/lib/container/RemoteRuntimeModule.js.map\ndist/src/lib/container/RemoteToExternalDependency.d.ts\ndist/src/lib/container/RemoteToExternalDependency.js\ndist/src/lib/container/RemoteToExternalDependency.js.map\ndist/src/lib/container/runtime/EmbedFederationRuntimeModule.d.ts\ndist/src/lib/container/runtime/EmbedFederationRuntimeModule.js\ndist/src/lib/container/runtime/EmbedFederationRuntimeModule.js.map\ndist/src/lib/container/runtime/EmbedFederationRuntimePlugin.d.ts\ndist/src/lib/container/runtime/EmbedFederationRuntimePlugin.js\ndist/src/lib/container/runtime/EmbedFederationRuntimePlugin.js.map\ndist/src/lib/container/runtime/FederationModulesPlugin.d.ts\ndist/src/lib/container/runtime/FederationModulesPlugin.js\ndist/src/lib/container/runtime/FederationModulesPlugin.js.map\ndist/src/lib/container/runtime/FederationRuntimeDependency.d.ts\ndist/src/lib/container/runtime/FederationRuntimeDependency.js\ndist/src/lib/container/runtime/FederationRuntimeDependency.js.map\ndist/src/lib/container/runtime/FederationRuntimeModule.d.ts\ndist/src/lib/container/runtime/FederationRuntimeModule.js\ndist/src/lib/container/runtime/FederationRuntimeModule.js.map\ndist/src/lib/container/runtime/FederationRuntimePlugin.d.ts\ndist/src/lib/container/runtime/FederationRuntimePlugin.js\ndist/src/lib/container/runtime/FederationRuntimePlugin.js.map\ndist/src/lib/container/runtime/getFederationGlobal.d.ts\ndist/src/lib/container/runtime/getFederationGlobal.js\ndist/src/lib/container/runtime/getFederationGlobal.js.map\ndist/src/lib/container/runtime/normalizeToPosixPath.d.ts\ndist/src/lib/container/runtime/normalizeToPosixPath.js\ndist/src/lib/container/runtime/normalizeToPosixPath.js.map\ndist/src/lib/container/runtime/utils.d.ts\ndist/src/lib/container/runtime/utils.js\ndist/src/lib/container/runtime/utils.js.map\ndist/src/lib/sharing/ConsumeSharedFallbackDependency.d.ts\ndist/src/lib/sharing/ConsumeSharedFallbackDependency.js\ndist/src/lib/sharing/ConsumeSharedFallbackDependency.js.map\ndist/src/lib/sharing/ConsumeSharedModule.d.ts\ndist/src/lib/sharing/ConsumeSharedModule.js\ndist/src/lib/sharing/ConsumeSharedModule.js.map\ndist/src/lib/sharing/ConsumeSharedPlugin.d.ts\ndist/src/lib/sharing/ConsumeSharedPlugin.js\ndist/src/lib/sharing/ConsumeSharedPlugin.js.map\ndist/src/lib/sharing/ConsumeSharedRuntimeModule.d.ts\ndist/src/lib/sharing/ConsumeSharedRuntimeModule.js\ndist/src/lib/sharing/ConsumeSharedRuntimeModule.js.map\ndist/src/lib/sharing/ProvideForSharedDependency.d.ts\ndist/src/lib/sharing/ProvideForSharedDependency.js\ndist/src/lib/sharing/ProvideForSharedDependency.js.map\ndist/src/lib/sharing/ProvideSharedDependency.d.ts\ndist/src/lib/sharing/ProvideSharedDependency.js\ndist/src/lib/sharing/ProvideSharedDependency.js.map\ndist/src/lib/sharing/ProvideSharedModule.d.ts\ndist/src/lib/sharing/ProvideSharedModule.js\ndist/src/lib/sharing/ProvideSharedModule.js.map\ndist/src/lib/sharing/ProvideSharedModuleFactory.d.ts\ndist/src/lib/sharing/ProvideSharedModuleFactory.js\ndist/src/lib/sharing/ProvideSharedModuleFactory.js.map\ndist/src/lib/sharing/ProvideSharedPlugin.d.ts\ndist/src/lib/sharing/ProvideSharedPlugin.js\ndist/src/lib/sharing/ProvideSharedPlugin.js.map\ndist/src/lib/sharing/resolveMatchedConfigs.d.ts\ndist/src/lib/sharing/resolveMatchedConfigs.js\ndist/src/lib/sharing/resolveMatchedConfigs.js.map\ndist/src/lib/sharing/SharePlugin.d.ts\ndist/src/lib/sharing/SharePlugin.js\ndist/src/lib/sharing/SharePlugin.js.map\ndist/src/lib/sharing/ShareRuntimeModule.d.ts\ndist/src/lib/sharing/ShareRuntimeModule.js\ndist/src/lib/sharing/ShareRuntimeModule.js.map\ndist/src/lib/sharing/tree-shaking/CollectSharedEntryPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/CollectSharedEntryPlugin.js\ndist/src/lib/sharing/tree-shaking/CollectSharedEntryPlugin.js.map\ndist/src/lib/sharing/tree-shaking/IndependentSharedPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/IndependentSharedPlugin.js\ndist/src/lib/sharing/tree-shaking/IndependentSharedPlugin.js.map\ndist/src/lib/sharing/tree-shaking/IndependentSharedRuntimeModule.d.ts\ndist/src/lib/sharing/tree-shaking/IndependentSharedRuntimeModule.js\ndist/src/lib/sharing/tree-shaking/IndependentSharedRuntimeModule.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedContainerPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedContainerPlugin.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedContainerPlugin.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedDependency.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedDependency.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedDependency.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryDependency.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryDependency.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryDependency.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModule.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModule.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModule.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModuleFactory.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModuleFactory.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModuleFactory.js.map\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerPlugin.js\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerPlugin.js.map\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerRuntimeModule.d.ts\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerRuntimeModule.js\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerRuntimeModule.js.map\ndist/src/lib/sharing/tree-shaking/TreeShakingSharedPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/TreeShakingSharedPlugin.js\ndist/src/lib/sharing/tree-shaking/TreeShakingSharedPlugin.js.map\ndist/src/lib/sharing/utils.d.ts\ndist/src/lib/sharing/utils.js\ndist/src/lib/sharing/utils.js.map\ndist/src/lib/startup/MfStartupChunkDependenciesPlugin.d.ts\ndist/src/lib/startup/MfStartupChunkDependenciesPlugin.js\ndist/src/lib/startup/MfStartupChunkDependenciesPlugin.js.map\ndist/src/lib/startup/StartupHelpers.d.ts\ndist/src/lib/startup/StartupHelpers.js\ndist/src/lib/startup/StartupHelpers.js.map\ndist/src/rspack.d.ts\ndist/src/rspack.js\ndist/src/runtime.d.ts\ndist/src/runtime.js\ndist/src/runtime.mjs\ndist/src/runtime/AddRuntimeRequirementToPromiseExternalPlugin.d.ts\ndist/src/runtime/AddRuntimeRequirementToPromiseExternalPlugin.js\ndist/src/runtime/AddRuntimeRequirementToPromiseExternalPlugin.js.map\ndist/src/schemas/container/ContainerPlugin.check.d.ts\ndist/src/schemas/container/ContainerPlugin.check.js\ndist/src/schemas/container/ContainerPlugin.check.js.map\ndist/src/schemas/container/ContainerPlugin.d.ts\ndist/src/schemas/container/ContainerPlugin.js\ndist/src/schemas/container/ContainerPlugin.js.map\ndist/src/schemas/container/ContainerReferencePlugin.check.d.ts\ndist/src/schemas/container/ContainerReferencePlugin.check.js\ndist/src/schemas/container/ContainerReferencePlugin.check.js.map\ndist/src/schemas/container/ContainerReferencePlugin.d.ts\ndist/src/schemas/container/ContainerReferencePlugin.js\ndist/src/schemas/container/ContainerReferencePlugin.js.map\ndist/src/schemas/container/ExternalsType.check.d.ts\ndist/src/schemas/container/ExternalsType.check.js\ndist/src/schemas/container/ExternalsType.check.js.map\ndist/src/schemas/container/ExternalsType.d.ts\ndist/src/schemas/container/ExternalsType.js\ndist/src/schemas/container/ExternalsType.js.map\ndist/src/schemas/container/ModuleFederationPlugin.check.d.ts\ndist/src/schemas/container/ModuleFederationPlugin.check.js\ndist/src/schemas/container/ModuleFederationPlugin.check.js.map\ndist/src/schemas/container/ModuleFederationPlugin.d.ts\ndist/src/schemas/container/ModuleFederationPlugin.js\ndist/src/schemas/container/ModuleFederationPlugin.js.map\ndist/src/schemas/sharing/ConsumeSharedPlugin.check.d.ts\ndist/src/schemas/sharing/ConsumeSharedPlugin.check.js\ndist/src/schemas/sharing/ConsumeSharedPlugin.check.js.map\ndist/src/schemas/sharing/ConsumeSharedPlugin.d.ts\ndist/src/schemas/sharing/ConsumeSharedPlugin.js\ndist/src/schemas/sharing/ConsumeSharedPlugin.js.map\ndist/src/schemas/sharing/ProviderSharedPlugin.check.d.ts\ndist/src/schemas/sharing/ProviderSharedPlugin.check.js\ndist/src/schemas/sharing/ProviderSharedPlugin.check.js.map\ndist/src/schemas/sharing/ProviderSharedPlugin.d.ts\ndist/src/schemas/sharing/ProviderSharedPlugin.js\ndist/src/schemas/sharing/ProviderSharedPlugin.js.map\ndist/src/schemas/sharing/ProvideSharedPlugin.check.d.ts\ndist/src/schemas/sharing/ProvideSharedPlugin.check.js\ndist/src/schemas/sharing/ProvideSharedPlugin.check.js.map\ndist/src/schemas/sharing/ProvideSharedPlugin.d.ts\ndist/src/schemas/sharing/ProvideSharedPlugin.js\ndist/src/schemas/sharing/ProvideSharedPlugin.js.map\ndist/src/schemas/sharing/SharePlugin.check.d.ts\ndist/src/schemas/sharing/SharePlugin.check.js\ndist/src/schemas/sharing/SharePlugin.check.js.map\ndist/src/schemas/sharing/SharePlugin.d.ts\ndist/src/schemas/sharing/SharePlugin.js\ndist/src/schemas/sharing/SharePlugin.js.map\ndist/src/utils.d.ts\ndist/src/utils.js\ndist/src/utils.js.map\ndist/src/webpack.d.ts\ndist/src/webpack.js\ndist/src/wrapper/AsyncBoundaryPlugin.d.ts\ndist/src/wrapper/AsyncBoundaryPlugin.js\ndist/src/wrapper/AsyncBoundaryPlugin.js.map\ndist/src/wrapper/BaseWrapperPlugin.d.ts\ndist/src/wrapper/BaseWrapperPlugin.js\ndist/src/wrapper/BaseWrapperPlugin.js.map\ndist/src/wrapper/ConsumeSharedPlugin.d.ts\ndist/src/wrapper/ConsumeSharedPlugin.js\ndist/src/wrapper/ConsumeSharedPlugin.js.map\ndist/src/wrapper/ContainerPlugin.d.ts\ndist/src/wrapper/ContainerPlugin.js\ndist/src/wrapper/ContainerPlugin.js.map\ndist/src/wrapper/ContainerReferencePlugin.d.ts\ndist/src/wrapper/ContainerReferencePlugin.js\ndist/src/wrapper/ContainerReferencePlugin.js.map\ndist/src/wrapper/FederationModulesPlugin.d.ts\ndist/src/wrapper/FederationModulesPlugin.js\ndist/src/wrapper/FederationModulesPlugin.js.map\ndist/src/wrapper/FederationRuntimePlugin.d.ts\ndist/src/wrapper/FederationRuntimePlugin.js\ndist/src/wrapper/FederationRuntimePlugin.js.map\ndist/src/wrapper/HoistContainerReferencesPlugin.d.ts\ndist/src/wrapper/HoistContainerReferencesPlugin.js\ndist/src/wrapper/HoistContainerReferencesPlugin.js.map\ndist/src/wrapper/ModuleFederationPlugin.d.ts\ndist/src/wrapper/ModuleFederationPlugin.js\ndist/src/wrapper/ModuleFederationPlugin.js.map\ndist/src/wrapper/ProvideSharedPlugin.d.ts\ndist/src/wrapper/ProvideSharedPlugin.js\ndist/src/wrapper/ProvideSharedPlugin.js.map\ndist/src/wrapper/SharePlugin.d.ts\ndist/src/wrapper/SharePlugin.js\ndist/src/wrapper/SharePlugin.js.map\ndist/src/wrapper/TreeShakingSharedPlugin.d.ts\ndist/src/wrapper/TreeShakingSharedPlugin.js\ndist/src/wrapper/TreeShakingSharedPlugin.js.map\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/enhanced.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/enhanced.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/enhanced"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/webpack-bundler-runtime/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "ea99033634d6ee918690ff1d4c4e5e77cb5c89f5\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/webpack-bundler-runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/webpack-bundler-runtime.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/webpack-bundler-runtime@2.9.1\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/attachShareScopeMap.cjs\ndist/attachShareScopeMap.cjs.map\ndist/attachShareScopeMap.d.cts\ndist/attachShareScopeMap.d.ts\ndist/attachShareScopeMap.js\ndist/attachShareScopeMap.js.map\ndist/bundler.cjs\ndist/bundler.d.cts\ndist/bundler.d.ts\ndist/bundler.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.d.cts\ndist/constant.d.ts\ndist/constant.js\ndist/constant.js.map\ndist/consumes.cjs\ndist/consumes.cjs.map\ndist/consumes.js\ndist/consumes.js.map\ndist/error-codes/dist/error-codes.cjs\ndist/error-codes/dist/error-codes.cjs.map\ndist/error-codes/dist/error-codes.js\ndist/error-codes/dist/error-codes.js.map\ndist/error-codes/dist/getShortErrorMsg.cjs\ndist/error-codes/dist/getShortErrorMsg.cjs.map\ndist/error-codes/dist/getShortErrorMsg.js\ndist/error-codes/dist/getShortErrorMsg.js.map\ndist/getSharedFallbackGetter.cjs\ndist/getSharedFallbackGetter.cjs.map\ndist/getSharedFallbackGetter.js\ndist/getSharedFallbackGetter.js.map\ndist/getUsedExports.cjs\ndist/getUsedExports.cjs.map\ndist/getUsedExports.js\ndist/getUsedExports.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/init.cjs\ndist/init.cjs.map\ndist/init.js\ndist/init.js.map\ndist/initContainerEntry.cjs\ndist/initContainerEntry.cjs.map\ndist/initContainerEntry.d.cts\ndist/initContainerEntry.d.ts\ndist/initContainerEntry.js\ndist/initContainerEntry.js.map\ndist/initializeSharing.cjs\ndist/initializeSharing.cjs.map\ndist/initializeSharing.d.cts\ndist/initializeSharing.d.ts\ndist/initializeSharing.js\ndist/initializeSharing.js.map\ndist/installInitialConsumes.cjs\ndist/installInitialConsumes.cjs.map\ndist/installInitialConsumes.js\ndist/installInitialConsumes.js.map\ndist/LICENSE\ndist/remotes.cjs\ndist/remotes.cjs.map\ndist/remotes.js\ndist/remotes.js.map\ndist/runtime-core/dist/core.d.cts\ndist/runtime-core/dist/core.d.ts\ndist/runtime-core/dist/global.d.cts\ndist/runtime-core/dist/global.d.ts\ndist/runtime-core/dist/module/index.d.cts\ndist/runtime-core/dist/module/index.d.ts\ndist/runtime-core/dist/plugins/snapshot/SnapshotHandler.d.cts\ndist/runtime-core/dist/plugins/snapshot/SnapshotHandler.d.ts\ndist/runtime-core/dist/remote/index.d.cts\ndist/runtime-core/dist/remote/index.d.ts\ndist/runtime-core/dist/shared/index.d.cts\ndist/runtime-core/dist/shared/index.d.ts\ndist/runtime-core/dist/type/config.d.cts\ndist/runtime-core/dist/type/config.d.ts\ndist/runtime-core/dist/type/plugin.d.cts\ndist/runtime-core/dist/type/plugin.d.ts\ndist/runtime-core/dist/type/preload.d.cts\ndist/runtime-core/dist/type/preload.d.ts\ndist/runtime-core/dist/types.d.cts\ndist/runtime-core/dist/types.d.ts\ndist/runtime-core/dist/utils/hooks/asyncHook.d.cts\ndist/runtime-core/dist/utils/hooks/asyncHook.d.ts\ndist/runtime-core/dist/utils/hooks/asyncWaterfallHooks.d.cts\ndist/runtime-core/dist/utils/hooks/asyncWaterfallHooks.d.ts\ndist/runtime-core/dist/utils/hooks/pluginSystem.d.cts\ndist/runtime-core/dist/utils/hooks/pluginSystem.d.ts\ndist/runtime-core/dist/utils/hooks/syncHook.d.cts\ndist/runtime-core/dist/utils/hooks/syncHook.d.ts\ndist/runtime-core/dist/utils/hooks/syncWaterfallHook.d.cts\ndist/runtime-core/dist/utils/hooks/syncWaterfallHook.d.ts\ndist/runtime-core/dist/utils/load.d.cts\ndist/runtime-core/dist/utils/load.d.ts\ndist/runtime/dist/types.d.cts\ndist/runtime/dist/types.d.ts\ndist/sdk/dist/types/plugins/ModuleFederationPlugin.d.cts\ndist/sdk/dist/types/plugins/ModuleFederationPlugin.d.ts\ndist/types.d.cts\ndist/types.d.ts\ndist/updateOptions.cjs\ndist/updateOptions.cjs.map\ndist/updateOptions.js\ndist/updateOptions.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/webpack-bundler-runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/webpack-bundler-runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/webpack-bundler-runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/error-codes/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "abf5470cb9dc68b33d547ec170593a3025fa3098\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/error-codes",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/error-codes.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/error-codes@2.9.1\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/browser.cjs\ndist/browser.cjs.map\ndist/browser.d.cts\ndist/browser.d.mts\ndist/browser.mjs\ndist/browser.mjs.map\ndist/desc.cjs\ndist/desc.cjs.map\ndist/desc.d.cts\ndist/desc.d.mts\ndist/desc.mjs\ndist/desc.mjs.map\ndist/error-codes.cjs\ndist/error-codes.cjs.map\ndist/error-codes.d.cts\ndist/error-codes.d.mts\ndist/error-codes.mjs\ndist/error-codes.mjs.map\ndist/getShortErrorMsg.cjs\ndist/getShortErrorMsg.cjs.map\ndist/getShortErrorMsg.d.cts\ndist/getShortErrorMsg.d.mts\ndist/getShortErrorMsg.mjs\ndist/getShortErrorMsg.mjs.map\ndist/index.cjs\ndist/index.d.cts\ndist/index.d.mts\ndist/index.mjs\ndist/MFContext.d.cts\ndist/MFContext.d.mts\ndist/node.cjs\ndist/node.cjs.map\ndist/node.d.cts\ndist/node.d.mts\ndist/node.mjs\ndist/node.mjs.map\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/error-codes.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/error-codes.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/error-codes"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "b713dc144d44ba106ce0962de714d3dab7e298dc\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/runtime@2.9.1\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/bundler.cjs\ndist/bundler.d.cts\ndist/bundler.d.ts\ndist/bundler.js\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.cts\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.cts\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/LICENSE\ndist/types.cjs\ndist/types.d.cts\ndist/types.d.ts\ndist/types.js\ndist/utils.cjs\ndist/utils.cjs.map\ndist/utils.d.cts\ndist/utils.d.ts\ndist/utils.js\ndist/utils.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/sdk/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "195fe11b1374cec208758c8ce92db4d7f90b2e32\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/sdk",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/sdk.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/sdk@2.9.1\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.d.cts\ndist/constant.d.ts\ndist/constant.js\ndist/constant.js.map\ndist/createModuleFederationConfig.cjs\ndist/createModuleFederationConfig.cjs.map\ndist/createModuleFederationConfig.d.cts\ndist/createModuleFederationConfig.d.ts\ndist/createModuleFederationConfig.js\ndist/createModuleFederationConfig.js.map\ndist/dom.cjs\ndist/dom.cjs.map\ndist/dom.d.cts\ndist/dom.d.ts\ndist/dom.js\ndist/dom.js.map\ndist/env.cjs\ndist/env.cjs.map\ndist/env.d.cts\ndist/env.d.ts\ndist/env.js\ndist/env.js.map\ndist/generateSnapshotFromManifest.cjs\ndist/generateSnapshotFromManifest.cjs.map\ndist/generateSnapshotFromManifest.d.cts\ndist/generateSnapshotFromManifest.d.ts\ndist/generateSnapshotFromManifest.js\ndist/generateSnapshotFromManifest.js.map\ndist/index.cjs\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/logger.cjs\ndist/logger.cjs.map\ndist/logger.d.cts\ndist/logger.d.ts\ndist/logger.js\ndist/logger.js.map\ndist/node.cjs\ndist/node.cjs.map\ndist/node.d.cts\ndist/node.d.ts\ndist/node.js\ndist/node.js.map\ndist/normalize-webpack-path.cjs\ndist/normalize-webpack-path.cjs.map\ndist/normalize-webpack-path.d.cts\ndist/normalize-webpack-path.d.ts\ndist/normalize-webpack-path.js\ndist/normalize-webpack-path.js.map\ndist/normalizeOptions.cjs\ndist/normalizeOptions.cjs.map\ndist/normalizeOptions.d.cts\ndist/normalizeOptions.d.ts\ndist/normalizeOptions.js\ndist/normalizeOptions.js.map\ndist/types/common.d.cts\ndist/types/common.d.ts\ndist/types/hooks.d.cts\ndist/types/hooks.d.ts\ndist/types/index.d.cts\ndist/types/index.d.ts\ndist/types/manifest.d.cts\ndist/types/manifest.d.ts\ndist/types/plugins/ConsumeSharedPlugin.cjs\ndist/types/plugins/ConsumeSharedPlugin.cjs.map\ndist/types/plugins/ConsumeSharedPlugin.d.cts\ndist/types/plugins/ConsumeSharedPlugin.d.ts\ndist/types/plugins/ConsumeSharedPlugin.js\ndist/types/plugins/ConsumeSharedPlugin.js.map\ndist/types/plugins/ContainerPlugin.cjs\ndist/types/plugins/ContainerPlugin.cjs.map\ndist/types/plugins/ContainerPlugin.d.cts\ndist/types/plugins/ContainerPlugin.d.ts\ndist/types/plugins/ContainerPlugin.js\ndist/types/plugins/ContainerPlugin.js.map\ndist/types/plugins/ContainerReferencePlugin.cjs\ndist/types/plugins/ContainerReferencePlugin.cjs.map\ndist/types/plugins/ContainerReferencePlugin.d.cts\ndist/types/plugins/ContainerReferencePlugin.d.ts\ndist/types/plugins/ContainerReferencePlugin.js\ndist/types/plugins/ContainerReferencePlugin.js.map\ndist/types/plugins/index.d.cts\ndist/types/plugins/index.d.ts\ndist/types/plugins/ModuleFederationPlugin.cjs\ndist/types/plugins/ModuleFederationPlugin.cjs.map\ndist/types/plugins/ModuleFederationPlugin.d.cts\ndist/types/plugins/ModuleFederationPlugin.d.ts\ndist/types/plugins/ModuleFederationPlugin.js\ndist/types/plugins/ModuleFederationPlugin.js.map\ndist/types/plugins/ProvideSharedPlugin.cjs\ndist/types/plugins/ProvideSharedPlugin.cjs.map\ndist/types/plugins/ProvideSharedPlugin.d.cts\ndist/types/plugins/ProvideSharedPlugin.d.ts\ndist/types/plugins/ProvideSharedPlugin.js\ndist/types/plugins/ProvideSharedPlugin.js.map\ndist/types/plugins/SharePlugin.cjs\ndist/types/plugins/SharePlugin.cjs.map\ndist/types/plugins/SharePlugin.d.cts\ndist/types/plugins/SharePlugin.d.ts\ndist/types/plugins/SharePlugin.js\ndist/types/plugins/SharePlugin.js.map\ndist/types/snapshot.d.cts\ndist/types/snapshot.d.ts\ndist/types/stats.d.cts\ndist/types/stats.d.ts\ndist/utils.cjs\ndist/utils.cjs.map\ndist/utils.d.cts\ndist/utils.d.ts\ndist/utils.js\ndist/utils.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/sdk.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/sdk.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/sdk"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime-core/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "e62853781c72dba3a386db50f0f59ea6e05b0068\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/runtime-core",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime-core.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/runtime-core@2.9.1\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.js\ndist/constant.js.map\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.cts\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/global.cjs\ndist/global.cjs.map\ndist/global.d.cts\ndist/global.d.ts\ndist/global.js\ndist/global.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.cts\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/LICENSE\ndist/module/index.cjs\ndist/module/index.cjs.map\ndist/module/index.d.cts\ndist/module/index.d.ts\ndist/module/index.js\ndist/module/index.js.map\ndist/plugins/generate-preload-assets.cjs\ndist/plugins/generate-preload-assets.cjs.map\ndist/plugins/generate-preload-assets.js\ndist/plugins/generate-preload-assets.js.map\ndist/plugins/snapshot/disabled.cjs\ndist/plugins/snapshot/disabled.cjs.map\ndist/plugins/snapshot/disabled.js\ndist/plugins/snapshot/disabled.js.map\ndist/plugins/snapshot/index.cjs\ndist/plugins/snapshot/index.cjs.map\ndist/plugins/snapshot/index.js\ndist/plugins/snapshot/index.js.map\ndist/plugins/snapshot/SnapshotHandler.cjs\ndist/plugins/snapshot/SnapshotHandler.cjs.map\ndist/plugins/snapshot/SnapshotHandler.d.cts\ndist/plugins/snapshot/SnapshotHandler.d.ts\ndist/plugins/snapshot/SnapshotHandler.js\ndist/plugins/snapshot/SnapshotHandler.js.map\ndist/remote/disabled.cjs\ndist/remote/disabled.cjs.map\ndist/remote/disabled.js\ndist/remote/disabled.js.map\ndist/remote/index.cjs\ndist/remote/index.cjs.map\ndist/remote/index.d.cts\ndist/remote/index.d.ts\ndist/remote/index.js\ndist/remote/index.js.map\ndist/shared/disabled.cjs\ndist/shared/disabled.cjs.map\ndist/shared/disabled.js\ndist/shared/disabled.js.map\ndist/shared/index.cjs\ndist/shared/index.cjs.map\ndist/shared/index.d.cts\ndist/shared/index.d.ts\ndist/shared/index.js\ndist/shared/index.js.map\ndist/type/config.d.cts\ndist/type/config.d.ts\ndist/type/index.cjs\ndist/type/index.cjs.map\ndist/type/index.d.cts\ndist/type/index.d.ts\ndist/type/index.js\ndist/type/index.js.map\ndist/type/plugin.d.cts\ndist/type/plugin.d.ts\ndist/type/preload.d.cts\ndist/type/preload.d.ts\ndist/types.cjs\ndist/types.d.cts\ndist/types.d.ts\ndist/types.js\ndist/utils/context.cjs\ndist/utils/context.cjs.map\ndist/utils/context.d.cts\ndist/utils/context.d.ts\ndist/utils/context.js\ndist/utils/context.js.map\ndist/utils/env.cjs\ndist/utils/env.cjs.map\ndist/utils/env.d.ts\ndist/utils/env.js\ndist/utils/env.js.map\ndist/utils/hooks/asyncHook.cjs\ndist/utils/hooks/asyncHook.cjs.map\ndist/utils/hooks/asyncHook.d.cts\ndist/utils/hooks/asyncHook.d.ts\ndist/utils/hooks/asyncHook.js\ndist/utils/hooks/asyncHook.js.map\ndist/utils/hooks/asyncWaterfallHooks.cjs\ndist/utils/hooks/asyncWaterfallHooks.cjs.map\ndist/utils/hooks/asyncWaterfallHooks.d.cts\ndist/utils/hooks/asyncWaterfallHooks.d.ts\ndist/utils/hooks/asyncWaterfallHooks.js\ndist/utils/hooks/asyncWaterfallHooks.js.map\ndist/utils/hooks/index.cjs\ndist/utils/hooks/index.js\ndist/utils/hooks/pluginSystem.cjs\ndist/utils/hooks/pluginSystem.cjs.map\ndist/utils/hooks/pluginSystem.d.cts\ndist/utils/hooks/pluginSystem.d.ts\ndist/utils/hooks/pluginSystem.js\ndist/utils/hooks/pluginSystem.js.map\ndist/utils/hooks/syncHook.cjs\ndist/utils/hooks/syncHook.cjs.map\ndist/utils/hooks/syncHook.d.cts\ndist/utils/hooks/syncHook.d.ts\ndist/utils/hooks/syncHook.js\ndist/utils/hooks/syncHook.js.map\ndist/utils/hooks/syncWaterfallHook.cjs\ndist/utils/hooks/syncWaterfallHook.cjs.map\ndist/utils/hooks/syncWaterfallHook.d.cts\ndist/utils/hooks/syncWaterfallHook.d.ts\ndist/utils/hooks/syncWaterfallHook.js\ndist/utils/hooks/syncWaterfallHook.js.map\ndist/utils/index.cjs\ndist/utils/index.d.cts\ndist/utils/index.d.ts\ndist/utils/index.js\ndist/utils/load.cjs\ndist/utils/load.cjs.map\ndist/utils/load.d.cts\ndist/utils/load.d.ts\ndist/utils/load.js\ndist/utils/load.js.map\ndist/utils/logger.cjs\ndist/utils/logger.cjs.map\ndist/utils/logger.d.cts\ndist/utils/logger.d.ts\ndist/utils/logger.js\ndist/utils/logger.js.map\ndist/utils/manifest.cjs\ndist/utils/manifest.cjs.map\ndist/utils/manifest.d.cts\ndist/utils/manifest.d.ts\ndist/utils/manifest.js\ndist/utils/manifest.js.map\ndist/utils/plugin.cjs\ndist/utils/plugin.cjs.map\ndist/utils/plugin.d.cts\ndist/utils/plugin.d.ts\ndist/utils/plugin.js\ndist/utils/plugin.js.map\ndist/utils/preload.cjs\ndist/utils/preload.cjs.map\ndist/utils/preload.d.cts\ndist/utils/preload.d.ts\ndist/utils/preload.js\ndist/utils/preload.js.map\ndist/utils/semver/compare.cjs\ndist/utils/semver/compare.cjs.map\ndist/utils/semver/compare.js\ndist/utils/semver/compare.js.map\ndist/utils/semver/constants.cjs\ndist/utils/semver/constants.cjs.map\ndist/utils/semver/constants.js\ndist/utils/semver/constants.js.map\ndist/utils/semver/index.cjs\ndist/utils/semver/index.cjs.map\ndist/utils/semver/index.d.cts\ndist/utils/semver/index.d.ts\ndist/utils/semver/index.js\ndist/utils/semver/index.js.map\ndist/utils/semver/parser.cjs\ndist/utils/semver/parser.cjs.map\ndist/utils/semver/parser.js\ndist/utils/semver/parser.js.map\ndist/utils/semver/utils.cjs\ndist/utils/semver/utils.cjs.map\ndist/utils/semver/utils.js\ndist/utils/semver/utils.js.map\ndist/utils/share.cjs\ndist/utils/share.cjs.map\ndist/utils/share.d.cts\ndist/utils/share.d.ts\ndist/utils/share.js\ndist/utils/share.js.map\ndist/utils/tool.cjs\ndist/utils/tool.cjs.map\ndist/utils/tool.d.cts\ndist/utils/tool.d.ts\ndist/utils/tool.js\ndist/utils/tool.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime-core.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime-core.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/runtime-core"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/bridge/bridge-react-webpack-plugin/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "9d627ba4f99c54e84102d3cd166126c0e5894f75\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/bridge/bridge-react-webpack-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/bridge-react-webpack-plugin.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/bridge-react-webpack-plugin@2.9.1\nTarball Contents\ndist/index.cjs.d.ts\ndist/index.cjs.js\ndist/index.es.js\ndist/types/index.d.ts\ndist/types/router-alias.d.ts\ndist/types/utils.d.ts\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/bridge-react-webpack-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/bridge-react-webpack-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/bridge-react-webpack-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/dts-plugin/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "50b23d43e413c0642efbb360ce7d6d71cdc00867\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/dts-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/dts-plugin.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/dts-plugin@2.9.1\nTarball Contents\ndist/Action-CzhPMw2i.js\ndist/Broker-C-uWF8l5.js\ndist/CHANGELOG.md\ndist/constant-C0QI9ddQ.d.ts\ndist/consumeTypes-DhrUgkUW.js\ndist/core.d.ts\ndist/core.js\ndist/DtsWorker-SBLpkK-D.d.ts\ndist/dynamic-remote-type-hints-plugin.d.ts\ndist/dynamic-remote-type-hints-plugin.js\ndist/esm/Action-DNNg2YDh.mjs\ndist/esm/Broker-BfFUcTHm.mjs\ndist/esm/consumeTypes-WKYNaS9i.mjs\ndist/esm/core.mjs\ndist/esm/dynamic-remote-type-hints-plugin.mjs\ndist/esm/expose-rpc-B0rqtOKP.mjs\ndist/esm/fork-dev-worker.mjs\ndist/esm/fork-generate-dts.mjs\ndist/esm/index.mjs\ndist/esm/start-broker.mjs\ndist/esm/utils-CkPvDGOy.mjs\ndist/expose-rpc-jaGpsAVL.js\ndist/fork-dev-worker.d.ts\ndist/fork-dev-worker.js\ndist/fork-generate-dts.d.ts\ndist/fork-generate-dts.js\ndist/iife/launch-web-client.iife.js\ndist/index.d.ts\ndist/index.js\ndist/README.md\ndist/start-broker.d.ts\ndist/start-broker.js\ndist/utils-7KqCZHbb.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/dts-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/dts-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/dts-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/managers/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "4c1353cd03933963cae57bec1d9d22ac832c5d0b\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/managers",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/managers.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/managers@2.9.1\nTarball Contents\ndist/BasicPluginOptionsManager.d.mts\ndist/BasicPluginOptionsManager.d.ts\ndist/BasicPluginOptionsManager.js\ndist/BasicPluginOptionsManager.mjs\ndist/constant.d.mts\ndist/constant.d.ts\ndist/constant.js\ndist/constant.mjs\ndist/ContainerManager.d.mts\ndist/ContainerManager.d.ts\ndist/ContainerManager.js\ndist/ContainerManager.mjs\ndist/findPackageJson.d.mts\ndist/findPackageJson.d.ts\ndist/findPackageJson.js\ndist/findPackageJson.mjs\ndist/index.d.mts\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/LICENSE\ndist/PKGJsonManager.d.mts\ndist/PKGJsonManager.d.ts\ndist/PKGJsonManager.js\ndist/PKGJsonManager.mjs\ndist/RemoteManager.d.mts\ndist/RemoteManager.d.ts\ndist/RemoteManager.js\ndist/RemoteManager.mjs\ndist/SharedManager.d.mts\ndist/SharedManager.d.ts\ndist/SharedManager.js\ndist/SharedManager.mjs\ndist/types.d.mts\ndist/types.d.ts\ndist/types.js\ndist/types.mjs\ndist/utils.d.mts\ndist/utils.d.ts\ndist/utils.js\ndist/utils.mjs\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/managers.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/managers.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/managers"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/third-party-dts-extractor/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "bc4bb813dd2ca3c33a2d9ffc91e9c6eb664ae947\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/third-party-dts-extractor",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/third-party-dts-extractor.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/third-party-dts-extractor@2.9.1\nTarball Contents\ndist/CHANGELOG.md\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/package.json\ndist/README.md\ndist/ThirdPartyExtractor.d.ts\ndist/utils.d.ts\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/third-party-dts-extractor.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/third-party-dts-extractor.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/third-party-dts-extractor"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime-plugins/inject-external-runtime-core-plugin/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "bfe60d85c05c5457c7612d5d4a527cf39ae93632\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/runtime-plugins/inject-external-runtime-core-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/inject-external-runtime-core-plugin.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/inject-external-runtime-core-plugin@2.9.1\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/LICENSE\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/inject-external-runtime-core-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/inject-external-runtime-core-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/inject-external-runtime-core-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/manifest/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "54338acd69839afe43c53ccd9f7814eb6dfecd51\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/manifest",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/manifest.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/manifest@2.9.1\nTarball Contents\ndist/constants.d.ts\ndist/constants.js\ndist/constants.mjs\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/LICENSE\ndist/logger.d.ts\ndist/logger.js\ndist/logger.mjs\ndist/ManifestManager.d.ts\ndist/ManifestManager.js\ndist/ManifestManager.mjs\ndist/ModuleHandler.d.ts\ndist/ModuleHandler.js\ndist/ModuleHandler.mjs\ndist/StatsManager.d.ts\ndist/StatsManager.js\ndist/StatsManager.mjs\ndist/StatsPlugin.d.ts\ndist/StatsPlugin.js\ndist/StatsPlugin.mjs\ndist/types.d.ts\ndist/types.js\ndist/types.mjs\ndist/utils.d.ts\ndist/utils.js\ndist/utils.mjs\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/manifest.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/manifest.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/manifest"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/rspack/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "4fae849e0feff19abbf4d83ecd3f04a25961019d\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/rspack",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/rspack.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/rspack@2.9.1\nTarball Contents\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/LICENSE\ndist/logger.d.ts\ndist/logger.js\ndist/logger.mjs\ndist/ModuleFederationPlugin.d.ts\ndist/ModuleFederationPlugin.js\ndist/ModuleFederationPlugin.mjs\ndist/plugin.d.ts\ndist/plugin.js\ndist/plugin.mjs\ndist/remote-entry-plugin.d.ts\ndist/remote-entry-plugin.js\ndist/remote-entry-plugin.mjs\ndist/RemoteEntryPlugin.d.ts\ndist/RemoteEntryPlugin.js\ndist/RemoteEntryPlugin.mjs\ndist/TreeShakingSharedPlugin.d.ts\ndist/TreeShakingSharedPlugin.js\ndist/TreeShakingSharedPlugin.mjs\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/rspack.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/rspack.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/rspack"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime-tools/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "f4ea674042013d827c73e03ac067b6392c50146e\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/runtime-tools",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime-tools.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/runtime-tools@2.9.1\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/bundler.cjs\ndist/bundler.cjs.map\ndist/bundler.d.cts\ndist/bundler.d.ts\ndist/bundler.js\ndist/bundler.js.map\ndist/index.cjs\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/runtime-core.cjs\ndist/runtime-core.d.cts\ndist/runtime-core.d.ts\ndist/runtime-core.js\ndist/runtime.cjs\ndist/runtime.d.cts\ndist/runtime.d.ts\ndist/runtime.js\ndist/webpack-bundler-runtime.cjs\ndist/webpack-bundler-runtime.cjs.map\ndist/webpack-bundler-runtime.d.cts\ndist/webpack-bundler-runtime.d.ts\ndist/webpack-bundler-runtime.js\ndist/webpack-bundler-runtime.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime-tools.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime-tools.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/runtime-tools"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/cli/src"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "4c08951e772f01308fe5bda94fa4edda839d6cb9\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-baseline/packages/cli",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/cli.tgz"
+    ],
+    "cwd": "packed-enhanced-baseline",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/cli@2.9.1\nTarball Contents\nbin/mf.js\ndist/cli.d.ts\ndist/cli.js\ndist/commands/dts.d.ts\ndist/commands/dts.js\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/types.d.ts\ndist/types.js\ndist/utils/apply-common-options.d.ts\ndist/utils/apply-common-options.js\ndist/utils/logger.d.ts\ndist/utils/logger.js\ndist/utils/prepare.d.ts\ndist/utils/prepare.js\ndist/utils/readConfig.d.ts\ndist/utils/readConfig.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/cli.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/cli.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/cli"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "8643b69633039571cac171d1595645b75e62cf95\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "status",
+      "--porcelain"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "ls-files",
+      "packages/**/package.json"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "packages/assemble-release-plan/package.json\npackages/bridge/bridge-react-webpack-plugin/__tests__/mockRouterDir/router-v5/react-router-dom/package.json\npackages/bridge/bridge-react-webpack-plugin/__tests__/mockRouterDir/router-v6/react-router-dom/package.json\npackages/bridge/bridge-react-webpack-plugin/__tests__/mockRouterDir/router-v7/react-router/package.json\npackages/bridge/bridge-react-webpack-plugin/package.json\npackages/bridge/bridge-react/package.json\npackages/bridge/bridge-shared/package.json\npackages/bridge/vue3-bridge/package.json\npackages/chrome-devtools/package.json\npackages/cli/package.json\npackages/core/package.json\npackages/create-module-federation/package.json\npackages/dts-plugin/package.json\npackages/enhanced/package.json\npackages/enhanced/test/configCases/build-version/package-json-version/package.json\npackages/enhanced/test/configCases/container/1-container-full/node_modules/package.json\npackages/enhanced/test/configCases/container/1-container-full/package.json\npackages/enhanced/test/configCases/container/2-container-full/node_modules/package.json\npackages/enhanced/test/configCases/container/2-container-full/package.json\npackages/enhanced/test/configCases/container/3-container-full/package.json\npackages/enhanced/test/configCases/container/exposed-overridables/node_modules/package.json\npackages/enhanced/test/configCases/container/exposed-overridables/package.json\npackages/enhanced/test/configCases/container/hoist-inactive-connections/node_modules/pruned-pkg/package.json\npackages/enhanced/test/configCases/container/hoist-inactive-connections/node_modules/runtime-specific-pkg/package.json\npackages/enhanced/test/configCases/container/hoist-inactive-connections/node_modules/used-pkg/package.json\npackages/enhanced/test/configCases/container/manifest-disable-assets-analyze/node_modules/package.json\npackages/enhanced/test/configCases/container/manifest-disable-assets-analyze/package.json\npackages/enhanced/test/configCases/container/manifest-file-name/node_modules/package.json\npackages/enhanced/test/configCases/container/manifest-file-name/package.json\npackages/enhanced/test/configCases/container/manifest/node_modules/package.json\npackages/enhanced/test/configCases/container/manifest/package.json\npackages/enhanced/test/configCases/container/module-federation-with-shareScope/node_modules/package.json\npackages/enhanced/test/configCases/container/module-federation-with-shareScope/package.json\npackages/enhanced/test/configCases/container/multiple-runtime-chunk/node_modules/package.json\npackages/enhanced/test/configCases/container/multiple-runtime-chunk/package.json\npackages/enhanced/test/configCases/container/remote-array-share-scope/node_modules/@scope-sc/ui-lib/package.json\npackages/enhanced/test/configCases/container/remote-array-share-scope/node_modules/@scope-sc/ui-lib2/package.json\npackages/enhanced/test/configCases/container/remote-array-share-scope/node_modules/@scope-sc/ui-lib3/package.json\npackages/enhanced/test/configCases/layers/3-layers-full/package.json\npackages/enhanced/test/configCases/layers/4-layers-full/package.json\npackages/enhanced/test/configCases/layers/5-layers-full/package.json\npackages/enhanced/test/configCases/layers/6-layers-full/package.json\npackages/enhanced/test/configCases/layers/7-layers-full/node_modules/package.json\npackages/enhanced/test/configCases/layers/7-layers-full/package.json\npackages/enhanced/test/configCases/layers/8-layers-full/node_modules/package.json\npackages/enhanced/test/configCases/layers/8-layers-full/package.json\npackages/enhanced/test/configCases/sharing/consume-distinct-ranges/node_modules/pkg-a/package.json\npackages/enhanced/test/configCases/sharing/consume-distinct-ranges/node_modules/pkg-b/package.json\npackages/enhanced/test/configCases/sharing/consume-distinct-ranges/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/singleton-filter/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-exclude-fail/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-exclude/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-include-fail/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-include/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/package.json\npackages/enhanced/test/configCases/sharing/consume-module-ignore-warnings/package.json\npackages/enhanced/test/configCases/sharing/consume-module/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module2/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module3/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module4/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module2/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module3/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module4/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/node_modules/package-1/esm/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/node_modules/package-1/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/node_modules/package-2/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/package.json\npackages/enhanced/test/configCases/sharing/consume-self-reference/node_modules/my-middleware/package.json\npackages/enhanced/test/configCases/sharing/consume-self-reference/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/consume-self-reference/package.json\npackages/enhanced/test/configCases/sharing/layers-consume-entry/package.json\npackages/enhanced/test/configCases/sharing/layers-consume-loader/package.json\npackages/enhanced/test/configCases/sharing/layers-provides-loader/package.json\npackages/enhanced/test/configCases/sharing/layers-share-plugin/package.json\npackages/enhanced/test/configCases/sharing/no-override-loaded/node_modules/package/package.json\npackages/enhanced/test/configCases/sharing/no-override-loaded/package.json\npackages/enhanced/test/configCases/sharing/provide-eager-module/node_modules/common/package.json\npackages/enhanced/test/configCases/sharing/provide-eager-module/node_modules/uncommon/package.json\npackages/enhanced/test/configCases/sharing/provide-eager-module/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/singleton-filter/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-exclude-fail/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-exclude/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-include-fail/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-include/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/package.json\npackages/enhanced/test/configCases/sharing/provide-module/node_modules/package/package.json\npackages/enhanced/test/configCases/sharing/provide-module/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/node_modules/my-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/node_modules/unused-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/package.json\npackages/enhanced/test/configCases/sharing/provide-shared-with-runtime-chunk/node_modules/x/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/my-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/unused-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/my-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/unused-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/cjs/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/node_modules/lib/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/node_modules/transitive_lib/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/app1/node_modules/lib2/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/app1/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/node_modules/lib1/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/node_modules/lib2/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/node_modules/lib1/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/node_modules/lib3/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/node_modules/store/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/package.json\npackages/enhanced/test/configCases/sharing/shared-strategy/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-dynamic-default-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-dynamic-specific-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-es/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-side-effect/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/legacy-nanoid-v3/node_modules/nanoid/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/legacy-nanoid-v3/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/nanoid/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-dynamic-default-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-dynamic-specific-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-es/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-side-effect/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/package.json\npackages/enhanced/test/configCases/tree-shaking-share/reshake-share/node_modules/ui-lib-dep/package.json\npackages/enhanced/test/configCases/tree-shaking-share/reshake-share/node_modules/ui-lib/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-dynamic-default-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-dynamic-specific-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-es/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-side-effect/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib/package.json\npackages/error-codes/package.json\npackages/esbuild/package.json\npackages/esbuild/src/resolve/package.json\npackages/managers/package.json\npackages/manifest/package.json\npackages/metro-core/package.json\npackages/metro-plugin-rnc-cli/package.json\npackages/metro-plugin-rnef/package.json\npackages/metro-plugin-rock/package.json\npackages/modernjs-v3/package.json\npackages/modernjs/package.json\npackages/native-federation-tests/package.json\npackages/native-federation-typescript/package.json\npackages/nextjs-mf/package.json\npackages/node/package.json\npackages/observability-plugin/package.json\npackages/playground/package.json\npackages/retry-plugin/package.json\npackages/rsbuild-plugin/package.json\npackages/rspack/package.json\npackages/rspress-plugin/package.json\npackages/rstest/package.json\npackages/runtime-core/package.json\npackages/runtime-plugins/inject-external-runtime-core-plugin/package.json\npackages/runtime-tools/package.json\npackages/runtime/package.json\npackages/sdk/package.json\npackages/storybook-addon/package.json\npackages/third-party-dts-extractor/package.json\npackages/treeshake-frontend/package.json\npackages/treeshake-server/package.json\npackages/treeshake-server/template/re-shake-share/package.json\npackages/typescript/package.json\npackages/utilities/package.json\npackages/webpack-bundler-runtime/package.json\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/enhanced/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "05d543f8b9611ba9e0619982a614571a85034e7e\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/enhanced",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/enhanced.tgz"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/enhanced@2.9.2\nTarball Contents\nbin/mf.js\ndist/CHANGELOG.md\ndist/README.md\ndist/rstestmigrate.md\ndist/src/_virtual/_rolldown/runtime.js\ndist/src/index.d.ts\ndist/src/index.js\ndist/src/index.js.map\ndist/src/lib/Constants.d.ts\ndist/src/lib/Constants.js\ndist/src/lib/Constants.js.map\ndist/src/lib/container/AsyncBoundaryPlugin.d.ts\ndist/src/lib/container/AsyncBoundaryPlugin.js\ndist/src/lib/container/AsyncBoundaryPlugin.js.map\ndist/src/lib/container/constant.d.ts\ndist/src/lib/container/constant.js\ndist/src/lib/container/constant.js.map\ndist/src/lib/container/ContainerEntryDependency.d.ts\ndist/src/lib/container/ContainerEntryDependency.js\ndist/src/lib/container/ContainerEntryDependency.js.map\ndist/src/lib/container/ContainerEntryModule.d.ts\ndist/src/lib/container/ContainerEntryModule.js\ndist/src/lib/container/ContainerEntryModule.js.map\ndist/src/lib/container/ContainerEntryModuleFactory.d.ts\ndist/src/lib/container/ContainerEntryModuleFactory.js\ndist/src/lib/container/ContainerEntryModuleFactory.js.map\ndist/src/lib/container/ContainerExposedDependency.d.ts\ndist/src/lib/container/ContainerExposedDependency.js\ndist/src/lib/container/ContainerExposedDependency.js.map\ndist/src/lib/container/ContainerPlugin.d.ts\ndist/src/lib/container/ContainerPlugin.js\ndist/src/lib/container/ContainerPlugin.js.map\ndist/src/lib/container/ContainerReferencePlugin.d.ts\ndist/src/lib/container/ContainerReferencePlugin.js\ndist/src/lib/container/ContainerReferencePlugin.js.map\ndist/src/lib/container/FallbackDependency.d.ts\ndist/src/lib/container/FallbackDependency.js\ndist/src/lib/container/FallbackDependency.js.map\ndist/src/lib/container/FallbackItemDependency.d.ts\ndist/src/lib/container/FallbackItemDependency.js\ndist/src/lib/container/FallbackItemDependency.js.map\ndist/src/lib/container/FallbackModule.d.ts\ndist/src/lib/container/FallbackModule.js\ndist/src/lib/container/FallbackModule.js.map\ndist/src/lib/container/FallbackModuleFactory.d.ts\ndist/src/lib/container/FallbackModuleFactory.js\ndist/src/lib/container/FallbackModuleFactory.js.map\ndist/src/lib/container/HoistContainerReferencesPlugin.d.ts\ndist/src/lib/container/HoistContainerReferencesPlugin.js\ndist/src/lib/container/HoistContainerReferencesPlugin.js.map\ndist/src/lib/container/ModuleFederationPlugin.d.ts\ndist/src/lib/container/ModuleFederationPlugin.js\ndist/src/lib/container/ModuleFederationPlugin.js.map\ndist/src/lib/container/options.d.ts\ndist/src/lib/container/options.js\ndist/src/lib/container/options.js.map\ndist/src/lib/container/RemoteModule.d.ts\ndist/src/lib/container/RemoteModule.js\ndist/src/lib/container/RemoteModule.js.map\ndist/src/lib/container/RemoteRuntimeModule.d.ts\ndist/src/lib/container/RemoteRuntimeModule.js\ndist/src/lib/container/RemoteRuntimeModule.js.map\ndist/src/lib/container/RemoteToExternalDependency.d.ts\ndist/src/lib/container/RemoteToExternalDependency.js\ndist/src/lib/container/RemoteToExternalDependency.js.map\ndist/src/lib/container/runtime/EmbedFederationRuntimeModule.d.ts\ndist/src/lib/container/runtime/EmbedFederationRuntimeModule.js\ndist/src/lib/container/runtime/EmbedFederationRuntimeModule.js.map\ndist/src/lib/container/runtime/EmbedFederationRuntimePlugin.d.ts\ndist/src/lib/container/runtime/EmbedFederationRuntimePlugin.js\ndist/src/lib/container/runtime/EmbedFederationRuntimePlugin.js.map\ndist/src/lib/container/runtime/FederationModulesPlugin.d.ts\ndist/src/lib/container/runtime/FederationModulesPlugin.js\ndist/src/lib/container/runtime/FederationModulesPlugin.js.map\ndist/src/lib/container/runtime/FederationRuntimeDependency.d.ts\ndist/src/lib/container/runtime/FederationRuntimeDependency.js\ndist/src/lib/container/runtime/FederationRuntimeDependency.js.map\ndist/src/lib/container/runtime/FederationRuntimeModule.d.ts\ndist/src/lib/container/runtime/FederationRuntimeModule.js\ndist/src/lib/container/runtime/FederationRuntimeModule.js.map\ndist/src/lib/container/runtime/FederationRuntimePlugin.d.ts\ndist/src/lib/container/runtime/FederationRuntimePlugin.js\ndist/src/lib/container/runtime/FederationRuntimePlugin.js.map\ndist/src/lib/container/runtime/FederationSelectionPlugin.d.ts\ndist/src/lib/container/runtime/FederationSelectionPlugin.js\ndist/src/lib/container/runtime/FederationSelectionPlugin.js.map\ndist/src/lib/container/runtime/getFederationGlobal.d.ts\ndist/src/lib/container/runtime/getFederationGlobal.js\ndist/src/lib/container/runtime/getFederationGlobal.js.map\ndist/src/lib/container/runtime/normalizeToPosixPath.d.ts\ndist/src/lib/container/runtime/normalizeToPosixPath.js\ndist/src/lib/container/runtime/normalizeToPosixPath.js.map\ndist/src/lib/container/runtime/utils.d.ts\ndist/src/lib/container/runtime/utils.js\ndist/src/lib/container/runtime/utils.js.map\ndist/src/lib/sharing/ConsumeSharedFallbackDependency.d.ts\ndist/src/lib/sharing/ConsumeSharedFallbackDependency.js\ndist/src/lib/sharing/ConsumeSharedFallbackDependency.js.map\ndist/src/lib/sharing/ConsumeSharedModule.d.ts\ndist/src/lib/sharing/ConsumeSharedModule.js\ndist/src/lib/sharing/ConsumeSharedModule.js.map\ndist/src/lib/sharing/ConsumeSharedPlugin.d.ts\ndist/src/lib/sharing/ConsumeSharedPlugin.js\ndist/src/lib/sharing/ConsumeSharedPlugin.js.map\ndist/src/lib/sharing/ConsumeSharedRuntimeModule.d.ts\ndist/src/lib/sharing/ConsumeSharedRuntimeModule.js\ndist/src/lib/sharing/ConsumeSharedRuntimeModule.js.map\ndist/src/lib/sharing/ProvideForSharedDependency.d.ts\ndist/src/lib/sharing/ProvideForSharedDependency.js\ndist/src/lib/sharing/ProvideForSharedDependency.js.map\ndist/src/lib/sharing/ProvideSharedDependency.d.ts\ndist/src/lib/sharing/ProvideSharedDependency.js\ndist/src/lib/sharing/ProvideSharedDependency.js.map\ndist/src/lib/sharing/ProvideSharedModule.d.ts\ndist/src/lib/sharing/ProvideSharedModule.js\ndist/src/lib/sharing/ProvideSharedModule.js.map\ndist/src/lib/sharing/ProvideSharedModuleFactory.d.ts\ndist/src/lib/sharing/ProvideSharedModuleFactory.js\ndist/src/lib/sharing/ProvideSharedModuleFactory.js.map\ndist/src/lib/sharing/ProvideSharedPlugin.d.ts\ndist/src/lib/sharing/ProvideSharedPlugin.js\ndist/src/lib/sharing/ProvideSharedPlugin.js.map\ndist/src/lib/sharing/resolveMatchedConfigs.d.ts\ndist/src/lib/sharing/resolveMatchedConfigs.js\ndist/src/lib/sharing/resolveMatchedConfigs.js.map\ndist/src/lib/sharing/SharePlugin.d.ts\ndist/src/lib/sharing/SharePlugin.js\ndist/src/lib/sharing/SharePlugin.js.map\ndist/src/lib/sharing/ShareRuntimeModule.d.ts\ndist/src/lib/sharing/ShareRuntimeModule.js\ndist/src/lib/sharing/ShareRuntimeModule.js.map\ndist/src/lib/sharing/tree-shaking/CollectSharedEntryPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/CollectSharedEntryPlugin.js\ndist/src/lib/sharing/tree-shaking/CollectSharedEntryPlugin.js.map\ndist/src/lib/sharing/tree-shaking/IndependentSharedPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/IndependentSharedPlugin.js\ndist/src/lib/sharing/tree-shaking/IndependentSharedPlugin.js.map\ndist/src/lib/sharing/tree-shaking/IndependentSharedRuntimeModule.d.ts\ndist/src/lib/sharing/tree-shaking/IndependentSharedRuntimeModule.js\ndist/src/lib/sharing/tree-shaking/IndependentSharedRuntimeModule.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedContainerPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedContainerPlugin.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedContainerPlugin.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedDependency.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedDependency.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedDependency.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryDependency.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryDependency.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryDependency.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModule.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModule.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModule.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModuleFactory.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModuleFactory.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModuleFactory.js.map\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerPlugin.js\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerPlugin.js.map\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerRuntimeModule.d.ts\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerRuntimeModule.js\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerRuntimeModule.js.map\ndist/src/lib/sharing/tree-shaking/TreeShakingSharedPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/TreeShakingSharedPlugin.js\ndist/src/lib/sharing/tree-shaking/TreeShakingSharedPlugin.js.map\ndist/src/lib/sharing/utils.d.ts\ndist/src/lib/sharing/utils.js\ndist/src/lib/sharing/utils.js.map\ndist/src/lib/startup/MfStartupChunkDependenciesPlugin.d.ts\ndist/src/lib/startup/MfStartupChunkDependenciesPlugin.js\ndist/src/lib/startup/MfStartupChunkDependenciesPlugin.js.map\ndist/src/lib/startup/StartupHelpers.d.ts\ndist/src/lib/startup/StartupHelpers.js\ndist/src/lib/startup/StartupHelpers.js.map\ndist/src/rspack.d.ts\ndist/src/rspack.js\ndist/src/runtime.d.ts\ndist/src/runtime.js\ndist/src/runtime.mjs\ndist/src/runtime/AddRuntimeRequirementToPromiseExternalPlugin.d.ts\ndist/src/runtime/AddRuntimeRequirementToPromiseExternalPlugin.js\ndist/src/runtime/AddRuntimeRequirementToPromiseExternalPlugin.js.map\ndist/src/schemas/container/ContainerPlugin.check.d.ts\ndist/src/schemas/container/ContainerPlugin.check.js\ndist/src/schemas/container/ContainerPlugin.check.js.map\ndist/src/schemas/container/ContainerPlugin.d.ts\ndist/src/schemas/container/ContainerPlugin.js\ndist/src/schemas/container/ContainerPlugin.js.map\ndist/src/schemas/container/ContainerReferencePlugin.check.d.ts\ndist/src/schemas/container/ContainerReferencePlugin.check.js\ndist/src/schemas/container/ContainerReferencePlugin.check.js.map\ndist/src/schemas/container/ContainerReferencePlugin.d.ts\ndist/src/schemas/container/ContainerReferencePlugin.js\ndist/src/schemas/container/ContainerReferencePlugin.js.map\ndist/src/schemas/container/ExternalsType.check.d.ts\ndist/src/schemas/container/ExternalsType.check.js\ndist/src/schemas/container/ExternalsType.check.js.map\ndist/src/schemas/container/ExternalsType.d.ts\ndist/src/schemas/container/ExternalsType.js\ndist/src/schemas/container/ExternalsType.js.map\ndist/src/schemas/container/ModuleFederationPlugin.check.d.ts\ndist/src/schemas/container/ModuleFederationPlugin.check.js\ndist/src/schemas/container/ModuleFederationPlugin.check.js.map\ndist/src/schemas/container/ModuleFederationPlugin.d.ts\ndist/src/schemas/container/ModuleFederationPlugin.js\ndist/src/schemas/container/ModuleFederationPlugin.js.map\ndist/src/schemas/sharing/ConsumeSharedPlugin.check.d.ts\ndist/src/schemas/sharing/ConsumeSharedPlugin.check.js\ndist/src/schemas/sharing/ConsumeSharedPlugin.check.js.map\ndist/src/schemas/sharing/ConsumeSharedPlugin.d.ts\ndist/src/schemas/sharing/ConsumeSharedPlugin.js\ndist/src/schemas/sharing/ConsumeSharedPlugin.js.map\ndist/src/schemas/sharing/ProviderSharedPlugin.check.d.ts\ndist/src/schemas/sharing/ProviderSharedPlugin.check.js\ndist/src/schemas/sharing/ProviderSharedPlugin.check.js.map\ndist/src/schemas/sharing/ProviderSharedPlugin.d.ts\ndist/src/schemas/sharing/ProviderSharedPlugin.js\ndist/src/schemas/sharing/ProviderSharedPlugin.js.map\ndist/src/schemas/sharing/ProvideSharedPlugin.check.d.ts\ndist/src/schemas/sharing/ProvideSharedPlugin.check.js\ndist/src/schemas/sharing/ProvideSharedPlugin.check.js.map\ndist/src/schemas/sharing/ProvideSharedPlugin.d.ts\ndist/src/schemas/sharing/ProvideSharedPlugin.js\ndist/src/schemas/sharing/ProvideSharedPlugin.js.map\ndist/src/schemas/sharing/SharePlugin.check.d.ts\ndist/src/schemas/sharing/SharePlugin.check.js\ndist/src/schemas/sharing/SharePlugin.check.js.map\ndist/src/schemas/sharing/SharePlugin.d.ts\ndist/src/schemas/sharing/SharePlugin.js\ndist/src/schemas/sharing/SharePlugin.js.map\ndist/src/utils.d.ts\ndist/src/utils.js\ndist/src/utils.js.map\ndist/src/webpack.d.ts\ndist/src/webpack.js\ndist/src/wrapper/AsyncBoundaryPlugin.d.ts\ndist/src/wrapper/AsyncBoundaryPlugin.js\ndist/src/wrapper/AsyncBoundaryPlugin.js.map\ndist/src/wrapper/BaseWrapperPlugin.d.ts\ndist/src/wrapper/BaseWrapperPlugin.js\ndist/src/wrapper/BaseWrapperPlugin.js.map\ndist/src/wrapper/ConsumeSharedPlugin.d.ts\ndist/src/wrapper/ConsumeSharedPlugin.js\ndist/src/wrapper/ConsumeSharedPlugin.js.map\ndist/src/wrapper/ContainerPlugin.d.ts\ndist/src/wrapper/ContainerPlugin.js\ndist/src/wrapper/ContainerPlugin.js.map\ndist/src/wrapper/ContainerReferencePlugin.d.ts\ndist/src/wrapper/ContainerReferencePlugin.js\ndist/src/wrapper/ContainerReferencePlugin.js.map\ndist/src/wrapper/FederationModulesPlugin.d.ts\ndist/src/wrapper/FederationModulesPlugin.js\ndist/src/wrapper/FederationModulesPlugin.js.map\ndist/src/wrapper/FederationRuntimePlugin.d.ts\ndist/src/wrapper/FederationRuntimePlugin.js\ndist/src/wrapper/FederationRuntimePlugin.js.map\ndist/src/wrapper/HoistContainerReferencesPlugin.d.ts\ndist/src/wrapper/HoistContainerReferencesPlugin.js\ndist/src/wrapper/HoistContainerReferencesPlugin.js.map\ndist/src/wrapper/ModuleFederationPlugin.d.ts\ndist/src/wrapper/ModuleFederationPlugin.js\ndist/src/wrapper/ModuleFederationPlugin.js.map\ndist/src/wrapper/ProvideSharedPlugin.d.ts\ndist/src/wrapper/ProvideSharedPlugin.js\ndist/src/wrapper/ProvideSharedPlugin.js.map\ndist/src/wrapper/SharePlugin.d.ts\ndist/src/wrapper/SharePlugin.js\ndist/src/wrapper/SharePlugin.js.map\ndist/src/wrapper/TreeShakingSharedPlugin.d.ts\ndist/src/wrapper/TreeShakingSharedPlugin.js\ndist/src/wrapper/TreeShakingSharedPlugin.js.map\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/enhanced.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/enhanced.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/enhanced"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/webpack-bundler-runtime/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "f849b62822e6d5c00894073bb1293b70853b42cf\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/webpack-bundler-runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/webpack-bundler-runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/error-codes/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "abf5470cb9dc68b33d547ec170593a3025fa3098\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/error-codes.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/error-codes"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "e498870159d9eb9577915e13155d5f70c3fe1992\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/sdk/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "dd6790bede99a123618dc89f77a58dd36a5e46a1\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/sdk.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/sdk"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime-core/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "531510b61c3425e872d31e16479da2fc9d3759e9\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/runtime-core.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/runtime-core"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/bridge/bridge-react-webpack-plugin/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "9d627ba4f99c54e84102d3cd166126c0e5894f75\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/bridge/bridge-react-webpack-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/bridge-react-webpack-plugin.tgz"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/bridge-react-webpack-plugin@2.9.2\nTarball Contents\ndist/index.cjs.d.ts\ndist/index.cjs.js\ndist/index.es.js\ndist/types/index.d.ts\ndist/types/router-alias.d.ts\ndist/types/utils.d.ts\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/bridge-react-webpack-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/bridge-react-webpack-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/bridge-react-webpack-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/dts-plugin/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "50b23d43e413c0642efbb360ce7d6d71cdc00867\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/dts-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/dts-plugin.tgz"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/dts-plugin@2.9.2\nTarball Contents\ndist/Action-CzhPMw2i.js\ndist/Broker-C-uWF8l5.js\ndist/CHANGELOG.md\ndist/constant-C0QI9ddQ.d.ts\ndist/consumeTypes-DhrUgkUW.js\ndist/core.d.ts\ndist/core.js\ndist/DtsWorker-SBLpkK-D.d.ts\ndist/dynamic-remote-type-hints-plugin.d.ts\ndist/dynamic-remote-type-hints-plugin.js\ndist/esm/Action-DNNg2YDh.mjs\ndist/esm/Broker-BfFUcTHm.mjs\ndist/esm/consumeTypes-WKYNaS9i.mjs\ndist/esm/core.mjs\ndist/esm/dynamic-remote-type-hints-plugin.mjs\ndist/esm/expose-rpc-B0rqtOKP.mjs\ndist/esm/fork-dev-worker.mjs\ndist/esm/fork-generate-dts.mjs\ndist/esm/index.mjs\ndist/esm/start-broker.mjs\ndist/esm/utils-CkPvDGOy.mjs\ndist/expose-rpc-jaGpsAVL.js\ndist/fork-dev-worker.d.ts\ndist/fork-dev-worker.js\ndist/fork-generate-dts.d.ts\ndist/fork-generate-dts.js\ndist/iife/launch-web-client.iife.js\ndist/index.d.ts\ndist/index.js\ndist/README.md\ndist/start-broker.d.ts\ndist/start-broker.js\ndist/utils-7KqCZHbb.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/dts-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/dts-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/dts-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/managers/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "9bdb2302cf9883fbbcf8c0db3dc520db364de5f4\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/managers",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/managers.tgz"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/managers@2.9.2\nTarball Contents\ndist/BasicPluginOptionsManager.d.mts\ndist/BasicPluginOptionsManager.d.ts\ndist/BasicPluginOptionsManager.js\ndist/BasicPluginOptionsManager.mjs\ndist/constant.d.mts\ndist/constant.d.ts\ndist/constant.js\ndist/constant.mjs\ndist/ContainerManager.d.mts\ndist/ContainerManager.d.ts\ndist/ContainerManager.js\ndist/ContainerManager.mjs\ndist/findPackageJson.d.mts\ndist/findPackageJson.d.ts\ndist/findPackageJson.js\ndist/findPackageJson.mjs\ndist/index.d.mts\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/LICENSE\ndist/PKGJsonManager.d.mts\ndist/PKGJsonManager.d.ts\ndist/PKGJsonManager.js\ndist/PKGJsonManager.mjs\ndist/RemoteManager.d.mts\ndist/RemoteManager.d.ts\ndist/RemoteManager.js\ndist/RemoteManager.mjs\ndist/runtime-selection/capabilityProfile.d.mts\ndist/runtime-selection/capabilityProfile.d.ts\ndist/runtime-selection/capabilityProfile.js\ndist/runtime-selection/capabilityProfile.mjs\ndist/runtime-selection/compilerSlot.d.mts\ndist/runtime-selection/compilerSlot.d.ts\ndist/runtime-selection/compilerSlot.js\ndist/runtime-selection/compilerSlot.mjs\ndist/runtime-selection/index.d.mts\ndist/runtime-selection/index.d.ts\ndist/runtime-selection/index.js\ndist/runtime-selection/index.mjs\ndist/runtime-selection/legacyFamily.d.mts\ndist/runtime-selection/legacyFamily.d.ts\ndist/runtime-selection/legacyFamily.js\ndist/runtime-selection/legacyFamily.mjs\ndist/runtime-selection/resolveRuntimeImplementation.d.mts\ndist/runtime-selection/resolveRuntimeImplementation.d.ts\ndist/runtime-selection/resolveRuntimeImplementation.js\ndist/runtime-selection/resolveRuntimeImplementation.mjs\ndist/runtime-selection/types.d.mts\ndist/runtime-selection/types.d.ts\ndist/runtime-selection/types.js\ndist/runtime-selection/types.mjs\ndist/SharedManager.d.mts\ndist/SharedManager.d.ts\ndist/SharedManager.js\ndist/SharedManager.mjs\ndist/types.d.mts\ndist/types.d.ts\ndist/types.js\ndist/types.mjs\ndist/utils.d.mts\ndist/utils.d.ts\ndist/utils.js\ndist/utils.mjs\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/managers.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/managers.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/managers"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/third-party-dts-extractor/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "bc4bb813dd2ca3c33a2d9ffc91e9c6eb664ae947\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/third-party-dts-extractor",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/third-party-dts-extractor.tgz"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/third-party-dts-extractor@2.9.2\nTarball Contents\ndist/CHANGELOG.md\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/package.json\ndist/README.md\ndist/ThirdPartyExtractor.d.ts\ndist/utils.d.ts\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/third-party-dts-extractor.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/third-party-dts-extractor.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/third-party-dts-extractor"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime-plugins/inject-external-runtime-core-plugin/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "be8b6e3a822e91c66f4fbbca31233b885724aa94\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/inject-external-runtime-core-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/inject-external-runtime-core-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/manifest/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "54338acd69839afe43c53ccd9f7814eb6dfecd51\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/manifest",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/manifest.tgz"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/manifest@2.9.2\nTarball Contents\ndist/constants.d.ts\ndist/constants.js\ndist/constants.mjs\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/LICENSE\ndist/logger.d.ts\ndist/logger.js\ndist/logger.mjs\ndist/ManifestManager.d.ts\ndist/ManifestManager.js\ndist/ManifestManager.mjs\ndist/ModuleHandler.d.ts\ndist/ModuleHandler.js\ndist/ModuleHandler.mjs\ndist/StatsManager.d.ts\ndist/StatsManager.js\ndist/StatsManager.mjs\ndist/StatsPlugin.d.ts\ndist/StatsPlugin.js\ndist/StatsPlugin.mjs\ndist/types.d.ts\ndist/types.js\ndist/types.mjs\ndist/utils.d.ts\ndist/utils.js\ndist/utils.mjs\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/manifest.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/manifest.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/manifest"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/rspack/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "b9ef540b70bf65370193d7bc2ba051315d81e81a\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/rspack",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/rspack.tgz"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/rspack@2.9.2\nTarball Contents\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/LICENSE\ndist/logger.d.ts\ndist/logger.js\ndist/logger.mjs\ndist/ModuleFederationPlugin.d.ts\ndist/ModuleFederationPlugin.js\ndist/ModuleFederationPlugin.mjs\ndist/plugin.d.ts\ndist/plugin.js\ndist/plugin.mjs\ndist/remote-entry-plugin.d.ts\ndist/remote-entry-plugin.js\ndist/remote-entry-plugin.mjs\ndist/RemoteEntryPlugin.d.ts\ndist/RemoteEntryPlugin.js\ndist/RemoteEntryPlugin.mjs\ndist/TreeShakingSharedPlugin.d.ts\ndist/TreeShakingSharedPlugin.js\ndist/TreeShakingSharedPlugin.mjs\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/rspack.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/rspack.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/rspack"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime-tools/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "829dd3e11546b184ba7619eb13321775a59adb67\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/runtime-tools.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/runtime-tools"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/cli/src"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "4c08951e772f01308fe5bda94fa4edda839d6cb9\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/cli",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/cli.tgz"
+    ],
+    "cwd": "stack5107",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/cli@2.9.2\nTarball Contents\nbin/mf.js\ndist/cli.d.ts\ndist/cli.js\ndist/commands/dts.d.ts\ndist/commands/dts.js\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/types.d.ts\ndist/types.js\ndist/utils/apply-common-options.d.ts\ndist/utils/apply-common-options.js\ndist/utils/logger.d.ts\ndist/utils/logger.js\ndist/utils/prepare.d.ts\ndist/utils/prepare.js\ndist/utils/readConfig.d.ts\ndist/utils/readConfig.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/cli.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/tarballs/cli.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5036/node_modules/@module-federation/cli"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "83134b63016cd237bad96f7797706bfd8dd565c5\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "status",
+      "--porcelain"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "ls-files",
+      "packages/**/package.json"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "packages/assemble-release-plan/package.json\npackages/bridge/bridge-react-webpack-plugin/__tests__/mockRouterDir/router-v5/react-router-dom/package.json\npackages/bridge/bridge-react-webpack-plugin/__tests__/mockRouterDir/router-v6/react-router-dom/package.json\npackages/bridge/bridge-react-webpack-plugin/__tests__/mockRouterDir/router-v7/react-router/package.json\npackages/bridge/bridge-react-webpack-plugin/package.json\npackages/bridge/bridge-react/package.json\npackages/bridge/bridge-shared/package.json\npackages/bridge/vue3-bridge/package.json\npackages/chrome-devtools/package.json\npackages/cli/package.json\npackages/core/package.json\npackages/create-module-federation/package.json\npackages/dts-plugin/package.json\npackages/enhanced/package.json\npackages/enhanced/test/configCases/build-version/package-json-version/package.json\npackages/enhanced/test/configCases/container/1-container-full/node_modules/package.json\npackages/enhanced/test/configCases/container/1-container-full/package.json\npackages/enhanced/test/configCases/container/2-container-full/node_modules/package.json\npackages/enhanced/test/configCases/container/2-container-full/package.json\npackages/enhanced/test/configCases/container/3-container-full/package.json\npackages/enhanced/test/configCases/container/exposed-overridables/node_modules/package.json\npackages/enhanced/test/configCases/container/exposed-overridables/package.json\npackages/enhanced/test/configCases/container/hoist-inactive-connections/node_modules/pruned-pkg/package.json\npackages/enhanced/test/configCases/container/hoist-inactive-connections/node_modules/runtime-specific-pkg/package.json\npackages/enhanced/test/configCases/container/hoist-inactive-connections/node_modules/used-pkg/package.json\npackages/enhanced/test/configCases/container/manifest-disable-assets-analyze/node_modules/package.json\npackages/enhanced/test/configCases/container/manifest-disable-assets-analyze/package.json\npackages/enhanced/test/configCases/container/manifest-file-name/node_modules/package.json\npackages/enhanced/test/configCases/container/manifest-file-name/package.json\npackages/enhanced/test/configCases/container/manifest/node_modules/package.json\npackages/enhanced/test/configCases/container/manifest/package.json\npackages/enhanced/test/configCases/container/module-federation-with-shareScope/node_modules/package.json\npackages/enhanced/test/configCases/container/module-federation-with-shareScope/package.json\npackages/enhanced/test/configCases/container/multiple-runtime-chunk/node_modules/package.json\npackages/enhanced/test/configCases/container/multiple-runtime-chunk/package.json\npackages/enhanced/test/configCases/container/remote-array-share-scope/node_modules/@scope-sc/ui-lib/package.json\npackages/enhanced/test/configCases/container/remote-array-share-scope/node_modules/@scope-sc/ui-lib2/package.json\npackages/enhanced/test/configCases/container/remote-array-share-scope/node_modules/@scope-sc/ui-lib3/package.json\npackages/enhanced/test/configCases/layers/3-layers-full/package.json\npackages/enhanced/test/configCases/layers/4-layers-full/package.json\npackages/enhanced/test/configCases/layers/5-layers-full/package.json\npackages/enhanced/test/configCases/layers/6-layers-full/package.json\npackages/enhanced/test/configCases/layers/7-layers-full/node_modules/package.json\npackages/enhanced/test/configCases/layers/7-layers-full/package.json\npackages/enhanced/test/configCases/layers/8-layers-full/node_modules/package.json\npackages/enhanced/test/configCases/layers/8-layers-full/package.json\npackages/enhanced/test/configCases/sharing/consume-distinct-ranges/node_modules/pkg-a/package.json\npackages/enhanced/test/configCases/sharing/consume-distinct-ranges/node_modules/pkg-b/package.json\npackages/enhanced/test/configCases/sharing/consume-distinct-ranges/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/singleton-filter/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-exclude-fail/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-exclude/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-include-fail/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/node_modules/version-include/package.json\npackages/enhanced/test/configCases/sharing/consume-filters/package.json\npackages/enhanced/test/configCases/sharing/consume-module-ignore-warnings/package.json\npackages/enhanced/test/configCases/sharing/consume-module/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module2/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module3/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/node_modules/my-module4/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions-ignore-warnings/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module2/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module3/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/node_modules/my-module4/package.json\npackages/enhanced/test/configCases/sharing/consume-multiple-versions/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/node_modules/package-1/esm/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/node_modules/package-1/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/node_modules/package-2/package.json\npackages/enhanced/test/configCases/sharing/consume-nested/package.json\npackages/enhanced/test/configCases/sharing/consume-self-reference/node_modules/my-middleware/package.json\npackages/enhanced/test/configCases/sharing/consume-self-reference/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/consume-self-reference/package.json\npackages/enhanced/test/configCases/sharing/layers-consume-entry/package.json\npackages/enhanced/test/configCases/sharing/layers-consume-loader/package.json\npackages/enhanced/test/configCases/sharing/layers-provides-loader/package.json\npackages/enhanced/test/configCases/sharing/layers-share-plugin/package.json\npackages/enhanced/test/configCases/sharing/no-override-loaded/node_modules/package/package.json\npackages/enhanced/test/configCases/sharing/no-override-loaded/package.json\npackages/enhanced/test/configCases/sharing/provide-eager-module/node_modules/common/package.json\npackages/enhanced/test/configCases/sharing/provide-eager-module/node_modules/uncommon/package.json\npackages/enhanced/test/configCases/sharing/provide-eager-module/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/singleton-filter/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-exclude-fail/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-exclude/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-include-fail/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/node_modules/version-include/package.json\npackages/enhanced/test/configCases/sharing/provide-filters/package.json\npackages/enhanced/test/configCases/sharing/provide-module/node_modules/package/package.json\npackages/enhanced/test/configCases/sharing/provide-module/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/node_modules/my-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/node_modules/unused-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/provide-multiple-versions/package.json\npackages/enhanced/test/configCases/sharing/provide-shared-with-runtime-chunk/node_modules/x/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/my-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/node_modules/unused-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-deep-module/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/my-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/my-module/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/node_modules/unused-module/node_modules/shared/package.json\npackages/enhanced/test/configCases/sharing/share-multiple-versions/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/cjs/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/node_modules/lib/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/node_modules/transitive_lib/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-dual-mode/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/app1/node_modules/lib2/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/app1/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/node_modules/lib1/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/node_modules/lib2/package.json\npackages/enhanced/test/configCases/sharing/share-plugin-monorepo/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/node_modules/lib1/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/node_modules/lib3/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/node_modules/store/package.json\npackages/enhanced/test/configCases/sharing/share-plugin/package.json\npackages/enhanced/test/configCases/sharing/shared-strategy/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-dynamic-default-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-dynamic-specific-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-es/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib-side-effect/package.json\npackages/enhanced/test/configCases/tree-shaking-share/infer-strategy/node_modules/ui-lib/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/legacy-nanoid-v3/node_modules/nanoid/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/legacy-nanoid-v3/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/nanoid/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-dynamic-default-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-dynamic-specific-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-es/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib-side-effect/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/node_modules/ui-lib/package.json\npackages/enhanced/test/configCases/tree-shaking-share/multi-version-fallback/package.json\npackages/enhanced/test/configCases/tree-shaking-share/reshake-share/node_modules/ui-lib-dep/package.json\npackages/enhanced/test/configCases/tree-shaking-share/reshake-share/node_modules/ui-lib/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-dynamic-default-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-dynamic-specific-export/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-es/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib-side-effect/package.json\npackages/enhanced/test/configCases/tree-shaking-share/server-strategy/node_modules/ui-lib/package.json\npackages/error-codes/package.json\npackages/esbuild/package.json\npackages/esbuild/src/resolve/package.json\npackages/managers/package.json\npackages/manifest/package.json\npackages/metro-core/package.json\npackages/metro-plugin-rnc-cli/package.json\npackages/metro-plugin-rnef/package.json\npackages/metro-plugin-rock/package.json\npackages/modernjs-v3/package.json\npackages/modernjs/package.json\npackages/native-federation-tests/package.json\npackages/native-federation-typescript/package.json\npackages/nextjs-mf/package.json\npackages/node/package.json\npackages/observability-plugin/package.json\npackages/playground/package.json\npackages/retry-plugin/package.json\npackages/rsbuild-plugin/package.json\npackages/rspack/__tests__/composed-fixture/shared-lib/package.json\npackages/rspack/package.json\npackages/rspress-plugin/package.json\npackages/rstest/package.json\npackages/runtime-core/package.json\npackages/runtime-plugins/inject-external-runtime-core-plugin/package.json\npackages/runtime-tools/package.json\npackages/runtime/package.json\npackages/sdk/package.json\npackages/storybook-addon/package.json\npackages/third-party-dts-extractor/package.json\npackages/treeshake-frontend/package.json\npackages/treeshake-server/package.json\npackages/treeshake-server/template/re-shake-share/package.json\npackages/typescript/package.json\npackages/utilities/package.json\npackages/webpack-bundler-runtime/package.json\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/enhanced/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "7b75522db2deea041063b65d6cce5d554dad90f8\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/enhanced",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/enhanced.tgz"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/enhanced@2.9.2\nTarball Contents\nbin/mf.js\ndist/CHANGELOG.md\ndist/README.md\ndist/rstestmigrate.md\ndist/src/_virtual/_rolldown/runtime.js\ndist/src/index.d.ts\ndist/src/index.js\ndist/src/index.js.map\ndist/src/lib/Constants.d.ts\ndist/src/lib/Constants.js\ndist/src/lib/Constants.js.map\ndist/src/lib/container/AsyncBoundaryPlugin.d.ts\ndist/src/lib/container/AsyncBoundaryPlugin.js\ndist/src/lib/container/AsyncBoundaryPlugin.js.map\ndist/src/lib/container/constant.d.ts\ndist/src/lib/container/constant.js\ndist/src/lib/container/constant.js.map\ndist/src/lib/container/ContainerEntryDependency.d.ts\ndist/src/lib/container/ContainerEntryDependency.js\ndist/src/lib/container/ContainerEntryDependency.js.map\ndist/src/lib/container/ContainerEntryModule.d.ts\ndist/src/lib/container/ContainerEntryModule.js\ndist/src/lib/container/ContainerEntryModule.js.map\ndist/src/lib/container/ContainerEntryModuleFactory.d.ts\ndist/src/lib/container/ContainerEntryModuleFactory.js\ndist/src/lib/container/ContainerEntryModuleFactory.js.map\ndist/src/lib/container/ContainerExposedDependency.d.ts\ndist/src/lib/container/ContainerExposedDependency.js\ndist/src/lib/container/ContainerExposedDependency.js.map\ndist/src/lib/container/ContainerPlugin.d.ts\ndist/src/lib/container/ContainerPlugin.js\ndist/src/lib/container/ContainerPlugin.js.map\ndist/src/lib/container/ContainerReferencePlugin.d.ts\ndist/src/lib/container/ContainerReferencePlugin.js\ndist/src/lib/container/ContainerReferencePlugin.js.map\ndist/src/lib/container/FallbackDependency.d.ts\ndist/src/lib/container/FallbackDependency.js\ndist/src/lib/container/FallbackDependency.js.map\ndist/src/lib/container/FallbackItemDependency.d.ts\ndist/src/lib/container/FallbackItemDependency.js\ndist/src/lib/container/FallbackItemDependency.js.map\ndist/src/lib/container/FallbackModule.d.ts\ndist/src/lib/container/FallbackModule.js\ndist/src/lib/container/FallbackModule.js.map\ndist/src/lib/container/FallbackModuleFactory.d.ts\ndist/src/lib/container/FallbackModuleFactory.js\ndist/src/lib/container/FallbackModuleFactory.js.map\ndist/src/lib/container/HoistContainerReferencesPlugin.d.ts\ndist/src/lib/container/HoistContainerReferencesPlugin.js\ndist/src/lib/container/HoistContainerReferencesPlugin.js.map\ndist/src/lib/container/ModuleFederationPlugin.d.ts\ndist/src/lib/container/ModuleFederationPlugin.js\ndist/src/lib/container/ModuleFederationPlugin.js.map\ndist/src/lib/container/options.d.ts\ndist/src/lib/container/options.js\ndist/src/lib/container/options.js.map\ndist/src/lib/container/RemoteModule.d.ts\ndist/src/lib/container/RemoteModule.js\ndist/src/lib/container/RemoteModule.js.map\ndist/src/lib/container/RemoteRuntimeModule.d.ts\ndist/src/lib/container/RemoteRuntimeModule.js\ndist/src/lib/container/RemoteRuntimeModule.js.map\ndist/src/lib/container/RemoteToExternalDependency.d.ts\ndist/src/lib/container/RemoteToExternalDependency.js\ndist/src/lib/container/RemoteToExternalDependency.js.map\ndist/src/lib/container/runtime/EmbedFederationRuntimeModule.d.ts\ndist/src/lib/container/runtime/EmbedFederationRuntimeModule.js\ndist/src/lib/container/runtime/EmbedFederationRuntimeModule.js.map\ndist/src/lib/container/runtime/EmbedFederationRuntimePlugin.d.ts\ndist/src/lib/container/runtime/EmbedFederationRuntimePlugin.js\ndist/src/lib/container/runtime/EmbedFederationRuntimePlugin.js.map\ndist/src/lib/container/runtime/FederationCompositionPlugin.d.ts\ndist/src/lib/container/runtime/FederationCompositionPlugin.js\ndist/src/lib/container/runtime/FederationCompositionPlugin.js.map\ndist/src/lib/container/runtime/FederationModulesPlugin.d.ts\ndist/src/lib/container/runtime/FederationModulesPlugin.js\ndist/src/lib/container/runtime/FederationModulesPlugin.js.map\ndist/src/lib/container/runtime/FederationRuntimeDependency.d.ts\ndist/src/lib/container/runtime/FederationRuntimeDependency.js\ndist/src/lib/container/runtime/FederationRuntimeDependency.js.map\ndist/src/lib/container/runtime/FederationRuntimeModule.d.ts\ndist/src/lib/container/runtime/FederationRuntimeModule.js\ndist/src/lib/container/runtime/FederationRuntimeModule.js.map\ndist/src/lib/container/runtime/FederationRuntimePlugin.d.ts\ndist/src/lib/container/runtime/FederationRuntimePlugin.js\ndist/src/lib/container/runtime/FederationRuntimePlugin.js.map\ndist/src/lib/container/runtime/getFederationGlobal.d.ts\ndist/src/lib/container/runtime/getFederationGlobal.js\ndist/src/lib/container/runtime/getFederationGlobal.js.map\ndist/src/lib/container/runtime/normalizeToPosixPath.d.ts\ndist/src/lib/container/runtime/normalizeToPosixPath.js\ndist/src/lib/container/runtime/normalizeToPosixPath.js.map\ndist/src/lib/container/runtime/utils.d.ts\ndist/src/lib/container/runtime/utils.js\ndist/src/lib/container/runtime/utils.js.map\ndist/src/lib/makeSerializable.d.ts\ndist/src/lib/makeSerializable.js\ndist/src/lib/makeSerializable.js.map\ndist/src/lib/sharing/ConsumeSharedFallbackDependency.d.ts\ndist/src/lib/sharing/ConsumeSharedFallbackDependency.js\ndist/src/lib/sharing/ConsumeSharedFallbackDependency.js.map\ndist/src/lib/sharing/ConsumeSharedModule.d.ts\ndist/src/lib/sharing/ConsumeSharedModule.js\ndist/src/lib/sharing/ConsumeSharedModule.js.map\ndist/src/lib/sharing/ConsumeSharedPlugin.d.ts\ndist/src/lib/sharing/ConsumeSharedPlugin.js\ndist/src/lib/sharing/ConsumeSharedPlugin.js.map\ndist/src/lib/sharing/ConsumeSharedRuntimeModule.d.ts\ndist/src/lib/sharing/ConsumeSharedRuntimeModule.js\ndist/src/lib/sharing/ConsumeSharedRuntimeModule.js.map\ndist/src/lib/sharing/ProvideForSharedDependency.d.ts\ndist/src/lib/sharing/ProvideForSharedDependency.js\ndist/src/lib/sharing/ProvideForSharedDependency.js.map\ndist/src/lib/sharing/ProvideSharedDependency.d.ts\ndist/src/lib/sharing/ProvideSharedDependency.js\ndist/src/lib/sharing/ProvideSharedDependency.js.map\ndist/src/lib/sharing/ProvideSharedModule.d.ts\ndist/src/lib/sharing/ProvideSharedModule.js\ndist/src/lib/sharing/ProvideSharedModule.js.map\ndist/src/lib/sharing/ProvideSharedModuleFactory.d.ts\ndist/src/lib/sharing/ProvideSharedModuleFactory.js\ndist/src/lib/sharing/ProvideSharedModuleFactory.js.map\ndist/src/lib/sharing/ProvideSharedPlugin.d.ts\ndist/src/lib/sharing/ProvideSharedPlugin.js\ndist/src/lib/sharing/ProvideSharedPlugin.js.map\ndist/src/lib/sharing/resolveMatchedConfigs.d.ts\ndist/src/lib/sharing/resolveMatchedConfigs.js\ndist/src/lib/sharing/resolveMatchedConfigs.js.map\ndist/src/lib/sharing/SharePlugin.d.ts\ndist/src/lib/sharing/SharePlugin.js\ndist/src/lib/sharing/SharePlugin.js.map\ndist/src/lib/sharing/ShareRuntimeModule.d.ts\ndist/src/lib/sharing/ShareRuntimeModule.js\ndist/src/lib/sharing/ShareRuntimeModule.js.map\ndist/src/lib/sharing/tree-shaking/CollectSharedEntryPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/CollectSharedEntryPlugin.js\ndist/src/lib/sharing/tree-shaking/CollectSharedEntryPlugin.js.map\ndist/src/lib/sharing/tree-shaking/IndependentSharedPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/IndependentSharedPlugin.js\ndist/src/lib/sharing/tree-shaking/IndependentSharedPlugin.js.map\ndist/src/lib/sharing/tree-shaking/IndependentSharedRuntimeModule.d.ts\ndist/src/lib/sharing/tree-shaking/IndependentSharedRuntimeModule.js\ndist/src/lib/sharing/tree-shaking/IndependentSharedRuntimeModule.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedContainerPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedContainerPlugin.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedContainerPlugin.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedDependency.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedDependency.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedDependency.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryDependency.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryDependency.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryDependency.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModule.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModule.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModule.js.map\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModuleFactory.d.ts\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModuleFactory.js\ndist/src/lib/sharing/tree-shaking/SharedContainerPlugin/SharedEntryModuleFactory.js.map\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerPlugin.js\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerPlugin.js.map\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerRuntimeModule.d.ts\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerRuntimeModule.js\ndist/src/lib/sharing/tree-shaking/SharedUsedExportsOptimizerRuntimeModule.js.map\ndist/src/lib/sharing/tree-shaking/TreeShakingSharedPlugin.d.ts\ndist/src/lib/sharing/tree-shaking/TreeShakingSharedPlugin.js\ndist/src/lib/sharing/tree-shaking/TreeShakingSharedPlugin.js.map\ndist/src/lib/sharing/utils.d.ts\ndist/src/lib/sharing/utils.js\ndist/src/lib/sharing/utils.js.map\ndist/src/lib/startup/MfStartupChunkDependenciesPlugin.d.ts\ndist/src/lib/startup/MfStartupChunkDependenciesPlugin.js\ndist/src/lib/startup/MfStartupChunkDependenciesPlugin.js.map\ndist/src/lib/startup/StartupHelpers.d.ts\ndist/src/lib/startup/StartupHelpers.js\ndist/src/lib/startup/StartupHelpers.js.map\ndist/src/rspack.d.ts\ndist/src/rspack.js\ndist/src/runtime.d.ts\ndist/src/runtime.js\ndist/src/runtime.mjs\ndist/src/runtime/AddRuntimeRequirementToPromiseExternalPlugin.d.ts\ndist/src/runtime/AddRuntimeRequirementToPromiseExternalPlugin.js\ndist/src/runtime/AddRuntimeRequirementToPromiseExternalPlugin.js.map\ndist/src/schemas/container/ContainerPlugin.check.d.ts\ndist/src/schemas/container/ContainerPlugin.check.js\ndist/src/schemas/container/ContainerPlugin.check.js.map\ndist/src/schemas/container/ContainerPlugin.d.ts\ndist/src/schemas/container/ContainerPlugin.js\ndist/src/schemas/container/ContainerPlugin.js.map\ndist/src/schemas/container/ContainerReferencePlugin.check.d.ts\ndist/src/schemas/container/ContainerReferencePlugin.check.js\ndist/src/schemas/container/ContainerReferencePlugin.check.js.map\ndist/src/schemas/container/ContainerReferencePlugin.d.ts\ndist/src/schemas/container/ContainerReferencePlugin.js\ndist/src/schemas/container/ContainerReferencePlugin.js.map\ndist/src/schemas/container/ExternalsType.check.d.ts\ndist/src/schemas/container/ExternalsType.check.js\ndist/src/schemas/container/ExternalsType.check.js.map\ndist/src/schemas/container/ExternalsType.d.ts\ndist/src/schemas/container/ExternalsType.js\ndist/src/schemas/container/ExternalsType.js.map\ndist/src/schemas/container/ModuleFederationPlugin.check.d.ts\ndist/src/schemas/container/ModuleFederationPlugin.check.js\ndist/src/schemas/container/ModuleFederationPlugin.check.js.map\ndist/src/schemas/container/ModuleFederationPlugin.d.ts\ndist/src/schemas/container/ModuleFederationPlugin.js\ndist/src/schemas/container/ModuleFederationPlugin.js.map\ndist/src/schemas/sharing/ConsumeSharedPlugin.check.d.ts\ndist/src/schemas/sharing/ConsumeSharedPlugin.check.js\ndist/src/schemas/sharing/ConsumeSharedPlugin.check.js.map\ndist/src/schemas/sharing/ConsumeSharedPlugin.d.ts\ndist/src/schemas/sharing/ConsumeSharedPlugin.js\ndist/src/schemas/sharing/ConsumeSharedPlugin.js.map\ndist/src/schemas/sharing/ProviderSharedPlugin.check.d.ts\ndist/src/schemas/sharing/ProviderSharedPlugin.check.js\ndist/src/schemas/sharing/ProviderSharedPlugin.check.js.map\ndist/src/schemas/sharing/ProviderSharedPlugin.d.ts\ndist/src/schemas/sharing/ProviderSharedPlugin.js\ndist/src/schemas/sharing/ProviderSharedPlugin.js.map\ndist/src/schemas/sharing/ProvideSharedPlugin.check.d.ts\ndist/src/schemas/sharing/ProvideSharedPlugin.check.js\ndist/src/schemas/sharing/ProvideSharedPlugin.check.js.map\ndist/src/schemas/sharing/ProvideSharedPlugin.d.ts\ndist/src/schemas/sharing/ProvideSharedPlugin.js\ndist/src/schemas/sharing/ProvideSharedPlugin.js.map\ndist/src/schemas/sharing/SharePlugin.check.d.ts\ndist/src/schemas/sharing/SharePlugin.check.js\ndist/src/schemas/sharing/SharePlugin.check.js.map\ndist/src/schemas/sharing/SharePlugin.d.ts\ndist/src/schemas/sharing/SharePlugin.js\ndist/src/schemas/sharing/SharePlugin.js.map\ndist/src/utils.d.ts\ndist/src/utils.js\ndist/src/utils.js.map\ndist/src/webpack.d.ts\ndist/src/webpack.js\ndist/src/wrapper/AsyncBoundaryPlugin.d.ts\ndist/src/wrapper/AsyncBoundaryPlugin.js\ndist/src/wrapper/AsyncBoundaryPlugin.js.map\ndist/src/wrapper/BaseWrapperPlugin.d.ts\ndist/src/wrapper/BaseWrapperPlugin.js\ndist/src/wrapper/BaseWrapperPlugin.js.map\ndist/src/wrapper/ConsumeSharedPlugin.d.ts\ndist/src/wrapper/ConsumeSharedPlugin.js\ndist/src/wrapper/ConsumeSharedPlugin.js.map\ndist/src/wrapper/ContainerPlugin.d.ts\ndist/src/wrapper/ContainerPlugin.js\ndist/src/wrapper/ContainerPlugin.js.map\ndist/src/wrapper/ContainerReferencePlugin.d.ts\ndist/src/wrapper/ContainerReferencePlugin.js\ndist/src/wrapper/ContainerReferencePlugin.js.map\ndist/src/wrapper/FederationModulesPlugin.d.ts\ndist/src/wrapper/FederationModulesPlugin.js\ndist/src/wrapper/FederationModulesPlugin.js.map\ndist/src/wrapper/FederationRuntimePlugin.d.ts\ndist/src/wrapper/FederationRuntimePlugin.js\ndist/src/wrapper/FederationRuntimePlugin.js.map\ndist/src/wrapper/HoistContainerReferencesPlugin.d.ts\ndist/src/wrapper/HoistContainerReferencesPlugin.js\ndist/src/wrapper/HoistContainerReferencesPlugin.js.map\ndist/src/wrapper/ModuleFederationPlugin.d.ts\ndist/src/wrapper/ModuleFederationPlugin.js\ndist/src/wrapper/ModuleFederationPlugin.js.map\ndist/src/wrapper/ProvideSharedPlugin.d.ts\ndist/src/wrapper/ProvideSharedPlugin.js\ndist/src/wrapper/ProvideSharedPlugin.js.map\ndist/src/wrapper/SharePlugin.d.ts\ndist/src/wrapper/SharePlugin.js\ndist/src/wrapper/SharePlugin.js.map\ndist/src/wrapper/TreeShakingSharedPlugin.d.ts\ndist/src/wrapper/TreeShakingSharedPlugin.js\ndist/src/wrapper/TreeShakingSharedPlugin.js.map\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/enhanced.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/enhanced.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/enhanced"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/webpack-bundler-runtime/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "1f8bee19589b803bbfaf5897cf5d84f2f2620df3\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/webpack-bundler-runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/webpack-bundler-runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/error-codes/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "abf5470cb9dc68b33d547ec170593a3025fa3098\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/error-codes.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/error-codes"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "15fa2d1b75a41a64b5ccd5958d7eae10e0f5c1de\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/sdk/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "5f8f1c517009b904a6a379ad6f4a45ffc855c218\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/sdk.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/sdk"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime-core/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "5022d206746b44a8ded579a5f5ba202cf42e99a1\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/runtime-core.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/runtime-core"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/bridge/bridge-react-webpack-plugin/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "9d627ba4f99c54e84102d3cd166126c0e5894f75\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/bridge/bridge-react-webpack-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/bridge-react-webpack-plugin.tgz"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/bridge-react-webpack-plugin@2.9.2\nTarball Contents\ndist/index.cjs.d.ts\ndist/index.cjs.js\ndist/index.es.js\ndist/types/index.d.ts\ndist/types/router-alias.d.ts\ndist/types/utils.d.ts\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/bridge-react-webpack-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/bridge-react-webpack-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/bridge-react-webpack-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/dts-plugin/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "50b23d43e413c0642efbb360ce7d6d71cdc00867\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/dts-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/dts-plugin.tgz"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/dts-plugin@2.9.2\nTarball Contents\ndist/Action-CzhPMw2i.js\ndist/Broker-C-uWF8l5.js\ndist/CHANGELOG.md\ndist/constant-C0QI9ddQ.d.ts\ndist/consumeTypes-DhrUgkUW.js\ndist/core.d.ts\ndist/core.js\ndist/DtsWorker-SBLpkK-D.d.ts\ndist/dynamic-remote-type-hints-plugin.d.ts\ndist/dynamic-remote-type-hints-plugin.js\ndist/esm/Action-DNNg2YDh.mjs\ndist/esm/Broker-BfFUcTHm.mjs\ndist/esm/consumeTypes-WKYNaS9i.mjs\ndist/esm/core.mjs\ndist/esm/dynamic-remote-type-hints-plugin.mjs\ndist/esm/expose-rpc-B0rqtOKP.mjs\ndist/esm/fork-dev-worker.mjs\ndist/esm/fork-generate-dts.mjs\ndist/esm/index.mjs\ndist/esm/start-broker.mjs\ndist/esm/utils-CkPvDGOy.mjs\ndist/expose-rpc-jaGpsAVL.js\ndist/fork-dev-worker.d.ts\ndist/fork-dev-worker.js\ndist/fork-generate-dts.d.ts\ndist/fork-generate-dts.js\ndist/iife/launch-web-client.iife.js\ndist/index.d.ts\ndist/index.js\ndist/README.md\ndist/start-broker.d.ts\ndist/start-broker.js\ndist/utils-7KqCZHbb.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/dts-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/dts-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/dts-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/managers/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "10d60715967777c704a3ac05f06001e69ec71a5d\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/managers",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/managers.tgz"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/managers@2.9.2\nTarball Contents\ndist/BasicPluginOptionsManager.d.mts\ndist/BasicPluginOptionsManager.d.ts\ndist/BasicPluginOptionsManager.js\ndist/BasicPluginOptionsManager.mjs\ndist/composition/checkFederationGraph.d.mts\ndist/composition/checkFederationGraph.d.ts\ndist/composition/checkFederationGraph.js\ndist/composition/checkFederationGraph.mjs\ndist/composition/family.d.mts\ndist/composition/family.d.ts\ndist/composition/family.js\ndist/composition/family.mjs\ndist/composition/plan.d.mts\ndist/composition/plan.d.ts\ndist/composition/plan.js\ndist/composition/plan.mjs\ndist/composition/renderComposition.d.mts\ndist/composition/renderComposition.d.ts\ndist/composition/renderComposition.js\ndist/composition/renderComposition.mjs\ndist/composition/resolveImports.d.mts\ndist/composition/resolveImports.d.ts\ndist/composition/resolveImports.js\ndist/composition/resolveImports.mjs\ndist/composition/selectMode.d.mts\ndist/composition/selectMode.d.ts\ndist/composition/selectMode.js\ndist/composition/selectMode.mjs\ndist/constant.d.mts\ndist/constant.d.ts\ndist/constant.js\ndist/constant.mjs\ndist/ContainerManager.d.mts\ndist/ContainerManager.d.ts\ndist/ContainerManager.js\ndist/ContainerManager.mjs\ndist/findPackageJson.d.mts\ndist/findPackageJson.d.ts\ndist/findPackageJson.js\ndist/findPackageJson.mjs\ndist/index.d.mts\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/LICENSE\ndist/PKGJsonManager.d.mts\ndist/PKGJsonManager.d.ts\ndist/PKGJsonManager.js\ndist/PKGJsonManager.mjs\ndist/RemoteManager.d.mts\ndist/RemoteManager.d.ts\ndist/RemoteManager.js\ndist/RemoteManager.mjs\ndist/SharedManager.d.mts\ndist/SharedManager.d.ts\ndist/SharedManager.js\ndist/SharedManager.mjs\ndist/types.d.mts\ndist/types.d.ts\ndist/types.js\ndist/types.mjs\ndist/utils.d.mts\ndist/utils.d.ts\ndist/utils.js\ndist/utils.mjs\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/managers.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/managers.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/managers"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/third-party-dts-extractor/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "bc4bb813dd2ca3c33a2d9ffc91e9c6eb664ae947\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/third-party-dts-extractor",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/third-party-dts-extractor.tgz"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/third-party-dts-extractor@2.9.2\nTarball Contents\ndist/CHANGELOG.md\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/package.json\ndist/README.md\ndist/ThirdPartyExtractor.d.ts\ndist/utils.d.ts\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/third-party-dts-extractor.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/third-party-dts-extractor.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/third-party-dts-extractor"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime-plugins/inject-external-runtime-core-plugin/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "bfe60d85c05c5457c7612d5d4a527cf39ae93632\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/inject-external-runtime-core-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/inject-external-runtime-core-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/manifest/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "54338acd69839afe43c53ccd9f7814eb6dfecd51\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/manifest",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/manifest.tgz"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/manifest@2.9.2\nTarball Contents\ndist/constants.d.ts\ndist/constants.js\ndist/constants.mjs\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/LICENSE\ndist/logger.d.ts\ndist/logger.js\ndist/logger.mjs\ndist/ManifestManager.d.ts\ndist/ManifestManager.js\ndist/ManifestManager.mjs\ndist/ModuleHandler.d.ts\ndist/ModuleHandler.js\ndist/ModuleHandler.mjs\ndist/StatsManager.d.ts\ndist/StatsManager.js\ndist/StatsManager.mjs\ndist/StatsPlugin.d.ts\ndist/StatsPlugin.js\ndist/StatsPlugin.mjs\ndist/types.d.ts\ndist/types.js\ndist/types.mjs\ndist/utils.d.ts\ndist/utils.js\ndist/utils.mjs\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/manifest.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/manifest.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/manifest"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/rspack/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "09970c6d8e6eb43dd08c5cb10bd5e08697302d1d\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/rspack",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/rspack.tgz"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/rspack@2.9.2\nTarball Contents\ndist/ComposedRuntimePlugin.d.ts\ndist/ComposedRuntimePlugin.js\ndist/ComposedRuntimePlugin.mjs\ndist/index.d.ts\ndist/index.js\ndist/index.mjs\ndist/LICENSE\ndist/logger.d.ts\ndist/logger.js\ndist/logger.mjs\ndist/ModuleFederationPlugin.d.ts\ndist/ModuleFederationPlugin.js\ndist/ModuleFederationPlugin.mjs\ndist/plugin.d.ts\ndist/plugin.js\ndist/plugin.mjs\ndist/remote-entry-plugin.d.ts\ndist/remote-entry-plugin.js\ndist/remote-entry-plugin.mjs\ndist/RemoteEntryPlugin.d.ts\ndist/RemoteEntryPlugin.js\ndist/RemoteEntryPlugin.mjs\ndist/TreeShakingSharedPlugin.d.ts\ndist/TreeShakingSharedPlugin.js\ndist/TreeShakingSharedPlugin.mjs\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/rspack.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/rspack.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/rspack"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/runtime-tools/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "f4ea674042013d827c73e03ac067b6392c50146e\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/runtime-tools.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/runtime-tools"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD:packages/cli/src"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "4c08951e772f01308fe5bda94fa4edda839d6cb9\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/cli",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/cli.tgz"
+    ],
+    "cwd": "stack5141",
+    "exitCode": 0,
+    "stdout": "📦  @module-federation/cli@2.9.2\nTarball Contents\nbin/mf.js\ndist/cli.d.ts\ndist/cli.js\ndist/commands/dts.d.ts\ndist/commands/dts.js\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/types.d.ts\ndist/types.js\ndist/utils/apply-common-options.d.ts\ndist/utils/apply-common-options.js\ndist/utils/logger.d.ts\ndist/utils/logger.js\ndist/utils/prepare.d.ts\ndist/utils/prepare.js\ndist/utils/readConfig.d.ts\ndist/utils/readConfig.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/cli.tgz\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/tarballs/cli.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/5128-minor/node_modules/@module-federation/cli"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/sdk.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/sdk"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/error-codes.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/error-codes"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime-core.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/runtime-core"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/webpack-bundler-runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/webpack-bundler-runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/runtime-tools.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/runtime-tools"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/tarballs/inject-external-runtime-core-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/old/node_modules/@module-federation/inject-external-runtime-core-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/sdk.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5036/node_modules/@module-federation/sdk"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/error-codes.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5036/node_modules/@module-federation/error-codes"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/runtime-core.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5036/node_modules/@module-federation/runtime-core"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5036/node_modules/@module-federation/runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/webpack-bundler-runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5036/node_modules/@module-federation/webpack-bundler-runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/runtime-tools.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5036/node_modules/@module-federation/runtime-tools"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/inject-external-runtime-core-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5036/node_modules/@module-federation/inject-external-runtime-core-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/tarballs/sdk.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/sdk"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/tarballs/error-codes.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/error-codes"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/tarballs/runtime-core.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-core"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/tarballs/runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/tarballs/webpack-bundler-runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/webpack-bundler-runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/tarballs/runtime-tools.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/runtime-tools"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/tarballs/inject-external-runtime-core-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-minor/node_modules/@module-federation/inject-external-runtime-core-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/tarballs/sdk.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-major/node_modules/@module-federation/sdk"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/tarballs/error-codes.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-major/node_modules/@module-federation/error-codes"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/tarballs/runtime-core.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-major/node_modules/@module-federation/runtime-core"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/tarballs/runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-major/node_modules/@module-federation/runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/tarballs/webpack-bundler-runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-major/node_modules/@module-federation/webpack-bundler-runtime"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/tarballs/runtime-tools.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-major/node_modules/@module-federation/runtime-tools"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/tarballs/inject-external-runtime-core-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/runtimes/5128-major/node_modules/@module-federation/inject-external-runtime-core-plugin"
+    ],
+    "cwd": "",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]
