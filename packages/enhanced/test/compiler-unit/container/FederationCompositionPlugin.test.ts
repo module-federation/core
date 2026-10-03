@@ -183,6 +183,59 @@ describe('FederationCompositionPlugin', () => {
     expect(on.output).toEqual(off.output);
   });
 
+  it('falls back with explicit defines for a custom require-only composition export', async () => {
+    const context = fixture({
+      'index.js': 'export default typeof FEDERATION_OPTIMIZE_NO_SHARED;',
+    });
+    for (const pkg of [
+      'runtime-tools',
+      'webpack-bundler-runtime',
+      'runtime',
+      'runtime-core',
+      'sdk',
+      'error-codes',
+    ]) {
+      const source = path.resolve(__dirname, '../../../../', pkg);
+      const target = path.join(context, 'node_modules/@module-federation', pkg);
+      fs.mkdirSync(target, { recursive: true });
+      fs.copyFileSync(
+        path.join(source, 'package.json'),
+        path.join(target, 'package.json'),
+      );
+      fs.cpSync(path.join(source, 'dist'), path.join(target, 'dist'), {
+        recursive: true,
+      });
+    }
+    const file = path.join(
+      context,
+      'node_modules/@module-federation/webpack-bundler-runtime/package.json',
+    );
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+    data.exports['./compose'] = { require: './dist/compose.cjs' };
+    fs.writeFileSync(file, JSON.stringify(data));
+    const implementation = path.join(
+      context,
+      'node_modules/@module-federation/runtime-tools',
+    );
+    const off = await compile(context, {
+      plugins: [host(undefined, { implementation })],
+    });
+    const on = await compile(context, {
+      plugins: [host({ composedRuntime: true }, { implementation })],
+    });
+    expect(messages(on.stats.errors)).toEqual([]);
+    expect(messages(on.stats.warnings)).toEqual([
+      expect.stringContaining('cannot resolve "./compose" for ESM composition'),
+    ]);
+    expect(moduleNames(on.stats).some((name) => COMPOSE.test(name))).toBe(
+      false,
+    );
+    expect(on.output).toEqual(off.output);
+    expect(on.output['main.js']).not.toContain(
+      'typeof FEDERATION_OPTIMIZE_NO_SHARED',
+    );
+  });
+
   it('isolates runtime aliases in a real child compiler without mutating parent resolver options', async () => {
     const context = fixture({ 'index.js': 'export default 1;' });
     let parentResolve;
@@ -219,6 +272,59 @@ describe('FederationCompositionPlugin', () => {
     expect(child.options.resolve.alias['@module-federation/runtime$']).toEqual(
       expect.any(String),
     );
+  });
+
+  it('preserves array aliases and parent resolver options in a real child compilation', async () => {
+    const context = fixture({
+      'index.js': 'import value from "child-only"; export default value;',
+      'value.js': 'export default 42;',
+    });
+    const configuredAlias = [
+      {
+        name: 'child-only',
+        alias: path.join(context, 'value.js'),
+        onlyModule: true,
+      },
+    ];
+    let parentResolve;
+    let parentAlias;
+    let child;
+    const { stats } = await compile(context, {
+      resolve: { alias: configuredAlias },
+      output: {
+        path: path.join(context, 'array-dist'),
+        library: { type: 'commonjs2' },
+      },
+      plugins: [
+        {
+          apply(compiler) {
+            compiler.hooks.thisCompilation.tap(
+              'ChildArrayAliasProof',
+              (compilation) => {
+                parentResolve = compiler.options.resolve;
+                parentAlias = parentResolve.alias;
+                child = compilation.createChildCompiler('array-child', {});
+                new FederationRuntimePlugin().setRuntimeAlias(child);
+              },
+            );
+          },
+        },
+        host({ composedRuntime: true }),
+      ],
+    });
+    expect(messages(stats.errors)).toEqual([]);
+    expect(Array.isArray(parentAlias)).toBe(true);
+    expect(parentResolve.alias).toBe(parentAlias);
+    expect(child.options.resolve).not.toBe(parentResolve);
+    expect(Array.isArray(child.options.resolve.alias)).toBe(true);
+    expect(child.options.resolve.alias).not.toBe(parentAlias);
+    expect(child.options.resolve.alias[0]).toEqual(configuredAlias[0]);
+    expect(child.options.resolve.alias[0]).not.toBe(parentAlias[0]);
+    expect(parentAlias[0]).toEqual(configuredAlias[0]);
+    expect(
+      createRequire(__filename)(path.join(context, 'array-dist/main.js'))
+        .default,
+    ).toBe(42);
   });
 
   it('selects legacy when a function external names runtime-core', async () => {
