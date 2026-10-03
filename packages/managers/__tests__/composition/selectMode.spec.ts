@@ -34,6 +34,34 @@ describe('selectMode', () => {
     );
   });
 
+  it.each([
+    [
+      'an invalid ESM target',
+      { import: '../outside.js', require: './dist/compose.cjs' },
+      /Invalid.*target|Export should|not exported|Can't resolve/,
+    ],
+    [
+      'a missing declared ESM file',
+      { import: './dist/missing.js', require: './dist/compose.cjs' },
+      /Can't resolve/,
+    ],
+  ])(
+    'reports %s instead of silently selecting the full runtime',
+    async (_, entry, error) => {
+      const root = composableFamily(tempDir());
+      const file = path.join(
+        packageDir(root, '@module-federation/webpack-bundler-runtime'),
+        'package.json',
+      );
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      data.exports['./compose'] = entry;
+      fs.writeFileSync(file, JSON.stringify(data));
+      await expect(selectMode(resolveRuntimeFamily(root), {})).rejects.toThrow(
+        error,
+      );
+    },
+  );
+
   it('selects legacy for the older runtime-tools in the pnpm store', async () => {
     const store = path.resolve(__dirname, '../../../../node_modules/.pnpm');
     const [older] = fs

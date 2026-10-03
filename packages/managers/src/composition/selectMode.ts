@@ -62,11 +62,26 @@ function familyProblem({ anchor, members }: RuntimeFamily): string | undefined {
     if (missing) return `${pkg} at ${member.root} does not export "${missing}"`;
     for (const key of RUNTIME_FAMILY[pkg]) {
       try {
-        if (!resolveCompositionEntry(member.root, `${pkg}/${key.slice(2)}`)) {
+        const resolved = resolveCompositionEntry(
+          member.root,
+          `${pkg}/${key.slice(2)}`,
+        );
+        if (typeof resolved !== 'string') {
+          throw new Error('the export did not resolve to a file');
+        }
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message.startsWith(`"${key}" is not exported under `)
+        ) {
           return `${pkg} at ${member.root} cannot resolve "${key}" for ESM composition`;
         }
-      } catch {
-        return `${pkg} at ${member.root} cannot resolve "${key}" for ESM composition`;
+        throw Object.assign(
+          new Error(
+            `${pkg} at ${member.root} failed to resolve "${key}" for ESM composition: ${error instanceof Error ? error.message : String(error)}`,
+          ),
+          { cause: error },
+        );
       }
     }
     from = member.root;
