@@ -430,15 +430,18 @@ class FederationRuntimePlugin {
 
   getRuntimeAlias(compiler: Compiler) {
     const { implementation } = this.options || {};
-    const alias: any = compiler.options.resolve.alias || {};
+    const alias = compiler.options.resolve.alias;
 
     const resolvedPaths = resolveRuntimePaths(implementation);
 
     this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
     this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
 
-    if (alias['@module-federation/runtime$']) {
-      this.runtimePath = alias['@module-federation/runtime$'];
+    const configuredRuntime = Array.isArray(alias)
+      ? alias.find(({ name }) => name === '@module-federation/runtime')?.alias
+      : alias?.['@module-federation/runtime$'];
+    if (typeof configuredRuntime === 'string') {
+      this.runtimePath = configuredRuntime;
       return this.runtimePath;
     }
 
@@ -449,17 +452,30 @@ class FederationRuntimePlugin {
 
   setRuntimeAlias(compiler: Compiler) {
     const { implementation } = this.options || {};
-    const alias: any = { ...compiler.options.resolve.alias };
+    const configuredAlias = compiler.options.resolve.alias;
     const runtimePath = this.getRuntimeAlias(compiler);
-    alias['@module-federation/runtime$'] =
-      alias['@module-federation/runtime$'] || runtimePath;
-    alias['@module-federation/runtime-tools$'] =
-      alias['@module-federation/runtime-tools$'] ||
-      implementation ||
-      this.runtimeToolsPath;
-
-    // Set up aliases for the federation runtime and tools
-    // This ensures that the correct versions are used throughout the project
+    const runtimeToolsPath = implementation || this.runtimeToolsPath;
+    let alias: NonNullable<Compiler['options']['resolve']['alias']>;
+    if (Array.isArray(configuredAlias)) {
+      alias = configuredAlias.map((entry) => ({ ...entry }));
+      for (const [name, target] of [
+        ['@module-federation/runtime', runtimePath],
+        ['@module-federation/runtime-tools', runtimeToolsPath],
+      ]) {
+        if (!alias.some((entry) => entry.name === name)) {
+          alias.push({ name, alias: target, onlyModule: true });
+        }
+      }
+    } else {
+      alias = {
+        ...configuredAlias,
+        '@module-federation/runtime$':
+          configuredAlias?.['@module-federation/runtime$'] ?? runtimePath,
+        '@module-federation/runtime-tools$':
+          configuredAlias?.['@module-federation/runtime-tools$'] ??
+          runtimeToolsPath,
+      };
+    }
     compiler.options.resolve = { ...compiler.options.resolve, alias };
   }
 
