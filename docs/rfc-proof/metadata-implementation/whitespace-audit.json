@@ -1,0 +1,21 @@
+{
+  "blanketEvidenceCheck": {
+    "command": "git show --format= --check ae2121a60902cdf4a06d1c630cf11ae12c86c1fa",
+    "exitCode": 2,
+    "outcome": "raw patch/log whitespace flagged",
+    "flaggedPaths": [
+      "docs/rfc-proof/metadata-implementation/isolated-runtime-image.patch",
+      "docs/rfc-proof/metadata-implementation/logs/metadata-evidence-format-check-wrong-invocation.log",
+      "docs/rfc-proof/metadata-implementation/logs/metadata-evidence-format-write-wrong-invocation.log",
+      "docs/rfc-proof/metadata-implementation/logs/metadata-stack5141-build.log",
+      "docs/rfc-proof/metadata-implementation/logs/metadata-stack5142-build.log",
+      "docs/rfc-proof/metadata-implementation/major-runtime-image.patch",
+      "docs/rfc-proof/metadata-implementation/minor-runtime-image.patch"
+    ]
+  },
+  "scopedEvidenceCheck": {
+    "command": "git show --format= --check HEAD -- Markdown JSON mjs mts cts cjs paths",
+    "exitCode": 0
+  },
+  "sourceChecks": "PASS"
+}

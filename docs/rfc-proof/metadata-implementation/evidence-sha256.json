@@ -1,8 +1,8 @@
 [
   {
     "path": "README.md",
-    "bytes": 11635,
-    "sha256": "fa9766f93d8ac722061043dbea1f388d2c70cbded67f2ddf587868f652336cc6"
+    "bytes": 12064,
+    "sha256": "76afd74237eb3bbb12634dcae354ea8797a349c03bb428a74f499689d9f76b22"
   },
   {
     "path": "compiled/stack5141/1.5/abi.log",
@@ -1425,6 +1425,11 @@
     "sha256": "d551874e8f038592bdfc9715a56c9fa056e5d84eff9f236a39cd7d737ffd96e3"
   },
   {
+    "path": "logs/metadata-evidence-readme-final-format.log",
+    "bytes": 66,
+    "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+  },
+  {
     "path": "logs/metadata-major-counter-format.log",
     "bytes": 87,
     "sha256": "e8af3a405f44378bba802d3377d2213300ffef84eeff6dd81bf6e0a91858ebaa"
@@ -1773,5 +1778,10 @@
     "path": "source-manifest.json",
     "bytes": 2379,
     "sha256": "29a6442c539def8dc768bfdf40f376d27de89f3b96f4e5eb5652200b508bb29e"
+  },
+  {
+    "path": "whitespace-audit.json",
+    "bytes": 983,
+    "sha256": "04f4c9a90cabfdc9e056c89f6c3189eab80ac0d2241f8b4f0bcfb53abdabbe27"
   }
 ]
