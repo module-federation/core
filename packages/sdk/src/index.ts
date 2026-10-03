@@ -18,6 +18,6 @@ export {
 export type { Logger, InfrastructureLogger } from './logger';
 export * from './env';
 export * from './dom';
-export * from './node';
+export { createScriptNode, loadScriptNode } from '#mf/platform-loader';
 export * from './normalizeOptions';
 export { createModuleFederationConfig } from './createModuleFederationConfig';

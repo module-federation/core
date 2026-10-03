@@ -37,4 +37,9 @@ module.exports = {
   rootDir: __dirname,
   testMatch: ['<rootDir>__tests__/**/**.spec.[jt]s?(x)'],
   testPathIgnorePatterns: ['/node_modules/'],
+  moduleNameMapper: {
+    '^#mf/env$': '<rootDir>/src/selectors/env/legacy.ts',
+    '^#mf/platform-loader$':
+      '<rootDir>/src/selectors/platform-loader/legacy.ts',
+  },
 };

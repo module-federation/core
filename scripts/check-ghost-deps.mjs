@@ -93,6 +93,7 @@ const VIRTUAL_EXACT = new Set([
 function shouldSkip(spec) {
   if (!spec) return true;
   if (spec.startsWith('.') || spec.startsWith('/')) return true; // relative/absolute paths
+  if (spec.startsWith('#')) return true;
   if (spec.startsWith('node:')) return true; // node: protocol
   // Template string interpolation leftovers (e.g. `${foo}/bar`)
   if (spec.includes('${')) return true;

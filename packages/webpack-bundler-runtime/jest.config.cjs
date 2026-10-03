@@ -37,4 +37,10 @@ module.exports = {
   rootDir: __dirname,
   testMatch: ['<rootDir>__tests__/**/**.spec.[jt]s?(x)'],
   testPathIgnorePatterns: ['/node_modules/'],
+  moduleNameMapper: {
+    '^#mf/container-entry$':
+      '<rootDir>/src/selectors/container-entry/legacy.ts',
+    '^#mf/remotes$': '<rootDir>/src/selectors/remotes/legacy.ts',
+    '^#mf/shared-runtime$': '<rootDir>/src/selectors/shared-runtime/legacy.ts',
+  },
 };

@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "declaration": true,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "#mf/container-entry": ["./src/selectors/container-entry/legacy.ts"],
+      "#mf/remotes": ["./src/selectors/remotes/legacy.ts"],
+      "#mf/shared-runtime": ["./src/selectors/shared-runtime/legacy.ts"],
+      "*": ["./*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]

@@ -3,7 +3,12 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "declaration": true,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "#mf/env": ["./src/selectors/env/legacy.ts"],
+      "#mf/platform-loader": ["./src/selectors/platform-loader/legacy.ts"],
+      "*": ["./*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
