@@ -107,6 +107,14 @@ describe('selectMode', () => {
     const cases: [string, ModeInputs['externals']][] = [
       ['a string', RUNTIME],
       ['an object key', { [RUNTIME]: 'mf' }],
+      [
+        'a composition subpath object key',
+        { '@module-federation/runtime-core/kernel': 'kernel' },
+      ],
+      [
+        'a composition subpath regexp',
+        /^@module-federation\/runtime-core\/kernel$/,
+      ],
       ['a RegExp', /^@module-federation\/runtime-core$/],
       ['an array item', ['react', { '@module-federation/sdk': 'sdk' }]],
       [
