@@ -9,6 +9,9 @@ export function createMockCompiler(): Compiler {
       mode: 'development',
     },
     hooks: {
+      afterResolvers: {
+        tap: rs.fn(),
+      },
       thisCompilation: {
         tap: rs.fn(),
       },

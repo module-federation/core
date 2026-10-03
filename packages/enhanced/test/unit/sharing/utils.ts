@@ -283,6 +283,7 @@ export const createMockCompiler = () => {
   // Define the compiler with a more flexible type to allow property addition
   const compiler: any = {
     hooks: {
+      afterResolvers: createTapableHook('afterResolvers'),
       thisCompilation: createTapableHook('thisCompilation'),
       compilation: createTapableHook('compilation'),
       finishMake: createTapableHook('finishMake'),

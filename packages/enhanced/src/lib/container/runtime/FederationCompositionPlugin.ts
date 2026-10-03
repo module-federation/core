@@ -29,6 +29,8 @@ const WebpackError = require(
 
 const PLUGIN_NAME = 'FederationCompositionPlugin';
 const SLOT = Symbol.for('module-federation.composition/1');
+const REQUESTED = Symbol.for('module-federation.composition/requested/1');
+const validatingCompilers = new WeakSet<Compiler>();
 
 export interface ComposedEntry {
   path: string;
@@ -49,7 +51,8 @@ interface RuntimeRequest {
 
 type CompositionParticipant =
   | Extract<Participant, { kind: 'needs' }>
-  | (Extract<Participant, { kind: 'options' }> & RuntimeRequest);
+  | (Extract<Participant, { kind: 'options' }> &
+      RuntimeRequest & { composedRuntime: boolean });
 
 export interface CompositionSlot {
   version: 1;
@@ -59,7 +62,7 @@ export interface CompositionSlot {
   entry?: ComposedEntry;
 }
 
-type SlotCompiler = Compiler & { [SLOT]?: unknown };
+type SlotCompiler = Compiler & { [SLOT]?: unknown; [REQUESTED]?: boolean };
 
 export const COVERED_BY_OPTIONS = Symbol('covered by ModuleFederationPlugin');
 export type CoveredByOptions = typeof COVERED_BY_OPTIONS;
@@ -104,6 +107,7 @@ function isParticipant(value: unknown): value is CompositionParticipant {
     value.kind === 'needs' ||
     (value.kind === 'options' &&
       isRuntimeRequest(value) &&
+      typeof value.composedRuntime === 'boolean' &&
       isRecord(value.disable) &&
       Object.entries(value.disable).every(
         ([key, flag]) =>
@@ -128,7 +132,40 @@ function isCompositionSlot(value: unknown): value is CompositionSlot {
   );
 }
 
+function requestsComposition(options: unknown): boolean {
+  return (
+    isRecord(options) &&
+    isRecord(options.experiments) &&
+    options.experiments.composedRuntime === true
+  );
+}
+
+function compositionRequested(compiler: Compiler): boolean {
+  if ((compiler as SlotCompiler)[REQUESTED]) return true;
+  const value = (compiler as SlotCompiler)[SLOT];
+  // An older copy applied through a wrapper cannot set our requested marker,
+  // but its planner retains the options that explicitly enabled composition.
+  if (
+    isRecord(value) &&
+    isRecord(value.planner) &&
+    requestsComposition(value.planner._options)
+  )
+    return true;
+  return (compiler.options?.plugins ?? []).some((plugin) => {
+    if (
+      !isRecord(plugin) ||
+      typeof plugin.constructor !== 'function' ||
+      plugin.constructor.name !== 'ModuleFederationPlugin' ||
+      !isRecord(plugin._options)
+    ) {
+      return false;
+    }
+    return requestsComposition(plugin._options);
+  });
+}
+
 export const composedEntryOf = (compiler: Compiler) =>
+  !compositionRequested(compiler) ||
   (compiler as SlotCompiler)[SLOT] === undefined
     ? undefined
     : slotOf(compiler).entry;
@@ -139,6 +176,7 @@ class FederationCompositionPlugin {
   private _plan?: CompositionPlan;
   private _selecting?: Promise<Outcome>;
   private _outcome?: Outcome;
+  private _legacyReason?: string;
 
   constructor(
     private readonly _options: Options,
@@ -153,6 +191,30 @@ class FederationCompositionPlugin {
     compiler: Compiler,
     participant: CompositionParticipant,
   ): void {
+    if (participant.kind === 'options' && participant.composedRuntime) {
+      (compiler as SlotCompiler)[REQUESTED] = true;
+    }
+    if (!validatingCompilers.has(compiler)) {
+      validatingCompilers.add(compiler);
+      compiler.hooks.afterResolvers.tap(PLUGIN_NAME, () => {
+        if (compositionRequested(compiler)) slotOf(compiler);
+      });
+    }
+    // Collect early participants for a later opt-in without imposing a new
+    // protocol on an opted-out build's slot from an older installed copy.
+    if (!compositionRequested(compiler)) {
+      const value = (compiler as SlotCompiler)[SLOT];
+      if (value === undefined) {
+        slotOf(compiler).participants.push(participant);
+      } else if (
+        isRecord(value) &&
+        Array.isArray(value.participants) &&
+        value.sealed === false
+      ) {
+        value.participants.push(participant);
+      }
+      return;
+    }
     const slot = slotOf(compiler);
     if (slot.sealed) {
       throw new Error(
@@ -177,12 +239,16 @@ class FederationCompositionPlugin {
           'Invalid module-federation.composition/1 compiler slot: the slot was replaced after the planner registered.',
         );
       }
-      checkRuntimeRequests(
-        slot.participants.filter(
-          (participant) => participant.kind === 'options',
-        ),
+      const options = slot.participants.filter(
+        (participant) => participant.kind === 'options',
       );
       slot.sealed = true;
+      if (options.some((participant) => !participant.composedRuntime)) {
+        this._legacyReason =
+          'another federation options participant did not enable composedRuntime';
+        return;
+      }
+      checkRuntimeRequests(options);
       this._plan = planComposition(
         slot.participants,
         this._options.experiments?.optimization?.target ?? 'universal',
@@ -201,6 +267,7 @@ class FederationCompositionPlugin {
     compiler: Compiler,
     slot: CompositionSlot,
   ): Promise<Outcome> {
+    if (this._legacyReason) return { legacyReason: this._legacyReason };
     const plan = this._plan;
     if (!plan) {
       return {

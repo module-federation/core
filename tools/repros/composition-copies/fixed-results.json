@@ -1,10 +1,16 @@
 {
-  "implementationSha": "c807938a8e7069b72aece5fda371ae0817c7ef28",
+  "implementationParentSha": "1af66be6397307d6d78c1a7587de3c2c650b738f",
+  "implementationSourceSha256": "c965d21d91f206cb981e06901834c2fdf5ae77721e0ca4fcef6b24308eafa882",
+  "sourceHashFilesInOrder": [
+    "packages/enhanced/src/lib/container/runtime/FederationCompositionPlugin.ts",
+    "packages/enhanced/src/lib/container/ModuleFederationPlugin.ts"
+  ],
   "node": "24.15.0",
   "pnpm": "10.28.0",
   "distinctInstalledEnhancedCopies": true,
+  "legacyCompilerSourceSha": "84cee419c5c7dc2bb87d1a92cd7fb8e15e409aec",
   "command": "node tools/repros/composition-copies/run.cjs",
-  "note": "Proof-directory prefixes in diagnostic paths normalized to <proof>. Baseline runtime instance identity was not executed in the original capture.",
+  "note": "Artifact path prefixes normalized. Source SHA256 hashes the two listed UTF-8 files joined by one newline. Early remotes graph fixtures are compiled but their HTTP imports are not executed.",
   "cases": [
     {
       "case": "control-same-family-ab",
@@ -16,9 +22,11 @@
         "nonnull": true,
         "same": true
       },
+      "selectedAdapters": [],
       "selectedFamily": ["/family-a/"],
       "composeModuleCount": 1,
-      "kernelModuleCount": 1
+      "kernelModuleCount": 1,
+      "remotesAdapterModuleCount": 0
     },
     {
       "case": "control-same-family-ba",
@@ -30,9 +38,11 @@
         "nonnull": true,
         "same": true
       },
+      "selectedAdapters": [],
       "selectedFamily": ["/family-a/"],
       "composeModuleCount": 1,
-      "kernelModuleCount": 1
+      "kernelModuleCount": 1,
+      "remotesAdapterModuleCount": 0
     },
     {
       "case": "conflict-family-ab",
@@ -53,6 +63,128 @@
       "case": "conflict-target-node-web",
       "expected": "reject incompatible compiler composition",
       "error": "Federation composition participants request incompatible targets \"node\" and \"web\". Use one optimization.target per compiler."
+    },
+    {
+      "case": "early-needs-forward",
+      "expected": "composed remotes adapter retained across a wrapped opt-in",
+      "errors": [],
+      "warnings": [],
+      "selectedAdapters": ["remotes", "share-scope"],
+      "selectedFamily": [],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1,
+      "remotesAdapterModuleCount": 1
+    },
+    {
+      "case": "early-needs-reverse",
+      "expected": "composed remotes adapter retained across a wrapped opt-in",
+      "errors": [],
+      "warnings": [],
+      "selectedAdapters": ["remotes", "share-scope"],
+      "selectedFamily": [],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1,
+      "remotesAdapterModuleCount": 1
+    },
+    {
+      "case": "early-needs-afterPlugins",
+      "expected": "composed remotes adapter retained across a wrapped opt-in",
+      "errors": [],
+      "warnings": [],
+      "selectedAdapters": ["remotes", "share-scope"],
+      "selectedFamily": [],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1,
+      "remotesAdapterModuleCount": 1
+    },
+    {
+      "case": "legacy-old-old",
+      "expected": "full runtime without composition or warnings",
+      "errors": [],
+      "warnings": [],
+      "executedIdentity": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      }
+    },
+    {
+      "case": "legacy-old-new",
+      "expected": "full runtime without composition or warnings",
+      "errors": [],
+      "warnings": [],
+      "executedIdentity": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      }
+    },
+    {
+      "case": "legacy-new-old",
+      "expected": "full runtime without composition or warnings",
+      "errors": [],
+      "warnings": [],
+      "executedIdentity": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      }
+    },
+    {
+      "case": "mixed-current-optout-false",
+      "expected": "full runtime with an explicit mixed-mode fallback warning",
+      "errors": [],
+      "warnings": [
+        "experiments.composedRuntime is set, but this build uses the full federation runtime because another federation options participant did not enable composedRuntime."
+      ],
+      "executedIdentity": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      }
+    },
+    {
+      "case": "invalid-slot-mixed-protocol-false",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-mixed-protocol-mode-false-false",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-mixed-protocol-mode-true-false",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "mixed-current-optout-true",
+      "expected": "full runtime with an explicit mixed-mode fallback warning",
+      "errors": [],
+      "warnings": [
+        "experiments.composedRuntime is set, but this build uses the full federation runtime because another federation options participant did not enable composedRuntime."
+      ],
+      "executedIdentity": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      }
+    },
+    {
+      "case": "invalid-slot-mixed-protocol-true",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-mixed-protocol-mode-false-true",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-mixed-protocol-mode-true-true",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
     },
     {
       "case": "invalid-slot-null",
@@ -78,6 +210,26 @@
       "case": "invalid-slot-invalid-version",
       "expected": "reject invalid compiler composition slot",
       "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-mutation-old-first",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-mutation-old-last",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-mutation-malformed-needs",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-mutation-replacement",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: the slot was replaced after the planner registered."
     }
   ]
 }
