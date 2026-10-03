@@ -19,6 +19,21 @@ describe('selectMode', () => {
     expect(await selectMode(composable(), {})).toEqual({ mode: 'composed' });
   });
 
+  it('selects legacy when a declared composition export only supports require', async () => {
+    const root = composableFamily(tempDir());
+    const file = path.join(
+      packageDir(root, '@module-federation/webpack-bundler-runtime'),
+      'package.json',
+    );
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+    data.exports['./compose'] = { require: './dist/compose.cjs' };
+    fs.writeFileSync(file, JSON.stringify(data));
+
+    expect(await legacyReason({}, resolveRuntimeFamily(root))).toMatch(
+      /compose.*ESM/,
+    );
+  });
+
   it('selects legacy for the older runtime-tools in the pnpm store', async () => {
     const store = path.resolve(__dirname, '../../../../node_modules/.pnpm');
     const [older] = fs
