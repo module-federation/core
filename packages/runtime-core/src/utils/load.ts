@@ -1,7 +1,11 @@
 import { composeKeyWithSeparator } from '@module-federation/sdk/core';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import type { ModuleFederation } from '../index';
-import { globalLoading, getRemoteEntryExports } from '../global';
+import {
+  globalLoading,
+  getRemoteEntryExports,
+  getEntryLoadingIdentity,
+} from '../global';
 import {
   Remote,
   RemoteEntryExports,
@@ -45,9 +49,45 @@ export function handleRemoteEntryLoaded(
   return entryExports;
 }
 
-export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
+export function getRemoteEntryUniqueKey(
+  remoteInfo: RemoteInfo,
+  origin?: ModuleFederation,
+  getEntryUrl?: (url: string) => string,
+): string {
   const { entry, name } = remoteInfo;
-  return composeKeyWithSeparator(name, entry);
+  const key = composeKeyWithSeparator(name, entry);
+  if (!origin) {
+    return key;
+  }
+
+  // Reusing a platform object trusts its provider to supply compatible loads.
+  // It does not establish equivalence between different platform objects.
+  // Custom loading callbacks can read host-specific state, so their entries
+  // are host-scoped even when callbacks are identical. Distinct evaluators can
+  // still load their own entry; identity differences never reject a load.
+  // Observational hooks are excluded from this boundary.
+  const loadingHooks = [
+    origin.remoteHandler.hooks.lifecycle.loadEntry,
+    origin.loaderHook.lifecycle.createScript,
+    origin.loaderHook.lifecycle.fetch,
+    origin.loaderHook.lifecycle.loadEntryError,
+  ];
+  const hookIdentities = loadingHooks.map((hook) =>
+    [...hook.listeners].map(getEntryLoadingIdentity).join(','),
+  );
+  const customLoading = loadingHooks.some((hook) => hook.listeners.size > 0);
+  return composeKeyWithSeparator(
+    key,
+    JSON.stringify([
+      remoteInfo.type,
+      remoteInfo.entryGlobalName,
+      getEntryLoadingIdentity(origin.platform),
+      getEntryLoadingIdentity(origin.platform.loadEntry),
+      getEntryUrl ? getEntryLoadingIdentity(getEntryUrl) : null,
+      ...(customLoading ? [getEntryLoadingIdentity(origin)] : []),
+      ...hookIdentities,
+    ]),
+  );
 }
 
 export async function getRemoteEntry(params: {
@@ -66,7 +106,7 @@ export async function getRemoteEntry(params: {
     resourceContext,
     _inErrorHandling = false,
   } = params;
-  const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+  const uniqueKey = getRemoteEntryUniqueKey(remoteInfo, origin, getEntryUrl);
 
   if (remoteEntryExports) {
     await origin.loaderHook.lifecycle.afterLoadEntry.emit({
