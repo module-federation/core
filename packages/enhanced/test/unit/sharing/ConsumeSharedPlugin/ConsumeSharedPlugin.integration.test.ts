@@ -135,6 +135,7 @@ describe('ConsumeSharedPlugin integration scenarios', () => {
 
     const compiler = {
       hooks: {
+        afterResolvers: new SyncHook<[]>(),
         thisCompilation: thisCompilationHook,
         compilation: new SyncHook<[unknown, unknown]>(),
         finishMake: finishMakeHook,

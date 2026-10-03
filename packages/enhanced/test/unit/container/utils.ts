@@ -112,6 +112,7 @@ export const createMockCompiler = (): any => {
 
   const compiler = {
     hooks: {
+      afterResolvers: createTapableMock('afterResolvers'),
       thisCompilation: createTapableMock('thisCompilation'),
       compilation: createTapableMock('compilation'),
       finishMake: createTapableMock('finishMake'),

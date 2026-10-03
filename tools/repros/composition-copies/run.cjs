@@ -14,6 +14,19 @@ const req = createRequire(path.join(stage, 'package.json'));
 const webpack = req('webpack');
 const A = req('enhanced-a/webpack').ModuleFederationPlugin;
 const B = req('enhanced-b/webpack').ModuleFederationPlugin;
+const Legacy = req('enhanced-legacy/webpack').ModuleFederationPlugin;
+const RefA = req(
+  path.join(
+    path.dirname(req.resolve('enhanced-a/webpack')),
+    'lib/container/ContainerReferencePlugin.js',
+  ),
+).default;
+const RefB = req(
+  path.join(
+    path.dirname(req.resolve('enhanced-b/webpack')),
+    'lib/container/ContainerReferencePlugin.js',
+  ),
+).default;
 const slot = Symbol.for('module-federation.composition/1');
 const anchor = (name) =>
   path.join(
@@ -21,31 +34,55 @@ const anchor = (name) =>
     `family-${name}/node_modules/@module-federation/runtime-tools`,
   );
 const results = [];
-async function build(label, specs, poison, mutation) {
+async function build(label, specs, poison, mutation, topology) {
   const context = path.join(stage, label);
   fs.mkdirSync(context, { recursive: true });
   fs.writeFileSync(
     path.join(context, 'index.js'),
-    'globalThis.__compositionProofInstances.push(__webpack_require__.federation.instance); export default 1;',
+    topology
+      ? 'import("remote/Button");'
+      : 'globalThis.__compositionProofInstances.push(__webpack_require__.federation.instance); export default 1;',
   );
   fs.writeFileSync(
     path.join(context, 'second.js'),
     'globalThis.__compositionProofInstances.push(__webpack_require__.federation.instance);',
   );
   let selected;
-  const plugins = specs.map(
-    ({ Ctor, family, target }, i) =>
+  let plugins = specs.map(
+    ({ Ctor, family, target, composedRuntime = true }, i) =>
       new Ctor({
         name: `host_${i}`,
         dts: false,
         manifest: false,
         implementation: anchor(family),
         experiments: {
-          composedRuntime: true,
+          composedRuntime,
           ...(target ? { optimization: { target } } : {}),
         },
       }),
   );
+  if (topology) {
+    const standalone = new RefA({
+      remoteType: 'script',
+      remotes: { remote: 'remote@http://localhost:3001/remoteEntry.js' },
+    });
+    const wrapped = {
+      apply(compiler) {
+        const apply = () =>
+          new B({
+            name: 'wrapped_host',
+            dts: false,
+            manifest: false,
+            experiments: { composedRuntime: true },
+          }).apply(compiler);
+        if (topology === 'afterPlugins')
+          compiler.hooks.afterPlugins.tap('WrappedOptIn', apply);
+        else apply();
+      },
+    };
+    plugins =
+      topology === 'reverse' ? [wrapped, standalone] : [standalone, wrapped];
+  }
   if (poison !== undefined)
     plugins.unshift({
       apply(c) {
@@ -122,11 +159,17 @@ async function build(label, specs, poison, mutation) {
   });
   const r = {
     label,
-    expected: label.startsWith('conflict')
-      ? 'reject incompatible compiler composition'
-      : label.startsWith('invalid')
-        ? 'reject invalid compiler composition slot'
-        : 'successful compatible composition',
+    expected: topology
+      ? 'composed remotes adapter retained across a wrapped opt-in'
+      : label.startsWith('legacy')
+        ? 'full runtime without composition or warnings'
+        : label.startsWith('mixed-current-optout')
+          ? 'full runtime with an explicit mixed-mode fallback warning'
+          : label.startsWith('conflict')
+            ? 'reject incompatible compiler composition'
+            : label.startsWith('invalid')
+              ? 'reject invalid compiler composition slot'
+              : 'successful compatible composition',
     ...result,
   };
   if (r.stats) {
@@ -135,7 +178,7 @@ async function build(label, specs, poison, mutation) {
     r.modules = r.stats.modules.map((m) => m.nameForCondition).filter(Boolean);
     delete r.stats;
   }
-  if (!r.error && r.errors?.length === 0) {
+  if (!topology && !r.error && r.errors?.length === 0) {
     globalThis.__compositionProofInstances = [];
     try {
       require(path.join(context, 'dist/main.js'));
@@ -160,9 +203,10 @@ async function build(label, specs, poison, mutation) {
       warnings: r.warnings,
       executedIdentity: r.executedIdentity,
       executionError: r.executionError,
+      selectedAdapters: r.selected?.adapters,
       selectedFamily: r.selected?.source.match(/family-[ab]/g),
       modules: r.modules?.filter((x) =>
-        /family-[ab].*(compose|platform)/.test(x),
+        /family-[ab].*(compose|platform)|adapters[\\/]remotes\.js$/.test(x),
       ),
     }),
   );
@@ -199,6 +243,47 @@ async function build(label, specs, poison, mutation) {
     { Ctor: B, family: 'a', target: 'node' },
     { Ctor: A, family: 'a', target: 'web' },
   ]);
+  assert.notEqual(RefA, RefB);
+  for (const topology of ['forward', 'reverse', 'afterPlugins']) {
+    await build(`early-needs-${topology}`, [], undefined, undefined, topology);
+  }
+  await build('legacy-old-old', [
+    { Ctor: Legacy, family: 'a', composedRuntime: false },
+    { Ctor: Legacy, family: 'a', composedRuntime: false },
+  ]);
+  await build('legacy-old-new', [
+    { Ctor: Legacy, family: 'a', composedRuntime: false },
+    { Ctor: A, family: 'a', composedRuntime: false },
+  ]);
+  await build('legacy-new-old', [
+    { Ctor: A, family: 'a', composedRuntime: false },
+    { Ctor: Legacy, family: 'a', composedRuntime: false },
+  ]);
+  for (const reverse of [false, true]) {
+    const specs = [
+      { Ctor: A, family: 'a', composedRuntime: true },
+      { Ctor: B, family: 'a', composedRuntime: false },
+    ];
+    if (reverse) specs.reverse();
+    await build(`mixed-current-optout-${reverse}`, specs);
+    const mixedProtocol = [
+      { Ctor: A, family: 'a', composedRuntime: true },
+      { Ctor: Legacy, family: 'a', composedRuntime: true },
+    ];
+    if (reverse) mixedProtocol.reverse();
+    await build(`invalid-slot-mixed-protocol-${reverse}`, mixedProtocol);
+    for (const legacyOptIn of [false, true]) {
+      const mixedModes = [
+        { Ctor: A, family: 'a', composedRuntime: !legacyOptIn },
+        { Ctor: Legacy, family: 'a', composedRuntime: legacyOptIn },
+      ];
+      if (reverse) mixedModes.reverse();
+      await build(
+        `invalid-slot-mixed-protocol-mode-${legacyOptIn}-${reverse}`,
+        mixedModes,
+      );
+    }
+  }
   for (const [kind, value] of [
     ['null', null],
     ['primitive', true],
@@ -251,6 +336,52 @@ async function build(label, specs, poison, mutation) {
         assert.ok(
           !result.modules.some((m) => m.includes('/family-b/node_modules/')),
         );
+      } else if (result.label.startsWith('early-needs')) {
+        assert.equal(result.error, undefined);
+        assert.deepEqual(result.errors, []);
+        assert.deepEqual(result.warnings, []);
+        assert.ok(result.selected.adapters.includes('remotes'));
+        assert.ok(result.selected.adapters.includes('share-scope'));
+        assert.match(result.selected.source, /adapters[\\/]remotes\.js/);
+        assert.equal(
+          result.modules.filter((m) => /adapters[\\/]remotes\.js$/.test(m))
+            .length,
+          1,
+        );
+      } else if (result.label.startsWith('legacy')) {
+        assert.equal(result.error, undefined);
+        assert.deepEqual(result.errors, []);
+        assert.deepEqual(result.warnings, []);
+        assert.equal(result.selected, undefined);
+        assert.ok(
+          !result.modules.some((m) =>
+            /webpack-bundler-runtime[\\/]dist[\\/]compose\.js$/.test(m),
+          ),
+        );
+        assert.deepEqual(result.executedIdentity, {
+          count: 2,
+          nonnull: true,
+          same: true,
+        });
+      } else if (result.label.startsWith('mixed-current-optout')) {
+        assert.equal(result.error, undefined);
+        assert.deepEqual(result.errors, []);
+        assert.equal(result.warnings.length, 1);
+        assert.match(
+          result.warnings[0],
+          /another federation options participant did not enable composedRuntime/,
+        );
+        assert.equal(result.selected, undefined);
+        assert.ok(
+          !result.modules.some((m) =>
+            /webpack-bundler-runtime[\\/]dist[\\/]compose\.js$/.test(m),
+          ),
+        );
+        assert.deepEqual(result.executedIdentity, {
+          count: 2,
+          nonnull: true,
+          same: true,
+        });
       } else if (result.label.startsWith('conflict-family'))
         assert.match(result.error, /incompatible runtime families/);
       else if (result.label.startsWith('conflict-target'))

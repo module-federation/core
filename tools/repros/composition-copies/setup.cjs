@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const cp = require('node:child_process');
+const { createRequire } = require('node:module');
 function setup(stage) {
   if (process.versions.node.split('.')[0] !== '24')
     throw new Error('Use Node 24, matching AGENTS.md.');
@@ -81,6 +82,50 @@ function setup(stage) {
     { cwd: stage, stdio: 'inherit' },
   );
   consumer.dependencies['enhanced-b'] = 'file:./enhanced-b.tgz';
+  fs.writeFileSync(path.join(stage, 'package.json'), JSON.stringify(consumer));
+  cp.execFileSync(
+    'corepack',
+    ['pnpm', 'install', '--offline', '--ignore-scripts'],
+    { cwd: stage, stdio: 'inherit' },
+  );
+  // Install an actual tarball whose compiler modules are transpiled from the
+  // exact baseline source; all other artifacts/dependencies stay locked locally.
+  const baseline = '84cee419c5c7dc2bb87d1a92cd7fb8e15e409aec';
+  const legacy = path.join(stage, 'legacy-package');
+  fs.mkdirSync(legacy, { recursive: true });
+  cp.execFileSync('tar', [
+    '-xzf',
+    path.join(stage, 'enhanced-a.tgz'),
+    '-C',
+    legacy,
+  ]);
+  const swc = createRequire(path.join(repo, 'package.json'))('@swc/core');
+  for (const file of [
+    'lib/container/ModuleFederationPlugin',
+    'lib/container/runtime/FederationCompositionPlugin',
+  ]) {
+    const source = cp.execFileSync(
+      'git',
+      ['show', `${baseline}:packages/enhanced/src/${file}.ts`],
+      { cwd: repo, encoding: 'utf8' },
+    );
+    const output = swc.transformSync(source, {
+      jsc: { parser: { syntax: 'typescript' }, target: 'es2022' },
+      module: { type: 'commonjs' },
+    });
+    fs.writeFileSync(
+      path.join(legacy, `package/dist/src/${file}.js`),
+      output.code,
+    );
+  }
+  cp.execFileSync('tar', [
+    '-czf',
+    path.join(stage, 'enhanced-legacy.tgz'),
+    '-C',
+    legacy,
+    'package',
+  ]);
+  consumer.dependencies['enhanced-legacy'] = 'file:./enhanced-legacy.tgz';
   fs.writeFileSync(path.join(stage, 'package.json'), JSON.stringify(consumer));
   cp.execFileSync(
     'corepack',

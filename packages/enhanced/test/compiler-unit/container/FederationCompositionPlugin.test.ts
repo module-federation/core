@@ -395,6 +395,140 @@ describe('FederationCompositionPlugin', () => {
   });
 
   it.each([false, true])(
+    'retains standalone remotes needs across a wrapped opt-in from another copy (reverse=%s)',
+    async (reverse) => {
+      const OtherPlugin = loadOtherFederationPlugin();
+      const context = fixture({ 'index.js': 'import("remote/Button");' });
+      const plugins = [
+        new ContainerReferencePlugin({
+          remoteType: 'script',
+          remotes: { remote: 'remote@http://localhost:3001/remoteEntry.js' },
+        }),
+        {
+          apply(compiler) {
+            new OtherPlugin({
+              name: 'wrapped_host',
+              dts: false,
+              manifest: false,
+              experiments: { composedRuntime: true },
+            }).apply(compiler);
+          },
+        },
+      ];
+      if (reverse) plugins.reverse();
+      const { stats } = await compile(context, { plugins });
+      expect(messages(stats.errors)).toEqual([]);
+      expect(messages(stats.warnings)).toEqual([]);
+      expect(
+        moduleNames(stats).some((name) => REMOTES_ADAPTER.test(name)),
+      ).toBe(true);
+    },
+  );
+
+  it('retains early needs when the wrapped opt-in registers in afterPlugins', async () => {
+    const OtherPlugin = loadOtherFederationPlugin();
+    const context = fixture({ 'index.js': 'import("remote/Button");' });
+    const { stats } = await compile(context, {
+      plugins: [
+        new ContainerReferencePlugin({
+          remoteType: 'script',
+          remotes: { remote: 'remote@http://localhost:3001/remoteEntry.js' },
+        }),
+        {
+          apply(compiler) {
+            compiler.hooks.afterPlugins.tap('WrappedOptIn', () => {
+              new OtherPlugin({
+                name: 'wrapped_host',
+                dts: false,
+                manifest: false,
+                experiments: { composedRuntime: true },
+              }).apply(compiler);
+            });
+          },
+        },
+      ],
+    });
+    expect(messages(stats.errors)).toEqual([]);
+    expect(messages(stats.warnings)).toEqual([]);
+    expect(moduleNames(stats).some((name) => REMOTES_ADAPTER.test(name))).toBe(
+      true,
+    );
+  });
+
+  it.each([false, true])(
+    'preserves the full runtime with an old slot while opted out (oldFirst=%s)',
+    async (oldFirst) => {
+      const context = fixture({ 'index.js': 'export default 1;' });
+      const legacyWriter = {
+        apply(compiler) {
+          const key = Symbol.for('module-federation.composition/1');
+          const slot = (compiler[key] ??= { participants: [], sealed: false });
+          slot.participants.push({ kind: 'options', needs: [], disable: {} });
+        },
+      };
+      const plugins = [host({ composedRuntime: false }), legacyWriter];
+      if (oldFirst) plugins.reverse();
+      const { stats } = await compile(context, { plugins });
+      expect(messages(stats.errors)).toEqual([]);
+      expect(messages(stats.warnings)).toEqual([]);
+      expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
+    },
+  );
+
+  it.each([false, true])(
+    'uses the full runtime for same-protocol mixed opt-in and opt-out (reverse=%s)',
+    async (reverse) => {
+      const OtherPlugin = loadOtherFederationPlugin();
+      const context = fixture({ 'index.js': 'export default 1;' });
+      const plugins = [
+        host({ composedRuntime: true }),
+        new OtherPlugin({
+          name: 'composition_host',
+          dts: false,
+          manifest: false,
+          experiments: { composedRuntime: false },
+        }),
+      ];
+      if (reverse) plugins.reverse();
+      const { stats } = await compile(context, { plugins });
+      expect(messages(stats.errors)).toEqual([]);
+      expect(messages(stats.warnings)).toEqual([
+        expect.stringMatching(
+          /another federation options participant did not enable composedRuntime/,
+        ),
+      ]);
+      expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
+    },
+  );
+
+  it('keeps an earlier opt-out when a wrapper applies an opt-in from another copy later', async () => {
+    const OtherPlugin = loadOtherFederationPlugin();
+    const context = fixture({ 'index.js': 'export default 1;' });
+    const { stats } = await compile(context, {
+      plugins: [
+        {
+          apply(compiler) {
+            host({ composedRuntime: false }).apply(compiler);
+            new OtherPlugin({
+              name: 'composition_host',
+              dts: false,
+              manifest: false,
+              experiments: { composedRuntime: true },
+            }).apply(compiler);
+          },
+        },
+      ],
+    });
+    expect(messages(stats.errors)).toEqual([]);
+    expect(messages(stats.warnings)).toEqual([
+      expect.stringMatching(
+        /another federation options participant did not enable composedRuntime/,
+      ),
+    ]);
+    expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
+  });
+
+  it.each([false, true])(
     'rejects an old copy options registration in either order (oldFirst=%s)',
     async (oldFirst) => {
       const context = fixture({ 'index.js': 'export default 1;' });

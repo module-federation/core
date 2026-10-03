@@ -220,6 +220,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     new FederationModulesPlugin().apply(compiler);
     FederationCompositionPlugin.register(compiler, {
       ...optionsParticipant(options),
+      composedRuntime: options.experiments?.composedRuntime === true,
       anchor: options.implementation ?? __dirname,
       platform: options.experiments?.optimization?.target ?? 'universal',
     });
