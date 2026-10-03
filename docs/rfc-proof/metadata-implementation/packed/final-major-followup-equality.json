@@ -1,0 +1,158 @@
+{
+  "kind": "passed",
+  "scope": "Only two Rspack metadata-probe test counter/comment follow-ups; no production artifact drift",
+  "comparisons": [
+    {
+      "priorLabel": "final-major",
+      "priorHead": "acf69e8e6ae37bcc23bef4d91395f6e12f795b8a",
+      "currentLabel": "final-major-complete",
+      "currentHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+      "sourceFileFingerprints": "all seven identical",
+      "manifestDistFingerprints": "all seven identical",
+      "checks": [
+        {
+          "package": "@module-federation/sdk",
+          "kind": "passed",
+          "originalTarballSHA256": "0a762a63845a70048575cb37c5d67278e18cc793ff55aadbeac2c5e3753ca227",
+          "finalTarballSHA256": "0a762a63845a70048575cb37c5d67278e18cc793ff55aadbeac2c5e3753ca227",
+          "members": 99,
+          "byteDifferences": []
+        },
+        {
+          "package": "@module-federation/error-codes",
+          "kind": "passed",
+          "originalTarballSHA256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+          "finalTarballSHA256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+          "members": 40,
+          "byteDifferences": []
+        },
+        {
+          "package": "@module-federation/runtime-core",
+          "kind": "passed",
+          "originalTarballSHA256": "b4bd5faff32aa7673c57c86cad366a5628d61e6e78f2a3df923cfd6187e01d34",
+          "finalTarballSHA256": "b4bd5faff32aa7673c57c86cad366a5628d61e6e78f2a3df923cfd6187e01d34",
+          "members": 209,
+          "byteDifferences": []
+        },
+        {
+          "package": "@module-federation/runtime",
+          "kind": "passed",
+          "originalTarballSHA256": "2921d463948d452091e0209b99fdc320c3f9e427307dfe142d5bac0ed5c63a4d",
+          "finalTarballSHA256": "f9eac4f1a8372ce5e59a7fc8bacc4bf6f8c0b8287ac9ed138b3f22788756c92c",
+          "members": 36,
+          "byteDifferences": [
+            {
+              "member": "package/package.json",
+              "difference": "dependency JSON key order only; parsed manifests equal"
+            }
+          ]
+        },
+        {
+          "package": "@module-federation/webpack-bundler-runtime",
+          "kind": "passed",
+          "originalTarballSHA256": "bdd3e9b42b540e601d4c1188127b5461b74a2195ec600731800c47528c10182b",
+          "finalTarballSHA256": "92ba6ac7026204233b45928dcddb7026e9c301e1fc579d6f693e62637189761f",
+          "members": 94,
+          "byteDifferences": [
+            {
+              "member": "package/package.json",
+              "difference": "dependency JSON key order only; parsed manifests equal"
+            }
+          ]
+        },
+        {
+          "package": "@module-federation/runtime-tools",
+          "kind": "passed",
+          "originalTarballSHA256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17",
+          "finalTarballSHA256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17",
+          "members": 25,
+          "byteDifferences": []
+        },
+        {
+          "package": "@module-federation/inject-external-runtime-core-plugin",
+          "kind": "passed",
+          "originalTarballSHA256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a",
+          "finalTarballSHA256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a",
+          "members": 10,
+          "byteDifferences": []
+        }
+      ]
+    },
+    {
+      "priorLabel": "final-major-current",
+      "priorHead": "89dc3d4397cf97e45afe82c60e6279f93786f7f0",
+      "currentLabel": "final-major-complete",
+      "currentHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+      "sourceFileFingerprints": "all seven identical",
+      "manifestDistFingerprints": "all seven identical",
+      "checks": [
+        {
+          "package": "@module-federation/sdk",
+          "kind": "passed",
+          "originalTarballSHA256": "0a762a63845a70048575cb37c5d67278e18cc793ff55aadbeac2c5e3753ca227",
+          "finalTarballSHA256": "0a762a63845a70048575cb37c5d67278e18cc793ff55aadbeac2c5e3753ca227",
+          "members": 99,
+          "byteDifferences": []
+        },
+        {
+          "package": "@module-federation/error-codes",
+          "kind": "passed",
+          "originalTarballSHA256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+          "finalTarballSHA256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+          "members": 40,
+          "byteDifferences": []
+        },
+        {
+          "package": "@module-federation/runtime-core",
+          "kind": "passed",
+          "originalTarballSHA256": "b4bd5faff32aa7673c57c86cad366a5628d61e6e78f2a3df923cfd6187e01d34",
+          "finalTarballSHA256": "b4bd5faff32aa7673c57c86cad366a5628d61e6e78f2a3df923cfd6187e01d34",
+          "members": 209,
+          "byteDifferences": []
+        },
+        {
+          "package": "@module-federation/runtime",
+          "kind": "passed",
+          "originalTarballSHA256": "037bb33c143e67f6024ebc2510d5972110cbee201f0ba24c68cc94b9971ac4e7",
+          "finalTarballSHA256": "f9eac4f1a8372ce5e59a7fc8bacc4bf6f8c0b8287ac9ed138b3f22788756c92c",
+          "members": 36,
+          "byteDifferences": [
+            {
+              "member": "package/package.json",
+              "difference": "dependency JSON key order only; parsed manifests equal"
+            }
+          ]
+        },
+        {
+          "package": "@module-federation/webpack-bundler-runtime",
+          "kind": "passed",
+          "originalTarballSHA256": "bdd3e9b42b540e601d4c1188127b5461b74a2195ec600731800c47528c10182b",
+          "finalTarballSHA256": "92ba6ac7026204233b45928dcddb7026e9c301e1fc579d6f693e62637189761f",
+          "members": 94,
+          "byteDifferences": [
+            {
+              "member": "package/package.json",
+              "difference": "dependency JSON key order only; parsed manifests equal"
+            }
+          ]
+        },
+        {
+          "package": "@module-federation/runtime-tools",
+          "kind": "passed",
+          "originalTarballSHA256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17",
+          "finalTarballSHA256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17",
+          "members": 25,
+          "byteDifferences": []
+        },
+        {
+          "package": "@module-federation/inject-external-runtime-core-plugin",
+          "kind": "passed",
+          "originalTarballSHA256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a",
+          "finalTarballSHA256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a",
+          "members": 10,
+          "byteDifferences": []
+        }
+      ]
+    }
+  ]
+}

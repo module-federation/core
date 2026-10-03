@@ -1,0 +1,3 @@
+{"actualFormatOptionsAndNormalizationSource":true,"substitutionsRejectBeforeRemoteSharedInit":true,"knownImageRetainedAcrossHookAbsence":true,"absentInitialHookAddedValidImage":"allowed first structural admission","scope":"isolated actual formatOptions method; observes registration calls, not full constructor side effects"}
+(node:84556) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)

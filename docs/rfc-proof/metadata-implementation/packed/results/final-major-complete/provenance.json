@@ -1,0 +1,116 @@
+{
+  "label": "final-major-complete",
+  "worktree": "stack5142",
+  "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+  "artifactStatus": "actual final committed pnpm package artifacts",
+  "dirtyStatus": "",
+  "sourceFiles": [
+    {
+      "path": "packages/runtime-core/src/runtimeImage.ts",
+      "sha256": "6ff0505fe24a5dc15bc612d74de1d5657c1fea2c8152d9b950d3ee10b1dbafe3"
+    },
+    {
+      "path": "packages/runtime-core/src/index.ts",
+      "sha256": "ec923a3fd48506b3fbac2ae647ff88f2b7ae8d8b13218b714ad60935de21bb6d"
+    },
+    {
+      "path": "packages/runtime-core/src/kernel.ts",
+      "sha256": "bcf57fec6da80d382bff9a7afa4eececbafbd9c3d50c5f143b034ac37ffd4ef0"
+    },
+    {
+      "path": "packages/runtime-core/src/core.ts",
+      "sha256": "d9c5a0734a8b710686d92885a2f0c350227d27c0a18c007f72771e3a25411abb"
+    },
+    {
+      "path": "packages/runtime-core/src/type/config.ts",
+      "sha256": "93ed4a743bb7d19ed8572746bdc62fa8a7bcdb406d81494c73e06c18c74c844e"
+    },
+    {
+      "path": "packages/runtime/src/instance.ts",
+      "sha256": "ad379239c4d60d818cc08559b2aef7e68d4983fe512be6c167d347adb4a8b5b5"
+    },
+    {
+      "path": "packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts",
+      "sha256": "96649fc82c9e43f6a8252921448e2327a5c157a9c12fdf1d33178dff822d0dd3"
+    }
+  ],
+  "packages": [
+    {
+      "package": "@module-federation/sdk",
+      "version": "2.9.2",
+      "mappedSources": 32,
+      "sourceMismatches": [],
+      "manifestSHA256": "b8e9c836645d30f1dce08eacd68aa45877df1dc669dc4737c55237e9ce5cead1",
+      "distTreeSHA256": "942b8f828ee05d5392d4a435f585f53f9c4dee645fbf739b9954d0ab529ca4e1",
+      "origin": "actual pnpm pack of current emitted outputs",
+      "tarball": "newmetadata-proof/results/final-major-complete/tarballs/sdk.tgz",
+      "tarballSHA256": "0a762a63845a70048575cb37c5d67278e18cc793ff55aadbeac2c5e3753ca227"
+    },
+    {
+      "package": "@module-federation/error-codes",
+      "version": "2.9.2",
+      "mappedSources": 10,
+      "sourceMismatches": [],
+      "manifestSHA256": "d879850d5cfad74768a47312a2700d3a13186da5f148ddd6d2a4ce2c2164028f",
+      "distTreeSHA256": "cfc81d7460922c4e64c7956cc1cea4b4ad9cbd5e0700d0332d8e64881eb2956b",
+      "origin": "reused actual baseline tarball after full dist-byte equality",
+      "tarball": "newmetadata-proof/results/final-major-complete/tarballs/error-codes.tgz",
+      "tarballSHA256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e"
+    },
+    {
+      "package": "@module-federation/runtime-core",
+      "version": "2.9.2",
+      "mappedSources": 74,
+      "sourceMismatches": [],
+      "manifestSHA256": "d92276b1b62dd3d82e2edd76d9c066b7ca87a61741c0d6bf608f904f5da02d4b",
+      "distTreeSHA256": "904267185d96cab3fc862a51f8fc6d41655564dce809707f1b42420ba6a77070",
+      "origin": "actual pnpm pack of current emitted outputs",
+      "tarball": "newmetadata-proof/results/final-major-complete/tarballs/runtime-core.tgz",
+      "tarballSHA256": "b4bd5faff32aa7673c57c86cad366a5628d61e6e78f2a3df923cfd6187e01d34"
+    },
+    {
+      "package": "@module-federation/runtime",
+      "version": "2.9.2",
+      "mappedSources": 10,
+      "sourceMismatches": [],
+      "manifestSHA256": "8f79df578382bf816a5c5c426a23688ee9c5d242c5402a1381c7e3cb4d738346",
+      "distTreeSHA256": "ba91f4c6b4e344fb8eb2dfbdd46d8766b2d2540de37523a4de630e94253e5c29",
+      "origin": "actual pnpm pack of current emitted outputs",
+      "tarball": "newmetadata-proof/results/final-major-complete/tarballs/runtime.tgz",
+      "tarballSHA256": "f9eac4f1a8372ce5e59a7fc8bacc4bf6f8c0b8287ac9ed138b3f22788756c92c"
+    },
+    {
+      "package": "@module-federation/webpack-bundler-runtime",
+      "version": "2.9.2",
+      "mappedSources": 38,
+      "sourceMismatches": [],
+      "manifestSHA256": "d00f5e9853896b108cd5d226135822f00441dcda7c809a326c6113e7c8dd30b0",
+      "distTreeSHA256": "8ffc539816514e3b1ecf06d7d298ef2e5187b9acc61bb8f2d4250ccef5b0a0f1",
+      "origin": "actual pnpm pack of current emitted outputs",
+      "tarball": "newmetadata-proof/results/final-major-complete/tarballs/webpack-bundler-runtime.tgz",
+      "tarballSHA256": "92ba6ac7026204233b45928dcddb7026e9c301e1fc579d6f693e62637189761f"
+    },
+    {
+      "package": "@module-federation/runtime-tools",
+      "version": "2.9.2",
+      "mappedSources": 4,
+      "sourceMismatches": [],
+      "manifestSHA256": "4952fdc776d6ace1ee2aed6d733c2925cf6c685043071c127f1d9c80af0eb791",
+      "distTreeSHA256": "0f180c5804cec48960850e5af7a189c0c0c44c32149de1b774236e12b4e5cc4e",
+      "origin": "actual pnpm pack of current emitted outputs",
+      "tarball": "newmetadata-proof/results/final-major-complete/tarballs/runtime-tools.tgz",
+      "tarballSHA256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17"
+    },
+    {
+      "package": "@module-federation/inject-external-runtime-core-plugin",
+      "version": "2.9.2",
+      "mappedSources": 2,
+      "sourceMismatches": [],
+      "manifestSHA256": "04650400ea1ea2bd5a9670f1cee0a56a6c366c2317aaf01773fc0dd33ba92182",
+      "distTreeSHA256": "0bdbf314e8a55057e196243462d812836b82ec77ef050e6a64d4ab7fab2b1465",
+      "origin": "actual pnpm pack of current emitted outputs",
+      "tarball": "newmetadata-proof/results/final-major-complete/tarballs/inject-external-runtime-core-plugin.tgz",
+      "tarballSHA256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a"
+    }
+  ]
+}

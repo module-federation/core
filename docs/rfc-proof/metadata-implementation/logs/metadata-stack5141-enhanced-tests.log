@@ -1,0 +1,125 @@
+
+> @module-federation/enhanced@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/enhanced
+> node test/scripts/ensure-reshake-fixtures.js && NODE_OPTIONS="--experimental-vm-modules --max-old-space-size=24576" npx rstest && NODE_OPTIONS="--experimental-vm-modules --max-old-space-size=24576" npx rstest -c rstest.treeshake.serial.config.ts
+
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "recursive". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_lululemon-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "no-fund". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "node-linker". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "no-audit". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+(node:92641) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/enhanced/rstest.config.ts?t=1791005225115 is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/enhanced/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+---
+tool: "@rstest/core@0.10.6"
+timestamp: "2026-10-03T05:27:31.155Z"
+runtime: {"node":"v24.15.0","platform":"darwin","cwd":"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/enhanced"}
+---
+
+# Rstest Test Execution Report
+
+## Summary
+
+```json
+{
+  "status": "pass",
+  "counts": {
+    "testFiles": 40,
+    "failedFiles": 0,
+    "tests": 526,
+    "failedTests": 0,
+    "passedTests": 525,
+    "skippedTests": 1,
+    "todoTests": 0
+  },
+  "durationMs": {
+    "total": 25557,
+    "build": 286,
+    "tests": 25271
+  },
+  "snapshot": {
+    "added": 0,
+    "updated": 0,
+    "unmatched": 0,
+    "removed": 0,
+    "unchecked": 0
+  }
+}
+```
+
+## Failures
+
+No test failures reported.
+
+Note: all tests passed. Lists omitted for brevity.
+npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "recursive". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_lululemon-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "no-fund". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "node-linker". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "no-audit". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+(node:93225) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/enhanced/rstest.treeshake.serial.config.ts?t=1791005251823 is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/enhanced/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+---
+tool: "@rstest/core@0.10.6"
+timestamp: "2026-10-03T05:27:38.126Z"
+runtime: {"node":"v24.15.0","platform":"darwin","cwd":"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/enhanced"}
+---
+
+# Rstest Test Execution Report
+
+## Summary
+
+```json
+{
+  "status": "pass",
+  "counts": {
+    "testFiles": 1,
+    "failedFiles": 0,
+    "tests": 6,
+    "failedTests": 0,
+    "passedTests": 6,
+    "skippedTests": 0,
+    "todoTests": 0
+  },
+  "durationMs": {
+    "total": 6093,
+    "build": 42,
+    "tests": 6051
+  },
+  "snapshot": {
+    "added": 0,
+    "updated": 0,
+    "unmatched": 0,
+    "removed": 0,
+    "unchecked": 0
+  }
+}
+```
+
+## Tests
+
+### Passed
+
+- test/ConfigTestCases.treeshake.rstest.ts :: warmup > should warmup webpack
+- test/ConfigTestCases.treeshake.rstest.ts :: ConfigTestCases-treeshake > tree-shaking-share > infer-strategy > infer-strategy should compile
+- test/ConfigTestCases.treeshake.rstest.ts :: ConfigTestCases-treeshake > tree-shaking-share > local-provided-version > local-provided-version should compile
+- test/ConfigTestCases.treeshake.rstest.ts :: ConfigTestCases-treeshake > tree-shaking-share > multi-version-fallback > multi-version-fallback should compile
+- test/ConfigTestCases.treeshake.rstest.ts :: ConfigTestCases-treeshake > tree-shaking-share > reshake-share > reshake-share should compile
+- test/ConfigTestCases.treeshake.rstest.ts :: ConfigTestCases-treeshake > tree-shaking-share > server-strategy > server-strategy should compile
+
+### Skipped
+
+None.
+
+## Failures
+
+No test failures reported.

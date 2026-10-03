@@ -1,0 +1,788 @@
+[
+  {
+    "name": "source-map:@module-federation/sdk",
+    "outcome": {
+      "kind": "passed",
+      "mappedSources": 32
+    }
+  },
+  {
+    "name": "pack:sdk",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/sdk",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/sdk.tgz"
+    ],
+    "cwd": "stack5141",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "📦  @module-federation/sdk@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.d.ts\ndist/constant.js\ndist/constant.js.map\ndist/core.cjs\ndist/core.d.ts\ndist/core.js\ndist/createModuleFederationConfig.cjs\ndist/createModuleFederationConfig.cjs.map\ndist/createModuleFederationConfig.d.ts\ndist/createModuleFederationConfig.js\ndist/createModuleFederationConfig.js.map\ndist/dom.cjs\ndist/dom.cjs.map\ndist/dom.d.ts\ndist/dom.js\ndist/dom.js.map\ndist/env.cjs\ndist/env.cjs.map\ndist/env.d.ts\ndist/env.js\ndist/env.js.map\ndist/generateSnapshotFromManifest.cjs\ndist/generateSnapshotFromManifest.cjs.map\ndist/generateSnapshotFromManifest.d.ts\ndist/generateSnapshotFromManifest.js\ndist/generateSnapshotFromManifest.js.map\ndist/index.cjs\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/logger.cjs\ndist/logger.cjs.map\ndist/logger.d.ts\ndist/logger.js\ndist/logger.js.map\ndist/node.cjs\ndist/node.cjs.map\ndist/node.d.ts\ndist/node.js\ndist/node.js.map\ndist/normalize-webpack-path.cjs\ndist/normalize-webpack-path.cjs.map\ndist/normalize-webpack-path.d.ts\ndist/normalize-webpack-path.js\ndist/normalize-webpack-path.js.map\ndist/normalizeOptions.cjs\ndist/normalizeOptions.cjs.map\ndist/normalizeOptions.d.ts\ndist/normalizeOptions.js\ndist/normalizeOptions.js.map\ndist/types/common.d.ts\ndist/types/hooks.d.ts\ndist/types/index.d.ts\ndist/types/manifest.d.ts\ndist/types/plugins/ConsumeSharedPlugin.cjs\ndist/types/plugins/ConsumeSharedPlugin.cjs.map\ndist/types/plugins/ConsumeSharedPlugin.d.ts\ndist/types/plugins/ConsumeSharedPlugin.js\ndist/types/plugins/ConsumeSharedPlugin.js.map\ndist/types/plugins/ContainerPlugin.cjs\ndist/types/plugins/ContainerPlugin.cjs.map\ndist/types/plugins/ContainerPlugin.d.ts\ndist/types/plugins/ContainerPlugin.js\ndist/types/plugins/ContainerPlugin.js.map\ndist/types/plugins/ContainerReferencePlugin.cjs\ndist/types/plugins/ContainerReferencePlugin.cjs.map\ndist/types/plugins/ContainerReferencePlugin.d.ts\ndist/types/plugins/ContainerReferencePlugin.js\ndist/types/plugins/ContainerReferencePlugin.js.map\ndist/types/plugins/index.d.ts\ndist/types/plugins/ModuleFederationPlugin.cjs\ndist/types/plugins/ModuleFederationPlugin.cjs.map\ndist/types/plugins/ModuleFederationPlugin.d.ts\ndist/types/plugins/ModuleFederationPlugin.js\ndist/types/plugins/ModuleFederationPlugin.js.map\ndist/types/plugins/ProvideSharedPlugin.cjs\ndist/types/plugins/ProvideSharedPlugin.cjs.map\ndist/types/plugins/ProvideSharedPlugin.d.ts\ndist/types/plugins/ProvideSharedPlugin.js\ndist/types/plugins/ProvideSharedPlugin.js.map\ndist/types/plugins/SharePlugin.cjs\ndist/types/plugins/SharePlugin.cjs.map\ndist/types/plugins/SharePlugin.d.ts\ndist/types/plugins/SharePlugin.js\ndist/types/plugins/SharePlugin.js.map\ndist/types/snapshot.d.ts\ndist/types/stats.d.ts\ndist/utils.cjs\ndist/utils.cjs.map\ndist/utils.d.ts\ndist/utils.js\ndist/utils.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/sdk.tgz\n",
+    "stderr": ""
+  },
+  {
+    "name": "extract:sdk",
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/sdk.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer/node_modules/@module-federation/sdk"
+    ],
+    "cwd": "",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "source-map:@module-federation/error-codes",
+    "outcome": {
+      "kind": "passed",
+      "mappedSources": 10
+    }
+  },
+  {
+    "name": "extract:error-codes",
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/error-codes.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer/node_modules/@module-federation/error-codes"
+    ],
+    "cwd": "",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "source-map:@module-federation/runtime-core",
+    "outcome": {
+      "kind": "passed",
+      "mappedSources": 76
+    }
+  },
+  {
+    "name": "pack:runtime-core",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/runtime-core",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/runtime-core.tgz"
+    ],
+    "cwd": "stack5141",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "📦  @module-federation/runtime-core@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.js\ndist/constant.js.map\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/global.cjs\ndist/global.cjs.map\ndist/global.d.ts\ndist/global.js\ndist/global.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/kernel.cjs\ndist/kernel.d.ts\ndist/kernel.js\ndist/LICENSE\ndist/module/index.cjs\ndist/module/index.cjs.map\ndist/module/index.d.ts\ndist/module/index.js\ndist/module/index.js.map\ndist/platform/node.cjs\ndist/platform/node.cjs.map\ndist/platform/node.d.ts\ndist/platform/node.js\ndist/platform/node.js.map\ndist/platform/universal.cjs\ndist/platform/universal.cjs.map\ndist/platform/universal.d.ts\ndist/platform/universal.js\ndist/platform/universal.js.map\ndist/platform/web.cjs\ndist/platform/web.cjs.map\ndist/platform/web.d.ts\ndist/platform/web.js\ndist/platform/web.js.map\ndist/plugins/generate-preload-assets.cjs\ndist/plugins/generate-preload-assets.cjs.map\ndist/plugins/generate-preload-assets.js\ndist/plugins/generate-preload-assets.js.map\ndist/plugins/snapshot/capability.cjs\ndist/plugins/snapshot/capability.d.ts\ndist/plugins/snapshot/capability.js\ndist/plugins/snapshot/disabled.cjs\ndist/plugins/snapshot/disabled.cjs.map\ndist/plugins/snapshot/disabled.js\ndist/plugins/snapshot/disabled.js.map\ndist/plugins/snapshot/index.cjs\ndist/plugins/snapshot/index.cjs.map\ndist/plugins/snapshot/index.d.ts\ndist/plugins/snapshot/index.js\ndist/plugins/snapshot/index.js.map\ndist/plugins/snapshot/SnapshotHandler.cjs\ndist/plugins/snapshot/SnapshotHandler.cjs.map\ndist/plugins/snapshot/SnapshotHandler.d.ts\ndist/plugins/snapshot/SnapshotHandler.js\ndist/plugins/snapshot/SnapshotHandler.js.map\ndist/remote/capability.cjs\ndist/remote/capability.d.ts\ndist/remote/capability.js\ndist/remote/disabled.cjs\ndist/remote/disabled.cjs.map\ndist/remote/disabled.js\ndist/remote/disabled.js.map\ndist/remote/index.cjs\ndist/remote/index.cjs.map\ndist/remote/index.d.ts\ndist/remote/index.js\ndist/remote/index.js.map\ndist/runtimeImage.cjs\ndist/runtimeImage.cjs.map\ndist/runtimeImage.d.ts\ndist/runtimeImage.js\ndist/runtimeImage.js.map\ndist/shared/capability.cjs\ndist/shared/capability.d.ts\ndist/shared/capability.js\ndist/shared/disabled.cjs\ndist/shared/disabled.cjs.map\ndist/shared/disabled.js\ndist/shared/disabled.js.map\ndist/shared/index.cjs\ndist/shared/index.cjs.map\ndist/shared/index.d.ts\ndist/shared/index.js\ndist/shared/index.js.map\ndist/type/capability.d.ts\ndist/type/config.d.ts\ndist/type/index.cjs\ndist/type/index.cjs.map\ndist/type/index.d.ts\ndist/type/index.js\ndist/type/index.js.map\ndist/type/plugin.d.ts\ndist/type/preload.d.ts\ndist/types.cjs\ndist/types.d.ts\ndist/types.js\ndist/utils/context.cjs\ndist/utils/context.cjs.map\ndist/utils/context.d.ts\ndist/utils/context.js\ndist/utils/context.js.map\ndist/utils/env.cjs\ndist/utils/env.cjs.map\ndist/utils/env.d.ts\ndist/utils/env.js\ndist/utils/env.js.map\ndist/utils/hooks/asyncHook.cjs\ndist/utils/hooks/asyncHook.cjs.map\ndist/utils/hooks/asyncHook.d.ts\ndist/utils/hooks/asyncHook.js\ndist/utils/hooks/asyncHook.js.map\ndist/utils/hooks/asyncWaterfallHooks.cjs\ndist/utils/hooks/asyncWaterfallHooks.cjs.map\ndist/utils/hooks/asyncWaterfallHooks.d.ts\ndist/utils/hooks/asyncWaterfallHooks.js\ndist/utils/hooks/asyncWaterfallHooks.js.map\ndist/utils/hooks/index.cjs\ndist/utils/hooks/index.js\ndist/utils/hooks/pluginSystem.cjs\ndist/utils/hooks/pluginSystem.cjs.map\ndist/utils/hooks/pluginSystem.d.ts\ndist/utils/hooks/pluginSystem.js\ndist/utils/hooks/pluginSystem.js.map\ndist/utils/hooks/syncHook.cjs\ndist/utils/hooks/syncHook.cjs.map\ndist/utils/hooks/syncHook.d.ts\ndist/utils/hooks/syncHook.js\ndist/utils/hooks/syncHook.js.map\ndist/utils/hooks/syncWaterfallHook.cjs\ndist/utils/hooks/syncWaterfallHook.cjs.map\ndist/utils/hooks/syncWaterfallHook.d.ts\ndist/utils/hooks/syncWaterfallHook.js\ndist/utils/hooks/syncWaterfallHook.js.map\ndist/utils/index.cjs\ndist/utils/index.d.ts\ndist/utils/index.js\ndist/utils/load.cjs\ndist/utils/load.cjs.map\ndist/utils/load.d.ts\ndist/utils/load.js\ndist/utils/load.js.map\ndist/utils/logger.cjs\ndist/utils/logger.cjs.map\ndist/utils/logger.d.ts\ndist/utils/logger.js\ndist/utils/logger.js.map\ndist/utils/manifest.cjs\ndist/utils/manifest.cjs.map\ndist/utils/manifest.d.ts\ndist/utils/manifest.js\ndist/utils/manifest.js.map\ndist/utils/plugin.cjs\ndist/utils/plugin.cjs.map\ndist/utils/plugin.d.ts\ndist/utils/plugin.js\ndist/utils/plugin.js.map\ndist/utils/preload.cjs\ndist/utils/preload.cjs.map\ndist/utils/preload.d.ts\ndist/utils/preload.js\ndist/utils/preload.js.map\ndist/utils/semver/compare.cjs\ndist/utils/semver/compare.cjs.map\ndist/utils/semver/compare.js\ndist/utils/semver/compare.js.map\ndist/utils/semver/constants.cjs\ndist/utils/semver/constants.cjs.map\ndist/utils/semver/constants.js\ndist/utils/semver/constants.js.map\ndist/utils/semver/index.cjs\ndist/utils/semver/index.cjs.map\ndist/utils/semver/index.d.ts\ndist/utils/semver/index.js\ndist/utils/semver/index.js.map\ndist/utils/semver/parser.cjs\ndist/utils/semver/parser.cjs.map\ndist/utils/semver/parser.js\ndist/utils/semver/parser.js.map\ndist/utils/semver/utils.cjs\ndist/utils/semver/utils.cjs.map\ndist/utils/semver/utils.js\ndist/utils/semver/utils.js.map\ndist/utils/share.cjs\ndist/utils/share.cjs.map\ndist/utils/share.d.ts\ndist/utils/share.js\ndist/utils/share.js.map\ndist/utils/tool.cjs\ndist/utils/tool.cjs.map\ndist/utils/tool.d.ts\ndist/utils/tool.js\ndist/utils/tool.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/runtime-core.tgz\n",
+    "stderr": ""
+  },
+  {
+    "name": "extract:runtime-core",
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/runtime-core.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer/node_modules/@module-federation/runtime-core"
+    ],
+    "cwd": "",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "source-map:@module-federation/runtime",
+    "outcome": {
+      "kind": "passed",
+      "mappedSources": 10
+    }
+  },
+  {
+    "name": "pack:runtime",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/runtime.tgz"
+    ],
+    "cwd": "stack5141",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "📦  @module-federation/runtime@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/bundler.cjs\ndist/bundler.d.ts\ndist/bundler.js\ndist/compose.cjs\ndist/compose.cjs.map\ndist/compose.d.ts\ndist/compose.js\ndist/compose.js.map\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/instance.cjs\ndist/instance.cjs.map\ndist/instance.d.ts\ndist/instance.js\ndist/instance.js.map\ndist/LICENSE\ndist/types.cjs\ndist/types.d.ts\ndist/types.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "name": "extract:runtime",
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer/node_modules/@module-federation/runtime"
+    ],
+    "cwd": "",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "source-map:@module-federation/webpack-bundler-runtime",
+    "outcome": {
+      "kind": "passed",
+      "mappedSources": 38
+    }
+  },
+  {
+    "name": "pack:webpack-bundler-runtime",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/webpack-bundler-runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/webpack-bundler-runtime.tgz"
+    ],
+    "cwd": "stack5141",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "📦  @module-federation/webpack-bundler-runtime@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/adapters/consumes.cjs\ndist/adapters/consumes.cjs.map\ndist/adapters/consumes.d.ts\ndist/adapters/consumes.js\ndist/adapters/consumes.js.map\ndist/adapters/container.cjs\ndist/adapters/container.cjs.map\ndist/adapters/container.d.ts\ndist/adapters/container.js\ndist/adapters/container.js.map\ndist/adapters/remotes.cjs\ndist/adapters/remotes.cjs.map\ndist/adapters/remotes.d.ts\ndist/adapters/remotes.js\ndist/adapters/remotes.js.map\ndist/adapters/share-scope.cjs\ndist/adapters/share-scope.cjs.map\ndist/adapters/share-scope.d.ts\ndist/adapters/share-scope.js\ndist/adapters/share-scope.js.map\ndist/attachShareScopeMap.cjs\ndist/attachShareScopeMap.cjs.map\ndist/attachShareScopeMap.d.ts\ndist/attachShareScopeMap.js\ndist/attachShareScopeMap.js.map\ndist/bundler.cjs\ndist/bundler.d.ts\ndist/bundler.js\ndist/compose.cjs\ndist/compose.cjs.map\ndist/compose.d.ts\ndist/compose.js\ndist/compose.js.map\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.d.ts\ndist/constant.js\ndist/constant.js.map\ndist/consumes.cjs\ndist/consumes.cjs.map\ndist/consumes.js\ndist/consumes.js.map\ndist/error-codes/dist/error-codes.cjs\ndist/error-codes/dist/error-codes.cjs.map\ndist/error-codes/dist/error-codes.js\ndist/error-codes/dist/error-codes.js.map\ndist/error-codes/dist/getShortErrorMsg.cjs\ndist/error-codes/dist/getShortErrorMsg.cjs.map\ndist/error-codes/dist/getShortErrorMsg.js\ndist/error-codes/dist/getShortErrorMsg.js.map\ndist/getSharedFallbackGetter.cjs\ndist/getSharedFallbackGetter.cjs.map\ndist/getSharedFallbackGetter.js\ndist/getSharedFallbackGetter.js.map\ndist/getUsedExports.cjs\ndist/getUsedExports.cjs.map\ndist/getUsedExports.js\ndist/getUsedExports.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/initContainerEntry.cjs\ndist/initContainerEntry.cjs.map\ndist/initContainerEntry.d.ts\ndist/initContainerEntry.js\ndist/initContainerEntry.js.map\ndist/initializeSharing.cjs\ndist/initializeSharing.cjs.map\ndist/initializeSharing.d.ts\ndist/initializeSharing.js\ndist/initializeSharing.js.map\ndist/installInitialConsumes.cjs\ndist/installInitialConsumes.cjs.map\ndist/installInitialConsumes.js\ndist/installInitialConsumes.js.map\ndist/LICENSE\ndist/remotes.cjs\ndist/remotes.cjs.map\ndist/remotes.js\ndist/remotes.js.map\ndist/treeShakingSharePlugin.cjs\ndist/treeShakingSharePlugin.cjs.map\ndist/treeShakingSharePlugin.js\ndist/treeShakingSharePlugin.js.map\ndist/types.d.ts\ndist/updateOptions.cjs\ndist/updateOptions.cjs.map\ndist/updateOptions.js\ndist/updateOptions.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/webpack-bundler-runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "name": "extract:webpack-bundler-runtime",
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/webpack-bundler-runtime.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer/node_modules/@module-federation/webpack-bundler-runtime"
+    ],
+    "cwd": "",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "source-map:@module-federation/runtime-tools",
+    "outcome": {
+      "kind": "passed",
+      "mappedSources": 4
+    }
+  },
+  {
+    "name": "pack:runtime-tools",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/runtime-tools",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/runtime-tools.tgz"
+    ],
+    "cwd": "stack5141",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "📦  @module-federation/runtime-tools@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/bundler.cjs\ndist/bundler.cjs.map\ndist/bundler.d.ts\ndist/bundler.js\ndist/bundler.js.map\ndist/index.cjs\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/runtime-core.cjs\ndist/runtime-core.d.ts\ndist/runtime-core.js\ndist/runtime.cjs\ndist/runtime.d.ts\ndist/runtime.js\ndist/webpack-bundler-runtime.cjs\ndist/webpack-bundler-runtime.cjs.map\ndist/webpack-bundler-runtime.d.ts\ndist/webpack-bundler-runtime.js\ndist/webpack-bundler-runtime.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/runtime-tools.tgz\n",
+    "stderr": ""
+  },
+  {
+    "name": "extract:runtime-tools",
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/runtime-tools.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer/node_modules/@module-federation/runtime-tools"
+    ],
+    "cwd": "",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "source-map:@module-federation/inject-external-runtime-core-plugin",
+    "outcome": {
+      "kind": "passed",
+      "mappedSources": 2
+    }
+  },
+  {
+    "name": "pack:inject-external-runtime-core-plugin",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/runtime-plugins/inject-external-runtime-core-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/inject-external-runtime-core-plugin.tgz"
+    ],
+    "cwd": "stack5141",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "📦  @module-federation/inject-external-runtime-core-plugin@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/LICENSE\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/inject-external-runtime-core-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "name": "extract:inject-external-runtime-core-plugin",
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/tarballs/inject-external-runtime-core-plugin.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer/node_modules/@module-federation/inject-external-runtime-core-plugin"
+    ],
+    "cwd": "",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "strict:consumer.mts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--pretty",
+      "false",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "newmetadata-proof/results/final-minor/consumer",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "strict:consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--pretty",
+      "false",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "newmetadata-proof/results/final-minor/consumer",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "strict:consumer.mts+consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--pretty",
+      "false",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "newmetadata-proof/results/final-minor/consumer",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "strict:readonly-negative",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--pretty",
+      "false",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer-negative.mts"
+    ],
+    "cwd": "newmetadata-proof/results/final-minor/consumer",
+    "expected": "readonly-negative",
+    "outcome": {
+      "kind": "rejected",
+      "reason": "readonly-fields-and-arrays",
+      "exitCode": 2,
+      "diagnosticCodes": [
+        2540,
+        2540,
+        2540,
+        2540,
+        2540,
+        2540,
+        2540,
+        2339,
+        2339,
+        2339
+      ]
+    },
+    "stdout": "consumer-negative.mts(5,12): error TS2540: Cannot assign to 'contract' because it is a read-only property.\nconsumer-negative.mts(6,12): error TS2540: Cannot assign to 'compatibilityId' because it is a read-only property.\nconsumer-negative.mts(7,12): error TS2540: Cannot assign to 'target' because it is a read-only property.\nconsumer-negative.mts(8,12): error TS2540: Cannot assign to 'entryLoadingIdentity' because it is a read-only property.\nconsumer-negative.mts(9,12): error TS2540: Cannot assign to 'required' because it is a read-only property.\nconsumer-negative.mts(10,12): error TS2540: Cannot assign to 'forbidden' because it is a read-only property.\nconsumer-negative.mts(11,12): error TS2540: Cannot assign to 'available' because it is a read-only property.\nconsumer-negative.mts(12,21): error TS2339: Property 'push' does not exist on type 'readonly string[]'.\nconsumer-negative.mts(13,22): error TS2339: Property 'push' does not exist on type 'readonly string[]'.\nconsumer-negative.mts(14,22): error TS2339: Property 'push' does not exist on type 'readonly string[]'.\n",
+    "stderr": ""
+  },
+  {
+    "name": "api:esm",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer/api-worker.mjs",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer",
+      "esm"
+    ],
+    "cwd": "newmetadata-proof/results/final-minor/consumer",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"format\":\"esm\",\"metadataValueExports\":[\"RUNTIME_IMAGE\",\"parseRuntimeImage\",\"readRuntimeImage\",\"attachRuntimeImage\",\"assertRuntimeImageCompatible\"],\"metadataExportKinds\":{\"RUNTIME_IMAGE\":\"symbol\",\"parseRuntimeImage\":\"function\",\"readRuntimeImage\":\"function\",\"attachRuntimeImage\":\"function\",\"assertRuntimeImageCompatible\":\"function\"},\"malformedRejected\":11,\"compatibilityMismatchesRejected\":5,\"immutableDescriptorAndArrays\":\"passed\",\"attachReadCopies\":\"passed\",\"runtimeOptionsCopies\":\"passed\",\"instanceReuse\":\"same\",\"shared\":\"immutable-packed-shared\",\"namespaceShapes\":{\"root\":[\"CurrentGlobal\",\"FederationKernel\",\"Global\",\"Module\",\"ModuleFederation\",\"RUNTIME_IMAGE\",\"addGlobalSnapshot\",\"assert\",\"assertRuntimeImageCompatible\",\"attachRuntimeImage\",\"error\",\"getGlobalFederationConstructor\",\"getGlobalSnapshot\",\"getGlobalSnapshotInfoByModuleInfo\",\"getInfoWithoutType\",\"getRegisteredShare\",\"getRemoteEntry\",\"getRemoteInfo\",\"helpers\",\"isStaticResourcesEqual\",\"loadScript\",\"loadScriptNode\",\"matchRemoteWithNameAndExpose\",\"parseRuntimeImage\",\"readRuntimeImage\",\"registerGlobalPlugins\",\"resetFederationGlobalInfo\",\"safeWrapper\",\"satisfy\",\"setGlobalFederationConstructor\",\"setGlobalFederationInstance\",\"types\"],\"kernel\":[\"CurrentGlobal\",\"FederationKernel\",\"RUNTIME_IMAGE\",\"assertRuntimeImageCompatible\",\"attachRuntimeImage\",\"getGlobalSnapshotInfoByModuleInfo\",\"getRemoteEntry\",\"parseRuntimeImage\",\"readRuntimeImage\",\"setGlobalFederationInstance\"],\"barrel\":[\"CurrentGlobal\",\"FederationKernel\",\"Global\",\"Module\",\"ModuleFederation\",\"RUNTIME_IMAGE\",\"addGlobalSnapshot\",\"assert\",\"assertRuntimeImageCompatible\",\"attachRuntimeImage\",\"default\",\"error\",\"getGlobalFederationConstructor\",\"getGlobalSnapshot\",\"getGlobalSnapshotInfoByModuleInfo\",\"getInfoWithoutType\",\"getRegisteredShare\",\"getRemoteEntry\",\"getRemoteInfo\",\"helpers\",\"isStaticResourcesEqual\",\"loadScript\",\"loadScriptNode\",\"matchRemoteWithNameAndExpose\",\"parseRuntimeImage\",\"readRuntimeImage\",\"registerGlobalPlugins\",\"resetFederationGlobalInfo\",\"safeWrapper\",\"satisfy\",\"setGlobalFederationConstructor\",\"setGlobalFederationInstance\",\"types\"],\"runtime\":[\"Module\",\"ModuleFederation\",\"createInstance\",\"getInstance\",\"getRemoteEntry\",\"getRemoteInfo\",\"init\",\"loadRemote\",\"loadScript\",\"loadScriptNode\",\"loadShare\",\"loadShareSync\",\"preloadRemote\",\"registerGlobalPlugins\",\"registerPlugins\",\"registerRemotes\",\"registerShared\",\"satisfy\"],\"helpers\":[\"default\",\"global\",\"share\",\"utils\"]}}\n",
+    "stderr": ""
+  },
+  {
+    "name": "api:cjs",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer/api-worker.mjs",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer",
+      "cjs"
+    ],
+    "cwd": "newmetadata-proof/results/final-minor/consumer",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"format\":\"cjs\",\"metadataValueExports\":[\"RUNTIME_IMAGE\",\"parseRuntimeImage\",\"readRuntimeImage\",\"attachRuntimeImage\",\"assertRuntimeImageCompatible\"],\"metadataExportKinds\":{\"RUNTIME_IMAGE\":\"symbol\",\"parseRuntimeImage\":\"function\",\"readRuntimeImage\":\"function\",\"attachRuntimeImage\":\"function\",\"assertRuntimeImageCompatible\":\"function\"},\"malformedRejected\":11,\"compatibilityMismatchesRejected\":5,\"immutableDescriptorAndArrays\":\"passed\",\"attachReadCopies\":\"passed\",\"runtimeOptionsCopies\":\"passed\",\"instanceReuse\":\"same\",\"shared\":\"immutable-packed-shared\",\"namespaceShapes\":{\"root\":[\"CurrentGlobal\",\"FederationKernel\",\"Global\",\"Module\",\"ModuleFederation\",\"RUNTIME_IMAGE\",\"addGlobalSnapshot\",\"assert\",\"assertRuntimeImageCompatible\",\"attachRuntimeImage\",\"error\",\"getGlobalFederationConstructor\",\"getGlobalSnapshot\",\"getGlobalSnapshotInfoByModuleInfo\",\"getInfoWithoutType\",\"getRegisteredShare\",\"getRemoteEntry\",\"getRemoteInfo\",\"helpers\",\"isStaticResourcesEqual\",\"loadScript\",\"loadScriptNode\",\"matchRemoteWithNameAndExpose\",\"parseRuntimeImage\",\"readRuntimeImage\",\"registerGlobalPlugins\",\"resetFederationGlobalInfo\",\"safeWrapper\",\"satisfy\",\"setGlobalFederationConstructor\",\"setGlobalFederationInstance\",\"types\"],\"kernel\":[\"CurrentGlobal\",\"FederationKernel\",\"Global\",\"Module\",\"ModuleFederation\",\"RUNTIME_IMAGE\",\"addGlobalSnapshot\",\"assert\",\"assertRuntimeImageCompatible\",\"attachRuntimeImage\",\"error\",\"getGlobalFederationConstructor\",\"getGlobalSnapshot\",\"getGlobalSnapshotInfoByModuleInfo\",\"getInfoWithoutType\",\"getRegisteredShare\",\"getRemoteEntry\",\"getRemoteInfo\",\"helpers\",\"isStaticResourcesEqual\",\"loadScript\",\"loadScriptNode\",\"matchRemoteWithNameAndExpose\",\"parseRuntimeImage\",\"readRuntimeImage\",\"registerGlobalPlugins\",\"resetFederationGlobalInfo\",\"safeWrapper\",\"satisfy\",\"setGlobalFederationConstructor\",\"setGlobalFederationInstance\",\"types\"],\"barrel\":[\"CurrentGlobal\",\"FederationKernel\",\"Global\",\"Module\",\"ModuleFederation\",\"RUNTIME_IMAGE\",\"addGlobalSnapshot\",\"assert\",\"assertRuntimeImageCompatible\",\"attachRuntimeImage\",\"default\",\"error\",\"getGlobalFederationConstructor\",\"getGlobalSnapshot\",\"getGlobalSnapshotInfoByModuleInfo\",\"getInfoWithoutType\",\"getRegisteredShare\",\"getRemoteEntry\",\"getRemoteInfo\",\"helpers\",\"isStaticResourcesEqual\",\"loadScript\",\"loadScriptNode\",\"matchRemoteWithNameAndExpose\",\"parseRuntimeImage\",\"readRuntimeImage\",\"registerGlobalPlugins\",\"resetFederationGlobalInfo\",\"safeWrapper\",\"satisfy\",\"setGlobalFederationConstructor\",\"setGlobalFederationInstance\",\"types\"],\"runtime\":[\"Module\",\"ModuleFederation\",\"createInstance\",\"getInstance\",\"getRemoteEntry\",\"getRemoteInfo\",\"init\",\"loadRemote\",\"loadScript\",\"loadScriptNode\",\"loadShare\",\"loadShareSync\",\"preloadRemote\",\"registerGlobalPlugins\",\"registerPlugins\",\"registerRemotes\",\"registerShared\",\"satisfy\"],\"helpers\":[\"default\",\"global\",\"share\",\"utils\"]}}\n",
+    "stderr": ""
+  },
+  {
+    "name": "old7aca:extract-actual-core",
+    "command": [
+      "tar",
+      "-xzf",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/old-cores/7aca/runtime-core.tgz",
+      "--strip-components=1",
+      "-C",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/old7aca-consumer/node_modules/@module-federation/runtime-core"
+    ],
+    "cwd": "",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "old7aca:esm:minimum-contract+legacy",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/old7aca-consumer/old-core-worker.mjs",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/old7aca-consumer",
+      "esm"
+    ],
+    "cwd": "newmetadata-proof/results/final-minor/old7aca-consumer",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"format\":\"esm\",\"boundary\":\"actual bare import of published runtime root linked to old7aca core with actual kernel namespace and metadata helpers absent\",\"metadataAdmission\":{\"kind\":\"rejected\",\"name\":\"RuntimeImageMinimumContract\",\"firstUseMessage\":\"[RuntimeImageMinimumContract] The runtime core must provide parseRuntimeImage, readRuntimeImage, attachRuntimeImage and assertRuntimeImageCompatible for metadata-aware admission.\",\"reuseMessage\":\"[RuntimeImageMinimumContract] The runtime core must provide parseRuntimeImage, readRuntimeImage, attachRuntimeImage and assertRuntimeImageCompatible for metadata-aware admission.\",\"registeredInstancesUnchanged\":true,\"legacyOptionsUnchanged\":true},\"legacy\":{\"kind\":\"passed\",\"shared\":\"actual-oldcore-legacy-shared\",\"sameNonNullInstance\":true,\"runtimeImage\":\"absent\"}}\n",
+    "stderr": ""
+  },
+  {
+    "name": "old7aca:cjs:minimum-contract+legacy",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/old7aca-consumer/old-core-worker.mjs",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/old7aca-consumer",
+      "cjs"
+    ],
+    "cwd": "newmetadata-proof/results/final-minor/old7aca-consumer",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"format\":\"cjs\",\"boundary\":\"actual bare require of published runtime root linked to old7aca core with actual kernel namespace and metadata helpers absent\",\"metadataAdmission\":{\"kind\":\"rejected\",\"name\":\"RuntimeImageMinimumContract\",\"firstUseMessage\":\"[RuntimeImageMinimumContract] The runtime core must provide parseRuntimeImage, readRuntimeImage, attachRuntimeImage and assertRuntimeImageCompatible for metadata-aware admission.\",\"reuseMessage\":\"[RuntimeImageMinimumContract] The runtime core must provide parseRuntimeImage, readRuntimeImage, attachRuntimeImage and assertRuntimeImageCompatible for metadata-aware admission.\",\"registeredInstancesUnchanged\":true,\"legacyOptionsUnchanged\":true},\"legacy\":{\"kind\":\"passed\",\"shared\":\"actual-oldcore-legacy-shared\",\"sameNonNullInstance\":true,\"runtimeImage\":\"absent\"}}\n",
+    "stderr": ""
+  },
+  {
+    "name": "old94aa:compiled-namespace-minimum-contract+legacy",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/old-namespace-worker.mjs",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/results/final-minor/consumer",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old"
+    ],
+    "cwd": "newmetadata-proof/results/final-minor/consumer",
+    "expected": "pass",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"boundary\":\"webpack external maps root/kernel requests to the actual old94aa root namespace, without fabricating any export; this is not direct Node old-kernel support\",\"oldCoreEntry\":\"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-enhanced-bootstrap/compilers/old/node_modules/@module-federation/runtime-core/dist/index.cjs\",\"metadataAdmission\":{\"kind\":\"rejected\",\"name\":\"RuntimeImageMinimumContract\",\"message\":\"[RuntimeImageMinimumContract] The runtime core must provide parseRuntimeImage, readRuntimeImage, attachRuntimeImage and assertRuntimeImageCompatible for metadata-aware admission.\",\"kernelAbsent\":true,\"registeredInstancesUnchanged\":true},\"legacy\":{\"kind\":\"passed\",\"shared\":\"actual-old94-legacy-shared\"},\"errors\":[],\"warnings\":[]}\n",
+    "stderr": ""
+  },
+  {
+    "name": "namespace:esm-cjs-public-api-parity",
+    "outcome": {
+      "kind": "passed"
+    },
+    "shapes": [
+      {
+        "root": [
+          "CurrentGlobal",
+          "FederationKernel",
+          "Global",
+          "Module",
+          "ModuleFederation",
+          "RUNTIME_IMAGE",
+          "addGlobalSnapshot",
+          "assert",
+          "assertRuntimeImageCompatible",
+          "attachRuntimeImage",
+          "error",
+          "getGlobalFederationConstructor",
+          "getGlobalSnapshot",
+          "getGlobalSnapshotInfoByModuleInfo",
+          "getInfoWithoutType",
+          "getRegisteredShare",
+          "getRemoteEntry",
+          "getRemoteInfo",
+          "helpers",
+          "isStaticResourcesEqual",
+          "loadScript",
+          "loadScriptNode",
+          "matchRemoteWithNameAndExpose",
+          "parseRuntimeImage",
+          "readRuntimeImage",
+          "registerGlobalPlugins",
+          "resetFederationGlobalInfo",
+          "safeWrapper",
+          "satisfy",
+          "setGlobalFederationConstructor",
+          "setGlobalFederationInstance",
+          "types"
+        ],
+        "kernel": [
+          "CurrentGlobal",
+          "FederationKernel",
+          "RUNTIME_IMAGE",
+          "assertRuntimeImageCompatible",
+          "attachRuntimeImage",
+          "getGlobalSnapshotInfoByModuleInfo",
+          "getRemoteEntry",
+          "parseRuntimeImage",
+          "readRuntimeImage",
+          "setGlobalFederationInstance"
+        ],
+        "barrel": [
+          "CurrentGlobal",
+          "FederationKernel",
+          "Global",
+          "Module",
+          "ModuleFederation",
+          "RUNTIME_IMAGE",
+          "addGlobalSnapshot",
+          "assert",
+          "assertRuntimeImageCompatible",
+          "attachRuntimeImage",
+          "default",
+          "error",
+          "getGlobalFederationConstructor",
+          "getGlobalSnapshot",
+          "getGlobalSnapshotInfoByModuleInfo",
+          "getInfoWithoutType",
+          "getRegisteredShare",
+          "getRemoteEntry",
+          "getRemoteInfo",
+          "helpers",
+          "isStaticResourcesEqual",
+          "loadScript",
+          "loadScriptNode",
+          "matchRemoteWithNameAndExpose",
+          "parseRuntimeImage",
+          "readRuntimeImage",
+          "registerGlobalPlugins",
+          "resetFederationGlobalInfo",
+          "safeWrapper",
+          "satisfy",
+          "setGlobalFederationConstructor",
+          "setGlobalFederationInstance",
+          "types"
+        ],
+        "runtime": [
+          "Module",
+          "ModuleFederation",
+          "createInstance",
+          "getInstance",
+          "getRemoteEntry",
+          "getRemoteInfo",
+          "init",
+          "loadRemote",
+          "loadScript",
+          "loadScriptNode",
+          "loadShare",
+          "loadShareSync",
+          "preloadRemote",
+          "registerGlobalPlugins",
+          "registerPlugins",
+          "registerRemotes",
+          "registerShared",
+          "satisfy"
+        ],
+        "helpers": [
+          "default",
+          "global",
+          "share",
+          "utils"
+        ]
+      },
+      {
+        "root": [
+          "CurrentGlobal",
+          "FederationKernel",
+          "Global",
+          "Module",
+          "ModuleFederation",
+          "RUNTIME_IMAGE",
+          "addGlobalSnapshot",
+          "assert",
+          "assertRuntimeImageCompatible",
+          "attachRuntimeImage",
+          "error",
+          "getGlobalFederationConstructor",
+          "getGlobalSnapshot",
+          "getGlobalSnapshotInfoByModuleInfo",
+          "getInfoWithoutType",
+          "getRegisteredShare",
+          "getRemoteEntry",
+          "getRemoteInfo",
+          "helpers",
+          "isStaticResourcesEqual",
+          "loadScript",
+          "loadScriptNode",
+          "matchRemoteWithNameAndExpose",
+          "parseRuntimeImage",
+          "readRuntimeImage",
+          "registerGlobalPlugins",
+          "resetFederationGlobalInfo",
+          "safeWrapper",
+          "satisfy",
+          "setGlobalFederationConstructor",
+          "setGlobalFederationInstance",
+          "types"
+        ],
+        "kernel": [
+          "CurrentGlobal",
+          "FederationKernel",
+          "Global",
+          "Module",
+          "ModuleFederation",
+          "RUNTIME_IMAGE",
+          "addGlobalSnapshot",
+          "assert",
+          "assertRuntimeImageCompatible",
+          "attachRuntimeImage",
+          "error",
+          "getGlobalFederationConstructor",
+          "getGlobalSnapshot",
+          "getGlobalSnapshotInfoByModuleInfo",
+          "getInfoWithoutType",
+          "getRegisteredShare",
+          "getRemoteEntry",
+          "getRemoteInfo",
+          "helpers",
+          "isStaticResourcesEqual",
+          "loadScript",
+          "loadScriptNode",
+          "matchRemoteWithNameAndExpose",
+          "parseRuntimeImage",
+          "readRuntimeImage",
+          "registerGlobalPlugins",
+          "resetFederationGlobalInfo",
+          "safeWrapper",
+          "satisfy",
+          "setGlobalFederationConstructor",
+          "setGlobalFederationInstance",
+          "types"
+        ],
+        "barrel": [
+          "CurrentGlobal",
+          "FederationKernel",
+          "Global",
+          "Module",
+          "ModuleFederation",
+          "RUNTIME_IMAGE",
+          "addGlobalSnapshot",
+          "assert",
+          "assertRuntimeImageCompatible",
+          "attachRuntimeImage",
+          "default",
+          "error",
+          "getGlobalFederationConstructor",
+          "getGlobalSnapshot",
+          "getGlobalSnapshotInfoByModuleInfo",
+          "getInfoWithoutType",
+          "getRegisteredShare",
+          "getRemoteEntry",
+          "getRemoteInfo",
+          "helpers",
+          "isStaticResourcesEqual",
+          "loadScript",
+          "loadScriptNode",
+          "matchRemoteWithNameAndExpose",
+          "parseRuntimeImage",
+          "readRuntimeImage",
+          "registerGlobalPlugins",
+          "resetFederationGlobalInfo",
+          "safeWrapper",
+          "satisfy",
+          "setGlobalFederationConstructor",
+          "setGlobalFederationInstance",
+          "types"
+        ],
+        "runtime": [
+          "Module",
+          "ModuleFederation",
+          "createInstance",
+          "getInstance",
+          "getRemoteEntry",
+          "getRemoteInfo",
+          "init",
+          "loadRemote",
+          "loadScript",
+          "loadScriptNode",
+          "loadShare",
+          "loadShareSync",
+          "preloadRemote",
+          "registerGlobalPlugins",
+          "registerPlugins",
+          "registerRemotes",
+          "registerShared",
+          "satisfy"
+        ],
+        "helpers": [
+          "default",
+          "global",
+          "share",
+          "utils"
+        ]
+      }
+    ],
+    "kernelPolicy": "Existing require /kernel -> full index namespace remains; both formats expose the five identical metadata API values"
+  }
+]

@@ -1,0 +1,11 @@
+const assert = require('node:assert/strict');
+const root = './rfc5128-runtime-image/packages/';
+const core = require(root + 'runtime-core/dist/index.cjs');
+const runtime = require(root + 'runtime/dist/index.cjs');
+const inject = require(root + 'runtime-plugins/inject-external-runtime-core-plugin/dist/index.cjs');
+const image = core.parseRuntimeImage({contract:1,compatibilityId:'order',target:'node',entryLoadingIdentity:'loader',required:['shared'],available:['shared'],forbidden:[]});
+const before = {core:globalThis._FEDERATION_RUNTIME_CORE,from:globalThis._FEDERATION_RUNTIME_CORE_FROM,instances:[...core.CurrentGlobal.__FEDERATION__.__INSTANCES__]};
+assert.throws(() => runtime.createInstance({name:'order',remotes:[],runtimeImage:image,plugins:[inject({runtimeImage:image}),{name:'bad-later-hook',beforeInit(args){return {...args,userOptions:{...args.userOptions,runtimeImage:null}};}}]}),/RuntimeImageContract/);
+console.log(JSON.stringify({rejected:true,coreSlotUnchanged:globalThis._FEDERATION_RUNTIME_CORE===before.core,fromSlotUnchanged:globalThis._FEDERATION_RUNTIME_CORE_FROM===before.from,instancesUnchanged:core.CurrentGlobal.__FEDERATION__.__INSTANCES__.length===before.instances.length}));
+assert.equal(globalThis._FEDERATION_RUNTIME_CORE,before.core,'Rejected metadata hook must not publish a core');
+assert.equal(globalThis._FEDERATION_RUNTIME_CORE_FROM,before.from,'Rejected metadata hook must not publish metadata');

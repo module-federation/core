@@ -1,0 +1,5 @@
+[ Federation Runtime ] Runtime image metadata is missing. Reuse stays allowed until a mismatch is known.
+[ Federation Runtime ] Runtime image metadata is missing. Reuse stays allowed until a mismatch is known.
+{"actualSource":true,"actualOldLogger":true,"copiedFrozenArrays":"all three, caller mutation isolated","attachmentCopy":true,"requiredAvailableUnionBothSides":true,"forbiddenChecksProviderUnion":true,"scalarIdentitiesExact":true,"bothAbsent":"UNCHECKED allow","oneAbsentBothDirections":"UNCHECKED warn and allow","malformedBeforeAbsentComparisonBothDirections":true}
+(node:84555) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)

@@ -1,0 +1,16 @@
+
+> @module-federation/inject-external-runtime-core-plugin@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/runtime-plugins/inject-external-runtime-core-plugin
+> NODE_OPTIONS=--experimental-vm-modules pnpm exec jest --config jest.config.cjs --runInBand
+
+(node:93352) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS inject-external-runtime-core-plugin __tests__/esm-import.spec.ts
+  @module-federation/inject-external-runtime-core-plugin
+    ✓ loads from the ESM entry and runs beforeInit without a runtime-core default export (406 ms)
+    ✓ loads from the CJS entry and runs beforeInit (179 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        0.914 s
+Ran all test suites.

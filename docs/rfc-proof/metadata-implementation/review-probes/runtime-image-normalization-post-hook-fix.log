@@ -1,0 +1,16 @@
+{
+  "oldProviderHead": "7aca6f70d415d110dd5419ace5b4c6a566c902c9",
+  "validRealBuiltKernel": true,
+  "legacyBothAbsent": "UNCHECKED and allowed",
+  "actualConstructorAndReusePassed": true,
+  "knownMetadataMissingApi": "RuntimeImageMinimumContract before construction",
+  "statePreserved": true,
+  "scope": "current actual helper source stripped by Node24 against old built core namespace; not a compiled external bootstrap proof"
+}
+{"partialMetadataApi":"real new parser plus real old namespace; read/attach/assert missing","constructorsCalledBeforeNamedRejection":0,"shareStateUnchanged":true}
+{"configuredPluginFamilyGate":true,"directImageAbsent":true,"existingFamily":"family-A","configuredFamily":"family-C","constructorsCalled":0,"publicationAndShareStateUnchanged":true,"scope":"actual current generic/image/injector source with real old constructor and metadata associations"}
+{"producerAgainstRealOldPublishedNamespace":true,"constructorsCalledBeforeNamedRejection":0,"shareStateUnchanged":true}
+{"directRequestAgainstSmallerPluginImage":"missing capability remote","constructorsCalled":0,"shareStateUnchanged":true}
+{"equivalentSetClaimsWithReorderingAndDuplicates":"first structural admission allowed","actualConstructorCalledAfterValidation":true,"finalImageFrozen":true}
+(node:84557) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)

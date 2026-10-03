@@ -1,0 +1,32 @@
+{
+  "head": "0d7a700b7469487d7347007e71825b24719296b7",
+  "base": "7aca6f70d415d110dd5419ace5b4c6a566c902c9",
+  "status": "",
+  "files": {
+    ".changeset/rfc5128-runtime-image-admission.md": "2c648c6a1e251450b049e1d6bf237fb45fe4ba95afc3add6c43cf093fd683bb3",
+    "packages/enhanced/src/lib/container/ModuleFederationPlugin.ts": "cbb4a5357c0ffcddd16206c8e578aa8c0327c1a015189b5ba5de3704745490e1",
+    "packages/enhanced/test/unit/container/ModuleFederationPlugin.runtime-image.test.ts": "312253fc729c62f1219de9ace9474efcdebf81ad3d12f8828726153d96085c70",
+    "packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts": "193e3e68ae538f6b4bc083721ba8e007f9199a1280be9b759991390f1b81328c",
+    "packages/rspack/__tests__/RuntimeImageProfile.spec.ts": "ab78d660a69fa2a625fe07f8d08526e09e38c93097ce05c236929fbc3be25930",
+    "packages/rspack/__tests__/external-runtime-fixture/metadata-probe.mjs": "1b5ace9a224d11fe82e57316c9b70876391e2b109861992db23603df0a7c93bb",
+    "packages/rspack/__tests__/runtimeImage.spec.ts": "f4b5b1735ae8ff471b08a44f064afcb8650267941cce2dab9c055b4a17c69248",
+    "packages/rspack/src/ExternalRuntimePlugin.ts": "7c39f5fd55c93deefffd8fb914a753092654f71127574f87c4c6c61648336d46",
+    "packages/rspack/src/ModuleFederationPlugin.ts": "be742e3c17a8791215b414b64df496e19f8422092ac7a7dee2b6fd3a8706c728",
+    "packages/rspack/src/RuntimeImageProfile.ts": "20b0def144f982dc2fc2a387ace92c12a96f927e9d6ee56457a478af3933d154",
+    "packages/runtime-core/__tests__/runtime-image.spec.ts": "2f796bbd6ae130cdb74cd977bbc172977c60db6e084d2cf7d2a1004048e08553",
+    "packages/runtime-core/src/core.ts": "c750e7cc4dcbd45034af4b811436c3b1d9501d3ab4b6d9c707f47c1642356b62",
+    "packages/runtime-core/src/index.ts": "e99b97015504f7b79a6b00f0c28c9e8903122aeaa6fa68597ce67d654a0589f3",
+    "packages/runtime-core/src/kernel.ts": "bcf57fec6da80d382bff9a7afa4eececbafbd9c3d50c5f143b034ac37ffd4ef0",
+    "packages/runtime-core/src/runtimeImage.ts": "6ff0505fe24a5dc15bc612d74de1d5657c1fea2c8152d9b950d3ee10b1dbafe3",
+    "packages/runtime-core/src/shared/index.ts": "81e14d552503d2bf3b3f37646bc12f69187904d77d245fc4e7ea2b866eeb8046",
+    "packages/runtime-core/src/type/config.ts": "93ed4a743bb7d19ed8572746bdc62fa8a7bcdb406d81494c73e06c18c74c844e",
+    "packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts": "96649fc82c9e43f6a8252921448e2327a5c157a9c12fdf1d33178dff822d0dd3",
+    "packages/runtime/__tests__/runtime-image.spec.ts": "2f2ecac4ff23e4df1d7bf7dd082bc5e3ebe2964b968b3651d35ac6ced8dabd85",
+    "packages/runtime/src/instance.ts": "f564051326da0847961af670f0e1a7fb813e8826bac0ddbebd6ca243d42a889a",
+    "packages/sdk/src/types/plugins/ModuleFederationPlugin.ts": "21929f6228b5d3e0d08c282a3edca3fc13aac50bf59461a7d7eac4c3a24ef0e1",
+    "packages/webpack-bundler-runtime/__tests__/initContainerEntry.array.spec.ts": "6d9cb32ee00d65f79d33b1bb6d9ce302e02d563dfbbe1b84d84111f4a96c7289",
+    "packages/webpack-bundler-runtime/__tests__/initContainerEntry.non-array.spec.ts": "c98b165f40ec7b87b024dd2fc91b54abbd0f44671bc220744849ec1477de3ddb",
+    "packages/webpack-bundler-runtime/__tests__/initContainerEntry.runtime-image.spec.ts": "3e78ce19f6a9d55b5ba3ec337feba020a033fc78967a840625384bcaa830dfd4",
+    "packages/webpack-bundler-runtime/src/initContainerEntry.ts": "c1f339bd74450b059990348c2edddceac92e3528c5ea61d665ee7e2a5a1ddfb7"
+  }
+}

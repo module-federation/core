@@ -1,0 +1,23 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ '3cf6ff1050089c8bd500ab044653116ee2f22b23'
+- '89dc3d4397cf97e45afe82c60e6279f93786f7f0'
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/newmetadata-proof/audit.mjs:48:10
+    at ModuleJob.run (node:internal/modules/esm/module_job:437:25)
+    at async node:internal/modules/esm/loader:639:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '3cf6ff1050089c8bd500ab044653116ee2f22b23',
+  expected: '89dc3d4397cf97e45afe82c60e6279f93786f7f0',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

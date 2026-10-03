@@ -1,0 +1,2 @@
+{"rejected":true,"coreSlotUnchanged":false,"fromSlotUnchanged":false,"instancesUnchanged":true}
+Actual Node24 assertion exit1: rejected metadata hook must not publish a core. Full namespace assertion dump omitted.

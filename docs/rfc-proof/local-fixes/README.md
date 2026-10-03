@@ -1,5 +1,7 @@
 # Local fixes and review evidence
 
+2026-10-03: [The reviewed RFC5128 metadata alternative is now implemented and verified locally](../metadata-implementation/README.md). Its source pushes remain held; the linked patches and final minor/major evidence supersede the earlier metadata proposal/pending status. Earlier reports remain historical snapshots.
+
 Three bounded source fixes are committed locally and verified. Source and PR pushes remain held because PR synchronization triggers package/website previews. Only this evidence branch is published. RFC5128 metadata admission remains incomplete and its implementation awaits the parent's independent review.
 
 ## Review deliverables

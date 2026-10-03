@@ -1,0 +1,43 @@
+{"mode":"compatible","admission":"compatible","constructorIdentity":true,"sharedIdentity":true,"fileRemote":true,"sdkRemote":true,"missingMetadataWarning":false}
+{"mode":"captured-defines","admission":"compatible","constructorIdentity":true,"sharedIdentity":true,"fileRemote":true,"sdkRemote":true,"missingMetadataWarning":false}
+{"mode":"both-absent","admission":"unchecked","constructorIdentity":true,"sharedIdentity":true,"fileRemote":true,"sdkRemote":true,"missingMetadataWarning":false}
+{"mode":"provider-only","admission":"unchecked","constructorIdentity":true,"sharedIdentity":true,"fileRemote":true,"sdkRemote":true,"missingMetadataWarning":true}
+{"mode":"consumer-only","admission":"unchecked","constructorIdentity":true,"sharedIdentity":true,"fileRemote":true,"sdkRemote":true,"missingMetadataWarning":true}
+{"mode":"abi","rejected":"runtime state","publicationAndStateUnchanged":true}
+{"mode":"target","rejected":"runtime image","publicationAndStateUnchanged":true}
+{"mode":"loader","rejected":"entry loader","publicationAndStateUnchanged":true}
+{"mode":"capability","rejected":"missing capability remote","publicationAndStateUnchanged":true}
+{"mode":"forbidden","admission":"compatible","constructorIdentity":true,"sharedIdentity":true,"fileRemote":true,"sdkRemote":true,"missingMetadataWarning":false}
+{"mode":"options-forbidden","rejected":"forbidden capability snapshot","publicationAndStateUnchanged":true}
+{"mode":"supplied-late-hook","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"transport-tagged","rejected":"[RuntimeImageTransportBoundary]","publicationAndStateUnchanged":true}
+{"mode":"transport-legacy","admission":"unchecked","constructorIdentity":true,"sharedIdentity":true,"fileRemote":true,"sdkRemote":true,"missingMetadataWarning":false}
+{"mode":"publication-info-null","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"publication-info-array","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"malformed-info-null","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"malformed-info-array","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"malformed-null","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"publication-null","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"supplied-config-null","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"supplied-options-null","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"malformed-array","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"publication-array","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"supplied-config-array","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"supplied-options-array","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"malformed-version","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"publication-version","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"supplied-config-version","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"supplied-options-version","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"malformed-field","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"publication-field","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"supplied-config-field","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"supplied-options-field","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"malformed-sparse","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"publication-sparse","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"supplied-config-sparse","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"supplied-options-sparse","rejected":"[RuntimeImageContract]","publicationAndStateUnchanged":true}
+{"mode":"root-ModuleFederation","rejected":"[ExternalRuntimeKernelContract]","publicationAndStateUnchanged":true}
+{"mode":"root-getGlobalFederationConstructor","rejected":"[ExternalRuntimeKernelContract]","publicationAndStateUnchanged":true}
+{"mode":"root-setGlobalFederationConstructor","rejected":"[ExternalRuntimeKernelContract]","publicationAndStateUnchanged":true}
+{"mode":"root-Global","rejected":"[RuntimeImageMinimumContract]","publicationAndStateUnchanged":true}
+{"compiled":12,"processes":43,"directRootGuard":true,"coreCounts":{"producer":41,"provider-untagged":41,"provider-tagged":41,"remote-untagged":0,"remote-tagged":0,"consumer-untagged":0,"consumer-tagged":0,"consumer-forbidden":0,"consumer-commonjs":0,"direct-commonjs":0,"provider-captured":41,"direct-root":0}}

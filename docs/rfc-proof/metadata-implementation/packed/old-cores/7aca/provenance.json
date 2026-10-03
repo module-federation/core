@@ -1,0 +1,8 @@
+{
+  "head": "7aca6f70d415d110dd5419ace5b4c6a566c902c9",
+  "package": "@module-federation/runtime-core",
+  "mappedSources": 74,
+  "tarball": "newmetadata-proof/old-cores/7aca/runtime-core.tgz",
+  "sha256": "bae2e54c46475d6deddd60b648e9dc12aeb3dbca7cf53d1b5c9bd9a7ebd6debc",
+  "artifactOrigin": "Existing emitted output matched every source-map input; no build during capture"
+}

@@ -1,0 +1,343 @@
+{
+  "algorithm": "SHA256",
+  "currentMinorHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+  "currentMajorHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+  "files": [
+    {
+      "path": "newmetadata-proof/README.md",
+      "sha256": "77238c9b10b859332cf4ac478e6e8940bbb3cc7f203acbd0a29354dbfc4d1a76",
+      "bytes": 5784,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/final-proof-report.md",
+      "sha256": "4a8b4fd53217d665e7a15e525f36ad076f355fed711b4be4c7ad89c8e797846b",
+      "bytes": 9750,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/prove.mjs",
+      "sha256": "7adae8494825b12da3e616c5cdd96af751e039ad81c0611856861f22644301c0",
+      "bytes": 12636,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/audit.mjs",
+      "sha256": "0bf58699ff8409657bf65e288f227b0f1006d221e0a7b2716516e23fdee0cfbf",
+      "bytes": 3854,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/api-worker.mjs",
+      "sha256": "875590e90d0ada62163fd223eaa9887e78885028a66e451f7abe8147ce01b2cd",
+      "bytes": 6507,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/old-core-worker.mjs",
+      "sha256": "e64cb0c6c8d1a96ab181ed41a92a813dd1c13b69affcd98fcdcf7a02394aa132",
+      "bytes": 3692,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/old-namespace-worker.mjs",
+      "sha256": "9bd1004957e69db0b9b3592860971ccbb402325e240d3d0bb0c26c5440dd5686",
+      "bytes": 3713,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/consumer.mts",
+      "sha256": "d7f2a7c5c1c773883e56a45b43786b125c8db63c61690fe56e78e4013352e2d4",
+      "bytes": 1388,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/consumer.cts",
+      "sha256": "d7f2a7c5c1c773883e56a45b43786b125c8db63c61690fe56e78e4013352e2d4",
+      "bytes": 1388,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/consumer-negative.mts",
+      "sha256": "433fa720196b62cf7dfe821bc33a25c577c74d8c664ac4adcb68a6bbc68ac241",
+      "bytes": 557,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/final-minor-proof.log",
+      "sha256": "aa332117dc3ec921468ac6109738a2a41efff486e2996c2b12f4c9279cdc025e",
+      "bytes": 1000,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/final-major-complete-proof.log",
+      "sha256": "2ed6211195713adbb34bc204a9884eeca513e1bab9e4a9375533688aa7ff0858",
+      "bytes": 1207,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/final-artifact-audit.log",
+      "sha256": "5cfd3b6437fc8b6105939d559dfa89e608d9b7da35a382439bd8ae8465004a9d",
+      "bytes": 57,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/final-artifact-audit.json",
+      "sha256": "25de6e8dbdeb77e0e46b4096a49b6abf6223f06cc7243fe2766c77ff857976f5",
+      "bytes": 10809,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/final-major-followup-equality.json",
+      "sha256": "0989ec3cfa45065cf303169ce809c308f2cc05423436343fec514356602b358f",
+      "bytes": 6719,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/old-cores/7aca/provenance.json",
+      "sha256": "d044190a206cc004e2f664903863fd7fac7b212e253802f1093626fd060bf95d",
+      "bytes": 377,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/results/final-minor/results.json",
+      "sha256": "554b8f332be8bb94ab9fbdfb9b73c4d57e677984aea1e57c5f24375206d73994",
+      "bytes": 45299,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/results/final-minor/provenance.json",
+      "sha256": "87168e8c08a9fb726a86a8da71d3087241628998b9fa745ba4a3e92111c4a502",
+      "bytes": 5373,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-complete/results.json",
+      "sha256": "aa16e2e4dbaa252af368812418f3482c2e0223130207ba9e9402542345986392",
+      "bytes": 45620,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-complete/provenance.json",
+      "sha256": "9d72c7c8d6f259edc35157e71aaf8a290e097c458a73280bfca490b49f8d8840",
+      "bytes": 5445,
+      "publication": "lean evidence"
+    },
+    {
+      "path": "newmetadata-proof/results/final-minor/tarballs/runtime.tgz",
+      "sha256": "13834467f9736932e4f2a02aa1050adbee5bc14a01c723e69caa91fa66eb4632",
+      "bytes": 10768,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-minor/tarballs/error-codes.tgz",
+      "sha256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+      "bytes": 8540,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-minor/tarballs/webpack-bundler-runtime.tgz",
+      "sha256": "ba8c6f4435e28b52e851f764e572e70fe506336053f7458ca5d933d4b061f599",
+      "bytes": 35610,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-minor/tarballs/sdk.tgz",
+      "sha256": "c87d3e34e0778d0b2674119446faa23cabbab6a0a0e591e76807f18c5cd419d6",
+      "bytes": 63546,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-minor/tarballs/inject-external-runtime-core-plugin.tgz",
+      "sha256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a",
+      "bytes": 6217,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-minor/tarballs/runtime-tools.tgz",
+      "sha256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17",
+      "bytes": 3681,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-minor/tarballs/runtime-core.tgz",
+      "sha256": "8fd44351a52af972453c4885c2e7004a40f0c27a4ace0253f0b009ac0334c9b7",
+      "bytes": 185716,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major/tarballs/runtime.tgz",
+      "sha256": "2921d463948d452091e0209b99fdc320c3f9e427307dfe142d5bac0ed5c63a4d",
+      "bytes": 10523,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major/tarballs/error-codes.tgz",
+      "sha256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+      "bytes": 8540,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major/tarballs/webpack-bundler-runtime.tgz",
+      "sha256": "bdd3e9b42b540e601d4c1188127b5461b74a2195ec600731800c47528c10182b",
+      "bytes": 34725,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major/tarballs/sdk.tgz",
+      "sha256": "0a762a63845a70048575cb37c5d67278e18cc793ff55aadbeac2c5e3753ca227",
+      "bytes": 63390,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major/tarballs/inject-external-runtime-core-plugin.tgz",
+      "sha256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a",
+      "bytes": 6217,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major/tarballs/runtime-tools.tgz",
+      "sha256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17",
+      "bytes": 3681,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major/tarballs/runtime-core.tgz",
+      "sha256": "b4bd5faff32aa7673c57c86cad366a5628d61e6e78f2a3df923cfd6187e01d34",
+      "bytes": 183959,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-current/tarballs/runtime.tgz",
+      "sha256": "037bb33c143e67f6024ebc2510d5972110cbee201f0ba24c68cc94b9971ac4e7",
+      "bytes": 10523,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-current/tarballs/error-codes.tgz",
+      "sha256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+      "bytes": 8540,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-current/tarballs/webpack-bundler-runtime.tgz",
+      "sha256": "bdd3e9b42b540e601d4c1188127b5461b74a2195ec600731800c47528c10182b",
+      "bytes": 34725,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-current/tarballs/sdk.tgz",
+      "sha256": "0a762a63845a70048575cb37c5d67278e18cc793ff55aadbeac2c5e3753ca227",
+      "bytes": 63390,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-current/tarballs/inject-external-runtime-core-plugin.tgz",
+      "sha256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a",
+      "bytes": 6217,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-current/tarballs/runtime-tools.tgz",
+      "sha256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17",
+      "bytes": 3681,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-current/tarballs/runtime-core.tgz",
+      "sha256": "b4bd5faff32aa7673c57c86cad366a5628d61e6e78f2a3df923cfd6187e01d34",
+      "bytes": 183959,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-complete/tarballs/runtime.tgz",
+      "sha256": "f9eac4f1a8372ce5e59a7fc8bacc4bf6f8c0b8287ac9ed138b3f22788756c92c",
+      "bytes": 10520,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-complete/tarballs/error-codes.tgz",
+      "sha256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+      "bytes": 8540,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-complete/tarballs/webpack-bundler-runtime.tgz",
+      "sha256": "92ba6ac7026204233b45928dcddb7026e9c301e1fc579d6f693e62637189761f",
+      "bytes": 34724,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-complete/tarballs/sdk.tgz",
+      "sha256": "0a762a63845a70048575cb37c5d67278e18cc793ff55aadbeac2c5e3753ca227",
+      "bytes": 63390,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-complete/tarballs/inject-external-runtime-core-plugin.tgz",
+      "sha256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a",
+      "bytes": 6217,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-complete/tarballs/runtime-tools.tgz",
+      "sha256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17",
+      "bytes": 3681,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-complete/tarballs/runtime-core.tgz",
+      "sha256": "b4bd5faff32aa7673c57c86cad366a5628d61e6e78f2a3df923cfd6187e01d34",
+      "bytes": 183959,
+      "publication": "local actual artifact; fingerprint public"
+    },
+    {
+      "path": "newmetadata-proof/old-cores/7aca/runtime-core.tgz",
+      "sha256": "bae2e54c46475d6deddd60b648e9dc12aeb3dbca7cf53d1b5c9bd9a7ebd6debc",
+      "bytes": 177403,
+      "publication": "preserved historical/control evidence"
+    },
+    {
+      "path": "newmetadata-proof/final-artifact-audit-before-counter-fix.json",
+      "sha256": "a6c4eaf18a2d6f53efed42cea878f57f6762d3cf2d43319600666f5515c77d9a",
+      "bytes": 10683,
+      "publication": "preserved historical/control evidence"
+    },
+    {
+      "path": "newmetadata-proof/final-artifact-audit-moving-head-control.log",
+      "sha256": "7f108585f6ccd70f3b2201fc7eb808ba03aa3a418ddc6ca7aa699ed3e62057fa",
+      "bytes": 786,
+      "publication": "preserved historical/control evidence"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major/results.json",
+      "sha256": "d64d7561ccf7791de352f5356cf40e48e8de83727f68a46731979e4950941c7b",
+      "bytes": 45215,
+      "publication": "preserved historical/control evidence"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major/provenance.json",
+      "sha256": "e2fcb1f0357c4ebd16e2d9c945a954e984f5c6aff90480cc2d28d59c7a497ba6",
+      "bytes": 5373,
+      "publication": "preserved historical/control evidence"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-current/results.json",
+      "sha256": "c14ead70bf7988e5d3ee5a0a79478977e322d4c0a9be5437683e0b8be4e3a4f3",
+      "bytes": 45575,
+      "publication": "preserved historical/control evidence"
+    },
+    {
+      "path": "newmetadata-proof/results/final-major-current/provenance.json",
+      "sha256": "8e4233ca364b7989f9baf979c3c4f04af4a6e44cbda71aef61b0c7a16a83c05a",
+      "bytes": 5437,
+      "publication": "preserved historical/control evidence"
+    },
+    {
+      "path": "newmetadata-proof/final-major-intermediate-equality.json",
+      "sha256": "b3b4f48cb8b896f399b3382810e0fc4abda14ef3d8c4be057446a61df4b7b6a8",
+      "bytes": 2797,
+      "publication": "preserved historical/control evidence"
+    }
+  ]
+}

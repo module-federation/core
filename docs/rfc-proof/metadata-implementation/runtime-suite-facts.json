@@ -1,0 +1,156 @@
+{
+  "date": "2026-10-03",
+  "node": "24.15.0",
+  "pnpm": "10.28.0",
+  "heads_at_initial_verification": {
+    "stack5141": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "stack5142": "acf69e8e6ae37bcc23bef4d91395f6e12f795b8a"
+  },
+  "heads_at_final_verification": {
+    "stack5141": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "stack5142": "3cf6ff1050089c8bd500ab044653116ee2f22b23"
+  },
+  "head_change_authorization": "Parent changed major only to correct unrelated Rspack metadata test fixture during verification",
+  "head_deltas": {
+    "stack5141": [],
+    "stack5142": [
+      "packages/rspack/__tests__/external-runtime-fixture/metadata-probe.mjs"
+    ]
+  },
+  "counts": {
+    "stack5141": {
+      "core": {
+        "files": 19,
+        "passed": 201,
+        "failed": 0,
+        "skipped": 0,
+        "snapshots": {
+          "added": 0,
+          "updated": 0,
+          "unmatched": 0,
+          "removed": 0,
+          "unchecked": 0
+        }
+      },
+      "runtime": {
+        "files": 15,
+        "passed": 101,
+        "failed": 0,
+        "skipped": 0,
+        "snapshots": {
+          "added": 0,
+          "updated": 0,
+          "unmatched": 0,
+          "removed": 0,
+          "unchecked": 0
+        }
+      },
+      "wbr": {
+        "files": 14,
+        "passed": 129,
+        "failed": 0,
+        "skipped": 0,
+        "snapshots_total": 0
+      },
+      "injector": {
+        "files": 1,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "snapshots_total": 0
+      }
+    },
+    "stack5142": {
+      "core": {
+        "files": 19,
+        "passed": 201,
+        "failed": 0,
+        "skipped": 0,
+        "snapshots": {
+          "added": 0,
+          "updated": 0,
+          "unmatched": 0,
+          "removed": 0,
+          "unchecked": 0
+        }
+      },
+      "runtime": {
+        "files": 15,
+        "passed": 102,
+        "failed": 0,
+        "skipped": 0,
+        "snapshots": {
+          "added": 0,
+          "updated": 0,
+          "unmatched": 0,
+          "removed": 0,
+          "unchecked": 0
+        }
+      },
+      "wbr": {
+        "files": 14,
+        "passed": 131,
+        "failed": 0,
+        "skipped": 0,
+        "snapshots_total": 0
+      },
+      "injector": {
+        "files": 1,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "snapshots_total": 0
+      }
+    }
+  },
+  "owned_package_config_hashes": {
+    "stack5141": {
+      "paths": [
+        "packages/runtime-core",
+        "packages/runtime",
+        "packages/webpack-bundler-runtime",
+        "packages/runtime-plugins/inject-external-runtime-core-plugin",
+        "packages/sdk",
+        "packages/error-codes",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "turbo.json",
+        "tsconfig.base.json",
+        "jest.config.js",
+        "AGENTS.md"
+      ],
+      "start_sha256": "1893ba17a591174442a21ea9a5c2e8940345caaec0499181906931e3de2e3cc2",
+      "current_sha256": "1893ba17a591174442a21ea9a5c2e8940345caaec0499181906931e3de2e3cc2",
+      "equal": true
+    },
+    "stack5142": {
+      "paths": [
+        "packages/runtime-core",
+        "packages/runtime",
+        "packages/webpack-bundler-runtime",
+        "packages/runtime-plugins/inject-external-runtime-core-plugin",
+        "packages/sdk",
+        "packages/error-codes",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "turbo.json",
+        "tsconfig.base.json",
+        "jest.config.js",
+        "AGENTS.md"
+      ],
+      "start_sha256": "4bbc4c3e62139374b28bd78cf2b905a033d1b2026b027ea8b0b252b113354434",
+      "current_sha256": "4bbc4c3e62139374b28bd78cf2b905a033d1b2026b027ea8b0b252b113354434",
+      "equal": true
+    }
+  },
+  "unexpected_test_failures": 0,
+  "skipped_tests": 0,
+  "snapshot_updates": 0,
+  "source_preservation": "Both worktrees clean; minor unchanged; tested package/config trees identical at major initial/final heads",
+  "builds_run": false,
+  "source_edits": false,
+  "pushes": false,
+  "logs_pattern": "metadata-stack514X-{core,runtime,wbr,injector}-tests.log"
+}

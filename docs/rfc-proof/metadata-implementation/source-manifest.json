@@ -1,0 +1,73 @@
+{
+  "focusedCommit": "0d7a700b7469487d7347007e71825b24719296b7",
+  "metadataImplemented": true,
+  "scope": "explicit Rspack external/provide profiles; unsupported Enhanced/composed/custom profiles have named boundary",
+  "sourcePublished": false,
+  "branches": [
+    {
+      "pr": 5135,
+      "beforeMetadataHead": "7aca6f70d415d110dd5419ace5b4c6a566c902c9",
+      "status": "",
+      "localFinalHead": "0d7a700b7469487d7347007e71825b24719296b7",
+      "clean": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true
+    },
+    {
+      "pr": 5137,
+      "beforeMetadataHead": "feab1692880cacd51fb9bb63fa1fca957d07e793",
+      "status": "",
+      "localFinalHead": "0f3943ae80afb1e3ebf4162d4d774f3619e3ac7f",
+      "clean": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true
+    },
+    {
+      "pr": 5139,
+      "beforeMetadataHead": "a4e4da4eb6e17d9dd9acb46db3b3aff6240159d1",
+      "status": "",
+      "localFinalHead": "f5ad894feb6355837aaa5fd47d01104d2aacbd3c",
+      "clean": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true
+    },
+    {
+      "pr": 5134,
+      "beforeMetadataHead": "0999fbfa562a52f781765d9f3d6c4e4a2dde8900",
+      "status": "",
+      "localFinalHead": "5f8cc00615e55d370a6dd65a4b8d2140673a4dfe",
+      "clean": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true
+    },
+    {
+      "pr": 5140,
+      "beforeMetadataHead": "0599689e29f927b7ff3efdb8ade1522d7989525e",
+      "status": "",
+      "localFinalHead": "258521a8805fb8ea62880b72fbdff1d60e2a80c8",
+      "clean": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true
+    },
+    {
+      "pr": 5141,
+      "beforeMetadataHead": "7af25cdb9243eb8556d18ec451fce9973b6a0cfb",
+      "status": "",
+      "localFinalHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+      "clean": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true
+    },
+    {
+      "pr": 5142,
+      "beforeMetadataHead": "9a5c81b05ae0ab16f7858fa877ab3073e48b218b",
+      "status": "",
+      "localFinalHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+      "clean": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true
+    }
+  ],
+  "majorBuildHead": "acf69e8e6ae37bcc23bef4d91395f6e12f795b8a",
+  "majorFinalChangesAfterBuild": "Only Rspack regression fixture counter assertions; all production package sources/configs/dist are unchanged and independently fingerprinted."
+}

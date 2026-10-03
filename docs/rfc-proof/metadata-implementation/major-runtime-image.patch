@@ -1,0 +1,2382 @@
+diff --git a/.changeset/rfc5128-runtime-image-admission.md b/.changeset/rfc5128-runtime-image-admission.md
+new file mode 100644
+index 000000000..337b2cb58
+--- /dev/null
++++ b/.changeset/rfc5128-runtime-image-admission.md
+@@ -0,0 +1,13 @@
++---
++'@module-federation/runtime-core': minor
++'@module-federation/runtime': minor
++'@module-federation/inject-external-runtime-core-plugin': minor
++'@module-federation/rspack': minor
++'@module-federation/sdk': minor
++'@module-federation/enhanced': patch
++'@module-federation/webpack-bundler-runtime': patch
++---
++
++Add immutable runtime-image v1 metadata and admission helpers to the runtime core and kernel. Validate supplied metadata before state construction, publication, or reuse while retaining unchecked legacy reuse when metadata is absent.
++
++Rspack external-runtime builds can opt into an image profile with explicit ABI and entry-loader guarantees, an explicit runtime target, and the built-in runtime without opaque plugins. Default/global external consumers validate the published image before namespace access. Metadata-aware admission through other external transport types has a named unsupported-boundary error; untagged transports retain their existing resolution.
+diff --git a/packages/enhanced/src/lib/container/ModuleFederationPlugin.ts b/packages/enhanced/src/lib/container/ModuleFederationPlugin.ts
+index 66a066de1..41231d1d1 100644
+--- a/packages/enhanced/src/lib/container/ModuleFederationPlugin.ts
++++ b/packages/enhanced/src/lib/container/ModuleFederationPlugin.ts
+@@ -139,6 +139,11 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
+     );
+     const { _options: options } = this;
+     const { name, experiments, dts, remotes, shared, shareScope } = options;
++    if (experiments?.runtimeImage !== undefined) {
++      throw new Error(
++        '[RuntimeImageDerivation] Enhanced compiler runtime-image profiles are unavailable. Use Rspack externalRuntime or provideExternalRuntime.',
++      );
++    }
+     if (!name) {
+       throw new Error('ModuleFederationPlugin name is required');
+     }
+diff --git a/packages/enhanced/test/unit/container/ModuleFederationPlugin.runtime-image.test.ts b/packages/enhanced/test/unit/container/ModuleFederationPlugin.runtime-image.test.ts
+new file mode 100644
+index 000000000..206b54270
+--- /dev/null
++++ b/packages/enhanced/test/unit/container/ModuleFederationPlugin.runtime-image.test.ts
+@@ -0,0 +1,35 @@
++import { describe, expect, it } from '@rstest/core';
++import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
++import ModuleFederationPlugin from '../../../src/lib/container/ModuleFederationPlugin';
++
++const webpack: typeof import('webpack') = require(
++  normalizeWebpackPath('webpack'),
++);
++
++describe('runtime-image compiler boundary', () => {
++  it('rejects the Rspack-only profile on an actual Webpack compiler', () => {
++    expect(() =>
++      webpack({
++        mode: 'none',
++        entry: {},
++        plugins: [
++          new ModuleFederationPlugin({
++            name: 'profile',
++            dts: false,
++            manifest: false,
++            experiments: {
++              externalRuntime: true,
++              runtimeImage: {
++                compatibilityId: 'abi',
++                entryLoadingIdentity: 'loader',
++              },
++              optimization: { target: 'node' },
++            },
++          }),
++        ],
++      }),
++    ).toThrow(
++      '[RuntimeImageDerivation] Enhanced compiler runtime-image profiles are unavailable.',
++    );
++  });
++});
+diff --git a/packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts b/packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts
+index caf11fb9b..64fb57d79 100644
+--- a/packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts
++++ b/packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts
+@@ -17,12 +17,14 @@ const provider = () => ({
+   getRemoteEntry: () => {},
+   setGlobalFederationInstance: () => {},
+   ModuleFederation: () => {},
++  getGlobalFederationConstructor: () => {},
++  setGlobalFederationConstructor: () => {},
+ });
+ 
+ describe('external kernel namespace', () => {
+   it('projects the kernel exports with their actual provider identities', () => {
+     const core = provider();
+-    expect(evaluate(core)).toEqual({
++    expect(evaluate(core)).toMatchObject({
+       FederationKernel: core.FederationKernel,
+       CurrentGlobal: core.CurrentGlobal,
+       getGlobalSnapshotInfoByModuleInfo: core.getGlobalSnapshotInfoByModuleInfo,
+diff --git a/packages/rspack/__tests__/RuntimeImageProfile.spec.ts b/packages/rspack/__tests__/RuntimeImageProfile.spec.ts
+new file mode 100644
+index 000000000..df39c991b
+--- /dev/null
++++ b/packages/rspack/__tests__/RuntimeImageProfile.spec.ts
+@@ -0,0 +1,43 @@
++import { deriveRuntimeImage } from '../src/RuntimeImageProfile';
++import type { moduleFederationPlugin } from '@module-federation/sdk';
++const options = (): moduleFederationPlugin.ModuleFederationPluginOptions => ({
++  name: 'profile',
++  dts: false,
++  experiments: {
++    externalRuntime: true,
++    runtimeImage: { compatibilityId: 'abi', entryLoadingIdentity: 'loader' },
++    optimization: { target: 'node' },
++  },
++});
++
++it('describes the full legacy facade despite historical disable flags', () => {
++  const full = {
++    required: ['shared', 'remote', 'snapshot', 'platform'],
++    available: ['shared', 'remote', 'snapshot', 'platform'],
++    forbidden: [],
++    target: 'node',
++  };
++  expect(deriveRuntimeImage(options())).toMatchObject(full);
++  const ignored = options();
++  for (const flag of ['disableShared', 'disableRemote', 'disableSnapshot']) {
++    Reflect.set(ignored.experiments!.optimization!, flag, true);
++  }
++  expect(deriveRuntimeImage(ignored)).toMatchObject(full);
++});
++
++it('rejects missing explicit guarantees and opaque implementations/plugins', () => {
++  const noTarget = options();
++  delete noTarget.experiments!.optimization!.target;
++  expect(() => deriveRuntimeImage(noTarget)).toThrow('target explicitly');
++  expect(() =>
++    deriveRuntimeImage({ ...options(), implementation: 'opaque' }),
++  ).toThrow('unknown capability');
++  expect(() =>
++    deriveRuntimeImage({ ...options(), runtimePlugins: ['opaque'] }),
++  ).toThrow('unknown capability');
++  const composed = options();
++  delete composed.experiments!.externalRuntime;
++  expect(() => deriveRuntimeImage(composed)).toThrow(
++    'composed runtime profiles are unavailable',
++  );
++});
+diff --git a/packages/rspack/__tests__/external-runtime-fixture/metadata-probe.mjs b/packages/rspack/__tests__/external-runtime-fixture/metadata-probe.mjs
+new file mode 100644
+index 000000000..35c837be3
+--- /dev/null
++++ b/packages/rspack/__tests__/external-runtime-fixture/metadata-probe.mjs
+@@ -0,0 +1,590 @@
++import assert from 'node:assert/strict';
++import fs from 'node:fs';
++import path from 'node:path';
++import { createRequire } from 'node:module';
++import { spawnSync } from 'node:child_process';
++import { fileURLToPath } from 'node:url';
++const require = createRequire(import.meta.url);
++const script = fileURLToPath(import.meta.url);
++const [action, dir, mode] = process.argv.slice(2);
++const full = {
++  contract: 1,
++  compatibilityId: 'abi-v1',
++  entryLoadingIdentity: 'sdk-node-v1',
++  target: 'node',
++  required: ['shared', 'remote', 'snapshot', 'platform'],
++  available: ['shared', 'remote', 'snapshot', 'platform'],
++  forbidden: [],
++};
++const profile = {
++  compatibilityId: full.compatibilityId,
++  entryLoadingIdentity: full.entryLoadingIdentity,
++};
++const clone = (value) =>
++  Array.isArray(value)
++    ? value.map(clone)
++    : value &&
++        typeof value === 'object' &&
++        Object.getPrototypeOf(value) === Object.prototype
++      ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, clone(v)]))
++      : value;
++const snap = () => ({
++  core: globalThis._FEDERATION_RUNTIME_CORE,
++  from: globalThis._FEDERATION_RUNTIME_CORE_FROM,
++  registry: globalThis.__FEDERATION__,
++  instances: globalThis.__FEDERATION__?.__INSTANCES__,
++  contents: [...(globalThis.__FEDERATION__?.__INSTANCES__ ?? [])],
++  shares: clone(globalThis.__FEDERATION__?.__SHARE__),
++});
++const unchanged = (before) => {
++  assert.equal(globalThis._FEDERATION_RUNTIME_CORE, before.core);
++  assert.equal(globalThis._FEDERATION_RUNTIME_CORE_FROM, before.from);
++  assert.equal(globalThis.__FEDERATION__, before.registry);
++  assert.equal(globalThis.__FEDERATION__.__INSTANCES__, before.instances);
++  assert.deepEqual(globalThis.__FEDERATION__.__INSTANCES__, before.contents);
++  assert.deepEqual(globalThis.__FEDERATION__.__SHARE__, before.shares);
++};
++if (action === 'execute') {
++  const warnings = [];
++  const traces = [];
++  const original = console.warn;
++  console.warn = (...args) => {
++    warnings.push(args.join(' '));
++    traces.push(new Error(args.join(' ')).stack);
++  };
++  const publication = mode.startsWith('publication-');
++  const supplied = mode.startsWith('supplied-');
++  const override = mode === 'options-forbidden';
++  const lateHook = mode === 'supplied-late-hook';
++  let provider;
++  if (mode === 'publication-old7aca') {
++    provider = require(process.env.PROOF_OLD_KERNEL_PROVIDER_PATH).default;
++  } else if (publication || supplied) {
++    require('../../../runtime-core/dist/index.cjs');
++  } else if (
++    mode.startsWith('old7aca-') &&
++    process.env.PROOF_OLD_KERNEL_PROVIDER_PATH
++  )
++    provider = require(process.env.PROOF_OLD_KERNEL_PROVIDER_PATH).default;
++  else if (mode === 'captured-defines')
++    provider = require(path.join(dir, 'out/provider-captured.cjs')).default;
++  else
++    provider = require(
++      path.join(
++        dir,
++        'out',
++        mode === 'both-absent' ||
++          mode === 'consumer-only' ||
++          mode === 'old7aca-legacy' ||
++          mode === 'transport-legacy' ||
++          mode === 'captured-defines'
++          ? 'provider-untagged.cjs'
++          : 'provider-tagged.cjs',
++      ),
++    ).default;
++  if (mode === 'transport-legacy')
++    globalThis._FEDERATION_RUNTIME_CORE = {
++      ...globalThis._FEDERATION_RUNTIME_CORE,
++      customExtra: 'preserved-extra-export',
++    };
++  const current = globalThis._FEDERATION_RUNTIME_CORE_FROM;
++  const core = globalThis._FEDERATION_RUNTIME_CORE;
++  let expected;
++  const invalid = {
++    null: null,
++    array: [],
++    version: { ...full, contract: 2 },
++    field: { ...full, target: '' },
++    sparse: { ...full, required: new Array(1) },
++  };
++  if (mode === 'publication-old7aca') {
++    expected = '[RuntimeImageMinimumContract]';
++  } else if (mode.includes('-info-')) {
++    globalThis._FEDERATION_RUNTIME_CORE_FROM = mode.endsWith('null')
++      ? null
++      : [];
++    expected = '[RuntimeImageContract]';
++  } else if (supplied) {
++    expected = '[RuntimeImageContract]';
++  } else if (publication) {
++    const payload = invalid[mode.slice('publication-'.length)];
++    globalThis._FEDERATION_RUNTIME_CORE_FROM = {
++      name: 'injected',
++      version: 'injected',
++      runtimeImage: payload,
++    };
++    expected = '[RuntimeImageContract]';
++  } else if (mode.startsWith('malformed-')) {
++    globalThis._FEDERATION_RUNTIME_CORE_FROM = {
++      ...current,
++      runtimeImage: invalid[mode.slice('malformed-'.length)],
++    };
++    expected = '[RuntimeImageContract]';
++  } else if (mode === 'abi') {
++    globalThis._FEDERATION_RUNTIME_CORE_FROM = {
++      ...current,
++      runtimeImage: { ...full, compatibilityId: 'different' },
++    };
++    expected = 'runtime state';
++  } else if (mode === 'target') {
++    globalThis._FEDERATION_RUNTIME_CORE_FROM = {
++      ...current,
++      runtimeImage: { ...full, target: 'web' },
++    };
++    expected = 'runtime image';
++  } else if (mode === 'loader') {
++    globalThis._FEDERATION_RUNTIME_CORE_FROM = {
++      ...current,
++      runtimeImage: { ...full, entryLoadingIdentity: 'different' },
++    };
++    expected = 'entry loader';
++  } else if (mode === 'capability') {
++    globalThis._FEDERATION_RUNTIME_CORE_FROM = {
++      ...current,
++      runtimeImage: { ...full, available: [], required: ['shared'] },
++    };
++    expected = 'missing capability remote';
++  } else if (override) {
++    expected = 'forbidden capability snapshot';
++  } else if (mode === 'forbidden' && !process.env.PROOF_LEGACY_FULL) {
++    expected = 'forbidden capability snapshot';
++  } else if (mode === 'old7aca-tagged' || mode === 'old7aca-legacy') {
++    if (!process.env.PROOF_OLD_KERNEL_PROVIDER_PATH)
++      globalThis._FEDERATION_RUNTIME_CORE = require(
++        process.env.PROOF_OLD_KERNEL_CORE_PATH,
++      );
++    if (mode === 'old7aca-tagged') expected = '[RuntimeImageMinimumContract]';
++  } else if (mode === 'old94aa-tagged') {
++    globalThis._FEDERATION_RUNTIME_CORE = require(
++      process.env.PROOF_OLD_CORE_PATH,
++    );
++    expected = '[RuntimeImageMinimumContract]';
++  } else if (mode.startsWith('root-')) {
++    globalThis._FEDERATION_RUNTIME_CORE = {
++      ...core,
++      [mode.slice(5)]: undefined,
++    };
++    expected =
++      mode === 'root-Global'
++        ? '[RuntimeImageMinimumContract]'
++        : '[ExternalRuntimeKernelContract]';
++  } else if (mode === 'transport-tagged') {
++    expected = '[RuntimeImageTransportBoundary]';
++  }
++  const producer =
++    supplied || override
++      ? require(path.join(dir, 'out/producer.cjs'))
++      : undefined;
++  const before = snap();
++  const entry = publication
++    ? 'provider-tagged.cjs'
++    : mode === 'both-absent' ||
++        mode === 'provider-only' ||
++        mode === 'old7aca-legacy'
++      ? 'consumer-untagged.cjs'
++      : mode === 'forbidden'
++        ? 'consumer-forbidden.cjs'
++        : mode === 'transport-tagged' || mode === 'transport-legacy'
++          ? 'consumer-commonjs.cjs'
++          : 'consumer-tagged.cjs';
++  if (expected) {
++    assert.throws(
++      () =>
++        lateHook
++          ? producer.publishLateHook()
++          : override
++            ? producer.publishWithPlugin({ ...full, forbidden: ['snapshot'] })
++            : supplied
++              ? producer[
++                  mode.includes('-options-')
++                    ? 'publishOptions'
++                    : 'publishConfig'
++                ](invalid[mode.split('-').at(-1)])
++              : require(path.join(dir, 'out', entry)),
++      (e) => e.message.includes(expected),
++    );
++    unchanged(before);
++    console.log(
++      JSON.stringify({
++        mode,
++        rejected: expected,
++        publicationAndStateUnchanged: true,
++      }),
++    );
++  } else {
++    const consumer = await require(path.join(dir, 'out', entry)).default;
++    assert.ok(consumer.instance);
++    assert.equal(consumer.instance.constructor, before.core.ModuleFederation);
++    assert.ok(consumer.instance instanceof before.core.ModuleFederation);
++    assert.equal(consumer.shared.literal, 'shared-provider-literal');
++    assert.equal(consumer.remote.literal, 'remote-file-literal');
++    assert.equal(consumer.shared, consumer.remote.shared);
++    consumer.instance.registerRemotes([
++      {
++        name: 'dataRemote',
++        entry:
++          'data:text/javascript,' +
++          encodeURIComponent(
++            "module.exports={init(){},get(){return Promise.resolve(()=>({default:'runtime-data-url-remote-literal'}));}};",
++          ),
++        type: 'commonjs',
++        entryGlobalName: 'dataRemote',
++      },
++    ]);
++    assert.equal(
++      (await consumer.instance.loadRemote('dataRemote/literal')).default,
++      'runtime-data-url-remote-literal',
++    );
++    if (mode === 'provider-only' || mode === 'consumer-only')
++      assert.ok(warnings.some((w) => w.includes('metadata is missing')));
++    if (mode === 'captured-defines') {
++      assert.deepEqual(before.from.runtimeImage, full);
++      assert.deepEqual(before.core.readRuntimeImage(consumer.instance), full);
++    }
++    if (mode === 'transport-legacy') {
++      const direct = require(path.join(dir, 'out/direct-commonjs.cjs')).default;
++      assert.equal(direct.core, before.core);
++      assert.equal(direct.namespace.customExtra, 'preserved-extra-export');
++    }
++    if (mode === 'compatible') {
++      assert.ok(
++        !warnings.some((w) => w.includes('metadata is missing')),
++        warnings.join('\n'),
++      );
++      assert.deepEqual(before.from.runtimeImage, full);
++      assert.ok(Object.isFrozen(before.from.runtimeImage));
++      for (const key of ['required', 'available', 'forbidden'])
++        assert.ok(Object.isFrozen(before.from.runtimeImage[key]));
++      assert.deepEqual(before.core.readRuntimeImage(provider.instance), full);
++      assert.deepEqual(before.core.readRuntimeImage(consumer.instance), full);
++    }
++    if (mode === 'both-absent' || mode === 'old7aca-legacy')
++      assert.ok(!warnings.some((w) => w.includes('metadata is missing')));
++    assert.equal(globalThis._FEDERATION_RUNTIME_CORE, before.core);
++    assert.equal(globalThis._FEDERATION_RUNTIME_CORE_FROM, before.from);
++    console.log(
++      JSON.stringify({
++        mode,
++        admission: [
++          'both-absent',
++          'provider-only',
++          'consumer-only',
++          'old7aca-legacy',
++          'transport-legacy',
++        ].includes(mode)
++          ? 'unchecked'
++          : 'compatible',
++        constructorIdentity: true,
++        sharedIdentity: true,
++        fileRemote: true,
++        sdkRemote: true,
++        missingMetadataWarning: warnings.some((w) =>
++          w.includes('metadata is missing'),
++        ),
++      }),
++    );
++  }
++  if (mode === 'compatible')
++    fs.writeFileSync(
++      path.join(dir, 'compatible-warning-stacks.log'),
++      traces.join('\n'),
++    );
++  console.warn = original;
++} else {
++  const imported = process.env.PROOF_RSPACK_CORE_PATH
++    ? require(process.env.PROOF_RSPACK_CORE_PATH)
++    : await import('@rspack/core');
++  const rspack = imported.rspack ?? imported.default.rspack;
++  const { ModuleFederationPlugin } = require('../../dist/index.js');
++  fs.mkdirSync(dir, { recursive: true });
++  fs.mkdirSync(path.join(dir, 'node_modules/_FEDERATION_RUNTIME_CORE'), {
++    recursive: true,
++  });
++  fs.writeFileSync(
++    path.join(dir, 'node_modules/_FEDERATION_RUNTIME_CORE/index.js'),
++    'module.exports=globalThis._FEDERATION_RUNTIME_CORE;',
++  );
++  fs.writeFileSync(path.join(dir, 'package.json'), '{}');
++  fs.writeFileSync(
++    path.join(dir, 'shared.js'),
++    "module.exports={literal:'shared-provider-literal',marker:{}};",
++  );
++  fs.writeFileSync(
++    path.join(dir, 'provider.js'),
++    "import shared from 'proof-shared';export default {shared,instance:__webpack_require__.federation.instance};",
++  );
++  fs.writeFileSync(
++    path.join(dir, 'remote.js'),
++    "import shared from 'proof-shared';export default {shared,literal:'remote-file-literal'};",
++  );
++  fs.writeFileSync(
++    path.join(dir, 'consumer.js'),
++    "import shared from 'proof-shared';export default import('remote/literal').then(({default:remote})=>({shared,remote,instance:__webpack_require__.federation.instance}));",
++  );
++  fs.writeFileSync(
++    path.join(dir, 'producer.js'),
++    `import {createInstance} from ${JSON.stringify(require.resolve('@module-federation/runtime', { paths: [require.resolve('@module-federation/runtime-tools')] }))};import inject from ${JSON.stringify(require.resolve('@module-federation/inject-external-runtime-core-plugin'))};export function publishConfig(runtimeImage){return createInstance({name:'supplied',remotes:[],plugins:[inject({runtimeImage})]});}export function publishOptions(runtimeImage){return createInstance({name:'supplied',remotes:[],runtimeImage,plugins:[inject()]});}export function publishLateHook(){return createInstance({name:'late-hook',remotes:[],runtimeImage:${JSON.stringify(full)},plugins:[inject({runtimeImage:${JSON.stringify(full)}}),{name:'later-invalid-image',beforeInit(args){return {...args,userOptions:{...args.userOptions,runtimeImage:null}};}}]});}export function publishWithPlugin(runtimeImage){return createInstance({name:'direct-request',remotes:[],runtimeImage,plugins:[inject({runtimeImage:${JSON.stringify(full)},publish:false})]});}`,
++  );
++  fs.writeFileSync(
++    path.join(dir, 'direct-commonjs.js'),
++    "import core from '@module-federation/runtime-core';import * as namespace from '@module-federation/runtime-core';export default {core,namespace};",
++  );
++  fs.writeFileSync(
++    path.join(dir, 'direct-root.js'),
++    "import {ModuleFederation} from '@module-federation/runtime-core';export default ModuleFederation;",
++  );
++  const base = {
++    name: 'unused',
++    dts: false,
++    manifest: false,
++    bridge: { enableBridgeRouter: false },
++    shared: {
++      'proof-shared': {
++        import: path.join(dir, 'shared.js'),
++        eager: true,
++        singleton: true,
++        version: '1.0.0',
++        requiredVersion: false,
++      },
++    },
++  };
++  const config = (name, entry, opts = {}, transport = 'global') => ({
++    mode: 'development',
++    target: 'async-node',
++    context: dir,
++    devtool: false,
++    entry: entry ? path.join(dir, entry) : {},
++    output: {
++      path: path.join(dir, 'out'),
++      filename: name + '.cjs',
++      uniqueName: name,
++      publicPath: '',
++      library: { type: 'commonjs-module' },
++    },
++    resolve: {
++      modules: [
++        path.resolve(path.dirname(script), '../../node_modules'),
++        'node_modules',
++      ],
++    },
++    externalsType: transport,
++    optimization: { minimize: false },
++    performance: false,
++    plugins: [new ModuleFederationPlugin({ ...base, name, ...opts })],
++  });
++  const experiments = (kind, tagged = true, extra = {}) => ({
++    [kind]: true,
++    ...(tagged ? { runtimeImage: profile } : {}),
++    optimization: { target: 'node', ...extra },
++  });
++  const compile = (config) =>
++    new Promise((resolve, reject) => {
++      let compiler;
++      try {
++        compiler = rspack(config);
++      } catch (error) {
++        reject(error);
++        return;
++      }
++      compiler.run((error, stats) =>
++        compiler.close(() => {
++          if (error) return reject(error);
++          const graph = new Set();
++          for (const chunk of stats.compilation.chunks)
++            for (const module of stats.compilation.chunkGraph.getChunkModulesIterable(
++              chunk,
++            ))
++              for (const nested of [module, ...(module.modules ?? [])]) {
++                const resource = nested.nameForCondition?.();
++                if (resource?.includes('/runtime-core/dist/'))
++                  graph.add(resource);
++              }
++          resolve({
++            ...stats.toJson({ all: false, errors: true, warnings: true }),
++            coreModules: [...graph].sort(),
++          });
++        }),
++      );
++    });
++  const results = {};
++  const producerConfig = config('producer', 'producer.js');
++  producerConfig.plugins = [];
++  results.producer = await compile(producerConfig);
++  for (const tagged of [false, true])
++    results['provider-' + (tagged ? 'tagged' : 'untagged')] = await compile(
++      config('provider-' + (tagged ? 'tagged' : 'untagged'), 'provider.js', {
++        experiments: experiments('provideExternalRuntime', tagged),
++      }),
++    );
++  for (const tagged of [false, true]) {
++    const remoteConfig = config('remote', null, {
++      experiments: experiments('externalRuntime', tagged),
++      exposes: { './literal': path.join(dir, 'remote.js') },
++      library: { type: 'commonjs-module' },
++    });
++    remoteConfig.output.filename =
++      'remote-' + (tagged ? 'tagged' : 'untagged') + '.cjs';
++    results['remote-' + (tagged ? 'tagged' : 'untagged')] =
++      await compile(remoteConfig);
++  }
++  const remote = (tagged) =>
++    `promise Promise.resolve(require(${JSON.stringify(path.join(dir, 'out/remote-' + (tagged ? 'tagged' : 'untagged') + '.cjs'))}))`;
++  for (const tagged of [false, true])
++    results['consumer-' + (tagged ? 'tagged' : 'untagged')] = await compile(
++      config('consumer-' + (tagged ? 'tagged' : 'untagged'), 'consumer.js', {
++        experiments: experiments('externalRuntime', tagged),
++        remotes: { remote: remote(tagged) },
++      }),
++    );
++  results['consumer-forbidden'] = await compile(
++    config('consumer-forbidden', 'consumer.js', {
++      experiments: experiments('externalRuntime', true, {
++        disableSnapshot: true,
++      }),
++      remotes: { remote: remote(true) },
++    }),
++  );
++  results['consumer-commonjs'] = await compile(
++    config(
++      'consumer-commonjs',
++      'consumer.js',
++      {
++        experiments: experiments('externalRuntime', false),
++        remotes: { remote: remote(false) },
++      },
++      'commonjs',
++    ),
++  );
++  results['direct-commonjs'] = await compile(
++    config(
++      'direct-commonjs',
++      'direct-commonjs.js',
++      { experiments: experiments('externalRuntime', false) },
++      'commonjs',
++    ),
++  );
++  let flagReads = 0,
++    targetReads = 0;
++  const captured = {
++    get target() {
++      targetReads++;
++      return targetReads === 1 ? 'node' : 'web';
++    },
++    get disableRemote() {
++      flagReads++;
++      return flagReads === 1 ? false : true;
++    },
++  };
++  results['provider-captured'] = await compile(
++    config('provider-captured', 'provider.js', {
++      experiments: {
++        provideExternalRuntime: true,
++        runtimeImage: profile,
++        optimization: captured,
++      },
++    }),
++  );
++  // The major's tentative composition planner reads this flag once;
++  // external/provide still selects its full legacy image and ignores the flag.
++  assert.equal(flagReads, 1);
++  // The major also reads target for its tentative, unselected composition.
++  // Emitted legacy defines and the admitted image retain the first node value.
++  assert.equal(targetReads, process.env.PROOF_LEGACY_FULL ? 2 : 1);
++  await assert.rejects(
++    () =>
++      compile(
++        config(
++          'unsupported-transport',
++          'consumer.js',
++          { experiments: experiments('externalRuntime') },
++          'commonjs',
++        ),
++      ),
++    /RuntimeImageTransportBoundary/,
++  );
++  results['direct-root'] = await compile(
++    config('direct-root', 'direct-root.js', {
++      experiments: experiments('externalRuntime'),
++    }),
++  );
++  for (const [name, result] of Object.entries(results)) {
++    assert.equal(result.errors.length, 0, name + JSON.stringify(result.errors));
++    if (!name.startsWith('provider-') && name !== 'producer')
++      assert.equal(
++        result.coreModules.length,
++        0,
++        name + ' contains bundled core',
++      );
++  }
++  fs.writeFileSync(
++    path.join(dir, 'graphs.json'),
++    JSON.stringify(results, null, 2),
++  );
++  const modes = [
++    'compatible',
++    'captured-defines',
++    'both-absent',
++    'provider-only',
++    'consumer-only',
++    'abi',
++    'target',
++    'loader',
++    'capability',
++    'forbidden',
++    'options-forbidden',
++    'supplied-late-hook',
++    'transport-tagged',
++    'transport-legacy',
++    'publication-info-null',
++    'publication-info-array',
++    'malformed-info-null',
++    'malformed-info-array',
++    ...['null', 'array', 'version', 'field', 'sparse'].flatMap((key) => [
++      'malformed-' + key,
++      'publication-' + key,
++      'supplied-config-' + key,
++      'supplied-options-' + key,
++    ]),
++    ...[
++      'ModuleFederation',
++      'getGlobalFederationConstructor',
++      'setGlobalFederationConstructor',
++      'Global',
++    ].map((key) => 'root-' + key),
++  ];
++  if (process.env.PROOF_OLD_KERNEL_CORE_PATH)
++    modes.push('old7aca-legacy', 'old7aca-tagged');
++  if (process.env.PROOF_OLD_KERNEL_PROVIDER_PATH)
++    modes.push('publication-old7aca');
++  if (process.env.PROOF_OLD_CORE_PATH) modes.push('old94aa-tagged');
++  for (const mode of modes) {
++    const row = spawnSync(process.execPath, [script, 'execute', dir, mode], {
++      env: process.env,
++      encoding: 'utf8',
++      timeout: 30000,
++    });
++    fs.writeFileSync(path.join(dir, mode + '.log'), row.stdout + row.stderr);
++    assert.equal(row.status, 0, mode + '\n' + row.stdout + row.stderr);
++    process.stdout.write(row.stdout);
++  }
++  // A direct root import must run the same early guard, independently of kernel.
++  const direct = spawnSync(
++    process.execPath,
++    [
++      '-e',
++      `const assert=require('node:assert/strict');require(${JSON.stringify(path.join(dir, 'out/provider-tagged.cjs'))});globalThis._FEDERATION_RUNTIME_CORE_FROM.runtimeImage={...globalThis._FEDERATION_RUNTIME_CORE_FROM.runtimeImage,contract:2};const core=globalThis._FEDERATION_RUNTIME_CORE,from=globalThis._FEDERATION_RUNTIME_CORE_FROM,registry=globalThis.__FEDERATION__,instances=[...registry.__INSTANCES__],shares=JSON.stringify(registry.__SHARE__);assert.throws(()=>require(${JSON.stringify(path.join(dir, 'out/direct-root.cjs'))}),/RuntimeImageContract/);assert.equal(globalThis._FEDERATION_RUNTIME_CORE,core);assert.equal(globalThis._FEDERATION_RUNTIME_CORE_FROM,from);assert.equal(globalThis.__FEDERATION__,registry);assert.deepEqual(registry.__INSTANCES__,instances);assert.equal(JSON.stringify(registry.__SHARE__),shares);console.log('direct-root rejected with state unchanged');`,
++    ],
++    { encoding: 'utf8' },
++  );
++  assert.equal(direct.status, 0, direct.stderr);
++  console.log(
++    JSON.stringify({
++      compiled: Object.keys(results).length,
++      processes: modes.length + 1,
++      directRootGuard: true,
++      coreCounts: Object.fromEntries(
++        Object.entries(results).map(([k, v]) => [k, v.coreModules.length]),
++      ),
++    }),
++  );
++}
+diff --git a/packages/rspack/__tests__/runtimeImage.spec.ts b/packages/rspack/__tests__/runtimeImage.spec.ts
+new file mode 100644
+index 000000000..c76a96c35
+--- /dev/null
++++ b/packages/rspack/__tests__/runtimeImage.spec.ts
+@@ -0,0 +1,29 @@
++import { execFileSync } from 'node:child_process';
++import fs from 'node:fs';
++import os from 'node:os';
++import path from 'node:path';
++
++it('admits actual runtime-image providers before publication or namespace access', () => {
++  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rspack-runtime-image-'));
++  try {
++    const output = execFileSync(
++      process.execPath,
++      [
++        path.join(__dirname, 'external-runtime-fixture/metadata-probe.mjs'),
++        'build',
++        dir,
++      ],
++      {
++        encoding: 'utf8',
++        timeout: 120000,
++        env: { ...process.env, PROOF_LEGACY_FULL: '1' },
++      },
++    );
++    expect(output).toContain('"directRootGuard":true');
++    expect(output).toContain('"publicationAndStateUnchanged":true');
++    expect(output).toContain('"mode":"compatible"');
++    expect(output).toContain('"mode":"transport-legacy"');
++  } finally {
++    fs.rmSync(dir, { recursive: true, force: true });
++  }
++}, 130000);
+diff --git a/packages/rspack/src/ExternalRuntimePlugin.ts b/packages/rspack/src/ExternalRuntimePlugin.ts
+index 7722e8409..39b104e21 100644
+--- a/packages/rspack/src/ExternalRuntimePlugin.ts
++++ b/packages/rspack/src/ExternalRuntimePlugin.ts
+@@ -1,4 +1,6 @@
+ import type { Compiler } from '@rspack/core';
++import * as runtimeCore from '@module-federation/runtime-tools/runtime-core';
++import type { RuntimeImageDescriptorV1 } from '@module-federation/runtime-tools/runtime-core';
+ 
+ type ProviderNamespace =
+   typeof import('@module-federation/runtime-tools/runtime-core');
+@@ -10,6 +12,41 @@ const kernelFunctions = [
+   'setGlobalFederationInstance',
+ ] as const satisfies readonly (keyof ProviderNamespace)[];
+ 
++const metadataFunctions = [
++  'parseRuntimeImage',
++  'readRuntimeImage',
++  'attachRuntimeImage',
++  'assertRuntimeImageCompatible',
++] as const satisfies readonly (keyof ProviderNamespace)[];
++const kernelExports = [...kernelFunctions, ...metadataFunctions];
++
++export function externalAdmissionBody(
++  image?: RuntimeImageDescriptorV1,
++  unsupportedTransport?: string,
++): string {
++  return `
++var parseImage = ${runtimeCore.parseRuntimeImage.toString()};
++var info = globalThis._FEDERATION_RUNTIME_CORE_FROM;
++if (info !== undefined && (typeof info !== 'object' || info === null || Array.isArray(info))) {
++  throw new Error('[RuntimeImageContract] Invalid external runtime provider information.');
++}
++var current = parseImage(info === undefined ? undefined : info.runtimeImage);
++var next = parseImage(${JSON.stringify(image) ?? 'undefined'});
++if (current !== undefined || next !== undefined) {
++  ${
++    unsupportedTransport
++      ? `throw new Error('[RuntimeImageTransportBoundary] Runtime-image admission does not support externalsType ${unsupportedTransport}. Use the default/global transport.');`
++      : `
++  if (typeof core !== 'object' || core === null || Array.isArray(core) || typeof core.Global !== 'object' || core.Global === null || Array.isArray(core.Global) || ${metadataFunctions.map((name) => `typeof core.${name} !== 'function'`).join(' || ')}) {
++    throw new Error('[RuntimeImageMinimumContract] The external runtime core must provide parseRuntimeImage, readRuntimeImage, attachRuntimeImage and assertRuntimeImageCompatible for metadata-aware admission.');
++  }
++  core.assertRuntimeImageCompatible(current, next);
++  `
++  }
++}
++`;
++}
++
+ // The kernel's CommonJS export resolves to the full core today. Project its
+ // public kernel interface from the provider instead of bundling that core again.
+ export const externalKernelBody = `
+@@ -29,9 +66,14 @@ var registry = core.CurrentGlobal.__FEDERATION__;
+ if (typeof registry !== 'object' || registry === null || Array.isArray(registry) || !Array.isArray(registry.__INSTANCES__)) {
+   throw new Error(prefix + 'The external runtime provider is missing the federation instance registry.');
+ }
++for (var rootName of ['ModuleFederation', 'getGlobalFederationConstructor', 'setGlobalFederationConstructor']) {
++  if (typeof core[rootName] !== 'function') {
++    throw new Error(prefix + 'The external runtime provider is missing callable root "' + rootName + '".');
++  }
++}
+ var kernel = {
+   CurrentGlobal: core.CurrentGlobal,
+-  ${kernelFunctions.map((name) => `${name}: core.${name}`).join(',\n  ')}
++  ${kernelExports.map((name) => `${name}: core.${name}`).join(',\n  ')}
+ };
+ `;
+ 
+@@ -39,10 +81,41 @@ export const externalKernelSource = `
+ import core from '@module-federation/runtime-core';
+ ${externalKernelBody}
+ export const CurrentGlobal = kernel.CurrentGlobal;
+-${kernelFunctions.map((name) => `export const ${name} = kernel.${name};`).join('\n')}
++${kernelExports.map((name) => `export const ${name} = kernel.${name};`).join('\n')}
++export const RUNTIME_IMAGE = core.RUNTIME_IMAGE;
+ `;
+ 
+-export function applyExternalRuntime(compiler: Compiler): void {
++export function applyExternalRuntime(
++  compiler: Compiler,
++  image?: RuntimeImageDescriptorV1,
++): void {
++  const transport = compiler.options.externalsType || 'global';
++  if (transport !== 'global' && image !== undefined) {
++    throw new Error(
++      `[RuntimeImageTransportBoundary] Runtime-image admission does not support externalsType ${transport}. Use the default/global transport.`,
++    );
++  }
++  const admission = externalAdmissionBody(
++    image,
++    transport === 'global' ? undefined : transport,
++  );
++  if (transport !== 'global') {
++    // Preserve the selected external transport; validate its returned real core
++    // before a root importer or kernel projection dereferences that namespace.
++    const rootSource = `var core = require('@module-federation/runtime-core/__external_transport__');
++${admission}
++${externalKernelBody}
++module.exports = core;`;
++    const rootResource = `data:text/javascript,${encodeURIComponent(rootSource)}`;
++    compiler.options.module.rules.unshift({
++      resource: rootResource,
++      type: 'javascript/auto',
++    });
++    new compiler.webpack.NormalModuleReplacementPlugin(
++      /^@module-federation\/runtime-core$/,
++      rootResource,
++    ).apply(compiler);
++  }
+   new compiler.webpack.NormalModuleReplacementPlugin(
+     /^@module-federation\/runtime-core\/kernel$/,
+     `data:text/javascript,${encodeURIComponent(externalKernelSource)}`,
+@@ -52,6 +125,20 @@ export function applyExternalRuntime(compiler: Compiler): void {
+     compiler.options.externalsType || 'global',
+     ({ request }, callback) => {
+       if (request === '@module-federation/runtime-core') {
++        if (transport === 'global') {
++          callback(
++            undefined,
++            `(function(){var core = globalThis._FEDERATION_RUNTIME_CORE;${admission}${externalKernelBody}return core;})()`,
++            'var',
++          );
++        } else {
++          // Let the exact-root adapter resolve; only its private request is external.
++          callback();
++        }
++      } else if (
++        request === '@module-federation/runtime-core/__external_transport__' &&
++        transport !== 'global'
++      ) {
+         callback(undefined, '_FEDERATION_RUNTIME_CORE');
+       } else if (
+         request?.startsWith('@module-federation/runtime-core/') &&
+diff --git a/packages/rspack/src/ModuleFederationPlugin.ts b/packages/rspack/src/ModuleFederationPlugin.ts
+index 801249bbf..c4dedcd2d 100644
+--- a/packages/rspack/src/ModuleFederationPlugin.ts
++++ b/packages/rspack/src/ModuleFederationPlugin.ts
+@@ -20,6 +20,8 @@ import fs from 'node:fs';
+ import { RemoteEntryPlugin } from './RemoteEntryPlugin';
+ import { ComposedRuntimePlugin } from './ComposedRuntimePlugin';
+ import { applyExternalRuntime } from './ExternalRuntimePlugin';
++import { deriveRuntimeImage } from './RuntimeImageProfile';
++import type { RuntimeImageDescriptorV1 } from '@module-federation/runtime-tools/runtime-core';
+ import logger from './logger';
+ 
+ type ExcludeFalse<T> = T extends undefined | false ? never : T;
+@@ -85,12 +87,17 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
+     this._options = options;
+   }
+ 
+-  private _patchBundlerConfig(compiler: Compiler): void {
++  private _patchBundlerConfig(
++    compiler: Compiler,
++    runtimeImage?: RuntimeImageDescriptorV1,
++  ): void {
+     const { experiments } = this._options;
+     const definePluginOptions: Record<string, string | boolean> = {};
+ 
+     // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
+-    if (
++    if (runtimeImage) {
++      definePluginOptions['ENV_TARGET'] = JSON.stringify(runtimeImage.target);
++    } else if (
+       experiments?.optimization &&
+       typeof experiments.optimization === 'object' &&
+       experiments.optimization !== null &&
+@@ -138,7 +145,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
+       throw new Error('[ ModuleFederationPlugin ]: name is required');
+     }
+     this._checkSingleton(compiler);
+-    this._patchBundlerConfig(compiler);
++    const runtimeImage = deriveRuntimeImage(options);
++    const metadataPlugin = (publish: boolean) =>
++      `data:text/javascript;base64,${Buffer.from(`import inject from ${JSON.stringify(require.resolve('@module-federation/inject-external-runtime-core-plugin'))};export default function(){return inject(${JSON.stringify({ runtimeImage, publish })});}`).toString('base64')}`;
++    this._patchBundlerConfig(compiler, runtimeImage);
+     const containerManager = new ContainerManager();
+     containerManager.init(options);
+ 
+@@ -158,12 +168,19 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
+ 
+       const runtimePlugins = options.runtimePlugins || [];
+       options.runtimePlugins = runtimePlugins.concat(
+-        require.resolve('@module-federation/inject-external-runtime-core-plugin'),
++        runtimeImage
++          ? metadataPlugin(true)
++          : require.resolve('@module-federation/inject-external-runtime-core-plugin'),
+       );
+     }
+ 
+     if (options.experiments?.externalRuntime === true) {
+-      applyExternalRuntime(compiler);
++      applyExternalRuntime(compiler, runtimeImage);
++      if (runtimeImage) {
++        options.runtimePlugins = (options.runtimePlugins || []).concat([
++          metadataPlugin(false),
++        ]);
++      }
+     }
+ 
+     const implementationPath = options.implementation
+@@ -191,6 +208,40 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
+       }
+     }
+ 
++    if (runtimeImage) {
++      const knownPlugin =
++        require.resolve('@module-federation/inject-external-runtime-core-plugin');
++      if (
++        options.runtimePlugins?.some(
++          (plugin) =>
++            (typeof plugin === 'string' ? plugin : plugin[0]) !== knownPlugin &&
++            plugin !== metadataPlugin(true) &&
++            plugin !== metadataPlugin(false),
++        )
++      ) {
++        throw new Error(
++          '[RuntimeImageDerivation] Automatically added runtime plugins have unknown capability or loader requirements. Disable them before opting into a runtime-image profile.',
++        );
++      }
++      for (const plugin of compiler.options.plugins) {
++        if (plugin && typeof plugin === 'object' && 'definitions' in plugin) {
++          const definitions: unknown = plugin['definitions'];
++          if (
++            definitions &&
++            typeof definitions === 'object' &&
++            Object.keys(definitions).some(
++              (key) =>
++                key.startsWith('FEDERATION_OPTIMIZE_') || key === 'ENV_TARGET',
++            )
++          ) {
++            throw new Error(
++              '[RuntimeImageDerivation] User DefinePlugin runtime capability or target overrides are unsupported.',
++            );
++          }
++        }
++      }
++    }
++
+     const buildId = composeKeyWithSeparator(
+       options.name,
+       utils.getBuildVersion(),
+diff --git a/packages/rspack/src/RuntimeImageProfile.ts b/packages/rspack/src/RuntimeImageProfile.ts
+new file mode 100644
+index 000000000..7184caae9
+--- /dev/null
++++ b/packages/rspack/src/RuntimeImageProfile.ts
+@@ -0,0 +1,60 @@
++import type { moduleFederationPlugin } from '@module-federation/sdk';
++import {
++  parseRuntimeImage,
++  type RuntimeImageDescriptorV1,
++} from '@module-federation/runtime-tools/runtime-core';
++
++type Options = moduleFederationPlugin.ModuleFederationPluginOptions;
++
++/** Describe this wrapper's known legacy runtime, not an opaque implementation. */
++export function deriveRuntimeImage(
++  options: Options,
++): RuntimeImageDescriptorV1 | undefined {
++  const profile = options.experiments?.runtimeImage;
++  if (profile === undefined) return undefined;
++  const fail = (message: string): never => {
++    throw new Error('[RuntimeImageDerivation] ' + message);
++  };
++  if (
++    typeof profile !== 'object' ||
++    profile === null ||
++    Array.isArray(profile)
++  ) {
++    return fail(
++      'Expected explicit compatibilityId and entryLoadingIdentity guarantees.',
++    );
++  }
++  if (
++    options.experiments?.externalRuntime !== true &&
++    options.experiments?.provideExternalRuntime !== true
++  ) {
++    return fail(
++      'Runtime-image profiles currently require externalRuntime or provideExternalRuntime; composed runtime profiles are unavailable.',
++    );
++  }
++  if (options.implementation || options.runtimePlugins?.length) {
++    return fail(
++      'Custom runtime implementations and runtime plugins have unknown capability or loader requirements.',
++    );
++  }
++  const optimization = options.experiments?.optimization;
++  const target = optimization?.target;
++  if (target !== 'web' && target !== 'node') {
++    return fail(
++      'Set experiments.optimization.target explicitly to web or node; compiler.target does not determine the runtime entry loader.',
++    );
++  }
++  // External/provide builds select the full legacy facade in this major.
++  // Historical disable flags do not remove any family from that facade.
++  const available = ['shared', 'remote', 'snapshot', 'platform'];
++  const forbidden: string[] = [];
++  return parseRuntimeImage({
++    contract: 1,
++    compatibilityId: profile.compatibilityId,
++    entryLoadingIdentity: profile.entryLoadingIdentity,
++    target,
++    required: available,
++    available,
++    forbidden,
++  });
++}
+diff --git a/packages/runtime-core/__tests__/runtime-image.spec.ts b/packages/runtime-core/__tests__/runtime-image.spec.ts
+new file mode 100644
+index 000000000..25cf21633
+--- /dev/null
++++ b/packages/runtime-core/__tests__/runtime-image.spec.ts
+@@ -0,0 +1,259 @@
++import { describe, expect, it, rs } from '@rstest/core';
++import { ModuleFederation, CurrentGlobal } from '../src';
++import { SharedHandler } from '../src/shared';
++import { RemoteHandler } from '../src/remote';
++import {
++  parseRuntimeImage,
++  readRuntimeImage,
++  attachRuntimeImage,
++  assertRuntimeImageCompatible,
++} from '../src/runtimeImage';
++
++const image = () => ({
++  contract: 1,
++  compatibilityId: 'abi-v1',
++  target: 'node',
++  entryLoadingIdentity: 'sdk-node-v1',
++  required: ['shared'],
++  available: ['shared', 'remote'],
++  forbidden: [],
++});
++
++describe('runtime-image v1 admission', () => {
++  it('copies and freezes the exact validated snapshot', () => {
++    const input = image();
++    const parsed = parseRuntimeImage(input)!;
++    expect(parsed).not.toBe(input);
++    for (const key of ['required', 'available', 'forbidden'] as const) {
++      expect(parsed[key]).not.toBe(input[key]);
++      expect(Object.isFrozen(parsed[key])).toBe(true);
++    }
++    expect(Object.isFrozen(parsed)).toBe(true);
++    input.available.push('later');
++    input.compatibilityId = 'later';
++    expect(parsed.available).toEqual(['shared', 'remote']);
++    expect(parsed.compatibilityId).toBe('abi-v1');
++    let reads = 0;
++    const changing = {
++      ...image(),
++      get compatibilityId() {
++        return ++reads === 1 ? 'once' : undefined;
++      },
++    };
++    expect(parseRuntimeImage(changing)?.compatibilityId).toBe('once');
++    expect(reads).toBe(1);
++  });
++
++  it.each(
++    [
++      null,
++      false,
++      [],
++      {},
++      { ...image(), contract: 2 },
++      ...(['required', 'available', 'forbidden'] as const).flatMap((key) => [
++        { ...image(), [key]: [null] },
++        { ...image(), [key]: new Array(1) },
++      ]),
++    ].map((input) => [input]),
++  )('rejects malformed supplied metadata even beside absence: %p', (input) => {
++    expect(() => assertRuntimeImageCompatible(undefined, input)).toThrow(
++      '[RuntimeImageContract]',
++    );
++  });
++
++  it('retains the supported union comparisons and explicit missing policy', () => {
++    expect(() =>
++      assertRuntimeImageCompatible(
++        { ...image(), available: [], required: ['shared', 'remote'] },
++        image(),
++      ),
++    ).not.toThrow();
++    expect(() =>
++      assertRuntimeImageCompatible(image(), {
++        ...image(),
++        required: ['snapshot'],
++      }),
++    ).toThrow('missing capability snapshot');
++    expect(() =>
++      assertRuntimeImageCompatible(image(), {
++        ...image(),
++        forbidden: ['remote'],
++      }),
++    ).toThrow('forbidden capability remote');
++    expect(() =>
++      assertRuntimeImageCompatible(image(), {
++        ...image(),
++        compatibilityId: 'other',
++      }),
++    ).toThrow('runtime state');
++    expect(() =>
++      assertRuntimeImageCompatible(image(), { ...image(), target: 'web' }),
++    ).toThrow('runtime image');
++    expect(() =>
++      assertRuntimeImageCompatible(image(), {
++        ...image(),
++        entryLoadingIdentity: 'other',
++      }),
++    ).toThrow('entry loader');
++    expect(() =>
++      assertRuntimeImageCompatible(undefined, undefined),
++    ).not.toThrow();
++    expect(() =>
++      assertRuntimeImageCompatible(image(), undefined),
++    ).not.toThrow();
++  });
++
++  it('normalizes existing plugin associations before first admission without self-comparison', () => {
++    const overlap = parseRuntimeImage({ ...image(), forbidden: ['shared'] })!;
++    const plugin = { name: 'tagged' };
++    attachRuntimeImage(plugin, {
++      ...overlap,
++      available: ['remote', 'shared', 'shared'],
++    });
++    const instance = new ModuleFederation({
++      name: 'tagged',
++      remotes: [],
++      runtimeImage: overlap,
++      plugins: [plugin],
++    });
++    expect(readRuntimeImage(instance)).toEqual(overlap);
++  });
++
++  it('attaches an immutable independent association', () => {
++    const input = image();
++    const instance = {};
++    attachRuntimeImage(instance, input);
++    input.required.push('later');
++    expect(readRuntimeImage(instance)?.required).toEqual(['shared']);
++  });
++
++  it('rejects before handlers or plugin registration can change state', () => {
++    const registry = CurrentGlobal.__FEDERATION__;
++    const shares = { ...registry.__SHARE__ };
++    const malformed = { name: 'malformed', remotes: [] };
++    Reflect.set(malformed, 'runtimeImage', null);
++    expect(() => new ModuleFederation(malformed)).toThrow(
++      '[RuntimeImageContract]',
++    );
++    expect(registry.__SHARE__).toEqual(shares);
++    const instance = new ModuleFederation({
++      name: 'valid',
++      remotes: [],
++      runtimeImage: parseRuntimeImage(image()),
++    });
++    const before = instance.options;
++    const register = rs.spyOn(instance, 'registerPlugins');
++    expect(() =>
++      instance.initOptions({
++        name: 'valid',
++        remotes: [],
++        runtimeImage: parseRuntimeImage({ ...image(), target: 'web' }),
++      }),
++    ).toThrow('runtime image');
++    expect(instance.options).toBe(before);
++    expect(register).not.toHaveBeenCalled();
++  });
++
++  it('retains known first-admission constraints across beforeInit hook output', () => {
++    const shared = rs.spyOn(SharedHandler.prototype, 'registerShared');
++    const remote = rs.spyOn(RemoteHandler.prototype, 'formatAndRegisterRemote');
++    expect(
++      () =>
++        new ModuleFederation({
++          name: 'changed-hook',
++          remotes: [],
++          runtimeImage: parseRuntimeImage(image()),
++          plugins: [
++            {
++              name: 'changed-image',
++              beforeInit(args) {
++                return {
++                  ...args,
++                  userOptions: {
++                    ...args.userOptions,
++                    runtimeImage: parseRuntimeImage({
++                      ...image(),
++                      compatibilityId: 'different',
++                    }),
++                  },
++                };
++              },
++            },
++          ],
++        }),
++    ).toThrow('runtime state');
++    expect(shared).not.toHaveBeenCalled();
++    expect(remote).not.toHaveBeenCalled();
++    shared.mockRestore();
++    remote.mockRestore();
++    const added = new ModuleFederation({
++      name: 'added-hook',
++      remotes: [],
++      plugins: [
++        {
++          name: 'added-image',
++          beforeInit(args) {
++            return {
++              ...args,
++              userOptions: {
++                ...args.userOptions,
++                runtimeImage: parseRuntimeImage(image()),
++              },
++            };
++          },
++        },
++      ],
++    });
++    expect(readRuntimeImage(added)).toEqual(image());
++  });
++
++  it('retains the admitted immutable image when a hook removes both options tags', () => {
++    const admitted = parseRuntimeImage(image())!;
++    const instance = new ModuleFederation({
++      name: 'removed-hook',
++      remotes: [],
++      runtimeImage: admitted,
++      plugins: [
++        {
++          name: 'remove-image',
++          beforeInit(args) {
++            return {
++              ...args,
++              options: { ...args.options, runtimeImage: undefined },
++              userOptions: { ...args.userOptions, runtimeImage: undefined },
++            };
++          },
++        },
++      ],
++    });
++    expect(readRuntimeImage(instance)).toEqual(admitted);
++    expect(Object.isFrozen(instance.options.runtimeImage)).toBe(true);
++    expect(() =>
++      instance.initOptions({
++        name: 'removed-hook',
++        remotes: [],
++        runtimeImage: parseRuntimeImage({ ...image(), target: 'web' }),
++      }),
++    ).toThrow('runtime image');
++  });
++
++  it('validates hook-returned metadata before registering remote/shared options', () => {
++    expect(
++      () =>
++        new ModuleFederation({
++          name: 'hooks',
++          remotes: [],
++          plugins: [
++            {
++              name: 'bad-hook',
++              beforeInit(args) {
++                Reflect.set(args.userOptions, 'runtimeImage', null);
++                return args;
++              },
++            },
++          ],
++        }),
++    ).toThrow('[RuntimeImageContract]');
++  });
++});
+diff --git a/packages/runtime-core/src/core.ts b/packages/runtime-core/src/core.ts
+index d262804a4..79e11977f 100644
+--- a/packages/runtime-core/src/core.ts
++++ b/packages/runtime-core/src/core.ts
+@@ -1,3 +1,10 @@
++import { Global } from './global';
++import {
++  parseRuntimeImage,
++  attachRuntimeImage,
++  readRuntimeImage,
++  assertRuntimeImageCompatible,
++} from './runtimeImage';
+ import {
+   isBrowserEnvValue,
+   type CreateLinkHookReturnDom,
+@@ -50,6 +57,36 @@ import { DEFAULT_SCOPE } from './constant';
+ import { disabledRemote } from './remote/disabled';
+ import { disabledShared } from './shared/disabled';
+ 
++type RuntimeImage = NonNullable<ReturnType<typeof parseRuntimeImage>>;
++function sameImage(left: RuntimeImage, right: RuntimeImage): boolean {
++  if (
++    left.compatibilityId !== right.compatibilityId ||
++    left.target !== right.target ||
++    left.entryLoadingIdentity !== right.entryLoadingIdentity
++  )
++    return false;
++  return (['required', 'forbidden', 'available'] as const).every((key) => {
++    const a = new Set(left[key]);
++    const b = new Set(right[key]);
++    return a.size === b.size && [...a].every((item) => b.has(item));
++  });
++}
++
++function normalizeImageOptions(options: UserOptions): UserOptions {
++  let runtimeImage = parseRuntimeImage(options.runtimeImage);
++  for (const plugin of options.plugins || []) {
++    const image = readRuntimeImage(plugin);
++    if (image !== undefined) {
++      if (runtimeImage === undefined) runtimeImage = image;
++      else if (!sameImage(runtimeImage, image)) {
++        assertRuntimeImageCompatible(runtimeImage, image);
++        assertRuntimeImageCompatible(image, runtimeImage);
++      }
++    }
++  }
++  return { ...options, runtimeImage };
++}
++
+ type BridgeHookContext = object;
+ type BridgeHookResult = {
+   context: BridgeHookContext;
+@@ -289,11 +326,47 @@ export class FederationCore {
+     afterBridgeRouteSync: new SyncHook<[BridgeHookResult], void>(),
+   });
+   moduleInfo?: GlobalModuleInfo[string];
++  private runtimeImageInitialized = false;
+ 
+   constructor(
+     userOptions: UserOptions,
+     { shared, remote, snapshot, platform }: ResolvedCapabilities,
+   ) {
++    userOptions = normalizeImageOptions(userOptions);
++    if (
++      userOptions.runtimeImage !== undefined &&
++      Global._FEDERATION_RUNTIME_CORE
++    ) {
++      const from: unknown = Global._FEDERATION_RUNTIME_CORE_FROM;
++      if (
++        from !== undefined &&
++        (typeof from !== 'object' || from === null || Array.isArray(from))
++      ) {
++        throw new Error(
++          '[RuntimeImageContract] Invalid external runtime provider information.',
++        );
++      }
++      const currentImage = parseRuntimeImage(
++        from && 'runtimeImage' in from ? from.runtimeImage : undefined,
++      );
++      const published: unknown = Global._FEDERATION_RUNTIME_CORE;
++      if (
++        typeof published !== 'object' ||
++        published === null ||
++        Array.isArray(published) ||
++        [
++          'parseRuntimeImage',
++          'readRuntimeImage',
++          'attachRuntimeImage',
++          'assertRuntimeImageCompatible',
++        ].some((key) => typeof Reflect.get(published, key) !== 'function')
++      ) {
++        throw new Error(
++          '[RuntimeImageMinimumContract] The published runtime core does not support runtime-image admission.',
++        );
++      }
++      assertRuntimeImageCompatible(currentImage, userOptions.runtimeImage);
++    }
+     const plugins = snapshot ? snapshot.plugins() : [];
+     // TODO: Validate the details of the options
+     // Initialize options with default values
+@@ -304,6 +377,7 @@ export class FederationCore {
+       remotes: [],
+       shared: {},
+       inBrowser: platform.isBrowser(),
++      runtimeImage: userOptions.runtimeImage,
+     };
+ 
+     this.name = userOptions.name;
+@@ -321,9 +395,16 @@ export class FederationCore {
+       ...(userOptions.plugins || []),
+     ]);
+     this.options = this.formatOptions(defaultOptions, userOptions);
++    attachRuntimeImage(this, this.options.runtimeImage);
++    this.runtimeImageInitialized = true;
+   }
+ 
+   initOptions(userOptions: UserOptions): Options {
++    userOptions = normalizeImageOptions(userOptions);
++    assertRuntimeImageCompatible(
++      readRuntimeImage(this),
++      userOptions.runtimeImage,
++    );
+     if (userOptions.name && userOptions.name !== this.options.name) {
+       error(getShortErrorMsg(RUNTIME_010, runtimeDescMap));
+     }
+@@ -396,6 +477,13 @@ export class FederationCore {
+   }
+ 
+   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
++    globalOptions = {
++      ...globalOptions,
++      runtimeImage: parseRuntimeImage(globalOptions.runtimeImage),
++    };
++    userOptions = normalizeImageOptions(userOptions);
++    const admittedImage =
++      userOptions.runtimeImage ?? globalOptions.runtimeImage;
+     const shared = this.sharedHandler.formatShareInfos(
+       globalOptions,
+       userOptions,
+@@ -408,6 +496,29 @@ export class FederationCore {
+         shareInfo: shared,
+       });
+ 
++    const globalImage = parseRuntimeImage(globalOptionsRes.runtimeImage);
++    const userImage = normalizeImageOptions({
++      ...userOptionsRes,
++      plugins: [...globalOptionsRes.plugins, ...(userOptionsRes.plugins || [])],
++    }).runtimeImage;
++    const resolvedImage = userImage ?? globalImage ?? admittedImage;
++    if (
++      !this.runtimeImageInitialized &&
++      admittedImage !== undefined &&
++      resolvedImage !== undefined
++    ) {
++      if (
++        resolvedImage !== undefined &&
++        !sameImage(admittedImage, resolvedImage)
++      ) {
++        assertRuntimeImageCompatible(admittedImage, resolvedImage);
++        assertRuntimeImageCompatible(resolvedImage, admittedImage);
++      }
++    }
++    if (this.runtimeImageInitialized) {
++      assertRuntimeImageCompatible(readRuntimeImage(this), resolvedImage);
++    }
++
+     const remotes = this.remoteHandler.formatAndRegisterRemote(
+       globalOptionsRes,
+       userOptionsRes,
+@@ -435,6 +546,7 @@ export class FederationCore {
+       remotes,
+       shared: allShareInfos,
+       id: userOptionsRes.id || globalOptions.id,
++      runtimeImage: resolvedImage,
+     };
+ 
+     this.hooks.lifecycle.init.emit({
+diff --git a/packages/runtime-core/src/index.ts b/packages/runtime-core/src/index.ts
+index 94bdbd451..bca04f22b 100644
+--- a/packages/runtime-core/src/index.ts
++++ b/packages/runtime-core/src/index.ts
+@@ -57,3 +57,12 @@ export * as types from './type';
+ export { helpers };
+ export { satisfy } from '../src/utils/semver';
+ export type { IGlobalUtils, IShareUtils };
++
++export {
++  RUNTIME_IMAGE,
++  assertRuntimeImageCompatible,
++  attachRuntimeImage,
++  readRuntimeImage,
++  parseRuntimeImage,
++  type RuntimeImageDescriptorV1,
++} from './runtimeImage';
+diff --git a/packages/runtime-core/src/kernel.ts b/packages/runtime-core/src/kernel.ts
+index 79efc71a2..98c0a7df7 100644
+--- a/packages/runtime-core/src/kernel.ts
++++ b/packages/runtime-core/src/kernel.ts
+@@ -20,3 +20,12 @@ export type {
+   SnapshotHandlerContract,
+   UserOptions,
+ } from './type';
++
++export {
++  RUNTIME_IMAGE,
++  assertRuntimeImageCompatible,
++  attachRuntimeImage,
++  readRuntimeImage,
++  parseRuntimeImage,
++  type RuntimeImageDescriptorV1,
++} from './runtimeImage';
+diff --git a/packages/runtime-core/src/runtimeImage.ts b/packages/runtime-core/src/runtimeImage.ts
+new file mode 100644
+index 000000000..ebf486596
+--- /dev/null
++++ b/packages/runtime-core/src/runtimeImage.ts
+@@ -0,0 +1,125 @@
++import { error, warn } from './utils/logger';
++
++export const RUNTIME_IMAGE = Symbol.for('module-federation.runtime-image.v1');
++
++export interface RuntimeImageDescriptorV1 {
++  readonly contract: 1;
++  readonly compatibilityId: string;
++  readonly required: readonly string[];
++  readonly forbidden: readonly string[];
++  readonly available: readonly string[];
++  readonly target: string;
++  readonly entryLoadingIdentity: string;
++}
++
++export function parseRuntimeImage(
++  value: unknown,
++): RuntimeImageDescriptorV1 | undefined {
++  // This boundary is self-contained so compilers can emit the same parser before
++  // dereferencing an external core that might not yet support this contract.
++  const fail = (message: string): never => {
++    throw new Error('[RuntimeImageContract] ' + message);
++  };
++  const nonempty = (entry: unknown): entry is string =>
++    typeof entry === 'string' && entry.trim().length > 0;
++  const list = (entry: unknown): entry is readonly string[] =>
++    Array.isArray(entry) && Array.from(entry).every(nonempty);
++  if (value === undefined) return undefined;
++  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
++    return fail('Invalid runtime-image descriptor.');
++  }
++  const contract: unknown = Reflect.get(value, 'contract');
++  if (contract !== 1) {
++    return fail('Unsupported runtime-image contract; expected 1.');
++  }
++  const compatibilityId: unknown = Reflect.get(value, 'compatibilityId');
++  const target: unknown = Reflect.get(value, 'target');
++  const entryLoadingIdentity: unknown = Reflect.get(
++    value,
++    'entryLoadingIdentity',
++  );
++  const snapshotList = (key: string): unknown => {
++    const entry: unknown = Reflect.get(value, key);
++    return Array.isArray(entry) ? Array.from(entry) : entry;
++  };
++  const required = snapshotList('required');
++  const forbidden = snapshotList('forbidden');
++  const available = snapshotList('available');
++  if (
++    !nonempty(compatibilityId) ||
++    !nonempty(target) ||
++    !nonempty(entryLoadingIdentity) ||
++    !list(required) ||
++    !list(forbidden) ||
++    !list(available)
++  ) {
++    return fail('Invalid runtime-image descriptor fields.');
++  }
++  return Object.freeze({
++    contract: 1,
++    compatibilityId,
++    target,
++    entryLoadingIdentity,
++    required: Object.freeze(required),
++    forbidden: Object.freeze(forbidden),
++    available: Object.freeze(available),
++  });
++}
++
++export function readRuntimeImage(
++  instance: object,
++): RuntimeImageDescriptorV1 | undefined {
++  const image: unknown = Reflect.get(instance, RUNTIME_IMAGE);
++  return parseRuntimeImage(image);
++}
++
++export function attachRuntimeImage(instance: object, image: unknown): void {
++  const descriptor = parseRuntimeImage(image);
++  Object.defineProperty(instance, RUNTIME_IMAGE, {
++    value: descriptor,
++    enumerable: false,
++    configurable: true,
++  });
++}
++
++export function assertRuntimeImageCompatible(
++  currentImage: unknown,
++  nextImage: unknown,
++): void {
++  const current = parseRuntimeImage(currentImage);
++  const next = parseRuntimeImage(nextImage);
++  if (!current || !next) {
++    if (current || next) {
++      warn(
++        'Runtime image metadata is missing. Reuse stays allowed until a mismatch is known.',
++      );
++    }
++    return;
++  }
++  if (current.compatibilityId !== next.compatibilityId) {
++    error(
++      `Refusing to reuse runtime state from ${current.compatibilityId} with ${next.compatibilityId}.`,
++    );
++  }
++  if (current.target !== next.target) {
++    error(
++      `Refusing to reuse a ${current.target} runtime image for ${next.target}.`,
++    );
++  }
++  if (current.entryLoadingIdentity !== next.entryLoadingIdentity) {
++    error(
++      `Refusing to reuse entry loader ${current.entryLoadingIdentity} with ${next.entryLoadingIdentity}.`,
++    );
++  }
++  const provided = new Set([...current.available, ...current.required]);
++  for (const capability of new Set([...next.required, ...next.available])) {
++    if (!provided.has(capability)) {
++      error(`Runtime image is missing capability ${capability}.`);
++    }
++  }
++  for (const capability of next.forbidden) {
++    if (provided.has(capability)) {
++      error(`Runtime image exposes forbidden capability ${capability}.`);
++    }
++  }
++}
+diff --git a/packages/runtime-core/src/type/config.ts b/packages/runtime-core/src/type/config.ts
+index 2e91ab436..83fc486f7 100644
+--- a/packages/runtime-core/src/type/config.ts
++++ b/packages/runtime-core/src/type/config.ts
+@@ -1,3 +1,4 @@
++import type { RuntimeImageDescriptorV1 } from '../runtimeImage';
+ import type {
+   RemoteWithEntry,
+   RemoteWithVersion,
+@@ -141,6 +142,7 @@ export interface Options {
+   plugins: Array<ModuleFederationRuntimePlugin>;
+   inBrowser: boolean;
+   shareStrategy?: ShareStrategy;
++  runtimeImage?: RuntimeImageDescriptorV1;
+ }
+ 
+ export type UserOptions = Omit<
+@@ -158,6 +160,7 @@ export type LoadModuleOptions = {
+ 
+ // Only for legacy federation provider
+ export type RemoteEntryInitOptions = {
++  runtimeImage?: RuntimeImageDescriptorV1;
+   version: string;
+   shareScopeMap?: ShareScopeMap;
+   shareScopeKeys: string | string[];
+diff --git a/packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts b/packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts
+index 6e86653da..1adfc8d91 100644
+--- a/packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts
++++ b/packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts
+@@ -1,49 +1,211 @@
+ import * as runtimeCore from '@module-federation/runtime-tools/runtime-core';
++import type {
++  ModuleFederationRuntimePlugin,
++  RuntimeImageDescriptorV1,
++} from '@module-federation/runtime-tools/runtime-core';
+ 
+-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime-tools/runtime-core';
+ declare global {
+   var __VERSION__: string;
+   var _FEDERATION_RUNTIME_CORE: typeof runtimeCore;
+   var _FEDERATION_RUNTIME_CORE_FROM: {
+     version: string;
+     name: string;
++    runtimeImage?: RuntimeImageDescriptorV1;
+   };
+ }
+ 
+-function injectExternalRuntimeCorePlugin(): ModuleFederationRuntimePlugin {
+-  return {
++export interface ExternalRuntimeCorePluginOptions {
++  runtimeImage?: RuntimeImageDescriptorV1;
++  /** Tag an external consumer without publishing its core. */
++  publish?: boolean;
++}
++
++function injectExternalRuntimeCorePlugin(
++  config: ExternalRuntimeCorePluginOptions = {},
++): ModuleFederationRuntimePlugin {
++  // Factory arguments are known before the core constructs shared handlers.
++  // Reject malformed compiler metadata before first-publication state exists.
++  const parse = runtimeCore.parseRuntimeImage;
++  const compare = runtimeCore.assertRuntimeImageCompatible;
++  const existingInfo: unknown =
++    runtimeCore.Global?._FEDERATION_RUNTIME_CORE_FROM;
++  if (
++    existingInfo !== undefined &&
++    (typeof existingInfo !== 'object' ||
++      existingInfo === null ||
++      Array.isArray(existingInfo))
++  ) {
++    throw new Error(
++      '[RuntimeImageContract] Invalid external runtime provider information.',
++    );
++  }
++  const previous: unknown =
++    existingInfo && 'runtimeImage' in existingInfo
++      ? existingInfo.runtimeImage
++      : undefined;
++  if (
++    (config.runtimeImage !== undefined || previous !== undefined) &&
++    (typeof parse !== 'function' || typeof compare !== 'function')
++  ) {
++    throw new Error(
++      '[RuntimeImageMinimumContract] Runtime-image publication requires parseRuntimeImage and assertRuntimeImageCompatible.',
++    );
++  }
++  const configuredImage =
++    typeof parse === 'function' ? parse(config.runtimeImage) : undefined;
++  const existingImage =
++    typeof parse === 'function' ? parse(previous) : undefined;
++  const published = runtimeCore.Global?._FEDERATION_RUNTIME_CORE;
++  if (
++    published &&
++    (configuredImage !== undefined || existingImage !== undefined)
++  ) {
++    if (
++      typeof published.parseRuntimeImage !== 'function' ||
++      typeof published.readRuntimeImage !== 'function' ||
++      typeof published.attachRuntimeImage !== 'function' ||
++      typeof published.assertRuntimeImageCompatible !== 'function'
++    ) {
++      throw new Error(
++        '[RuntimeImageMinimumContract] The published runtime core does not support runtime-image admission.',
++      );
++    }
++  }
++  if (
++    runtimeCore.Global?._FEDERATION_RUNTIME_CORE &&
++    configuredImage !== undefined
++  ) {
++    compare(existingImage, configuredImage);
++  }
++  const plugin: ModuleFederationRuntimePlugin = {
+     name: 'inject-external-runtime-core-plugin',
+     version: __VERSION__,
+     beforeInit(args) {
+-      const globalRef = (
+-        runtimeCore as typeof runtimeCore & {
+-          Global?: typeof runtimeCore.Global;
+-        }
+-      ).Global;
+-      if (!globalRef || typeof globalRef !== 'object') {
+-        return args;
++      const globalRef = runtimeCore.Global;
++      const parse = runtimeCore.parseRuntimeImage;
++      const compare = runtimeCore.assertRuntimeImageCompatible;
++      const supplied = [
++        configuredImage,
++        args.options.runtimeImage,
++        args.userOptions?.runtimeImage,
++      ];
++      if (
++        supplied.some((image) => image !== undefined) &&
++        (typeof parse !== 'function' ||
++          typeof compare !== 'function' ||
++          !globalRef ||
++          typeof globalRef !== 'object')
++      ) {
++        throw new Error(
++          '[RuntimeImageMinimumContract] Runtime-image admission requires a runtime core with Global, parseRuntimeImage and assertRuntimeImageCompatible.',
++        );
+       }
+-      const name = args.options.name;
+-      const version = __VERSION__;
++      if (!globalRef || typeof globalRef !== 'object') return args;
++      const from: unknown = globalRef._FEDERATION_RUNTIME_CORE_FROM;
+       if (
+-        globalRef._FEDERATION_RUNTIME_CORE &&
+-        globalRef._FEDERATION_RUNTIME_CORE_FROM &&
+-        (globalRef._FEDERATION_RUNTIME_CORE_FROM.name !== name ||
+-          globalRef._FEDERATION_RUNTIME_CORE_FROM.version !== version)
++        from !== undefined &&
++        (typeof from !== 'object' || from === null || Array.isArray(from))
+       ) {
+-        console.warn(
+-          `Detect multiple module federation runtime! Injected runtime from ${globalRef._FEDERATION_RUNTIME_CORE_FROM.name}@${globalRef._FEDERATION_RUNTIME_CORE_FROM.version} and current is ${name}@${version}, pleasure ensure there is only one consumer to provider runtime!`,
++        throw new Error(
++          '[RuntimeImageContract] Invalid external runtime provider information.',
+         );
+-        return args;
+       }
+-      globalRef._FEDERATION_RUNTIME_CORE = runtimeCore;
+-      globalRef._FEDERATION_RUNTIME_CORE_FROM = {
+-        version,
+-        name,
++      const previous: unknown =
++        from && 'runtimeImage' in from ? from.runtimeImage : undefined;
++      if (
++        previous !== undefined &&
++        (typeof parse !== 'function' || typeof compare !== 'function')
++      ) {
++        throw new Error(
++          '[RuntimeImageMinimumContract] Runtime-image admission requires parseRuntimeImage and assertRuntimeImageCompatible.',
++        );
++      }
++      // Retain parsed immutable copies, never caller-owned metadata arrays.
++      const images = typeof parse === 'function' ? supplied.map(parse) : [];
++      const current = typeof parse === 'function' ? parse(previous) : undefined;
++      const image = images[0] ?? images[2] ?? images[1];
++      const taggedArgs = {
++        ...args,
++        userOptions: { ...args.userOptions, runtimeImage: image },
+       };
+-      return args;
++      if (globalRef._FEDERATION_RUNTIME_CORE) {
++        if (current !== undefined || image !== undefined) {
++          const published = globalRef._FEDERATION_RUNTIME_CORE;
++          if (
++            typeof published.parseRuntimeImage !== 'function' ||
++            typeof published.assertRuntimeImageCompatible !== 'function'
++          ) {
++            throw new Error(
++              '[RuntimeImageMinimumContract] The published runtime core does not support runtime-image admission.',
++            );
++          }
++        }
++        if (typeof compare === 'function') compare(current, image);
++      }
++      if (config.publish === false) return taggedArgs;
++      // Tagged publication follows all beforeInit admission in the existing init hook.
++      // Untagged providers preserve the legacy publication timing.
++      if (image === undefined) publish(args.options.name, image);
++      return taggedArgs;
++    },
++    init({ options }) {
++      const image =
++        typeof parse === 'function' ? parse(options.runtimeImage) : undefined;
++      if (image !== undefined && config.publish !== false)
++        publish(options.name, image);
+     },
+   };
++  function publish(
++    name: string,
++    image: RuntimeImageDescriptorV1 | undefined,
++  ): void {
++    const globalRef = runtimeCore.Global;
++    const from: unknown = globalRef._FEDERATION_RUNTIME_CORE_FROM;
++    if (
++      from !== undefined &&
++      (typeof from !== 'object' || from === null || Array.isArray(from))
++    ) {
++      throw new Error(
++        '[RuntimeImageContract] Invalid external runtime provider information.',
++      );
++    }
++    const current =
++      typeof parse === 'function'
++        ? parse(from && 'runtimeImage' in from ? from.runtimeImage : undefined)
++        : undefined;
++    if (globalRef._FEDERATION_RUNTIME_CORE && typeof compare === 'function')
++      compare(current, image);
++    const version = __VERSION__;
++    if (
++      globalRef._FEDERATION_RUNTIME_CORE &&
++      from &&
++      (('name' in from && from.name !== name) ||
++        ('version' in from && from.version !== version))
++    ) {
++      console.warn(
++        `Detect multiple module federation runtime! Injected runtime differs from ${name}@${version}, please ensure there is only one consumer to provide runtime!`,
++      );
++      return;
++    }
++    globalRef._FEDERATION_RUNTIME_CORE = runtimeCore;
++    globalRef._FEDERATION_RUNTIME_CORE_FROM = {
++      version,
++      name,
++      ...(image !== undefined ? { runtimeImage: image } : {}),
++    };
++  }
++  if (configuredImage !== undefined) {
++    if (
++      typeof runtimeCore.attachRuntimeImage !== 'function' ||
++      typeof runtimeCore.readRuntimeImage !== 'function'
++    ) {
++      throw new Error(
++        '[RuntimeImageMinimumContract] Metadata-bearing runtime plugins require attachRuntimeImage and readRuntimeImage.',
++      );
++    }
++    runtimeCore.attachRuntimeImage(plugin, configuredImage);
++  }
++  return plugin;
+ }
+ 
+ export default injectExternalRuntimeCorePlugin;
+diff --git a/packages/runtime/__tests__/runtime-image.spec.ts b/packages/runtime/__tests__/runtime-image.spec.ts
+new file mode 100644
+index 000000000..fa6d5b578
+--- /dev/null
++++ b/packages/runtime/__tests__/runtime-image.spec.ts
+@@ -0,0 +1,85 @@
++import { describe, expect, it } from '@rstest/core';
++import { createInstance } from '../src';
++import {
++  CurrentGlobal,
++  attachRuntimeImage,
++  parseRuntimeImage,
++  readRuntimeImage,
++} from '@module-federation/runtime-core';
++
++const image = () =>
++  parseRuntimeImage({
++    contract: 1,
++    compatibilityId: 'abi',
++    target: 'node',
++    entryLoadingIdentity: 'loader',
++    required: ['shared', 'remote'],
++    available: ['shared', 'remote'],
++    forbidden: [],
++  })!;
++
++describe('runtime image options and plugin association', () => {
++  it('normalizes compiler plugin metadata before construction and retains its final image', () => {
++    const plugin = { name: 'compiled-image' };
++    attachRuntimeImage(plugin, image());
++    const instance = createInstance({
++      name: 'tagged',
++      remotes: [],
++      plugins: [plugin],
++    });
++    expect(readRuntimeImage(instance)).toEqual(image());
++    expect(instance.options.runtimeImage).toEqual(image());
++    expect(Object.isFrozen(instance.options.runtimeImage)).toBe(true);
++  });
++
++  it('checks config-tagged families before construction or global registration', () => {
++    createInstance({ name: 'existing', remotes: [], runtimeImage: image() });
++    const registry = CurrentGlobal.__FEDERATION__;
++    const instances = [...registry.__INSTANCES__];
++    const shares = { ...registry.__SHARE__ };
++    const plugin = { name: 'different-family' };
++    attachRuntimeImage(plugin, { ...image(), compatibilityId: 'other' });
++    expect(() =>
++      createInstance({ name: 'rejected', remotes: [], plugins: [plugin] }),
++    ).toThrow('runtime family other');
++    expect(registry.__INSTANCES__).toEqual(instances);
++    expect(registry.__SHARE__).toEqual(shares);
++  });
++
++  it('rejects incompatible direct requests against a tagged implementation before construction', () => {
++    const registry = CurrentGlobal.__FEDERATION__;
++    const shares = { ...registry.__SHARE__ };
++    const plugin = { name: 'shared-only' };
++    attachRuntimeImage(plugin, {
++      ...image(),
++      required: ['shared'],
++      available: ['shared'],
++    });
++    expect(() =>
++      createInstance({
++        name: 'rejected',
++        remotes: [],
++        runtimeImage: image(),
++        plugins: [plugin],
++      }),
++    ).toThrow('missing capability remote');
++    expect(registry.__SHARE__).toEqual(shares);
++  });
++
++  it('treats equivalent set claims as one structural first admission', () => {
++    const overlap = { ...image(), forbidden: ['shared'] };
++    const plugin = { name: 'equivalent-claim' };
++    attachRuntimeImage(plugin, {
++      ...overlap,
++      required: ['remote', 'shared', 'shared'],
++      available: ['remote', 'shared'],
++    });
++    const instance = createInstance({
++      name: 'equal',
++      remotes: [],
++      runtimeImage: parseRuntimeImage(overlap),
++      plugins: [plugin],
++    });
++    expect(readRuntimeImage(instance)).toEqual(overlap);
++  });
++});
+diff --git a/packages/runtime/src/instance.ts b/packages/runtime/src/instance.ts
+index c3e7c13dd..e4cff9215 100644
+--- a/packages/runtime/src/instance.ts
++++ b/packages/runtime/src/instance.ts
+@@ -4,6 +4,90 @@ import {
+   type ModuleFederation,
+   type UserOptions,
+ } from '@module-federation/runtime-core/kernel';
++import * as runtimeKernel from '@module-federation/runtime-core/kernel';
++
++const {
++  parseRuntimeImage,
++  readRuntimeImage,
++  attachRuntimeImage,
++  assertRuntimeImageCompatible,
++} = runtimeKernel;
++
++function minimumContract(): never {
++  throw new Error(
++    '[RuntimeImageMinimumContract] The runtime core must provide parseRuntimeImage, readRuntimeImage, attachRuntimeImage and assertRuntimeImageCompatible for metadata-aware admission.',
++  );
++}
++
++function requireMetadataHelpers(): void {
++  if (
++    typeof parseRuntimeImage !== 'function' ||
++    typeof readRuntimeImage !== 'function' ||
++    typeof attachRuntimeImage !== 'function' ||
++    typeof assertRuntimeImageCompatible !== 'function'
++  )
++    minimumContract();
++}
++
++function parseImage(image: unknown) {
++  if (typeof parseRuntimeImage === 'function') {
++    const parsed = parseRuntimeImage(image);
++    if (parsed !== undefined) requireMetadataHelpers();
++    return parsed;
++  }
++  if (image !== undefined) minimumContract();
++  return undefined;
++}
++
++function imageOf(instance: object) {
++  if (typeof readRuntimeImage === 'function') {
++    const parsed = readRuntimeImage(instance);
++    if (parsed !== undefined) requireMetadataHelpers();
++    return parsed;
++  }
++  const image: unknown = Reflect.get(
++    instance,
++    Symbol.for('module-federation.runtime-image.v1'),
++  );
++  if (image !== undefined) minimumContract();
++  return undefined;
++}
++
++function compareImages(current: unknown, next: unknown): void {
++  if (current === undefined && next === undefined) return;
++  if (typeof assertRuntimeImageCompatible !== 'function') minimumContract();
++  assertRuntimeImageCompatible(current, next);
++}
++
++type RuntimeImage = NonNullable<ReturnType<typeof parseRuntimeImage>>;
++function sameImage(left: RuntimeImage, right: RuntimeImage): boolean {
++  if (
++    left.compatibilityId !== right.compatibilityId ||
++    left.target !== right.target ||
++    left.entryLoadingIdentity !== right.entryLoadingIdentity
++  )
++    return false;
++  return (['required', 'forbidden', 'available'] as const).every((key) => {
++    const a = new Set(left[key]);
++    const b = new Set(right[key]);
++    return a.size === b.size && [...a].every((item) => b.has(item));
++  });
++}
++
++function normalizedImage(options: UserOptions) {
++  let image = parseImage(options.runtimeImage);
++  for (const plugin of options.plugins || []) {
++    const tagged = imageOf(plugin);
++    if (tagged !== undefined) {
++      if (image === undefined) image = tagged;
++      else if (!sameImage(image, tagged)) {
++        compareImages(image, tagged);
++        compareImages(tagged, image);
++      }
++    }
++  }
++  return image;
++}
+ 
+ export function getGlobalFederationInstance(
+   name: string,
+@@ -41,10 +125,26 @@ export function createInstance<T extends ModuleFederation>(
+   options: UserOptions,
+   construct: (options: UserOptions) => T,
+ ): T {
++  const runtimeImage = normalizedImage(options);
++  if (runtimeImage !== undefined) {
++    for (const registered of CurrentGlobal.__FEDERATION__.__INSTANCES__) {
++      const current = imageOf(registered);
++      if (current && current.compatibilityId !== runtimeImage.compatibilityId) {
++        throw new Error(
++          `Refusing to register ${options.name} from runtime family ${runtimeImage.compatibilityId} beside ${registered.name} from ${current.compatibilityId}.`,
++        );
++      }
++    }
++  }
+   const instance = construct({
+     id: `${options.name}@${options.version || Date.now()}`,
+     ...options,
++    runtimeImage,
+   });
++  const resolvedImage = parseImage(instance.options?.runtimeImage);
++  if (typeof attachRuntimeImage === 'function')
++    attachRuntimeImage(instance, resolvedImage);
++  else if (resolvedImage !== undefined) minimumContract();
+   setGlobalFederationInstance(instance);
+   return instance;
+ }
+@@ -53,15 +153,17 @@ export function initInstance<T extends ModuleFederation>(
+   options: UserOptions,
+   construct: (options: UserOptions) => T,
+ ): T {
++  const runtimeImage = normalizedImage(options);
+   const instance = getGlobalFederationInstance(
+     options.name,
+     options.version,
+     bundleInstance,
+   );
+-  const normalizedOptions = { ...options, id: options.id || '' };
++  const normalizedOptions = { ...options, runtimeImage, id: options.id || '' };
+   if (!instance) {
+     return (bundleInstance = createInstance(normalizedOptions, construct));
+   }
++  compareImages(imageOf(instance), runtimeImage);
+   instance.initOptions(normalizedOptions);
+   if (!bundleInstance) {
+     bundleInstance = instance;
+diff --git a/packages/sdk/src/types/plugins/ModuleFederationPlugin.ts b/packages/sdk/src/types/plugins/ModuleFederationPlugin.ts
+index c129a8db9..b993fa762 100644
+--- a/packages/sdk/src/types/plugins/ModuleFederationPlugin.ts
++++ b/packages/sdk/src/types/plugins/ModuleFederationPlugin.ts
+@@ -486,6 +486,16 @@ export interface ModuleFederationPluginOptions {
+   experiments?: {
+     externalRuntime?: boolean;
+     provideExternalRuntime?: boolean;
++    /**
++     * Rspack external-runtime image admission. These are explicit caller guarantees
++     * for the state/core ABI and entry evaluator, not inferred package identities.
++     * Requires an explicit optimization.target and the built-in implementation;
++     * custom runtime plugins and non-external/composed profiles are unsupported.
++     */
++    runtimeImage?: {
++      compatibilityId: string;
++      entryLoadingIdentity: string;
++    };
+     asyncStartup?: boolean;
+     /**
+      * Options related to build optimizations.
+diff --git a/packages/webpack-bundler-runtime/__tests__/initContainerEntry.array.spec.ts b/packages/webpack-bundler-runtime/__tests__/initContainerEntry.array.spec.ts
+index 2e48d7195..62926eecf 100644
+--- a/packages/webpack-bundler-runtime/__tests__/initContainerEntry.array.spec.ts
++++ b/packages/webpack-bundler-runtime/__tests__/initContainerEntry.array.spec.ts
+@@ -9,6 +9,7 @@ import type { RemoteEntryInitOptions } from '@module-federation/runtime/types';
+  */
+ function createMockFederationInstance(overrides: Record<string, any> = {}) {
+   return {
++    options: {},
+     initOptions: jest.fn(),
+     initShareScopeMap: jest.fn(),
+     ...overrides,
+@@ -236,6 +237,7 @@ describe('initContainerEntry with array-based share scopes', () => {
+         S: {},
+         federation: {
+           instance: {
++            options: {},
+             initOptions: jest.fn(),
+             initShareScopeMap: jest.fn(),
+           },
+@@ -894,6 +896,7 @@ describe('initContainerEntry with array-based share scopes', () => {
+       S: {},
+       federation: {
+         instance: {
++          options: {},
+           initOptions: jest.fn(),
+           initShareScopeMap: mockInitShareScopeMap,
+         },
+@@ -944,6 +947,7 @@ describe('initContainerEntry with array-based share scopes', () => {
+       S: {},
+       federation: {
+         instance: {
++          options: {},
+           initOptions: jest.fn(),
+           initShareScopeMap: jest.fn(),
+         },
+@@ -975,6 +979,7 @@ describe('initContainerEntry with array-based share scopes', () => {
+         S: {},
+         federation: {
+           instance: {
++            options: {},
+             initOptions: jest.fn(),
+             initShareScopeMap: jest.fn(),
+           },
+@@ -1011,6 +1016,7 @@ describe('initContainerEntry with array-based share scopes', () => {
+         S: {},
+         federation: {
+           instance: {
++            options: {},
+             initOptions: jest.fn(),
+             initShareScopeMap: jest.fn(),
+           },
+@@ -1065,6 +1071,7 @@ describe('initContainerEntry with array-based share scopes', () => {
+         S: {},
+         federation: {
+           instance: {
++            options: {},
+             initOptions: jest.fn(),
+             initShareScopeMap: jest.fn(),
+           },
+diff --git a/packages/webpack-bundler-runtime/__tests__/initContainerEntry.non-array.spec.ts b/packages/webpack-bundler-runtime/__tests__/initContainerEntry.non-array.spec.ts
+index b9cf5987d..518c8f672 100644
+--- a/packages/webpack-bundler-runtime/__tests__/initContainerEntry.non-array.spec.ts
++++ b/packages/webpack-bundler-runtime/__tests__/initContainerEntry.non-array.spec.ts
+@@ -9,6 +9,7 @@ import type { RemoteEntryInitOptions } from '@module-federation/runtime/types';
+  */
+ function createMockFederationInstance(overrides: Record<string, any> = {}) {
+   return {
++    options: {},
+     initOptions: jest.fn(),
+     initShareScopeMap: jest.fn(),
+     ...overrides,
+@@ -354,6 +355,7 @@ describe('initContainerEntry with non-array-based share scopes', () => {
+         S: {},
+         federation: {
+           instance: {
++            options: {},
+             initOptions: mockInitOptions1,
+             initShareScopeMap: mockInitShareScopeMap1,
+           },
+@@ -404,6 +406,7 @@ describe('initContainerEntry with non-array-based share scopes', () => {
+         S: {},
+         federation: {
+           instance: {
++            options: {},
+             initOptions: mockInitOptions2,
+             initShareScopeMap: mockInitShareScopeMap2,
+           },
+diff --git a/packages/webpack-bundler-runtime/__tests__/initContainerEntry.runtime-image.spec.ts b/packages/webpack-bundler-runtime/__tests__/initContainerEntry.runtime-image.spec.ts
+new file mode 100644
+index 000000000..0f8672a35
+--- /dev/null
++++ b/packages/webpack-bundler-runtime/__tests__/initContainerEntry.runtime-image.spec.ts
+@@ -0,0 +1,65 @@
++import { initContainerEntry } from '../src/initContainerEntry';
++import { createInstance } from '@module-federation/runtime';
++import { parseRuntimeImage } from '@module-federation/runtime/core';
++import type { WebpackRequire } from '../src/types';
++
++it('retains the admitted image for same-instance scope initialization and rejects explicit mismatches', () => {
++  const runtimeImage = parseRuntimeImage({
++    contract: 1,
++    compatibilityId: 'abi',
++    target: 'node',
++    entryLoadingIdentity: 'loader',
++    required: [],
++    available: [],
++    forbidden: [],
++  });
++  const instance = createInstance({
++    name: 'image-container',
++    remotes: [],
++    runtimeImage,
++  });
++  const initOptions = { name: 'image-container', remotes: [] };
++  const webpackRequire = Object.assign(
++    (_moduleId: string | number) => undefined,
++    {
++      p: '',
++      o: (object: Record<string, unknown>, key: string | number) =>
++        Object.hasOwn(object, key),
++      R: [],
++      m: {},
++      c: {},
++      S: {},
++      I: jest.fn(),
++      federation: { instance, initOptions, bundlerRuntimeOptions: {} },
++    },
++  ) satisfies WebpackRequire;
++  const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
++  try {
++    initContainerEntry({
++      webpackRequire,
++      shareScope: {},
++      initScope: [],
++      shareScopeKey: 'default',
++    });
++    expect(instance.options.runtimeImage).toEqual(runtimeImage);
++    expect(warn).not.toHaveBeenCalled();
++    const before = instance.options;
++    const foreign = {
++      version: 'foreign',
++      shareScopeMap: {},
++      runtimeImage: parseRuntimeImage({ ...runtimeImage, target: 'web' }),
++    };
++    expect(() =>
++      initContainerEntry({
++        webpackRequire,
++        shareScope: {},
++        initScope: [],
++        shareScopeKey: 'default',
++        remoteEntryInitOptions: foreign,
++      }),
++    ).toThrow('runtime image');
++    expect(instance.options).toBe(before);
++  } finally {
++    warn.mockRestore();
++  }
++});
+diff --git a/packages/webpack-bundler-runtime/src/initContainerEntry.ts b/packages/webpack-bundler-runtime/src/initContainerEntry.ts
+index 008846164..cfc088503 100644
+--- a/packages/webpack-bundler-runtime/src/initContainerEntry.ts
++++ b/packages/webpack-bundler-runtime/src/initContainerEntry.ts
+@@ -23,6 +23,9 @@ export function initContainerEntry(
+   federationInstance.initOptions({
+     name: webpackRequire.federation.initOptions.name,
+     remotes: [],
++    // This initializes sharing on the already admitted container instance.
++    // Preserve its image instead of turning the update into an untagged reuse.
++    runtimeImage: federationInstance.options.runtimeImage,
+     ...remoteEntryInitOptions,
+   });
+ 

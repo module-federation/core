@@ -1,5 +1,7 @@
 # Runtime RFC behavioral proof ledger
 
+2026-10-03: [The reviewed RFC5128 metadata alternative is now implemented and verified locally](metadata-implementation/README.md). Its source pushes remain held; the linked patches and final minor/major evidence supersede the earlier metadata proposal/pending status. Earlier reports remain historical snapshots.
+
 Bounded fixes and regression coverage are implemented and validated. RFC5036 and RFC5128 remain separate alternative stacks. This ledger records evidence for the independent reviewer; it does not approve or merge either stack.
 
 The parent’s custom-then-default Node cache control reproduced `[A,A]` where `[A,B]` was required. RFC5128 correction `fb97b4f1c` closes the unproven physical-global shortcut for contextual requests. Six actual SDK cases now pass, including both orders, deterministic overlap, default deduplication, and direct legacy reuse. The same six cases pass on the final major head. RFC5036’s invalid SDK payload fallback was independently reproduced and corrected by `2f7085b1a`; actual malformed exports reject while valid/retry/legacy controls pass.

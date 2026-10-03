@@ -1,0 +1,366 @@
+[
+  {
+    "label": "final-minor",
+    "sourceHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "package": "@module-federation/sdk",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 96
+    },
+    "tarball": "newmetadata-proof/results/final-minor/tarballs/sdk.tgz",
+    "tarballSHA256": "c87d3e34e0778d0b2674119446faa23cabbab6a0a0e591e76807f18c5cd419d6",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5141/packages/sdk/tsdown.config.ts",
+      "sha256": "fdd40fc7bf00adbf3d7d2646fe4e57a15ae9f0a92dba25780f8696fc818200c8"
+    }
+  },
+  {
+    "label": "final-minor",
+    "sourceHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "package": "@module-federation/error-codes",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 37
+    },
+    "tarball": "newmetadata-proof/results/final-minor/tarballs/error-codes.tgz",
+    "tarballSHA256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5141/packages/error-codes/tsdown.config.ts",
+      "sha256": "daaf62063159894c6ae4bc4e209b209a831ae5771ccc686426e42d49d7661acc"
+    }
+  },
+  {
+    "label": "final-minor",
+    "sourceHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "package": "@module-federation/runtime-core",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 208
+    },
+    "tarball": "newmetadata-proof/results/final-minor/tarballs/runtime-core.tgz",
+    "tarballSHA256": "8fd44351a52af972453c4885c2e7004a40f0c27a4ace0253f0b009ac0334c9b7",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5141/packages/runtime-core/tsdown.config.ts",
+      "sha256": "0911c0c83f537f7ce2171d0bf1501b149fad16d549f57485caa4d3d158851e63"
+    }
+  },
+  {
+    "label": "final-minor",
+    "sourceHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "package": "@module-federation/runtime",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 33
+    },
+    "tarball": "newmetadata-proof/results/final-minor/tarballs/runtime.tgz",
+    "tarballSHA256": "13834467f9736932e4f2a02aa1050adbee5bc14a01c723e69caa91fa66eb4632",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5141/packages/runtime/tsdown.config.ts",
+      "sha256": "c817a61f196a48114d822670db8fdde03c4b7b968d921ac477582d73eda17c7c"
+    }
+  },
+  {
+    "label": "final-minor",
+    "sourceHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "package": "@module-federation/webpack-bundler-runtime",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 92
+    },
+    "tarball": "newmetadata-proof/results/final-minor/tarballs/webpack-bundler-runtime.tgz",
+    "tarballSHA256": "ba8c6f4435e28b52e851f764e572e70fe506336053f7458ca5d933d4b061f599",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5141/packages/webpack-bundler-runtime/tsdown.config.ts",
+      "sha256": "0482546dfad71961042734e3b30c49665f529f2794ddd3e4b848de8526bf6464"
+    }
+  },
+  {
+    "label": "final-minor",
+    "sourceHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "package": "@module-federation/runtime-tools",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 22
+    },
+    "tarball": "newmetadata-proof/results/final-minor/tarballs/runtime-tools.tgz",
+    "tarballSHA256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5141/packages/runtime-tools/tsdown.config.ts",
+      "sha256": "d55d50f2e6d17bcda8f4d7e367b084d0656de6579e54e4820a52604a2d3ec917"
+    }
+  },
+  {
+    "label": "final-minor",
+    "sourceHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "package": "@module-federation/inject-external-runtime-core-plugin",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 7
+    },
+    "tarball": "newmetadata-proof/results/final-minor/tarballs/inject-external-runtime-core-plugin.tgz",
+    "tarballSHA256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5141/packages/runtime-plugins/inject-external-runtime-core-plugin/tsdown.config.ts",
+      "sha256": "c0fb527fcbee657b87c2ca1d7ab09719f606fa2f672c3e91b946ee75bcbf7ac6"
+    }
+  },
+  {
+    "label": "final-major-complete",
+    "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+    "package": "@module-federation/sdk",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 96
+    },
+    "tarball": "newmetadata-proof/results/final-major-complete/tarballs/sdk.tgz",
+    "tarballSHA256": "0a762a63845a70048575cb37c5d67278e18cc793ff55aadbeac2c5e3753ca227",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5142/packages/sdk/tsdown.config.ts",
+      "sha256": "fdd40fc7bf00adbf3d7d2646fe4e57a15ae9f0a92dba25780f8696fc818200c8"
+    }
+  },
+  {
+    "label": "final-major-complete",
+    "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+    "package": "@module-federation/error-codes",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 37
+    },
+    "tarball": "newmetadata-proof/results/final-major-complete/tarballs/error-codes.tgz",
+    "tarballSHA256": "aeff96de7fdeebf88d395e440455bef872b6b93d0b616e6628ebf0a10498709e",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5142/packages/error-codes/tsdown.config.ts",
+      "sha256": "daaf62063159894c6ae4bc4e209b209a831ae5771ccc686426e42d49d7661acc"
+    }
+  },
+  {
+    "label": "final-major-complete",
+    "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+    "package": "@module-federation/runtime-core",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 206
+    },
+    "tarball": "newmetadata-proof/results/final-major-complete/tarballs/runtime-core.tgz",
+    "tarballSHA256": "b4bd5faff32aa7673c57c86cad366a5628d61e6e78f2a3df923cfd6187e01d34",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5142/packages/runtime-core/tsdown.config.ts",
+      "sha256": "0911c0c83f537f7ce2171d0bf1501b149fad16d549f57485caa4d3d158851e63"
+    }
+  },
+  {
+    "label": "final-major-complete",
+    "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+    "package": "@module-federation/runtime",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 33
+    },
+    "tarball": "newmetadata-proof/results/final-major-complete/tarballs/runtime.tgz",
+    "tarballSHA256": "f9eac4f1a8372ce5e59a7fc8bacc4bf6f8c0b8287ac9ed138b3f22788756c92c",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5142/packages/runtime/tsdown.config.ts",
+      "sha256": "c817a61f196a48114d822670db8fdde03c4b7b968d921ac477582d73eda17c7c"
+    }
+  },
+  {
+    "label": "final-major-complete",
+    "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+    "package": "@module-federation/webpack-bundler-runtime",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 91
+    },
+    "tarball": "newmetadata-proof/results/final-major-complete/tarballs/webpack-bundler-runtime.tgz",
+    "tarballSHA256": "92ba6ac7026204233b45928dcddb7026e9c301e1fc579d6f693e62637189761f",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5142/packages/webpack-bundler-runtime/tsdown.config.ts",
+      "sha256": "0482546dfad71961042734e3b30c49665f529f2794ddd3e4b848de8526bf6464"
+    }
+  },
+  {
+    "label": "final-major-complete",
+    "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+    "package": "@module-federation/runtime-tools",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 22
+    },
+    "tarball": "newmetadata-proof/results/final-major-complete/tarballs/runtime-tools.tgz",
+    "tarballSHA256": "f899ce60ffee8b60098b98abba05dee7f0d02e7695ffaa3f872366304376fe17",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5142/packages/runtime-tools/tsdown.config.ts",
+      "sha256": "d55d50f2e6d17bcda8f4d7e367b084d0656de6579e54e4820a52604a2d3ec917"
+    }
+  },
+  {
+    "label": "final-major-complete",
+    "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+    "package": "@module-federation/inject-external-runtime-core-plugin",
+    "outcome": {
+      "kind": "passed",
+      "extractedDistFiles": 7
+    },
+    "tarball": "newmetadata-proof/results/final-major-complete/tarballs/inject-external-runtime-core-plugin.tgz",
+    "tarballSHA256": "ee7d2ef38fc92153145a63484d4f243f15637aa009f92a540b6895c78c60ed4a",
+    "publicManifestFields": [
+      "name",
+      "version",
+      "type",
+      "main",
+      "module",
+      "types",
+      "exports",
+      "imports",
+      "engines"
+    ],
+    "buildConfig": {
+      "path": "stack5142/packages/runtime-plugins/inject-external-runtime-core-plugin/tsdown.config.ts",
+      "sha256": "c0fb527fcbee657b87c2ca1d7ab09719f606fa2f672c3e91b946ee75bcbf7ac6"
+    }
+  }
+]

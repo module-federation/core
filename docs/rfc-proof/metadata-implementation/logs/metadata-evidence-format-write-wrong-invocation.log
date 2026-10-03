@@ -1,0 +1,14 @@
+Error: ERR_PNPM_BAD_PM_VERSION
+
+  × This project is configured to use 10.28.0 of pnpm. Your current pnpm is
+  │ v12.8.1
+  │ Corepack invoked pnpm with this version, and pnpm does not switch versions
+  │ when running under corepack.
+  help: Align the "packageManager" field in package.json with
+        "devEngines.packageManager", or invoke pnpm directly (without
+        corepack) so it can switch versions automatically.
+        If you want to bypass this version check, you can set the "pmOnFail"
+        configuration to "warn" or "ignore" (e.g. via --pm-on-fail=ignore). If
+        using "devEngines.packageManager", you can set its "onFail" to "warn"
+        or "ignore"
+

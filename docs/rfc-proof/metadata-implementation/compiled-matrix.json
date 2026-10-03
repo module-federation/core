@@ -1,0 +1,134 @@
+[
+  {
+    "tip": "stack5141",
+    "version": "2.1",
+    "sourceHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "compiled": 12,
+    "processes": 47,
+    "directRootGuard": true,
+    "coreCounts": {
+      "producer": 41,
+      "provider-untagged": 41,
+      "provider-tagged": 41,
+      "remote-untagged": 0,
+      "remote-tagged": 0,
+      "consumer-untagged": 0,
+      "consumer-tagged": 0,
+      "consumer-forbidden": 0,
+      "consumer-commonjs": 0,
+      "direct-commonjs": 0,
+      "provider-captured": 41,
+      "direct-root": 0
+    }
+  },
+  {
+    "tip": "stack5141",
+    "version": "1.5",
+    "sourceHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "compiled": 12,
+    "processes": 43,
+    "directRootGuard": true,
+    "coreCounts": {
+      "producer": 41,
+      "provider-untagged": 41,
+      "provider-tagged": 41,
+      "remote-untagged": 0,
+      "remote-tagged": 0,
+      "consumer-untagged": 0,
+      "consumer-tagged": 0,
+      "consumer-forbidden": 0,
+      "consumer-commonjs": 0,
+      "direct-commonjs": 0,
+      "provider-captured": 41,
+      "direct-root": 0
+    }
+  },
+  {
+    "tip": "stack5141",
+    "version": "1.7",
+    "sourceHead": "abc32180ce7820bbd784b6fc3b90cf1dbacfe1a6",
+    "compiled": 12,
+    "processes": 43,
+    "directRootGuard": true,
+    "coreCounts": {
+      "producer": 41,
+      "provider-untagged": 41,
+      "provider-tagged": 41,
+      "remote-untagged": 0,
+      "remote-tagged": 0,
+      "consumer-untagged": 0,
+      "consumer-tagged": 0,
+      "consumer-forbidden": 0,
+      "consumer-commonjs": 0,
+      "direct-commonjs": 0,
+      "provider-captured": 41,
+      "direct-root": 0
+    }
+  },
+  {
+    "tip": "stack5142",
+    "version": "2.1",
+    "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+    "compiled": 12,
+    "processes": 47,
+    "directRootGuard": true,
+    "coreCounts": {
+      "producer": 41,
+      "provider-untagged": 41,
+      "provider-tagged": 41,
+      "remote-untagged": 0,
+      "remote-tagged": 0,
+      "consumer-untagged": 0,
+      "consumer-tagged": 0,
+      "consumer-forbidden": 0,
+      "consumer-commonjs": 0,
+      "direct-commonjs": 0,
+      "provider-captured": 41,
+      "direct-root": 0
+    }
+  },
+  {
+    "tip": "stack5142",
+    "version": "1.5",
+    "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+    "compiled": 12,
+    "processes": 43,
+    "directRootGuard": true,
+    "coreCounts": {
+      "producer": 41,
+      "provider-untagged": 41,
+      "provider-tagged": 41,
+      "remote-untagged": 0,
+      "remote-tagged": 0,
+      "consumer-untagged": 0,
+      "consumer-tagged": 0,
+      "consumer-forbidden": 0,
+      "consumer-commonjs": 0,
+      "direct-commonjs": 0,
+      "provider-captured": 41,
+      "direct-root": 0
+    }
+  },
+  {
+    "tip": "stack5142",
+    "version": "1.7",
+    "sourceHead": "3cf6ff1050089c8bd500ab044653116ee2f22b23",
+    "compiled": 12,
+    "processes": 43,
+    "directRootGuard": true,
+    "coreCounts": {
+      "producer": 41,
+      "provider-untagged": 41,
+      "provider-tagged": 41,
+      "remote-untagged": 0,
+      "remote-tagged": 0,
+      "consumer-untagged": 0,
+      "consumer-tagged": 0,
+      "consumer-forbidden": 0,
+      "consumer-commonjs": 0,
+      "direct-commonjs": 0,
+      "provider-captured": 41,
+      "direct-root": 0
+    }
+  }
+]

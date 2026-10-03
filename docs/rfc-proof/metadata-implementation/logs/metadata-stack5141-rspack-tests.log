@@ -1,0 +1,17 @@
+
+> @module-federation/rspack@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/rspack
+> pnpm exec jest --config jest.config.js --passWithNoTests
+
+PASS __tests__/RuntimeImageProfile.spec.ts
+PASS __tests__/ExternalRuntimePlugin.spec.ts
+PASS __tests__/ComposedRuntimePlugin.spec.ts
+PASS __tests__/ModuleFederationPlugin.spec.ts
+PASS __tests__/externalRuntime.spec.ts
+PASS __tests__/runtimeImage.spec.ts (5.044 s)
+PASS __tests__/composedRuntime.spec.ts (10.607 s)
+
+Test Suites: 7 passed, 7 total
+Tests:       37 passed, 37 total
+Snapshots:   0 total
+Time:        10.924 s
+Ran all test suites.

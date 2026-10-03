@@ -1,0 +1,68 @@
+
+> @module-federation/rspack@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/rspack
+> pnpm exec jest --config jest.config.js --passWithNoTests
+
+PASS __tests__/RuntimeImageProfile.spec.ts
+PASS __tests__/ExternalRuntimePlugin.spec.ts
+PASS __tests__/ModuleFederationPlugin.spec.ts
+PASS __tests__/ComposedRuntimePlugin.spec.ts
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+2 !== 1
+
+    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/rspack/__tests__/external-runtime-fixture/metadata-probe.mjs:490:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 2,
+  expected: 1,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0
+FAIL __tests__/runtimeImage.spec.ts
+  ● admits actual runtime-image providers before publication or namespace access
+
+    Command failed: /Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/rspack/__tests__/external-runtime-fixture/metadata-probe.mjs build /var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/rspack-runtime-image-nP8aXK
+    node:internal/modules/run_main:107
+        triggerUncaughtException(
+        ^
+
+    AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+    2 !== 1
+
+       7 |   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rspack-runtime-image-'));
+       8 |   try {
+    >  9 |     const output = execFileSync(
+         |                                ^
+      10 |       process.execPath,
+      11 |       [
+      12 |         path.join(__dirname, 'external-runtime-fixture/metadata-probe.mjs'),
+
+      at file:/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/rspack/__tests__/external-runtime-fixture/metadata-probe.mjs:490:10 {
+        generatedMessage: true,
+        code: 'ERR_ASSERTION',
+        actual: 2,
+        expected: 1,
+        operator: 'strictEqual',
+        diff: 'simple'
+      }
+      Node.js v24.15.0
+      at Object.<anonymous> (__tests__/runtimeImage.spec.ts:9:32)
+
+PASS __tests__/externalRuntime.spec.ts
+PASS __tests__/composedRuntime.spec.ts (10.854 s)
+
+Test Suites: 1 failed, 6 passed, 7 total
+Tests:       1 failed, 40 passed, 41 total
+Snapshots:   0 total
+Time:        11.185 s
+Ran all test suites.
+/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/rspack:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @module-federation/rspack@2.9.2 test: `pnpm exec jest --config jest.config.js --passWithNoTests`
+Exit status 1
