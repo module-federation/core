@@ -24,6 +24,10 @@ export interface Federation {
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __PRELOADED_MAP__: Map<string, boolean>;
   __PRELOADED_ASSETS__: Set<string>;
+  __ENTRY_LOADING_IDENTITY__: {
+    ids: WeakMap<object, number>;
+    nextId: number;
+  };
 }
 
 const MAX_PRELOADED_ASSETS = 2000;
@@ -106,10 +110,24 @@ function setGlobalDefaultVal(target: typeof CurrentGlobal) {
   target.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
   target.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
   target.__FEDERATION__.__PRELOADED_ASSETS__ ??= new Set();
+  target.__FEDERATION__.__ENTRY_LOADING_IDENTITY__ ??= {
+    ids: new WeakMap(),
+    nextId: 0,
+  };
 }
 
 setGlobalDefaultVal(CurrentGlobal);
 setGlobalDefaultVal(nativeGlobal);
+
+export function getEntryLoadingIdentity(evaluator: object): number {
+  const identity = CurrentGlobal.__FEDERATION__.__ENTRY_LOADING_IDENTITY__;
+  let id = identity.ids.get(evaluator);
+  if (id === undefined) {
+    id = identity.nextId++;
+    identity.ids.set(evaluator, id);
+  }
+  return id;
+}
 
 export function resetFederationGlobalInfo(): void {
   CurrentGlobal.__FEDERATION__.__GLOBAL_PLUGIN__ = [];
