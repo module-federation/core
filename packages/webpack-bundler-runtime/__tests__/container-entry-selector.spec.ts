@@ -6,6 +6,7 @@ import path from 'node:path';
 import { clearImmediate, setImmediate } from 'node:timers';
 import { TextDecoder, TextEncoder } from 'node:util';
 import type webpack from 'webpack';
+import { loadNativeRspack } from '../../../tools/testing/loadNativeRspack';
 
 const packageDir = path.resolve(__dirname, '..');
 type CompilerFactory = typeof webpack;
@@ -41,12 +42,7 @@ function compilerCases(): [string, CompilerFactory][] {
         'webpack',
       ) as CompilerFactory,
     ],
-    [
-      'rspack',
-      createRequire(path.resolve(packageDir, '../rspack/package.json'))(
-        '@rspack/core',
-      ) as CompilerFactory,
-    ],
+    ['rspack', loadNativeRspack().rspack as CompilerFactory],
   ];
 }
 
