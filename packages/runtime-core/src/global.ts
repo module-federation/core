@@ -33,6 +33,16 @@ export interface RemoteEntryCacheDescriptorV1 {
   entryLoadingIdentity: string;
   remoteType: string;
   entryGlobalName: string;
+  remoteEntryKey?: string;
+  evaluatorOrigin?: object;
+  entryUrlTransform?: object;
+  browserScript?: boolean;
+  entryEvaluators?: {
+    loadEntry: readonly object[];
+    createScript: readonly object[];
+    loadEntryError: readonly object[];
+    fetch: readonly object[];
+  };
 }
 
 export interface RemoteEntryCacheMetadataV1 {

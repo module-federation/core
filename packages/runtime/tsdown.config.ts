@@ -40,6 +40,7 @@ const buildConfig = {
     copyLicense: true,
     unbundle: true,
   }),
+  cjsDefault: false,
   outputOptions: {
     exports: 'named',
   },

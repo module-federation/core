@@ -32,11 +32,19 @@ function injectExternalRuntimeCorePlugin(): ModuleFederationRuntimePlugin {
       const runtimeImage =
         args.userOptions?.runtimeImage ?? args.options.runtimeImage;
       const provider = globalRef._FEDERATION_RUNTIME_CORE_FROM;
-      if (globalRef._FEDERATION_RUNTIME_CORE && provider) {
-        runtimeCore.assertRuntimeImageCompatible(
-          provider.runtimeImage,
-          runtimeImage,
+      const assertCompatible = runtimeCore.assertRuntimeImageCompatible;
+      if (
+        typeof assertCompatible !== 'function' &&
+        (provider?.runtimeImage || runtimeImage)
+      ) {
+        throw new Error(
+          '[RuntimeImageMinimumContract] External runtime-image metadata requires a runtime core with assertRuntimeImageCompatible. Upgrade the runtime core before providing or reusing a runtime image.',
         );
+      }
+      if (globalRef._FEDERATION_RUNTIME_CORE && provider) {
+        if (typeof assertCompatible === 'function') {
+          assertCompatible(provider.runtimeImage, runtimeImage);
+        }
         if (provider.name !== name || provider.version !== version) {
           console.warn(
             `Detect multiple module federation runtime! Injected runtime from ${provider.name}@${provider.version} and current is ${name}@${version}, pleasure ensure there is only one consumer to provider runtime!`,
