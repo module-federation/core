@@ -1,0 +1,396 @@
+[
+  {
+    "family": "5128-minor",
+    "name": "pack:runtime",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/tarballs/runtime.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "📦  @module-federation/runtime@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/bundler.cjs\ndist/bundler.d.ts\ndist/bundler.js\ndist/compose.cjs\ndist/compose.cjs.map\ndist/compose.d.ts\ndist/compose.js\ndist/compose.js.map\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/instance.cjs\ndist/instance.cjs.map\ndist/instance.d.ts\ndist/instance.js\ndist/instance.js.map\ndist/LICENSE\ndist/types.cjs\ndist/types.d.ts\ndist/types.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/tarballs/runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "packed-entry:esm",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "smoke.mjs",
+      "esm"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"format\":\"esm\",\"version\":\"2.9.2\",\"shared\":\"final-packed-shared\",\"remote\":\"final-packed-remote\",\"bundlerKeys\":[\"attachShareScopeMap\",\"bundlerRuntime\",\"bundlerRuntimeOptions\",\"default\",\"initOptions\",\"instance\",\"runtime\"]}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "packed-entry:cjs",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "smoke.mjs",
+      "cjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"format\":\"cjs\",\"version\":\"2.9.2\",\"shared\":\"final-packed-shared\",\"remote\":\"final-packed-remote\",\"bundlerKeys\":[\"attachShareScopeMap\",\"bundlerRuntime\",\"bundlerRuntimeOptions\",\"default\",\"initOptions\",\"instance\",\"runtime\"]}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "types:consumer.mts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "types:consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "types:consumer.mts+consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "provider:actual-hook-and-identity",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "provider.mjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"providerName\":\"provider\",\"metadata\":null,\"identity\":\"actual-provider-core-constructor\"}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "webpack:old-plugin-new-runtime",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "name": "webpack:new-plugin-old-runtime",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "name": "rspack:externalRuntime-provider",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "name": "rolldown:optimizeDeps",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-major",
+    "name": "pack:runtime",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/tarballs/runtime.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "📦  @module-federation/runtime@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/bundler.cjs\ndist/bundler.d.ts\ndist/bundler.js\ndist/compose.cjs\ndist/compose.cjs.map\ndist/compose.d.ts\ndist/compose.js\ndist/compose.js.map\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/instance.cjs\ndist/instance.cjs.map\ndist/instance.d.ts\ndist/instance.js\ndist/instance.js.map\ndist/LICENSE\ndist/types.cjs\ndist/types.d.ts\ndist/types.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/tarballs/runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "packed-entry:esm",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "smoke.mjs",
+      "esm"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"format\":\"esm\",\"version\":\"2.9.2\",\"shared\":\"final-packed-shared\",\"remote\":\"final-packed-remote\",\"bundlerKeys\":[\"attachShareScopeMap\",\"bundlerRuntime\",\"bundlerRuntimeOptions\",\"default\",\"initOptions\",\"instance\"]}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "packed-entry:cjs",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "smoke.mjs",
+      "cjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"format\":\"cjs\",\"version\":\"2.9.2\",\"shared\":\"final-packed-shared\",\"remote\":\"final-packed-remote\",\"bundlerKeys\":[\"attachShareScopeMap\",\"bundlerRuntime\",\"bundlerRuntimeOptions\",\"default\",\"initOptions\",\"instance\"]}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "types:consumer.mts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "types:consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "types:consumer.mts+consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "provider:actual-hook-and-identity",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "provider.mjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-corrected-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"providerName\":\"provider\",\"metadata\":null,\"identity\":\"actual-provider-core-constructor\"}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "webpack:old-plugin-new-runtime",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-major",
+    "name": "webpack:new-plugin-old-runtime",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-major",
+    "name": "rspack:externalRuntime-provider",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-major",
+    "name": "rolldown:optimizeDeps",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "name": "namespace:actual-before-after:esm+cjs",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "packed-final-namespace-control.mjs",
+      "5128-minor"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"family\":\"5128-minor\",\"controls\":\"actual final packed ESM and CJS root/helpers/core namespaces before and after the declaration correction\",\"comparisons\":[{\"format\":\"esm\",\"entry\":\"index\",\"keys\":[\"Module\",\"ModuleFederation\",\"createInstance\",\"getInstance\",\"getRemoteEntry\",\"getRemoteInfo\",\"init\",\"loadRemote\",\"loadScript\",\"loadScriptNode\",\"loadShare\",\"loadShareSync\",\"preloadRemote\",\"registerGlobalPlugins\",\"registerPlugins\",\"registerRemotes\",\"registerShared\",\"satisfy\"],\"namedDefaultIdentities\":\"not-applicable\"},{\"format\":\"esm\",\"entry\":\"helpers\",\"keys\":[\"default\",\"global\",\"share\",\"utils\"],\"namedDefaultIdentities\":\"passed\"},{\"format\":\"esm\",\"entry\":\"core\",\"keys\":[\"CurrentGlobal\",\"FederationKernel\",\"Global\",\"Module\",\"ModuleFederation\",\"addGlobalSnapshot\",\"assert\",\"default\",\"error\",\"getGlobalFederationConstructor\",\"getGlobalSnapshot\",\"getGlobalSnapshotInfoByModuleInfo\",\"getInfoWithoutType\",\"getRegisteredShare\",\"getRemoteEntry\",\"getRemoteInfo\",\"helpers\",\"isStaticResourcesEqual\",\"loadScript\",\"loadScriptNode\",\"matchRemoteWithNameAndExpose\",\"registerGlobalPlugins\",\"resetFederationGlobalInfo\",\"safeWrapper\",\"satisfy\",\"setGlobalFederationConstructor\",\"setGlobalFederationInstance\",\"types\"],\"namedDefaultIdentities\":\"passed\"},{\"format\":\"cjs\",\"entry\":\"index\",\"keys\":[\"Module\",\"ModuleFederation\",\"createInstance\",\"getInstance\",\"getRemoteEntry\",\"getRemoteInfo\",\"init\",\"loadRemote\",\"loadScript\",\"loadScriptNode\",\"loadShare\",\"loadShareSync\",\"preloadRemote\",\"registerGlobalPlugins\",\"registerPlugins\",\"registerRemotes\",\"registerShared\",\"satisfy\"],\"namedDefaultIdentities\":\"not-applicable\"},{\"format\":\"cjs\",\"entry\":\"helpers\",\"keys\":[\"default\",\"global\",\"share\",\"utils\"],\"namedDefaultIdentities\":\"passed\"},{\"format\":\"cjs\",\"entry\":\"core\",\"keys\":[\"CurrentGlobal\",\"FederationKernel\",\"Global\",\"Module\",\"ModuleFederation\",\"addGlobalSnapshot\",\"assert\",\"default\",\"error\",\"getGlobalFederationConstructor\",\"getGlobalSnapshot\",\"getGlobalSnapshotInfoByModuleInfo\",\"getInfoWithoutType\",\"getRegisteredShare\",\"getRemoteEntry\",\"getRemoteInfo\",\"helpers\",\"isStaticResourcesEqual\",\"loadScript\",\"loadScriptNode\",\"matchRemoteWithNameAndExpose\",\"registerGlobalPlugins\",\"resetFederationGlobalInfo\",\"safeWrapper\",\"satisfy\",\"setGlobalFederationConstructor\",\"setGlobalFederationInstance\",\"types\"],\"namedDefaultIdentities\":\"passed\"}]}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "namespace:actual-before-after:esm+cjs",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "packed-final-namespace-control.mjs",
+      "5128-major"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"family\":\"5128-major\",\"controls\":\"actual final packed ESM and CJS root/helpers/core namespaces before and after the declaration correction\",\"comparisons\":[{\"format\":\"esm\",\"entry\":\"index\",\"keys\":[\"Module\",\"ModuleFederation\",\"createInstance\",\"getInstance\",\"getRemoteEntry\",\"getRemoteInfo\",\"init\",\"loadRemote\",\"loadScript\",\"loadScriptNode\",\"loadShare\",\"loadShareSync\",\"preloadRemote\",\"registerGlobalPlugins\",\"registerPlugins\",\"registerRemotes\",\"registerShared\",\"satisfy\"],\"namedDefaultIdentities\":\"not-applicable\"},{\"format\":\"esm\",\"entry\":\"helpers\",\"keys\":[\"default\",\"global\",\"share\",\"utils\"],\"namedDefaultIdentities\":\"passed\"},{\"format\":\"esm\",\"entry\":\"core\",\"keys\":[\"CurrentGlobal\",\"FederationKernel\",\"Global\",\"Module\",\"ModuleFederation\",\"addGlobalSnapshot\",\"assert\",\"default\",\"error\",\"getGlobalFederationConstructor\",\"getGlobalSnapshot\",\"getGlobalSnapshotInfoByModuleInfo\",\"getInfoWithoutType\",\"getRegisteredShare\",\"getRemoteEntry\",\"getRemoteInfo\",\"helpers\",\"isStaticResourcesEqual\",\"loadScript\",\"loadScriptNode\",\"matchRemoteWithNameAndExpose\",\"registerGlobalPlugins\",\"resetFederationGlobalInfo\",\"safeWrapper\",\"satisfy\",\"setGlobalFederationConstructor\",\"setGlobalFederationInstance\",\"types\"],\"namedDefaultIdentities\":\"passed\"},{\"format\":\"cjs\",\"entry\":\"index\",\"keys\":[\"Module\",\"ModuleFederation\",\"createInstance\",\"getInstance\",\"getRemoteEntry\",\"getRemoteInfo\",\"init\",\"loadRemote\",\"loadScript\",\"loadScriptNode\",\"loadShare\",\"loadShareSync\",\"preloadRemote\",\"registerGlobalPlugins\",\"registerPlugins\",\"registerRemotes\",\"registerShared\",\"satisfy\"],\"namedDefaultIdentities\":\"not-applicable\"},{\"format\":\"cjs\",\"entry\":\"helpers\",\"keys\":[\"default\",\"global\",\"share\",\"utils\"],\"namedDefaultIdentities\":\"passed\"},{\"format\":\"cjs\",\"entry\":\"core\",\"keys\":[\"CurrentGlobal\",\"FederationKernel\",\"Global\",\"Module\",\"ModuleFederation\",\"addGlobalSnapshot\",\"assert\",\"default\",\"error\",\"getGlobalFederationConstructor\",\"getGlobalSnapshot\",\"getGlobalSnapshotInfoByModuleInfo\",\"getInfoWithoutType\",\"getRegisteredShare\",\"getRemoteEntry\",\"getRemoteInfo\",\"helpers\",\"isStaticResourcesEqual\",\"loadScript\",\"loadScriptNode\",\"matchRemoteWithNameAndExpose\",\"registerGlobalPlugins\",\"resetFederationGlobalInfo\",\"safeWrapper\",\"satisfy\",\"setGlobalFederationConstructor\",\"setGlobalFederationInstance\",\"types\"],\"namedDefaultIdentities\":\"passed\"}]}\n",
+    "stderr": ""
+  }
+]

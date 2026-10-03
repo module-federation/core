@@ -1,0 +1,10 @@
+PASS esbuild src/lib/core/__tests__/createContainerTemplate.test.ts
+  createContainerCode
+    ✓ initializes through bundlerRuntime.init with the composed bundler runtime (2 ms)
+    ✓ still initializes with the legacy bundler runtime (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        0.406 s
+Ran all test suites.

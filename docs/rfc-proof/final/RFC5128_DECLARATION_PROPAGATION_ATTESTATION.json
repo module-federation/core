@@ -1,0 +1,191 @@
+[
+  {
+    "number": 5135,
+    "before": "d3b926ef4110bd189bd1d2b7c8ad0fa1a365634c",
+    "after": "ca0b6188fd57b067dc20e3b8d66f0805e8d2b72a",
+    "changedFiles": [
+      ".changeset/runtime-named-packed-declarations.md",
+      "packages/runtime/__tests__/packed-declarations.spec.ts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.cts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.mts",
+      "packages/runtime/tsdown.config.ts"
+    ],
+    "unchangedTrackedScopes": {
+      "packages/runtime/src": true,
+      "packages/runtime-core": true,
+      "packages/sdk": true,
+      "packages/managers": true,
+      "packages/enhanced": true,
+      "packages/rspack": true,
+      "packages/webpack-bundler-runtime": true,
+      "packages/node": true,
+      "packages/esbuild": true,
+      "package.json": true,
+      "pnpm-lock.yaml": true,
+      "tsconfig.base.json": true,
+      "turbo.json": true
+    }
+  },
+  {
+    "number": 5137,
+    "before": "ccaaa3854fb7d234356f3cbf9c781dc86ea64329",
+    "after": "b26e12e9f27fe6fb5b76438e7b7f5e4042af892e",
+    "changedFiles": [
+      ".changeset/runtime-named-packed-declarations.md",
+      "packages/runtime/__tests__/packed-declarations.spec.ts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.cts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.mts",
+      "packages/runtime/tsdown.config.ts"
+    ],
+    "unchangedTrackedScopes": {
+      "packages/runtime/src": true,
+      "packages/runtime-core": true,
+      "packages/sdk": true,
+      "packages/managers": true,
+      "packages/enhanced": true,
+      "packages/rspack": true,
+      "packages/webpack-bundler-runtime": true,
+      "packages/node": true,
+      "packages/esbuild": true,
+      "package.json": true,
+      "pnpm-lock.yaml": true,
+      "tsconfig.base.json": true,
+      "turbo.json": true
+    }
+  },
+  {
+    "number": 5139,
+    "before": "5dec45f2bcf7c22f0e76b69eb49c2eef708efdfb",
+    "after": "95286625fc5ce7a1479983b6fa3a8b2980146d71",
+    "changedFiles": [
+      ".changeset/runtime-named-packed-declarations.md",
+      "packages/runtime/__tests__/packed-declarations.spec.ts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.cts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.mts",
+      "packages/runtime/tsdown.config.ts"
+    ],
+    "unchangedTrackedScopes": {
+      "packages/runtime/src": true,
+      "packages/runtime-core": true,
+      "packages/sdk": true,
+      "packages/managers": true,
+      "packages/enhanced": true,
+      "packages/rspack": true,
+      "packages/webpack-bundler-runtime": true,
+      "packages/node": true,
+      "packages/esbuild": true,
+      "package.json": true,
+      "pnpm-lock.yaml": true,
+      "tsconfig.base.json": true,
+      "turbo.json": true
+    }
+  },
+  {
+    "number": 5134,
+    "before": "2ed70fc0781e80fc731bc5f2e60ceda1568d5dfd",
+    "after": "54622d775688ff8c3e9ac77cba50acffca265cfc",
+    "changedFiles": [
+      ".changeset/runtime-named-packed-declarations.md",
+      "packages/runtime/__tests__/packed-declarations.spec.ts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.cts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.mts",
+      "packages/runtime/tsdown.config.ts"
+    ],
+    "unchangedTrackedScopes": {
+      "packages/runtime/src": true,
+      "packages/runtime-core": true,
+      "packages/sdk": true,
+      "packages/managers": true,
+      "packages/enhanced": true,
+      "packages/rspack": true,
+      "packages/webpack-bundler-runtime": true,
+      "packages/node": true,
+      "packages/esbuild": true,
+      "package.json": true,
+      "pnpm-lock.yaml": true,
+      "tsconfig.base.json": true,
+      "turbo.json": true
+    }
+  },
+  {
+    "number": 5140,
+    "before": "7e1e276ac4a59c8696f38aae999a7c7c9883a5be",
+    "after": "47bc0f852aa5867214e153fb822f6683f6ce3cb0",
+    "changedFiles": [
+      ".changeset/runtime-named-packed-declarations.md",
+      "packages/runtime/__tests__/packed-declarations.spec.ts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.cts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.mts",
+      "packages/runtime/tsdown.config.ts"
+    ],
+    "unchangedTrackedScopes": {
+      "packages/runtime/src": true,
+      "packages/runtime-core": true,
+      "packages/sdk": true,
+      "packages/managers": true,
+      "packages/enhanced": true,
+      "packages/rspack": true,
+      "packages/webpack-bundler-runtime": true,
+      "packages/node": true,
+      "packages/esbuild": true,
+      "package.json": true,
+      "pnpm-lock.yaml": true,
+      "tsconfig.base.json": true,
+      "turbo.json": true
+    }
+  },
+  {
+    "number": 5141,
+    "before": "968ffee8c12687f332c952cca5a7f8da267a30f6",
+    "after": "83134b63016cd237bad96f7797706bfd8dd565c5",
+    "changedFiles": [
+      ".changeset/runtime-named-packed-declarations.md",
+      "packages/runtime/__tests__/packed-declarations.spec.ts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.cts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.mts",
+      "packages/runtime/tsdown.config.ts"
+    ],
+    "unchangedTrackedScopes": {
+      "packages/runtime/src": true,
+      "packages/runtime-core": true,
+      "packages/sdk": true,
+      "packages/managers": true,
+      "packages/enhanced": true,
+      "packages/rspack": true,
+      "packages/webpack-bundler-runtime": true,
+      "packages/node": true,
+      "packages/esbuild": true,
+      "package.json": true,
+      "pnpm-lock.yaml": true,
+      "tsconfig.base.json": true,
+      "turbo.json": true
+    }
+  },
+  {
+    "number": 5142,
+    "before": "3d8014a1de8194628046603320911226cc50719a",
+    "after": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+    "changedFiles": [
+      ".changeset/runtime-named-packed-declarations.md",
+      "packages/runtime/__tests__/packed-declarations.spec.ts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.cts",
+      "packages/runtime/__tests__/resources/packed-declarations/consumer.mts",
+      "packages/runtime/tsdown.config.ts"
+    ],
+    "unchangedTrackedScopes": {
+      "packages/runtime/src": true,
+      "packages/runtime-core": true,
+      "packages/sdk": true,
+      "packages/managers": true,
+      "packages/enhanced": true,
+      "packages/rspack": true,
+      "packages/webpack-bundler-runtime": true,
+      "packages/node": true,
+      "packages/esbuild": true,
+      "package.json": true,
+      "pnpm-lock.yaml": true,
+      "tsconfig.base.json": true,
+      "turbo.json": true
+    }
+  }
+]

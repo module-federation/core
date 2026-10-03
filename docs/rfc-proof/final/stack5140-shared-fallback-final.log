@@ -1,0 +1,15 @@
+Start building shared fallback resources ...
+Shared "shared-lib" compilation succeeded
+All shared fallback have been compiled successfully
+{
+  "value": "secondary-shared-fallback",
+  "requests": [
+    "/independent-packages/shared_lib/1.0.0/share-entry.js"
+  ],
+  "remoteDisabled": true,
+  "configuredPlatform": "node",
+  "platformNodeModule": true,
+  "nonInitialChunks": 0,
+  "remoteCapability": false,
+  "snapshotCapability": false
+}

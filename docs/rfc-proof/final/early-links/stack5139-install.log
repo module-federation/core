@@ -1,0 +1,101 @@
+Scope: 17 of 104 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+.                                        |    +2336 ++++++++++++++++++++++++++++
+Progress: resolved 2336, reused 147, downloaded 0, added 0
+Progress: resolved 2336, reused 336, downloaded 0, added 0
+Progress: resolved 2336, reused 816, downloaded 0, added 0
+Progress: resolved 2336, reused 2018, downloaded 0, added 0
+Progress: resolved 2336, reused 2294, downloaded 0, added 54
+Progress: resolved 2336, reused 2294, downloaded 0, added 120
+Progress: resolved 2336, reused 2294, downloaded 0, added 264
+Progress: resolved 2336, reused 2294, downloaded 0, added 346
+Progress: resolved 2336, reused 2294, downloaded 0, added 434
+Progress: resolved 2336, reused 2294, downloaded 0, added 526
+Progress: resolved 2336, reused 2294, downloaded 0, added 549
+Progress: resolved 2336, reused 2294, downloaded 0, added 593
+Progress: resolved 2336, reused 2294, downloaded 0, added 667
+Progress: resolved 2336, reused 2294, downloaded 0, added 740
+Progress: resolved 2336, reused 2294, downloaded 0, added 756
+Progress: resolved 2336, reused 2294, downloaded 0, added 804
+Progress: resolved 2336, reused 2294, downloaded 0, added 835
+Progress: resolved 2336, reused 2294, downloaded 0, added 922
+Progress: resolved 2336, reused 2294, downloaded 0, added 1049
+Progress: resolved 2336, reused 2294, downloaded 0, added 1074
+Progress: resolved 2336, reused 2294, downloaded 0, added 1103
+Progress: resolved 2336, reused 2294, downloaded 0, added 1217
+Progress: resolved 2336, reused 2294, downloaded 0, added 1352
+Progress: resolved 2336, reused 2294, downloaded 0, added 1413
+Progress: resolved 2336, reused 2294, downloaded 0, added 1490
+Progress: resolved 2336, reused 2294, downloaded 0, added 1528
+Progress: resolved 2336, reused 2294, downloaded 0, added 1698
+Progress: resolved 2336, reused 2294, downloaded 0, added 1764
+Progress: resolved 2336, reused 2294, downloaded 0, added 1916
+Progress: resolved 2336, reused 2294, downloaded 0, added 2028
+Progress: resolved 2336, reused 2294, downloaded 0, added 2127
+Progress: resolved 2336, reused 2294, downloaded 0, added 2316
+Progress: resolved 2336, reused 2294, downloaded 0, added 2325
+Progress: resolved 2336, reused 2294, downloaded 0, added 2326
+Progress: resolved 2336, reused 2294, downloaded 0, added 2327
+Progress: resolved 2336, reused 2294, downloaded 0, added 2330
+Progress: resolved 2336, reused 2294, downloaded 0, added 2331
+Progress: resolved 2336, reused 2294, downloaded 0, added 2333
+Progress: resolved 2336, reused 2294, downloaded 0, added 2334
+Progress: resolved 2336, reused 2294, downloaded 0, added 2335
+Progress: resolved 2336, reused 2294, downloaded 0, added 2336, done
+packages/assemble-release-plan postinstall$ pnpm run build
+. prepare$ husky install
+packages/assemble-release-plan postinstall: > @changesets/assemble-release-plan@6.0.4 build /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5139/packages/assemble-release-plan
+packages/assemble-release-plan postinstall: > pnpm exec tsdown --config tsdown.config.mts
+. prepare: husky - Git hooks installed
+. prepare: Done
+packages/assemble-release-plan postinstall: ℹ tsdown v0.20.3 powered by rolldown v1.0.0-rc.3
+packages/assemble-release-plan postinstall: ℹ config file: /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5139/packages/assemble-release-plan/tsdown.config.mts
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] entry: src/index.ts
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] tsconfig: tsconfig.lib.json
+packages/assemble-release-plan postinstall: ℹ Build start
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/index.d.ts  0.63 kB │ gzip: 0.35 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] 1 files, total: 0.63 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/index.cjs                        7.69 kB │ gzip: 2.31 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/index.cjs.map                   15.95 kB │ gzip: 5.14 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/determine-dependents.cjs.map    11.00 kB │ gzip: 3.66 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/determine-dependents.cjs         4.42 kB │ gzip: 1.43 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/flatten-releases.cjs.map         2.88 kB │ gzip: 1.19 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/apply-links.cjs.map              2.76 kB │ gzip: 1.22 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/match-fixed-constraint.cjs.map   2.73 kB │ gzip: 1.06 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/utils.cjs.map                    2.27 kB │ gzip: 1.01 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/match-fixed-constraint.cjs       1.57 kB │ gzip: 0.61 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/utils.cjs                        1.48 kB │ gzip: 0.66 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/increment.cjs.map                1.38 kB │ gzip: 0.69 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/flatten-releases.cjs             1.28 kB │ gzip: 0.60 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/_virtual/_rolldown/runtime.cjs   1.04 kB │ gzip: 0.52 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/apply-links.cjs                  0.98 kB │ gzip: 0.42 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] dist/increment.cjs                    0.91 kB │ gzip: 0.44 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [CJS] 15 files, total: 58.33 kB
+packages/assemble-release-plan postinstall: ✔ [assemble-release-plan-build] Build complete in 845ms
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/index.mjs                        7.19 kB │ gzip: 2.22 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/index.mjs.map                   15.85 kB │ gzip: 5.09 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/determine-dependents.mjs.map    10.99 kB │ gzip: 3.66 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/determine-dependents.mjs         4.12 kB │ gzip: 1.36 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/flatten-releases.mjs.map         2.88 kB │ gzip: 1.19 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/apply-links.mjs.map              2.71 kB │ gzip: 1.21 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/match-fixed-constraint.mjs.map   2.68 kB │ gzip: 1.05 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/utils.mjs.map                    2.27 kB │ gzip: 1.01 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/match-fixed-constraint.mjs       1.46 kB │ gzip: 0.58 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/increment.mjs.map                1.36 kB │ gzip: 0.68 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/utils.mjs                        1.25 kB │ gzip: 0.59 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/flatten-releases.mjs             1.17 kB │ gzip: 0.55 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/apply-links.mjs                  0.99 kB │ gzip: 0.42 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/increment.mjs                    0.69 kB │ gzip: 0.37 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] dist/index.d.mts                      0.65 kB │ gzip: 0.36 kB
+packages/assemble-release-plan postinstall: ℹ [assemble-release-plan-build] [ESM] 15 files, total: 56.27 kB
+packages/assemble-release-plan postinstall: ✔ [assemble-release-plan-build] Build complete in 849ms
+packages/assemble-release-plan postinstall: Done
+╭ Warning ─────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│   Ignored build scripts: puppeteer@25.3.0.                                   │
+│   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+│   to run scripts.                                                            │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+Done in 49.1s using pnpm v10.28.0

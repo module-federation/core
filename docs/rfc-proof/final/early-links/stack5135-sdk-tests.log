@@ -1,0 +1,39 @@
+
+> @module-federation/sdk@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/sdk
+> NODE_OPTIONS=--experimental-vm-modules pnpm exec jest --config jest.config.cjs --passWithNoTests --runInBand
+
+PASS __tests__/dom.spec.ts
+(node:16906) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS __tests__/node-builtin-esm.spec.ts
+PASS __tests__/generateSnapshotFromManifest.spec.ts
+PASS __tests__/utils.spec.ts
+  ● Console
+
+    console.warn
+      Cannot get resource URL. If in debug mode, please ignore. {} test.js
+
+      218 |     return `${module.publicPath}${sourceUrl}`;
+      219 |   } else {
+    > 220 |     console.warn(
+          |             ^
+      221 |       'Cannot get resource URL. If in debug mode, please ignore.',
+      222 |       module,
+      223 |       sourceUrl,
+
+      at console.<anonymous> (../../node_modules/.pnpm/jest-mock@29.7.0/node_modules/jest-mock/build/index.js:794:25)
+      at warn (src/utils.ts:220:13)
+      at Object.<anonymous> (__tests__/utils.spec.ts:90:34)
+
+PASS __tests__/normalizeOptions.spec.ts
+PASS __tests__/simpleJoinRemoteEntry.spec.ts
+PASS __tests__/parseEntry.spec.ts
+PASS __tests__/decodeName.spec.ts
+PASS __tests__/inferAutoPublicPath.spec.ts
+PASS __tests__/encodeName.spec.ts
+
+Test Suites: 10 passed, 10 total
+Tests:       1 skipped, 70 passed, 71 total
+Snapshots:   0 total
+Time:        5.047 s
+Ran all test suites.

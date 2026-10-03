@@ -1,0 +1,833 @@
+{
+  "data": {
+    "repository": {
+      "p5143": {
+        "number": 5143,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "226ec3198cff98a7babae288d7915a6088246227",
+        "headRefName": "fix/disabled-remote-shared-fallback",
+        "url": "https://github.com/module-federation/core/pull/5143",
+        "commits": {
+          "nodes": [
+            {
+              "commit": {
+                "statusCheckRollup": {
+                  "contexts": {
+                    "nodes": [
+                      {
+                        "name": "checkout-install",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109241172333"
+                      },
+                      {
+                        "name": "measure",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921104/job/109241170390"
+                      },
+                      {
+                        "name": "Analyze (actions)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516918611/job/109241166058"
+                      },
+                      {
+                        "name": "lint-deps",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921342/job/109241171281"
+                      },
+                      {
+                        "name": "actionlint",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921261/job/109241170984"
+                      },
+                      {
+                        "name": "Labeling for changes",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516942514/job/109241239320"
+                      },
+                      {
+                        "name": "publish-preview",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921121/job/109241170248"
+                      },
+                      {
+                        "name": "Analyze (javascript)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516918611/job/109241165856"
+                      },
+                      {
+                        "name": "Analyze (python)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516918611/job/109241166079"
+                      },
+                      {
+                        "name": "e2e-modern / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459537"
+                      },
+                      {
+                        "name": "node20-compat",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459411"
+                      },
+                      {
+                        "name": "e2e-runtime / e2e-runtime",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459551"
+                      },
+                      {
+                        "name": "e2e-manifest / e2e-manifest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459486"
+                      },
+                      {
+                        "name": "e2e-node / e2e-node",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459617"
+                      },
+                      {
+                        "name": "e2e-rstest / e2e-rstest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459633"
+                      },
+                      {
+                        "name": "e2e-next-dev / e2e-next-dev",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459592"
+                      },
+                      {
+                        "name": "e2e-next-prod / e2e-next-prod",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459677"
+                      },
+                      {
+                        "name": "e2e-treeshake",
+                        "conclusion": "SKIPPED",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242460426"
+                      },
+                      {
+                        "name": "e2e-modern-ssr / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459689"
+                      },
+                      {
+                        "name": "e2e-router / e2e-router",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459657"
+                      },
+                      {
+                        "name": "e2e-metro / e2e-metro-android",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459975"
+                      },
+                      {
+                        "name": "e2e-metro / e2e-metro-ios",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459851"
+                      },
+                      {
+                        "name": "devtools / main",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36516921604/job/109242459898"
+                      },
+                      {
+                        "name": "CodeQL",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/runs/109241318013"
+                      },
+                      {
+                        "name": "Continuous Releases",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://pkg.pr.new"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "p5121": {
+        "number": 5121,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "c41da583a0b81cc77f08fd2ae27c94c6569a0f88",
+        "headRefName": "worktree-agent-a11ed1d537bcdea27",
+        "url": "https://github.com/module-federation/core/pull/5121",
+        "commits": {
+          "nodes": [
+            {
+              "commit": {
+                "statusCheckRollup": {
+                  "contexts": {
+                    "nodes": [
+                      {
+                        "name": "checkout-install",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111072696694"
+                      },
+                      {
+                        "name": "measure",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204295/job/111072695483"
+                      },
+                      {
+                        "name": "Analyze (actions)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078200895/job/111072687026"
+                      },
+                      {
+                        "name": "lint-deps",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204210/job/111072694906"
+                      },
+                      {
+                        "name": "actionlint",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204290/job/111072694935"
+                      },
+                      {
+                        "name": "publish-preview",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204188/job/111072695182"
+                      },
+                      {
+                        "name": "Analyze (javascript)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078200895/job/111072688050"
+                      },
+                      {
+                        "name": "Analyze (python)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078200895/job/111072687211"
+                      },
+                      {
+                        "name": "e2e-modern / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602470"
+                      },
+                      {
+                        "name": "node20-compat",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602257"
+                      },
+                      {
+                        "name": "e2e-runtime / e2e-runtime",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602488"
+                      },
+                      {
+                        "name": "e2e-manifest / e2e-manifest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602370"
+                      },
+                      {
+                        "name": "e2e-node / e2e-node",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602455"
+                      },
+                      {
+                        "name": "e2e-rstest / e2e-rstest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602474"
+                      },
+                      {
+                        "name": "e2e-next-dev / e2e-next-dev",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602491"
+                      },
+                      {
+                        "name": "e2e-next-prod / e2e-next-prod",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602567"
+                      },
+                      {
+                        "name": "e2e-treeshake",
+                        "conclusion": "SKIPPED",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073603204"
+                      },
+                      {
+                        "name": "e2e-modern-ssr / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602538"
+                      },
+                      {
+                        "name": "e2e-router / e2e-router",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602516"
+                      },
+                      {
+                        "name": "e2e-metro",
+                        "conclusion": "SKIPPED",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073603893"
+                      },
+                      {
+                        "name": "devtools / main",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204538/job/111073602699"
+                      },
+                      {
+                        "name": "CodeQL",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/runs/111072813524"
+                      },
+                      {
+                        "name": "Continuous Releases",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://pkg.pr.new"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "p5144": {
+        "number": 5144,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "3636d048dc7547e381cf7491d9da2246a107ab03",
+        "headRefName": "fix/enhanced-duplicate-serializable",
+        "url": "https://github.com/module-federation/core/pull/5144",
+        "commits": {
+          "nodes": [
+            {
+              "commit": {
+                "statusCheckRollup": {
+                  "contexts": {
+                    "nodes": [
+                      {
+                        "name": "checkout-install",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111072711440"
+                      },
+                      {
+                        "name": "measure",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209088/job/111072710420"
+                      },
+                      {
+                        "name": "Analyze (actions)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204794/job/111072699943"
+                      },
+                      {
+                        "name": "lint-deps",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078208949/job/111072709913"
+                      },
+                      {
+                        "name": "actionlint",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078208916/job/111072709202"
+                      },
+                      {
+                        "name": "publish-preview",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209000/job/111072710273"
+                      },
+                      {
+                        "name": "Analyze (javascript)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204794/job/111072700052"
+                      },
+                      {
+                        "name": "Analyze (python)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078204794/job/111072699765"
+                      },
+                      {
+                        "name": "e2e-modern / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073676706"
+                      },
+                      {
+                        "name": "node20-compat",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073676569"
+                      },
+                      {
+                        "name": "e2e-runtime / e2e-runtime",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073676700"
+                      },
+                      {
+                        "name": "e2e-manifest / e2e-manifest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073676704"
+                      },
+                      {
+                        "name": "e2e-node / e2e-node",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073676652"
+                      },
+                      {
+                        "name": "e2e-rstest / e2e-rstest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073676790"
+                      },
+                      {
+                        "name": "e2e-next-dev / e2e-next-dev",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073676852"
+                      },
+                      {
+                        "name": "e2e-next-prod / e2e-next-prod",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073676807"
+                      },
+                      {
+                        "name": "e2e-treeshake",
+                        "conclusion": "SKIPPED",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073678017"
+                      },
+                      {
+                        "name": "e2e-modern-ssr / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073676875"
+                      },
+                      {
+                        "name": "e2e-router / e2e-router",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073676729"
+                      },
+                      {
+                        "name": "e2e-metro",
+                        "conclusion": "SKIPPED",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073677601"
+                      },
+                      {
+                        "name": "devtools / main",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078209446/job/111073677101"
+                      },
+                      {
+                        "name": "CodeQL",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/runs/111072818253"
+                      },
+                      {
+                        "name": "Continuous Releases",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://pkg.pr.new"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "p5124": {
+        "number": 5124,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "94aa846311eeaa5cdb33afd6894b09c1ba9c791c",
+        "headRefName": "fix/dts-dual-format-race",
+        "url": "https://github.com/module-federation/core/pull/5124",
+        "commits": {
+          "nodes": [
+            {
+              "commit": {
+                "statusCheckRollup": {
+                  "contexts": {
+                    "nodes": [
+                      {
+                        "name": "checkout-install",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111072725708"
+                      },
+                      {
+                        "name": "measure",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078213447/job/111072723915"
+                      },
+                      {
+                        "name": "Analyze (actions)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078210595/job/111072717583"
+                      },
+                      {
+                        "name": "lint-deps",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078213531/job/111072724007"
+                      },
+                      {
+                        "name": "actionlint",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078213554/job/111072723826"
+                      },
+                      {
+                        "name": "publish-preview",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078213451/job/111072723859"
+                      },
+                      {
+                        "name": "Analyze (javascript)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078210595/job/111072717542"
+                      },
+                      {
+                        "name": "Analyze (python)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078210595/job/111072717622"
+                      },
+                      {
+                        "name": "e2e-modern / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074317718"
+                      },
+                      {
+                        "name": "node20-compat",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074317426"
+                      },
+                      {
+                        "name": "e2e-runtime / e2e-runtime",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074317716"
+                      },
+                      {
+                        "name": "e2e-manifest / e2e-manifest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074317646"
+                      },
+                      {
+                        "name": "e2e-node / e2e-node",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074317695"
+                      },
+                      {
+                        "name": "e2e-rstest / e2e-rstest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074317791"
+                      },
+                      {
+                        "name": "e2e-next-dev / e2e-next-dev",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074317644"
+                      },
+                      {
+                        "name": "e2e-next-prod / e2e-next-prod",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074317764"
+                      },
+                      {
+                        "name": "e2e-treeshake / e2e-treeshake",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074317844"
+                      },
+                      {
+                        "name": "e2e-modern-ssr / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074318096"
+                      },
+                      {
+                        "name": "e2e-router / e2e-router",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074317947"
+                      },
+                      {
+                        "name": "e2e-metro / e2e-metro-android",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074318634"
+                      },
+                      {
+                        "name": "e2e-metro / e2e-metro-ios",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074318626"
+                      },
+                      {
+                        "name": "devtools / main",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078214055/job/111074318644"
+                      },
+                      {
+                        "name": "CodeQL",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/runs/111072827671"
+                      },
+                      {
+                        "name": "Continuous Releases",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://pkg.pr.new"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "p5179": {
+        "number": 5179,
+        "state": "OPEN",
+        "isDraft": true,
+        "headRefOid": "3f9e3cbcf9fb3ba6f28c4af6b1ac12efc048b0a5",
+        "headRefName": "fix/runtime-handler-contract",
+        "url": "https://github.com/module-federation/core/pull/5179",
+        "commits": {
+          "nodes": [
+            {
+              "commit": {
+                "statusCheckRollup": {
+                  "contexts": {
+                    "nodes": [
+                      {
+                        "name": "checkout-install",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111072829799"
+                      },
+                      {
+                        "name": "lint-deps",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246606/job/111072828867"
+                      },
+                      {
+                        "name": "actionlint",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246725/job/111072829441"
+                      },
+                      {
+                        "name": "Labeling for changes",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246724/job/111072830683"
+                      },
+                      {
+                        "name": "publish-preview",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246636/job/111072828898"
+                      },
+                      {
+                        "name": "e2e-modern / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141277"
+                      },
+                      {
+                        "name": "node20-compat",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141115"
+                      },
+                      {
+                        "name": "e2e-runtime / e2e-runtime",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141370"
+                      },
+                      {
+                        "name": "e2e-manifest / e2e-manifest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141345"
+                      },
+                      {
+                        "name": "e2e-node / e2e-node",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141333"
+                      },
+                      {
+                        "name": "e2e-rstest / e2e-rstest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141352"
+                      },
+                      {
+                        "name": "e2e-next-dev / e2e-next-dev",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141434"
+                      },
+                      {
+                        "name": "e2e-next-prod / e2e-next-prod",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141373"
+                      },
+                      {
+                        "name": "e2e-treeshake",
+                        "conclusion": "SKIPPED",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074142257"
+                      },
+                      {
+                        "name": "e2e-modern-ssr / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141599"
+                      },
+                      {
+                        "name": "e2e-router / e2e-router",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141343"
+                      },
+                      {
+                        "name": "e2e-metro / e2e-metro-android",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141760"
+                      },
+                      {
+                        "name": "e2e-metro / e2e-metro-ios",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141758"
+                      },
+                      {
+                        "name": "devtools / main",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37078246772/job/111074141761"
+                      },
+                      {
+                        "name": "Continuous Releases",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://pkg.pr.new"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "p5180": {
+        "number": 5180,
+        "state": "OPEN",
+        "isDraft": true,
+        "headRefOid": "dc61543814fd4a4706608e8b3d3fe34169f7532b",
+        "headRefName": "fix/shared-fallback-public-path",
+        "url": "https://github.com/module-federation/core/pull/5180",
+        "commits": {
+          "nodes": [
+            {
+              "commit": {
+                "statusCheckRollup": {
+                  "contexts": {
+                    "nodes": [
+                      {
+                        "name": "checkout-install",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111091786972"
+                      },
+                      {
+                        "name": "measure",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084472962/job/111091786436"
+                      },
+                      {
+                        "name": "Analyze (actions)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084470395/job/111091781731"
+                      },
+                      {
+                        "name": "lint-deps",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084472964/job/111091787346"
+                      },
+                      {
+                        "name": "actionlint",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084472945/job/111091786050"
+                      },
+                      {
+                        "name": "Labeling for changes",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37085145334/job/111093748413"
+                      },
+                      {
+                        "name": "publish-preview",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084472951/job/111091786276"
+                      },
+                      {
+                        "name": "Analyze (javascript)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084470395/job/111091781733"
+                      },
+                      {
+                        "name": "Analyze (python)",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084470395/job/111091781582"
+                      },
+                      {
+                        "name": "e2e-modern / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092222659"
+                      },
+                      {
+                        "name": "node20-compat",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092222414"
+                      },
+                      {
+                        "name": "e2e-runtime / e2e-runtime",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092222552"
+                      },
+                      {
+                        "name": "e2e-manifest / e2e-manifest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092222543"
+                      },
+                      {
+                        "name": "e2e-node / e2e-node",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092222555"
+                      },
+                      {
+                        "name": "e2e-rstest / e2e-rstest",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092222558"
+                      },
+                      {
+                        "name": "e2e-next-dev / e2e-next-dev",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092222798"
+                      },
+                      {
+                        "name": "e2e-next-prod / e2e-next-prod",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092222625"
+                      },
+                      {
+                        "name": "e2e-treeshake",
+                        "conclusion": "SKIPPED",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092223594"
+                      },
+                      {
+                        "name": "e2e-modern-ssr / e2e-modern",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092222714"
+                      },
+                      {
+                        "name": "e2e-router / e2e-router",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092222600"
+                      },
+                      {
+                        "name": "e2e-metro",
+                        "conclusion": "SKIPPED",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092223211"
+                      },
+                      {
+                        "name": "devtools / main",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://github.com/module-federation/core/actions/runs/37084473098/job/111092223043"
+                      },
+                      {
+                        "name": "CodeQL",
+                        "conclusion": "FAILURE",
+                        "detailsUrl": "https://github.com/module-federation/core/runs/111091889764"
+                      },
+                      {
+                        "name": "Continuous Releases",
+                        "conclusion": "SUCCESS",
+                        "detailsUrl": "https://pkg.pr.new"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

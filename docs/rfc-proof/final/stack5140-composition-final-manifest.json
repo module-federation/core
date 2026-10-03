@@ -1,0 +1,73 @@
+{
+  "head": "7e1e276ac4a59c8696f38aae999a7c7c9883a5be",
+  "sourceSha256": "c965d21d91f206cb981e06901834c2fdf5ae77721e0ca4fcef6b24308eafa882",
+  "sourceFiles": [
+    "packages/enhanced/src/lib/container/runtime/FederationCompositionPlugin.ts",
+    "packages/enhanced/src/lib/container/ModuleFederationPlugin.ts"
+  ],
+  "node": "v24.15.0",
+  "pnpm": "10.28.0",
+  "harnessCommit": "7e1e276ac4a59c8696f38aae999a7c7c9883a5be",
+  "artifactDir": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5140-composition-final-artifacts-7e1e276ac",
+  "caseCount": 29,
+  "installedCopies": [
+    {
+      "alias": "enhanced-a",
+      "webpackEntry": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5140-composition-final-artifacts-7e1e276ac/node_modules/.pnpm/@module-federation+enhanced@file+enhanced-a.tgz_webpack@stack5140+node_modules+.pnpm+we_e65c722b9d89afe1364c4b6d8f185b2b/node_modules/@module-federation/enhanced/dist/src/webpack.js",
+      "version": "2.9.2",
+      "hashes": [
+        {
+          "file": "lib/container/runtime/FederationCompositionPlugin.js",
+          "sha256": "4d6ebfe7bb6cf7661735fa6773cfe2048bbc3f61ea7a1b00e6a6a614c162bebc",
+          "matchesFinalBuiltArtifact": true
+        },
+        {
+          "file": "lib/container/ModuleFederationPlugin.js",
+          "sha256": "5a987fef40cab740dbbc946e67e080e0c7803e4f4524b0fe65ff53567be2d4e7",
+          "matchesFinalBuiltArtifact": true
+        }
+      ]
+    },
+    {
+      "alias": "enhanced-b",
+      "webpackEntry": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5140-composition-final-artifacts-7e1e276ac/node_modules/.pnpm/@module-federation+enhanced@file+enhanced-b.tgz_webpack@stack5140+node_modules+.pnpm+we_6221e641044fc0487bd4846b06e2761b/node_modules/@module-federation/enhanced/dist/src/webpack.js",
+      "version": "2.9.2",
+      "hashes": [
+        {
+          "file": "lib/container/runtime/FederationCompositionPlugin.js",
+          "sha256": "4d6ebfe7bb6cf7661735fa6773cfe2048bbc3f61ea7a1b00e6a6a614c162bebc",
+          "matchesFinalBuiltArtifact": true
+        },
+        {
+          "file": "lib/container/ModuleFederationPlugin.js",
+          "sha256": "5a987fef40cab740dbbc946e67e080e0c7803e4f4524b0fe65ff53567be2d4e7",
+          "matchesFinalBuiltArtifact": true
+        }
+      ]
+    }
+  ],
+  "fullSuite": {
+    "passed": 524,
+    "skipped": 1,
+    "serialPassed": 6,
+    "runAtHead": "0f6031e5dfdc53df6158b2fdb36ec13028484b8f",
+    "attestation": {
+      "unchangedPackagesTree": "2867ab1a249e36a16487c0cd9c7422588f0ee789",
+      "comparisonCommand": "git rev-parse HEAD:packages 0f6031e5dfdc53df6158b2fdb36ec13028484b8f:packages",
+      "onlyChangedFile": "tools/repros/composition-copies/setup.cjs"
+    }
+  },
+  "build": {
+    "tasks": 15,
+    "cached": 15,
+    "mode": "normal checked-in harness Turbo build",
+    "priorFreshBuild": {
+      "runAtHead": "0f6031e5dfdc53df6158b2fdb36ec13028484b8f",
+      "tasks": 15,
+      "cached": 0
+    }
+  },
+  "proofCommand": "COMPOSITION_PROOF_REPO=/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5140 COMPOSITION_PROOF_DIR=/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5140-composition-final-artifacts-7e1e276ac node stack5140/tools/repros/composition-copies/run.cjs",
+  "proofWorkingDirectory": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4",
+  "proofLog": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5140-composition-final-installed-proof-7e1e276ac.log"
+}

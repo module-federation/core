@@ -1,0 +1,38 @@
+[
+  {
+    "scope": "packages/runtime-core",
+    "sha256": {
+      "stack5135": "7e5f6ee0b2314c456a3e662250be625bf919107f9613ad779d92b8d4154d135a",
+      "stack5137": "7e5f6ee0b2314c456a3e662250be625bf919107f9613ad779d92b8d4154d135a",
+      "stack5139": "7e5f6ee0b2314c456a3e662250be625bf919107f9613ad779d92b8d4154d135a"
+    },
+    "equal": true
+  },
+  {
+    "scope": "packages/runtime",
+    "sha256": {
+      "stack5135": "01c393e8af0288dae3dcebe659daa73e37d791fd749f93957947b1804234b2f8",
+      "stack5137": "01c393e8af0288dae3dcebe659daa73e37d791fd749f93957947b1804234b2f8",
+      "stack5139": "01c393e8af0288dae3dcebe659daa73e37d791fd749f93957947b1804234b2f8"
+    },
+    "equal": true
+  },
+  {
+    "scope": "packages/sdk",
+    "sha256": {
+      "stack5135": "d9025b94deb176c12d35db778ff05c011e0970dca5741abfb5658c1489dca5b2",
+      "stack5137": "d9025b94deb176c12d35db778ff05c011e0970dca5741abfb5658c1489dca5b2",
+      "stack5139": "d9025b94deb176c12d35db778ff05c011e0970dca5741abfb5658c1489dca5b2"
+    },
+    "equal": true
+  },
+  {
+    "scope": "packages/error-codes",
+    "sha256": {
+      "stack5135": "baeb4cf03561853c10439b79854e3d90a15da6fd4298ec29b5a91e6f05d29d67",
+      "stack5137": "baeb4cf03561853c10439b79854e3d90a15da6fd4298ec29b5a91e6f05d29d67",
+      "stack5139": "baeb4cf03561853c10439b79854e3d90a15da6fd4298ec29b5a91e6f05d29d67"
+    },
+    "equal": true
+  }
+]

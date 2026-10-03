@@ -1,0 +1,124 @@
+[
+  {
+    "worktree": "stack5137",
+    "validated_baseline": "c7a3099c9e7c124b510d9f59896f821bba25d07f",
+    "current_head": "ccaaa3854fb7d234356f3cbf9c781dc86ea64329",
+    "only_expected_inherited_delta": true,
+    "unchanged_scopes": [
+      {
+        "paths": ["packages/webpack-bundler-runtime"],
+        "baseline_sha256": "722b22e00a1e36db3b17aec16b1dcb471f26cf41dd3ad1803d0fe7fe6458349e",
+        "current_sha256": "722b22e00a1e36db3b17aec16b1dcb471f26cf41dd3ad1803d0fe7fe6458349e",
+        "equal": true
+      },
+      {
+        "paths": [
+          "package.json",
+          "pnpm-lock.yaml",
+          "pnpm-workspace.yaml",
+          "turbo.json",
+          "tsconfig.base.json",
+          "jest.config.js",
+          "AGENTS.md"
+        ],
+        "baseline_sha256": "3e95fd39fc481551ee47f043060f12c23e51226d7c1652b7e4d5d6edbaf53ab4",
+        "current_sha256": "3e95fd39fc481551ee47f043060f12c23e51226d7c1652b7e4d5d6edbaf53ab4",
+        "equal": true
+      }
+    ],
+    "changed_files": [
+      {
+        "path": ".changeset/node-default-evaluator-isolation.md",
+        "baseline_blob": null,
+        "current_blob": "074bd91a2a9ac8c6736aa52b517dcf6d0e81ba45"
+      },
+      {
+        "path": "packages/runtime-core/__tests__/platform-entry-cache.spec.ts",
+        "baseline_blob": "08dd5ba31af005501b4779549c15b1661a54afa2",
+        "current_blob": "05f31640b436a028017468d40c4406f43b4355a9"
+      },
+      {
+        "path": "packages/runtime-core/src/platform/node.ts",
+        "baseline_blob": "77e6699253fde28e49a6963b7d4e0c3cbdeda199",
+        "current_blob": "dba9b85526f919b9f6302a2c4f36f492d211afd0"
+      },
+      {
+        "path": "packages/runtime-core/src/utils/load.ts",
+        "baseline_blob": "6e4f63d14a785e9764ce8cb221716ee398117cfb",
+        "current_blob": "f4f16c4998ccc7cfccf035f2c90ab527861aa280"
+      },
+      {
+        "path": "packages/runtime/__tests__/hooks.spec.ts",
+        "baseline_blob": "8033f33563da143340c34a524fa664f66a6bb096",
+        "current_blob": "d143a4cc82525b8702e092d573c6efe42f0e0578"
+      }
+    ]
+  },
+  {
+    "worktree": "stack5139",
+    "validated_baseline": "100baf397e1eeb953c868dd69dd9abd27a1fc29f",
+    "current_head": "5dec45f2bcf7c22f0e76b69eb49c2eef708efdfb",
+    "only_expected_inherited_delta": true,
+    "unchanged_scopes": [
+      {
+        "paths": ["packages/node"],
+        "baseline_sha256": "0427b46727364e9d49a68a1302c38258ad29e77604c0dbe7b5031502b29d193d",
+        "current_sha256": "0427b46727364e9d49a68a1302c38258ad29e77604c0dbe7b5031502b29d193d",
+        "equal": true
+      },
+      {
+        "paths": ["packages/esbuild"],
+        "baseline_sha256": "d5275e072e64d97bfbe1796815b9a91a570e4e8acdd8167815f01073a2457a23",
+        "current_sha256": "d5275e072e64d97bfbe1796815b9a91a570e4e8acdd8167815f01073a2457a23",
+        "equal": true
+      },
+      {
+        "paths": ["packages/webpack-bundler-runtime"],
+        "baseline_sha256": "722b22e00a1e36db3b17aec16b1dcb471f26cf41dd3ad1803d0fe7fe6458349e",
+        "current_sha256": "722b22e00a1e36db3b17aec16b1dcb471f26cf41dd3ad1803d0fe7fe6458349e",
+        "equal": true
+      },
+      {
+        "paths": [
+          "package.json",
+          "pnpm-lock.yaml",
+          "pnpm-workspace.yaml",
+          "turbo.json",
+          "tsconfig.base.json",
+          "jest.config.js",
+          "AGENTS.md"
+        ],
+        "baseline_sha256": "3e95fd39fc481551ee47f043060f12c23e51226d7c1652b7e4d5d6edbaf53ab4",
+        "current_sha256": "3e95fd39fc481551ee47f043060f12c23e51226d7c1652b7e4d5d6edbaf53ab4",
+        "equal": true
+      }
+    ],
+    "changed_files": [
+      {
+        "path": ".changeset/node-default-evaluator-isolation.md",
+        "baseline_blob": null,
+        "current_blob": "074bd91a2a9ac8c6736aa52b517dcf6d0e81ba45"
+      },
+      {
+        "path": "packages/runtime-core/__tests__/platform-entry-cache.spec.ts",
+        "baseline_blob": "08dd5ba31af005501b4779549c15b1661a54afa2",
+        "current_blob": "05f31640b436a028017468d40c4406f43b4355a9"
+      },
+      {
+        "path": "packages/runtime-core/src/platform/node.ts",
+        "baseline_blob": "77e6699253fde28e49a6963b7d4e0c3cbdeda199",
+        "current_blob": "dba9b85526f919b9f6302a2c4f36f492d211afd0"
+      },
+      {
+        "path": "packages/runtime-core/src/utils/load.ts",
+        "baseline_blob": "6e4f63d14a785e9764ce8cb221716ee398117cfb",
+        "current_blob": "f4f16c4998ccc7cfccf035f2c90ab527861aa280"
+      },
+      {
+        "path": "packages/runtime/__tests__/hooks.spec.ts",
+        "baseline_blob": "8033f33563da143340c34a524fa664f66a6bb096",
+        "current_blob": "d143a4cc82525b8702e092d573c6efe42f0e0578"
+      }
+    ]
+  }
+]

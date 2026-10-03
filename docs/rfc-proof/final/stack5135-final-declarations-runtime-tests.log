@@ -1,0 +1,46 @@
+
+> @module-federation/runtime@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/runtime
+> rstest -u
+
+---
+tool: "@rstest/core@0.10.6"
+timestamp: "2026-10-03T02:45:36.552Z"
+runtime: {"node":"v24.15.0","platform":"darwin","cwd":"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/runtime"}
+---
+
+# Rstest Test Execution Report
+
+## Summary
+
+```json
+{
+  "status": "pass",
+  "counts": {
+    "testFiles": 14,
+    "failedFiles": 0,
+    "tests": 97,
+    "failedTests": 0,
+    "passedTests": 97,
+    "skippedTests": 0,
+    "todoTests": 0
+  },
+  "durationMs": {
+    "total": 6890,
+    "build": 209,
+    "tests": 6681
+  },
+  "snapshot": {
+    "added": 0,
+    "updated": 0,
+    "unmatched": 0,
+    "removed": 0,
+    "unchecked": 0
+  }
+}
+```
+
+## Failures
+
+No test failures reported.
+
+Note: all tests passed. Lists omitted for brevity.

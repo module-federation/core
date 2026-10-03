@@ -1,0 +1,526 @@
+• turbo 2.10.2
+
+   • Packages in scope: @module-federation/error-codes, @module-federation/runtime, @module-federation/runtime-core, @module-federation/sdk
+   • Running build in 4 packages
+   • Remote caching disabled, using shared worktree cache
+
+@module-federation/error-codes:build: cache bypass, force executing 09ff732199cb0600
+@module-federation/sdk:build: cache bypass, force executing 300b23d001fdaaf3
+@module-federation/sdk:build:
+@module-federation/sdk:build: > @module-federation/sdk@2.9.2 build /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/sdk
+@module-federation/sdk:build: > tsdown --config tsdown.config.ts
+@module-federation/sdk:build:
+@module-federation/error-codes:build:
+@module-federation/error-codes:build: > @module-federation/error-codes@2.9.2 build /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/error-codes
+@module-federation/error-codes:build: > tsdown --config tsdown.config.ts --filter error-codes-build
+@module-federation/error-codes:build:
+@module-federation/error-codes:build: ℹ tsdown v0.20.3 powered by rolldown v1.0.0-rc.3
+@module-federation/sdk:build: ℹ tsdown v0.20.3 powered by rolldown v1.0.0-rc.3
+@module-federation/sdk:build: ℹ config file: /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/sdk/tsdown.config.ts
+@module-federation/error-codes:build: ℹ config file: /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/error-codes/tsdown.config.ts
+@module-federation/error-codes:build: (node:15961) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/error-codes/tsdown.config.ts?no-cache=a2b2e4cf-de33-44e6-94a8-6da0e5b4a5a8 is not specified and it doesn't parse as CommonJS.
+@module-federation/error-codes:build: Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+@module-federation/error-codes:build: To eliminate this warning, add "type": "module" to /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/error-codes/package.json.
+@module-federation/error-codes:build: (Use `node --trace-warnings ...` to show where the warning was created)
+@module-federation/sdk:build: ℹ [sdk-build] entry: src/index.ts, src/core.ts, src/node.ts, src/normalize-webpack-path.ts
+@module-federation/error-codes:build: ℹ [error-codes-build] entry: src/index.ts, src/browser.ts, src/node.ts
+@module-federation/error-codes:build: ℹ [error-codes-build] tsconfig: tsconfig.lib.json
+@module-federation/sdk:build: ℹ [sdk-build] tsconfig: tsconfig.lib.json
+@module-federation/sdk:build: ℹ Build start
+@module-federation/error-codes:build: ℹ Build start
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/index.cjs                       1.49 kB │ gzip: 0.34 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/node.cjs                        1.11 kB │ gzip: 0.56 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/browser.cjs                     0.43 kB │ gzip: 0.27 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/desc.cjs.map                    2.61 kB │ gzip: 0.95 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/desc.cjs                        2.14 kB │ gzip: 0.76 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/node.cjs.map                    1.74 kB │ gzip: 0.84 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/error-codes.cjs                 1.32 kB │ gzip: 0.31 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/error-codes.cjs.map             1.17 kB │ gzip: 0.29 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/getShortErrorMsg.cjs.map        1.13 kB │ gzip: 0.61 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/_virtual/_rolldown/runtime.cjs  1.04 kB │ gzip: 0.52 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/browser.cjs.map                 0.70 kB │ gzip: 0.40 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/getShortErrorMsg.cjs            0.68 kB │ gzip: 0.38 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] 12 files, total: 15.55 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/index.d.ts             1.17 kB │ gzip: 0.36 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/browser.d.ts           0.38 kB │ gzip: 0.25 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/node.d.ts              0.37 kB │ gzip: 0.25 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/MFContext.d.ts         2.60 kB │ gzip: 1.00 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/desc.d.ts              1.16 kB │ gzip: 0.25 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/error-codes.d.ts       1.08 kB │ gzip: 0.29 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] dist/getShortErrorMsg.d.ts  0.28 kB │ gzip: 0.18 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [CJS] 7 files, total: 7.04 kB
+@module-federation/error-codes:build: ✔ [error-codes-build] Build complete in 883ms
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/node.mjs                  0.81 kB │ gzip: 0.45 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/index.mjs                 0.72 kB │ gzip: 0.21 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/browser.mjs               0.32 kB │ gzip: 0.20 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/desc.mjs.map              2.33 kB │ gzip: 0.89 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/desc.mjs                  1.90 kB │ gzip: 0.78 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/node.mjs.map              1.71 kB │ gzip: 0.84 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/error-codes.mjs.map       1.17 kB │ gzip: 0.29 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/getShortErrorMsg.mjs.map  1.13 kB │ gzip: 0.61 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/error-codes.mjs           0.94 kB │ gzip: 0.28 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/browser.mjs.map           0.68 kB │ gzip: 0.39 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/getShortErrorMsg.mjs      0.66 kB │ gzip: 0.38 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/index.d.mts               1.17 kB │ gzip: 0.36 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/browser.d.mts             0.38 kB │ gzip: 0.26 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/node.d.mts                0.37 kB │ gzip: 0.25 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/MFContext.d.mts           2.61 kB │ gzip: 1.00 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/desc.d.mts                1.16 kB │ gzip: 0.26 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/error-codes.d.mts         1.08 kB │ gzip: 0.29 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] dist/getShortErrorMsg.d.mts    0.28 kB │ gzip: 0.19 kB
+@module-federation/error-codes:build: ℹ [error-codes-build] [ESM] 18 files, total: 19.43 kB
+@module-federation/error-codes:build: ✔ [error-codes-build] Build complete in 888ms
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/node.cjs                                         8.54 kB │ gzip: 2.70 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/index.cjs                                        5.22 kB │ gzip: 1.09 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/core.cjs                                         5.07 kB │ gzip: 1.06 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/normalize-webpack-path.cjs                       1.29 kB │ gzip: 0.64 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/node.cjs.map                                    19.01 kB │ gzip: 5.56 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ModuleFederationPlugin.cjs.map    16.32 kB │ gzip: 4.27 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/dom.cjs.map                                     14.51 kB │ gzip: 4.37 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/utils.cjs.map                                    9.85 kB │ gzip: 3.19 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/generateSnapshotFromManifest.cjs.map             9.54 kB │ gzip: 3.08 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/logger.cjs.map                                   7.30 kB │ gzip: 2.30 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/dom.cjs                                          7.04 kB │ gzip: 2.05 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/utils.cjs                                        5.33 kB │ gzip: 1.57 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/generateSnapshotFromManifest.cjs                 4.85 kB │ gzip: 1.53 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ConsumeSharedPlugin.cjs.map        3.86 kB │ gzip: 1.33 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/logger.cjs                                       3.63 kB │ gzip: 1.18 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ProvideSharedPlugin.cjs.map        3.31 kB │ gzip: 1.17 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/normalize-webpack-path.cjs.map                   2.34 kB │ gzip: 1.07 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/constant.cjs                                     2.19 kB │ gzip: 0.78 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/env.cjs.map                                      2.13 kB │ gzip: 0.91 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/constant.cjs.map                                 2.05 kB │ gzip: 0.89 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ContainerPlugin.cjs.map            1.44 kB │ gzip: 0.69 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/env.cjs                                          1.25 kB │ gzip: 0.50 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/normalizeOptions.cjs.map                         1.16 kB │ gzip: 0.54 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/SharePlugin.cjs.map                0.86 kB │ gzip: 0.51 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ContainerReferencePlugin.cjs.map   0.83 kB │ gzip: 0.47 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/normalizeOptions.cjs                             0.63 kB │ gzip: 0.31 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/createModuleFederationConfig.cjs.map             0.45 kB │ gzip: 0.25 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ContainerReferencePlugin.cjs       0.45 kB │ gzip: 0.26 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ModuleFederationPlugin.cjs         0.44 kB │ gzip: 0.26 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ConsumeSharedPlugin.cjs            0.42 kB │ gzip: 0.26 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ProvideSharedPlugin.cjs            0.42 kB │ gzip: 0.26 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ContainerPlugin.cjs                0.40 kB │ gzip: 0.26 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/_virtual/_rolldown/runtime.cjs                   0.38 kB │ gzip: 0.26 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/SharePlugin.cjs                    0.38 kB │ gzip: 0.26 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/createModuleFederationConfig.cjs                 0.26 kB │ gzip: 0.15 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] 35 files, total: 143.18 kB
+@module-federation/sdk:build: src/node.ts (129:26) [33m[EVAL] Warning:[0m Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+@module-federation/sdk:build:      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/node.ts:129:27 [38;5;246m][0m
+@module-federation/sdk:build:      [38;5;246m│[0m
+@module-federation/sdk:build:  [38;5;246m129 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mq[0m[38;5;249mu[0m[38;5;249mi[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mF[0m[38;5;249mn[0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0meval[38;5;249m([0m[38;5;249m'[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mq[0m[38;5;249mu[0m[38;5;249mi[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249m'[0m[38;5;249m)[0m[38;5;249m [0m[38;5;249ma[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249mN[0m[38;5;249mo[0m[38;5;249md[0m[38;5;249me[0m[38;5;249mR[0m[38;5;249me[0m[38;5;249mq[0m[38;5;249mu[0m[38;5;249mi[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249m;[0m
+@module-federation/sdk:build:  [38;5;240m    │[0m                           ──┬─
+@module-federation/sdk:build:  [38;5;240m    │[0m                             ╰─── Use of direct `eval` here.
+@module-federation/sdk:build:  [38;5;240m    │[0m
+@module-federation/sdk:build:  [38;5;240m    │[0m [38;5;115mHelp[0m: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+@module-federation/sdk:build: [38;5;246m─────╯[0m
+@module-federation/sdk:build:
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/index.d.ts                                    4.86 kB │ gzip: 1.11 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/core.d.ts                                     4.77 kB │ gzip: 1.10 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/node.d.ts                                     0.57 kB │ gzip: 0.29 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/normalize-webpack-path.d.ts                   0.37 kB │ gzip: 0.23 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ModuleFederationPlugin.d.ts    16.07 kB │ gzip: 4.33 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ConsumeSharedPlugin.d.ts        3.72 kB │ gzip: 1.27 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ProvideSharedPlugin.d.ts        3.19 kB │ gzip: 1.11 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/stats.d.ts                              2.99 kB │ gzip: 0.85 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/snapshot.d.ts                           2.61 kB │ gzip: 0.66 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/utils.d.ts                                    1.59 kB │ gzip: 0.60 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/constant.d.ts                                 1.53 kB │ gzip: 0.65 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/index.d.ts                              1.48 kB │ gzip: 0.43 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/logger.d.ts                                   1.40 kB │ gzip: 0.50 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ContainerPlugin.d.ts            1.33 kB │ gzip: 0.62 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/dom.d.ts                                      1.20 kB │ gzip: 0.49 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/hooks.d.ts                              1.18 kB │ gzip: 0.36 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/manifest.d.ts                           1.14 kB │ gzip: 0.47 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/generateSnapshotFromManifest.d.ts             1.10 kB │ gzip: 0.43 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/ContainerReferencePlugin.d.ts   0.79 kB │ gzip: 0.41 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/SharePlugin.d.ts                0.77 kB │ gzip: 0.43 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/env.d.ts                                      0.46 kB │ gzip: 0.25 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/plugins/index.d.ts                      0.43 kB │ gzip: 0.15 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/createModuleFederationConfig.d.ts             0.37 kB │ gzip: 0.18 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/types/common.d.ts                             0.36 kB │ gzip: 0.19 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] dist/normalizeOptions.d.ts                         0.28 kB │ gzip: 0.20 kB
+@module-federation/sdk:build: ℹ [sdk-build] [CJS] 25 files, total: 54.57 kB
+@module-federation/sdk:build: ✔ [sdk-build] Build complete in 1316ms
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/node.js                                         8.59 kB │ gzip: 2.70 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/index.js                                        2.90 kB │ gzip: 0.78 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/core.js                                         2.80 kB │ gzip: 0.77 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/normalize-webpack-path.js                       1.16 kB │ gzip: 0.58 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/node.js.map                                    19.10 kB │ gzip: 5.59 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ModuleFederationPlugin.js.map    16.32 kB │ gzip: 4.26 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/dom.js.map                                     14.50 kB │ gzip: 4.37 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/utils.js.map                                    9.68 kB │ gzip: 3.12 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/generateSnapshotFromManifest.js.map             9.48 kB │ gzip: 3.06 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/logger.js.map                                   7.29 kB │ gzip: 2.29 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/dom.js                                          6.90 kB │ gzip: 2.02 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/utils.js                                        4.66 kB │ gzip: 1.52 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/generateSnapshotFromManifest.js                 4.64 kB │ gzip: 1.50 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ConsumeSharedPlugin.js.map        3.86 kB │ gzip: 1.33 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/logger.js                                       3.48 kB │ gzip: 1.16 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ProvideSharedPlugin.js.map        3.31 kB │ gzip: 1.17 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/normalize-webpack-path.js.map                   2.34 kB │ gzip: 1.07 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/env.js.map                                      2.12 kB │ gzip: 0.90 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/constant.js.map                                 2.05 kB │ gzip: 0.89 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/constant.js                                     1.81 kB │ gzip: 0.73 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ContainerPlugin.js.map            1.44 kB │ gzip: 0.69 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/normalizeOptions.js.map                         1.16 kB │ gzip: 0.54 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/env.js                                          1.11 kB │ gzip: 0.47 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/SharePlugin.js.map                0.86 kB │ gzip: 0.51 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ContainerReferencePlugin.js.map   0.83 kB │ gzip: 0.47 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/normalizeOptions.js                             0.61 kB │ gzip: 0.31 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/createModuleFederationConfig.js.map             0.45 kB │ gzip: 0.25 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/_virtual/_rolldown/runtime.js                   0.37 kB │ gzip: 0.26 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ContainerReferencePlugin.js       0.31 kB │ gzip: 0.20 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ModuleFederationPlugin.js         0.30 kB │ gzip: 0.20 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ConsumeSharedPlugin.js            0.29 kB │ gzip: 0.19 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ProvideSharedPlugin.js            0.29 kB │ gzip: 0.20 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ContainerPlugin.js                0.27 kB │ gzip: 0.19 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/SharePlugin.js                    0.26 kB │ gzip: 0.19 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/createModuleFederationConfig.js                 0.23 kB │ gzip: 0.15 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/index.d.ts                                      4.86 kB │ gzip: 1.11 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/core.d.ts                                       4.77 kB │ gzip: 1.10 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/node.d.ts                                       0.57 kB │ gzip: 0.29 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/normalize-webpack-path.d.ts                     0.37 kB │ gzip: 0.23 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ModuleFederationPlugin.d.ts      16.07 kB │ gzip: 4.33 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ConsumeSharedPlugin.d.ts          3.72 kB │ gzip: 1.27 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ProvideSharedPlugin.d.ts          3.19 kB │ gzip: 1.11 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/stats.d.ts                                2.99 kB │ gzip: 0.85 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/snapshot.d.ts                             2.61 kB │ gzip: 0.66 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/utils.d.ts                                      1.59 kB │ gzip: 0.60 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/constant.d.ts                                   1.53 kB │ gzip: 0.65 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/index.d.ts                                1.48 kB │ gzip: 0.43 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/logger.d.ts                                     1.40 kB │ gzip: 0.50 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ContainerPlugin.d.ts              1.33 kB │ gzip: 0.62 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/dom.d.ts                                        1.20 kB │ gzip: 0.49 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/hooks.d.ts                                1.18 kB │ gzip: 0.36 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/manifest.d.ts                             1.14 kB │ gzip: 0.47 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/generateSnapshotFromManifest.d.ts               1.10 kB │ gzip: 0.43 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/ContainerReferencePlugin.d.ts     0.79 kB │ gzip: 0.41 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/SharePlugin.d.ts                  0.77 kB │ gzip: 0.43 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/env.d.ts                                        0.46 kB │ gzip: 0.25 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/plugins/index.d.ts                        0.43 kB │ gzip: 0.15 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/createModuleFederationConfig.d.ts               0.37 kB │ gzip: 0.18 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/types/common.d.ts                               0.36 kB │ gzip: 0.19 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] dist/normalizeOptions.d.ts                           0.28 kB │ gzip: 0.20 kB
+@module-federation/sdk:build: ℹ [sdk-build] [ESM] 60 files, total: 190.32 kB
+@module-federation/sdk:build: ✔ [sdk-build] Build complete in 1334ms
+@module-federation/runtime-core:build: cache bypass, force executing 388ba1e0096573b8
+@module-federation/runtime-core:build:
+@module-federation/runtime-core:build: > @module-federation/runtime-core@2.9.2 build /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/runtime-core
+@module-federation/runtime-core:build: > tsdown --config tsdown.config.ts
+@module-federation/runtime-core:build:
+@module-federation/runtime-core:build: ℹ tsdown v0.20.3 powered by rolldown v1.0.0-rc.3
+@module-federation/runtime-core:build: ℹ config file: /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/runtime-core/tsdown.config.ts
+@module-federation/runtime-core:build: ℹ [runtime-core-build] entry: src/index.ts, src/types.ts, src/kernel.ts, src/shared/capability.ts, src/remote/capability.ts, src/plugins/snapshot/capability.ts, src/platform/web.ts, src/platform/node.ts, src/platform/universal.ts
+@module-federation/runtime-core:build: ℹ [runtime-core-build] tsconfig: tsconfig.lib.json
+@module-federation/runtime-core:build: ℹ Build start
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/index.d.ts                             2.30 kB │ gzip: 0.70 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/types.d.ts                             2.04 kB │ gzip: 0.54 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/kernel.d.ts                            0.95 kB │ gzip: 0.32 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/platform/web.d.ts                      0.45 kB │ gzip: 0.27 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/platform/node.d.ts                     0.44 kB │ gzip: 0.27 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/platform/universal.d.ts                0.20 kB │ gzip: 0.16 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/snapshot/capability.d.ts       0.06 kB │ gzip: 0.06 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/remote/capability.d.ts                 0.06 kB │ gzip: 0.06 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/shared/capability.d.ts                 0.06 kB │ gzip: 0.06 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/core.d.ts                              8.37 kB │ gzip: 1.90 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/remote/index.d.ts                      4.87 kB │ gzip: 1.23 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/type/config.d.ts                       4.30 kB │ gzip: 1.37 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/shared/index.d.ts                      4.29 kB │ gzip: 1.16 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/global.d.ts                            3.32 kB │ gzip: 1.03 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/snapshot/SnapshotHandler.d.ts  2.97 kB │ gzip: 0.81 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/type/capability.d.ts                   2.70 kB │ gzip: 0.84 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/type/index.d.ts                        2.16 kB │ gzip: 0.61 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/type/plugin.d.ts                       1.90 kB │ gzip: 0.50 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/type/preload.d.ts                      1.83 kB │ gzip: 0.68 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/helpers.d.ts                           1.72 kB │ gzip: 0.47 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/module/index.d.ts                      1.27 kB │ gzip: 0.51 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/share.d.ts                       0.82 kB │ gzip: 0.38 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/load.d.ts                        0.67 kB │ gzip: 0.34 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/logger.d.ts                      0.64 kB │ gzip: 0.29 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/preload.d.ts                     0.55 kB │ gzip: 0.29 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/pluginSystem.d.ts          0.53 kB │ gzip: 0.31 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/syncHook.d.ts              0.52 kB │ gzip: 0.30 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/asyncWaterfallHooks.d.ts   0.46 kB │ gzip: 0.29 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/tool.d.ts                        0.44 kB │ gzip: 0.30 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/asyncHook.d.ts             0.43 kB │ gzip: 0.25 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/syncWaterfallHook.d.ts     0.39 kB │ gzip: 0.26 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/manifest.d.ts                    0.33 kB │ gzip: 0.23 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/snapshot/index.d.ts            0.28 kB │ gzip: 0.20 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/index.d.ts                0.17 kB │ gzip: 0.15 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] 34 files, total: 52.46 kB
+@module-federation/runtime-core:build: [33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugins. Here is a breakdown:
+@module-federation/runtime-core:build:   - rolldown-plugin-dts:resolver (54%)
+@module-federation/runtime-core:build:   - rolldown-plugin-dts:generate (39%)
+@module-federation/runtime-core:build: See https://rolldown.rs/options/checks#plugintimings for more details.
+@module-federation/runtime-core:build:
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/platform/web.cjs                           5.75 kB │ gzip: 1.77 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/index.cjs                                  4.32 kB │ gzip: 1.09 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/platform/node.cjs                          2.35 kB │ gzip: 0.93 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/platform/universal.cjs                     0.70 kB │ gzip: 0.35 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/kernel.cjs                                 0.56 kB │ gzip: 0.25 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/snapshot/capability.cjs            0.16 kB │ gzip: 0.14 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/remote/capability.cjs                      0.16 kB │ gzip: 0.14 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/shared/capability.cjs                      0.16 kB │ gzip: 0.14 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/types.cjs                                  0.00 kB │ gzip: 0.02 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/remote/index.cjs.map                      34.63 kB │ gzip: 8.86 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/shared/index.cjs.map                      34.48 kB │ gzip: 8.05 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/share.cjs.map                       21.21 kB │ gzip: 5.80 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/snapshot/SnapshotHandler.cjs.map  20.47 kB │ gzip: 4.99 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/core.cjs.map                              18.14 kB │ gzip: 4.72 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/shared/index.cjs                          17.11 kB │ gzip: 3.64 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/module/index.cjs.map                      16.87 kB │ gzip: 4.16 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/remote/index.cjs                          16.70 kB │ gzip: 4.20 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/generate-preload-assets.cjs.map   16.06 kB │ gzip: 4.55 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/global.cjs.map                            14.48 kB │ gzip: 4.39 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/preload.cjs.map                     13.16 kB │ gzip: 3.45 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/parser.cjs.map               11.03 kB │ gzip: 2.55 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/platform/web.cjs.map                      10.94 kB │ gzip: 3.44 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/load.cjs.map                        10.69 kB │ gzip: 3.25 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/share.cjs                           10.64 kB │ gzip: 2.88 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/snapshot/SnapshotHandler.cjs      10.39 kB │ gzip: 2.32 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/module/index.cjs                           8.99 kB │ gzip: 2.04 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/index.cjs.map                 8.61 kB │ gzip: 3.06 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/global.cjs                                 8.30 kB │ gzip: 2.17 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/generate-preload-assets.cjs        7.91 kB │ gzip: 2.18 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/core.cjs                                   6.90 kB │ gzip: 1.73 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/preload.cjs                          6.67 kB │ gzip: 1.79 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/load.cjs                             5.83 kB │ gzip: 1.58 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/snapshot/index.cjs.map             5.22 kB │ gzip: 1.78 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/parser.cjs                    5.11 kB │ gzip: 1.03 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/tool.cjs.map                         5.00 kB │ gzip: 1.90 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/compare.cjs.map               4.60 kB │ gzip: 1.51 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/platform/node.cjs.map                      4.02 kB │ gzip: 1.61 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/index.cjs.map                              3.84 kB │ gzip: 1.25 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/constants.cjs.map             3.71 kB │ gzip: 1.43 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/manifest.cjs.map                     3.39 kB │ gzip: 1.09 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/utils.cjs.map                 3.29 kB │ gzip: 1.23 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/plugin.cjs.map                       3.24 kB │ gzip: 1.16 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/logger.cjs.map                       3.13 kB │ gzip: 1.08 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/snapshot/index.cjs                 3.07 kB │ gzip: 1.07 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/helpers.cjs.map                            2.92 kB │ gzip: 0.70 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/tool.cjs                             2.85 kB │ gzip: 1.03 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/index.cjs                     2.77 kB │ gzip: 0.86 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/asyncWaterfallHooks.cjs.map    2.44 kB │ gzip: 1.08 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/context.cjs.map                      2.36 kB │ gzip: 1.02 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/pluginSystem.cjs.map           2.24 kB │ gzip: 0.92 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/syncWaterfallHook.cjs.map      2.21 kB │ gzip: 1.05 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/remote/disabled.cjs.map                    2.06 kB │ gzip: 0.83 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/constants.cjs                 2.04 kB │ gzip: 0.63 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/compare.cjs                   1.99 kB │ gzip: 0.55 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/helpers.cjs                                1.89 kB │ gzip: 0.53 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/syncHook.cjs.map               1.87 kB │ gzip: 0.85 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/shared/disabled.cjs.map                    1.83 kB │ gzip: 0.82 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/plugin.cjs                           1.74 kB │ gzip: 0.64 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/asyncHook.cjs.map              1.69 kB │ gzip: 0.77 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/manifest.cjs                         1.62 kB │ gzip: 0.52 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/asyncWaterfallHooks.cjs        1.40 kB │ gzip: 0.57 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/remote/disabled.cjs                        1.34 kB │ gzip: 0.49 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/logger.cjs                           1.33 kB │ gzip: 0.52 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/pluginSystem.cjs               1.29 kB │ gzip: 0.49 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/syncWaterfallHook.cjs          1.25 kB │ gzip: 0.54 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/context.cjs                          1.18 kB │ gzip: 0.56 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/shared/disabled.cjs                        1.11 kB │ gzip: 0.50 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/semver/utils.cjs                     0.86 kB │ gzip: 0.40 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/platform/universal.cjs.map                 0.77 kB │ gzip: 0.43 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/syncHook.cjs                   0.77 kB │ gzip: 0.40 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/asyncHook.cjs                  0.72 kB │ gzip: 0.38 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/env.cjs.map                          0.53 kB │ gzip: 0.35 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/snapshot/disabled.cjs.map          0.53 kB │ gzip: 0.31 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/index.cjs                            0.40 kB │ gzip: 0.17 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/plugins/snapshot/disabled.cjs              0.39 kB │ gzip: 0.23 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/_virtual/_rolldown/runtime.cjs             0.38 kB │ gzip: 0.26 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/type/index.cjs                             0.34 kB │ gzip: 0.24 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/hooks/index.cjs                      0.31 kB │ gzip: 0.12 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/utils/env.cjs                              0.31 kB │ gzip: 0.23 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/constant.cjs                               0.24 kB │ gzip: 0.16 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/constant.cjs.map                           0.24 kB │ gzip: 0.19 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] dist/type/index.cjs.map                         0.23 kB │ gzip: 0.16 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [CJS] 82 files, total: 442.46 kB
+@module-federation/runtime-core:build: ✔ [runtime-core-build] Build complete in 9693ms
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/platform/web.js                           5.28 kB │ gzip: 1.67 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/index.js                                  2.97 kB │ gzip: 0.85 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/platform/node.js                          2.08 kB │ gzip: 0.84 kB
+@module-federation/runtime-core:build: [33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugins. Here is a breakdown:
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/platform/universal.js                     0.44 kB │ gzip: 0.27 kB
+@module-federation/runtime-core:build:   - rolldown-plugin-dts:resolver (66%)
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/kernel.js                                 0.33 kB │ gzip: 0.17 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/snapshot/capability.js            0.06 kB │ gzip: 0.07 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/remote/capability.js                      0.06 kB │ gzip: 0.06 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/shared/capability.js                      0.06 kB │ gzip: 0.06 kB
+@module-federation/runtime-core:build:   - rolldown-plugin-dts:generate (21%)
+@module-federation/runtime-core:build: See https://rolldown.rs/options/checks#plugintimings for more details.
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/types.js                                  0.01 kB │ gzip: 0.03 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/shared/index.js.map                      34.14 kB │ gzip: 7.93 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/remote/index.js.map                      34.12 kB │ gzip: 8.66 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/share.js.map                       21.12 kB │ gzip: 5.76 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/snapshot/SnapshotHandler.js.map  20.15 kB │ gzip: 4.87 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/core.js.map                              17.87 kB │ gzip: 4.62 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/module/index.js.map                      16.72 kB │ gzip: 4.10 kB
+@module-federation/runtime-core:build:
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/shared/index.js                          16.38 kB │ gzip: 3.61 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/generate-preload-assets.js.map   15.86 kB │ gzip: 4.49 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/remote/index.js                          15.82 kB │ gzip: 4.15 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/global.js.map                            14.46 kB │ gzip: 4.38 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/preload.js.map                     13.09 kB │ gzip: 3.41 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/parser.js.map               10.84 kB │ gzip: 2.45 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/platform/web.js.map                      10.78 kB │ gzip: 3.39 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/load.js.map                        10.53 kB │ gzip: 3.19 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/share.js                           10.22 kB │ gzip: 2.83 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/snapshot/SnapshotHandler.js       9.75 kB │ gzip: 2.28 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/module/index.js                           8.64 kB │ gzip: 2.01 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/index.js.map                 8.39 kB │ gzip: 3.00 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/generate-preload-assets.js        7.76 kB │ gzip: 2.15 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/global.js                                 7.45 kB │ gzip: 2.07 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/preload.js                          6.41 kB │ gzip: 1.74 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/core.js                                   6.05 kB │ gzip: 1.66 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/load.js                             5.35 kB │ gzip: 1.52 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/snapshot/index.js.map             5.05 kB │ gzip: 1.73 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/tool.js.map                         5.00 kB │ gzip: 1.89 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/compare.js.map               4.60 kB │ gzip: 1.51 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/parser.js                    4.49 kB │ gzip: 1.00 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/platform/node.js.map                      3.95 kB │ gzip: 1.60 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/constants.js.map             3.71 kB │ gzip: 1.42 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/index.js.map                              3.69 kB │ gzip: 1.21 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/manifest.js.map                     3.39 kB │ gzip: 1.08 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/utils.js.map                 3.27 kB │ gzip: 1.22 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/plugin.js.map                       3.20 kB │ gzip: 1.15 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/logger.js.map                       3.15 kB │ gzip: 1.09 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/helpers.js.map                            2.92 kB │ gzip: 0.70 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/snapshot/index.js                 2.85 kB │ gzip: 1.02 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/index.js                     2.65 kB │ gzip: 0.85 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/tool.js                             2.49 kB │ gzip: 0.96 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/asyncWaterfallHooks.js.map    2.38 kB │ gzip: 1.05 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/context.js.map                      2.36 kB │ gzip: 1.02 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/pluginSystem.js.map           2.22 kB │ gzip: 0.91 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/syncWaterfallHook.js.map      2.17 kB │ gzip: 1.03 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/remote/disabled.js.map                    2.01 kB │ gzip: 0.81 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/compare.js                   1.98 kB │ gzip: 0.55 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/syncHook.js.map               1.87 kB │ gzip: 0.84 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/constants.js                 1.86 kB │ gzip: 0.60 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/shared/disabled.js.map                    1.79 kB │ gzip: 0.81 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/asyncHook.js.map              1.68 kB │ gzip: 0.77 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/plugin.js                           1.66 kB │ gzip: 0.63 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/manifest.js                         1.54 kB │ gzip: 0.50 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/helpers.js                                1.47 kB │ gzip: 0.50 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/asyncWaterfallHooks.js        1.25 kB │ gzip: 0.56 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/remote/disabled.js                        1.22 kB │ gzip: 0.47 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/pluginSystem.js               1.20 kB │ gzip: 0.48 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/logger.js                           1.17 kB │ gzip: 0.49 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/context.js                          1.16 kB │ gzip: 0.55 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/syncWaterfallHook.js          1.10 kB │ gzip: 0.52 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/shared/disabled.js                        1.03 kB │ gzip: 0.49 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/syncHook.js                   0.76 kB │ gzip: 0.40 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/platform/universal.js.map                 0.74 kB │ gzip: 0.42 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/utils.js                     0.73 kB │ gzip: 0.38 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/asyncHook.js                  0.68 kB │ gzip: 0.38 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/index.js                            0.67 kB │ gzip: 0.34 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/env.js.map                          0.53 kB │ gzip: 0.35 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/snapshot/disabled.js.map          0.51 kB │ gzip: 0.30 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/_virtual/_rolldown/runtime.js             0.37 kB │ gzip: 0.26 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/snapshot/disabled.js              0.33 kB │ gzip: 0.22 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/index.js                      0.27 kB │ gzip: 0.12 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/env.js                              0.26 kB │ gzip: 0.21 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/constant.js.map                           0.24 kB │ gzip: 0.19 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/type/index.js.map                         0.23 kB │ gzip: 0.16 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/type/index.js                             0.22 kB │ gzip: 0.17 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/constant.js                               0.19 kB │ gzip: 0.15 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/index.d.ts                                2.30 kB │ gzip: 0.70 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/types.d.ts                                2.04 kB │ gzip: 0.54 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/kernel.d.ts                               0.95 kB │ gzip: 0.32 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/platform/web.d.ts                         0.45 kB │ gzip: 0.27 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/platform/node.d.ts                        0.44 kB │ gzip: 0.27 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/platform/universal.d.ts                   0.20 kB │ gzip: 0.16 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/snapshot/capability.d.ts          0.06 kB │ gzip: 0.06 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/remote/capability.d.ts                    0.06 kB │ gzip: 0.06 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/shared/capability.d.ts                    0.06 kB │ gzip: 0.06 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/core.d.ts                                 8.37 kB │ gzip: 1.90 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/remote/index.d.ts                         4.87 kB │ gzip: 1.23 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/type/config.d.ts                          4.30 kB │ gzip: 1.37 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/shared/index.d.ts                         4.29 kB │ gzip: 1.16 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/global.d.ts                               3.32 kB │ gzip: 1.03 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/snapshot/SnapshotHandler.d.ts     2.97 kB │ gzip: 0.81 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/type/capability.d.ts                      2.70 kB │ gzip: 0.84 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/type/index.d.ts                           2.16 kB │ gzip: 0.61 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/type/plugin.d.ts                          1.90 kB │ gzip: 0.50 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/type/preload.d.ts                         1.83 kB │ gzip: 0.68 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/helpers.d.ts                              1.72 kB │ gzip: 0.47 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/module/index.d.ts                         1.27 kB │ gzip: 0.51 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/share.d.ts                          0.82 kB │ gzip: 0.38 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/load.d.ts                           0.67 kB │ gzip: 0.34 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/logger.d.ts                         0.64 kB │ gzip: 0.29 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/preload.d.ts                        0.55 kB │ gzip: 0.29 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/pluginSystem.d.ts             0.53 kB │ gzip: 0.31 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/syncHook.d.ts                 0.52 kB │ gzip: 0.30 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/asyncWaterfallHooks.d.ts      0.46 kB │ gzip: 0.29 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/tool.d.ts                           0.44 kB │ gzip: 0.30 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/asyncHook.d.ts                0.43 kB │ gzip: 0.25 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/hooks/syncWaterfallHook.d.ts        0.39 kB │ gzip: 0.26 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/manifest.d.ts                       0.33 kB │ gzip: 0.23 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/plugins/snapshot/index.d.ts               0.28 kB │ gzip: 0.20 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/index.d.ts                          0.23 kB │ gzip: 0.16 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/semver/index.d.ts                   0.17 kB │ gzip: 0.15 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/context.d.ts                        0.06 kB │ gzip: 0.08 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/env.d.ts                            0.01 kB │ gzip: 0.03 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] dist/utils/plugin.d.ts                         0.01 kB │ gzip: 0.03 kB
+@module-federation/runtime-core:build: ℹ [runtime-core-build] [ESM] 120 files, total: 480.19 kB
+@module-federation/runtime-core:build: ✔ [runtime-core-build] Build complete in 9741ms
+@module-federation/runtime:build: cache bypass, force executing d8be0adfb6d76734
+@module-federation/runtime:build:
+@module-federation/runtime:build: > @module-federation/runtime@2.9.2 build /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/runtime
+@module-federation/runtime:build: > tsdown --config tsdown.config.ts
+@module-federation/runtime:build:
+@module-federation/runtime:build: ℹ tsdown v0.20.3 powered by rolldown v1.0.0-rc.3
+@module-federation/runtime:build: ℹ config file: /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/runtime/tsdown.config.ts
+@module-federation/runtime:build: ℹ [runtime-build] entry: src/index.ts, src/helpers.ts, src/types.ts, src/core.ts, src/bundler.ts, src/compose.ts
+@module-federation/runtime:build: ℹ [runtime-build] tsconfig: tsconfig.lib.json
+@module-federation/runtime:build: ℹ Build start
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/index.cjs                       4.81 kB │ gzip: 0.82 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/bundler.cjs                     1.94 kB │ gzip: 0.44 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/helpers.cjs                     0.81 kB │ gzip: 0.37 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/compose.cjs                     0.81 kB │ gzip: 0.36 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/core.cjs                        0.79 kB │ gzip: 0.40 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/types.cjs                       0.46 kB │ gzip: 0.27 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/index.cjs.map                   5.18 kB │ gzip: 1.26 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/instance.cjs.map                3.11 kB │ gzip: 1.14 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/instance.cjs                    1.88 kB │ gzip: 0.70 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/helpers.cjs.map                 1.30 kB │ gzip: 0.51 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/compose.cjs.map                 1.30 kB │ gzip: 0.55 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/_virtual/_rolldown/runtime.cjs  1.04 kB │ gzip: 0.52 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/core.cjs.map                    0.28 kB │ gzip: 0.18 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] 13 files, total: 23.73 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/index.d.ts     1.85 kB │ gzip: 0.51 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/helpers.d.ts   1.06 kB │ gzip: 0.42 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/bundler.d.ts   0.68 kB │ gzip: 0.20 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/compose.d.ts   0.42 kB │ gzip: 0.23 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/core.d.ts      0.13 kB │ gzip: 0.09 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/types.d.ts     0.05 kB │ gzip: 0.07 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] dist/instance.d.ts  0.36 kB │ gzip: 0.23 kB
+@module-federation/runtime:build: ℹ [runtime-build] [CJS] 7 files, total: 4.56 kB
+@module-federation/runtime:build: ✔ [runtime-build] Build complete in 1070ms
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/index.js         2.35 kB │ gzip: 0.60 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/compose.js       0.58 kB │ gzip: 0.27 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/bundler.js       0.55 kB │ gzip: 0.18 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/helpers.js       0.43 kB │ gzip: 0.25 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/core.js          0.25 kB │ gzip: 0.17 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/types.js         0.07 kB │ gzip: 0.08 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/index.js.map     5.02 kB │ gzip: 1.22 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/instance.js.map  3.10 kB │ gzip: 1.14 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/instance.js      1.54 kB │ gzip: 0.58 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/helpers.js.map   1.29 kB │ gzip: 0.51 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/compose.js.map   1.26 kB │ gzip: 0.54 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/core.js.map      0.27 kB │ gzip: 0.18 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/index.d.ts       1.85 kB │ gzip: 0.51 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/helpers.d.ts     1.06 kB │ gzip: 0.42 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/bundler.d.ts     0.68 kB │ gzip: 0.20 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/compose.d.ts     0.42 kB │ gzip: 0.23 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/core.d.ts        0.15 kB │ gzip: 0.10 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/types.d.ts       0.05 kB │ gzip: 0.07 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] dist/instance.d.ts    0.36 kB │ gzip: 0.23 kB
+@module-federation/runtime:build: ℹ [runtime-build] [ESM] 19 files, total: 21.28 kB
+@module-federation/runtime:build: ✔ [runtime-build] Build complete in 1078ms
+
+ Tasks:    4 successful, 4 total
+Cached:    0 cached, 4 total
+  Time:    15.5s

@@ -1,0 +1,166 @@
+[
+  {
+    "mode": "before",
+    "emitterFormat": "cjs only",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/cjs-only-before/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 2
+    },
+    "stdout": "node_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS1203: Export assignment cannot be used when targeting ECMAScript modules. Consider using 'export default' or another module format instead.\nnode_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS2309: An export assignment cannot be used in a module with other exported elements.\n",
+    "stderr": ""
+  },
+  {
+    "mode": "before",
+    "emitterFormat": "cjs only",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/cjs-only-before/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 2
+    },
+    "stdout": "node_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS1203: Export assignment cannot be used when targeting ECMAScript modules. Consider using 'export default' or another module format instead.\nnode_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS2309: An export assignment cannot be used in a module with other exported elements.\n",
+    "stderr": ""
+  },
+  {
+    "mode": "before",
+    "emitterFormat": "cjs only",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/cjs-only-before/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 2
+    },
+    "stdout": "node_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS1203: Export assignment cannot be used when targeting ECMAScript modules. Consider using 'export default' or another module format instead.\nnode_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS2309: An export assignment cannot be used in a module with other exported elements.\n",
+    "stderr": ""
+  },
+  {
+    "mode": "after",
+    "emitterFormat": "cjs only",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/cjs-only-after/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "mode": "after",
+    "emitterFormat": "cjs only",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/cjs-only-after/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "mode": "after",
+    "emitterFormat": "cjs only",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/cjs-only-after/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  }
+]

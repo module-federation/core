@@ -1,0 +1,114 @@
+[
+  {
+    "number": 5093,
+    "url": "https://github.com/module-federation/core/pull/5093",
+    "headRefOid": "00b53e38730a4728781282b036847ab9194bfe3a",
+    "headRefName": "rfc5036/01-runtime-family-resolver",
+    "baseRefName": "main",
+    "mergeable": "CONFLICTING"
+  },
+  {
+    "number": 5094,
+    "url": "https://github.com/module-federation/core/pull/5094",
+    "headRefOid": "d077ea1969d78fb98d1d4fbbd67427a52ea0deac",
+    "headRefName": "rfc5036/02-compiler-coordination",
+    "baseRefName": "rfc5036/01-runtime-family-resolver",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5095,
+    "url": "https://github.com/module-federation/core/pull/5095",
+    "headRefOid": "9fb0f2fc76a21059688ae7d8c2d867a13ee7994c",
+    "headRefName": "rfc5036/03-runtime-selectors",
+    "baseRefName": "rfc5036/02-compiler-coordination",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5096,
+    "url": "https://github.com/module-federation/core/pull/5096",
+    "headRefOid": "f32aae69b62b66f7f7453ce3ad038b13b8d1d3f3",
+    "headRefName": "rfc5036/04-runtime-image-cache",
+    "baseRefName": "rfc5036/03-runtime-selectors",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5097,
+    "url": "https://github.com/module-federation/core/pull/5097",
+    "headRefOid": "9f7dc2319d336e9615c12f1187e4f67aae83ea71",
+    "headRefName": "rfc5036/05-esbuild-rollout",
+    "baseRefName": "rfc5036/04-runtime-image-cache",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5098,
+    "url": "https://github.com/module-federation/core/pull/5098",
+    "headRefOid": "17531d70586dee766d9b67f18b8efb7fdffef848",
+    "headRefName": "rfc5036/06-docs-rollout",
+    "baseRefName": "rfc5036/05-esbuild-rollout",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5107,
+    "url": "https://github.com/module-federation/core/pull/5107",
+    "headRefOid": "c813c4fdd82e3f146daca65c322b481ada0cb6c9",
+    "headRefName": "rfc5036/07-handler-contracts",
+    "baseRefName": "rfc5036/06-docs-rollout",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5135,
+    "url": "https://github.com/module-federation/core/pull/5135",
+    "headRefOid": "b5733f4712ee2e696af9d5b68b4b5e0e0112b59f",
+    "headRefName": "rfc5128/01-runtime-core-kernel",
+    "baseRefName": "main",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5137,
+    "url": "https://github.com/module-federation/core/pull/5137",
+    "headRefOid": "ab1bcc0401f1eb93729004a069586f0d6510e4df",
+    "headRefName": "rfc5128/02-bundler-runtime-compose",
+    "baseRefName": "rfc5128/01-runtime-core-kernel",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5139,
+    "url": "https://github.com/module-federation/core/pull/5139",
+    "headRefOid": "302500c868c4f5fb862356e0f3509089897bc066",
+    "headRefName": "rfc5128/03-node-esbuild-runtime",
+    "baseRefName": "rfc5128/02-bundler-runtime-compose",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5134,
+    "url": "https://github.com/module-federation/core/pull/5134",
+    "headRefOid": "a3a65b4be74b7e4bfd41adc8da6124ea82df384c",
+    "headRefName": "rfc5128/04-managers-composition",
+    "baseRefName": "rfc5128/03-node-esbuild-runtime",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5140,
+    "url": "https://github.com/module-federation/core/pull/5140",
+    "headRefOid": "f2eb03ceefc96adde04bb266107fb0284cd17e8a",
+    "headRefName": "rfc5128/05-enhanced-composed",
+    "baseRefName": "rfc5128/04-managers-composition",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5141,
+    "url": "https://github.com/module-federation/core/pull/5141",
+    "headRefOid": "84cee419c5c7dc2bb87d1a92cd7fb8e15e409aec",
+    "headRefName": "rfc5128/06-rspack-composed",
+    "baseRefName": "rfc5128/05-enhanced-composed",
+    "mergeable": "MERGEABLE"
+  },
+  {
+    "number": 5142,
+    "url": "https://github.com/module-federation/core/pull/5142",
+    "headRefOid": "db5159fcffec872651ed9b11d2ad2ca1f4c0fcb2",
+    "headRefName": "rfc5128/07-composed-default-major",
+    "baseRefName": "rfc5128/06-rspack-composed",
+    "mergeable": "MERGEABLE"
+  }
+]

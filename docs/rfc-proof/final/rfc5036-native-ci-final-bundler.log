@@ -1,0 +1,44 @@
+
+> @module-federation/webpack-bundler-runtime@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/webpack-bundler-runtime
+> pnpm exec jest --config jest.config.cjs --passWithNoTests
+
+PASS __tests__/constant.spec.ts
+PASS __tests__/attachShareScopeMap.spec.ts
+PASS __tests__/remotes.spec.ts
+PASS __tests__/initContainerEntry.array.spec.ts
+PASS __tests__/initContainerEntry.non-array.spec.ts
+PASS __tests__/installInitialConsumes.spec.ts
+PASS __tests__/initializeSharing.spec.ts
+  ● Console
+
+    console.warn
+      Initialization of sharing external failed: TypeError: webpackRequire is not a function
+
+      28 |     if (promise) return promise;
+      29 |     var warn = (msg: string) =>
+    > 30 |       typeof console !== 'undefined' && console.warn && console.warn(msg);
+         |                                                                 ^
+      31 |
+      32 |     var initExternal = (id: string | number) => {
+      33 |       var handleError = (err: any) =>
+
+      at warn (src/initializeSharing.ts:30:65)
+      at warn (src/initializeSharing.ts:34:9)
+      at handleError (src/initializeSharing.ts:53:9)
+      at initExternal (src/initializeSharing.ts:78:15)
+          at Array.forEach (<anonymous>)
+      at forEach (src/initializeSharing.ts:66:63)
+      at _initializeSharing (src/initializeSharing.ts:95:36)
+          at Array.forEach (<anonymous>)
+      at forEach (src/initializeSharing.ts:94:18)
+      at Object.<anonymous> (__tests__/initializeSharing.spec.ts:299:37)
+
+PASS __tests__/consumes.spec.ts
+PASS __tests__/federation.spec.ts
+PASS __tests__/container-entry-selector.spec.ts
+
+Test Suites: 10 passed, 10 total
+Tests:       108 passed, 108 total
+Snapshots:   0 total
+Time:        5.442 s
+Ran all test suites.

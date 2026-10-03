@@ -1,0 +1,161 @@
+
+---
+tool: "@rstest/core@0.10.6"
+timestamp: "2026-10-03T01:30:59.407Z"
+runtime: {"node":"v24.15.0","platform":"darwin","cwd":"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/runtime"}
+---
+
+# Rstest Test Execution Report
+
+## Summary
+
+```json
+{
+  "status": "fail",
+  "counts": {
+    "testFiles": 13,
+    "failedFiles": 1,
+    "tests": 96,
+    "failedTests": 2,
+    "passedTests": 94,
+    "skippedTests": 0,
+    "todoTests": 0
+  },
+  "durationMs": {
+    "total": 3654,
+    "build": 263,
+    "tests": 3391
+  },
+  "snapshot": {
+    "added": 0,
+    "updated": 0,
+    "unmatched": 0,
+    "removed": 0,
+    "unchecked": 0
+  }
+}
+```
+
+## Failures
+
+### [F01] __tests__/hooks.spec.ts :: hooks > loader fetch hooks
+
+repro:
+
+```bash
+pnpm exec rstest '__tests__/hooks.spec.ts' --testNamePattern 'hooks > loader fetch hooks'
+```
+
+details:
+
+```json
+{
+  "testPath": "__tests__/hooks.spec.ts",
+  "project": "rstest",
+  "fullName": "hooks > loader fetch hooks",
+  "status": "fail",
+  "duration": 13,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "Error",
+      "message": "[ Federation Runtime ]: Unsupported browser global entry isolation: remote \"@loader-hooks/app2\" uses global \"@loader-hooks/app2\" already owned by another entry evaluator. Use distinct global names or an ESM entry.",
+      "topFrame": {
+        "file": "../runtime-core/src/utils/logger.ts",
+        "line": 68,
+        "column": 9,
+        "method": "error"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "../runtime-core/src/platform/web.ts",
+      "line": 164
+    },
+    {
+      "path": "../runtime-core/src/utils/logger.ts",
+      "line": 68
+    },
+    {
+      "path": "../runtime-core/src/utils/load.ts",
+      "line": 141
+    }
+  ]
+}
+```
+
+codeFrame (error 1):
+
+```text
+66 |     throw msg;
+67 |   }
+68 |   throw new Error(`${LOG_CATEGORY}: ${msg}`);
+   |         ^
+69 | }
+70 |
+```
+
+### [F02] __tests__/hooks.spec.ts :: hooks > loaderEntry hooks
+
+repro:
+
+```bash
+pnpm exec rstest '__tests__/hooks.spec.ts' --testNamePattern 'hooks > loaderEntry hooks'
+```
+
+details:
+
+```json
+{
+  "testPath": "__tests__/hooks.spec.ts",
+  "project": "rstest",
+  "fullName": "hooks > loaderEntry hooks",
+  "status": "fail",
+  "duration": 1,
+  "retryCount": 0,
+  "errors": [
+    {
+      "type": "Error",
+      "message": "[ Federation Runtime ]: Unsupported browser global entry isolation: remote \"@loader-hooks/app2\" uses global \"@loader-hooks/app2\" already owned by another entry evaluator. Use distinct global names or an ESM entry.",
+      "topFrame": {
+        "file": "../runtime-core/src/utils/logger.ts",
+        "line": 68,
+        "column": 9,
+        "method": "error"
+      },
+      "stackFrames": []
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "../runtime-core/src/platform/web.ts",
+      "line": 164
+    },
+    {
+      "path": "../runtime-core/src/utils/logger.ts",
+      "line": 68
+    },
+    {
+      "path": "../runtime-core/src/utils/load.ts",
+      "line": 141
+    }
+  ]
+}
+```
+
+codeFrame (error 1):
+
+```text
+66 |     throw msg;
+67 |   }
+68 |   throw new Error(`${LOG_CATEGORY}: ${msg}`);
+   |         ^
+69 | }
+70 |
+```
+
+undefined
+/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/runtime:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: rstest

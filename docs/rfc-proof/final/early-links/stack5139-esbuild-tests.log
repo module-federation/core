@@ -1,0 +1,14 @@
+
+> @module-federation/esbuild@0.0.116 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5139/packages/esbuild
+> node --test __tests__/*.spec.mjs
+
+build ended with 0 errors
+✔ a build whose absWorkingDir is not the process directory (387.088917ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 524.254084

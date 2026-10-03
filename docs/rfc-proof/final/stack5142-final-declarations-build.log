@@ -1,0 +1,54 @@
+
+> @module-federation/runtime@2.9.2 build /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/runtime
+> tsdown --config tsdown.config.ts
+
+ℹ tsdown v0.20.3 powered by rolldown v1.0.0-rc.3
+ℹ config file: /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/runtime/tsdown.config.ts
+ℹ [runtime-build] entry: src/index.ts, src/helpers.ts, src/types.ts, src/core.ts, src/bundler.ts, src/compose.ts
+ℹ [runtime-build] tsconfig: tsconfig.lib.json
+ℹ Build start
+ℹ Cleaning 35 files
+ℹ [runtime-build] [CJS] dist/index.cjs                       4.81 kB │ gzip: 0.82 kB
+ℹ [runtime-build] [CJS] dist/bundler.cjs                     1.94 kB │ gzip: 0.44 kB
+ℹ [runtime-build] [CJS] dist/helpers.cjs                     0.81 kB │ gzip: 0.37 kB
+ℹ [runtime-build] [CJS] dist/compose.cjs                     0.81 kB │ gzip: 0.36 kB
+ℹ [runtime-build] [CJS] dist/core.cjs                        0.79 kB │ gzip: 0.40 kB
+ℹ [runtime-build] [CJS] dist/types.cjs                       0.46 kB │ gzip: 0.27 kB
+ℹ [runtime-build] [CJS] dist/index.cjs.map                   5.18 kB │ gzip: 1.26 kB
+ℹ [runtime-build] [CJS] dist/instance.cjs.map                2.62 kB │ gzip: 0.97 kB
+ℹ [runtime-build] [CJS] dist/instance.cjs                    1.66 kB │ gzip: 0.62 kB
+ℹ [runtime-build] [CJS] dist/helpers.cjs.map                 1.30 kB │ gzip: 0.51 kB
+ℹ [runtime-build] [CJS] dist/compose.cjs.map                 1.30 kB │ gzip: 0.55 kB
+ℹ [runtime-build] [CJS] dist/_virtual/_rolldown/runtime.cjs  1.04 kB │ gzip: 0.52 kB
+ℹ [runtime-build] [CJS] dist/core.cjs.map                    0.28 kB │ gzip: 0.18 kB
+ℹ [runtime-build] [CJS] 13 files, total: 23.01 kB
+ℹ [runtime-build] [CJS] dist/index.d.ts     1.85 kB │ gzip: 0.51 kB
+ℹ [runtime-build] [CJS] dist/helpers.d.ts   1.06 kB │ gzip: 0.42 kB
+ℹ [runtime-build] [CJS] dist/bundler.d.ts   0.68 kB │ gzip: 0.20 kB
+ℹ [runtime-build] [CJS] dist/compose.d.ts   0.42 kB │ gzip: 0.23 kB
+ℹ [runtime-build] [CJS] dist/core.d.ts      0.15 kB │ gzip: 0.10 kB
+ℹ [runtime-build] [CJS] dist/types.d.ts     0.05 kB │ gzip: 0.07 kB
+ℹ [runtime-build] [CJS] dist/instance.d.ts  0.36 kB │ gzip: 0.23 kB
+ℹ [runtime-build] [CJS] 7 files, total: 4.57 kB
+✔ [runtime-build] Build complete in 1190ms
+ℹ [runtime-build] [ESM] dist/index.js         2.35 kB │ gzip: 0.60 kB
+ℹ [runtime-build] [ESM] dist/compose.js       0.58 kB │ gzip: 0.27 kB
+ℹ [runtime-build] [ESM] dist/bundler.js       0.55 kB │ gzip: 0.18 kB
+ℹ [runtime-build] [ESM] dist/helpers.js       0.43 kB │ gzip: 0.25 kB
+ℹ [runtime-build] [ESM] dist/core.js          0.25 kB │ gzip: 0.17 kB
+ℹ [runtime-build] [ESM] dist/types.js         0.07 kB │ gzip: 0.08 kB
+ℹ [runtime-build] [ESM] dist/index.js.map     5.02 kB │ gzip: 1.22 kB
+ℹ [runtime-build] [ESM] dist/instance.js.map  2.60 kB │ gzip: 0.96 kB
+ℹ [runtime-build] [ESM] dist/instance.js      1.32 kB │ gzip: 0.51 kB
+ℹ [runtime-build] [ESM] dist/helpers.js.map   1.29 kB │ gzip: 0.51 kB
+ℹ [runtime-build] [ESM] dist/compose.js.map   1.26 kB │ gzip: 0.54 kB
+ℹ [runtime-build] [ESM] dist/core.js.map      0.27 kB │ gzip: 0.18 kB
+ℹ [runtime-build] [ESM] dist/index.d.ts       1.85 kB │ gzip: 0.51 kB
+ℹ [runtime-build] [ESM] dist/helpers.d.ts     1.06 kB │ gzip: 0.42 kB
+ℹ [runtime-build] [ESM] dist/bundler.d.ts     0.68 kB │ gzip: 0.20 kB
+ℹ [runtime-build] [ESM] dist/compose.d.ts     0.42 kB │ gzip: 0.23 kB
+ℹ [runtime-build] [ESM] dist/core.d.ts        0.15 kB │ gzip: 0.10 kB
+ℹ [runtime-build] [ESM] dist/types.d.ts       0.05 kB │ gzip: 0.07 kB
+ℹ [runtime-build] [ESM] dist/instance.d.ts    0.36 kB │ gzip: 0.23 kB
+ℹ [runtime-build] [ESM] 19 files, total: 20.57 kB
+✔ [runtime-build] Build complete in 1195ms

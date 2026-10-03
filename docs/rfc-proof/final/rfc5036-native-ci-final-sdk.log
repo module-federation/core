@@ -1,0 +1,68 @@
+
+> @module-federation/sdk@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/sdk
+> NODE_OPTIONS=--experimental-vm-modules pnpm exec jest --config jest.config.cjs --passWithNoTests
+
+PASS __tests__/simpleJoinRemoteEntry.spec.ts
+PASS __tests__/normalizeOptions.spec.ts
+PASS __tests__/utils.spec.ts
+  ● Console
+
+    console.warn
+      Cannot get resource URL. If in debug mode, please ignore. {} test.js
+
+      209 |     return `${module.publicPath}${sourceUrl}`;
+      210 |   } else {
+    > 211 |     console.warn(
+          |             ^
+      212 |       'Cannot get resource URL. If in debug mode, please ignore.',
+      213 |       module,
+      214 |       sourceUrl,
+
+      at console.<anonymous> (../../node_modules/.pnpm/jest-mock@29.7.0/node_modules/jest-mock/build/index.js:794:25)
+      at warn (src/utils.ts:211:13)
+      at Object.<anonymous> (__tests__/utils.spec.ts:75:34)
+
+(node:55855) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS __tests__/node-builtin-esm.spec.ts
+PASS __tests__/generateSnapshotFromManifest.spec.ts
+PASS __tests__/dom.spec.ts
+PASS __tests__/encodeName.spec.ts
+PASS __tests__/inferAutoPublicPath.spec.ts
+PASS __tests__/parseEntry.spec.ts
+PASS __tests__/decodeName.spec.ts
+Error constructing URL: TypeError: Invalid URL
+    at new URL (node:internal/url:819:25)
+    at /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-eAa5h2/webpack-legacy/out.js:41:12
+    at /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-eAa5h2/webpack-legacy/out.js:98:3
+    at new Promise (<anonymous>)
+    at loadScriptNode (/private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-eAa5h2/webpack-legacy/out.js:97:9)
+    at /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-eAa5h2/webpack-legacy/out.js:254:72
+    at /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-eAa5h2/webpack-legacy/out.js:255:3
+    at Object.<anonymous> (/private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-eAa5h2/webpack-legacy/out.js:257:12)
+    at Module._compile (node:internal/modules/cjs/loader:1830:14)
+    at Object..js (node:internal/modules/cjs/loader:1961:10) {
+  code: 'ERR_INVALID_URL',
+  input: 'unused'
+}
+Error constructing URL: TypeError: Invalid URL
+    at new URL (node:internal/url:819:25)
+    at /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-NP8N2K/rspack-legacy/out.js:38:12
+    at /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-NP8N2K/rspack-legacy/out.js:95:3
+    at new Promise (<anonymous>)
+    at loadScriptNode (/private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-NP8N2K/rspack-legacy/out.js:94:9)
+    at /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-NP8N2K/rspack-legacy/out.js:248:60
+    at /private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-NP8N2K/rspack-legacy/out.js:249:3
+    at Object.<anonymous> (/private/var/folders/6v/c06plt297s75l4yjpgd_zfvr0000gn/T/mf-sdk-selector-NP8N2K/rspack-legacy/out.js:251:3)
+    at Module._compile (node:internal/modules/cjs/loader:1830:14)
+    at Object..js (node:internal/modules/cjs/loader:1961:10) {
+  code: 'ERR_INVALID_URL',
+  input: 'unused'
+}
+PASS __tests__/platform-loader-selector.spec.ts
+
+Test Suites: 11 passed, 11 total
+Tests:       1 skipped, 80 passed, 81 total
+Snapshots:   0 total
+Time:        4.825 s
+Ran all test suites.

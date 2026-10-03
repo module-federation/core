@@ -1,0 +1,12 @@
+remote:
+remote: GitHub found 768 vulnerabilities on module-federation/core's default branch (25 critical, 342 high, 319 moderate, 82 low). To find out more, visit:
+remote:      https://github.com/module-federation/core/security/dependabot
+remote:
+To github.com:module-federation/core.git
+   2ed70fc07..54622d775  54622d775688ff8c3e9ac77cba50acffca265cfc -> proof/review-final-20261003/rfc5128-5134
+   d3b926ef4..ca0b6188f  ca0b6188fd57b067dc20e3b8d66f0805e8d2b72a -> proof/review-final-20261003/rfc5128-5135
+   ccaaa3854..b26e12e9f  b26e12e9f27fe6fb5b76438e7b7f5e4042af892e -> proof/review-final-20261003/rfc5128-5137
+   5dec45f2b..95286625f  95286625fc5ce7a1479983b6fa3a8b2980146d71 -> proof/review-final-20261003/rfc5128-5139
+   7e1e276ac..47bc0f852  47bc0f852aa5867214e153fb822f6683f6ce3cb0 -> proof/review-final-20261003/rfc5128-5140
+   968ffee8c..83134b630  83134b63016cd237bad96f7797706bfd8dd565c5 -> proof/review-final-20261003/rfc5128-5141
+   3d8014a1d..7db5f9fb9  7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72 -> proof/review-final-20261003/rfc5128-5142

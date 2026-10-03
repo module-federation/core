@@ -1,0 +1,929 @@
+[
+  {
+    "family": "5036",
+    "name": "pack:sdk",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/sdk",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/sdk.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/sdk@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.d.cts\ndist/constant.d.ts\ndist/constant.js\ndist/constant.js.map\ndist/createModuleFederationConfig.cjs\ndist/createModuleFederationConfig.cjs.map\ndist/createModuleFederationConfig.d.cts\ndist/createModuleFederationConfig.d.ts\ndist/createModuleFederationConfig.js\ndist/createModuleFederationConfig.js.map\ndist/dom.cjs\ndist/dom.cjs.map\ndist/dom.d.cts\ndist/dom.d.ts\ndist/dom.js\ndist/dom.js.map\ndist/env.cjs\ndist/env.cjs.map\ndist/env.d.cts\ndist/env.d.ts\ndist/env.js\ndist/env.js.map\ndist/generateSnapshotFromManifest.cjs\ndist/generateSnapshotFromManifest.cjs.map\ndist/generateSnapshotFromManifest.d.cts\ndist/generateSnapshotFromManifest.d.ts\ndist/generateSnapshotFromManifest.js\ndist/generateSnapshotFromManifest.js.map\ndist/index.cjs\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/logger.cjs\ndist/logger.cjs.map\ndist/logger.d.cts\ndist/logger.d.ts\ndist/logger.js\ndist/logger.js.map\ndist/node.cjs\ndist/node.cjs.map\ndist/node.d.cts\ndist/node.d.ts\ndist/node.js\ndist/node.js.map\ndist/normalize-webpack-path.cjs\ndist/normalize-webpack-path.cjs.map\ndist/normalize-webpack-path.d.cts\ndist/normalize-webpack-path.d.ts\ndist/normalize-webpack-path.js\ndist/normalize-webpack-path.js.map\ndist/normalizeOptions.cjs\ndist/normalizeOptions.cjs.map\ndist/normalizeOptions.d.cts\ndist/normalizeOptions.d.ts\ndist/normalizeOptions.js\ndist/normalizeOptions.js.map\ndist/selectors/env/legacy.cjs\ndist/selectors/env/legacy.cjs.map\ndist/selectors/env/legacy.d.cts\ndist/selectors/env/legacy.d.ts\ndist/selectors/env/legacy.js\ndist/selectors/env/legacy.js.map\ndist/selectors/env/node.cjs\ndist/selectors/env/node.cjs.map\ndist/selectors/env/node.d.cts\ndist/selectors/env/node.d.ts\ndist/selectors/env/node.js\ndist/selectors/env/node.js.map\ndist/selectors/env/universal.cjs\ndist/selectors/env/universal.cjs.map\ndist/selectors/env/universal.d.cts\ndist/selectors/env/universal.d.ts\ndist/selectors/env/universal.js\ndist/selectors/env/universal.js.map\ndist/selectors/env/web.cjs\ndist/selectors/env/web.cjs.map\ndist/selectors/env/web.d.cts\ndist/selectors/env/web.d.ts\ndist/selectors/env/web.js\ndist/selectors/env/web.js.map\ndist/selectors/env/worker.cjs\ndist/selectors/env/worker.cjs.map\ndist/selectors/env/worker.d.cts\ndist/selectors/env/worker.d.ts\ndist/selectors/env/worker.js\ndist/selectors/env/worker.js.map\ndist/selectors/platform-loader/legacy.cjs\ndist/selectors/platform-loader/legacy.d.cts\ndist/selectors/platform-loader/legacy.d.ts\ndist/selectors/platform-loader/legacy.js\ndist/selectors/platform-loader/node.cjs\ndist/selectors/platform-loader/node.d.cts\ndist/selectors/platform-loader/node.d.ts\ndist/selectors/platform-loader/node.js\ndist/selectors/platform-loader/universal.cjs\ndist/selectors/platform-loader/universal.d.cts\ndist/selectors/platform-loader/universal.d.ts\ndist/selectors/platform-loader/universal.js\ndist/selectors/platform-loader/web.cjs\ndist/selectors/platform-loader/web.cjs.map\ndist/selectors/platform-loader/web.d.cts\ndist/selectors/platform-loader/web.d.ts\ndist/selectors/platform-loader/web.js\ndist/selectors/platform-loader/web.js.map\ndist/selectors/platform-loader/worker.cjs\ndist/selectors/platform-loader/worker.cjs.map\ndist/selectors/platform-loader/worker.d.cts\ndist/selectors/platform-loader/worker.d.ts\ndist/selectors/platform-loader/worker.js\ndist/selectors/platform-loader/worker.js.map\ndist/types/common.d.cts\ndist/types/common.d.ts\ndist/types/hooks.d.cts\ndist/types/hooks.d.ts\ndist/types/index.d.cts\ndist/types/index.d.ts\ndist/types/manifest.d.cts\ndist/types/manifest.d.ts\ndist/types/plugins/ConsumeSharedPlugin.cjs\ndist/types/plugins/ConsumeSharedPlugin.cjs.map\ndist/types/plugins/ConsumeSharedPlugin.d.cts\ndist/types/plugins/ConsumeSharedPlugin.d.ts\ndist/types/plugins/ConsumeSharedPlugin.js\ndist/types/plugins/ConsumeSharedPlugin.js.map\ndist/types/plugins/ContainerPlugin.cjs\ndist/types/plugins/ContainerPlugin.cjs.map\ndist/types/plugins/ContainerPlugin.d.cts\ndist/types/plugins/ContainerPlugin.d.ts\ndist/types/plugins/ContainerPlugin.js\ndist/types/plugins/ContainerPlugin.js.map\ndist/types/plugins/ContainerReferencePlugin.cjs\ndist/types/plugins/ContainerReferencePlugin.cjs.map\ndist/types/plugins/ContainerReferencePlugin.d.cts\ndist/types/plugins/ContainerReferencePlugin.d.ts\ndist/types/plugins/ContainerReferencePlugin.js\ndist/types/plugins/ContainerReferencePlugin.js.map\ndist/types/plugins/index.d.cts\ndist/types/plugins/index.d.ts\ndist/types/plugins/ModuleFederationPlugin.cjs\ndist/types/plugins/ModuleFederationPlugin.cjs.map\ndist/types/plugins/ModuleFederationPlugin.d.cts\ndist/types/plugins/ModuleFederationPlugin.d.ts\ndist/types/plugins/ModuleFederationPlugin.js\ndist/types/plugins/ModuleFederationPlugin.js.map\ndist/types/plugins/ProvideSharedPlugin.cjs\ndist/types/plugins/ProvideSharedPlugin.cjs.map\ndist/types/plugins/ProvideSharedPlugin.d.cts\ndist/types/plugins/ProvideSharedPlugin.d.ts\ndist/types/plugins/ProvideSharedPlugin.js\ndist/types/plugins/ProvideSharedPlugin.js.map\ndist/types/plugins/SharePlugin.cjs\ndist/types/plugins/SharePlugin.cjs.map\ndist/types/plugins/SharePlugin.d.cts\ndist/types/plugins/SharePlugin.d.ts\ndist/types/plugins/SharePlugin.js\ndist/types/plugins/SharePlugin.js.map\ndist/types/snapshot.d.cts\ndist/types/snapshot.d.ts\ndist/types/stats.d.cts\ndist/types/stats.d.ts\ndist/utils.cjs\ndist/utils.cjs.map\ndist/utils.d.cts\ndist/utils.d.ts\ndist/utils.js\ndist/utils.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/sdk.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "pack:error-codes",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/error-codes",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/error-codes.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/error-codes@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/browser.cjs\ndist/browser.cjs.map\ndist/browser.d.cts\ndist/browser.d.mts\ndist/browser.mjs\ndist/browser.mjs.map\ndist/desc.cjs\ndist/desc.cjs.map\ndist/desc.d.cts\ndist/desc.d.mts\ndist/desc.mjs\ndist/desc.mjs.map\ndist/error-codes.cjs\ndist/error-codes.cjs.map\ndist/error-codes.d.cts\ndist/error-codes.d.mts\ndist/error-codes.mjs\ndist/error-codes.mjs.map\ndist/getShortErrorMsg.cjs\ndist/getShortErrorMsg.cjs.map\ndist/getShortErrorMsg.d.cts\ndist/getShortErrorMsg.d.mts\ndist/getShortErrorMsg.mjs\ndist/getShortErrorMsg.mjs.map\ndist/index.cjs\ndist/index.d.cts\ndist/index.d.mts\ndist/index.mjs\ndist/MFContext.d.cts\ndist/MFContext.d.mts\ndist/node.cjs\ndist/node.cjs.map\ndist/node.d.cts\ndist/node.d.mts\ndist/node.mjs\ndist/node.mjs.map\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/error-codes.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "pack:runtime-core",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/runtime-core",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/runtime-core.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/runtime-core@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.js\ndist/constant.js.map\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.cts\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/global.cjs\ndist/global.cjs.map\ndist/global.d.cts\ndist/global.d.ts\ndist/global.js\ndist/global.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.cts\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/LICENSE\ndist/module/index.cjs\ndist/module/index.cjs.map\ndist/module/index.d.cts\ndist/module/index.d.ts\ndist/module/index.js\ndist/module/index.js.map\ndist/plugins/generate-preload-assets.cjs\ndist/plugins/generate-preload-assets.cjs.map\ndist/plugins/generate-preload-assets.js\ndist/plugins/generate-preload-assets.js.map\ndist/plugins/snapshot/disabled.cjs\ndist/plugins/snapshot/disabled.cjs.map\ndist/plugins/snapshot/disabled.d.cts\ndist/plugins/snapshot/disabled.d.ts\ndist/plugins/snapshot/disabled.js\ndist/plugins/snapshot/disabled.js.map\ndist/plugins/snapshot/index.cjs\ndist/plugins/snapshot/index.cjs.map\ndist/plugins/snapshot/index.js\ndist/plugins/snapshot/index.js.map\ndist/plugins/snapshot/SnapshotHandler.cjs\ndist/plugins/snapshot/SnapshotHandler.cjs.map\ndist/plugins/snapshot/SnapshotHandler.d.cts\ndist/plugins/snapshot/SnapshotHandler.d.ts\ndist/plugins/snapshot/SnapshotHandler.js\ndist/plugins/snapshot/SnapshotHandler.js.map\ndist/remote/disabled.cjs\ndist/remote/disabled.cjs.map\ndist/remote/disabled.d.cts\ndist/remote/disabled.d.ts\ndist/remote/disabled.js\ndist/remote/disabled.js.map\ndist/remote/hooks.cjs\ndist/remote/hooks.cjs.map\ndist/remote/hooks.d.cts\ndist/remote/hooks.d.ts\ndist/remote/hooks.js\ndist/remote/hooks.js.map\ndist/remote/index.cjs\ndist/remote/index.cjs.map\ndist/remote/index.d.cts\ndist/remote/index.d.ts\ndist/remote/index.js\ndist/remote/index.js.map\ndist/runtimeImage.cjs\ndist/runtimeImage.cjs.map\ndist/runtimeImage.d.cts\ndist/runtimeImage.d.ts\ndist/runtimeImage.js\ndist/runtimeImage.js.map\ndist/selectors/default-plugins/disabled.cjs\ndist/selectors/default-plugins/disabled.cjs.map\ndist/selectors/default-plugins/disabled.d.cts\ndist/selectors/default-plugins/disabled.d.ts\ndist/selectors/default-plugins/disabled.js\ndist/selectors/default-plugins/disabled.js.map\ndist/selectors/default-plugins/enabled.cjs\ndist/selectors/default-plugins/enabled.cjs.map\ndist/selectors/default-plugins/enabled.d.cts\ndist/selectors/default-plugins/enabled.d.ts\ndist/selectors/default-plugins/enabled.js\ndist/selectors/default-plugins/enabled.js.map\ndist/selectors/default-plugins/legacy.cjs\ndist/selectors/default-plugins/legacy.cjs.map\ndist/selectors/default-plugins/legacy.d.cts\ndist/selectors/default-plugins/legacy.d.ts\ndist/selectors/default-plugins/legacy.js\ndist/selectors/default-plugins/legacy.js.map\ndist/selectors/preload/disabled.cjs\ndist/selectors/preload/disabled.cjs.map\ndist/selectors/preload/disabled.d.cts\ndist/selectors/preload/disabled.d.ts\ndist/selectors/preload/disabled.js\ndist/selectors/preload/disabled.js.map\ndist/selectors/preload/enabled.cjs\ndist/selectors/preload/enabled.d.cts\ndist/selectors/preload/enabled.d.ts\ndist/selectors/preload/enabled.js\ndist/selectors/preload/legacy.cjs\ndist/selectors/preload/legacy.d.cts\ndist/selectors/preload/legacy.d.ts\ndist/selectors/preload/legacy.js\ndist/selectors/remote-handler/disabled.cjs\ndist/selectors/remote-handler/disabled.cjs.map\ndist/selectors/remote-handler/disabled.d.cts\ndist/selectors/remote-handler/disabled.d.ts\ndist/selectors/remote-handler/disabled.js\ndist/selectors/remote-handler/disabled.js.map\ndist/selectors/remote-handler/enabled.cjs\ndist/selectors/remote-handler/enabled.cjs.map\ndist/selectors/remote-handler/enabled.d.cts\ndist/selectors/remote-handler/enabled.d.ts\ndist/selectors/remote-handler/enabled.js\ndist/selectors/remote-handler/enabled.js.map\ndist/selectors/remote-handler/legacy.cjs\ndist/selectors/remote-handler/legacy.cjs.map\ndist/selectors/remote-handler/legacy.d.cts\ndist/selectors/remote-handler/legacy.d.ts\ndist/selectors/remote-handler/legacy.js\ndist/selectors/remote-handler/legacy.js.map\ndist/selectors/remote-module/disabled.cjs\ndist/selectors/remote-module/disabled.d.cts\ndist/selectors/remote-module/disabled.d.ts\ndist/selectors/remote-module/disabled.js\ndist/selectors/remote-module/enabled.cjs\ndist/selectors/remote-module/enabled.d.cts\ndist/selectors/remote-module/enabled.d.ts\ndist/selectors/remote-module/enabled.js\ndist/selectors/remote-module/legacy.cjs\ndist/selectors/remote-module/legacy.cjs.map\ndist/selectors/remote-module/legacy.d.cts\ndist/selectors/remote-module/legacy.d.ts\ndist/selectors/remote-module/legacy.js\ndist/selectors/remote-module/legacy.js.map\ndist/selectors/share-config/disabled.cjs\ndist/selectors/share-config/disabled.cjs.map\ndist/selectors/share-config/disabled.d.cts\ndist/selectors/share-config/disabled.d.ts\ndist/selectors/share-config/disabled.js\ndist/selectors/share-config/disabled.js.map\ndist/selectors/share-config/enabled.cjs\ndist/selectors/share-config/enabled.cjs.map\ndist/selectors/share-config/enabled.d.cts\ndist/selectors/share-config/enabled.d.ts\ndist/selectors/share-config/enabled.js\ndist/selectors/share-config/enabled.js.map\ndist/selectors/share-config/legacy.cjs\ndist/selectors/share-config/legacy.cjs.map\ndist/selectors/share-config/legacy.d.cts\ndist/selectors/share-config/legacy.d.ts\ndist/selectors/share-config/legacy.js\ndist/selectors/share-config/legacy.js.map\ndist/selectors/share-utils/disabled.cjs\ndist/selectors/share-utils/disabled.cjs.map\ndist/selectors/share-utils/disabled.d.cts\ndist/selectors/share-utils/disabled.d.ts\ndist/selectors/share-utils/disabled.js\ndist/selectors/share-utils/disabled.js.map\ndist/selectors/share-utils/enabled.cjs\ndist/selectors/share-utils/enabled.d.cts\ndist/selectors/share-utils/enabled.d.ts\ndist/selectors/share-utils/enabled.js\ndist/selectors/share-utils/legacy.cjs\ndist/selectors/share-utils/legacy.d.cts\ndist/selectors/share-utils/legacy.d.ts\ndist/selectors/share-utils/legacy.js\ndist/selectors/shared-handler/disabled.cjs\ndist/selectors/shared-handler/disabled.cjs.map\ndist/selectors/shared-handler/disabled.d.cts\ndist/selectors/shared-handler/disabled.d.ts\ndist/selectors/shared-handler/disabled.js\ndist/selectors/shared-handler/disabled.js.map\ndist/selectors/shared-handler/enabled.cjs\ndist/selectors/shared-handler/enabled.cjs.map\ndist/selectors/shared-handler/enabled.d.cts\ndist/selectors/shared-handler/enabled.d.ts\ndist/selectors/shared-handler/enabled.js\ndist/selectors/shared-handler/enabled.js.map\ndist/selectors/shared-handler/legacy.cjs\ndist/selectors/shared-handler/legacy.cjs.map\ndist/selectors/shared-handler/legacy.d.cts\ndist/selectors/shared-handler/legacy.d.ts\ndist/selectors/shared-handler/legacy.js\ndist/selectors/shared-handler/legacy.js.map\ndist/selectors/snapshot-handler/disabled.cjs\ndist/selectors/snapshot-handler/disabled.cjs.map\ndist/selectors/snapshot-handler/disabled.d.cts\ndist/selectors/snapshot-handler/disabled.d.ts\ndist/selectors/snapshot-handler/disabled.js\ndist/selectors/snapshot-handler/disabled.js.map\ndist/selectors/snapshot-handler/enabled.cjs\ndist/selectors/snapshot-handler/enabled.cjs.map\ndist/selectors/snapshot-handler/enabled.d.cts\ndist/selectors/snapshot-handler/enabled.d.ts\ndist/selectors/snapshot-handler/enabled.js\ndist/selectors/snapshot-handler/enabled.js.map\ndist/selectors/snapshot-handler/legacy.cjs\ndist/selectors/snapshot-handler/legacy.cjs.map\ndist/selectors/snapshot-handler/legacy.d.cts\ndist/selectors/snapshot-handler/legacy.d.ts\ndist/selectors/snapshot-handler/legacy.js\ndist/selectors/snapshot-handler/legacy.js.map\ndist/shared/disabled.cjs\ndist/shared/disabled.cjs.map\ndist/shared/disabled.d.cts\ndist/shared/disabled.d.ts\ndist/shared/disabled.js\ndist/shared/disabled.js.map\ndist/shared/index.cjs\ndist/shared/index.cjs.map\ndist/shared/index.d.cts\ndist/shared/index.d.ts\ndist/shared/index.js\ndist/shared/index.js.map\ndist/type/config.d.cts\ndist/type/config.d.ts\ndist/type/index.cjs\ndist/type/index.cjs.map\ndist/type/index.d.cts\ndist/type/index.d.ts\ndist/type/index.js\ndist/type/index.js.map\ndist/type/plugin.d.cts\ndist/type/plugin.d.ts\ndist/type/preload.d.cts\ndist/type/preload.d.ts\ndist/types.cjs\ndist/types.d.cts\ndist/types.d.ts\ndist/types.js\ndist/utils/context.cjs\ndist/utils/context.cjs.map\ndist/utils/context.d.cts\ndist/utils/context.d.ts\ndist/utils/context.js\ndist/utils/context.js.map\ndist/utils/env.cjs\ndist/utils/env.cjs.map\ndist/utils/env.d.ts\ndist/utils/env.js\ndist/utils/env.js.map\ndist/utils/hooks/asyncHook.cjs\ndist/utils/hooks/asyncHook.cjs.map\ndist/utils/hooks/asyncHook.d.cts\ndist/utils/hooks/asyncHook.d.ts\ndist/utils/hooks/asyncHook.js\ndist/utils/hooks/asyncHook.js.map\ndist/utils/hooks/asyncWaterfallHooks.cjs\ndist/utils/hooks/asyncWaterfallHooks.cjs.map\ndist/utils/hooks/asyncWaterfallHooks.d.cts\ndist/utils/hooks/asyncWaterfallHooks.d.ts\ndist/utils/hooks/asyncWaterfallHooks.js\ndist/utils/hooks/asyncWaterfallHooks.js.map\ndist/utils/hooks/index.cjs\ndist/utils/hooks/index.js\ndist/utils/hooks/pluginSystem.cjs\ndist/utils/hooks/pluginSystem.cjs.map\ndist/utils/hooks/pluginSystem.d.cts\ndist/utils/hooks/pluginSystem.d.ts\ndist/utils/hooks/pluginSystem.js\ndist/utils/hooks/pluginSystem.js.map\ndist/utils/hooks/syncHook.cjs\ndist/utils/hooks/syncHook.cjs.map\ndist/utils/hooks/syncHook.d.cts\ndist/utils/hooks/syncHook.d.ts\ndist/utils/hooks/syncHook.js\ndist/utils/hooks/syncHook.js.map\ndist/utils/hooks/syncWaterfallHook.cjs\ndist/utils/hooks/syncWaterfallHook.cjs.map\ndist/utils/hooks/syncWaterfallHook.d.cts\ndist/utils/hooks/syncWaterfallHook.d.ts\ndist/utils/hooks/syncWaterfallHook.js\ndist/utils/hooks/syncWaterfallHook.js.map\ndist/utils/index.cjs\ndist/utils/index.d.cts\ndist/utils/index.d.ts\ndist/utils/index.js\ndist/utils/load.cjs\ndist/utils/load.cjs.map\ndist/utils/load.d.cts\ndist/utils/load.d.ts\ndist/utils/load.js\ndist/utils/load.js.map\ndist/utils/logger.cjs\ndist/utils/logger.cjs.map\ndist/utils/logger.d.cts\ndist/utils/logger.d.ts\ndist/utils/logger.js\ndist/utils/logger.js.map\ndist/utils/manifest.cjs\ndist/utils/manifest.cjs.map\ndist/utils/manifest.d.cts\ndist/utils/manifest.d.ts\ndist/utils/manifest.js\ndist/utils/manifest.js.map\ndist/utils/plugin.cjs\ndist/utils/plugin.cjs.map\ndist/utils/plugin.d.cts\ndist/utils/plugin.d.ts\ndist/utils/plugin.js\ndist/utils/plugin.js.map\ndist/utils/preload.cjs\ndist/utils/preload.cjs.map\ndist/utils/preload.d.cts\ndist/utils/preload.d.ts\ndist/utils/preload.js\ndist/utils/preload.js.map\ndist/utils/remoteInfo.cjs\ndist/utils/remoteInfo.cjs.map\ndist/utils/remoteInfo.d.cts\ndist/utils/remoteInfo.d.ts\ndist/utils/remoteInfo.js\ndist/utils/remoteInfo.js.map\ndist/utils/semver/compare.cjs\ndist/utils/semver/compare.cjs.map\ndist/utils/semver/compare.js\ndist/utils/semver/compare.js.map\ndist/utils/semver/constants.cjs\ndist/utils/semver/constants.cjs.map\ndist/utils/semver/constants.js\ndist/utils/semver/constants.js.map\ndist/utils/semver/index.cjs\ndist/utils/semver/index.cjs.map\ndist/utils/semver/index.d.cts\ndist/utils/semver/index.d.ts\ndist/utils/semver/index.js\ndist/utils/semver/index.js.map\ndist/utils/semver/parser.cjs\ndist/utils/semver/parser.cjs.map\ndist/utils/semver/parser.js\ndist/utils/semver/parser.js.map\ndist/utils/semver/utils.cjs\ndist/utils/semver/utils.cjs.map\ndist/utils/semver/utils.js\ndist/utils/semver/utils.js.map\ndist/utils/share.cjs\ndist/utils/share.cjs.map\ndist/utils/share.d.cts\ndist/utils/share.d.ts\ndist/utils/share.js\ndist/utils/share.js.map\ndist/utils/tool.cjs\ndist/utils/tool.cjs.map\ndist/utils/tool.d.cts\ndist/utils/tool.d.ts\ndist/utils/tool.js\ndist/utils/tool.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/runtime-core.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "pack:runtime",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/runtime.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/runtime@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/bundler.cjs\ndist/bundler.d.cts\ndist/bundler.d.ts\ndist/bundler.js\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.cts\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.cts\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/LICENSE\ndist/types.cjs\ndist/types.d.cts\ndist/types.d.ts\ndist/types.js\ndist/utils.cjs\ndist/utils.cjs.map\ndist/utils.d.cts\ndist/utils.d.ts\ndist/utils.js\ndist/utils.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "pack:webpack-bundler-runtime",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/webpack-bundler-runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/webpack-bundler-runtime.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/webpack-bundler-runtime@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/attachShareScopeMap.cjs\ndist/attachShareScopeMap.cjs.map\ndist/attachShareScopeMap.d.cts\ndist/attachShareScopeMap.d.ts\ndist/attachShareScopeMap.js\ndist/attachShareScopeMap.js.map\ndist/bundler.cjs\ndist/bundler.d.cts\ndist/bundler.d.ts\ndist/bundler.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.d.cts\ndist/constant.d.ts\ndist/constant.js\ndist/constant.js.map\ndist/consumes.cjs\ndist/consumes.cjs.map\ndist/consumes.d.cts\ndist/consumes.d.ts\ndist/consumes.js\ndist/consumes.js.map\ndist/error-codes/dist/error-codes.cjs\ndist/error-codes/dist/error-codes.cjs.map\ndist/error-codes/dist/error-codes.js\ndist/error-codes/dist/error-codes.js.map\ndist/error-codes/dist/getShortErrorMsg.cjs\ndist/error-codes/dist/getShortErrorMsg.cjs.map\ndist/error-codes/dist/getShortErrorMsg.js\ndist/error-codes/dist/getShortErrorMsg.js.map\ndist/getSharedFallbackGetter.cjs\ndist/getSharedFallbackGetter.cjs.map\ndist/getSharedFallbackGetter.d.cts\ndist/getSharedFallbackGetter.d.ts\ndist/getSharedFallbackGetter.js\ndist/getSharedFallbackGetter.js.map\ndist/getUsedExports.cjs\ndist/getUsedExports.cjs.map\ndist/getUsedExports.js\ndist/getUsedExports.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/init.cjs\ndist/init.cjs.map\ndist/init.js\ndist/init.js.map\ndist/initContainerEntry.cjs\ndist/initContainerEntry.cjs.map\ndist/initContainerEntry.d.cts\ndist/initContainerEntry.d.ts\ndist/initContainerEntry.js\ndist/initContainerEntry.js.map\ndist/initializeSharing.cjs\ndist/initializeSharing.cjs.map\ndist/initializeSharing.d.cts\ndist/initializeSharing.d.ts\ndist/initializeSharing.js\ndist/initializeSharing.js.map\ndist/installInitialConsumes.cjs\ndist/installInitialConsumes.cjs.map\ndist/installInitialConsumes.d.cts\ndist/installInitialConsumes.d.ts\ndist/installInitialConsumes.js\ndist/installInitialConsumes.js.map\ndist/LICENSE\ndist/remotes.cjs\ndist/remotes.cjs.map\ndist/remotes.d.cts\ndist/remotes.d.ts\ndist/remotes.js\ndist/remotes.js.map\ndist/runtime-core/dist/core.d.cts\ndist/runtime-core/dist/core.d.ts\ndist/runtime-core/dist/global.d.cts\ndist/runtime-core/dist/global.d.ts\ndist/runtime-core/dist/module/index.d.cts\ndist/runtime-core/dist/module/index.d.ts\ndist/runtime-core/dist/plugins/snapshot/SnapshotHandler.d.cts\ndist/runtime-core/dist/plugins/snapshot/SnapshotHandler.d.ts\ndist/runtime-core/dist/remote/hooks.d.cts\ndist/runtime-core/dist/remote/hooks.d.ts\ndist/runtime-core/dist/remote/index.d.cts\ndist/runtime-core/dist/remote/index.d.ts\ndist/runtime-core/dist/runtimeImage.d.cts\ndist/runtime-core/dist/runtimeImage.d.ts\ndist/runtime-core/dist/shared/index.d.cts\ndist/runtime-core/dist/shared/index.d.ts\ndist/runtime-core/dist/type/config.d.cts\ndist/runtime-core/dist/type/config.d.ts\ndist/runtime-core/dist/type/plugin.d.cts\ndist/runtime-core/dist/type/plugin.d.ts\ndist/runtime-core/dist/type/preload.d.cts\ndist/runtime-core/dist/type/preload.d.ts\ndist/runtime-core/dist/types.d.cts\ndist/runtime-core/dist/types.d.ts\ndist/runtime-core/dist/utils/hooks/asyncHook.d.cts\ndist/runtime-core/dist/utils/hooks/asyncHook.d.ts\ndist/runtime-core/dist/utils/hooks/asyncWaterfallHooks.d.cts\ndist/runtime-core/dist/utils/hooks/asyncWaterfallHooks.d.ts\ndist/runtime-core/dist/utils/hooks/pluginSystem.d.cts\ndist/runtime-core/dist/utils/hooks/pluginSystem.d.ts\ndist/runtime-core/dist/utils/hooks/syncHook.d.cts\ndist/runtime-core/dist/utils/hooks/syncHook.d.ts\ndist/runtime-core/dist/utils/hooks/syncWaterfallHook.d.cts\ndist/runtime-core/dist/utils/hooks/syncWaterfallHook.d.ts\ndist/runtime-core/dist/utils/load.d.cts\ndist/runtime-core/dist/utils/load.d.ts\ndist/runtime/dist/types.d.cts\ndist/runtime/dist/types.d.ts\ndist/sdk/dist/createModuleFederationConfig.d.cts\ndist/sdk/dist/createModuleFederationConfig.d.ts\ndist/sdk/dist/env.d.cts\ndist/sdk/dist/env.d.ts\ndist/sdk/dist/generateSnapshotFromManifest.d.cts\ndist/sdk/dist/generateSnapshotFromManifest.d.ts\ndist/sdk/dist/index.d.cts\ndist/sdk/dist/index.d.ts\ndist/sdk/dist/types/common.d.cts\ndist/sdk/dist/types/common.d.ts\ndist/sdk/dist/types/plugins/ContainerPlugin.d.cts\ndist/sdk/dist/types/plugins/ContainerPlugin.d.ts\ndist/sdk/dist/types/plugins/ContainerReferencePlugin.d.cts\ndist/sdk/dist/types/plugins/ContainerReferencePlugin.d.ts\ndist/sdk/dist/types/plugins/ModuleFederationPlugin.d.cts\ndist/sdk/dist/types/plugins/ModuleFederationPlugin.d.ts\ndist/sdk/dist/types/plugins/SharePlugin.d.cts\ndist/sdk/dist/types/plugins/SharePlugin.d.ts\ndist/sdk/dist/utils.d.cts\ndist/sdk/dist/utils.d.ts\ndist/selectors/container-entry/disabled.cjs\ndist/selectors/container-entry/disabled.cjs.map\ndist/selectors/container-entry/disabled.d.cts\ndist/selectors/container-entry/disabled.d.ts\ndist/selectors/container-entry/disabled.js\ndist/selectors/container-entry/disabled.js.map\ndist/selectors/container-entry/enabled.cjs\ndist/selectors/container-entry/enabled.d.cts\ndist/selectors/container-entry/enabled.d.ts\ndist/selectors/container-entry/enabled.js\ndist/selectors/container-entry/legacy.cjs\ndist/selectors/container-entry/legacy.cjs.map\ndist/selectors/container-entry/legacy.d.cts\ndist/selectors/container-entry/legacy.d.ts\ndist/selectors/container-entry/legacy.js\ndist/selectors/container-entry/legacy.js.map\ndist/selectors/remotes/disabled.cjs\ndist/selectors/remotes/disabled.cjs.map\ndist/selectors/remotes/disabled.d.cts\ndist/selectors/remotes/disabled.d.ts\ndist/selectors/remotes/disabled.js\ndist/selectors/remotes/disabled.js.map\ndist/selectors/remotes/enabled.cjs\ndist/selectors/remotes/enabled.d.cts\ndist/selectors/remotes/enabled.d.ts\ndist/selectors/remotes/enabled.js\ndist/selectors/remotes/legacy.cjs\ndist/selectors/remotes/legacy.cjs.map\ndist/selectors/remotes/legacy.d.cts\ndist/selectors/remotes/legacy.d.ts\ndist/selectors/remotes/legacy.js\ndist/selectors/remotes/legacy.js.map\ndist/selectors/shared-runtime/disabled.cjs\ndist/selectors/shared-runtime/disabled.cjs.map\ndist/selectors/shared-runtime/disabled.d.cts\ndist/selectors/shared-runtime/disabled.d.ts\ndist/selectors/shared-runtime/disabled.js\ndist/selectors/shared-runtime/disabled.js.map\ndist/selectors/shared-runtime/enabled.cjs\ndist/selectors/shared-runtime/enabled.d.cts\ndist/selectors/shared-runtime/enabled.d.ts\ndist/selectors/shared-runtime/enabled.js\ndist/selectors/shared-runtime/legacy.cjs\ndist/selectors/shared-runtime/legacy.cjs.map\ndist/selectors/shared-runtime/legacy.d.cts\ndist/selectors/shared-runtime/legacy.d.ts\ndist/selectors/shared-runtime/legacy.js\ndist/selectors/shared-runtime/legacy.js.map\ndist/selectors/tree-shaking-share-plugin/disabled.cjs\ndist/selectors/tree-shaking-share-plugin/disabled.cjs.map\ndist/selectors/tree-shaking-share-plugin/disabled.d.cts\ndist/selectors/tree-shaking-share-plugin/disabled.d.ts\ndist/selectors/tree-shaking-share-plugin/disabled.js\ndist/selectors/tree-shaking-share-plugin/disabled.js.map\ndist/selectors/tree-shaking-share-plugin/enabled.cjs\ndist/selectors/tree-shaking-share-plugin/enabled.cjs.map\ndist/selectors/tree-shaking-share-plugin/enabled.d.cts\ndist/selectors/tree-shaking-share-plugin/enabled.d.ts\ndist/selectors/tree-shaking-share-plugin/enabled.js\ndist/selectors/tree-shaking-share-plugin/enabled.js.map\ndist/selectors/tree-shaking-share-plugin/legacy.cjs\ndist/selectors/tree-shaking-share-plugin/legacy.cjs.map\ndist/selectors/tree-shaking-share-plugin/legacy.d.cts\ndist/selectors/tree-shaking-share-plugin/legacy.d.ts\ndist/selectors/tree-shaking-share-plugin/legacy.js\ndist/selectors/tree-shaking-share-plugin/legacy.js.map\ndist/selectors/tree-shaking-share-plugin/types.d.cts\ndist/selectors/tree-shaking-share-plugin/types.d.ts\ndist/types.d.cts\ndist/types.d.ts\ndist/updateOptions.cjs\ndist/updateOptions.cjs.map\ndist/updateOptions.js\ndist/updateOptions.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/webpack-bundler-runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "pack:runtime-tools",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/runtime-tools",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/runtime-tools.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/runtime-tools@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/bundler.cjs\ndist/bundler.cjs.map\ndist/bundler.d.cts\ndist/bundler.d.ts\ndist/bundler.js\ndist/bundler.js.map\ndist/federation-facade.cjs\ndist/federation-facade.cjs.map\ndist/federation-facade.d.cts\ndist/federation-facade.d.ts\ndist/federation-facade.js\ndist/federation-facade.js.map\ndist/index.cjs\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/runtime-core.cjs\ndist/runtime-core.d.cts\ndist/runtime-core.d.ts\ndist/runtime-core.js\ndist/runtime.cjs\ndist/runtime.d.cts\ndist/runtime.d.ts\ndist/runtime.js\ndist/webpack-bundler-runtime.cjs\ndist/webpack-bundler-runtime.cjs.map\ndist/webpack-bundler-runtime.d.cts\ndist/webpack-bundler-runtime.d.ts\ndist/webpack-bundler-runtime.js\ndist/webpack-bundler-runtime.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/runtime-tools.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "pack:inject-external-runtime-core-plugin",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/runtime-plugins/inject-external-runtime-core-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/inject-external-runtime-core-plugin.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/inject-external-runtime-core-plugin@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.cts\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/LICENSE\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/tarballs/inject-external-runtime-core-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "packed-entry:esm",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "smoke.mjs",
+      "esm"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"format\":\"esm\",\"version\":\"2.9.2\",\"shared\":\"final-packed-shared\",\"remote\":\"final-packed-remote\",\"bundlerKeys\":[\"attachShareScopeMap\",\"bundlerRuntime\",\"bundlerRuntimeOptions\",\"default\",\"initOptions\",\"instance\",\"runtime\"]}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "packed-entry:cjs",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "smoke.mjs",
+      "cjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"format\":\"cjs\",\"version\":\"2.9.2\",\"shared\":\"final-packed-shared\",\"remote\":\"final-packed-remote\",\"bundlerKeys\":[\"attachShareScopeMap\",\"bundlerRuntime\",\"bundlerRuntimeOptions\",\"default\",\"initOptions\",\"instance\",\"runtime\"]}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "types:consumer.mts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "types:consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "types:consumer.mts+consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 2,
+      "error": null
+    },
+    "stdout": "node_modules/@module-federation/runtime-core/dist/global.d.cts(43,7): error TS2403: Subsequent variable declarations must have the same type.  Variable '__FEDERATION__' must be of type 'Federation', but here has type 'Federation'.\nnode_modules/@module-federation/runtime-core/dist/global.d.cts(43,35): error TS2403: Subsequent variable declarations must have the same type.  Variable '__VMOK__' must be of type 'Federation', but here has type 'Federation'.\nnode_modules/@module-federation/runtime-core/dist/global.d.cts(43,57): error TS2403: Subsequent variable declarations must have the same type.  Variable '__GLOBAL_LOADING_REMOTE_ENTRY__' must be of type 'Record<string, Promise<void | RemoteEntryExports> | undefined>', but here has type 'Record<string, Promise<void | RemoteEntryExports> | undefined>'.\nnode_modules/@module-federation/runtime-core/dist/global.d.cts(44,7): error TS2403: Subsequent variable declarations must have the same type.  Variable '__GLOBAL_LOADING_REMOTE_ENTRY_META__' must be of type 'Record<string, RemoteEntryCacheMetadataV1 | undefined>', but here has type 'Record<string, RemoteEntryCacheMetadataV1 | undefined>'.\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "provider:actual-hook-and-identity",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "provider.mjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"providerName\":\"provider\",\"metadata\":{\"contract\":1,\"compatibilityId\":\"packed-proof-v1\",\"required\":[\"remote\"],\"forbidden\":[],\"available\":[\"remote\"],\"target\":\"universal\",\"entryLoadingIdentity\":\"packed-loader-v1\"},\"identity\":\"actual-provider-core-constructor\"}\n",
+    "stderr": "[ Federation Runtime ] Error: [ Federation Runtime ]: Refusing to reuse entry loader packed-loader-v1 with other-loader.\n    at error (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime-core/dist/utils/logger.js:20:8)\n    at assertRuntimeImageCompatible (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime-core/dist/runtimeImage.js:22:66)\n    at beforeInit (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/inject-external-runtime-core-plugin/dist/index.js:18:49)\n    at SyncWaterfallHook.emit (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime-core/dist/utils/hooks/syncWaterfallHook.js:22:21)\n    at ModuleFederation.formatOptions (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime-core/dist/core.js:102:102)\n    at new ModuleFederation (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime-core/dist/core.js:70:23)\n    at createInstance (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime/dist/index.js:15:19)\n    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/provider.mjs:12:20\n    at getActual (node:assert:611:5)\n    at strict.throws (node:assert:759:24)\n[ Federation Runtime ] Error: [ Federation Runtime ]: Refusing to reuse a universal runtime image for node.\n    at error (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime-core/dist/utils/logger.js:20:8)\n    at assertRuntimeImageCompatible (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime-core/dist/runtimeImage.js:21:38)\n    at beforeInit (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/inject-external-runtime-core-plugin/dist/index.js:18:49)\n    at SyncWaterfallHook.emit (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime-core/dist/utils/hooks/syncWaterfallHook.js:22:21)\n    at ModuleFederation.formatOptions (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime-core/dist/core.js:102:102)\n    at new ModuleFederation (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime-core/dist/core.js:70:23)\n    at createInstance (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/runtime/dist/index.js:15:19)\n    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/provider.mjs:13:20\n    at getActual (node:assert:611:5)\n    at strict.throws (node:assert:759:24)\n"
+  },
+  {
+    "family": "5036",
+    "name": "conditions:#mf:no-remote",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "--conditions=module-federation:no-remote",
+      "conditions.mjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"selected\":\"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5036/consumer/node_modules/@module-federation/webpack-bundler-runtime/dist/selectors/remotes/disabled.cjs\"}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5036",
+    "name": "webpack:old-plugin-new-runtime",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5036",
+    "name": "webpack:new-plugin-old-runtime",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5036",
+    "name": "rspack:externalRuntime-provider",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5036",
+    "name": "rolldown:optimizeDeps",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "name": "pack:sdk",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/sdk",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/sdk.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/sdk@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.d.ts\ndist/constant.js\ndist/constant.js.map\ndist/core.cjs\ndist/core.d.ts\ndist/core.js\ndist/createModuleFederationConfig.cjs\ndist/createModuleFederationConfig.cjs.map\ndist/createModuleFederationConfig.d.ts\ndist/createModuleFederationConfig.js\ndist/createModuleFederationConfig.js.map\ndist/dom.cjs\ndist/dom.cjs.map\ndist/dom.d.ts\ndist/dom.js\ndist/dom.js.map\ndist/env.cjs\ndist/env.cjs.map\ndist/env.d.ts\ndist/env.js\ndist/env.js.map\ndist/generateSnapshotFromManifest.cjs\ndist/generateSnapshotFromManifest.cjs.map\ndist/generateSnapshotFromManifest.d.ts\ndist/generateSnapshotFromManifest.js\ndist/generateSnapshotFromManifest.js.map\ndist/index.cjs\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/logger.cjs\ndist/logger.cjs.map\ndist/logger.d.ts\ndist/logger.js\ndist/logger.js.map\ndist/node.cjs\ndist/node.cjs.map\ndist/node.d.ts\ndist/node.js\ndist/node.js.map\ndist/normalize-webpack-path.cjs\ndist/normalize-webpack-path.cjs.map\ndist/normalize-webpack-path.d.ts\ndist/normalize-webpack-path.js\ndist/normalize-webpack-path.js.map\ndist/normalizeOptions.cjs\ndist/normalizeOptions.cjs.map\ndist/normalizeOptions.d.ts\ndist/normalizeOptions.js\ndist/normalizeOptions.js.map\ndist/types/common.d.ts\ndist/types/hooks.d.ts\ndist/types/index.d.ts\ndist/types/manifest.d.ts\ndist/types/plugins/ConsumeSharedPlugin.cjs\ndist/types/plugins/ConsumeSharedPlugin.cjs.map\ndist/types/plugins/ConsumeSharedPlugin.d.ts\ndist/types/plugins/ConsumeSharedPlugin.js\ndist/types/plugins/ConsumeSharedPlugin.js.map\ndist/types/plugins/ContainerPlugin.cjs\ndist/types/plugins/ContainerPlugin.cjs.map\ndist/types/plugins/ContainerPlugin.d.ts\ndist/types/plugins/ContainerPlugin.js\ndist/types/plugins/ContainerPlugin.js.map\ndist/types/plugins/ContainerReferencePlugin.cjs\ndist/types/plugins/ContainerReferencePlugin.cjs.map\ndist/types/plugins/ContainerReferencePlugin.d.ts\ndist/types/plugins/ContainerReferencePlugin.js\ndist/types/plugins/ContainerReferencePlugin.js.map\ndist/types/plugins/index.d.ts\ndist/types/plugins/ModuleFederationPlugin.cjs\ndist/types/plugins/ModuleFederationPlugin.cjs.map\ndist/types/plugins/ModuleFederationPlugin.d.ts\ndist/types/plugins/ModuleFederationPlugin.js\ndist/types/plugins/ModuleFederationPlugin.js.map\ndist/types/plugins/ProvideSharedPlugin.cjs\ndist/types/plugins/ProvideSharedPlugin.cjs.map\ndist/types/plugins/ProvideSharedPlugin.d.ts\ndist/types/plugins/ProvideSharedPlugin.js\ndist/types/plugins/ProvideSharedPlugin.js.map\ndist/types/plugins/SharePlugin.cjs\ndist/types/plugins/SharePlugin.cjs.map\ndist/types/plugins/SharePlugin.d.ts\ndist/types/plugins/SharePlugin.js\ndist/types/plugins/SharePlugin.js.map\ndist/types/snapshot.d.ts\ndist/types/stats.d.ts\ndist/utils.cjs\ndist/utils.cjs.map\ndist/utils.d.ts\ndist/utils.js\ndist/utils.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/sdk.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "pack:error-codes",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/error-codes",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/error-codes.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/error-codes@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/browser.cjs\ndist/browser.cjs.map\ndist/browser.d.mts\ndist/browser.d.ts\ndist/browser.mjs\ndist/browser.mjs.map\ndist/desc.cjs\ndist/desc.cjs.map\ndist/desc.d.mts\ndist/desc.d.ts\ndist/desc.mjs\ndist/desc.mjs.map\ndist/error-codes.cjs\ndist/error-codes.cjs.map\ndist/error-codes.d.mts\ndist/error-codes.d.ts\ndist/error-codes.mjs\ndist/error-codes.mjs.map\ndist/getShortErrorMsg.cjs\ndist/getShortErrorMsg.cjs.map\ndist/getShortErrorMsg.d.mts\ndist/getShortErrorMsg.d.ts\ndist/getShortErrorMsg.mjs\ndist/getShortErrorMsg.mjs.map\ndist/index.cjs\ndist/index.d.mts\ndist/index.d.ts\ndist/index.mjs\ndist/MFContext.d.mts\ndist/MFContext.d.ts\ndist/node.cjs\ndist/node.cjs.map\ndist/node.d.mts\ndist/node.d.ts\ndist/node.mjs\ndist/node.mjs.map\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/error-codes.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "pack:runtime-core",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/runtime-core",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/runtime-core.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/runtime-core@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.js\ndist/constant.js.map\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/global.cjs\ndist/global.cjs.map\ndist/global.d.ts\ndist/global.js\ndist/global.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/kernel.cjs\ndist/kernel.d.ts\ndist/kernel.js\ndist/LICENSE\ndist/module/index.cjs\ndist/module/index.cjs.map\ndist/module/index.d.ts\ndist/module/index.js\ndist/module/index.js.map\ndist/platform/node.cjs\ndist/platform/node.cjs.map\ndist/platform/node.d.ts\ndist/platform/node.js\ndist/platform/node.js.map\ndist/platform/universal.cjs\ndist/platform/universal.cjs.map\ndist/platform/universal.d.ts\ndist/platform/universal.js\ndist/platform/universal.js.map\ndist/platform/web.cjs\ndist/platform/web.cjs.map\ndist/platform/web.d.ts\ndist/platform/web.js\ndist/platform/web.js.map\ndist/plugins/generate-preload-assets.cjs\ndist/plugins/generate-preload-assets.cjs.map\ndist/plugins/generate-preload-assets.js\ndist/plugins/generate-preload-assets.js.map\ndist/plugins/snapshot/capability.cjs\ndist/plugins/snapshot/capability.d.ts\ndist/plugins/snapshot/capability.js\ndist/plugins/snapshot/disabled.cjs\ndist/plugins/snapshot/disabled.cjs.map\ndist/plugins/snapshot/disabled.js\ndist/plugins/snapshot/disabled.js.map\ndist/plugins/snapshot/index.cjs\ndist/plugins/snapshot/index.cjs.map\ndist/plugins/snapshot/index.d.ts\ndist/plugins/snapshot/index.js\ndist/plugins/snapshot/index.js.map\ndist/plugins/snapshot/SnapshotHandler.cjs\ndist/plugins/snapshot/SnapshotHandler.cjs.map\ndist/plugins/snapshot/SnapshotHandler.d.ts\ndist/plugins/snapshot/SnapshotHandler.js\ndist/plugins/snapshot/SnapshotHandler.js.map\ndist/remote/capability.cjs\ndist/remote/capability.d.ts\ndist/remote/capability.js\ndist/remote/disabled.cjs\ndist/remote/disabled.cjs.map\ndist/remote/disabled.js\ndist/remote/disabled.js.map\ndist/remote/index.cjs\ndist/remote/index.cjs.map\ndist/remote/index.d.ts\ndist/remote/index.js\ndist/remote/index.js.map\ndist/shared/capability.cjs\ndist/shared/capability.d.ts\ndist/shared/capability.js\ndist/shared/disabled.cjs\ndist/shared/disabled.cjs.map\ndist/shared/disabled.js\ndist/shared/disabled.js.map\ndist/shared/index.cjs\ndist/shared/index.cjs.map\ndist/shared/index.d.ts\ndist/shared/index.js\ndist/shared/index.js.map\ndist/type/capability.d.ts\ndist/type/config.d.ts\ndist/type/index.cjs\ndist/type/index.cjs.map\ndist/type/index.d.ts\ndist/type/index.js\ndist/type/index.js.map\ndist/type/plugin.d.ts\ndist/type/preload.d.ts\ndist/types.cjs\ndist/types.d.ts\ndist/types.js\ndist/utils/context.cjs\ndist/utils/context.cjs.map\ndist/utils/context.d.ts\ndist/utils/context.js\ndist/utils/context.js.map\ndist/utils/env.cjs\ndist/utils/env.cjs.map\ndist/utils/env.d.ts\ndist/utils/env.js\ndist/utils/env.js.map\ndist/utils/hooks/asyncHook.cjs\ndist/utils/hooks/asyncHook.cjs.map\ndist/utils/hooks/asyncHook.d.ts\ndist/utils/hooks/asyncHook.js\ndist/utils/hooks/asyncHook.js.map\ndist/utils/hooks/asyncWaterfallHooks.cjs\ndist/utils/hooks/asyncWaterfallHooks.cjs.map\ndist/utils/hooks/asyncWaterfallHooks.d.ts\ndist/utils/hooks/asyncWaterfallHooks.js\ndist/utils/hooks/asyncWaterfallHooks.js.map\ndist/utils/hooks/index.cjs\ndist/utils/hooks/index.js\ndist/utils/hooks/pluginSystem.cjs\ndist/utils/hooks/pluginSystem.cjs.map\ndist/utils/hooks/pluginSystem.d.ts\ndist/utils/hooks/pluginSystem.js\ndist/utils/hooks/pluginSystem.js.map\ndist/utils/hooks/syncHook.cjs\ndist/utils/hooks/syncHook.cjs.map\ndist/utils/hooks/syncHook.d.ts\ndist/utils/hooks/syncHook.js\ndist/utils/hooks/syncHook.js.map\ndist/utils/hooks/syncWaterfallHook.cjs\ndist/utils/hooks/syncWaterfallHook.cjs.map\ndist/utils/hooks/syncWaterfallHook.d.ts\ndist/utils/hooks/syncWaterfallHook.js\ndist/utils/hooks/syncWaterfallHook.js.map\ndist/utils/index.cjs\ndist/utils/index.d.ts\ndist/utils/index.js\ndist/utils/load.cjs\ndist/utils/load.cjs.map\ndist/utils/load.d.ts\ndist/utils/load.js\ndist/utils/load.js.map\ndist/utils/logger.cjs\ndist/utils/logger.cjs.map\ndist/utils/logger.d.ts\ndist/utils/logger.js\ndist/utils/logger.js.map\ndist/utils/manifest.cjs\ndist/utils/manifest.cjs.map\ndist/utils/manifest.d.ts\ndist/utils/manifest.js\ndist/utils/manifest.js.map\ndist/utils/plugin.cjs\ndist/utils/plugin.cjs.map\ndist/utils/plugin.d.ts\ndist/utils/plugin.js\ndist/utils/plugin.js.map\ndist/utils/preload.cjs\ndist/utils/preload.cjs.map\ndist/utils/preload.d.ts\ndist/utils/preload.js\ndist/utils/preload.js.map\ndist/utils/semver/compare.cjs\ndist/utils/semver/compare.cjs.map\ndist/utils/semver/compare.js\ndist/utils/semver/compare.js.map\ndist/utils/semver/constants.cjs\ndist/utils/semver/constants.cjs.map\ndist/utils/semver/constants.js\ndist/utils/semver/constants.js.map\ndist/utils/semver/index.cjs\ndist/utils/semver/index.cjs.map\ndist/utils/semver/index.d.ts\ndist/utils/semver/index.js\ndist/utils/semver/index.js.map\ndist/utils/semver/parser.cjs\ndist/utils/semver/parser.cjs.map\ndist/utils/semver/parser.js\ndist/utils/semver/parser.js.map\ndist/utils/semver/utils.cjs\ndist/utils/semver/utils.cjs.map\ndist/utils/semver/utils.js\ndist/utils/semver/utils.js.map\ndist/utils/share.cjs\ndist/utils/share.cjs.map\ndist/utils/share.d.ts\ndist/utils/share.js\ndist/utils/share.js.map\ndist/utils/tool.cjs\ndist/utils/tool.cjs.map\ndist/utils/tool.d.ts\ndist/utils/tool.js\ndist/utils/tool.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/runtime-core.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "pack:runtime",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/runtime.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/runtime@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/bundler.cjs\ndist/bundler.d.ts\ndist/bundler.js\ndist/compose.cjs\ndist/compose.cjs.map\ndist/compose.d.ts\ndist/compose.js\ndist/compose.js.map\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/instance.cjs\ndist/instance.cjs.map\ndist/instance.d.ts\ndist/instance.js\ndist/instance.js.map\ndist/LICENSE\ndist/types.cjs\ndist/types.d.ts\ndist/types.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "pack:webpack-bundler-runtime",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/webpack-bundler-runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/webpack-bundler-runtime.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/webpack-bundler-runtime@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/adapters/consumes.cjs\ndist/adapters/consumes.cjs.map\ndist/adapters/consumes.d.ts\ndist/adapters/consumes.js\ndist/adapters/consumes.js.map\ndist/adapters/container.cjs\ndist/adapters/container.cjs.map\ndist/adapters/container.d.ts\ndist/adapters/container.js\ndist/adapters/container.js.map\ndist/adapters/remotes.cjs\ndist/adapters/remotes.cjs.map\ndist/adapters/remotes.d.ts\ndist/adapters/remotes.js\ndist/adapters/remotes.js.map\ndist/adapters/share-scope.cjs\ndist/adapters/share-scope.cjs.map\ndist/adapters/share-scope.d.ts\ndist/adapters/share-scope.js\ndist/adapters/share-scope.js.map\ndist/attachShareScopeMap.cjs\ndist/attachShareScopeMap.cjs.map\ndist/attachShareScopeMap.d.ts\ndist/attachShareScopeMap.js\ndist/attachShareScopeMap.js.map\ndist/bundler.cjs\ndist/bundler.d.ts\ndist/bundler.js\ndist/compose.cjs\ndist/compose.cjs.map\ndist/compose.d.ts\ndist/compose.js\ndist/compose.js.map\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.d.ts\ndist/constant.js\ndist/constant.js.map\ndist/consumes.cjs\ndist/consumes.cjs.map\ndist/consumes.js\ndist/consumes.js.map\ndist/error-codes/dist/error-codes.cjs\ndist/error-codes/dist/error-codes.cjs.map\ndist/error-codes/dist/error-codes.js\ndist/error-codes/dist/error-codes.js.map\ndist/error-codes/dist/getShortErrorMsg.cjs\ndist/error-codes/dist/getShortErrorMsg.cjs.map\ndist/error-codes/dist/getShortErrorMsg.js\ndist/error-codes/dist/getShortErrorMsg.js.map\ndist/getSharedFallbackGetter.cjs\ndist/getSharedFallbackGetter.cjs.map\ndist/getSharedFallbackGetter.js\ndist/getSharedFallbackGetter.js.map\ndist/getUsedExports.cjs\ndist/getUsedExports.cjs.map\ndist/getUsedExports.js\ndist/getUsedExports.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/initContainerEntry.cjs\ndist/initContainerEntry.cjs.map\ndist/initContainerEntry.d.ts\ndist/initContainerEntry.js\ndist/initContainerEntry.js.map\ndist/initializeSharing.cjs\ndist/initializeSharing.cjs.map\ndist/initializeSharing.d.ts\ndist/initializeSharing.js\ndist/initializeSharing.js.map\ndist/installInitialConsumes.cjs\ndist/installInitialConsumes.cjs.map\ndist/installInitialConsumes.js\ndist/installInitialConsumes.js.map\ndist/LICENSE\ndist/remotes.cjs\ndist/remotes.cjs.map\ndist/remotes.js\ndist/remotes.js.map\ndist/treeShakingSharePlugin.cjs\ndist/treeShakingSharePlugin.cjs.map\ndist/treeShakingSharePlugin.js\ndist/treeShakingSharePlugin.js.map\ndist/types.d.ts\ndist/updateOptions.cjs\ndist/updateOptions.cjs.map\ndist/updateOptions.js\ndist/updateOptions.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/webpack-bundler-runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "pack:runtime-tools",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/runtime-tools",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/runtime-tools.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/runtime-tools@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/bundler.cjs\ndist/bundler.cjs.map\ndist/bundler.d.ts\ndist/bundler.js\ndist/bundler.js.map\ndist/index.cjs\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/runtime-core.cjs\ndist/runtime-core.d.ts\ndist/runtime-core.js\ndist/runtime.cjs\ndist/runtime.d.ts\ndist/runtime.js\ndist/webpack-bundler-runtime.cjs\ndist/webpack-bundler-runtime.cjs.map\ndist/webpack-bundler-runtime.d.ts\ndist/webpack-bundler-runtime.js\ndist/webpack-bundler-runtime.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/runtime-tools.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "pack:inject-external-runtime-core-plugin",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/runtime-plugins/inject-external-runtime-core-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/inject-external-runtime-core-plugin.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/inject-external-runtime-core-plugin@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/LICENSE\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/tarballs/inject-external-runtime-core-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "packed-entry:esm",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "smoke.mjs",
+      "esm"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 1,
+      "error": null
+    },
+    "stdout": "",
+    "stderr": "file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer/node_modules/@module-federation/runtime-core/dist/utils/logger.js:20\n\tthrow new Error(`${LOG_CATEGORY}: ${msg}`);\n\t      ^\n\nError: [ Federation Runtime ]: Failed to load Node.js entry for remote \"final_remote\" from \"https://unused.invalid/remote.js\". fetch failed\n    at error (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer/node_modules/@module-federation/runtime-core/dist/utils/logger.js:20:8)\n    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer/node_modules/@module-federation/runtime-core/dist/platform/node.js:40:3\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n\nNode.js v24.15.0\n"
+  },
+  {
+    "family": "5128-minor",
+    "name": "packed-entry:cjs",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "smoke.mjs",
+      "cjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 1,
+      "error": null
+    },
+    "stdout": "",
+    "stderr": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer/node_modules/@module-federation/runtime-core/dist/utils/logger.cjs:20\n\tthrow new Error(`${LOG_CATEGORY}: ${msg}`);\n\t      ^\n\nError: [ Federation Runtime ]: Failed to load Node.js entry for remote \"final_remote\" from \"https://unused.invalid/remote.js\". fetch failed\n    at Object.error (/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer/node_modules/@module-federation/runtime-core/dist/utils/logger.cjs:20:8)\n    at /Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer/node_modules/@module-federation/runtime-core/dist/platform/node.cjs:41:18\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n\nNode.js v24.15.0\n"
+  },
+  {
+    "family": "5128-minor",
+    "name": "types:consumer.mts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 2,
+      "error": null
+    },
+    "stdout": "node_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS1203: Export assignment cannot be used when targeting ECMAScript modules. Consider using 'export default' or another module format instead.\nnode_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS2309: An export assignment cannot be used in a module with other exported elements.\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "types:consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 2,
+      "error": null
+    },
+    "stdout": "node_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS1203: Export assignment cannot be used when targeting ECMAScript modules. Consider using 'export default' or another module format instead.\nnode_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS2309: An export assignment cannot be used in a module with other exported elements.\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "types:consumer.mts+consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 2,
+      "error": null
+    },
+    "stdout": "node_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS1203: Export assignment cannot be used when targeting ECMAScript modules. Consider using 'export default' or another module format instead.\nnode_modules/@module-federation/runtime/dist/core.d.ts(3,1): error TS2309: An export assignment cannot be used in a module with other exported elements.\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "provider:actual-hook-and-identity",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "provider.mjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-minor/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"providerName\":\"provider\",\"metadata\":null,\"identity\":\"actual-provider-core-constructor\"}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-minor",
+    "name": "webpack:old-plugin-new-runtime",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "name": "webpack:new-plugin-old-runtime",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "name": "rspack:externalRuntime-provider",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-minor",
+    "name": "rolldown:optimizeDeps",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-major",
+    "name": "pack:sdk",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/sdk",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/sdk.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/sdk@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.d.ts\ndist/constant.js\ndist/constant.js.map\ndist/core.cjs\ndist/core.d.ts\ndist/core.js\ndist/createModuleFederationConfig.cjs\ndist/createModuleFederationConfig.cjs.map\ndist/createModuleFederationConfig.d.ts\ndist/createModuleFederationConfig.js\ndist/createModuleFederationConfig.js.map\ndist/dom.cjs\ndist/dom.cjs.map\ndist/dom.d.ts\ndist/dom.js\ndist/dom.js.map\ndist/env.cjs\ndist/env.cjs.map\ndist/env.d.ts\ndist/env.js\ndist/env.js.map\ndist/generateSnapshotFromManifest.cjs\ndist/generateSnapshotFromManifest.cjs.map\ndist/generateSnapshotFromManifest.d.ts\ndist/generateSnapshotFromManifest.js\ndist/generateSnapshotFromManifest.js.map\ndist/index.cjs\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/logger.cjs\ndist/logger.cjs.map\ndist/logger.d.ts\ndist/logger.js\ndist/logger.js.map\ndist/node.cjs\ndist/node.cjs.map\ndist/node.d.ts\ndist/node.js\ndist/node.js.map\ndist/normalize-webpack-path.cjs\ndist/normalize-webpack-path.cjs.map\ndist/normalize-webpack-path.d.ts\ndist/normalize-webpack-path.js\ndist/normalize-webpack-path.js.map\ndist/normalizeOptions.cjs\ndist/normalizeOptions.cjs.map\ndist/normalizeOptions.d.ts\ndist/normalizeOptions.js\ndist/normalizeOptions.js.map\ndist/types/common.d.ts\ndist/types/hooks.d.ts\ndist/types/index.d.ts\ndist/types/manifest.d.ts\ndist/types/plugins/ConsumeSharedPlugin.cjs\ndist/types/plugins/ConsumeSharedPlugin.cjs.map\ndist/types/plugins/ConsumeSharedPlugin.d.ts\ndist/types/plugins/ConsumeSharedPlugin.js\ndist/types/plugins/ConsumeSharedPlugin.js.map\ndist/types/plugins/ContainerPlugin.cjs\ndist/types/plugins/ContainerPlugin.cjs.map\ndist/types/plugins/ContainerPlugin.d.ts\ndist/types/plugins/ContainerPlugin.js\ndist/types/plugins/ContainerPlugin.js.map\ndist/types/plugins/ContainerReferencePlugin.cjs\ndist/types/plugins/ContainerReferencePlugin.cjs.map\ndist/types/plugins/ContainerReferencePlugin.d.ts\ndist/types/plugins/ContainerReferencePlugin.js\ndist/types/plugins/ContainerReferencePlugin.js.map\ndist/types/plugins/index.d.ts\ndist/types/plugins/ModuleFederationPlugin.cjs\ndist/types/plugins/ModuleFederationPlugin.cjs.map\ndist/types/plugins/ModuleFederationPlugin.d.ts\ndist/types/plugins/ModuleFederationPlugin.js\ndist/types/plugins/ModuleFederationPlugin.js.map\ndist/types/plugins/ProvideSharedPlugin.cjs\ndist/types/plugins/ProvideSharedPlugin.cjs.map\ndist/types/plugins/ProvideSharedPlugin.d.ts\ndist/types/plugins/ProvideSharedPlugin.js\ndist/types/plugins/ProvideSharedPlugin.js.map\ndist/types/plugins/SharePlugin.cjs\ndist/types/plugins/SharePlugin.cjs.map\ndist/types/plugins/SharePlugin.d.ts\ndist/types/plugins/SharePlugin.js\ndist/types/plugins/SharePlugin.js.map\ndist/types/snapshot.d.ts\ndist/types/stats.d.ts\ndist/utils.cjs\ndist/utils.cjs.map\ndist/utils.d.ts\ndist/utils.js\ndist/utils.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/sdk.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "pack:error-codes",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/error-codes",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/error-codes.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/error-codes@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/browser.cjs\ndist/browser.cjs.map\ndist/browser.d.mts\ndist/browser.d.ts\ndist/browser.mjs\ndist/browser.mjs.map\ndist/desc.cjs\ndist/desc.cjs.map\ndist/desc.d.mts\ndist/desc.d.ts\ndist/desc.mjs\ndist/desc.mjs.map\ndist/error-codes.cjs\ndist/error-codes.cjs.map\ndist/error-codes.d.mts\ndist/error-codes.d.ts\ndist/error-codes.mjs\ndist/error-codes.mjs.map\ndist/getShortErrorMsg.cjs\ndist/getShortErrorMsg.cjs.map\ndist/getShortErrorMsg.d.mts\ndist/getShortErrorMsg.d.ts\ndist/getShortErrorMsg.mjs\ndist/getShortErrorMsg.mjs.map\ndist/index.cjs\ndist/index.d.mts\ndist/index.d.ts\ndist/index.mjs\ndist/MFContext.d.mts\ndist/MFContext.d.ts\ndist/node.cjs\ndist/node.cjs.map\ndist/node.d.mts\ndist/node.d.ts\ndist/node.mjs\ndist/node.mjs.map\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/error-codes.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "pack:runtime-core",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/runtime-core",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/runtime-core.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/runtime-core@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.js\ndist/constant.js.map\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/global.cjs\ndist/global.cjs.map\ndist/global.d.ts\ndist/global.js\ndist/global.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/kernel.cjs\ndist/kernel.d.ts\ndist/kernel.js\ndist/LICENSE\ndist/module/index.cjs\ndist/module/index.cjs.map\ndist/module/index.d.ts\ndist/module/index.js\ndist/module/index.js.map\ndist/platform/node.cjs\ndist/platform/node.cjs.map\ndist/platform/node.d.ts\ndist/platform/node.js\ndist/platform/node.js.map\ndist/platform/universal.cjs\ndist/platform/universal.cjs.map\ndist/platform/universal.d.ts\ndist/platform/universal.js\ndist/platform/universal.js.map\ndist/platform/web.cjs\ndist/platform/web.cjs.map\ndist/platform/web.d.ts\ndist/platform/web.js\ndist/platform/web.js.map\ndist/plugins/generate-preload-assets.cjs\ndist/plugins/generate-preload-assets.cjs.map\ndist/plugins/generate-preload-assets.js\ndist/plugins/generate-preload-assets.js.map\ndist/plugins/snapshot/capability.cjs\ndist/plugins/snapshot/capability.d.ts\ndist/plugins/snapshot/capability.js\ndist/plugins/snapshot/disabled.cjs\ndist/plugins/snapshot/disabled.cjs.map\ndist/plugins/snapshot/disabled.js\ndist/plugins/snapshot/disabled.js.map\ndist/plugins/snapshot/index.cjs\ndist/plugins/snapshot/index.cjs.map\ndist/plugins/snapshot/index.d.ts\ndist/plugins/snapshot/index.js\ndist/plugins/snapshot/index.js.map\ndist/plugins/snapshot/SnapshotHandler.cjs\ndist/plugins/snapshot/SnapshotHandler.cjs.map\ndist/plugins/snapshot/SnapshotHandler.d.ts\ndist/plugins/snapshot/SnapshotHandler.js\ndist/plugins/snapshot/SnapshotHandler.js.map\ndist/remote/capability.cjs\ndist/remote/capability.d.ts\ndist/remote/capability.js\ndist/remote/disabled.cjs\ndist/remote/disabled.cjs.map\ndist/remote/disabled.js\ndist/remote/disabled.js.map\ndist/remote/index.cjs\ndist/remote/index.cjs.map\ndist/remote/index.d.ts\ndist/remote/index.js\ndist/remote/index.js.map\ndist/shared/capability.cjs\ndist/shared/capability.d.ts\ndist/shared/capability.js\ndist/shared/disabled.cjs\ndist/shared/disabled.cjs.map\ndist/shared/disabled.js\ndist/shared/disabled.js.map\ndist/shared/index.cjs\ndist/shared/index.cjs.map\ndist/shared/index.d.ts\ndist/shared/index.js\ndist/shared/index.js.map\ndist/type/capability.d.ts\ndist/type/config.d.ts\ndist/type/index.cjs\ndist/type/index.cjs.map\ndist/type/index.d.ts\ndist/type/index.js\ndist/type/index.js.map\ndist/type/plugin.d.ts\ndist/type/preload.d.ts\ndist/types.cjs\ndist/types.d.ts\ndist/types.js\ndist/utils/context.cjs\ndist/utils/context.cjs.map\ndist/utils/context.d.ts\ndist/utils/context.js\ndist/utils/context.js.map\ndist/utils/env.cjs\ndist/utils/env.d.ts\ndist/utils/env.js\ndist/utils/hooks/asyncHook.cjs\ndist/utils/hooks/asyncHook.cjs.map\ndist/utils/hooks/asyncHook.d.ts\ndist/utils/hooks/asyncHook.js\ndist/utils/hooks/asyncHook.js.map\ndist/utils/hooks/asyncWaterfallHooks.cjs\ndist/utils/hooks/asyncWaterfallHooks.cjs.map\ndist/utils/hooks/asyncWaterfallHooks.d.ts\ndist/utils/hooks/asyncWaterfallHooks.js\ndist/utils/hooks/asyncWaterfallHooks.js.map\ndist/utils/hooks/index.cjs\ndist/utils/hooks/index.js\ndist/utils/hooks/pluginSystem.cjs\ndist/utils/hooks/pluginSystem.cjs.map\ndist/utils/hooks/pluginSystem.d.ts\ndist/utils/hooks/pluginSystem.js\ndist/utils/hooks/pluginSystem.js.map\ndist/utils/hooks/syncHook.cjs\ndist/utils/hooks/syncHook.cjs.map\ndist/utils/hooks/syncHook.d.ts\ndist/utils/hooks/syncHook.js\ndist/utils/hooks/syncHook.js.map\ndist/utils/hooks/syncWaterfallHook.cjs\ndist/utils/hooks/syncWaterfallHook.cjs.map\ndist/utils/hooks/syncWaterfallHook.d.ts\ndist/utils/hooks/syncWaterfallHook.js\ndist/utils/hooks/syncWaterfallHook.js.map\ndist/utils/index.cjs\ndist/utils/index.d.ts\ndist/utils/index.js\ndist/utils/load.cjs\ndist/utils/load.cjs.map\ndist/utils/load.d.ts\ndist/utils/load.js\ndist/utils/load.js.map\ndist/utils/logger.cjs\ndist/utils/logger.cjs.map\ndist/utils/logger.d.ts\ndist/utils/logger.js\ndist/utils/logger.js.map\ndist/utils/manifest.cjs\ndist/utils/manifest.cjs.map\ndist/utils/manifest.d.ts\ndist/utils/manifest.js\ndist/utils/manifest.js.map\ndist/utils/plugin.cjs\ndist/utils/plugin.cjs.map\ndist/utils/plugin.d.ts\ndist/utils/plugin.js\ndist/utils/plugin.js.map\ndist/utils/preload.cjs\ndist/utils/preload.cjs.map\ndist/utils/preload.d.ts\ndist/utils/preload.js\ndist/utils/preload.js.map\ndist/utils/semver/compare.cjs\ndist/utils/semver/compare.cjs.map\ndist/utils/semver/compare.js\ndist/utils/semver/compare.js.map\ndist/utils/semver/constants.cjs\ndist/utils/semver/constants.cjs.map\ndist/utils/semver/constants.js\ndist/utils/semver/constants.js.map\ndist/utils/semver/index.cjs\ndist/utils/semver/index.cjs.map\ndist/utils/semver/index.d.ts\ndist/utils/semver/index.js\ndist/utils/semver/index.js.map\ndist/utils/semver/parser.cjs\ndist/utils/semver/parser.cjs.map\ndist/utils/semver/parser.js\ndist/utils/semver/parser.js.map\ndist/utils/semver/utils.cjs\ndist/utils/semver/utils.cjs.map\ndist/utils/semver/utils.js\ndist/utils/semver/utils.js.map\ndist/utils/share.cjs\ndist/utils/share.cjs.map\ndist/utils/share.d.ts\ndist/utils/share.js\ndist/utils/share.js.map\ndist/utils/tool.cjs\ndist/utils/tool.cjs.map\ndist/utils/tool.d.ts\ndist/utils/tool.js\ndist/utils/tool.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/runtime-core.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "pack:runtime",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/runtime.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/runtime@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/bundler.cjs\ndist/bundler.d.ts\ndist/bundler.js\ndist/compose.cjs\ndist/compose.cjs.map\ndist/compose.d.ts\ndist/compose.js\ndist/compose.js.map\ndist/core.cjs\ndist/core.cjs.map\ndist/core.d.ts\ndist/core.js\ndist/core.js.map\ndist/helpers.cjs\ndist/helpers.cjs.map\ndist/helpers.d.ts\ndist/helpers.js\ndist/helpers.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/instance.cjs\ndist/instance.cjs.map\ndist/instance.d.ts\ndist/instance.js\ndist/instance.js.map\ndist/LICENSE\ndist/types.cjs\ndist/types.d.ts\ndist/types.js\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "pack:webpack-bundler-runtime",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/webpack-bundler-runtime",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/webpack-bundler-runtime.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/webpack-bundler-runtime@2.9.2\nTarball Contents\ndist/adapters/consumes.cjs\ndist/adapters/consumes.cjs.map\ndist/adapters/consumes.d.ts\ndist/adapters/consumes.js\ndist/adapters/consumes.js.map\ndist/adapters/container.cjs\ndist/adapters/container.cjs.map\ndist/adapters/container.d.ts\ndist/adapters/container.js\ndist/adapters/container.js.map\ndist/adapters/remotes.cjs\ndist/adapters/remotes.cjs.map\ndist/adapters/remotes.d.ts\ndist/adapters/remotes.js\ndist/adapters/remotes.js.map\ndist/adapters/share-scope.cjs\ndist/adapters/share-scope.cjs.map\ndist/adapters/share-scope.d.ts\ndist/adapters/share-scope.js\ndist/adapters/share-scope.js.map\ndist/attachShareScopeMap.cjs\ndist/attachShareScopeMap.cjs.map\ndist/attachShareScopeMap.d.ts\ndist/attachShareScopeMap.js\ndist/attachShareScopeMap.js.map\ndist/bundler.cjs\ndist/bundler.d.ts\ndist/bundler.js\ndist/compose.cjs\ndist/compose.cjs.map\ndist/compose.d.ts\ndist/compose.js\ndist/compose.js.map\ndist/constant.cjs\ndist/constant.cjs.map\ndist/constant.d.ts\ndist/constant.js\ndist/constant.js.map\ndist/consumes.cjs\ndist/consumes.cjs.map\ndist/consumes.js\ndist/consumes.js.map\ndist/error-codes/dist/error-codes.cjs\ndist/error-codes/dist/error-codes.cjs.map\ndist/error-codes/dist/error-codes.js\ndist/error-codes/dist/error-codes.js.map\ndist/error-codes/dist/getShortErrorMsg.cjs\ndist/error-codes/dist/getShortErrorMsg.cjs.map\ndist/error-codes/dist/getShortErrorMsg.js\ndist/error-codes/dist/getShortErrorMsg.js.map\ndist/getSharedFallbackGetter.cjs\ndist/getSharedFallbackGetter.cjs.map\ndist/getSharedFallbackGetter.js\ndist/getSharedFallbackGetter.js.map\ndist/getUsedExports.cjs\ndist/getUsedExports.cjs.map\ndist/getUsedExports.js\ndist/getUsedExports.js.map\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/initContainerEntry.cjs\ndist/initContainerEntry.cjs.map\ndist/initContainerEntry.d.ts\ndist/initContainerEntry.js\ndist/initContainerEntry.js.map\ndist/initializeSharing.cjs\ndist/initializeSharing.cjs.map\ndist/initializeSharing.d.ts\ndist/initializeSharing.js\ndist/initializeSharing.js.map\ndist/installInitialConsumes.cjs\ndist/installInitialConsumes.cjs.map\ndist/installInitialConsumes.js\ndist/installInitialConsumes.js.map\ndist/LICENSE\ndist/remotes.cjs\ndist/remotes.cjs.map\ndist/remotes.js\ndist/remotes.js.map\ndist/treeShakingSharePlugin.cjs\ndist/treeShakingSharePlugin.cjs.map\ndist/treeShakingSharePlugin.js\ndist/treeShakingSharePlugin.js.map\ndist/types.d.ts\ndist/updateOptions.cjs\ndist/updateOptions.cjs.map\ndist/updateOptions.js\ndist/updateOptions.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/webpack-bundler-runtime.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "pack:runtime-tools",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/runtime-tools",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/runtime-tools.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/runtime-tools@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/_virtual/_rolldown/runtime.js\ndist/bundler.cjs\ndist/bundler.cjs.map\ndist/bundler.d.ts\ndist/bundler.js\ndist/bundler.js.map\ndist/index.cjs\ndist/index.d.ts\ndist/index.js\ndist/LICENSE\ndist/runtime-core.cjs\ndist/runtime-core.d.ts\ndist/runtime-core.js\ndist/runtime.cjs\ndist/runtime.d.ts\ndist/runtime.js\ndist/webpack-bundler-runtime.cjs\ndist/webpack-bundler-runtime.cjs.map\ndist/webpack-bundler-runtime.d.ts\ndist/webpack-bundler-runtime.js\ndist/webpack-bundler-runtime.js.map\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/runtime-tools.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "pack:inject-external-runtime-core-plugin",
+    "command": [
+      "corepack",
+      "pnpm@10.28.0",
+      "--dir",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/runtime-plugins/inject-external-runtime-core-plugin",
+      "pack",
+      "--out",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/inject-external-runtime-core-plugin.tgz"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "\ud83d\udce6  @module-federation/inject-external-runtime-core-plugin@2.9.2\nTarball Contents\ndist/_virtual/_rolldown/runtime.cjs\ndist/index.cjs\ndist/index.cjs.map\ndist/index.d.ts\ndist/index.js\ndist/index.js.map\ndist/LICENSE\nLICENSE\npackage.json\nREADME.md\nTarball Details\n/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/tarballs/inject-external-runtime-core-plugin.tgz\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "packed-entry:esm",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "smoke.mjs",
+      "esm"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 1,
+      "error": null
+    },
+    "stdout": "",
+    "stderr": "file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer/node_modules/@module-federation/runtime-core/dist/utils/logger.js:20\n\tthrow new Error(`${LOG_CATEGORY}: ${msg}`);\n\t      ^\n\nError: [ Federation Runtime ]: Failed to load Node.js entry for remote \"final_remote\" from \"https://unused.invalid/remote.js\". fetch failed\n    at error (file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer/node_modules/@module-federation/runtime-core/dist/utils/logger.js:20:8)\n    at file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer/node_modules/@module-federation/runtime-core/dist/platform/node.js:40:3\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n\nNode.js v24.15.0\n"
+  },
+  {
+    "family": "5128-major",
+    "name": "packed-entry:cjs",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "smoke.mjs",
+      "cjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "failed",
+      "exitCode": 1,
+      "error": null
+    },
+    "stdout": "",
+    "stderr": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer/node_modules/@module-federation/runtime-core/dist/utils/logger.cjs:20\n\tthrow new Error(`${LOG_CATEGORY}: ${msg}`);\n\t      ^\n\nError: [ Federation Runtime ]: Failed to load Node.js entry for remote \"final_remote\" from \"https://unused.invalid/remote.js\". fetch failed\n    at Object.error (/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer/node_modules/@module-federation/runtime-core/dist/utils/logger.cjs:20:8)\n    at /Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer/node_modules/@module-federation/runtime-core/dist/platform/node.cjs:41:18\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n\nNode.js v24.15.0\n"
+  },
+  {
+    "family": "5128-major",
+    "name": "types:consumer.mts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "types:consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "types:consumer.mts+consumer.cts",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "provider:actual-hook-and-identity",
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "provider.mjs"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-final-audit/5128-major/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "{\"kind\":\"passed\",\"providerName\":\"provider\",\"metadata\":null,\"identity\":\"actual-provider-core-constructor\"}\n",
+    "stderr": ""
+  },
+  {
+    "family": "5128-major",
+    "name": "webpack:old-plugin-new-runtime",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-major",
+    "name": "webpack:new-plugin-old-runtime",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-major",
+    "name": "rspack:externalRuntime-provider",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  },
+  {
+    "family": "5128-major",
+    "name": "rolldown:optimizeDeps",
+    "outcome": {
+      "kind": "unrun",
+      "reason": "Preserved historical matrix limitation; bounded final audit adds no compiler/bootstrap integrations"
+    }
+  }
+]

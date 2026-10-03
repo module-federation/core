@@ -1,0 +1,19 @@
+
+> @module-federation/rspack@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/rspack
+> pnpm exec jest --config jest.config.js --passWithNoTests
+
+PASS __tests__/ModuleFederationPlugin.spec.ts
+  runtime resolution compatibility
+    ✓ prefers the bundler implementation when available (2 ms)
+    ✓ does not replace a missing custom family member from another install (16 ms)
+  ModuleFederationPlugin runtime selection
+    ✓ rejects a second ModuleFederationPlugin in one compiler (16 ms)
+    ✓ keeps all runtime capabilities enabled by default (302 ms)
+    ✓ defines the capabilities the plugin options disable (133 ms)
+    ✓ gives child compilers the parent selection (95 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        2.614 s
+Ran all test suites.

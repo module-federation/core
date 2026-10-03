@@ -1,0 +1,1778 @@
+{
+  "data": {
+    "repository": {
+      "p5093": {
+        "number": 5093,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "d4cd788d976c9086879856b3f317fd70084c5353",
+        "baseRefName": "main",
+        "mergeable": "MERGEABLE"
+      },
+      "c5093": {
+        "oid": "d4cd788d976c9086879856b3f317fd70084c5353",
+        "statusCheckRollup": {
+          "state": "FAILURE",
+          "contexts": {
+            "nodes": [
+              {
+                "name": "deploy",
+                "status": "COMPLETED",
+                "conclusion": "FAILURE",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838927/job/111101692559",
+                "completedAt": "2026-10-03T01:56:16Z"
+              },
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111101692954",
+                "completedAt": "2026-10-03T01:59:45Z"
+              },
+              {
+                "name": "measure",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838939/job/111101692408",
+                "completedAt": "2026-10-03T01:56:53Z"
+              },
+              {
+                "name": "Analyze (actions)",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087835117/job/111101684792",
+                "completedAt": "2026-10-03T01:54:31Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838908/job/111101692389",
+                "completedAt": "2026-10-03T01:55:58Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838929/job/111101692260",
+                "completedAt": "2026-10-03T01:54:22Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838921/job/111101692591",
+                "completedAt": "2026-10-03T01:57:04Z"
+              },
+              {
+                "name": "Analyze (javascript)",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087835117/job/111101685033",
+                "completedAt": "2026-10-03T01:55:24Z"
+              },
+              {
+                "name": "Analyze (python)",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087835117/job/111101685021",
+                "completedAt": "2026-10-03T01:54:46Z"
+              },
+              {
+                "name": "e2e-modern / e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700628",
+                "completedAt": "2026-10-03T02:01:19Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700603",
+                "completedAt": "2026-10-03T02:01:34Z"
+              },
+              {
+                "name": "e2e-runtime / e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700669",
+                "completedAt": "2026-10-03T02:02:11Z"
+              },
+              {
+                "name": "e2e-manifest / e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700597",
+                "completedAt": "2026-10-03T02:03:08Z"
+              },
+              {
+                "name": "e2e-node / e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700650",
+                "completedAt": "2026-10-03T02:01:28Z"
+              },
+              {
+                "name": "e2e-rstest / e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700617",
+                "completedAt": "2026-10-03T02:01:33Z"
+              },
+              {
+                "name": "e2e-next-dev / e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700732",
+                "completedAt": "2026-10-03T02:03:28Z"
+              },
+              {
+                "name": "e2e-next-prod / e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700659",
+                "completedAt": "2026-10-03T02:04:09Z"
+              },
+              {
+                "name": "e2e-treeshake / e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700709",
+                "completedAt": "2026-10-03T02:02:38Z"
+              },
+              {
+                "name": "e2e-modern-ssr / e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700727",
+                "completedAt": "2026-10-03T02:02:05Z"
+              },
+              {
+                "name": "e2e-router / e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700770",
+                "completedAt": "2026-10-03T02:03:51Z"
+              },
+              {
+                "name": "e2e-metro / e2e-metro-android",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700899",
+                "completedAt": "2026-10-03T02:03:49Z"
+              },
+              {
+                "name": "e2e-metro / e2e-metro-ios",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700918",
+                "completedAt": "2026-10-03T02:20:49Z"
+              },
+              {
+                "name": "devtools / main",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839130/job/111102700827",
+                "completedAt": "2026-10-03T02:04:21Z"
+              },
+              {
+                "name": "CodeQL",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/runs/111101752867",
+                "completedAt": "2026-10-03T01:54:24Z"
+              },
+              {
+                "name": "Continuous Releases",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://pkg.pr.new",
+                "completedAt": "2026-10-03T01:56:42Z"
+              }
+            ]
+          }
+        }
+      },
+      "p5094": {
+        "number": 5094,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "96516ecf52dd041ea018d28f2c789ca09be1e363",
+        "baseRefName": "rfc5036/01-runtime-family-resolver",
+        "mergeable": "MERGEABLE"
+      },
+      "c5094": {
+        "oid": "96516ecf52dd041ea018d28f2c789ca09be1e363",
+        "statusCheckRollup": {
+          "state": "FAILURE",
+          "contexts": {
+            "nodes": [
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "FAILURE",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111101697823",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101694127",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839303/job/111101693273",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839246/job/111101693470",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839273/job/111101697011",
+                "completedAt": "2026-10-03T01:56:23Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839264/job/111101693219",
+                "completedAt": "2026-10-03T01:54:22Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839263/job/111101693257",
+                "completedAt": "2026-10-03T01:54:21Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839287/job/111101697271",
+                "completedAt": "2026-10-03T01:58:02Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102258702",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101697022",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101697104",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102258857",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102258959",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101697005",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102259064",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101696958",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102259054",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101696870",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102258833",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101697209",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102258874",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101697381",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102258690",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101696852",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102259444",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101697356",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102259235",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101697583",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102259149",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101697388",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102259090",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101697413",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "devtools",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839501/job/111102259058",
+                "completedAt": "2026-10-03T01:57:13Z"
+              },
+              {
+                "name": "devtools",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839521/job/111101696963",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "Continuous Releases",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://pkg.pr.new",
+                "completedAt": "2026-10-03T01:57:38Z"
+              }
+            ]
+          }
+        }
+      },
+      "p5095": {
+        "number": 5095,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "7efeac068015dfec64934dac702b051bb6e31f35",
+        "baseRefName": "rfc5036/02-compiler-coordination",
+        "mergeable": "MERGEABLE"
+      },
+      "c5095": {
+        "oid": "7efeac068015dfec64934dac702b051bb6e31f35",
+        "statusCheckRollup": {
+          "state": "FAILURE",
+          "contexts": {
+            "nodes": [
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "FAILURE",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111101699428",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101693812",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839002/job/111101693589",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838971/job/111101692829",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839953/job/111101697966",
+                "completedAt": "2026-10-03T01:58:29Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838988/job/111101692748",
+                "completedAt": "2026-10-03T01:54:18Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840081/job/111101695925",
+                "completedAt": "2026-10-03T01:54:36Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839960/job/111101697455",
+                "completedAt": "2026-10-03T01:59:21Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698863",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677536",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698332",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677583",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698155",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677442",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698701",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677535",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698573",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677524",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698640",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677805",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698884",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677224",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698607",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677695",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698378",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677623",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698781",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677574",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698864",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677686",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698768",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677693",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "devtools",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839312/job/111101698455",
+                "completedAt": "2026-10-03T01:54:05Z"
+              },
+              {
+                "name": "devtools",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087840050/job/111102677586",
+                "completedAt": "2026-10-03T01:59:37Z"
+              },
+              {
+                "name": "Continuous Releases",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://pkg.pr.new",
+                "completedAt": "2026-10-03T01:58:58Z"
+              }
+            ]
+          }
+        }
+      },
+      "p5096": {
+        "number": 5096,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "89e57fd4a306b27089d812f838f281ff94956812",
+        "baseRefName": "rfc5036/03-runtime-selectors",
+        "mergeable": "MERGEABLE"
+      },
+      "c5096": {
+        "oid": "89e57fd4a306b27089d812f838f281ff94956812",
+        "statusCheckRollup": {
+          "state": "FAILURE",
+          "contexts": {
+            "nodes": [
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "FAILURE",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111101697333",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101692226",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838494/job/111101691394",
+                "completedAt": "2026-10-03T01:54:03Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838493/job/111101691379",
+                "completedAt": "2026-10-03T01:54:03Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838763/job/111101695130",
+                "completedAt": "2026-10-03T01:56:13Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838527/job/111101691565",
+                "completedAt": "2026-10-03T01:54:16Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838791/job/111101692111",
+                "completedAt": "2026-10-03T01:54:19Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838820/job/111101695288",
+                "completedAt": "2026-10-03T01:57:23Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101695972",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331473",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696077",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331537",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696497",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331090",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696524",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331124",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696154",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102330929",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101695959",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331151",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696635",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331087",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696178",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331189",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696255",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331062",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696138",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102330944",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696489",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331185",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696270",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331080",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "devtools",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838729/job/111101696683",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "devtools",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839034/job/111102331567",
+                "completedAt": "2026-10-03T01:57:39Z"
+              },
+              {
+                "name": "Continuous Releases",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://pkg.pr.new",
+                "completedAt": "2026-10-03T01:57:02Z"
+              }
+            ]
+          }
+        }
+      },
+      "p5097": {
+        "number": 5097,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "92d892a53e1c5eccfe7bddf99f71eb3792e9e007",
+        "baseRefName": "rfc5036/04-runtime-image-cache",
+        "mergeable": "MERGEABLE"
+      },
+      "c5097": {
+        "oid": "92d892a53e1c5eccfe7bddf99f71eb3792e9e007",
+        "statusCheckRollup": {
+          "state": "FAILURE",
+          "contexts": {
+            "nodes": [
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101693207",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838768/job/111101692163",
+                "completedAt": "2026-10-03T01:54:03Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838866/job/111101692434",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111101696796",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838907/job/111101695245",
+                "completedAt": "2026-10-03T01:56:12Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838784/job/111101691995",
+                "completedAt": "2026-10-03T01:54:18Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838920/job/111101692400",
+                "completedAt": "2026-10-03T01:54:35Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839094/job/111101696221",
+                "completedAt": "2026-10-03T01:57:03Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696127",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450640",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696641",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102449557",
+                "completedAt": "2026-10-03T01:59:39Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696578",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450206",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696311",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450697",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696117",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450497",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696576",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450373",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696507",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450318",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696688",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450403",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696465",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450395",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696552",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450663",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696180",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450178",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696164",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102450276",
+                "completedAt": "2026-10-03T01:58:19Z"
+              },
+              {
+                "name": "devtools",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839075/job/111101696604",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "devtools / main",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839198/job/111102449972",
+                "completedAt": "2026-10-03T02:03:00Z"
+              },
+              {
+                "name": "Continuous Releases",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://pkg.pr.new",
+                "completedAt": "2026-10-03T01:56:46Z"
+              }
+            ]
+          }
+        }
+      },
+      "p5098": {
+        "number": 5098,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "ef693e396ab619466b749692b4af564888156ee5",
+        "baseRefName": "rfc5036/05-esbuild-rollout",
+        "mergeable": "MERGEABLE"
+      },
+      "c5098": {
+        "oid": "ef693e396ab619466b749692b4af564888156ee5",
+        "statusCheckRollup": {
+          "state": "FAILURE",
+          "contexts": {
+            "nodes": [
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101692652",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838838/job/111101692558",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838810/job/111101692361",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111101698387",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839680/job/111101696726",
+                "completedAt": "2026-10-03T01:56:34Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838793/job/111101692083",
+                "completedAt": "2026-10-03T01:54:24Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839678/job/111101694474",
+                "completedAt": "2026-10-03T01:54:18Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839666/job/111101696654",
+                "completedAt": "2026-10-03T01:58:39Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697411",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102347123",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697127",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102345953",
+                "completedAt": "2026-10-03T01:58:49Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697490",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102346811",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697223",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102346999",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697624",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102346803",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697296",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102346639",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697713",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102347037",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697392",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102346967",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697304",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102346666",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697350",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102346881",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697268",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102346836",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697492",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102346781",
+                "completedAt": "2026-10-03T01:57:44Z"
+              },
+              {
+                "name": "devtools",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838900/job/111101697199",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "devtools / main",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839882/job/111102346277",
+                "completedAt": "2026-10-03T02:02:22Z"
+              },
+              {
+                "name": "Continuous Releases",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://pkg.pr.new",
+                "completedAt": "2026-10-03T01:58:17Z"
+              }
+            ]
+          }
+        }
+      },
+      "p5107": {
+        "number": 5107,
+        "state": "OPEN",
+        "isDraft": false,
+        "headRefOid": "6ae5e8dd67a02162fc32b3522357d6ef85e24710",
+        "baseRefName": "rfc5036/06-docs-rollout",
+        "mergeable": "MERGEABLE"
+      },
+      "c5107": {
+        "oid": "6ae5e8dd67a02162fc32b3522357d6ef85e24710",
+        "statusCheckRollup": {
+          "state": "FAILURE",
+          "contexts": {
+            "nodes": [
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "FAILURE",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111101696075",
+                "completedAt": "2026-10-03T01:57:50Z"
+              },
+              {
+                "name": "checkout-install",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101692409",
+                "completedAt": "2026-10-03T01:54:03Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838432/job/111101691445",
+                "completedAt": "2026-10-03T01:54:03Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838435/job/111101691423",
+                "completedAt": "2026-10-03T01:54:03Z"
+              },
+              {
+                "name": "lint-deps",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839115/job/111101695020",
+                "completedAt": "2026-10-03T01:56:13Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838440/job/111101691206",
+                "completedAt": "2026-10-03T01:54:19Z"
+              },
+              {
+                "name": "actionlint",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839117/job/111101692781",
+                "completedAt": "2026-10-03T01:54:15Z"
+              },
+              {
+                "name": "publish-preview",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839092/job/111101694872",
+                "completedAt": "2026-10-03T01:57:27Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695431",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-modern",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102364766",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "CANCELLED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695380",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "node20-compat",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102364715",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695483",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-runtime",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102365204",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695611",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-manifest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102364845",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695250",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-node",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102364932",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695227",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-rstest",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102365003",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695613",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-next-dev",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102365233",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695570",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-next-prod",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102365075",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695454",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-treeshake",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102365039",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695558",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-modern-ssr",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102364676",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695226",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-router",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102364759",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695343",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "e2e-metro",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102365113",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "devtools",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087838748/job/111101695443",
+                "completedAt": "2026-10-03T01:54:04Z"
+              },
+              {
+                "name": "devtools",
+                "status": "COMPLETED",
+                "conclusion": "SKIPPED",
+                "detailsUrl": "https://github.com/module-federation/core/actions/runs/37087839282/job/111102365207",
+                "completedAt": "2026-10-03T01:57:51Z"
+              },
+              {
+                "name": "Continuous Releases",
+                "status": "COMPLETED",
+                "conclusion": "SUCCESS",
+                "detailsUrl": "https://pkg.pr.new",
+                "completedAt": "2026-10-03T01:57:04Z"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "rateLimit": { "remaining": 4638, "resetAt": "2026-10-03T02:51:36Z" }
+  }
+}

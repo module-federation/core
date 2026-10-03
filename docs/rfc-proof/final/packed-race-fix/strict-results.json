@@ -1,0 +1,239 @@
+[
+  {
+    "emission": 1,
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/emission-1/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "emission": 1,
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/emission-1/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "emission": 1,
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/emission-1/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "emission": 2,
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/emission-2/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "emission": 2,
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/emission-2/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "emission": 2,
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/emission-2/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "emission": 3,
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/emission-3/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "emission": 3,
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/emission-3/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "emission": 3,
+    "command": [
+      "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+      "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-pack/node_modules/typescript/bin/tsc",
+      "--ignoreConfig",
+      "--noEmit",
+      "--strict",
+      "--module",
+      "NodeNext",
+      "--moduleResolution",
+      "NodeNext",
+      "--lib",
+      "ES2022,DOM",
+      "--types",
+      "node",
+      "consumer.mts",
+      "consumer.cts"
+    ],
+    "cwd": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/packed-race-fix/emission-3/consumer",
+    "outcome": {
+      "kind": "passed",
+      "exitCode": 0
+    },
+    "stdout": "",
+    "stderr": ""
+  }
+]

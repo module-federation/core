@@ -1,0 +1,12 @@
+PASS distinct A->B concurrent=false
+PASS distinct A->B concurrent=true
+PASS distinct B->A concurrent=false
+PASS distinct B->A concurrent=true
+PASS same platform dedupe concurrent=false
+PASS same platform dedupe concurrent=true
+PASS rejection then another evaluator then retry
+PASS reset clears evaluated promise
+PASS equivalent factories remain usable
+PASS identical callback uses host state independently
+PASS same source URL distinct transformations
+SUMMARY passed=11 failed=0 skipped=0

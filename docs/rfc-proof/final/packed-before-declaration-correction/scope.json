@@ -1,0 +1,27 @@
+{
+  "builtDuringAudit": [],
+  "installedDuringAudit": [],
+  "productionSourceChangedDuringAudit": [],
+  "artifactHeads": [
+    {
+      "name": "5036",
+      "directory": "stack5107",
+      "head": "8643b69633039571cac171d1595645b75e62cf95",
+      "historicalArtifactHead": "4a1bd3fe8ccdd443654c150293a2dd34e4af5b50"
+    },
+    {
+      "name": "5128-minor",
+      "directory": "stack5141",
+      "head": "968ffee8c12687f332c952cca5a7f8da267a30f6",
+      "historicalArtifactHead": "84cee419c5c7dc2bb87d1a92cd7fb8e15e409aec"
+    },
+    {
+      "name": "5128-major",
+      "directory": "stack5142",
+      "head": "3d8014a1de8194628046603320911226cc50719a",
+      "historicalArtifactHead": null,
+      "comparisonHead": "968ffee8c12687f332c952cca5a7f8da267a30f6"
+    }
+  ],
+  "preservation": "Historical FAIL/UNRUN evidence remains in packed-proof; this directory contains final-head evidence only"
+}

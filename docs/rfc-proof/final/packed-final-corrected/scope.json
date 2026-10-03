@@ -1,0 +1,64 @@
+{
+  "builtDuringAudit": [],
+  "installedDuringAudit": [],
+  "productionSourceChangedDuringAudit": [],
+  "artifactHeads": [
+    {
+      "name": "5128-minor",
+      "directory": "stack5141",
+      "head": "83134b63016cd237bad96f7797706bfd8dd565c5",
+      "historicalArtifactHead": "968ffee8c12687f332c952cca5a7f8da267a30f6"
+    },
+    {
+      "name": "5128-major",
+      "directory": "stack5142",
+      "head": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+      "historicalArtifactHead": "3d8014a1de8194628046603320911226cc50719a"
+    }
+  ],
+  "unchanged5036": {
+    "head": "8643b69633039571cac171d1595645b75e62cf95",
+    "comparison": [
+      {
+        "packagePath": "sdk",
+        "files": 171,
+        "status": "identical-to-previously-audited-packed-output"
+      },
+      {
+        "packagePath": "error-codes",
+        "files": 37,
+        "status": "identical-to-previously-audited-packed-output"
+      },
+      {
+        "packagePath": "runtime-core",
+        "files": 358,
+        "status": "identical-to-previously-audited-packed-output"
+      },
+      {
+        "packagePath": "runtime",
+        "files": 34,
+        "status": "identical-to-previously-audited-packed-output"
+      },
+      {
+        "packagePath": "webpack-bundler-runtime",
+        "files": 208,
+        "status": "identical-to-previously-audited-packed-output"
+      },
+      {
+        "packagePath": "runtime-tools",
+        "files": 33,
+        "status": "identical-to-previously-audited-packed-output"
+      },
+      {
+        "packagePath": "runtime-plugins/inject-external-runtime-core-plugin",
+        "files": 8,
+        "status": "identical-to-previously-audited-packed-output"
+      }
+    ],
+    "priorResults": "packed-final-audit/results.json",
+    "priorFingerprints": "packed-final-audit/fingerprints.json",
+    "combinedTypes": "failed-pre-existing-TS2403",
+    "reason": "All published dist bytes unchanged; no repeated pack or consumer execution"
+  },
+  "preservation": "Historical FAIL/UNRUN evidence remains in packed-proof and packed-final-audit; this directory contains final-head evidence only"
+}

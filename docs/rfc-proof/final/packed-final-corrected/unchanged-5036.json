@@ -1,0 +1,44 @@
+{
+  "head": "8643b69633039571cac171d1595645b75e62cf95",
+  "comparison": [
+    {
+      "packagePath": "sdk",
+      "files": 171,
+      "status": "identical-to-previously-audited-packed-output"
+    },
+    {
+      "packagePath": "error-codes",
+      "files": 37,
+      "status": "identical-to-previously-audited-packed-output"
+    },
+    {
+      "packagePath": "runtime-core",
+      "files": 358,
+      "status": "identical-to-previously-audited-packed-output"
+    },
+    {
+      "packagePath": "runtime",
+      "files": 34,
+      "status": "identical-to-previously-audited-packed-output"
+    },
+    {
+      "packagePath": "webpack-bundler-runtime",
+      "files": 208,
+      "status": "identical-to-previously-audited-packed-output"
+    },
+    {
+      "packagePath": "runtime-tools",
+      "files": 33,
+      "status": "identical-to-previously-audited-packed-output"
+    },
+    {
+      "packagePath": "runtime-plugins/inject-external-runtime-core-plugin",
+      "files": 8,
+      "status": "identical-to-previously-audited-packed-output"
+    }
+  ],
+  "priorResults": "packed-final-audit/results.json",
+  "priorFingerprints": "packed-final-audit/fingerprints.json",
+  "combinedTypes": "failed-pre-existing-TS2403",
+  "reason": "All published dist bytes unchanged; no repeated pack or consumer execution"
+}

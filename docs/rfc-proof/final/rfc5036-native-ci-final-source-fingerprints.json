@@ -1,0 +1,76 @@
+{
+  "before": "6ae5e8dd67a02162fc32b3522357d6ef85e24710",
+  "after": "8643b69633039571cac171d1595645b75e62cf95",
+  "changed_paths": [
+    "packages/rspack/__tests__/ModuleFederationPlugin.spec.ts",
+    "packages/sdk/__tests__/platform-loader-selector.spec.ts",
+    "packages/webpack-bundler-runtime/__tests__/container-entry-selector.spec.ts",
+    "tools/testing/loadNativeRspack.ts"
+  ],
+  "unchanged_production_and_test_config_hashes": {
+    "packages/managers": {
+      "before": "7c6dc70e5d584b0fa70c4413aa6317ff988e41ea",
+      "after": "7c6dc70e5d584b0fa70c4413aa6317ff988e41ea"
+    },
+    "packages/runtime-core": {
+      "before": "d783610d2ac479165b49fc1c9c50d3cc649dd2fc",
+      "after": "d783610d2ac479165b49fc1c9c50d3cc649dd2fc"
+    },
+    "packages/runtime": {
+      "before": "7b63309384f94f1532c7dd84fdd486299b1244ce",
+      "after": "7b63309384f94f1532c7dd84fdd486299b1244ce"
+    },
+    "packages/runtime-tools": {
+      "before": "f726f5b7b07e6b0af4be84fb45d581356da1c7ff",
+      "after": "f726f5b7b07e6b0af4be84fb45d581356da1c7ff"
+    },
+    "packages/enhanced": {
+      "before": "55a570baf89681ce2499398df0c3c146fafc930b",
+      "after": "55a570baf89681ce2499398df0c3c146fafc930b"
+    },
+    "packages/esbuild": {
+      "before": "7ee97cc0b7e6dbce54a6d6e3536da4b2633935a9",
+      "after": "7ee97cc0b7e6dbce54a6d6e3536da4b2633935a9"
+    },
+    "packages/runtime-plugins/inject-external-runtime-core-plugin": {
+      "before": "0262f5dba76e966f37c7be96a73fd3e22ed17e17",
+      "after": "0262f5dba76e966f37c7be96a73fd3e22ed17e17"
+    },
+    "packages/sdk/src": {
+      "before": "dd6790bede99a123618dc89f77a58dd36a5e46a1",
+      "after": "dd6790bede99a123618dc89f77a58dd36a5e46a1"
+    },
+    "packages/sdk/jest.config.cjs": {
+      "before": "10cf623152e5693a6601153f386eefd7e1309433",
+      "after": "10cf623152e5693a6601153f386eefd7e1309433"
+    },
+    "packages/sdk/package.json": {
+      "before": "209811ee549e6aa7d83d2309747d66b3f49bbea8",
+      "after": "209811ee549e6aa7d83d2309747d66b3f49bbea8"
+    },
+    "packages/webpack-bundler-runtime/src": {
+      "before": "f849b62822e6d5c00894073bb1293b70853b42cf",
+      "after": "f849b62822e6d5c00894073bb1293b70853b42cf"
+    },
+    "packages/webpack-bundler-runtime/jest.config.cjs": {
+      "before": "542303e232dd7e6f420ef44c5ded71ad4231bf1b",
+      "after": "542303e232dd7e6f420ef44c5ded71ad4231bf1b"
+    },
+    "packages/webpack-bundler-runtime/package.json": {
+      "before": "22f74d258e37fdca7e4607279eec6c35955fd512",
+      "after": "22f74d258e37fdca7e4607279eec6c35955fd512"
+    },
+    "packages/rspack/src": {
+      "before": "b9ef540b70bf65370193d7bc2ba051315d81e81a",
+      "after": "b9ef540b70bf65370193d7bc2ba051315d81e81a"
+    },
+    "packages/rspack/jest.config.js": {
+      "before": "907c9a1219918e1274cd12cc8fdef70b8f11f5e0",
+      "after": "907c9a1219918e1274cd12cc8fdef70b8f11f5e0"
+    },
+    "packages/rspack/package.json": {
+      "before": "74454f404dabdad1952c5835c2554a6a8170e4a7",
+      "after": "74454f404dabdad1952c5835c2554a6a8170e4a7"
+    }
+  }
+}

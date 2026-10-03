@@ -1,0 +1,53 @@
+
+---
+tool: "@rstest/core@0.10.6"
+timestamp: "2026-10-03T01:32:56.531Z"
+runtime: {"node":"v24.15.0","platform":"darwin","cwd":"/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135/packages/runtime"}
+---
+
+# Rstest Test Execution Report
+
+## Summary
+
+```json
+{
+  "status": "pass",
+  "counts": {
+    "testFiles": 1,
+    "failedFiles": 0,
+    "tests": 4,
+    "failedTests": 0,
+    "passedTests": 1,
+    "skippedTests": 3,
+    "todoTests": 0
+  },
+  "durationMs": {
+    "total": 593,
+    "build": 81,
+    "tests": 512
+  },
+  "snapshot": {
+    "added": 0,
+    "updated": 0,
+    "unmatched": 0,
+    "removed": 0,
+    "unchecked": 0
+  }
+}
+```
+
+## Tests
+
+### Passed
+
+- __tests__/hooks.spec.ts :: hooks > loaderEntry hooks
+
+### Skipped
+
+- __tests__/hooks.spec.ts :: hooks > core hooks args
+- __tests__/hooks.spec.ts :: hooks > loader hooks
+- __tests__/hooks.spec.ts :: hooks > loader fetch hooks
+
+## Failures
+
+No test failures reported.

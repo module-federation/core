@@ -1,0 +1,20 @@
+
+> @module-federation/node@2.7.52 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5139/packages/node
+> pnpm exec jest --config jest.config.js --passWithNoTests --runInBand
+
+PASS node src/__tests__/runtimePlugin.test.ts
+  ● Console
+
+    console.log
+      Backup remote entry found: http://localhost:3001/remoteEntry.js
+
+      at log (src/runtimePlugin.ts:171:17)
+
+PASS node src/__tests__/flush-chunks.test.ts
+PASS node src/__tests__/webpackChunkUtilities.test.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       59 passed, 59 total
+Snapshots:   0 total
+Time:        1.277 s
+Ran all test suites.
