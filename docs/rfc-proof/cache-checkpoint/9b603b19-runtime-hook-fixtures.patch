@@ -1,0 +1,25 @@
+From 9b603b19acb4562e61d0a93f7bcc56b09d0bb7f1 Mon Sep 17 00:00:00 2001
+From: ScriptedAlchemy <zackary.l.jackson@gmail.com>
+Date: Fri, 2 Oct 2026 18:36:05 -0700
+Subject: [PATCH] test(runtime): reset hook fixture globals between cases
+
+---
+ packages/runtime/__tests__/hooks.spec.ts | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/packages/runtime/__tests__/hooks.spec.ts b/packages/runtime/__tests__/hooks.spec.ts
+index 8033f3356..d143a4cc8 100644
+--- a/packages/runtime/__tests__/hooks.spec.ts
++++ b/packages/runtime/__tests__/hooks.spec.ts
+@@ -15,6 +15,8 @@ describe('hooks', () => {
+   });
+   beforeEach(() => {
+     removeScriptTags();
++    Reflect.deleteProperty(globalThis, '@loader-hooks/app2');
++    Reflect.deleteProperty(globalThis, '@loader-hooks/app3');
+   });
+ 
+   it('core hooks args', async () => {
+-- 
+2.55.0
+
