@@ -1,6 +1,28 @@
-import { optionsParticipant, planComposition } from '../src/composition/plan';
+import {
+  importRequest,
+  optionsParticipant,
+  planComposition,
+  plannedImports,
+} from '../src/composition/plan';
 
 describe('planComposition', () => {
+  it.each(['web', 'node', 'universal'] as const)(
+    'retains the %s loader for shared fallback entries with remote disabled',
+    (platform) => {
+      const plan = planComposition(
+        [{ kind: 'options', disable: { remote: true }, needs: ['consumes'] }],
+        platform,
+      );
+      const imports = plannedImports(plan).map(importRequest);
+      expect(imports).toEqual([
+        '@module-federation/webpack-bundler-runtime/compose',
+        '@module-federation/webpack-bundler-runtime/adapters/consumes',
+        '@module-federation/webpack-bundler-runtime/adapters/share-scope',
+        '@module-federation/runtime-core/shared',
+        `@module-federation/runtime-core/platform/${platform}`,
+      ]);
+    },
+  );
   it('keeps every handler on when no participant carries options', () => {
     expect(
       planComposition([{ kind: 'needs', needs: ['remotes'] }], 'universal'),
