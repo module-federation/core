@@ -1,0 +1,66 @@
+Scope: all 104 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +2604
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 2604, reused 69, downloaded 0, added 0
+Progress: resolved 2604, reused 72, downloaded 0, added 0
+Progress: resolved 2604, reused 225, downloaded 0, added 0
+
+   ╭──────────────────────────────────────────────╮
+   │                                              │
+   │     Update available! 10.28.0 → 12.8.1.      │
+   │     Changelog: https://pnpm.io/v/12.8.1      │
+   │   To update, run: corepack use pnpm@12.8.1   │
+   │                                              │
+   ╰──────────────────────────────────────────────╯
+
+Progress: resolved 2604, reused 339, downloaded 0, added 0
+Progress: resolved 2604, reused 458, downloaded 0, added 0
+Progress: resolved 2604, reused 1655, downloaded 0, added 0
+Progress: resolved 2604, reused 2344, downloaded 0, added 13
+Progress: resolved 2604, reused 2349, downloaded 0, added 106
+Progress: resolved 2604, reused 2349, downloaded 0, added 327
+Progress: resolved 2604, reused 2349, downloaded 0, added 399
+Progress: resolved 2604, reused 2349, downloaded 0, added 490
+Progress: resolved 2604, reused 2349, downloaded 0, added 530
+Progress: resolved 2604, reused 2349, downloaded 0, added 595
+Progress: resolved 2604, reused 2349, downloaded 0, added 724
+Progress: resolved 2604, reused 2349, downloaded 0, added 850
+Progress: resolved 2604, reused 2349, downloaded 0, added 851
+Progress: resolved 2604, reused 2349, downloaded 0, added 935
+Progress: resolved 2604, reused 2349, downloaded 0, added 942
+Progress: resolved 2604, reused 2349, downloaded 0, added 1026
+Progress: resolved 2604, reused 2349, downloaded 0, added 1090
+Progress: resolved 2604, reused 2349, downloaded 0, added 1124
+Progress: resolved 2604, reused 2349, downloaded 0, added 1142
+Progress: resolved 2604, reused 2349, downloaded 0, added 1166
+Progress: resolved 2604, reused 2349, downloaded 0, added 1261
+Progress: resolved 2604, reused 2349, downloaded 0, added 1430
+Progress: resolved 2604, reused 2349, downloaded 0, added 1574
+Progress: resolved 2604, reused 2349, downloaded 0, added 1577
+Progress: resolved 2604, reused 2349, downloaded 0, added 1578
+Progress: resolved 2604, reused 2349, downloaded 0, added 1583
+Progress: resolved 2604, reused 2349, downloaded 0, added 1646
+Progress: resolved 2604, reused 2349, downloaded 0, added 1839
+Progress: resolved 2604, reused 2349, downloaded 0, added 1955
+Progress: resolved 2604, reused 2349, downloaded 0, added 2014
+Progress: resolved 2604, reused 2349, downloaded 0, added 2040
+Progress: resolved 2604, reused 2349, downloaded 0, added 2134
+Progress: resolved 2604, reused 2349, downloaded 0, added 2159
+Progress: resolved 2604, reused 2349, downloaded 0, added 2233
+Progress: resolved 2604, reused 2349, downloaded 0, added 2285
+Progress: resolved 2604, reused 2349, downloaded 0, added 2345
+Progress: resolved 2604, reused 2349, downloaded 0, added 2486
+Progress: resolved 2604, reused 2349, downloaded 0, added 2567
+Progress: resolved 2604, reused 2349, downloaded 0, added 2592
+Progress: resolved 2604, reused 2349, downloaded 0, added 2595
+Progress: resolved 2604, reused 2349, downloaded 0, added 2596
+Progress: resolved 2604, reused 2349, downloaded 0, added 2598
+Progress: resolved 2604, reused 2349, downloaded 0, added 2599
+Progress: resolved 2604, reused 2349, downloaded 0, added 2601
+Progress: resolved 2604, reused 2349, downloaded 0, added 2602
+Progress: resolved 2604, reused 2349, downloaded 0, added 2603
+Progress: resolved 2604, reused 2349, downloaded 0, added 2604, done
+
+Done in 1m 3.7s using pnpm v10.28.0

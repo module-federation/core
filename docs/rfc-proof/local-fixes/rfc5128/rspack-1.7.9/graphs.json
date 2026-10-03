@@ -1,0 +1,72 @@
+{
+  "results": [
+    {
+      "errors": [],
+      "warnings": [],
+      "coreModules": [
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/_virtual/_rolldown/runtime.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/constant.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/core.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/global.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/helpers.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/index.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/module/index.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/platform/node.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/platform/universal.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/platform/web.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/plugins/generate-preload-assets.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/plugins/snapshot/SnapshotHandler.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/plugins/snapshot/disabled.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/plugins/snapshot/index.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/remote/disabled.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/remote/index.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/shared/disabled.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/shared/index.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/type/index.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/context.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/env.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/hooks/asyncHook.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/hooks/asyncWaterfallHooks.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/hooks/index.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/hooks/pluginSystem.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/hooks/syncHook.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/hooks/syncWaterfallHook.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/index.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/load.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/logger.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/manifest.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/plugin.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/preload.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/semver/compare.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/semver/constants.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/semver/index.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/semver/parser.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/semver/utils.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/share.cjs",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/utils/tool.cjs"
+      ]
+    },
+    {
+      "errors": [],
+      "warnings": [],
+      "coreModules": []
+    },
+    {
+      "errors": [],
+      "warnings": [],
+      "coreModules": []
+    }
+  ],
+  "unsupported": {
+    "errors": [
+      {
+        "message": "  × Error: [ExternalRuntimeNamespace] The external runtime provider does not publish \"@module-federation/runtime-core/shared\". Only the core root and kernel namespaces are supported.\n  │     at /Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/rspack/dist/ExternalRuntimePlugin.js:84:22\n  │     at /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/.pnpm/@rspack+core@1.7.9_@swc+helpers@0.5.23/node_modules/@rspack/core/dist/index.js:4152:58\n  │     at new Promise (<anonymous>)\n  │     at /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/node_modules/.pnpm/@rspack+core@1.7.9_@swc+helpers@0.5.23/node_modules/@rspack/core/dist/index.js:4151:37\n  │ \n",
+        "moduleIdentifier": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel-proof/rspack-1.7.9/unsupported.js",
+        "moduleName": "./unsupported.js",
+        "loc": "1:1-62"
+      }
+    ],
+    "warnings": [],
+    "coreModules": []
+  }
+}

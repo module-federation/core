@@ -1,0 +1,15 @@
+
+> @module-federation/rspack@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141/packages/rspack
+> pnpm exec jest --config jest.config.js --passWithNoTests
+
+PASS __tests__/ExternalRuntimePlugin.spec.ts
+PASS __tests__/ModuleFederationPlugin.spec.ts
+PASS __tests__/ComposedRuntimePlugin.spec.ts
+PASS __tests__/externalRuntime.spec.ts
+PASS __tests__/composedRuntime.spec.ts (7.98 s)
+
+Test Suites: 5 passed, 5 total
+Tests:       34 passed, 34 total
+Snapshots:   0 total
+Time:        8.249 s, estimated 9 s
+Ran all test suites.

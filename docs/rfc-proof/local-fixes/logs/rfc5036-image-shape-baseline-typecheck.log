@@ -1,0 +1,6 @@
+packages/runtime-core/src/utils/preload.ts(182,7): error TS2322: Type '(hookUrl: string, hookAttrs: Record<string, any> | undefined) => void | HTMLLinkElement | { link?: HTMLLinkElement | undefined; timeout?: number | undefined; } | Promise<...>' is not assignable to type 'CreateLinkHookDom'.
+  Type 'void | HTMLLinkElement | { link?: HTMLLinkElement | undefined; timeout?: number | undefined; } | Promise<any>' is not assignable to type 'CreateLinkHookReturnDom'.
+    Type 'Promise<any>' is not assignable to type 'CreateLinkHookReturnDom'.
+packages/runtime-core/src/utils/preload.ts(236,7): error TS2322: Type '(hookUrl: string, hookAttrs: any) => void | { url: string; } | HTMLScriptElement | { script?: HTMLScriptElement; timeout?: number; } | Promise<any>' is not assignable to type 'CreateScriptHookDom'.
+  Type 'void | { url: string; } | HTMLScriptElement | { script?: HTMLScriptElement | undefined; timeout?: number | undefined; } | Promise<any>' is not assignable to type 'CreateScriptHookReturnDom'.
+    Type '{ url: string; }' is not assignable to type 'CreateScriptHookReturnDom'.

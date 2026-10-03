@@ -1,0 +1,25 @@
+
+> @module-federation/rspack@2.9.2 build /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/rspack
+> rslib build
+
+Rslib v0.23.2
+
+(node:29729) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/rspack/rslib.config.ts?fresh-import-n0q7d0kj8ns=0,file:///Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/rspack/rslib.config.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142/packages/rspack/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+info    build started...
+start   generating declaration files... (esm)
+ready   declaration files generated with tsgo in 0.31 s (esm)
+ready   built in 2.86s (esm)
+ready   built in 2.86s (cjs)
+
+10 files generated in dist, total: 27.7 kB (esm)
+
+10 files generated in dist, total: 52.0 kB (cjs)
+
+warn    Publint found 1 warnings:
+warn    pkg.exports["."].import.types types is interpreted as CJS when resolving with the "import" condition. This causes the types to be ambiguous when default importing the package due to its implied interop. Consider splitting out two "types" conditions for "import" and "require", and use the .mts extension, e.g. pkg.exports["."].import.import.types: "./dist/index.d.mts"
+
+info    Publint found 1 suggestions:
+info    The package does not specify the "type" field. NodeJS may attempt to detect the package type causing a small performance hit. Consider adding "type": "commonjs".

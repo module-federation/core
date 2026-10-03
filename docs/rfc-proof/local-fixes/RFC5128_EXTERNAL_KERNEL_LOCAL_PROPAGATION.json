@@ -1,0 +1,122 @@
+[
+  {
+    "number": 5135,
+    "before": "ca0b6188fd57b067dc20e3b8d66f0805e8d2b72a",
+    "after": "7aca6f70d415d110dd5419ace5b4c6a566c902c9",
+    "updatedParent": "7aca6f70d415d110dd5419ace5b4c6a566c902c9",
+    "changedFiles": [
+      ".changeset/fix-external-kernel.md",
+      "packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts",
+      "packages/rspack/__tests__/external-runtime-fixture/probe.mjs",
+      "packages/rspack/__tests__/externalRuntime.spec.ts",
+      "packages/rspack/src/ExternalRuntimePlugin.ts",
+      "packages/rspack/src/ModuleFederationPlugin.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true
+  },
+  {
+    "number": 5137,
+    "before": "b26e12e9f27fe6fb5b76438e7b7f5e4042af892e",
+    "after": "feab1692880cacd51fb9bb63fa1fca957d07e793",
+    "updatedParent": "7aca6f70d415d110dd5419ace5b4c6a566c902c9",
+    "changedFiles": [
+      ".changeset/fix-external-kernel.md",
+      "packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts",
+      "packages/rspack/__tests__/external-runtime-fixture/probe.mjs",
+      "packages/rspack/__tests__/externalRuntime.spec.ts",
+      "packages/rspack/src/ExternalRuntimePlugin.ts",
+      "packages/rspack/src/ModuleFederationPlugin.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true
+  },
+  {
+    "number": 5139,
+    "before": "95286625fc5ce7a1479983b6fa3a8b2980146d71",
+    "after": "a4e4da4eb6e17d9dd9acb46db3b3aff6240159d1",
+    "updatedParent": "feab1692880cacd51fb9bb63fa1fca957d07e793",
+    "changedFiles": [
+      ".changeset/fix-external-kernel.md",
+      "packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts",
+      "packages/rspack/__tests__/external-runtime-fixture/probe.mjs",
+      "packages/rspack/__tests__/externalRuntime.spec.ts",
+      "packages/rspack/src/ExternalRuntimePlugin.ts",
+      "packages/rspack/src/ModuleFederationPlugin.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true
+  },
+  {
+    "number": 5134,
+    "before": "54622d775688ff8c3e9ac77cba50acffca265cfc",
+    "after": "0999fbfa562a52f781765d9f3d6c4e4a2dde8900",
+    "updatedParent": "a4e4da4eb6e17d9dd9acb46db3b3aff6240159d1",
+    "changedFiles": [
+      ".changeset/fix-external-kernel.md",
+      "packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts",
+      "packages/rspack/__tests__/external-runtime-fixture/probe.mjs",
+      "packages/rspack/__tests__/externalRuntime.spec.ts",
+      "packages/rspack/src/ExternalRuntimePlugin.ts",
+      "packages/rspack/src/ModuleFederationPlugin.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true
+  },
+  {
+    "number": 5140,
+    "before": "47bc0f852aa5867214e153fb822f6683f6ce3cb0",
+    "after": "0599689e29f927b7ff3efdb8ade1522d7989525e",
+    "updatedParent": "0999fbfa562a52f781765d9f3d6c4e4a2dde8900",
+    "changedFiles": [
+      ".changeset/fix-external-kernel.md",
+      "packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts",
+      "packages/rspack/__tests__/external-runtime-fixture/probe.mjs",
+      "packages/rspack/__tests__/externalRuntime.spec.ts",
+      "packages/rspack/src/ExternalRuntimePlugin.ts",
+      "packages/rspack/src/ModuleFederationPlugin.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true
+  },
+  {
+    "number": 5141,
+    "before": "83134b63016cd237bad96f7797706bfd8dd565c5",
+    "after": "7af25cdb9243eb8556d18ec451fce9973b6a0cfb",
+    "updatedParent": "0599689e29f927b7ff3efdb8ade1522d7989525e",
+    "changedFiles": [
+      ".changeset/fix-external-kernel.md",
+      "packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts",
+      "packages/rspack/__tests__/external-runtime-fixture/probe.mjs",
+      "packages/rspack/__tests__/externalRuntime.spec.ts",
+      "packages/rspack/src/ExternalRuntimePlugin.ts",
+      "packages/rspack/src/ModuleFederationPlugin.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true,
+    "mergeConflictResolution": "Preserved both ComposedRuntimePlugin and applyExternalRuntime imports at the same insertion point."
+  },
+  {
+    "number": 5142,
+    "before": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+    "after": "9a5c81b05ae0ab16f7858fa877ab3073e48b218b",
+    "updatedParent": "7af25cdb9243eb8556d18ec451fce9973b6a0cfb",
+    "changedFiles": [
+      ".changeset/fix-external-kernel.md",
+      "packages/rspack/__tests__/ExternalRuntimePlugin.spec.ts",
+      "packages/rspack/__tests__/external-runtime-fixture/probe.mjs",
+      "packages/rspack/__tests__/externalRuntime.spec.ts",
+      "packages/rspack/src/ExternalRuntimePlugin.ts",
+      "packages/rspack/src/ModuleFederationPlugin.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true
+  }
+]

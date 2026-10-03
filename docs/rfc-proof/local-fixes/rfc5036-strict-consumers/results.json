@@ -1,0 +1,83 @@
+{
+  "head": "d3d52a0cc28e8a6fef0d6698f5876ac5804285b3",
+  "artifactKind": "actual built package exports via isolated symlinks, not a new pack",
+  "skipLibCheck": false,
+  "rows": [
+    {
+      "files": [
+        "consumer.mts"
+      ],
+      "command": [
+        "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/node_modules/typescript/bin/tsc",
+        "--ignoreConfig",
+        "--noEmit",
+        "--strict",
+        "--module",
+        "NodeNext",
+        "--moduleResolution",
+        "NodeNext",
+        "--lib",
+        "ES2022,DOM",
+        "--types",
+        "node",
+        "consumer.mts"
+      ],
+      "exitCode": 0,
+      "diagnosticCodes": []
+    },
+    {
+      "files": [
+        "consumer.cts"
+      ],
+      "command": [
+        "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/node_modules/typescript/bin/tsc",
+        "--ignoreConfig",
+        "--noEmit",
+        "--strict",
+        "--module",
+        "NodeNext",
+        "--moduleResolution",
+        "NodeNext",
+        "--lib",
+        "ES2022,DOM",
+        "--types",
+        "node",
+        "consumer.cts"
+      ],
+      "exitCode": 0,
+      "diagnosticCodes": []
+    },
+    {
+      "files": [
+        "consumer.mts",
+        "consumer.cts"
+      ],
+      "command": [
+        "/Users/zackjackson/.nvm/versions/node/v24.15.0/bin/node",
+        "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/node_modules/typescript/bin/tsc",
+        "--ignoreConfig",
+        "--noEmit",
+        "--strict",
+        "--module",
+        "NodeNext",
+        "--moduleResolution",
+        "NodeNext",
+        "--lib",
+        "ES2022,DOM",
+        "--types",
+        "node",
+        "consumer.mts",
+        "consumer.cts"
+      ],
+      "exitCode": 2,
+      "diagnosticCodes": [
+        "TS2403",
+        "TS2403",
+        "TS2403",
+        "TS2403"
+      ]
+    }
+  ]
+}

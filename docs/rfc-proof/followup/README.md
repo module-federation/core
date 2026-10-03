@@ -1,5 +1,7 @@
 # Independent proof follow-up
 
+This is historical evidence from the preceding source snapshot. The [subsequent local-fix supplement](../local-fixes/README.md) supersedes the unsupported-version and partial-externalization findings, records final integrated checks and real HTTP execution, and provides the held RFC5128 metadata source/API proposal. Original failures below remain preserved as baseline evidence.
+
 The previously missing compiler artifacts were rebuilt from the recorded exact source in an isolated detached checkout. This supplement closes the requested compiler bootstrap execution gaps and records concrete external-provider and CodeQL limits. It does not authorize merging, applying the metadata proposal, or promoting held PR branches.
 
 | Area                               | Executed result                                                                                                                                                                                                                                                                                             | Evidence                                                                                                                                                                                                                                                  |

@@ -1,0 +1,13 @@
+{
+  "buildRoot": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/publicpath",
+  "buildHead": "dc61543814fd4a4706608e8b3d3fe34169f7532b",
+  "proposalHead": "663c8f39274ebd1198cdae57702b62066a697778",
+  "packageAndBuildInputsEqual": true,
+  "bothWorktreesClean": true,
+  "exactChangedProductionSourceInArtifactMap": true,
+  "pluginArtifact": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/publicpath/packages/enhanced/dist/src/lib/sharing/tree-shaking/IndependentSharedPlugin.js",
+  "pluginSha256": "69e593f03924634c9620bd9a0b60cca7dbcfb778cb846210dd4e2b4e4f1afe10",
+  "pluginMapSha256": "419e8ad014a3a5d5c07829092e5763dd1e9cc6d568a520a71d2a789a1b2c7960",
+  "lockfileSha256": "2d4d0e7bf0318a62a06403554259b1f6725d216d1e0c217679df8e3989fd04a5",
+  "publicPathRequirementPresent": true
+}

@@ -1,0 +1,122 @@
+{
+  "head": "d3d52a0cc28e8a6fef0d6698f5876ac5804285b3",
+  "local_source_commit": "13e83755eba6b461161cb47e747343bdb9a3894c",
+  "counts": {
+    "first-publication-rejected": 3,
+    "executed": 1,
+    "rejected": 7
+  },
+  "rows": [
+    {
+      "mode": "unknown-contract",
+      "status": "first-publication-rejected",
+      "providerSlotsUnchanged": true
+    },
+    {
+      "mode": "null",
+      "status": "first-publication-rejected",
+      "providerSlotsUnchanged": true
+    },
+    {
+      "mode": "wrong-shape",
+      "status": "first-publication-rejected",
+      "providerSlotsUnchanged": true
+    },
+    {
+      "label": "5036",
+      "artifacts": "built",
+      "mode": "compatible",
+      "status": "executed",
+      "constructorIdentity": true,
+      "providerInstance": true,
+      "consumerInstance": true,
+      "sharedLiteral": "shared-provider-literal",
+      "remoteLiteral": "remote-file-literal",
+      "runtimeRemoteLiteral": "runtime-data-url-remote-literal",
+      "consumerRemoteSharedIdentity": true,
+      "metadata": {
+        "contract": 1,
+        "compatibilityId": "rspack-file-proof-v1",
+        "required": [
+          "remote",
+          "shared"
+        ],
+        "forbidden": [],
+        "available": [
+          "remote",
+          "shared"
+        ],
+        "target": "node",
+        "entryLoadingIdentity": "rspack-async-node-file-v1"
+      },
+      "warnings": [
+        "Detect multiple module federation runtime! Injected runtime from proofProvider@2.9.2 and current is proofConsumer@2.9.2, pleasure ensure there is only one consumer to provider runtime!",
+        "Detect multiple module federation runtime! Injected runtime from proofProvider@2.9.2 and current is proofRemote@2.9.2, pleasure ensure there is only one consumer to provider runtime!",
+        "Detect multiple module federation runtime! Injected runtime from proofProvider@2.9.2 and current is proofRemote@2.9.2, pleasure ensure there is only one consumer to provider runtime!"
+      ]
+    },
+    {
+      "label": "5036",
+      "artifacts": "built",
+      "mode": "target",
+      "status": "rejected",
+      "message": "[ Federation Runtime ]: Refusing to reuse a node runtime image for web.",
+      "providerUnchanged": true
+    },
+    {
+      "label": "5036",
+      "artifacts": "built",
+      "mode": "loader",
+      "status": "rejected",
+      "message": "[ Federation Runtime ]: Refusing to reuse entry loader rspack-async-node-file-v1 with different-loader.",
+      "providerUnchanged": true
+    },
+    {
+      "label": "5036",
+      "artifacts": "built",
+      "mode": "abi",
+      "status": "rejected",
+      "message": "[ Federation Runtime ]: Refusing to reuse runtime state from rspack-file-proof-v1 with different-abi.",
+      "providerUnchanged": true
+    },
+    {
+      "label": "5036",
+      "artifacts": "built",
+      "mode": "capability",
+      "status": "rejected",
+      "message": "[ Federation Runtime ]: Runtime image is missing capability unsupported-proof-capability.",
+      "providerUnchanged": true
+    },
+    {
+      "label": "5036",
+      "artifacts": "built",
+      "mode": "unknown-contract",
+      "status": "rejected",
+      "message": "[ Federation Runtime ]: [RuntimeImageContract] Unsupported runtime-image contract; expected 1.",
+      "providerUnchanged": true
+    },
+    {
+      "label": "5036",
+      "artifacts": "built",
+      "mode": "null",
+      "status": "rejected",
+      "message": "[ Federation Runtime ]: [RuntimeImageContract] Invalid runtime-image descriptor.",
+      "providerUnchanged": true
+    },
+    {
+      "label": "5036",
+      "artifacts": "built",
+      "mode": "wrong-shape",
+      "status": "rejected",
+      "message": "[ Federation Runtime ]: [RuntimeImageContract] Invalid runtime-image descriptor fields.",
+      "providerUnchanged": true
+    }
+  ],
+  "built_artifact_sha256": {
+    "packages/runtime-core/dist/index.cjs": "f57446495e3b3d72d0c7330fe72f5771277d49bc65a660175f1f4456532646e2",
+    "packages/runtime-core/dist/runtimeImage.cjs": "30843996896eb9fed873904be7258e535f590dfa25f29f62f33eaf46148b7200",
+    "packages/runtime/dist/index.cjs": "2eda582d474242f7af732aa07ab8b6e516e03f82a835c69353ae6c6cd7314b0a",
+    "packages/runtime-plugins/inject-external-runtime-core-plugin/dist/index.cjs": "703c6c7283a4651c8010084863d59a340ce4b0123baff976f0fcede7b6870db7",
+    "packages/rspack/dist/index.js": "04ff8eafe9c7d1ea1625fe21b3575e0d70e9fa5fb5d019b6f170a37ac697d96c"
+  }
+}

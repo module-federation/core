@@ -1,0 +1,13 @@
+
+> @module-federation/runtime-core@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/runtime-core
+> rstest -u
+
+error   Failed to run Rstest.
+error   listen EPERM: operation not permitted ::1:3000
+    at Server.setupListenHandle [as _listen2] (node:net:1986:21)
+    at listenInCluster (node:net:2065:12)
+    at GetAddrInfoReqWrap.callback (node:net:2274:7)
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:134:8)
+/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/runtime-core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @module-federation/runtime-core@2.9.2 test: `rstest -u`
+Exit status 1

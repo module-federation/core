@@ -1,0 +1,7 @@
+{"version":"baseline","label":"expected asset","status":200,"body":"SAFE_EXPECTED_FALLBACK"}
+{"version":"baseline","label":"expected asset with query","status":200,"body":"SAFE_EXPECTED_FALLBACK"}
+{"version":"baseline","label":"literal traversal","status":200,"body":"HARMLESS_OUTSIDE_DIST_SENTINEL"}
+{"version":"baseline","label":"nested traversal","status":200,"body":"HARMLESS_OUTSIDE_DIST_SENTINEL"}
+{"version":"baseline","label":"encoded traversal","status":404}
+{"version":"baseline","label":"encoded slash traversal","status":404}
+{"version":"baseline","label":"unrelated emitted asset","status":200,"body":"HARMLESS_UNEXPECTED_OUTPUT"}

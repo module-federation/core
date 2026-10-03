@@ -1,0 +1,82 @@
+[
+  {
+    "number": 5096,
+    "before": "f276426d3f34fadcf1b4de2df5ad470aa88081b3",
+    "after": "13e83755eba6b461161cb47e747343bdb9a3894c",
+    "parent": "13e83755eba6b461161cb47e747343bdb9a3894c",
+    "changedFiles": [
+      ".changeset/tame-image-contract.md",
+      "packages/runtime-core/__tests__/runtime-image.spec.ts",
+      "packages/runtime-core/src/core.ts",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/src/runtimeImage.ts",
+      "packages/runtime-plugins/inject-external-runtime-core-plugin/__tests__/esm-import.spec.ts",
+      "packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts",
+      "packages/runtime/__tests__/runtime-image.spec.ts",
+      "packages/runtime/src/index.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true
+  },
+  {
+    "number": 5097,
+    "before": "40670d51b467bbbece0e3f0ba1da7eee2727af92",
+    "after": "9125075e4766828695725bbc2a47632be44374d3",
+    "parent": "13e83755eba6b461161cb47e747343bdb9a3894c",
+    "changedFiles": [
+      ".changeset/tame-image-contract.md",
+      "packages/runtime-core/__tests__/runtime-image.spec.ts",
+      "packages/runtime-core/src/core.ts",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/src/runtimeImage.ts",
+      "packages/runtime-plugins/inject-external-runtime-core-plugin/__tests__/esm-import.spec.ts",
+      "packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts",
+      "packages/runtime/__tests__/runtime-image.spec.ts",
+      "packages/runtime/src/index.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true
+  },
+  {
+    "number": 5098,
+    "before": "cf8bd3d6f06de1ad02402a113b4d7f2da79c415d",
+    "after": "1ddfa45b7f9d34e7d15b5630a64771e3ea6f0ee7",
+    "parent": "9125075e4766828695725bbc2a47632be44374d3",
+    "changedFiles": [
+      ".changeset/tame-image-contract.md",
+      "packages/runtime-core/__tests__/runtime-image.spec.ts",
+      "packages/runtime-core/src/core.ts",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/src/runtimeImage.ts",
+      "packages/runtime-plugins/inject-external-runtime-core-plugin/__tests__/esm-import.spec.ts",
+      "packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts",
+      "packages/runtime/__tests__/runtime-image.spec.ts",
+      "packages/runtime/src/index.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true
+  },
+  {
+    "number": 5107,
+    "before": "8643b69633039571cac171d1595645b75e62cf95",
+    "after": "d3d52a0cc28e8a6fef0d6698f5876ac5804285b3",
+    "parent": "1ddfa45b7f9d34e7d15b5630a64771e3ea6f0ee7",
+    "changedFiles": [
+      ".changeset/tame-image-contract.md",
+      "packages/runtime-core/__tests__/runtime-image.spec.ts",
+      "packages/runtime-core/src/core.ts",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/src/runtimeImage.ts",
+      "packages/runtime-plugins/inject-external-runtime-core-plugin/__tests__/esm-import.spec.ts",
+      "packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts",
+      "packages/runtime/__tests__/runtime-image.spec.ts",
+      "packages/runtime/src/index.ts"
+    ],
+    "clean": true,
+    "originalAncestor": true,
+    "updatedParentAncestor": true
+  }
+]

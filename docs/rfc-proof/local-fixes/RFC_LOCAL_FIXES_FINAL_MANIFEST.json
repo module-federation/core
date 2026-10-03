@@ -1,0 +1,179 @@
+{
+  "metadataImplemented": false,
+  "metadataProposalEvidenceCommit": "d52ec3cd4232de27a4ca6269747addda894674bd",
+  "focusedSourceCommits": {
+    "rfc5036": "13e83755eba6b461161cb47e747343bdb9a3894c",
+    "rfc5128": "7aca6f70d415d110dd5419ace5b4c6a566c902c9",
+    "codeql5180": "663c8f39274ebd1198cdae57702b62066a697778"
+  },
+  "links": [
+    {
+      "number": 5093,
+      "family": "rfc5036",
+      "originalHead": "00b53e38730a4728781282b036847ab9194bfe3a",
+      "previousPublishedProofHead": "d4cd788d976c9086879856b3f317fd70084c5353",
+      "localFinalHead": "d4cd788d976c9086879856b3f317fd70084c5353",
+      "followupChanged": false,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5093"
+    },
+    {
+      "number": 5094,
+      "family": "rfc5036",
+      "originalHead": "d077ea1969d78fb98d1d4fbbd67427a52ea0deac",
+      "previousPublishedProofHead": "0fcb404ceec52a96cc95f597023afa1c4e03c6ca",
+      "localFinalHead": "0fcb404ceec52a96cc95f597023afa1c4e03c6ca",
+      "followupChanged": false,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5094"
+    },
+    {
+      "number": 5095,
+      "family": "rfc5036",
+      "originalHead": "9fb0f2fc76a21059688ae7d8c2d867a13ee7994c",
+      "previousPublishedProofHead": "b447659fe6440c5c5c1fd3b9b4bae38eeb09ed17",
+      "localFinalHead": "b447659fe6440c5c5c1fd3b9b4bae38eeb09ed17",
+      "followupChanged": false,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5095"
+    },
+    {
+      "number": 5096,
+      "family": "rfc5036",
+      "originalHead": "f32aae69b62b66f7f7453ce3ad038b13b8d1d3f3",
+      "previousPublishedProofHead": "f276426d3f34fadcf1b4de2df5ad470aa88081b3",
+      "localFinalHead": "13e83755eba6b461161cb47e747343bdb9a3894c",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5096"
+    },
+    {
+      "number": 5097,
+      "family": "rfc5036",
+      "originalHead": "9f7dc2319d336e9615c12f1187e4f67aae83ea71",
+      "previousPublishedProofHead": "40670d51b467bbbece0e3f0ba1da7eee2727af92",
+      "localFinalHead": "9125075e4766828695725bbc2a47632be44374d3",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5097"
+    },
+    {
+      "number": 5098,
+      "family": "rfc5036",
+      "originalHead": "17531d70586dee766d9b67f18b8efb7fdffef848",
+      "previousPublishedProofHead": "cf8bd3d6f06de1ad02402a113b4d7f2da79c415d",
+      "localFinalHead": "1ddfa45b7f9d34e7d15b5630a64771e3ea6f0ee7",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5098"
+    },
+    {
+      "number": 5107,
+      "family": "rfc5036",
+      "originalHead": "c813c4fdd82e3f146daca65c322b481ada0cb6c9",
+      "previousPublishedProofHead": "8643b69633039571cac171d1595645b75e62cf95",
+      "localFinalHead": "d3d52a0cc28e8a6fef0d6698f5876ac5804285b3",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107"
+    },
+    {
+      "number": 5135,
+      "family": "rfc5128",
+      "originalHead": "b5733f4712ee2e696af9d5b68b4b5e0e0112b59f",
+      "previousPublishedProofHead": "ca0b6188fd57b067dc20e3b8d66f0805e8d2b72a",
+      "localFinalHead": "7aca6f70d415d110dd5419ace5b4c6a566c902c9",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5135"
+    },
+    {
+      "number": 5137,
+      "family": "rfc5128",
+      "originalHead": "ab1bcc0401f1eb93729004a069586f0d6510e4df",
+      "previousPublishedProofHead": "b26e12e9f27fe6fb5b76438e7b7f5e4042af892e",
+      "localFinalHead": "feab1692880cacd51fb9bb63fa1fca957d07e793",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5137"
+    },
+    {
+      "number": 5139,
+      "family": "rfc5128",
+      "originalHead": "302500c868c4f5fb862356e0f3509089897bc066",
+      "previousPublishedProofHead": "95286625fc5ce7a1479983b6fa3a8b2980146d71",
+      "localFinalHead": "a4e4da4eb6e17d9dd9acb46db3b3aff6240159d1",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5139"
+    },
+    {
+      "number": 5134,
+      "family": "rfc5128",
+      "originalHead": "a3a65b4be74b7e4bfd41adc8da6124ea82df384c",
+      "previousPublishedProofHead": "54622d775688ff8c3e9ac77cba50acffca265cfc",
+      "localFinalHead": "0999fbfa562a52f781765d9f3d6c4e4a2dde8900",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5134"
+    },
+    {
+      "number": 5140,
+      "family": "rfc5128",
+      "originalHead": "f2eb03ceefc96adde04bb266107fb0284cd17e8a",
+      "previousPublishedProofHead": "47bc0f852aa5867214e153fb822f6683f6ce3cb0",
+      "localFinalHead": "0599689e29f927b7ff3efdb8ade1522d7989525e",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5140"
+    },
+    {
+      "number": 5141,
+      "family": "rfc5128",
+      "originalHead": "84cee419c5c7dc2bb87d1a92cd7fb8e15e409aec",
+      "previousPublishedProofHead": "83134b63016cd237bad96f7797706bfd8dd565c5",
+      "localFinalHead": "7af25cdb9243eb8556d18ec451fce9973b6a0cfb",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5141"
+    },
+    {
+      "number": 5142,
+      "family": "rfc5128",
+      "originalHead": "db5159fcffec872651ed9b11d2ad2ca1f4c0fcb2",
+      "previousPublishedProofHead": "7db5f9fb9b3b386a3cd36b9ad5b89a62f8f5eb72",
+      "localFinalHead": "9a5c81b05ae0ab16f7858fa877ab3073e48b218b",
+      "followupChanged": true,
+      "sourcePushHeld": true,
+      "prPushHeld": true,
+      "clean": true,
+      "localWorktree": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5142"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+
+> @module-federation/inject-external-runtime-core-plugin@2.9.2 test /Users/zackjackson/Documents/Codex/2026-10-02/task-4/stack5107/packages/runtime-plugins/inject-external-runtime-core-plugin
+> NODE_OPTIONS=--experimental-vm-modules pnpm exec jest --config jest.config.cjs
+
+(node:22908) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS inject-external-runtime-core-plugin __tests__/esm-import.spec.ts
+  @module-federation/inject-external-runtime-core-plugin
+    ✓ rejects supplied null metadata with a core lacking Global while retaining untagged legacy behavior (248 ms)
+    ✓ rejects supplied null without first publication or replacement (13 ms)
+    ✓ rejects supplied false without first publication or replacement (1 ms)
+    ✓ rejects supplied zero without first publication or replacement (4 ms)
+    ✓ rejects supplied empty string without first publication or replacement (1 ms)
+    ✓ rejects supplied unsupported contract without first publication or replacement (1 ms)
+    ✓ rejects supplied array descriptor without first publication or replacement (1 ms)
+    ✓ rejects supplied malformed arrays without first publication or replacement (1 ms)
+    ✓ rejects supplied missing loader without first publication or replacement (1 ms)
+    ✓ admits v1 shape at first publication without applying peer capability checks
+    ✓ loads from the ESM entry and runs beforeInit without a runtime-core default export (154 ms)
+    ✓ loads from the CJS entry and runs beforeInit
+    ✓ stays silent and re-publishes for providers without runtime images (1 ms)
+    ✓ publishes runtime-image metadata and rejects an incompatible provider (1 ms)
+    ✓ keeps legacy first use and reuse working without an image checker (9 ms)
+    ✓ rejects image metadata on first use before publishing with an old core (8 ms)
+    ✓ rejects reuse of image metadata without replacing the old provider (10 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       17 passed, 17 total
+Snapshots:   0 total
+Time:        0.945 s, estimated 4 s
+Ran all test suites.

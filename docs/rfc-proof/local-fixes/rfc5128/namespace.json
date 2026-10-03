@@ -1,0 +1,27 @@
+{
+  "root": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/index.cjs",
+  "kernel": "/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5128-external-kernel/packages/runtime-core/dist/index.cjs",
+  "sameNamespace": true,
+  "kernelExports": [
+    {
+      "name": "FederationKernel",
+      "type": "function"
+    },
+    {
+      "name": "CurrentGlobal",
+      "type": "object"
+    },
+    {
+      "name": "getGlobalSnapshotInfoByModuleInfo",
+      "type": "function"
+    },
+    {
+      "name": "getRemoteEntry",
+      "type": "function"
+    },
+    {
+      "name": "setGlobalFederationInstance",
+      "type": "function"
+    }
+  ]
+}

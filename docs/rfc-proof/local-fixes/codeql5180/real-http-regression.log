@@ -1,0 +1,31 @@
+Start building shared fallback resources ...
+Shared "shared-lib" compilation succeeded
+All shared fallback have been compiled successfully
+{
+  "value": "secondary-shared-fallback",
+  "requests": [
+    "/independent-packages/shared_lib/1.0.0/share-entry.js"
+  ],
+  "remoteDisabled": false,
+  "configuredPlatform": "node",
+  "platformNodeModule": false,
+  "nonInitialChunks": 0,
+  "remoteCapability": "legacy full runtime",
+  "snapshotCapability": "legacy full runtime"
+}
+{
+  "cleanupObserver": true,
+  "fixtureExitCode": 0,
+  "temporaryDirectoriesCreated": 1,
+  "temporaryDirectoriesRemaining": 0,
+  "servers": [
+    {
+      "address": {
+        "address": "127.0.0.1",
+        "family": "IPv4",
+        "port": 64869
+      },
+      "closed": true
+    }
+  ]
+}
