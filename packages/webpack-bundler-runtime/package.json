@@ -83,6 +83,20 @@
         "default": "./dist/selectors/shared-runtime/legacy.js"
       }
     },
+    "#mf/tree-shaking-share-plugin": {
+      "module-federation:no-shared": {
+        "types": "./dist/selectors/tree-shaking-share-plugin/disabled.d.ts",
+        "import": "./dist/selectors/tree-shaking-share-plugin/disabled.js",
+        "require": "./dist/selectors/tree-shaking-share-plugin/disabled.cjs",
+        "default": "./dist/selectors/tree-shaking-share-plugin/disabled.js"
+      },
+      "default": {
+        "types": "./dist/selectors/tree-shaking-share-plugin/legacy.d.ts",
+        "import": "./dist/selectors/tree-shaking-share-plugin/legacy.js",
+        "require": "./dist/selectors/tree-shaking-share-plugin/legacy.cjs",
+        "default": "./dist/selectors/tree-shaking-share-plugin/legacy.js"
+      }
+    },
     "#mf/container-entry": {
       "module-federation:no-container-entry": {
         "types": "./dist/selectors/container-entry/disabled.d.ts",
