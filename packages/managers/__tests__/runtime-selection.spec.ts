@@ -9,6 +9,7 @@ import {
   registerRuntimeParticipant,
   resolveRuntimeImplementation,
   RuntimeSelectionError,
+  RUNTIME_SELECTION_SLOT,
 } from '../src/runtime-selection';
 
 const NAMES = {
@@ -537,6 +538,27 @@ describe('compiler selection slot', () => {
 
   afterEach(() => {
     fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it.each([
+    { participants: [], finalized: false, installed: false },
+    { version: 2, participants: [], finalized: false, installed: false },
+    { version: 1, participants: null, finalized: false, installed: false },
+    { version: 1, participants: [], finalized: true, installed: true },
+    {
+      version: 1,
+      participants: [],
+      finalized: true,
+      installed: true,
+      image: {},
+      profile: {},
+    },
+    false,
+  ])('rejects malformed or unsupported shared slots: %j', (value) => {
+    const compiler = { [RUNTIME_SELECTION_SLOT]: value };
+    expect(() => getSelectionSlot(compiler)).toThrow(
+      expect.objectContaining({ code: 'invalid-selection-slot' }),
+    );
   });
 
   it('names both families when participants request different ones', () => {

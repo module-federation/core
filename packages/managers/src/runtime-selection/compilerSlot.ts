@@ -2,6 +2,9 @@ import { conditionsFor, reduceCapabilityProfile } from './capabilityProfile';
 import { resolveRuntimeImplementation } from './resolveRuntimeImplementation';
 import {
   RUNTIME_SELECTION_SLOT,
+  RUNTIME_SELECTION_CONTRACT_VERSION,
+  isRecord,
+  MEMBER_ROLES,
   RuntimeSelectionError,
   type CapabilityProfile,
   type ParticipantRequest,
@@ -9,6 +12,7 @@ import {
 } from './types';
 
 export interface SelectionSlot {
+  version: 1;
   participants: ParticipantRequest[];
   finalized: boolean;
   installed: boolean;
@@ -16,13 +20,114 @@ export interface SelectionSlot {
   profile?: CapabilityProfile;
 }
 
+function isSelectedImage(
+  value: unknown,
+): value is ResolvedRuntimeImplementation {
+  if (!isRecord(value)) return false;
+  const family = value['family'];
+  if (!isRecord(family) || !isRecord(family['members'])) return false;
+  const members = family['members'];
+  return (
+    ['anchor', 'facadeEntry', 'entryLoadingIdentity'].every(
+      (key) => typeof value[key] === 'string',
+    ) &&
+    (value['mode'] === 'conditions' || value['mode'] === 'legacy-defines') &&
+    (value['externalMode'] === 'bundled' ||
+      value['externalMode'] === 'external-core') &&
+    typeof family['instanceId'] === 'string' &&
+    typeof family['compatibilityId'] === 'string' &&
+    MEMBER_ROLES.every((role) => {
+      const member = members[role];
+      return (
+        isRecord(member) &&
+        member['role'] === role &&
+        [
+          'packageName',
+          'version',
+          'canonicalRoot',
+          'entry',
+          'packageJsonPath',
+        ].every((key) => typeof member[key] === 'string')
+      );
+    }) &&
+    isRecord(value['allowedEntries']) &&
+    Object.values(value['allowedEntries']).every(
+      (entry) => typeof entry === 'string',
+    ) &&
+    isRecord(value['allowedRequests']) &&
+    Object.values(value['allowedRequests']).every(
+      (request) =>
+        isRecord(request) &&
+        MEMBER_ROLES.some((role) => role === request['role']) &&
+        typeof request['exportName'] === 'string',
+    ) &&
+    isRecord(value['selectors']) &&
+    Object.values(value['selectors']).every((selector) => {
+      if (!isRecord(selector) || !isRecord(selector['leaves'])) return false;
+      const leaves = selector['leaves'];
+      return (
+        MEMBER_ROLES.some((role) => role === selector['ownerRole']) &&
+        (selector['disabledCondition'] === undefined ||
+          typeof selector['disabledCondition'] === 'string') &&
+        ['enabled', 'disabled', 'legacy'].every(
+          (leaf) => typeof leaves[leaf] === 'string',
+        )
+      );
+    })
+  );
+}
+
+function isSelectedProfile(value: unknown): value is CapabilityProfile {
+  return (
+    isRecord(value) &&
+    ['remote', 'shared', 'snapshotPlugins', 'containerEntry'].every(
+      (capability) =>
+        ['neutral', 'required', 'forbidden'].some(
+          (intent) => intent === value[capability],
+        ),
+    ) &&
+    (value['explicitTarget'] === null ||
+      ['web', 'node', 'worker'].some(
+        (target) => target === value['explicitTarget'],
+      )) &&
+    ['web', 'node', 'worker', 'universal'].some(
+      (target) => target === value['target'],
+    ) &&
+    (value['externalMode'] === 'bundled' ||
+      value['externalMode'] === 'external-core')
+  );
+}
+
+function isSelectionSlot(value: unknown): value is SelectionSlot {
+  return (
+    isRecord(value) &&
+    value['version'] === RUNTIME_SELECTION_CONTRACT_VERSION &&
+    Array.isArray(value['participants']) &&
+    value['participants'].every(
+      (participant) =>
+        isRecord(participant) && typeof participant['pluginName'] === 'string',
+    ) &&
+    typeof value['finalized'] === 'boolean' &&
+    typeof value['installed'] === 'boolean' &&
+    (!value['finalized'] ||
+      (isSelectedImage(value['image']) && isSelectedProfile(value['profile'])))
+  );
+}
+
 export function getSelectionSlot(compiler: object): SelectionSlot {
-  const record = compiler as Record<symbol, SelectionSlot | undefined>;
+  const record = compiler as Record<symbol, unknown>;
   const existing = record[RUNTIME_SELECTION_SLOT];
-  if (existing) {
+  if (existing !== undefined) {
+    if (!isSelectionSlot(existing)) {
+      throw new RuntimeSelectionError(
+        'invalid-selection-slot',
+        'Compiler runtime selection slot has an unsupported version or malformed state.',
+      );
+    }
     return existing;
   }
   const created: SelectionSlot = {
+    version: RUNTIME_SELECTION_CONTRACT_VERSION,
     participants: [],
     finalized: false,
     installed: false,
