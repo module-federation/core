@@ -38,7 +38,11 @@ export async function loadEntryNode({
     loaderHook.lifecycle.createScript.listeners.size > 0 ||
     loaderHook.lifecycle.fetch.listeners.size > 0 ||
     loaderHook.lifecycle.loadEntryError.listeners.size > 0;
-  if (remoteEntryExports && !customLoading) {
+  // A process-global export has no evaluator provenance. Contextual loads
+  // deduplicate through globalLoading and must use their own SDK result, even
+  // when this request has no hooks: a previous custom load may own the global.
+  const isolatedLoading = Boolean(entryLoadingContext) || customLoading;
+  if (remoteEntryExports && !isolatedLoading) {
     return remoteEntryExports;
   }
 
@@ -75,7 +79,7 @@ export async function loadEntryNode({
       if (isRemoteEntryExports(loaded)) {
         return loaded;
       }
-      if (customLoading) {
+      if (isolatedLoading) {
         error(
           `Node entry evaluator for remote "${name}" did not return callable get/init exports.`,
         );
