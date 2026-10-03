@@ -146,7 +146,8 @@ const linkSharedPlugin = (config: NormalizedFederationConfig): Plugin => ({
 export const moduleFederationPlugin = (config: NormalizedFederationConfig) => ({
   name: 'module-federation',
   setup(build: PluginBuild) {
-    const cwd = build.initialOptions.absWorkingDir || process.cwd();
+    // esbuild reports metafile paths relative to absWorkingDir, which defaults to process.cwd().
+    const absWorkingDir = build.initialOptions.absWorkingDir || process.cwd();
     build.initialOptions.metafile = true;
     const externals = getExternals(config);
     if (build.initialOptions.external) {
@@ -234,7 +235,7 @@ export const moduleFederationPlugin = (config: NormalizedFederationConfig) => ({
 
           if (!(value as any).entryPoint.endsWith(remoteFile)) continue;
 
-          const outputFile = path.resolve(cwd, outputPath);
+          const outputFile = path.resolve(absWorkingDir, outputPath);
           const container = fs.readFileSync(outputFile, 'utf-8');
 
           const withExports = container
@@ -244,7 +245,7 @@ export const moduleFederationPlugin = (config: NormalizedFederationConfig) => ({
           fs.writeFileSync(outputFile, withExports, 'utf-8');
         }
       }
-      await writeRemoteManifest(config, result, cwd);
+      await writeRemoteManifest(config, result, absWorkingDir);
       console.log(`build ended with ${result.errors.length} errors`);
     });
   },
