@@ -1,5 +1,11 @@
 # @module-federation/native-federation-typescript
 
+## 0.6.5
+
+### Patch Changes
+
+- 000f3fa: Addresses CVE-2026-76845 by upgrading `adm-zip` to `0.6.1`.
+
 ## 0.6.4
 
 ### Patch Changes

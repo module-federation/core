@@ -756,6 +756,7 @@ export class RemoteHandler {
         }
         const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
           loadedModule.remoteInfo,
+          host,
         );
 
         if (globalLoading[remoteEntryUniqueKey]) {
