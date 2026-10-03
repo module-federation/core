@@ -457,7 +457,10 @@ class FederationRuntimePlugin {
   }
 
   setRuntimeAlias(compiler: Compiler) {
-    const alias: any = compiler.options.resolve.alias || {};
+    const existingAlias = compiler.options.resolve.alias;
+    const alias: any = Array.isArray(existingAlias)
+      ? [...existingAlias]
+      : { ...existingAlias };
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || this.runtimePath;
     alias['@module-federation/runtime-tools$'] =
