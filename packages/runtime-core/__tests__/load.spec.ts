@@ -565,6 +565,347 @@ describe('getRemoteEntry - globalLoading rejection cache', () => {
     expect(secondOriginAttempts).toBe(0);
   });
 
+  it.each([false, true])(
+    'isolates distinct host evaluators with matching image metadata (reverse=%s)',
+    async (reverse) => {
+      const containers = [
+        { get: rs.fn(), init: rs.fn() },
+        { get: rs.fn(), init: rs.fn() },
+      ];
+      const evaluators = containers.map((container, index) => ({
+        name: `distinct-evaluator-${index}`,
+        loadEntry: rs.fn(() => container),
+      }));
+      const hosts = evaluators.map((plugin, index) => {
+        const host = new ModuleFederation({
+          name: `evaluator-host-${index}`,
+          remotes: [],
+          plugins: [plugin],
+        });
+        attachRuntimeImage(host, runtimeImage());
+        return host;
+      });
+      const first = reverse ? 1 : 0;
+      const second = 1 - first;
+      const remoteInfo = getRemoteInfo({
+        name: 'evaluator-remote',
+        entry: 'https://remote.test/evaluator.js',
+      });
+      await expect(
+        getRemoteEntry({ origin: hosts[first], remoteInfo }),
+      ).resolves.toBe(containers[first]);
+      await expect(
+        getRemoteEntry({ origin: hosts[second], remoteInfo }),
+      ).resolves.toBe(containers[second]);
+      expect(evaluators[second].loadEntry).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it.each([false, true])(
+    'isolates distinct createScript evaluators while a load is pending (reverse=%s)',
+    async (reverse) => {
+      const container = { get: rs.fn(), init: rs.fn() };
+      const finishes: Array<(value: typeof container) => void> = [];
+      const loadEntry = rs.fn(
+        () =>
+          new Promise<typeof container>((resolve) => {
+            finishes.push(resolve);
+          }),
+      );
+      const hosts = [0, 1].map((index) => {
+        const host = new ModuleFederation({
+          name: `script-evaluator-host-${index}`,
+          remotes: [],
+          plugins: [
+            {
+              name: `script-evaluator-${index}`,
+              loadEntry,
+              createScript: rs.fn(),
+            },
+          ],
+        });
+        attachRuntimeImage(host, runtimeImage());
+        return host;
+      });
+      const remoteInfo = getRemoteInfo({
+        name: 'pending-evaluator-remote',
+        entry: 'https://remote.test/pending-evaluator.js',
+      });
+      const first = reverse ? 1 : 0;
+      const pending = getRemoteEntry({ origin: hosts[first], remoteInfo });
+      const otherPending = getRemoteEntry({
+        origin: hosts[1 - first],
+        remoteInfo,
+      });
+      expect(loadEntry).toHaveBeenCalledTimes(2);
+      for (const finish of finishes) finish(container);
+      await expect(pending).resolves.toBe(container);
+      await expect(otherPending).resolves.toBe(container);
+    },
+  );
+
+  it.each([false, true])(
+    'allows a different evaluator after rejection and reset (reverse=%s)',
+    async (reverse) => {
+      const container = { get: rs.fn(), init: rs.fn() };
+      const evaluators = [0, 1].map((index) => ({
+        name: `retry-evaluator-${index}`,
+        loadEntry: rs.fn(() => Promise.resolve(container)),
+      }));
+      const first = reverse ? 1 : 0;
+      evaluators[first].loadEntry.mockRejectedValueOnce(
+        new Error('evaluator transient failure'),
+      );
+      const hosts = evaluators.map((plugin, index) => {
+        const host = new ModuleFederation({
+          name: `retry-evaluator-host-${index}`,
+          remotes: [],
+          plugins: [plugin],
+        });
+        attachRuntimeImage(host, runtimeImage());
+        return host;
+      });
+      const remoteInfo = getRemoteInfo({
+        name: 'retry-evaluator-remote',
+        entry: 'https://remote.test/retry-evaluator.js',
+      });
+      const key = getRemoteEntryUniqueKey(remoteInfo);
+      await expect(
+        getRemoteEntry({ origin: hosts[first], remoteInfo }),
+      ).rejects.toThrow('evaluator transient failure');
+      expect(globalLoading[key]).toBeUndefined();
+      expect(globalLoadingMeta[key]).toBeUndefined();
+      await expect(
+        getRemoteEntry({ origin: hosts[1 - first], remoteInfo }),
+      ).resolves.toBe(container);
+      resetFederationGlobalInfo();
+      expect(globalLoading[key]).toBeUndefined();
+      expect(globalLoadingMeta[key]).toBeUndefined();
+      await expect(
+        getRemoteEntry({ origin: hosts[first], remoteInfo }),
+      ).resolves.toBe(container);
+    },
+  );
+
+  it.each([false, true])(
+    'isolates shared callbacks across hosts and deduplicates each host (reverse=%s)',
+    async (reverse) => {
+      const container = { get: rs.fn(), init: rs.fn() };
+      const loadEntry = rs.fn(async () => {
+        await Promise.resolve();
+        return container;
+      });
+      const plugin = { name: 'compatible-entry-evaluator', loadEntry };
+      const hosts = [0, 1].map((index) => {
+        const host = new ModuleFederation({
+          name: `compatible-evaluator-host-${index}`,
+          remotes: [],
+          plugins: [plugin],
+        });
+        attachRuntimeImage(host, runtimeImage());
+        return host;
+      });
+      if (reverse) hosts.reverse();
+      const remoteInfo = getRemoteInfo({
+        name: 'compatible-evaluator-remote',
+        entry: 'https://remote.test/compatible-evaluator.js',
+      });
+      const results = await Promise.all(
+        hosts.map((origin) => getRemoteEntry({ origin, remoteInfo })),
+      );
+      expect(results).toEqual([container, container]);
+      expect(loadEntry).toHaveBeenCalledTimes(2);
+      await expect(
+        getRemoteEntry({ origin: hosts[1], remoteInfo }),
+      ).resolves.toBe(container);
+      expect(loadEntry).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it.each([false, true])(
+    'refuses distinct actual browser IIFE evaluators sharing a physical global (reverse=%s)',
+    async (reverse) => {
+      Reflect.deleteProperty(globalThis, 'remote');
+      const labels = reverse ? ['b', 'a'] : ['a', 'b'];
+      const origins = labels.map((label) => {
+        const origin = new ModuleFederation({
+          name: `browser-script-${label}`,
+          remotes: [],
+          plugins: [
+            {
+              name: `browser-script-${label}`,
+              createScript() {
+                const script = document.createElement('script');
+                script.src = `${BASE}/evaluator-${label}.js`;
+                return script;
+              },
+            },
+          ],
+        });
+        attachRuntimeImage(origin, runtimeImage());
+        return origin;
+      });
+      const remoteInfo = getRemoteInfo({
+        name: 'remote',
+        entry: `${BASE}/original-evaluator.js`,
+      });
+      const results = await Promise.allSettled(
+        origins.map((origin) => getRemoteEntry({ origin, remoteInfo })),
+      );
+      expect(results[0].status).toBe('fulfilled');
+      if (results[0].status !== 'fulfilled' || !results[0].value)
+        throw new Error('first IIFE evaluator did not complete');
+      expect((await results[0].value.get('./value'))()).toBe(
+        `literal-${labels[0]}`,
+      );
+      expect(results[1].status).toBe('rejected');
+      if (results[1].status !== 'rejected')
+        throw new Error('physical global conflict was accepted');
+      expect(results[1].reason.message).toContain(
+        'Distinct browser script evaluators share physical global remote',
+      );
+      Reflect.deleteProperty(globalThis, 'remote');
+      removeScriptTags();
+    },
+  );
+
+  it('keeps scoped cache keys distinct from a real entry URL with the same suffix', async () => {
+    const base = 'https://remote.test/key-collision.js';
+    const firstContainer = { get: rs.fn(), init: rs.fn() };
+    const secondContainer = { get: rs.fn(), init: rs.fn() };
+    const suffixContainer = { get: rs.fn(), init: rs.fn() };
+    const first = new ModuleFederation({
+      name: 'collision-first',
+      remotes: [],
+      plugins: [
+        { name: 'collision-first-entry', loadEntry: () => firstContainer },
+      ],
+    });
+    const second = new ModuleFederation({
+      name: 'collision-second',
+      remotes: [],
+      plugins: [
+        {
+          name: 'collision-second-entry',
+          loadEntry: ({ remoteInfo }) =>
+            remoteInfo.entry === base ? secondContainer : suffixContainer,
+        },
+      ],
+    });
+    attachRuntimeImage(first, runtimeImage());
+    attachRuntimeImage(second, runtimeImage());
+    const remoteInfo = getRemoteInfo({ name: 'collision-remote', entry: base });
+    await expect(getRemoteEntry({ origin: first, remoteInfo })).resolves.toBe(
+      firstContainer,
+    );
+    await expect(getRemoteEntry({ origin: second, remoteInfo })).resolves.toBe(
+      secondContainer,
+    );
+    await expect(
+      getRemoteEntry({
+        origin: second,
+        remoteInfo: getRemoteInfo({
+          name: 'collision-remote',
+          entry: `${base}:evaluator:1`,
+        }),
+      }),
+    ).resolves.toBe(suffixContainer);
+  });
+
+  it('deduplicates default platform loading across image-backed hosts', async () => {
+    Reflect.deleteProperty(globalThis, 'remote');
+    const hosts = [0, 1].map((index) => {
+      const host = new ModuleFederation({
+        name: `default-loader-host-${index}`,
+        remotes: [],
+      });
+      attachRuntimeImage(host, runtimeImage());
+      return host;
+    });
+    const firstLoad = rs.spyOn(
+      hosts[0].loaderHook.lifecycle.createScript,
+      'emit',
+    );
+    const secondLoad = rs.spyOn(
+      hosts[1].loaderHook.lifecycle.createScript,
+      'emit',
+    );
+    const remoteInfo = getRemoteInfo({
+      name: 'remote',
+      entry: `${BASE}/success.js`,
+    });
+    const results = await Promise.all(
+      hosts.map((origin) => getRemoteEntry({ origin, remoteInfo })),
+    );
+    expect(results[0]).toBe(results[1]);
+    expect(firstLoad).toHaveBeenCalledTimes(1);
+    expect(secondLoad).not.toHaveBeenCalled();
+    firstLoad.mockRestore();
+    secondLoad.mockRestore();
+    Reflect.deleteProperty(globalThis, 'remote');
+    removeScriptTags();
+  });
+
+  it.each(['createScript', 'fetch', 'loadEntryError'] as const)(
+    'isolates changed %s hooks within one image-backed host',
+    async (hook) => {
+      const container = { get: rs.fn(), init: rs.fn() };
+      const loadEntry = rs.fn(() => container);
+      const origin = new ModuleFederation({
+        name: `changed-${hook}-host`,
+        remotes: [],
+        plugins: [{ name: 'changed-hook-entry', loadEntry }],
+      });
+      attachRuntimeImage(origin, runtimeImage());
+      const remoteInfo = getRemoteInfo({
+        name: `changed-${hook}-remote`,
+        entry: `https://remote.test/changed-${hook}.js`,
+      });
+      await expect(getRemoteEntry({ origin, remoteInfo })).resolves.toBe(
+        container,
+      );
+      origin.loaderHook.lifecycle[hook].on(rs.fn());
+      await expect(getRemoteEntry({ origin, remoteInfo })).resolves.toBe(
+        container,
+      );
+      expect(loadEntry).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it.each([false, true])(
+    'isolates same-host URL transforms for actual ESM evaluation (reverse=%s)',
+    async (reverse) => {
+      const origin = new ModuleFederation({
+        name: 'esm-transform-host',
+        remotes: [],
+      });
+      attachRuntimeImage(origin, runtimeImage());
+      const remoteInfo = getRemoteInfo({
+        name: 'esm-transform-remote',
+        entry: 'https://remote.test/original.js',
+        type: 'module',
+      });
+      const transforms = ['literal-first', 'literal-second'].map((label) => ({
+        label,
+        getEntryUrl: () =>
+          createDataUrlEntry(
+            `export function get() { return () => '${label}'; } export function init() {}`,
+          ),
+      }));
+      if (reverse) transforms.reverse();
+      for (const transform of transforms) {
+        const result = await getRemoteEntry({
+          origin,
+          remoteInfo,
+          getEntryUrl: transform.getEntryUrl,
+        });
+        expect(result).toBeTruthy();
+        if (!result) throw new Error('ESM entry did not load');
+        expect((await result.get('./value'))()).toBe(transform.label);
+      }
+    },
+  );
+
   it('reuses a cached entry when the retry URL policy changes', async () => {
     const container = { get: rs.fn(), init: rs.fn() };
     let attempts = 0;
