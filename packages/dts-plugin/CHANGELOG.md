@@ -1,5 +1,44 @@
 # @module-federation/dts-plugin
 
+## 2.9.2
+
+### Patch Changes
+
+- 000f3fa: Addresses CVE-2026-76845 by upgrading `adm-zip` to `0.6.1`.
+- 7f0ac8b: Upgrade Undici to 7.29.1 to include the latest 7.x security fixes while preserving Node 20 compatibility.
+  - @module-federation/sdk@2.9.2
+  - @module-federation/managers@2.9.2
+  - @module-federation/third-party-dts-extractor@2.9.2
+  - @module-federation/error-codes@2.9.2
+
+## 2.9.1
+
+### Patch Changes
+
+- 796d6ad: Update ws to 8.21.3 to address CVE-2026-62389.
+  - @module-federation/sdk@2.9.1
+  - @module-federation/managers@2.9.1
+  - @module-federation/third-party-dts-extractor@2.9.1
+  - @module-federation/error-codes@2.9.1
+
+## 2.9.0
+
+### Patch Changes
+
+- @module-federation/sdk@2.9.0
+- @module-federation/managers@2.9.0
+- @module-federation/third-party-dts-extractor@2.9.0
+- @module-federation/error-codes@2.9.0
+
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/sdk@2.8.2
+- @module-federation/managers@2.8.2
+- @module-federation/third-party-dts-extractor@2.8.2
+- @module-federation/error-codes@2.8.2
+
 ## 2.8.1
 
 ### Patch Changes

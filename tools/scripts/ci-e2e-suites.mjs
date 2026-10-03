@@ -72,6 +72,14 @@ export const E2E_SUITE_DEFINITIONS = {
       'tools/scripts/run-node-e2e.mjs',
     ],
   },
+  rstest: {
+    appNames: [
+      'rstest-federation-host',
+      'rstest-federation-profile-remote',
+      'rstest-federation-remote',
+    ],
+    inputs: ['.github/workflows/e2e-rstest.yml'],
+  },
   router: {
     appNames: [
       'host',

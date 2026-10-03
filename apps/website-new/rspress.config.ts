@@ -7,13 +7,12 @@ import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginModuleFederation } from '@module-federation/rspress-plugin';
 import mfConfig from './module-federation.config';
 
-const siteOrigin = (
-  process.env.SITE_ORIGIN || 'https://module-federation.io'
-).replace(/\/$/, '');
+const canonicalSiteOrigin = 'https://module-federation.io'.replace(/\/$/, '');
 const siteIcon = '/svg.svg';
-const socialImageUrl = `${siteOrigin}/module-federation-social.svg`;
+const socialImageUrl = `${canonicalSiteOrigin}/module-federation-social.svg`;
 const socialImageAlt = 'Module Federation icon';
 const googleAnalyticsMeasurementId = 'G-DRPXW0EEVT';
+const enableZephyr = Boolean(process.env.CI || process.env.ZE_SECRET_TOKEN);
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -86,7 +85,7 @@ export default defineConfig({
     //   wordsMapPath: 'words-map.json',
     // }),
     pluginModuleFederation(mfConfig),
-    withZephyr(),
+    ...(enableZephyr ? [withZephyr()] : []),
   ],
   builderConfig: {
     html: {
@@ -113,12 +112,25 @@ gtag('config', '${googleAnalyticsMeasurementId}');
     },
     plugins: [moduleFederationPluginOverview, pluginSass()],
     output: {
-      assetPrefix: `${siteOrigin}/`,
+      assetPrefix: '/',
+    },
+    environments: {
+      node: {
+        output: {
+          // The federated SSG build requires an absolute public path.
+          assetPrefix: `${canonicalSiteOrigin}/`,
+        },
+      },
     },
     dev: {
       assetPrefix: true,
       writeToDisk: true,
       lazyCompilation: false,
+    },
+    server: {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
     },
     performance: {
       buildCache: false,
@@ -126,6 +138,24 @@ gtag('config', '${googleAnalyticsMeasurementId}');
     tools: {
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);
+      },
+      rspack: (config, { environment }) => {
+        if (
+          environment.name === 'web' &&
+          config.optimization?.splitChunks &&
+          typeof config.optimization.splitChunks === 'object'
+        ) {
+          const splitChunks = config.optimization.splitChunks;
+          splitChunks.cacheGroups ??= {};
+          splitChunks.cacheGroups.reactSharedFallback = {
+            test: /[\\/]node_modules[\\/]\.pnpm[\\/](?:cookie|react(?:-dom|-router(?:-dom)?)?|scheduler|set-cookie-parser)@/,
+            name: 'react-shared-fallback',
+            chunks: 'async',
+            enforce: true,
+            priority: 50,
+            reuseExistingChunk: true,
+          };
+        }
       },
       // rspack: {
       //   optimization: {

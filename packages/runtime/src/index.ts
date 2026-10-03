@@ -16,8 +16,10 @@ export {
   Module,
   getRemoteEntry,
   getRemoteInfo,
+  satisfy,
   registerGlobalPlugins,
   type ModuleFederationRuntimePlugin,
+  type RuntimePluginHooks,
   type Federation,
 } from '@module-federation/runtime-core';
 

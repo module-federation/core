@@ -1,5 +1,46 @@
 # @module-federation/devtools
 
+## 2.9.2
+
+### Patch Changes
+
+- @module-federation/observability-plugin@2.6.2
+- @module-federation/sdk@2.9.2
+
+## 2.9.1
+
+### Patch Changes
+
+- 35f2119: Add page-level WebMCP tools for Module Federation inspection, proxy rules, HMR and loading traces. Build separate Chrome side-panel and embedded-browser popup extensions, with a compact popup layout and shared page configuration.
+
+  Use pinned umd-react 19.2.4 development builds for React 19 Fast Refresh, including react-dom/client and eager shared dependencies.
+
+  Register WebMCP tools at document start, retry late host API availability, and expose registration diagnostics.
+
+  Support WebMCP hosts that expose registerTool without unregisterTool.
+  - @module-federation/observability-plugin@2.6.1
+  - @module-federation/sdk@2.9.1
+
+## 2.9.0
+
+### Patch Changes
+
+- 403eebc: Fix remote overrides to support both direct and default proxy core exports.
+- af82ae4: Fix the shared dependencies packages badge rendering its count twice. The badge printed `stats.totalPackages` next to the `packagesBadge` translation, which already interpolates the same value, so a single package showed as "11 packages".
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+  - @module-federation/observability-plugin@2.6.0
+  - @module-federation/sdk@2.9.0
+
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/observability-plugin@2.5.6
+- @module-federation/sdk@2.8.2
+
 ## 2.8.1
 
 ### Patch Changes

@@ -38,11 +38,15 @@ try {
   const rootPackageJson = JSON.parse(
     readFileSync(join(ROOT, 'package.json'), 'utf8'),
   );
+  const rstestPackageJson = JSON.parse(
+    readFileSync(join(ROOT, 'packages/rstest/package.json'), 'utf8'),
+  );
   const packageJson = JSON.parse(
     readFileSync(join(consumerDir, 'package.json'), 'utf8'),
   );
 
   packageJson.devDependencies = {
+    '@rsbuild/core': rstestPackageJson.devDependencies['@rsbuild/core'],
     '@rspack/cli': rootPackageJson.devDependencies['@rspack/cli'],
     '@rspack/core': rootPackageJson.devDependencies['@rspack/core'],
     '@swc/core': rootPackageJson.devDependencies['@swc/core'],
@@ -80,6 +84,7 @@ try {
     cwd: consumerDir,
   });
   run('npm', ['run', 'typecheck'], { cwd: consumerDir });
+  run('npm', ['run', 'typecheck:rstest'], { cwd: consumerDir });
   run('npm', ['run', 'build:webpack'], { cwd: consumerDir });
   run('npm', ['run', 'build:rspack'], { cwd: consumerDir });
   run('node', ['dist/webpack/main.js'], { cwd: consumerDir });

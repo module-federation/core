@@ -147,7 +147,12 @@ export const getGlobalModuleInfo = async (
   }
   await sleep(300);
 
-  const listener = (message: { origin: string; data: any }) => {
+  const listener = (
+    message: { origin: string; data: any },
+    sender?: chrome.runtime.MessageSender,
+  ) => {
+    if (sender?.tab?.id !== undefined && sender.tab.id !== getCurrentTabId())
+      return;
     const { data } = message;
 
     if (!isModuleInfoSyncMessage(data) || data?.appInfos) {

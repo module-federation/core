@@ -11,6 +11,11 @@
   },
   {
     "type": "file",
+    "name": "rstest",
+    "label": "Rstest"
+  },
+  {
+    "type": "file",
     "name": "vite",
     "label": "Vite"
   }

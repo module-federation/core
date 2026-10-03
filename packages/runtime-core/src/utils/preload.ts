@@ -15,6 +15,7 @@ import { matchRemote } from './manifest';
 import { assert } from './logger';
 import { ModuleFederation } from '../core';
 import { getRemoteEntry, isEsmRemoteType } from './load';
+import { getPreloadedAsset, setPreloadedAsset } from '../global';
 
 export function defaultPreloadArgs(
   preloadConfig: PreloadRemoteArgs | depsPreloadArg,
@@ -23,6 +24,7 @@ export function defaultPreloadArgs(
     resourceCategory: 'sync',
     share: true,
     depsRemote: true,
+    recordPreloadedAssets: true,
     ...preloadConfig,
   } as PreloadConfig;
 }
@@ -87,6 +89,24 @@ function createAssetResult(
     id: context.id,
     error,
   };
+}
+
+function preloadAssetOnce(
+  context: ResourceLoadContext,
+  url: string,
+  recordPreloadedAssets: boolean,
+  preload: () => Promise<PreloadAssetResult>,
+): Promise<PreloadAssetResult> {
+  if (!recordPreloadedAssets) {
+    return preload();
+  }
+
+  if (getPreloadedAsset(url)) {
+    return Promise.resolve(createAssetResult(context, url, 'cached'));
+  }
+
+  setPreloadedAsset(url);
+  return preload();
 }
 
 async function waitForRemoteEntryPreload(
@@ -255,6 +275,7 @@ export function preloadAssets(
     initiator: 'preloadRemote',
     id: remoteInfo.name,
   },
+  recordPreloadedAssets = true,
 ): Promise<PreloadAssetResult[]> {
   const { cssAssets, jsAssetsWithoutEntry, entryAssets } = assets;
   const results: Array<Promise<PreloadAssetResult>> = [];
@@ -278,14 +299,17 @@ export function preloadAssets(
         as: 'style',
       };
       cssAssets.forEach((cssUrl) => {
+        const context = createResourceContext(baseContext, 'css');
         results.push(
-          waitForLinkPreload({
-            host,
-            remoteInfo,
-            url: cssUrl,
-            attrs: defaultAttrs,
-            context: createResourceContext(baseContext, 'css'),
-          }),
+          preloadAssetOnce(context, cssUrl, recordPreloadedAssets, () =>
+            waitForLinkPreload({
+              host,
+              remoteInfo,
+              url: cssUrl,
+              attrs: defaultAttrs,
+              context,
+            }),
+          ),
         );
       });
     } else {
@@ -294,15 +318,18 @@ export function preloadAssets(
         type: 'text/css',
       };
       cssAssets.forEach((cssUrl) => {
+        const context = createResourceContext(baseContext, 'css');
         results.push(
-          waitForLinkPreload({
-            host,
-            remoteInfo,
-            url: cssUrl,
-            attrs: defaultAttrs,
-            needDeleteLink: false,
-            context: createResourceContext(baseContext, 'css'),
-          }),
+          preloadAssetOnce(context, cssUrl, recordPreloadedAssets, () =>
+            waitForLinkPreload({
+              host,
+              remoteInfo,
+              url: cssUrl,
+              attrs: defaultAttrs,
+              needDeleteLink: false,
+              context,
+            }),
+          ),
         );
       });
     }
@@ -328,14 +355,17 @@ export function preloadAssets(
     }
 
     jsAssetsWithoutEntry.forEach((jsUrl) => {
+      const context = createResourceContext(baseContext, 'js');
       results.push(
-        preloadJsAsset({
-          host,
-          remoteInfo,
-          url: jsUrl,
-          attrs: defaultAttrs,
-          context: createResourceContext(baseContext, 'js'),
-        }),
+        preloadAssetOnce(context, jsUrl, recordPreloadedAssets, () =>
+          preloadJsAsset({
+            host,
+            remoteInfo,
+            url: jsUrl,
+            attrs: defaultAttrs,
+            context,
+          }),
+        ),
       );
     });
   }
