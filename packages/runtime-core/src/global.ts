@@ -5,6 +5,7 @@ import {
   Remote,
   Optional,
 } from './type';
+import type { EntryLoadingContext } from './type/capability';
 import { getFMId } from './utils/tool';
 import {
   GlobalModuleInfo,
@@ -27,6 +28,7 @@ export interface Federation {
   __ENTRY_LOADING_IDENTITY__: {
     ids: WeakMap<object, number>;
     nextId: number;
+    browserGlobals: Map<string, EntryLoadingContext & { pending: boolean }>;
   };
 }
 
@@ -113,11 +115,16 @@ function setGlobalDefaultVal(target: typeof CurrentGlobal) {
   target.__FEDERATION__.__ENTRY_LOADING_IDENTITY__ ??= {
     ids: new WeakMap(),
     nextId: 0,
+    browserGlobals: new Map(),
   };
+  target.__FEDERATION__.__ENTRY_LOADING_IDENTITY__.browserGlobals ??= new Map();
 }
 
 setGlobalDefaultVal(CurrentGlobal);
 setGlobalDefaultVal(nativeGlobal);
+
+export const browserEntryLoading =
+  CurrentGlobal.__FEDERATION__.__ENTRY_LOADING_IDENTITY__.browserGlobals;
 
 export function getEntryLoadingIdentity(evaluator: object): number {
   const identity = CurrentGlobal.__FEDERATION__.__ENTRY_LOADING_IDENTITY__;

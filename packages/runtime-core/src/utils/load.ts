@@ -24,6 +24,15 @@ const remoteEntryLoadingOrigins = new WeakMap<
   ModuleFederation
 >();
 
+function entryLoadingHooks(origin: ModuleFederation) {
+  return [
+    origin.remoteHandler.hooks.lifecycle.loadEntry,
+    origin.loaderHook.lifecycle.createScript,
+    origin.loaderHook.lifecycle.fetch,
+    origin.loaderHook.lifecycle.loadEntryError,
+  ];
+}
+
 export function isEsmRemoteType(type: RemoteInfo['type']): boolean {
   return type === 'esm' || type === 'module';
 }
@@ -66,12 +75,7 @@ export function getRemoteEntryUniqueKey(
   // are host-scoped even when callbacks are identical. Distinct evaluators can
   // still load their own entry; identity differences never reject a load.
   // Observational hooks are excluded from this boundary.
-  const loadingHooks = [
-    origin.remoteHandler.hooks.lifecycle.loadEntry,
-    origin.loaderHook.lifecycle.createScript,
-    origin.loaderHook.lifecycle.fetch,
-    origin.loaderHook.lifecycle.loadEntryError,
-  ];
+  const loadingHooks = entryLoadingHooks(origin);
   const hookIdentities = loadingHooks.map((hook) =>
     [...hook.listeners].map(getEntryLoadingIdentity).join(','),
   );
@@ -140,6 +144,12 @@ export async function getRemoteEntry(params: {
           loaderHook,
           getEntryUrl,
           resourceContext,
+          entryLoadingContext: {
+            key: uniqueKey,
+            custom:
+              Boolean(getEntryUrl) ||
+              entryLoadingHooks(origin).some((hook) => hook.listeners.size > 0),
+          },
         });
       })
       .then(async (res) => {
