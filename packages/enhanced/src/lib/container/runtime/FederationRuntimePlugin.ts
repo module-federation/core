@@ -449,7 +449,7 @@ class FederationRuntimePlugin {
 
   setRuntimeAlias(compiler: Compiler) {
     const { implementation } = this.options || {};
-    const alias: any = compiler.options.resolve.alias || {};
+    const alias: any = { ...compiler.options.resolve.alias };
     const runtimePath = this.getRuntimeAlias(compiler);
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || runtimePath;
@@ -460,7 +460,7 @@ class FederationRuntimePlugin {
 
     // Set up aliases for the federation runtime and tools
     // This ensures that the correct versions are used throughout the project
-    compiler.options.resolve.alias = alias;
+    compiler.options.resolve = { ...compiler.options.resolve, alias };
   }
 
   apply(compiler: Compiler) {
