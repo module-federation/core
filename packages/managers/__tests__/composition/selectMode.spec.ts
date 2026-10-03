@@ -26,6 +26,21 @@ describe('selectMode', () => {
     expect(await selectMode(composable(), {})).toEqual({ mode: 'composed' });
   });
 
+  it('rejects a declared composition export that only supports require', async () => {
+    const root = composableFamily(tempDir());
+    const file = path.join(
+      packageDir(root, '@module-federation/webpack-bundler-runtime'),
+      'package.json',
+    );
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+    data.exports['./compose'] = { require: './dist/compose.cjs' };
+    fs.writeFileSync(file, JSON.stringify(data));
+
+    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
+      /compose.*ESM/,
+    );
+  });
+
   it('rejects the older runtime-tools in the pnpm store and names the minimum version', async () => {
     const store = path.resolve(__dirname, '../../../../node_modules/.pnpm');
     const [older] = fs

@@ -4,6 +4,7 @@ import {
   RUNTIME_FAMILY,
   type RuntimeFamily,
 } from './family';
+import { resolveCompositionEntry } from './resolveImports';
 
 type ExternalCallback = (err?: Error | null, value?: unknown) => void;
 type ExternalFunction = (...args: any[]) => unknown;
@@ -75,6 +76,15 @@ function familyProblem({ anchor, members }: RuntimeFamily): string | undefined {
     );
     if (missing) {
       return `${pkg} at ${member.root} does not export "${missing}": the installed runtime family lacks the subpath exports this build needs; update the @module-federation runtime packages to the release that added them (${MIN_RUNTIME_VERSION})`;
+    }
+    for (const key of RUNTIME_FAMILY[pkg]) {
+      try {
+        if (!resolveCompositionEntry(member.root, `${pkg}/${key.slice(2)}`)) {
+          return `${pkg} at ${member.root} cannot resolve "${key}" for ESM composition`;
+        }
+      } catch {
+        return `${pkg} at ${member.root} cannot resolve "${key}" for ESM composition`;
+      }
     }
     from = member.root;
   }
