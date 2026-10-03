@@ -368,23 +368,24 @@ describe('FederationCompositionPlugin', () => {
       { '@module-federation/runtime-core/kernel': 'var {}' },
     ],
   ])(
-    'selects the full runtime for ordinary %s externals and keeps explicit defines',
+    'selects the full runtime for ordinary %s externals without removed capability defines',
     async (_, externals) => {
       const context = fixture({
-        'index.js': 'export default typeof FEDERATION_OPTIMIZE_NO_SHARED;',
+        'index.js':
+          'export default [typeof FEDERATION_OPTIMIZE_NO_SHARED, ENV_TARGET];',
       });
       const { stats, output } = await compile(context, {
         externals,
         externalsType: 'commonjs',
-        plugins: [host({ composedRuntime: true })],
+        plugins: [host({ optimization: { target: 'web' } })],
       });
       expect(messages(stats.errors)).toEqual([]);
       expect(messages(stats.warnings)).toEqual([
         expect.stringContaining('is externalized'),
       ]);
       expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
-      expect(output['main.js']).not.toContain(
-        'typeof FEDERATION_OPTIMIZE_NO_SHARED',
+      expect(output['main.js']).toContain(
+        '[typeof FEDERATION_OPTIMIZE_NO_SHARED, "web"]',
       );
     },
   );
@@ -756,7 +757,7 @@ describe('FederationCompositionPlugin', () => {
   });
 
   it.each([false, true])(
-    'preserves the full runtime with an old slot while opted out (oldFirst=%s)',
+    'rejects an old slot despite a retired opt-out setting (oldFirst=%s)',
     async (oldFirst) => {
       const context = fixture({ 'index.js': 'export default 1;' });
       const legacyWriter = {
@@ -768,15 +769,14 @@ describe('FederationCompositionPlugin', () => {
       };
       const plugins = [host({ composedRuntime: false }), legacyWriter];
       if (oldFirst) plugins.reverse();
-      const { stats } = await compile(context, { plugins });
-      expect(messages(stats.errors)).toEqual([]);
-      expect(messages(stats.warnings)).toEqual([]);
-      expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
+      await expect(compile(context, { plugins })).rejects.toThrow(
+        /Invalid module-federation\.composition\/1 compiler slot/,
+      );
     },
   );
 
   it.each([false, true])(
-    'uses the full runtime for same-protocol mixed opt-in and opt-out (reverse=%s)',
+    'composes across copies despite retired mixed opt-in settings (reverse=%s)',
     async (reverse) => {
       const OtherPlugin = loadOtherFederationPlugin();
       const context = fixture({ 'index.js': 'export default 1;' });
@@ -792,16 +792,12 @@ describe('FederationCompositionPlugin', () => {
       if (reverse) plugins.reverse();
       const { stats } = await compile(context, { plugins });
       expect(messages(stats.errors)).toEqual([]);
-      expect(messages(stats.warnings)).toEqual([
-        expect.stringMatching(
-          /another federation options participant did not enable composedRuntime/,
-        ),
-      ]);
-      expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
+      expect(messages(stats.warnings)).toEqual([]);
+      expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(true);
     },
   );
 
-  it('keeps an earlier opt-out when a wrapper applies an opt-in from another copy later', async () => {
+  it('composes when a wrapper applies another copy after a retired opt-out setting', async () => {
     const OtherPlugin = loadOtherFederationPlugin();
     const context = fixture({ 'index.js': 'export default 1;' });
     const { stats } = await compile(context, {
@@ -820,12 +816,8 @@ describe('FederationCompositionPlugin', () => {
       ],
     });
     expect(messages(stats.errors)).toEqual([]);
-    expect(messages(stats.warnings)).toEqual([
-      expect.stringMatching(
-        /another federation options participant did not enable composedRuntime/,
-      ),
-    ]);
-    expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
+    expect(messages(stats.warnings)).toEqual([]);
+    expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(true);
   });
 
   it.each([false, true])(

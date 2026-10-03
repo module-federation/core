@@ -279,7 +279,7 @@ describe('composed runtime', () => {
         out,
         target: 'node',
         ruleFamilyAlias: true,
-        mf: { name: 'identityHost', experiments: composed() },
+        mf: { name: 'identityHost' },
       },
     ]);
     expectComposed(b, 'identityHost');
