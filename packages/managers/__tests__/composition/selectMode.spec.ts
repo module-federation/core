@@ -41,6 +41,41 @@ describe('selectMode', () => {
     );
   });
 
+  it.each([
+    [
+      'an invalid ESM target',
+      { import: '../outside.js', require: './dist/compose.cjs' },
+    ],
+    [
+      'a missing declared ESM file',
+      { import: './dist/missing.js', require: './dist/compose.cjs' },
+    ],
+  ])(
+    'reports %s instead of classifying it as unavailable',
+    async (_, entry) => {
+      const root = composableFamily(tempDir());
+      const memberRoot = packageDir(
+        root,
+        '@module-federation/webpack-bundler-runtime',
+      );
+      const file = path.join(memberRoot, 'package.json');
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      data.exports['./compose'] = entry;
+      fs.writeFileSync(file, JSON.stringify(data));
+
+      const selection = selectMode(resolveRuntimeFamily(root), {});
+      await expect(selection).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `@module-federation/webpack-bundler-runtime at ${memberRoot} failed to resolve "./compose" for ESM composition:`,
+        ),
+        cause: expect.any(Error),
+      });
+      await expect(selection).rejects.toThrow(
+        /Can't resolve|Invalid "exports" target/,
+      );
+    },
+  );
+
   it('rejects the older runtime-tools in the pnpm store and names the minimum version', async () => {
     const store = path.resolve(__dirname, '../../../../node_modules/.pnpm');
     const [older] = fs
