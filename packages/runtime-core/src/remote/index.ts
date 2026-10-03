@@ -5,12 +5,7 @@ import {
   ModuleInfo,
 } from '@module-federation/sdk';
 import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
-import {
-  Global,
-  getInfoWithoutType,
-  globalLoading,
-  CurrentGlobal,
-} from '../global';
+import { Global, getInfoWithoutType, CurrentGlobal } from '../global';
 import {
   Options,
   UserOptions,
@@ -27,13 +22,13 @@ import {
   assert,
   error,
   getRemoteInfo,
-  getRemoteEntryUniqueKey,
   getFMId,
   composeRemoteRequestId,
   matchRemoteWithNameAndExpose,
   optionsToMFContext,
   logger,
 } from '../utils';
+import { clearRemoteEntryCache } from '../utils/load';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { createRemoteHandlerHooks, type RemoteHandlerHooks } from './hooks';
@@ -603,13 +598,7 @@ export class RemoteHandler {
             CurrentGlobal[key] = undefined;
           }
         }
-        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
-          loadedModule.remoteInfo,
-        );
-
-        if (globalLoading[remoteEntryUniqueKey]) {
-          delete globalLoading[remoteEntryUniqueKey];
-        }
+        clearRemoteEntryCache(loadedModule.remoteInfo);
 
         // delete unloaded shared and instance
         let remoteInsId = remoteInfo.buildVersion

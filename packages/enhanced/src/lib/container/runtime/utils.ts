@@ -17,6 +17,15 @@ export interface NormalizedRuntimeInitOptionsWithOutShared {
   remotes: Array<
     Remotes[0] & { externalType: moduleFederationPlugin.ExternalsType }
   >;
+  runtimeImage?: {
+    contract: 1;
+    compatibilityId: string;
+    required: string[];
+    forbidden: string[];
+    available: string[];
+    target: string;
+    entryLoadingIdentity: string;
+  };
 }
 
 const extractUrlAndGlobal = require(

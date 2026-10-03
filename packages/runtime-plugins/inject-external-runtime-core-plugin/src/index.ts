@@ -1,12 +1,16 @@
 import * as runtimeCore from '@module-federation/runtime-tools/runtime-core';
 
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime-tools/runtime-core';
+import type {
+  ModuleFederationRuntimePlugin,
+  RuntimeImageDescriptorV1,
+} from '@module-federation/runtime-tools/runtime-core';
 declare global {
   var __VERSION__: string;
   var _FEDERATION_RUNTIME_CORE: typeof runtimeCore;
   var _FEDERATION_RUNTIME_CORE_FROM: {
     version: string;
     name: string;
+    runtimeImage?: RuntimeImageDescriptorV1;
   };
 }
 
@@ -25,21 +29,34 @@ function injectExternalRuntimeCorePlugin(): ModuleFederationRuntimePlugin {
       }
       const name = args.options.name;
       const version = __VERSION__;
+      const runtimeImage =
+        args.userOptions?.runtimeImage ?? args.options.runtimeImage;
+      const provider = globalRef._FEDERATION_RUNTIME_CORE_FROM;
+      const assertCompatible = runtimeCore.assertRuntimeImageCompatible;
       if (
-        globalRef._FEDERATION_RUNTIME_CORE &&
-        globalRef._FEDERATION_RUNTIME_CORE_FROM &&
-        (globalRef._FEDERATION_RUNTIME_CORE_FROM.name !== name ||
-          globalRef._FEDERATION_RUNTIME_CORE_FROM.version !== version)
+        typeof assertCompatible !== 'function' &&
+        (provider?.runtimeImage || runtimeImage)
       ) {
-        console.warn(
-          `Detect multiple module federation runtime! Injected runtime from ${globalRef._FEDERATION_RUNTIME_CORE_FROM.name}@${globalRef._FEDERATION_RUNTIME_CORE_FROM.version} and current is ${name}@${version}, pleasure ensure there is only one consumer to provider runtime!`,
+        throw new Error(
+          '[RuntimeImageMinimumContract] External runtime-image metadata requires a runtime core with assertRuntimeImageCompatible. Upgrade the runtime core before providing or reusing a runtime image.',
         );
-        return args;
+      }
+      if (globalRef._FEDERATION_RUNTIME_CORE && provider) {
+        if (typeof assertCompatible === 'function') {
+          assertCompatible(provider.runtimeImage, runtimeImage);
+        }
+        if (provider.name !== name || provider.version !== version) {
+          console.warn(
+            `Detect multiple module federation runtime! Injected runtime from ${provider.name}@${provider.version} and current is ${name}@${version}, pleasure ensure there is only one consumer to provider runtime!`,
+          );
+          return args;
+        }
       }
       globalRef._FEDERATION_RUNTIME_CORE = runtimeCore;
       globalRef._FEDERATION_RUNTIME_CORE_FROM = {
         version,
         name,
+        ...(runtimeImage ? { runtimeImage } : {}),
       };
       return args;
     },

@@ -1,0 +1,72 @@
+import { error, warn } from './utils/logger';
+
+export const RUNTIME_IMAGE = Symbol.for('module-federation.runtime-image.v1');
+
+export interface RuntimeImageDescriptorV1 {
+  contract: 1;
+  compatibilityId: string;
+  required: readonly string[];
+  forbidden: readonly string[];
+  available: readonly string[];
+  target: string;
+  entryLoadingIdentity: string;
+}
+
+export function readRuntimeImage(
+  instance: object,
+): RuntimeImageDescriptorV1 | undefined {
+  return (instance as { [RUNTIME_IMAGE]?: RuntimeImageDescriptorV1 })[
+    RUNTIME_IMAGE
+  ];
+}
+
+export function attachRuntimeImage(
+  instance: object,
+  image: RuntimeImageDescriptorV1,
+): void {
+  Object.defineProperty(instance, RUNTIME_IMAGE, {
+    value: image,
+    enumerable: false,
+    configurable: true,
+  });
+}
+
+export function assertRuntimeImageCompatible(
+  current: RuntimeImageDescriptorV1 | undefined,
+  next: RuntimeImageDescriptorV1 | undefined,
+): void {
+  if (!current || !next) {
+    if (current || next) {
+      warn(
+        'Runtime image metadata is missing. Reuse stays allowed until a mismatch is known.',
+      );
+    }
+    return;
+  }
+  if (current.compatibilityId !== next.compatibilityId) {
+    error(
+      `Refusing to reuse runtime state from ${current.compatibilityId} with ${next.compatibilityId}.`,
+    );
+  }
+  if (current.target !== next.target) {
+    error(
+      `Refusing to reuse a ${current.target} runtime image for ${next.target}.`,
+    );
+  }
+  if (current.entryLoadingIdentity !== next.entryLoadingIdentity) {
+    error(
+      `Refusing to reuse entry loader ${current.entryLoadingIdentity} with ${next.entryLoadingIdentity}.`,
+    );
+  }
+  const provided = new Set([...current.available, ...current.required]);
+  for (const capability of new Set([...next.required, ...next.available])) {
+    if (!provided.has(capability)) {
+      error(`Runtime image is missing capability ${capability}.`);
+    }
+  }
+  for (const capability of next.forbidden) {
+    if (provided.has(capability)) {
+      error(`Runtime image exposes forbidden capability ${capability}.`);
+    }
+  }
+}

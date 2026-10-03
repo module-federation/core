@@ -297,6 +297,7 @@ export class ModuleFederation {
       remotes: [],
       shared: {},
       inBrowser: isBrowserEnvValue,
+      runtimeImage: userOptions.runtimeImage,
     };
 
     this.name = userOptions.name;
