@@ -1,6 +1,6 @@
 # Checkpoint — 2026-10-03 01:33 UTC
 
-No existing RFC PR branches have been updated. Published proof branches and the earlier cache checkpoint are ready for independent source review; no cache semantics or merge endorsement is claimed. #5180 is closed based on parent-verified successful CI. Main conflicts have now been resolved locally; final propagation is pending behavioral fixes and integrated validation.
+No existing RFC PR branches have been updated. Published proof branches and the earlier cache checkpoint are ready for independent source review; no cache semantics or merge endorsement is claimed. #5180 remains OPEN and draft at dc61543814fd4a4706608e8b3d3fe34169f7532b; its verification work is complete based on parent-verified successful CI. No PR state change was requested or made. Main conflicts have now been resolved locally; final propagation is pending behavioral fixes and integrated validation.
 
 ## Complete source/evidence unit
 

@@ -10,4 +10,6 @@ Runtime regression tests and JS fixtures are committed in the source patches. To
 
 Limits: Node runtime fetch-hook forwarding remains an existing unsupported SDK gap. Distinct custom browser IIFE scopes sharing one physical global are explicitly refused, rather than isolated. Different equivalent callbacks are supported using separate evaluations. RFC5036 metadata-less legacy reuse retains its weaker preexisting guarantee. Final integration and exact-head CI remain pending.
 
-Propagation blockers at this checkpoint: composition capability needs can be lost when a wrapper applies its plugin late (owner fixing); four existing RFC5036 fixture conflicts against current main (root resolving); final integrated-link validation. Strict packed RFC5036 mixed `.mts` plus `.cts` checking fails TS2403 and baseline attribution remains open. #5180 is closed based on parent-verified successful exact-head CI.
+Current propagation gates are tracked in [CURRENT_STATUS.md](CURRENT_STATUS.md). The earlier four fixture conflicts are resolved locally. Strict packed RFC5036 mixed `.mts` plus `.cts` checking fails four TS2403 global-declaration checks; original #5107 config replay produces the same four TS2403 plus its original TS2309. The focused CJS declaration correction removes TS2309 and leaves the preexisting TS2403 gate. Historical logs are preserved.
+
+#5180: its validation work is complete; the draft PR remains open and unmerged at `dc61543814fd4a4706608e8b3d3fe34169f7532b`. Green CI does not close a PR. No PR state changes were requested or made.
