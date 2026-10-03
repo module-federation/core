@@ -1,5 +1,16 @@
 # @module-federation/node
 
+## 2.7.52
+
+### Patch Changes
+
+- Updated dependencies [412f62e]
+- Updated dependencies [c130946]
+- Updated dependencies [923b55d]
+  - @module-federation/enhanced@2.9.2
+  - @module-federation/runtime@2.9.2
+  - @module-federation/sdk@2.9.2
+
 ## 2.7.51
 
 ### Patch Changes
