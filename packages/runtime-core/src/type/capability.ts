@@ -33,12 +33,18 @@ export type SnapshotHandlerContract = Pick<SnapshotHandler, 'hooks'>;
 
 export type ScriptInfo = { attrs?: Record<string, any> };
 
+export type EntryLoadingContext = {
+  key: string;
+  custom: boolean;
+};
+
 export type LoadEntryOptions = {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
   resourceContext?: ResourceLoadContext;
+  entryLoadingContext?: EntryLoadingContext;
 };
 
 export interface Platform {
