@@ -42,7 +42,7 @@ async function main() {
     (publicPathControl
       ? 'globalThis.__mfPublicPathControl = __webpack_public_path__;\n'
       : '') +
-      "module.exports = import('shared-lib').then(async () => { const f = __webpack_require__.federation; const getter = f.bundlerRuntime.getSharedFallbackGetter({ shareKey: 'shared-lib', version: '1.0.0', webpackRequire: __webpack_require__, libraryType: 'commonjs-module', factory: () => { throw new Error('unexpected local fallback'); } }); const factory = await getter(); return { value: factory().token, remoteRejected: f.instance.loadRemote('unavailable/thing').then(() => false, e => e.message.includes('Remote loading is disabled')) }; });",
+      "function discoverShared() { return import('shared-lib'); } module.exports = Promise.resolve().then(async () => { const f = __webpack_require__.federation; const getter = f.bundlerRuntime.getSharedFallbackGetter({ shareKey: 'shared-lib', version: '1.0.0', webpackRequire: __webpack_require__, libraryType: 'commonjs-module', factory: () => { throw new Error('unexpected local fallback'); } }); const factory = await getter(); return { value: factory().token, remoteRejected: f.instance.loadRemote('unavailable/thing').then(() => false, e => e.message.includes('Remote loading is disabled')) }; });",
   );
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   compiler = webpack({
@@ -66,6 +66,7 @@ async function main() {
       library: { type: 'commonjs-module' },
     },
     plugins: [
+      new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
       new ModuleFederationPlugin({
         name: 'shared_platform_proof',
         dts: false,
@@ -96,6 +97,14 @@ async function main() {
     stats.hasErrors(),
     false,
     stats.toString({ errors: true, warnings: true }),
+  );
+  const nonInitialChunks = [...stats.compilation.chunks].filter(
+    (chunk) => !chunk.canBeInitial(),
+  );
+  assert.equal(
+    nonInitialChunks.length,
+    0,
+    'main compilation must have no asynchronous chunks',
   );
   const files = [...stats.compilation.modules]
     .map((m) => m.resource || '')
@@ -142,7 +151,11 @@ async function main() {
         value: result.value,
         requests,
         remoteDisabled: !legacy,
-        platformNode: true,
+        configuredPlatform: 'node',
+        platformNodeModule: files.some((file) =>
+          /runtime-core[\\/]dist[\\/]platform[\\/]node\./.test(file),
+        ),
+        nonInitialChunks: nonInitialChunks.length,
         remoteCapability: legacy ? 'legacy full runtime' : false,
         snapshotCapability: legacy ? 'legacy full runtime' : false,
       },
