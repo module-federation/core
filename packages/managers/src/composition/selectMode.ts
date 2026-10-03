@@ -1,4 +1,5 @@
 import { FAMILY_PACKAGES, RUNTIME_FAMILY, type RuntimeFamily } from './family';
+import { resolveCompositionEntry } from './resolveImports';
 
 type ExternalCallback = (err?: Error | null, value?: unknown) => void;
 type ExternalFunction = (...args: any[]) => unknown;
@@ -59,6 +60,15 @@ function familyProblem({ anchor, members }: RuntimeFamily): string | undefined {
       (key) => !declaresExportKey(member.exports, key),
     );
     if (missing) return `${pkg} at ${member.root} does not export "${missing}"`;
+    for (const key of RUNTIME_FAMILY[pkg]) {
+      try {
+        if (!resolveCompositionEntry(member.root, `${pkg}/${key.slice(2)}`)) {
+          return `${pkg} at ${member.root} cannot resolve "${key}" for ESM composition`;
+        }
+      } catch {
+        return `${pkg} at ${member.root} cannot resolve "${key}" for ESM composition`;
+      }
+    }
     from = member.root;
   }
   return undefined;
