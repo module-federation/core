@@ -48,6 +48,7 @@ interface BuildSpec {
   alias?: Record<string, string>;
   externalsPattern?: string;
   referenceRemotes?: Record<string, string>;
+  ruleFamilyAlias?: boolean;
 }
 
 let outRoot: string;
@@ -274,6 +275,36 @@ describe('experiments.composedRuntime', () => {
       remotes: false,
       consumes: false,
     });
+  });
+
+  it('reports a rule-level runtime family alias and proves distinct kernel identities', async () => {
+    const out = 'rule-family-alias';
+    const [b] = await harness([
+      {
+        out,
+        target: 'node',
+        ruleFamilyAlias: true,
+        mf: { name: 'identityHost', experiments: composed() },
+      },
+    ]);
+    expectComposed(b, 'identityHost');
+    expect(
+      b.modules.some((m) => m.includes('/runtime-core-fork/dist/kernel.js')),
+    ).toBe(true);
+    expect(
+      b.modules.some((m) =>
+        m.endsWith('/packages/runtime-core/dist/kernel.js'),
+      ),
+    ).toBe(true);
+    const { stdout } = await promisify(execFile)(process.execPath, [
+      '-e',
+      'console.log(JSON.stringify(require(process.argv[1]).default))',
+      path.join(outRoot, out, 'main.js'),
+    ]);
+    expect(JSON.parse(stdout)).toEqual({ same: false, instance: false });
+    expect(b.warnings).toEqual([
+      expect.stringContaining('outside the runtime family'),
+    ]);
   });
 
   it('fails a composed build whose runtime package is externalized by a plugin', async () => {
