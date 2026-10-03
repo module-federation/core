@@ -394,6 +394,65 @@ describe('FederationCompositionPlugin', () => {
     );
   });
 
+  it.each([false, true])(
+    'rejects an old copy options registration in either order (oldFirst=%s)',
+    async (oldFirst) => {
+      const context = fixture({ 'index.js': 'export default 1;' });
+      const legacyWriter = {
+        apply(compiler) {
+          // This is the old copy's executable slot/register algorithm.
+          const key = Symbol.for('module-federation.composition/1');
+          const slot = (compiler[key] ??= { participants: [], sealed: false });
+          slot.participants.push({ kind: 'options', needs: [], disable: {} });
+        },
+      };
+      const plugins = [host({ composedRuntime: true }), legacyWriter];
+      if (oldFirst) plugins.reverse();
+      await expect(compile(context, { plugins })).rejects.toThrow(
+        /Invalid module-federation\.composition\/1 compiler slot/,
+      );
+    },
+  );
+
+  it('revalidates a malformed needs participant written in afterPlugins', async () => {
+    const context = fixture({ 'index.js': 'export default 1;' });
+    await expect(
+      compile(context, {
+        plugins: [
+          host({ composedRuntime: true }),
+          {
+            apply(compiler) {
+              compiler.hooks.afterPlugins.tap('OldNeedsWriter', () => {
+                compiler[
+                  Symbol.for('module-federation.composition/1')
+                ].participants.push({ kind: 'needs', needs: ['unknown'] });
+              });
+            },
+          },
+        ],
+      }),
+    ).rejects.toThrow(
+      /Invalid module-federation\.composition\/1 compiler slot/,
+    );
+  });
+
+  it('rejects replacing a valid slot after the planner registered', async () => {
+    const context = fixture({ 'index.js': 'export default 1;' });
+    await expect(
+      compile(context, {
+        plugins: [
+          host({ composedRuntime: true }),
+          {
+            apply(compiler) {
+              const key = Symbol.for('module-federation.composition/1');
+              compiler[key] = { ...compiler[key] };
+            },
+          },
+        ],
+      }),
+    ).rejects.toThrow(/slot was replaced after the planner registered/);
+  });
+
   it('errors when a plugin externalizes a runtime package in a composed build', async () => {
     const context = fixture({
       'index.js':

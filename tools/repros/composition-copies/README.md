@@ -24,4 +24,6 @@ Observed baseline: `84cee419c5c7dc2bb87d1a92cd7fb8e15e409aec` (live PR #5141, or
 | Null, missing version, invalid version slots | Silently accepted                                                                                | Reject `Invalid module-federation.composition/1 compiler slot`                                 |
 | Primitive or empty object slots              | `Cannot read properties of undefined (reading 'push')`                                           | Same clear protocol rejection                                                                  |
 
+The default run also executes the old registration algorithm against a newly created slot and an old unversioned slot in both orders, checks malformed needs mutation in `afterPlugins`, and checks replacement after planner registration. It requires the same named protocol diagnostic before compilation.
+
 The default run fails closed on any mismatch. Graph and runtime identity assertions are checks of the emitted artifact; a successful build alone is insufficient. The committed compiler regression suite additionally checks invalid participant, planner, entry, and sealed shapes. This harness makes no remote requests, merges, pushes, or release changes.

@@ -21,7 +21,7 @@ const anchor = (name) =>
     `family-${name}/node_modules/@module-federation/runtime-tools`,
   );
 const results = [];
-async function build(label, specs, poison) {
+async function build(label, specs, poison, mutation) {
   const context = path.join(stage, label);
   fs.mkdirSync(context, { recursive: true });
   fs.writeFileSync(
@@ -52,6 +52,32 @@ async function build(label, specs, poison) {
         c[slot] = poison;
       },
     });
+  if (mutation) {
+    const writer = {
+      apply(compiler) {
+        if (mutation === 'replacement') {
+          compiler[slot] = { ...compiler[slot] };
+          return;
+        }
+        const legacyRegister = () => {
+          const legacySlot = (compiler[slot] ??= {
+            participants: [],
+            sealed: false,
+          });
+          legacySlot.participants.push(
+            mutation === 'malformed-needs'
+              ? { kind: 'needs', needs: ['unknown'] }
+              : { kind: 'options', needs: [], disable: {} },
+          );
+        };
+        if (mutation === 'malformed-needs')
+          compiler.hooks.afterPlugins.tap('LegacyWriter', legacyRegister);
+        else legacyRegister();
+      },
+    };
+    if (mutation === 'old-first') plugins.unshift(writer);
+    else plugins.push(writer);
+  }
   plugins.push({
     apply(c) {
       c.hooks.afterCompile.tap('CaptureComposition', (compilation) => {
@@ -181,6 +207,19 @@ async function build(label, specs, poison) {
     ['invalid-version', { version: 2, participants: [], sealed: false }],
   ])
     await build('invalid-slot-' + kind, [{ Ctor: A, family: 'a' }], value);
+  for (const mutation of [
+    'old-first',
+    'old-last',
+    'malformed-needs',
+    'replacement',
+  ]) {
+    await build(
+      `invalid-slot-mutation-${mutation}`,
+      [{ Ctor: A, family: 'a' }],
+      undefined,
+      mutation,
+    );
+  }
   fs.writeFileSync(
     path.join(stage, 'results.json'),
     JSON.stringify(results, null, 2),
