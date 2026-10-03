@@ -6,6 +6,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import ModuleFederationPlugin from '../../../src/lib/container/ModuleFederationPlugin';
 import ContainerReferencePlugin from '../../../src/lib/container/ContainerReferencePlugin';
 import { FAMILY_PACKAGES } from '@module-federation/managers';
+import FederationRuntimePlugin from '../../../src/lib/container/runtime/FederationRuntimePlugin';
 import { COVERED_BY_OPTIONS } from '../../../src/lib/container/runtime/FederationCompositionPlugin';
 
 const webpack = require(
@@ -182,6 +183,44 @@ describe('FederationCompositionPlugin', () => {
     expect(on.output).toEqual(off.output);
   });
 
+  it('isolates runtime aliases in a real child compiler without mutating parent resolver options', async () => {
+    const context = fixture({ 'index.js': 'export default 1;' });
+    let parentResolve;
+    let parentAlias;
+    let child;
+    let inherited;
+    const aliases = { react: ['/first/react', '/second/react'] };
+    const { stats } = await compile(context, {
+      resolve: { alias: aliases },
+      plugins: [
+        {
+          apply(compiler) {
+            compiler.hooks.thisCompilation.tap(
+              'ChildAliasProof',
+              (compilation) => {
+                parentResolve = compiler.options.resolve;
+                parentAlias = parentResolve.alias;
+                child = compilation.createChildCompiler('resolver-child', {});
+                inherited = child.options.resolve === parentResolve;
+                new FederationRuntimePlugin().setRuntimeAlias(child);
+              },
+            );
+          },
+        },
+      ],
+    });
+    expect(messages(stats.errors)).toEqual([]);
+    expect(inherited).toBe(true);
+    expect(parentResolve.alias).toBe(parentAlias);
+    expect(parentAlias).toEqual({ react: ['/first/react', '/second/react'] });
+    expect(child.options.resolve).not.toBe(parentResolve);
+    expect(child.options.resolve.alias).not.toBe(parentAlias);
+    expect(child.options.resolve.alias.react).toEqual(aliases.react);
+    expect(child.options.resolve.alias['@module-federation/runtime$']).toEqual(
+      expect.any(String),
+    );
+  });
+
   it('selects legacy when a function external names runtime-core', async () => {
     const context = fixture({ 'index.js': 'export default 1;' });
     const { stats } = await compile(context, {
@@ -200,6 +239,78 @@ describe('FederationCompositionPlugin', () => {
       ),
     ]);
     expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
+  });
+
+  it.each([
+    ['object', { '@module-federation/runtime-core': 'var {}' }],
+    ['regexp', /^@module-federation\/runtime-core$/],
+    [
+      'callback',
+      ({ request }, callback) =>
+        callback(
+          null,
+          request === '@module-federation/runtime-core' ? 'var {}' : undefined,
+        ),
+    ],
+    [
+      'promise',
+      async ({ request }) =>
+        request === '@module-federation/runtime-core' ? 'var {}' : undefined,
+    ],
+    [
+      'byLayer',
+      { byLayer: { ssr: { '@module-federation/runtime-core': 'var {}' } } },
+    ],
+    [
+      'composition subpath',
+      { '@module-federation/runtime-core/kernel': 'var {}' },
+    ],
+  ])(
+    'selects the full runtime for ordinary %s externals and keeps explicit defines',
+    async (_, externals) => {
+      const context = fixture({
+        'index.js': 'export default typeof FEDERATION_OPTIMIZE_NO_SHARED;',
+      });
+      const { stats, output } = await compile(context, {
+        externals,
+        externalsType: 'commonjs',
+        plugins: [host({ composedRuntime: true })],
+      });
+      expect(messages(stats.errors)).toEqual([]);
+      expect(messages(stats.warnings)).toEqual([
+        expect.stringContaining('is externalized'),
+      ]);
+      expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
+      expect(output['main.js']).not.toContain(
+        'typeof FEDERATION_OPTIMIZE_NO_SHARED',
+      );
+    },
+  );
+
+  it('rejects an issuer-sensitive subpath external in the actual composed graph', async () => {
+    const context = fixture({
+      'index.js':
+        'import "@module-federation/runtime-core/kernel"; export default 1;',
+    });
+    const { stats } = await compile(context, {
+      externals: [
+        ({ request, contextInfo }, callback) =>
+          callback(
+            null,
+            request === '@module-federation/runtime-core/kernel' &&
+              contextInfo.issuer.endsWith('/index.js')
+              ? 'var {}'
+              : undefined,
+          ),
+      ],
+      plugins: [host({ composedRuntime: true })],
+    });
+    expect(messages(stats.errors)).toEqual([
+      expect.stringContaining(
+        '"@module-federation/runtime-core/kernel" is external',
+      ),
+    ]);
+    expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(true);
   });
 
   it('selects legacy when the user aliases a runtime package', async () => {
@@ -222,6 +333,60 @@ describe('FederationCompositionPlugin', () => {
       ),
     ]);
     expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
+  });
+
+  it('reports a rule-level runtime family alias and proves the two kernel identities in the emitted bundle', async () => {
+    const core = path.resolve(__dirname, '../../../../runtime-core');
+    const kernel = path.join(core, 'dist/kernel.js');
+    const context = fixture({
+      'index.js': `import { FederationKernel as selected } from ${JSON.stringify(kernel)};
+        import { FederationKernel as aliased } from '@module-federation/runtime-core/kernel';
+        export default { same: selected === aliased, instance: Object.create(selected.prototype) instanceof aliased };`,
+    });
+    const fork = path.join(context, 'runtime-core-fork');
+    fs.mkdirSync(fork);
+    fs.copyFileSync(
+      path.join(core, 'package.json'),
+      path.join(fork, 'package.json'),
+    );
+    fs.cpSync(path.join(core, 'dist'), path.join(fork, 'dist'), {
+      recursive: true,
+    });
+    fs.symlinkSync(
+      path.join(core, 'node_modules'),
+      path.join(fork, 'node_modules'),
+    );
+    const outputPath = path.join(context, 'identity-dist');
+    const { stats } = await compile(context, {
+      output: { path: outputPath, library: { type: 'commonjs2' } },
+      module: {
+        rules: [
+          {
+            test: /index\.js$/,
+            include: fs.realpathSync(context),
+            resolve: {
+              alias: {
+                '@module-federation/runtime-core/kernel$': path.join(
+                  fork,
+                  'dist/kernel.js',
+                ),
+              },
+            },
+          },
+        ],
+      },
+      plugins: [host({ composedRuntime: true })],
+    });
+    expect(messages(stats.errors)).toEqual([]);
+    expect(messages(stats.warnings)).toEqual([
+      expect.stringContaining('outside the runtime family'),
+    ]);
+    const names = moduleNames(stats);
+    expect(names).toContain(kernel);
+    expect(names).toContain(fs.realpathSync(path.join(fork, 'dist/kernel.js')));
+    expect(
+      createRequire(__filename)(path.join(outputPath, 'main.js')).default,
+    ).toEqual({ same: false, instance: false });
   });
 
   it('emits ENV_TARGET but no capability or build-id define when composed', async () => {
