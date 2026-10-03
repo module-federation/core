@@ -171,6 +171,12 @@ class FederationCompositionPlugin {
     };
 
     compiler.hooks.afterResolvers.tap(PLUGIN_NAME, () => {
+      // Another installed copy can write the shared slot after apply() validated it.
+      if (slotOf(compiler) !== slot) {
+        throw new Error(
+          'Invalid module-federation.composition/1 compiler slot: the slot was replaced after the planner registered.',
+        );
+      }
       checkRuntimeRequests(
         slot.participants.filter(
           (participant) => participant.kind === 'options',
