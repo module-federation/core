@@ -72,8 +72,9 @@ export function getRemoteEntryUniqueKey(
   // Reusing a platform object trusts its provider to supply compatible loads.
   // It does not establish equivalence between different platform objects.
   // Custom loading callbacks can read host-specific state, so their entries
-  // are host-scoped even when callbacks are identical. Distinct evaluators can
-  // still load their own entry; identity differences never reject a load.
+  // are host-scoped even when callbacks are identical. Platforms load distinct
+  // scopes independently where supported; browser IIFEs sharing a physical
+  // global reject conflicting custom scopes before evaluating another script.
   // Observational hooks are excluded from this boundary.
   const loadingHooks = entryLoadingHooks(origin);
   const hookIdentities = loadingHooks.map((hook) =>
