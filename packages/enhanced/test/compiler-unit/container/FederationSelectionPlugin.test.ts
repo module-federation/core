@@ -2,7 +2,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { createRequire } from 'module';
-import type { Compiler } from 'webpack';
+import type { Compiler, Configuration } from 'webpack';
 import { getSelectionSlot } from '@module-federation/managers/runtime-selection';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import ModuleFederationPlugin from '../../../src/lib/container/ModuleFederationPlugin';
@@ -32,7 +32,10 @@ describe('runtime selection in a webpack compiler', () => {
     tempDirs = [];
   });
 
-  function createCompiler(plugins: Array<{ apply(compiler: Compiler): void }>) {
+  function createCompiler(
+    plugins: Array<{ apply(compiler: Compiler): void }>,
+    options: Pick<Configuration, 'externals' | 'resolve'> = {},
+  ) {
     const context = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-select-'));
     tempDirs.push(context);
     fs.writeFileSync(path.join(context, 'index.js'), definesEntry);
@@ -48,6 +51,7 @@ describe('runtime selection in a webpack compiler', () => {
         library: { type: 'commonjs2' },
         uniqueName: 'webpack-selection',
       },
+      ...options,
       plugins,
     });
   }
@@ -110,23 +114,30 @@ describe('runtime selection in a webpack compiler', () => {
     });
   });
 
-  it('gives child compilers the parent selection', async () => {
+  it('gives child compilers the parent selection without mutating caller resolve options', async () => {
+    const resolve = {
+      conditionNames: ['require', 'node'],
+      alias: { ordinaryAlias: 'node:os' },
+    };
     let child: Compiler | undefined;
-    const compiler = createCompiler([
-      new ModuleFederationPlugin({
-        name: 'host',
-        dts: false,
-        manifest: false,
-        experiments: { optimization: { disableShared: true } },
-      }),
-      {
-        apply(compiler) {
-          compiler.hooks.make.tap('ChildProbe', (compilation) => {
-            child = compilation.createChildCompiler('probe', {}, []);
-          });
+    const compiler = createCompiler(
+      [
+        new ModuleFederationPlugin({
+          name: 'host',
+          dts: false,
+          manifest: false,
+          experiments: { optimization: { disableShared: true } },
+        }),
+        {
+          apply(compiler) {
+            compiler.hooks.make.tap('ChildProbe', (compilation) => {
+              child = compilation.createChildCompiler('probe', {}, []);
+            });
+          },
         },
-      },
-    ]);
+      ],
+      { resolve },
+    );
     await run(compiler);
 
     const parentSlot = getSelectionSlot(compiler);
@@ -135,5 +146,65 @@ describe('runtime selection in a webpack compiler', () => {
     expect(childSlot.profile).toEqual(parentSlot.profile);
     expect(childSlot.profile?.shared).toBe('forbidden');
     expect(childSlot.image).toBe(parentSlot.image);
+    expect(resolve).toEqual({
+      conditionNames: ['require', 'node'],
+      alias: { ordinaryAlias: 'node:os' },
+    });
+  });
+  it('preserves ordinary externals in a selected runtime compiler', async () => {
+    const compiler = createCompiler(
+      [
+        new ModuleFederationPlugin({
+          name: 'external-host',
+          dts: false,
+          manifest: false,
+        }),
+      ],
+      { externals: { 'ordinary-external': 'commonjs node:os' } },
+    );
+    fs.writeFileSync(
+      path.join(compiler.context, 'index.js'),
+      "module.exports = require('ordinary-external').platform();",
+    );
+    await run(compiler);
+    const output = path.join(compiler.options.output.path!, 'main.js');
+    expect(createRequire(output)(output)).toBe(os.platform());
+    expect(fs.readFileSync(output, 'utf8')).toContain('node:os');
+  });
+
+  it('keeps user options and selections isolated across compilers', async () => {
+    const resolve = {
+      conditionNames: ['require', 'node'],
+      alias: { ordinaryAlias: 'node:os' },
+    };
+    const first = createCompiler(
+      [
+        new ModuleFederationPlugin({
+          name: 'isolated-first',
+          dts: false,
+          manifest: false,
+          experiments: { optimization: { disableShared: true } },
+        }),
+      ],
+      { resolve },
+    );
+    const second = createCompiler(
+      [
+        new ModuleFederationPlugin({
+          name: 'isolated-second',
+          dts: false,
+          manifest: false,
+        }),
+      ],
+      { resolve },
+    );
+    await Promise.all([run(first), run(second)]);
+    expect(getSelectionSlot(first).profile?.shared).toBe('forbidden');
+    expect(getSelectionSlot(second).profile?.shared).toBe('neutral');
+    expect(resolve).toEqual({
+      conditionNames: ['require', 'node'],
+      alias: { ordinaryAlias: 'node:os' },
+    });
+    expect(first.options.resolve).not.toBe(second.options.resolve);
   });
 });
