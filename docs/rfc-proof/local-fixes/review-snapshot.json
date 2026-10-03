@@ -1,0 +1,15 @@
+{
+  "status": "local review snapshot, no metadata implementation, no source pushes",
+  "base": "ca0b6188fd57b067dc20e3b8d66f0805e8d2b72a",
+  "files": [
+    {
+      "path": "packages/rspack/src/ModuleFederationPlugin.ts",
+      "sha256": "a6e43d54ec47c2000657c87b64b839ad6cb2e64b35e1aa2fe3710b5dd6875304"
+    },
+    {
+      "path": "packages/rspack/src/ExternalRuntimePlugin.ts",
+      "sha256": "cf8f08a98129cb218c93d0dadaac3ba81f8af32eecd00c63323cf4d2fe3e405e"
+    }
+  ],
+  "patchFormat": "zero context; git apply --unidiff-zero if applying; final committed identity will be recorded separately"
+}

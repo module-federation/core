@@ -1,0 +1,88 @@
+diff --git a/packages/rspack/src/ModuleFederationPlugin.ts b/packages/rspack/src/ModuleFederationPlugin.ts
+index 4fe782666..416da5e49 100644
+--- a/packages/rspack/src/ModuleFederationPlugin.ts
++++ b/packages/rspack/src/ModuleFederationPlugin.ts
+@@ -20,0 +21 @@ import { RemoteEntryPlugin } from './RemoteEntryPlugin';
++import { applyExternalRuntime } from './ExternalRuntimePlugin';
+@@ -204,4 +205 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
+-      const Externals = compiler.webpack.ExternalsPlugin;
+-      new Externals(compiler.options.externalsType || 'global', {
+-        '@module-federation/runtime-core': '_FEDERATION_RUNTIME_CORE',
+-      }).apply(compiler);
++      applyExternalRuntime(compiler);
+diff --git a/packages/rspack/src/ExternalRuntimePlugin.ts b/packages/rspack/src/ExternalRuntimePlugin.ts
+new file mode 100644
+index 000000000..7722e8409
+--- /dev/null
++++ b/packages/rspack/src/ExternalRuntimePlugin.ts
+@@ -0,0 +1,70 @@
++import type { Compiler } from '@rspack/core';
++
++type ProviderNamespace =
++  typeof import('@module-federation/runtime-tools/runtime-core');
++
++const kernelFunctions = [
++  'FederationKernel',
++  'getGlobalSnapshotInfoByModuleInfo',
++  'getRemoteEntry',
++  'setGlobalFederationInstance',
++] as const satisfies readonly (keyof ProviderNamespace)[];
++
++// The kernel's CommonJS export resolves to the full core today. Project its
++// public kernel interface from the provider instead of bundling that core again.
++export const externalKernelBody = `
++var prefix = '[ExternalRuntimeKernelContract] ';
++if (typeof core !== 'object' || core === null || Array.isArray(core)) {
++  throw new Error(prefix + 'The external runtime provider must publish a core namespace.');
++}
++for (var name of ${JSON.stringify(kernelFunctions)}) {
++  if (typeof core[name] !== 'function') {
++    throw new Error(prefix + 'The external runtime provider is missing callable "' + name + '".');
++  }
++}
++if (typeof core.CurrentGlobal !== 'object' || core.CurrentGlobal === null || Array.isArray(core.CurrentGlobal)) {
++  throw new Error(prefix + 'The external runtime provider is missing object "CurrentGlobal".');
++}
++var registry = core.CurrentGlobal.__FEDERATION__;
++if (typeof registry !== 'object' || registry === null || Array.isArray(registry) || !Array.isArray(registry.__INSTANCES__)) {
++  throw new Error(prefix + 'The external runtime provider is missing the federation instance registry.');
++}
++var kernel = {
++  CurrentGlobal: core.CurrentGlobal,
++  ${kernelFunctions.map((name) => `${name}: core.${name}`).join(',\n  ')}
++};
++`;
++
++export const externalKernelSource = `
++import core from '@module-federation/runtime-core';
++${externalKernelBody}
++export const CurrentGlobal = kernel.CurrentGlobal;
++${kernelFunctions.map((name) => `export const ${name} = kernel.${name};`).join('\n')}
++`;
++
++export function applyExternalRuntime(compiler: Compiler): void {
++  new compiler.webpack.NormalModuleReplacementPlugin(
++    /^@module-federation\/runtime-core\/kernel$/,
++    `data:text/javascript,${encodeURIComponent(externalKernelSource)}`,
++  ).apply(compiler);
++
++  new compiler.webpack.ExternalsPlugin(
++    compiler.options.externalsType || 'global',
++    ({ request }, callback) => {
++      if (request === '@module-federation/runtime-core') {
++        callback(undefined, '_FEDERATION_RUNTIME_CORE');
++      } else if (
++        request?.startsWith('@module-federation/runtime-core/') &&
++        request !== '@module-federation/runtime-core/kernel'
++      ) {
++        callback(
++          new Error(
++            `[ExternalRuntimeNamespace] The external runtime provider does not publish "${request}". Only the core root and kernel namespaces are supported.`,
++          ),
++        );
++      } else {
++        callback();
++      }
++    },
++  ).apply(compiler);
++}
