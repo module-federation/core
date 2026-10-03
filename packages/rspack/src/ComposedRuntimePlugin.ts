@@ -1,7 +1,9 @@
 import { createHash } from 'node:crypto';
+import fs from 'node:fs';
 import path from 'node:path';
 import type { Compilation, Compiler, Module } from '@rspack/core';
 import {
+  FAMILY_PACKAGES,
   checkFederationGraph,
   planComposition,
   renderComposition,
@@ -159,6 +161,33 @@ function checkGraph(
   const summary: GraphModule[] = [];
   const externalUserRequests: string[] = [];
   let bootstraps = 0;
+  const owners = new Map<string, GraphModule['package']>();
+  const packageOf = (resource: string): GraphModule['package'] => {
+    let dir = path.dirname(resource);
+    const start = dir;
+    if (owners.has(start)) return owners.get(start);
+    let owner: GraphModule['package'];
+    while (true) {
+      try {
+        const data: { name?: unknown } = JSON.parse(
+          fs.readFileSync(path.join(dir, 'package.json'), 'utf8'),
+        );
+        if (typeof data.name === 'string') {
+          if (FAMILY_PACKAGES.some((pkg) => pkg === data.name)) {
+            owner = { name: data.name, root: fs.realpathSync(dir) };
+          }
+          break;
+        }
+      } catch {
+        /* Virtual resources and parent directories may have no package. */
+      }
+      const parent = path.dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+    owners.set(start, owner);
+    return owner;
+  };
   for (const module of modules) {
     if (module instanceof ExternalModule) {
       externalUserRequests.push(module.userRequest);
@@ -167,7 +196,11 @@ function checkGraph(
     } else {
       const { resource } = module as Module & { resource?: string };
       if (resource?.startsWith(bootstrapDir)) bootstraps++;
-      summary.push({ type: module.type, resource });
+      summary.push({
+        type: module.type,
+        resource,
+        package: resource ? packageOf(resource) : undefined,
+      });
     }
   }
   const findings = checkFederationGraph({
