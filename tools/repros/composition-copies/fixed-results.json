@@ -1,0 +1,83 @@
+{
+  "implementationSha": "c807938a8e7069b72aece5fda371ae0817c7ef28",
+  "node": "24.15.0",
+  "pnpm": "10.28.0",
+  "distinctInstalledEnhancedCopies": true,
+  "command": "node tools/repros/composition-copies/run.cjs",
+  "note": "Proof-directory prefixes in diagnostic paths normalized to <proof>. Baseline runtime instance identity was not executed in the original capture.",
+  "cases": [
+    {
+      "case": "control-same-family-ab",
+      "expected": "successful compatible composition",
+      "errors": [],
+      "warnings": [],
+      "executedIdentity": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "selectedFamily": ["/family-a/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    },
+    {
+      "case": "control-same-family-ba",
+      "expected": "successful compatible composition",
+      "errors": [],
+      "warnings": [],
+      "executedIdentity": {
+        "count": 2,
+        "nonnull": true,
+        "same": true
+      },
+      "selectedFamily": ["/family-a/"],
+      "composeModuleCount": 1,
+      "kernelModuleCount": 1
+    },
+    {
+      "case": "conflict-family-ab",
+      "expected": "reject incompatible compiler composition",
+      "error": "Federation composition participants request incompatible runtime families: @module-federation/runtime-tools resolves to \"/private<proof>/family-a/node_modules/@module-federation/runtime-tools\" from \"<proof>/family-a/node_modules/@module-federation/runtime-tools\" and \"/private<proof>/family-b/node_modules/@module-federation/runtime-tools\" from \"<proof>/family-b/node_modules/@module-federation/runtime-tools\". Use one runtime family per compiler."
+    },
+    {
+      "case": "conflict-family-ba",
+      "expected": "reject incompatible compiler composition",
+      "error": "Federation composition participants request incompatible runtime families: @module-federation/runtime-tools resolves to \"/private<proof>/family-b/node_modules/@module-federation/runtime-tools\" from \"<proof>/family-b/node_modules/@module-federation/runtime-tools\" and \"/private<proof>/family-a/node_modules/@module-federation/runtime-tools\" from \"<proof>/family-a/node_modules/@module-federation/runtime-tools\". Use one runtime family per compiler."
+    },
+    {
+      "case": "conflict-target-web-node",
+      "expected": "reject incompatible compiler composition",
+      "error": "Federation composition participants request incompatible targets \"web\" and \"node\". Use one optimization.target per compiler."
+    },
+    {
+      "case": "conflict-target-node-web",
+      "expected": "reject incompatible compiler composition",
+      "error": "Federation composition participants request incompatible targets \"node\" and \"web\". Use one optimization.target per compiler."
+    },
+    {
+      "case": "invalid-slot-null",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-primitive",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-missing-shape",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-missing-version",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    },
+    {
+      "case": "invalid-slot-invalid-version",
+      "expected": "reject invalid compiler composition slot",
+      "error": "Invalid module-federation.composition/1 compiler slot: expected version 1 with participants carrying runtime requests and a sealed flag. Ensure every enhanced copy uses the same composition protocol."
+    }
+  ]
+}
