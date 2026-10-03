@@ -3,7 +3,7 @@ import enhancedResolve from 'enhanced-resolve';
 import type { RuntimeFamily } from './family';
 import { importRequest, plannedImports, type CompositionPlan } from './plan';
 
-const resolveSelfReference = enhancedResolve.create.sync({
+export const resolveCompositionEntry = enhancedResolve.create.sync({
   conditionNames: ['import', 'module', 'default'],
   exportsFields: ['exports'],
 });
@@ -20,7 +20,7 @@ export function resolveImports(
     const member = family.members[planned.pkg];
     if (!member) throw new Error(`${planned.pkg} is not in the runtime family`);
     const request = importRequest(planned);
-    const resolved = resolveSelfReference(member.root, request);
+    const resolved = resolveCompositionEntry(member.root, request);
     if (typeof resolved !== 'string') {
       throw new Error(
         `${request} did not resolve to a file from ${member.root}`,

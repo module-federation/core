@@ -1,0 +1,402 @@
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const { createRequire } = require('node:module');
+const os = require('node:os');
+const stage = path.resolve(
+  process.env.COMPOSITION_PROOF_DIR ||
+    fs.mkdtempSync(path.join(os.tmpdir(), 'mf-composition-copies-')),
+);
+const observeOnly = process.argv.includes('--observe-only');
+require('./setup.cjs')(stage);
+console.log(`Composition proof artifacts: ${stage}`);
+const req = createRequire(path.join(stage, 'package.json'));
+const webpack = req('webpack');
+const A = req('enhanced-a/webpack').ModuleFederationPlugin;
+const B = req('enhanced-b/webpack').ModuleFederationPlugin;
+const Legacy = req('enhanced-legacy/webpack').ModuleFederationPlugin;
+const RefA = req(
+  path.join(
+    path.dirname(req.resolve('enhanced-a/webpack')),
+    'lib/container/ContainerReferencePlugin.js',
+  ),
+).default;
+const RefB = req(
+  path.join(
+    path.dirname(req.resolve('enhanced-b/webpack')),
+    'lib/container/ContainerReferencePlugin.js',
+  ),
+).default;
+const slot = Symbol.for('module-federation.composition/1');
+const anchor = (name) =>
+  path.join(
+    stage,
+    `family-${name}/node_modules/@module-federation/runtime-tools`,
+  );
+const results = [];
+async function build(label, specs, poison, mutation, topology) {
+  const context = path.join(stage, label);
+  fs.mkdirSync(context, { recursive: true });
+  fs.writeFileSync(
+    path.join(context, 'index.js'),
+    topology
+      ? 'import("remote/Button");'
+      : 'globalThis.__compositionProofInstances.push(__webpack_require__.federation.instance); export default 1;',
+  );
+  fs.writeFileSync(
+    path.join(context, 'second.js'),
+    'globalThis.__compositionProofInstances.push(__webpack_require__.federation.instance);',
+  );
+  let selected;
+  let plugins = specs.map(
+    ({ Ctor, family, target, composedRuntime = true }, i) =>
+      new Ctor({
+        name: `host_${i}`,
+        dts: false,
+        manifest: false,
+        implementation: anchor(family),
+        experiments: {
+          composedRuntime,
+          ...(target ? { optimization: { target } } : {}),
+        },
+      }),
+  );
+  if (topology) {
+    const standalone = new RefA({
+      remoteType: 'script',
+      remotes: { remote: 'remote@http://localhost:3001/remoteEntry.js' },
+    });
+    const wrapped = {
+      apply(compiler) {
+        const apply = () =>
+          new B({
+            name: 'wrapped_host',
+            dts: false,
+            manifest: false,
+            experiments: { composedRuntime: true },
+          }).apply(compiler);
+        if (topology === 'afterPlugins')
+          compiler.hooks.afterPlugins.tap('WrappedOptIn', apply);
+        else apply();
+      },
+    };
+    plugins =
+      topology === 'reverse' ? [wrapped, standalone] : [standalone, wrapped];
+  }
+  if (poison !== undefined)
+    plugins.unshift({
+      apply(c) {
+        c[slot] = poison;
+      },
+    });
+  if (mutation) {
+    const writer = {
+      apply(compiler) {
+        if (mutation === 'replacement') {
+          compiler[slot] = { ...compiler[slot] };
+          return;
+        }
+        const legacyRegister = () => {
+          const legacySlot = (compiler[slot] ??= {
+            participants: [],
+            sealed: false,
+          });
+          legacySlot.participants.push(
+            mutation === 'malformed-needs'
+              ? { kind: 'needs', needs: ['unknown'] }
+              : { kind: 'options', needs: [], disable: {} },
+          );
+        };
+        if (mutation === 'malformed-needs')
+          compiler.hooks.afterPlugins.tap('LegacyWriter', legacyRegister);
+        else legacyRegister();
+      },
+    };
+    if (mutation === 'old-first') plugins.unshift(writer);
+    else plugins.push(writer);
+  }
+  plugins.push({
+    apply(c) {
+      c.hooks.afterCompile.tap('CaptureComposition', (compilation) => {
+        const entry = c[slot]?.entry;
+        selected = entry && { source: entry.source, adapters: entry.adapters };
+      });
+    },
+  });
+  let compiler;
+  const result = await new Promise((resolve) => {
+    try {
+      compiler = webpack({
+        context,
+        mode: 'production',
+        devtool: false,
+        target: 'async-node',
+        entry: ['./index.js', './second.js'],
+        optimization: { minimize: false, concatenateModules: false },
+        output: { path: path.join(context, 'dist') },
+        plugins,
+      });
+    } catch (e) {
+      return resolve({ error: e.message });
+    }
+    compiler.run((error, stats) =>
+      compiler.close(() =>
+        resolve(
+          error
+            ? { error: error.message }
+            : {
+                stats: stats.toJson({
+                  all: false,
+                  errors: true,
+                  warnings: true,
+                  modules: true,
+                }),
+                selected,
+              },
+        ),
+      ),
+    );
+  });
+  const r = {
+    label,
+    expected: topology
+      ? 'composed remotes adapter retained across a wrapped opt-in'
+      : label.startsWith('legacy')
+        ? 'full runtime without composition or warnings'
+        : label.startsWith('mixed-current-optout')
+          ? 'full runtime with an explicit mixed-mode fallback warning'
+          : label.startsWith('conflict')
+            ? 'reject incompatible compiler composition'
+            : label.startsWith('invalid')
+              ? 'reject invalid compiler composition slot'
+              : 'successful compatible composition',
+    ...result,
+  };
+  if (r.stats) {
+    r.errors = r.stats.errors.map((e) => e.message);
+    r.warnings = r.stats.warnings.map((e) => e.message);
+    r.modules = r.stats.modules.map((m) => m.nameForCondition).filter(Boolean);
+    delete r.stats;
+  }
+  if (!topology && !r.error && r.errors?.length === 0) {
+    globalThis.__compositionProofInstances = [];
+    try {
+      require(path.join(context, 'dist/main.js'));
+      const instances = globalThis.__compositionProofInstances;
+      r.executedIdentity = {
+        count: instances.length,
+        nonnull: !!instances[0],
+        same: instances[0] === instances[1],
+      };
+    } catch (error) {
+      r.executionError = error.message;
+    }
+    delete globalThis.__compositionProofInstances;
+  }
+  results.push(r);
+  console.log(
+    JSON.stringify({
+      label: r.label,
+      expected: r.expected,
+      error: r.error,
+      errors: r.errors,
+      warnings: r.warnings,
+      executedIdentity: r.executedIdentity,
+      executionError: r.executionError,
+      selectedAdapters: r.selected?.adapters,
+      selectedFamily: r.selected?.source.match(/family-[ab]/g),
+      modules: r.modules?.filter((x) =>
+        /family-[ab].*(compose|platform)|adapters[\\/]remotes\.js$/.test(x),
+      ),
+    }),
+  );
+}
+(async () => {
+  console.log(
+    JSON.stringify({
+      copyA: req.resolve('enhanced-a/webpack'),
+      copyB: req.resolve('enhanced-b/webpack'),
+      distinct: A !== B,
+    }),
+  );
+  await build('control-same-family-ab', [
+    { Ctor: A, family: 'a' },
+    { Ctor: B, family: 'a' },
+  ]);
+  await build('control-same-family-ba', [
+    { Ctor: B, family: 'a' },
+    { Ctor: A, family: 'a' },
+  ]);
+  await build('conflict-family-ab', [
+    { Ctor: A, family: 'a' },
+    { Ctor: B, family: 'b' },
+  ]);
+  await build('conflict-family-ba', [
+    { Ctor: B, family: 'b' },
+    { Ctor: A, family: 'a' },
+  ]);
+  await build('conflict-target-web-node', [
+    { Ctor: A, family: 'a', target: 'web' },
+    { Ctor: B, family: 'a', target: 'node' },
+  ]);
+  await build('conflict-target-node-web', [
+    { Ctor: B, family: 'a', target: 'node' },
+    { Ctor: A, family: 'a', target: 'web' },
+  ]);
+  assert.notEqual(RefA, RefB);
+  for (const topology of ['forward', 'reverse', 'afterPlugins']) {
+    await build(`early-needs-${topology}`, [], undefined, undefined, topology);
+  }
+  await build('legacy-old-old', [
+    { Ctor: Legacy, family: 'a', composedRuntime: false },
+    { Ctor: Legacy, family: 'a', composedRuntime: false },
+  ]);
+  await build('legacy-old-new', [
+    { Ctor: Legacy, family: 'a', composedRuntime: false },
+    { Ctor: A, family: 'a', composedRuntime: false },
+  ]);
+  await build('legacy-new-old', [
+    { Ctor: A, family: 'a', composedRuntime: false },
+    { Ctor: Legacy, family: 'a', composedRuntime: false },
+  ]);
+  for (const reverse of [false, true]) {
+    const specs = [
+      { Ctor: A, family: 'a', composedRuntime: true },
+      { Ctor: B, family: 'a', composedRuntime: false },
+    ];
+    if (reverse) specs.reverse();
+    await build(`mixed-current-optout-${reverse}`, specs);
+    const mixedProtocol = [
+      { Ctor: A, family: 'a', composedRuntime: true },
+      { Ctor: Legacy, family: 'a', composedRuntime: true },
+    ];
+    if (reverse) mixedProtocol.reverse();
+    await build(`invalid-slot-mixed-protocol-${reverse}`, mixedProtocol);
+    for (const legacyOptIn of [false, true]) {
+      const mixedModes = [
+        { Ctor: A, family: 'a', composedRuntime: !legacyOptIn },
+        { Ctor: Legacy, family: 'a', composedRuntime: legacyOptIn },
+      ];
+      if (reverse) mixedModes.reverse();
+      await build(
+        `invalid-slot-mixed-protocol-mode-${legacyOptIn}-${reverse}`,
+        mixedModes,
+      );
+    }
+  }
+  for (const [kind, value] of [
+    ['null', null],
+    ['primitive', true],
+    ['missing-shape', {}],
+    ['missing-version', { participants: [], sealed: false }],
+    ['invalid-version', { version: 2, participants: [], sealed: false }],
+  ])
+    await build('invalid-slot-' + kind, [{ Ctor: A, family: 'a' }], value);
+  for (const mutation of [
+    'old-first',
+    'old-last',
+    'malformed-needs',
+    'replacement',
+  ]) {
+    await build(
+      `invalid-slot-mutation-${mutation}`,
+      [{ Ctor: A, family: 'a' }],
+      undefined,
+      mutation,
+    );
+  }
+  fs.writeFileSync(
+    path.join(stage, 'results.json'),
+    JSON.stringify(results, null, 2),
+  );
+  if (!observeOnly) {
+    assert.notEqual(A, B);
+    for (const result of results) {
+      if (result.label.startsWith('control')) {
+        assert.equal(result.error, undefined);
+        assert.deepEqual(result.errors, []);
+        assert.deepEqual(result.warnings, []);
+        assert.deepEqual(result.executedIdentity, {
+          count: 2,
+          nonnull: true,
+          same: true,
+        });
+        assert.equal(
+          result.modules.filter((m) =>
+            /webpack-bundler-runtime[\\/]dist[\\/]compose\.js$/.test(m),
+          ).length,
+          1,
+        );
+        assert.equal(
+          result.modules.filter((m) =>
+            /runtime-core[\\/]dist[\\/]kernel\.js$/.test(m),
+          ).length,
+          1,
+        );
+        assert.ok(
+          !result.modules.some((m) => m.includes('/family-b/node_modules/')),
+        );
+      } else if (result.label.startsWith('early-needs')) {
+        assert.equal(result.error, undefined);
+        assert.deepEqual(result.errors, []);
+        assert.deepEqual(result.warnings, []);
+        assert.ok(result.selected.adapters.includes('remotes'));
+        assert.ok(result.selected.adapters.includes('share-scope'));
+        assert.match(result.selected.source, /adapters[\\/]remotes\.js/);
+        assert.equal(
+          result.modules.filter((m) => /adapters[\\/]remotes\.js$/.test(m))
+            .length,
+          1,
+        );
+      } else if (result.label.startsWith('legacy')) {
+        assert.equal(result.error, undefined);
+        assert.deepEqual(result.errors, []);
+        assert.deepEqual(result.warnings, []);
+        assert.equal(result.selected, undefined);
+        assert.ok(
+          !result.modules.some((m) =>
+            /webpack-bundler-runtime[\\/]dist[\\/]compose\.js$/.test(m),
+          ),
+        );
+        assert.deepEqual(result.executedIdentity, {
+          count: 2,
+          nonnull: true,
+          same: true,
+        });
+      } else if (result.label.startsWith('mixed-current-optout')) {
+        assert.equal(result.error, undefined);
+        assert.deepEqual(result.errors, []);
+        assert.equal(result.warnings.length, 1);
+        assert.match(
+          result.warnings[0],
+          /another federation options participant did not enable composedRuntime/,
+        );
+        assert.equal(result.selected, undefined);
+        assert.ok(
+          !result.modules.some((m) =>
+            /webpack-bundler-runtime[\\/]dist[\\/]compose\.js$/.test(m),
+          ),
+        );
+        assert.deepEqual(result.executedIdentity, {
+          count: 2,
+          nonnull: true,
+          same: true,
+        });
+      } else if (result.label.startsWith('conflict-family'))
+        assert.match(result.error, /incompatible runtime families/);
+      else if (result.label.startsWith('conflict-target'))
+        assert.match(result.error, /incompatible targets/);
+      else
+        assert.match(
+          result.error,
+          /Invalid module-federation\.composition\/1 compiler slot/,
+        );
+    }
+    console.log(
+      'PASS: installed-copy identity, selected graph, conflicts in both orders and invalid slot boundary',
+    );
+  }
+})().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

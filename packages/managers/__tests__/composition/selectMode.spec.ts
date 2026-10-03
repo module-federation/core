@@ -26,6 +26,56 @@ describe('selectMode', () => {
     expect(await selectMode(composable(), {})).toEqual({ mode: 'composed' });
   });
 
+  it('rejects a declared composition export that only supports require', async () => {
+    const root = composableFamily(tempDir());
+    const file = path.join(
+      packageDir(root, '@module-federation/webpack-bundler-runtime'),
+      'package.json',
+    );
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+    data.exports['./compose'] = { require: './dist/compose.cjs' };
+    fs.writeFileSync(file, JSON.stringify(data));
+
+    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
+      /compose.*ESM/,
+    );
+  });
+
+  it.each([
+    [
+      'an invalid ESM target',
+      { import: '../outside.js', require: './dist/compose.cjs' },
+    ],
+    [
+      'a missing declared ESM file',
+      { import: './dist/missing.js', require: './dist/compose.cjs' },
+    ],
+  ])(
+    'reports %s instead of classifying it as unavailable',
+    async (_, entry) => {
+      const root = composableFamily(tempDir());
+      const memberRoot = packageDir(
+        root,
+        '@module-federation/webpack-bundler-runtime',
+      );
+      const file = path.join(memberRoot, 'package.json');
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      data.exports['./compose'] = entry;
+      fs.writeFileSync(file, JSON.stringify(data));
+
+      const selection = selectMode(resolveRuntimeFamily(root), {});
+      await expect(selection).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `@module-federation/webpack-bundler-runtime at ${memberRoot} failed to resolve "./compose" for ESM composition:`,
+        ),
+        cause: expect.any(Error),
+      });
+      await expect(selection).rejects.toThrow(
+        /Can't resolve|Invalid "exports" target/,
+      );
+    },
+  );
+
   it('rejects the older runtime-tools in the pnpm store and names the minimum version', async () => {
     const store = path.resolve(__dirname, '../../../../node_modules/.pnpm');
     const [older] = fs
@@ -108,6 +158,14 @@ describe('selectMode', () => {
     const cases: [string, ModeInputs['externals']][] = [
       ['a string', RUNTIME],
       ['an object key', { [RUNTIME]: 'mf' }],
+      [
+        'a composition subpath object key',
+        { '@module-federation/runtime-core/kernel': 'kernel' },
+      ],
+      [
+        'a composition subpath regexp',
+        /^@module-federation\/runtime-core\/kernel$/,
+      ],
       ['a RegExp', /^@module-federation\/runtime-core$/],
       ['an array item', ['react', { '@module-federation/sdk': 'sdk' }]],
       [

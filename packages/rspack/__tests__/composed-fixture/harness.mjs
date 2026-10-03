@@ -34,27 +34,75 @@ function config(
     alias,
     externalsPattern,
     referenceRemotes,
+    ruleFamilyAlias,
   },
 ) {
   const isHost = Boolean(mf.remotes || referenceRemotes);
+  let identityEntry;
+  let fork;
+  if (ruleFamilyAlias) {
+    const core = path.resolve(FIXTURE, '../../../runtime-core');
+    const identityDir = path.join(outRoot, out, 'identity-fixture');
+    fork = path.join(identityDir, 'runtime-core-fork');
+    fs.mkdirSync(fork, { recursive: true });
+    fs.copyFileSync(
+      path.join(core, 'package.json'),
+      path.join(fork, 'package.json'),
+    );
+    fs.cpSync(path.join(core, 'dist'), path.join(fork, 'dist'), {
+      recursive: true,
+    });
+    fs.symlinkSync(
+      path.join(core, 'node_modules'),
+      path.join(fork, 'node_modules'),
+    );
+    identityEntry = path.join(identityDir, 'identity.js');
+    fs.writeFileSync(
+      identityEntry,
+      `import { FederationKernel as selected } from ${JSON.stringify(path.join(core, 'dist/kernel.js'))};
+      import { FederationKernel as aliased } from '@module-federation/runtime-core/kernel';
+      export default { same: selected === aliased, instance: Object.create(selected.prototype) instanceof aliased };`,
+    );
+  }
   return {
     mode: 'production',
     target: target === 'node' ? 'async-node' : 'web',
     context: FIXTURE,
     devtool: false,
-    entry: isHost ? { main: './host/index.js' } : {},
+    entry: identityEntry
+      ? { main: identityEntry }
+      : isHost
+        ? { main: './host/index.js' }
+        : {},
     output: {
       path: path.join(outRoot, out),
       filename: '[name].js',
-      clean: true,
+      clean: !ruleFamilyAlias,
       uniqueName: mf.name,
       publicPath: 'auto',
-      ...(isHost &&
+      ...((isHost || ruleFamilyAlias) &&
         target === 'node' && { library: { type: 'commonjs-module' } }),
     },
     resolve: {
       alias: { 'shared-lib': path.join(FIXTURE, 'shared-lib'), ...alias },
     },
+    module: ruleFamilyAlias
+      ? {
+          rules: [
+            {
+              test: /identity\.js$/,
+              resolve: {
+                alias: {
+                  '@module-federation/runtime-core/kernel$': path.join(
+                    fork,
+                    'dist/kernel.js',
+                  ),
+                },
+              },
+            },
+          ],
+        }
+      : undefined,
     optimization: { minimize: false },
     performance: false,
     infrastructureLogging: { level: 'error' },

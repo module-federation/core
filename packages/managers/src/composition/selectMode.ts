@@ -4,6 +4,7 @@ import {
   RUNTIME_FAMILY,
   type RuntimeFamily,
 } from './family';
+import { resolveCompositionEntry } from './resolveImports';
 
 type ExternalCallback = (err?: Error | null, value?: unknown) => void;
 type ExternalFunction = (...args: any[]) => unknown;
@@ -76,6 +77,30 @@ function familyProblem({ anchor, members }: RuntimeFamily): string | undefined {
     if (missing) {
       return `${pkg} at ${member.root} does not export "${missing}": the installed runtime family lacks the subpath exports this build needs; update the @module-federation runtime packages to the release that added them (${MIN_RUNTIME_VERSION})`;
     }
+    for (const key of RUNTIME_FAMILY[pkg]) {
+      try {
+        const resolved = resolveCompositionEntry(
+          member.root,
+          `${pkg}/${key.slice(2)}`,
+        );
+        if (typeof resolved !== 'string') {
+          throw new Error('the export did not resolve to a file');
+        }
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message.startsWith(`"${key}" is not exported under `)
+        ) {
+          return `${pkg} at ${member.root} cannot resolve "${key}" for ESM composition`;
+        }
+        throw Object.assign(
+          new Error(
+            `${pkg} at ${member.root} failed to resolve "${key}" for ESM composition: ${error instanceof Error ? error.message : String(error)}`,
+          ),
+          { cause: error },
+        );
+      }
+    }
     from = member.root;
   }
   return undefined;
@@ -100,14 +125,18 @@ async function externalsProblem({
 }: ModeInputs): Promise<string | undefined> {
   if (externals === undefined) return undefined;
   const items = Array.isArray(externals) ? externals : [externals];
-  for (const pkg of FAMILY_PACKAGES) {
+  const requests = FAMILY_PACKAGES.flatMap((pkg) => [
+    pkg,
+    ...RUNTIME_FAMILY[pkg].map((key) => `${pkg}/${key.slice(2)}`),
+  ]);
+  for (const request of requests) {
     for (const item of items) {
       try {
-        if (await matchesExternal(item, pkg, context)) {
-          return `${pkg} is externalized`;
+        if (await matchesExternal(item, request, context)) {
+          return `${request} is externalized`;
         }
       } catch (error) {
-        return `externals could not be checked for ${pkg}: ${(error as Error)?.message ?? error}`;
+        return `externals could not be checked for ${request}: ${(error as Error)?.message ?? error}`;
       }
     }
   }

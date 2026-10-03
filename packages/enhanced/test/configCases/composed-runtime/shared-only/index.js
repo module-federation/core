@@ -13,15 +13,20 @@ it('resolves the shared module through the share scope', async () => {
 
 it('bundles the shared capability and the consumes adapter only', () => {
   const files = bundledRuntimeFiles(__STATS__);
-  for (const part of ['compose', 'shared', 'consumes', 'shareScope'])
+  for (const part of [
+    'compose',
+    'shared',
+    'consumes',
+    'shareScope',
+    'platform',
+    'sdkNode',
+  ])
     expect([part, hasPart(files, part)]).toEqual([part, true]);
   for (const part of [
     'remote',
     'snapshot',
-    'platform',
     'remotes',
     'container',
-    'sdkNode',
     'bundlerRuntimeIndex',
     'runtimeCoreIndex',
   ])
