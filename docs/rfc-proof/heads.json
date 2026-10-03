@@ -1,0 +1,3066 @@
+[
+  {
+    "baseRefName": "main",
+    "headRefName": "rfc5036/01-runtime-family-resolver",
+    "headRefOid": "00b53e38730a4728781282b036847ab9194bfe3a",
+    "mergeable": "CONFLICTING",
+    "number": 5093,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:11Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108341757351",
+        "name": "checkout-install",
+        "startedAt": "2026-09-26T04:59:05Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:04Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432047/job/108341757128",
+        "name": "measure",
+        "startedAt": "2026-09-26T04:59:04Z",
+        "status": "COMPLETED",
+        "workflowName": "Bundle Size"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T04:59:47Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219429888/job/108341752186",
+        "name": "Analyze (actions)",
+        "startedAt": "2026-09-26T04:59:02Z",
+        "status": "COMPLETED",
+        "workflowName": "CodeQL"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:00:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219431916/job/108341756894",
+        "name": "lint-deps",
+        "startedAt": "2026-09-26T04:59:04Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T04:59:19Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219431901/job/108341756520",
+        "name": "actionlint",
+        "startedAt": "2026-09-26T04:59:06Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T04:59:51Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219464509/job/108341849147",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T04:59:48Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:06Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219431993/job/108341756942",
+        "name": "deploy",
+        "startedAt": "2026-09-26T04:59:04Z",
+        "status": "COMPLETED",
+        "workflowName": "Website Zephyr Deploy"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:01:54Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219431874/job/108341756495",
+        "name": "publish-preview",
+        "startedAt": "2026-09-26T04:59:04Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:00:30Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219429888/job/108341752272",
+        "name": "Analyze (javascript)",
+        "startedAt": "2026-09-26T04:59:02Z",
+        "status": "COMPLETED",
+        "workflowName": "CodeQL"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T04:59:59Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219429888/job/108341752197",
+        "name": "Analyze (python)",
+        "startedAt": "2026-09-26T04:59:02Z",
+        "status": "COMPLETED",
+        "workflowName": "CodeQL"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:04:47Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342346991",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-26T05:03:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:04:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342346975",
+        "name": "node20-compat",
+        "startedAt": "2026-09-26T05:03:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:05:42Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347055",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-26T05:03:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:06:42Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347029",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-26T05:03:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:05:09Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347071",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-26T05:03:15Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:04:58Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347027",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-26T05:03:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:07:41Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347012",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-26T05:03:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:07:13Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347143",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:05:47Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347008",
+        "name": "e2e-treeshake / e2e-treeshake",
+        "startedAt": "2026-09-26T05:03:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:05:30Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347100",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-26T05:03:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:07:02Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347021",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-26T05:03:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:06:35Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347174",
+        "name": "e2e-metro / e2e-metro-android",
+        "startedAt": "2026-09-26T05:03:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:20:04Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347198",
+        "name": "e2e-metro / e2e-metro-ios",
+        "startedAt": "2026-09-26T05:04:00Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:09:12Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432117/job/108342347232",
+        "name": "devtools / main",
+        "startedAt": "2026-09-26T05:03:56Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T04:59:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/runs/108341835933",
+        "name": "CodeQL",
+        "startedAt": "2026-09-26T04:59:38Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:01:50Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-26T05:01:50Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "feat(managers): resolve runtime families atomically",
+    "url": "https://github.com/module-federation/core/pull/5093"
+  },
+  {
+    "baseRefName": "rfc5036/01-runtime-family-resolver",
+    "headRefName": "rfc5036/02-compiler-coordination",
+    "headRefOid": "d077ea1969d78fb98d1d4fbbd67427a52ea0deac",
+    "mergeable": "MERGEABLE",
+    "number": 5094,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:54Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108341759675",
+        "name": "checkout-install",
+        "startedAt": "2026-09-26T04:59:06Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:00:57Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432825/job/108341759314",
+        "name": "lint-deps",
+        "startedAt": "2026-09-26T04:59:05Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T04:59:15Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432801/job/108341759128",
+        "name": "actionlint",
+        "startedAt": "2026-09-26T04:59:05Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:01:08Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219465045/job/108341850746",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T05:01:04Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:14Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432844/job/108341759360",
+        "name": "publish-preview",
+        "startedAt": "2026-09-26T04:59:06Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:08:36Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446168",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-26T05:07:03Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:06:21Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446016",
+        "name": "node20-compat",
+        "startedAt": "2026-09-26T05:05:00Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:12:38Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446141",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-26T05:09:59Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:09:15Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446105",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-26T05:05:22Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:10:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446129",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-26T05:08:42Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:11:21Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446110",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-26T05:09:19Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:16:18Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446273",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-26T05:08:02Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:11:03Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446163",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-26T05:06:44Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:54Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446518",
+        "name": "e2e-treeshake",
+        "startedAt": "2026-09-26T05:03:55Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:07:15Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446154",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-26T05:04:48Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:16:23Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446259",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-26T05:12:39Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:54Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446774",
+        "name": "e2e-metro",
+        "startedAt": "2026-09-26T05:03:55Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:15:58Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219432932/job/108342446376",
+        "name": "devtools / main",
+        "startedAt": "2026-09-26T05:11:02Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:48Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-26T05:02:48Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "feat(enhanced): coordinate runtime family selection",
+    "url": "https://github.com/module-federation/core/pull/5094"
+  },
+  {
+    "baseRefName": "rfc5036/02-compiler-coordination",
+    "headRefName": "rfc5036/03-runtime-selectors",
+    "headRefOid": "9fb0f2fc76a21059688ae7d8c2d867a13ee7994c",
+    "mergeable": "MERGEABLE",
+    "number": 5095,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:05:37Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108341762696",
+        "name": "checkout-install",
+        "startedAt": "2026-09-26T04:59:08Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:00:49Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433814/job/108341762036",
+        "name": "lint-deps",
+        "startedAt": "2026-09-26T04:59:07Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T04:59:21Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433807/job/108341761883",
+        "name": "actionlint",
+        "startedAt": "2026-09-26T04:59:07Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:01:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219466461/job/108341855357",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T05:01:24Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:42Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433817/job/108341762189",
+        "name": "publish-preview",
+        "startedAt": "2026-09-26T04:59:07Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:14:59Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342683824",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-26T05:13:32Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:15:08Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342683693",
+        "name": "node20-compat",
+        "startedAt": "2026-09-26T05:13:53Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:15:46Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342683831",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-26T05:12:49Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:12:37Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342683761",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-26T05:08:38Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:12:48Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342683802",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-26T05:10:43Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:13:31Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342683781",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-26T05:11:18Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:13:56Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342683808",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-26T05:09:10Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:16:35Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342683870",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-26T05:12:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:05:37Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342684347",
+        "name": "e2e-treeshake",
+        "startedAt": "2026-09-26T05:05:37Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:15:46Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342683929",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-26T05:13:24Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:17:05Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342683977",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-26T05:13:26Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:18:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342684074",
+        "name": "e2e-metro / e2e-metro-android",
+        "startedAt": "2026-09-26T05:13:57Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:24:44Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342684039",
+        "name": "e2e-metro / e2e-metro-ios",
+        "startedAt": "2026-09-26T05:05:53Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:18:09Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219433978/job/108342684009",
+        "name": "devtools / main",
+        "startedAt": "2026-09-26T05:12:46Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:19Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-26T05:02:19Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "feat(runtime): add package selectors for runtime capabilities",
+    "url": "https://github.com/module-federation/core/pull/5095"
+  },
+  {
+    "baseRefName": "rfc5036/03-runtime-selectors",
+    "headRefName": "rfc5036/04-runtime-image-cache",
+    "headRefOid": "f32aae69b62b66f7f7453ce3ad038b13b8d1d3f3",
+    "mergeable": "MERGEABLE",
+    "number": 5096,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:54Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108341767138",
+        "name": "checkout-install",
+        "startedAt": "2026-09-26T04:59:23Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:01:02Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435404/job/108341766820",
+        "name": "lint-deps",
+        "startedAt": "2026-09-26T04:59:09Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T04:59:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435400/job/108341766703",
+        "name": "actionlint",
+        "startedAt": "2026-09-26T04:59:09Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:01:32Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219467726/job/108341859627",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T05:01:29Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435389/job/108341766943",
+        "name": "publish-preview",
+        "startedAt": "2026-09-26T04:59:09Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:13:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446698",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-26T05:11:51Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:08:00Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446597",
+        "name": "node20-compat",
+        "startedAt": "2026-09-26T05:06:23Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:11:16Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446690",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-26T05:08:31Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:08:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446739",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-26T05:05:12Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:08:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446802",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-26T05:06:42Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:06:41Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446799",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-26T05:04:48Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:11:30Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446859",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-26T05:07:14Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:09:16Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446781",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-26T05:05:30Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:55Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342447210",
+        "name": "e2e-treeshake",
+        "startedAt": "2026-09-26T05:03:55Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:10:42Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446787",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-26T05:08:38Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:10:37Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446819",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-26T05:06:37Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:15:09Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342446963",
+        "name": "e2e-metro / e2e-metro-android",
+        "startedAt": "2026-09-26T05:11:31Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:25:26Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342447019",
+        "name": "e2e-metro / e2e-metro-ios",
+        "startedAt": "2026-09-26T05:04:31Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:12:47Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219435482/job/108342447058",
+        "name": "devtools / main",
+        "startedAt": "2026-09-26T05:07:43Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:15Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-26T05:02:15Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "feat(runtime): reject incompatible runtime image reuse",
+    "url": "https://github.com/module-federation/core/pull/5096"
+  },
+  {
+    "baseRefName": "rfc5036/04-runtime-image-cache",
+    "headRefName": "rfc5036/05-esbuild-rollout",
+    "headRefOid": "9f7dc2319d336e9615c12f1187e4f67aae83ea71",
+    "mergeable": "MERGEABLE",
+    "number": 5097,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:49Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108341771943",
+        "name": "checkout-install",
+        "startedAt": "2026-09-26T04:59:36Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:07Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437043/job/108341771911",
+        "name": "lint-deps",
+        "startedAt": "2026-09-26T05:00:18Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:00:17Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437006/job/108341771495",
+        "name": "actionlint",
+        "startedAt": "2026-09-26T05:00:01Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:01:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219468992/job/108341862800",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T05:01:34Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:04:46Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219436989/job/108341771404",
+        "name": "publish-preview",
+        "startedAt": "2026-09-26T05:00:27Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342297024",
+        "name": "e2e-modern",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:04:01Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342296683",
+        "name": "node20-compat",
+        "startedAt": "2026-09-26T05:02:52Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342297334",
+        "name": "e2e-runtime",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342297101",
+        "name": "e2e-manifest",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342297231",
+        "name": "e2e-node",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342297044",
+        "name": "e2e-rstest",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342297332",
+        "name": "e2e-next-dev",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342296983",
+        "name": "e2e-next-prod",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342297134",
+        "name": "e2e-treeshake",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342297363",
+        "name": "e2e-modern-ssr",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342297357",
+        "name": "e2e-router",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:50Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342297335",
+        "name": "e2e-metro",
+        "startedAt": "2026-09-26T05:02:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:08:36Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219437089/job/108342296861",
+        "name": "devtools / main",
+        "startedAt": "2026-09-26T05:02:52Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:04:19Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-26T05:04:19Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "fix(esbuild): honor absWorkingDir for remote output",
+    "url": "https://github.com/module-federation/core/pull/5097"
+  },
+  {
+    "baseRefName": "rfc5036/05-esbuild-rollout",
+    "headRefName": "rfc5036/06-docs-rollout",
+    "headRefOid": "17531d70586dee766d9b67f18b8efb7fdffef848",
+    "mergeable": "MERGEABLE",
+    "number": 5098,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108341776229",
+        "name": "checkout-install",
+        "startedAt": "2026-09-26T04:59:27Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:20Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438326/job/108341776275",
+        "name": "lint-deps",
+        "startedAt": "2026-09-26T05:00:31Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T04:59:35Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438218/job/108341775850",
+        "name": "actionlint",
+        "startedAt": "2026-09-26T04:59:17Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:01:45Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219471155/job/108341869579",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T05:01:41Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:55Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438163/job/108341775649",
+        "name": "publish-preview",
+        "startedAt": "2026-09-26T04:59:21Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342358246",
+        "name": "e2e-modern",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:05:19Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342357188",
+        "name": "node20-compat",
+        "startedAt": "2026-09-26T05:04:02Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342358095",
+        "name": "e2e-runtime",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342357779",
+        "name": "e2e-manifest",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342357959",
+        "name": "e2e-node",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342358074",
+        "name": "e2e-rstest",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342358032",
+        "name": "e2e-next-dev",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342358106",
+        "name": "e2e-next-prod",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342357926",
+        "name": "e2e-treeshake",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342358165",
+        "name": "e2e-modern-ssr",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342358273",
+        "name": "e2e-router",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342358101",
+        "name": "e2e-metro",
+        "startedAt": "2026-09-26T05:03:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:09:17Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219438388/job/108342357537",
+        "name": "devtools / main",
+        "startedAt": "2026-09-26T05:03:48Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-26T05:02:28Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "docs(runtime): describe runtime family rollout",
+    "url": "https://github.com/module-federation/core/pull/5098"
+  },
+  {
+    "baseRefName": "rfc5036/06-docs-rollout",
+    "headRefName": "rfc5036/07-handler-contracts",
+    "headRefOid": "c813c4fdd82e3f146daca65c322b481ada0cb6c9",
+    "mergeable": "MERGEABLE",
+    "number": 5107,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:05:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108341779819",
+        "name": "checkout-install",
+        "startedAt": "2026-09-26T04:59:52Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:02:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439609/job/108341779489",
+        "name": "lint-deps",
+        "startedAt": "2026-09-26T05:00:51Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:01:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439591/job/108341779192",
+        "name": "actionlint",
+        "startedAt": "2026-09-26T05:01:09Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:01:50Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219473229/job/108341875950",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T05:01:46Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:47Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439615/job/108341779515",
+        "name": "publish-preview",
+        "startedAt": "2026-09-26T05:00:58Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:12:44Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665133",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-26T05:11:05Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:13:52Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342664906",
+        "name": "node20-compat",
+        "startedAt": "2026-09-26T05:12:39Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:14:13Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665039",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-26T05:11:38Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:14:51Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665037",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-26T05:11:23Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:11:01Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665103",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-26T05:09:17Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:09:08Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665004",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-26T05:07:18Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:14:02Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665053",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-26T05:10:38Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:09:57Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665197",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-26T05:05:44Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:05:29Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665592",
+        "name": "e2e-treeshake",
+        "startedAt": "2026-09-26T05:05:29Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:11:36Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665115",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-26T05:09:18Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:13:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665147",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-26T05:09:14Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:14:31Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665353",
+        "name": "e2e-metro / e2e-metro-android",
+        "startedAt": "2026-09-26T05:10:30Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:20:19Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665431",
+        "name": "e2e-metro / e2e-metro-ios",
+        "startedAt": "2026-09-26T05:05:35Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:11:50Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36219439721/job/108342665267",
+        "name": "devtools / main",
+        "startedAt": "2026-09-26T05:05:39Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T05:03:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-26T05:03:28Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "fix(runtime): select the tree-shaking share plugin and test bundle contents",
+    "url": "https://github.com/module-federation/core/pull/5107"
+  },
+  {
+    "baseRefName": "main",
+    "headRefName": "rfc5128/01-runtime-core-kernel",
+    "headRefOid": "b5733f4712ee2e696af9d5b68b4b5e0e0112b59f",
+    "mergeable": "MERGEABLE",
+    "number": 5135,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:16Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108287875219",
+        "name": "checkout-install",
+        "startedAt": "2026-09-25T23:28:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:32:00Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154698/job/108287874755",
+        "name": "measure",
+        "startedAt": "2026-09-25T23:28:34Z",
+        "status": "COMPLETED",
+        "workflowName": "Bundle Size"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:29:16Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201151473/job/108287865333",
+        "name": "Analyze (actions)",
+        "startedAt": "2026-09-25T23:28:31Z",
+        "status": "COMPLETED",
+        "workflowName": "CodeQL"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:30:27Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154610/job/108287874011",
+        "name": "lint-deps",
+        "startedAt": "2026-09-25T23:28:34Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:28:47Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154706/job/108287874636",
+        "name": "actionlint",
+        "startedAt": "2026-09-25T23:28:34Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:29:21Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201166424/job/108287910208",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-25T23:29:18Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T01:58:13Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36210167950/job/108314841834",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T01:58:09Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:31:49Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154592/job/108287873586",
+        "name": "publish-preview",
+        "startedAt": "2026-09-25T23:28:34Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:30:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201151473/job/108287865267",
+        "name": "Analyze (javascript)",
+        "startedAt": "2026-09-25T23:28:31Z",
+        "status": "COMPLETED",
+        "workflowName": "CodeQL"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:29:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201151473/job/108287865414",
+        "name": "Analyze (python)",
+        "startedAt": "2026-09-25T23:28:31Z",
+        "status": "COMPLETED",
+        "workflowName": "CodeQL"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:40:03Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019681",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-25T23:37:41Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:35:20Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019424",
+        "name": "node20-compat",
+        "startedAt": "2026-09-25T23:34:18Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:41:43Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019702",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-25T23:37:47Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:39:23Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019649",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-25T23:35:22Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:44:06Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019600",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-25T23:41:41Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:36:47Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019582",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-25T23:34:18Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:42:04Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019796",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-25T23:36:56Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:38:59Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019848",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-25T23:34:30Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:16Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289020415",
+        "name": "e2e-treeshake",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:39:05Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019876",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-25T23:36:09Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:41:26Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019820",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-25T23:37:00Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:38:57Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019933",
+        "name": "e2e-metro / e2e-metro-android",
+        "startedAt": "2026-09-25T23:34:27Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:57:47Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289020009",
+        "name": "e2e-metro / e2e-metro-ios",
+        "startedAt": "2026-09-25T23:38:37Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:40:29Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201154895/job/108289019959",
+        "name": "devtools / main",
+        "startedAt": "2026-09-25T23:34:41Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:29:09Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/runs/108287984457",
+        "name": "CodeQL",
+        "startedAt": "2026-09-25T23:29:06Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:31:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-25T23:31:25Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "refactor(runtime-core,sdk,runtime): split the kernel from its capabilities",
+    "url": "https://github.com/module-federation/core/pull/5135"
+  },
+  {
+    "baseRefName": "rfc5128/01-runtime-core-kernel",
+    "headRefName": "rfc5128/02-bundler-runtime-compose",
+    "headRefOid": "ab1bcc0401f1eb93729004a069586f0d6510e4df",
+    "mergeable": "MERGEABLE",
+    "number": 5137,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:14Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108288078838",
+        "name": "checkout-install",
+        "startedAt": "2026-09-25T23:29:50Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:30:51Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222517/job/108288078093",
+        "name": "lint-deps",
+        "startedAt": "2026-09-25T23:29:37Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:29:52Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222490/job/108288077757",
+        "name": "actionlint",
+        "startedAt": "2026-09-25T23:29:38Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T01:58:15Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36210169021/job/108314845060",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T01:58:10Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T01:59:13Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36210220978/job/108314992452",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T01:59:09Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:32:26Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222502/job/108288078678",
+        "name": "publish-preview",
+        "startedAt": "2026-09-25T23:29:38Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:35:48Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013769",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:36:08Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013575",
+        "name": "node20-compat",
+        "startedAt": "2026-09-25T23:34:53Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:36:54Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013803",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:37:39Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013680",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:36:32Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013770",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:36:02Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013755",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:38:31Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013946",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:38:13Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013857",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:36:44Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013965",
+        "name": "e2e-treeshake / e2e-treeshake",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:36:41Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013940",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:37:46Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289013844",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:37:58Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289014192",
+        "name": "e2e-metro / e2e-metro-android",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:53:10Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289014189",
+        "name": "e2e-metro / e2e-metro-ios",
+        "startedAt": "2026-09-25T23:34:24Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:39:12Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201222661/job/108289014225",
+        "name": "devtools / main",
+        "startedAt": "2026-09-25T23:34:16Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:32:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-25T23:32:22Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "refactor(webpack-bundler-runtime): compose the bundler runtime from adapters",
+    "url": "https://github.com/module-federation/core/pull/5137"
+  },
+  {
+    "baseRefName": "rfc5128/02-bundler-runtime-compose",
+    "headRefName": "rfc5128/03-node-esbuild-runtime",
+    "headRefOid": "302500c868c4f5fb862356e0f3509089897bc066",
+    "mergeable": "MERGEABLE",
+    "number": 5139,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:39Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108288349510",
+        "name": "checkout-install",
+        "startedAt": "2026-09-25T23:30:57Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:32:45Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315555/job/108288348797",
+        "name": "lint-deps",
+        "startedAt": "2026-09-25T23:30:57Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:31:12Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315512/job/108288348291",
+        "name": "actionlint",
+        "startedAt": "2026-09-25T23:30:57Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T01:58:16Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36210170239/job/108314848626",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T01:58:12Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315569/job/108288348389",
+        "name": "publish-preview",
+        "startedAt": "2026-09-25T23:30:58Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:40:27Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097230",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-25T23:39:00Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:43:01Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289096962",
+        "name": "node20-compat",
+        "startedAt": "2026-09-25T23:41:36Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:39Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097981",
+        "name": "e2e-runtime",
+        "startedAt": "2026-09-25T23:34:40Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:39Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097786",
+        "name": "e2e-manifest",
+        "startedAt": "2026-09-25T23:34:40Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:43:43Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097258",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-25T23:41:45Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:37:41Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097262",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-25T23:35:39Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:43:00Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097306",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-25T23:39:25Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:45:56Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097376",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-25T23:42:05Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:39Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097802",
+        "name": "e2e-treeshake",
+        "startedAt": "2026-09-25T23:34:40Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:41:33Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097469",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-25T23:39:05Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:41:52Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097270",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-25T23:37:59Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:39Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097925",
+        "name": "e2e-metro",
+        "startedAt": "2026-09-25T23:34:40Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:02:13Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201315738/job/108289097641",
+        "name": "devtools / main",
+        "startedAt": "2026-09-25T23:55:19Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:33:58Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-25T23:33:58Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "fix(node,esbuild): load through the instance platform instead of federation.runtime",
+    "url": "https://github.com/module-federation/core/pull/5139"
+  },
+  {
+    "baseRefName": "rfc5128/03-node-esbuild-runtime",
+    "headRefName": "rfc5128/04-managers-composition",
+    "headRefOid": "a3a65b4be74b7e4bfd41adc8da6124ea82df384c",
+    "mergeable": "MERGEABLE",
+    "number": 5134,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:35:37Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299579488",
+        "name": "checkout-install",
+        "startedAt": "2026-09-25T23:31:46Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:33:05Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367506/job/108288510527",
+        "name": "lint-deps",
+        "startedAt": "2026-09-25T23:31:46Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:32:01Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367481/job/108288510296",
+        "name": "actionlint",
+        "startedAt": "2026-09-25T23:31:45Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T01:58:16Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36210171106/job/108314851678",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T01:58:13Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T01:59:14Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36210222715/job/108314997925",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T01:59:11Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367558/job/108288510612",
+        "name": "publish-preview",
+        "startedAt": "2026-09-25T23:31:45Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:52:33Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580559",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-25T23:50:01Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:40:34Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580282",
+        "name": "node20-compat",
+        "startedAt": "2026-09-25T23:39:21Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:45:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580503",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-25T23:41:47Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:44:55Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580546",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-25T23:40:40Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:51:15Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580640",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-25T23:48:38Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:39:19Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580732",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-25T23:36:45Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:49:54Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580604",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-25T23:44:56Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:42:14Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580677",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-25T23:37:43Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:41:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580361",
+        "name": "e2e-treeshake / e2e-treeshake",
+        "startedAt": "2026-09-25T23:38:54Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:39:03Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580339",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-25T23:36:04Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:42:17Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580322",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-25T23:38:14Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:43:45Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299581529",
+        "name": "e2e-metro / e2e-metro-android",
+        "startedAt": "2026-09-25T23:39:13Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:53:00Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299580149",
+        "name": "e2e-metro / e2e-metro-ios",
+        "startedAt": "2026-09-26T00:29:12Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:52:14Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201367798/job/108299581109",
+        "name": "devtools / main",
+        "startedAt": "2026-09-25T23:45:35Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:34:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-25T23:34:25Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "feat(managers): plan the runtime composition and resolve one runtime family",
+    "url": "https://github.com/module-federation/core/pull/5134"
+  },
+  {
+    "baseRefName": "rfc5128/04-managers-composition",
+    "headRefName": "rfc5128/05-enhanced-composed",
+    "headRefOid": "f2eb03ceefc96adde04bb266107fb0284cd17e8a",
+    "mergeable": "MERGEABLE",
+    "number": 5140,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:56:17Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108289182474",
+        "name": "checkout-install",
+        "startedAt": "2026-09-25T23:50:18Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:38:16Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584092/job/108289181321",
+        "name": "lint-deps",
+        "startedAt": "2026-09-25T23:36:34Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:40:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584162/job/108289181627",
+        "name": "actionlint",
+        "startedAt": "2026-09-25T23:40:30Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T01:58:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36210172887/job/108314856821",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T01:58:17Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:38:37Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584088/job/108289181676",
+        "name": "publish-preview",
+        "startedAt": "2026-09-25T23:35:50Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:07:03Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293200771",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-26T00:05:21Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:02:11Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293200533",
+        "name": "node20-compat",
+        "startedAt": "2026-09-26T00:00:55Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:04:59Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293200785",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-26T00:01:58Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:00:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293200899",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-25T23:57:19Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:06:58Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293200842",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-26T00:05:15Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:02:52Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293200787",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-26T00:00:40Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:02:20Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293200841",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-25T23:57:41Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:10:15Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293200832",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-26T00:06:27Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:56:17Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293201538",
+        "name": "e2e-treeshake",
+        "startedAt": "2026-09-25T23:56:18Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:06:43Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293200978",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-26T00:04:31Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:05:14Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293200870",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-26T00:01:17Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:05:47Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293201154",
+        "name": "e2e-metro / e2e-metro-android",
+        "startedAt": "2026-09-26T00:02:08Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:19:10Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293201161",
+        "name": "e2e-metro / e2e-metro-ios",
+        "startedAt": "2026-09-26T00:02:21Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:10:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201584343/job/108293201080",
+        "name": "devtools / main",
+        "startedAt": "2026-09-26T00:05:15Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:38:31Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-25T23:38:31Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "feat(enhanced): compose the runtime bootstrap behind experiments.composedRuntime",
+    "url": "https://github.com/module-federation/core/pull/5140"
+  },
+  {
+    "baseRefName": "rfc5128/05-enhanced-composed",
+    "headRefName": "rfc5128/06-rspack-composed",
+    "headRefOid": "84cee419c5c7dc2bb87d1a92cd7fb8e15e409aec",
+    "mergeable": "MERGEABLE",
+    "number": 5141,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:44:05Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108289565375",
+        "name": "checkout-install",
+        "startedAt": "2026-09-25T23:39:06Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:54:04Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201707936/job/108289564265",
+        "name": "lint-deps",
+        "startedAt": "2026-09-25T23:52:46Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:41:45Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201707949/job/108289564161",
+        "name": "actionlint",
+        "startedAt": "2026-09-25T23:41:31Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T01:58:21Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36210174307/job/108314861414",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T01:58:17Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T01:59:18Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36210225442/job/108315006648",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T01:59:15Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:46:41Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201707956/job/108289564513",
+        "name": "publish-preview",
+        "startedAt": "2026-09-25T23:43:58Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:57:20Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290904065",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-25T23:55:02Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:54:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290903799",
+        "name": "node20-compat",
+        "startedAt": "2026-09-25T23:53:12Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:47:50Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290903979",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-25T23:44:24Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:50:16Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290903993",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-25T23:45:58Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:57:57Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290903943",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-25T23:54:55Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:54:43Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290904069",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-25T23:51:55Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:01:56Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290904045",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-25T23:56:44Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:53:20Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290904115",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-25T23:48:39Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:49:39Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290904092",
+        "name": "e2e-treeshake / e2e-treeshake",
+        "startedAt": "2026-09-25T23:46:43Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:49:12Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290904227",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-25T23:46:00Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:52:18Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290904116",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-25T23:47:44Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:02:07Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290904380",
+        "name": "e2e-metro / e2e-metro-android",
+        "startedAt": "2026-09-25T23:57:58Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:03:30Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290904426",
+        "name": "e2e-metro / e2e-metro-ios",
+        "startedAt": "2026-09-25T23:45:25Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:53:48Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201708238/job/108290904294",
+        "name": "devtools / main",
+        "startedAt": "2026-09-25T23:48:05Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:46:36Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-25T23:46:36Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "feat(rspack): redirect the native bundler runtime to a composed entry",
+    "url": "https://github.com/module-federation/core/pull/5141"
+  },
+  {
+    "baseRefName": "rfc5128/06-rspack-composed",
+    "headRefName": "rfc5128/07-composed-default-major",
+    "headRefOid": "db5159fcffec872651ed9b11d2ad2ca1f4c0fcb2",
+    "mergeable": "MERGEABLE",
+    "number": 5142,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:01:15Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108289916697",
+        "name": "checkout-install",
+        "startedAt": "2026-09-25T23:55:00Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:41:39Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201823907/job/108289916019",
+        "name": "lint-deps",
+        "startedAt": "2026-09-25T23:40:29Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint Dependencies"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:45:18Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201823887/job/108289915961",
+        "name": "actionlint",
+        "startedAt": "2026-09-25T23:45:01Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint GitHub Workflows"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T01:58:23Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36210175668/job/108314866101",
+        "name": "Labeling for changes",
+        "startedAt": "2026-09-26T01:58:19Z",
+        "status": "COMPLETED",
+        "workflowName": "PR Labeler"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:41:38Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201823903/job/108289915857",
+        "name": "publish-preview",
+        "startedAt": "2026-09-25T23:38:59Z",
+        "status": "COMPLETED",
+        "workflowName": "pkg.pr.new Preview"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:06:05Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294158663",
+        "name": "e2e-modern / e2e-modern",
+        "startedAt": "2026-09-26T00:04:19Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:03:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294158531",
+        "name": "node20-compat",
+        "startedAt": "2026-09-26T00:02:14Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:10:09Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294158772",
+        "name": "e2e-runtime / e2e-runtime",
+        "startedAt": "2026-09-26T00:07:05Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:07:50Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294158685",
+        "name": "e2e-manifest / e2e-manifest",
+        "startedAt": "2026-09-26T00:03:32Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:07:06Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294158710",
+        "name": "e2e-node / e2e-node",
+        "startedAt": "2026-09-26T00:05:19Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:04:17Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294158765",
+        "name": "e2e-rstest / e2e-rstest",
+        "startedAt": "2026-09-26T00:02:29Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:10:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294158678",
+        "name": "e2e-next-dev / e2e-next-dev",
+        "startedAt": "2026-09-26T00:06:05Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:10:04Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294158817",
+        "name": "e2e-next-prod / e2e-next-prod",
+        "startedAt": "2026-09-26T00:05:54Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:01:15Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294159244",
+        "name": "e2e-treeshake",
+        "startedAt": "2026-09-26T00:01:15Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:04:30Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294158904",
+        "name": "e2e-modern-ssr / e2e-modern",
+        "startedAt": "2026-09-26T00:02:22Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:09:17Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294158826",
+        "name": "e2e-router / e2e-router",
+        "startedAt": "2026-09-26T00:05:49Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:10:47Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294159100",
+        "name": "e2e-metro / e2e-metro-android",
+        "startedAt": "2026-09-26T00:06:45Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:27:08Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294159040",
+        "name": "e2e-metro / e2e-metro-ios",
+        "startedAt": "2026-09-26T00:05:56Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-26T00:12:16Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/module-federation/core/actions/runs/36201824066/job/108294159086",
+        "name": "devtools / main",
+        "startedAt": "2026-09-26T00:07:06Z",
+        "status": "COMPLETED",
+        "workflowName": "Build Affected Packages"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-25T23:41:33Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://pkg.pr.new",
+        "name": "Continuous Releases",
+        "startedAt": "2026-09-25T23:41:33Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "title": "feat!: compose the federation runtime by default and remove the capability defines",
+    "url": "https://github.com/module-federation/core/pull/5142"
+  }
+]
