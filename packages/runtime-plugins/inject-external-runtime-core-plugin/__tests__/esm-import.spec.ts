@@ -31,6 +31,27 @@ function expectInjectedRuntime(appName: string, version: string) {
   });
 }
 
+function withLegacyRuntimeCore(
+  run: (plugin: ReturnType<PluginFactoryModule['default']>) => void,
+) {
+  jest.doMock('@module-federation/runtime-tools/runtime-core', () => ({
+    ...jest.requireActual<
+      typeof import('@module-federation/runtime-tools/runtime-core')
+    >('@module-federation/runtime-tools/runtime-core'),
+    assertRuntimeImageCompatible: undefined,
+  }));
+  try {
+    jest.isolateModules(() => {
+      const createPlugin = require(
+        path.join(__dirname, '..', 'dist', 'index.cjs'),
+      ) as PluginFactoryModule['default'];
+      run(createPlugin());
+    });
+  } finally {
+    jest.dontMock('@module-federation/runtime-tools/runtime-core');
+  }
+}
+
 describe('@module-federation/inject-external-runtime-core-plugin', () => {
   beforeEach(() => {
     delete globalThis._FEDERATION_RUNTIME_CORE;
@@ -133,5 +154,55 @@ describe('@module-federation/inject-external-runtime-core-plugin', () => {
     expect(
       globalThis._FEDERATION_RUNTIME_CORE_FROM.runtimeImage?.compatibilityId,
     ).toBe('runtime-family');
+  });
+
+  it('keeps legacy first use and reuse working without an image checker', () => {
+    withLegacyRuntimeCore((plugin) => {
+      plugin.beforeInit({ options: { name: 'legacy-provider' } });
+      expectInjectedRuntime('legacy-provider', plugin.version);
+      plugin.beforeInit({ options: { name: 'legacy-provider' } });
+      expectInjectedRuntime('legacy-provider', plugin.version);
+    });
+  });
+
+  it('rejects image metadata on first use before publishing with an old core', () => {
+    withLegacyRuntimeCore((plugin) => {
+      const runtimeImage: RuntimeImage = {
+        contract: 1,
+        compatibilityId: 'runtime-family',
+        required: [],
+        forbidden: [],
+        available: [],
+        target: 'web',
+        entryLoadingIdentity: 'web-loader',
+      };
+      expect(() =>
+        plugin.beforeInit({ options: { name: 'provider', runtimeImage } }),
+      ).toThrow('[RuntimeImageMinimumContract]');
+      expect(globalThis._FEDERATION_RUNTIME_CORE).toBeUndefined();
+      expect(globalThis._FEDERATION_RUNTIME_CORE_FROM).toBeUndefined();
+    });
+  });
+
+  it('rejects reuse of image metadata without replacing the old provider', () => {
+    withLegacyRuntimeCore((plugin) => {
+      plugin.beforeInit({ options: { name: 'legacy-provider' } });
+      const provider = globalThis._FEDERATION_RUNTIME_CORE_FROM;
+      provider.runtimeImage = {
+        contract: 1,
+        compatibilityId: 'runtime-family',
+        required: [],
+        forbidden: [],
+        available: [],
+        target: 'web',
+        entryLoadingIdentity: 'web-loader',
+      };
+      const providerCore = globalThis._FEDERATION_RUNTIME_CORE;
+      expect(() =>
+        plugin.beforeInit({ options: { name: 'legacy-provider' } }),
+      ).toThrow('[RuntimeImageMinimumContract]');
+      expect(globalThis._FEDERATION_RUNTIME_CORE_FROM).toBe(provider);
+      expect(globalThis._FEDERATION_RUNTIME_CORE).toBe(providerCore);
+    });
   });
 });
