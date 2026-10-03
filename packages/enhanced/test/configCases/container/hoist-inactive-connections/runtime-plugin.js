@@ -1,5 +1,10 @@
 import { pruned } from 'pruned-pkg';
+import { runtimeSpecific } from 'runtime-specific-pkg';
 import { used } from 'used-pkg';
+
+export function getRuntimeSpecificValue() {
+  return runtimeSpecific;
+}
 
 export default function () {
   return {
