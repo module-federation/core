@@ -1,0 +1,23 @@
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const root='/Users/zackjackson/Documents/Codex/2026-10-02/task-4/rfc5036';
+process.env.IS_ESM_BUILD='true';
+const core=require(path.join(root,'packages/runtime-core/dist/index.cjs'));
+const data=source=>'data:text/javascript,'+encodeURIComponent(source);
+const name='skepticalMalformedNode';
+const remoteInfo=core.getRemoteInfo({name:'app',entry:data('module.exports={init(){},get(){return()=> "A"}}'),entryGlobalName:name});
+const image={contract:1,compatibilityId:'skeptical-family',required:['remote'],forbidden:[],available:['remote','shared'],target:'node',entryLoadingIdentity:'sdk-node'};
+const a=new core.ModuleFederation({name:'skeptic-a',remotes:[]});
+const b=new core.ModuleFederation({name:'skeptic-b',remotes:[]});
+core.attachRuntimeImage(a,image);core.attachRuntimeImage(b,image);
+(async()=>{
+ const first=await core.getRemoteEntry({origin:a,remoteInfo,getEntryUrl:()=>remoteInfo.entry});
+ const malformed=await core.getRemoteEntry({origin:b,remoteInfo,getEntryUrl:()=>data('module.exports={};')});
+ console.log(JSON.stringify({case:'malformed-sdk-payload',resolved:!!malformed,get:typeof malformed?.get,init:typeof malformed?.init}));
+ delete globalThis[name];
+ core.resetFederationGlobalInfo();
+ const firstAgain=await core.getRemoteEntry({origin:a,remoteInfo,getEntryUrl:()=>remoteInfo.entry});
+ const second=await core.getRemoteEntry({origin:b,remoteInfo,getEntryUrl:()=>data('const previous=globalThis.skepticalMalformedNode;module.exports={};queueMicrotask(()=>{globalThis.skepticalMalformedNode=previous;});')});
+ console.log(JSON.stringify({case:'malformed-payload-stale-global',same:firstAgain===second,value:await(await second.get('./x'))()}));
+ assert.notEqual(second,firstAgain,'malformed payload must not borrow another evaluator exports');
+})().catch(e=>{console.error(e.message);process.exitCode=1});

@@ -1,0 +1,3 @@
+{"case":"malformed-sdk-payload","resolved":true,"get":"undefined","init":"undefined"}
+{"case":"malformed-payload-stale-global","same":true,"value":"A"}
+malformed payload must not borrow another evaluator exports
