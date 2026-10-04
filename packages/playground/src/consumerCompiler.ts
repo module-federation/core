@@ -1,5 +1,6 @@
-import * as ts from 'typescript-compiler';
 import { BRIDGE_RUNTIME_FILES } from './generated/bridgeRuntimeFiles';
+
+type TypeScriptCompiler = typeof import('typescript-compiler');
 
 export type CompilePlaygroundParams = {
   appCode: string;
@@ -76,7 +77,11 @@ function buildBridgeRuntimeFiles() {
   };
 }
 
-function transpileModule(filename: string, source: string) {
+function transpileModule(
+  ts: TypeScriptCompiler,
+  filename: string,
+  source: string,
+) {
   const result = ts.transpileModule(source, {
     fileName: filename,
     compilerOptions: {
@@ -106,8 +111,12 @@ function transpileModule(filename: string, source: string) {
   return result.outputText;
 }
 
-function createModuleFactory(filename: string, source: string) {
-  return `${JSON.stringify(filename)}: function(require, module, exports) {\n${transpileModule(filename, source)}\n}`;
+function createModuleFactory(
+  ts: TypeScriptCompiler,
+  filename: string,
+  source: string,
+) {
+  return `${JSON.stringify(filename)}: function(require, module, exports) {\n${transpileModule(ts, filename, source)}\n}`;
 }
 
 function normalizeRuntimeFileName(value: string) {
@@ -205,6 +214,7 @@ function createBridgeRuntimeBootstrap() {
 export async function compilePlaygroundApp(
   params: CompilePlaygroundParams,
 ): Promise<string> {
+  const ts = await import('typescript-compiler');
   void params.rspackConfigCode;
 
   const runtimeModuleUrl = params.runtimeModuleUrl.trim();
@@ -219,9 +229,9 @@ export async function compilePlaygroundApp(
   const runtimePackageName =
     params.runtimePackageName.trim() || '@module-federation/runtime';
   const factories = [
-    createModuleFactory(APP_FILE, params.appCode),
-    createModuleFactory(runtimeFileName, params.mfCode),
-    createModuleFactory(ENTRY_FILE, params.entryCode),
+    createModuleFactory(ts, APP_FILE, params.appCode),
+    createModuleFactory(ts, runtimeFileName, params.mfCode),
+    createModuleFactory(ts, ENTRY_FILE, params.entryCode),
   ].join(',\n');
 
   return `(async function() {

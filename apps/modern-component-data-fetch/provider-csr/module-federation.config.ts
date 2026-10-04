@@ -5,6 +5,9 @@ export default createModuleFederationConfig({
   filename: 'remoteEntry.js',
   exposes: {
     '.': './src/index.tsx',
+    './no-data': './src/no-data.tsx',
+    // Used to compare parent rerenders with remote remounts.
+    './reload-demo': './src/reload-demo.tsx',
   },
   shared: {
     react: { singleton: true },

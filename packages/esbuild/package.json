@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/esbuild",
-  "version": "0.0.114",
+  "version": "0.0.116",
   "author": "Zack Jackson (@ScriptedAlchemy)",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -69,6 +69,7 @@
   "scripts": {
     "build": "rslib build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "node --test __tests__/*.spec.mjs",
     "build-debug": "FEDERATION_DEBUG=true rslib build",
     "pre-release": "pnpm run build"
   }
