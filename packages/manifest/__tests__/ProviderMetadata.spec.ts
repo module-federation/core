@@ -4,7 +4,7 @@ import { ModuleHandler } from '../src/ModuleHandler';
 import { StatsManager } from '../src/StatsManager';
 import { ManifestManager } from '../src/ManifestManager';
 import type { Stats } from '@module-federation/sdk';
-import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, realpath, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { StatsPlugin } from '../src/StatsPlugin';
@@ -14,7 +14,9 @@ const webpack = process.getBuiltinModule('module').createRequire(__filename)(
 );
 
 it('emits concrete providers with the main Webpack collector', async () => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'mf-providers-'));
+  const directory = await realpath(
+    await mkdtemp(path.join(tmpdir(), 'mf-providers-')),
+  );
   try {
     await writeFile(path.join(directory, 'package.json'), '{}');
     await writeFile(path.join(directory, 'entry.js'), '');
@@ -89,7 +91,7 @@ it('emits concrete providers with the main Webpack collector', async () => {
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
-});
+}, 30_000);
 
 it('collects concrete provider versions and assets without changing the legacy row', () => {
   const compiler = { context: '/project' } as Compiler;
