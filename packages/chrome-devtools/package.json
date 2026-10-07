@@ -68,7 +68,7 @@
     "reactflow": "11.11.4",
     "echarts": "6.1.0",
     "lucide-react": "0.364.0",
-    "echarts-for-react": "3.0.5",
+    "echarts-for-react": "3.0.6",
     "i18next": "23.0.0",
     "react-i18next": "15.0.0"
   },
