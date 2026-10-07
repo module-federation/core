@@ -353,11 +353,18 @@ export class SharedHandler {
           });
           return factory;
         } else {
+          if (typeof targetShared.get !== 'function') {
+            this.emitErrorLoadShare({
+              lifecycle: 'loadShare',
+              pkgName,
+              shareInfo: resolvedShareOptions,
+              recovered: true,
+              loadContext,
+            });
+            return false;
+          }
           const asyncLoadProcess = async () => {
-            if (typeof targetShared.get !== 'function') {
-              return false as unknown as () => T;
-            }
-            const factory = await targetShared.get();
+            const factory = await targetShared.get!();
             addUseIn(targetShared, host.options.name);
             targetShared.loaded = true;
             targetShared.lib = factory;
@@ -400,12 +407,19 @@ export class SharedHandler {
           resolvedShareOptions.treeShaking,
         );
         const targetShared = directShare(resolvedShareOptions, _useTreeShaking);
+        if (typeof targetShared.get !== 'function') {
+          this.emitErrorLoadShare({
+            lifecycle: 'loadShare',
+            pkgName,
+            shareInfo: resolvedShareOptions,
+            recovered: true,
+            loadContext,
+          });
+          return false;
+        }
 
         const asyncLoadProcess = async () => {
-          if (typeof targetShared.get !== 'function') {
-            return false as unknown as () => T;
-          }
-          const factory = await targetShared.get();
+          const factory = await targetShared.get!();
           targetShared.lib = factory;
           targetShared.loaded = true;
           addUseIn(targetShared, host.options.name);

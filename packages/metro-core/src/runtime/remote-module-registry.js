@@ -53,15 +53,23 @@ export async function loadSharedToRegistryAsync(id) {
     await promise;
   } else {
     registry[id] = {};
-    loading[id] = (async () => {
+    const sharedPromise = (async () => {
       const factory = await loadShare(id);
       if (!factory) {
-        return;
+        throw new Error(
+          `Shared module ${id} could not be loaded: no provider was found in the share scope and no local fallback is available.`,
+        );
       }
       const sharedModule = factory();
       cloneModule(sharedModule, registry[id]);
-    })();
-    await loading[id];
+    })().catch((error) => {
+      // drop the failed entry so a later attempt can retry
+      delete registry[id];
+      delete loading[id];
+      throw error;
+    });
+    loading[id] = sharedPromise;
+    await sharedPromise;
   }
 }
 
@@ -70,9 +78,7 @@ export function loadSharedToRegistrySync(id) {
     return;
   }
   loading[id] = loadShareSync(id);
-  if (loading[id]) {
-    registry[id] = loading[id]();
-  }
+  registry[id] = loading[id]();
 }
 
 export function getModuleFromRegistry(id) {
