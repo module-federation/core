@@ -35,9 +35,7 @@ const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
 const { sources: webpackSources } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
+import makeSerializable from '../makeSerializable';
 
 /**
  * @typedef {Object} ConsumeOptions
