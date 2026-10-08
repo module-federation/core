@@ -1,0 +1,7 @@
+.local/
+dist/
+.modern-js/
+node_modules/
+.env
+.env.*
+!.env.example
