@@ -366,6 +366,16 @@ test('model endpoint forwards browser tools and returns calls without executing 
   );
   assert.equal(response.model, 'mock-model');
   assert.equal((requestBody?.tools as unknown[]).length, 1);
+  await requestAgent(
+    { messages: [{ role: 'user', content: '你好' }], tools: [] },
+    {
+      MODEL_API_KEY: 'test-key-not-a-secret',
+      MODEL_NAME: 'deepseek-v4-flash',
+      MODEL_BASE_URL: 'https://api.deepseek.com',
+    },
+    fetcher,
+  );
+  assert.deepEqual(requestBody?.thinking, { type: 'disabled' });
   assert.deepEqual(
     modelStatus({ MODEL_API_KEY: 'hidden', MODEL_NAME: 'demo' }),
     { configured: true, model: 'demo' },

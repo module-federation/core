@@ -153,6 +153,9 @@ export async function requestAgent(
       signal: AbortSignal.timeout(45000),
       body: JSON.stringify({
         model: status.model,
+        ...(url.hostname === 'api.deepseek.com'
+          ? { thinking: { type: 'disabled' } }
+          : {}),
         messages: [
           {
             role: 'system',
