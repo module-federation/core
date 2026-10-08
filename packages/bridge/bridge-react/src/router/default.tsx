@@ -69,5 +69,9 @@ function WrapperRouterProvider(
 
 export * from 'react-router-dom/';
 
+export function readReactRouter() {
+  return ReactRouterDom;
+}
+
 export { WrapperRouter as BrowserRouter };
 export { WrapperRouterProvider as RouterProvider };
