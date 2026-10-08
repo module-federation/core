@@ -14,12 +14,10 @@ import {
   normalizeOptions,
   MetaDataTypes,
 } from '@module-federation/sdk';
-import {
-  isTSProject,
-  retrieveTypesAssetsInfo,
-} from '@module-federation/dts-plugin/core';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
+
+declare const __non_webpack_require__: NodeJS.Require | undefined;
 
 function isHotFile(file: string) {
   return file.includes(HOT_UPDATE_SUFFIX);
@@ -238,7 +236,20 @@ export function getTypesMetaInfo(
     zip: '',
     api: '',
   };
+  if (pluginOptions.dts === false) {
+    return defaultTypesMetaInfo;
+  }
   try {
+    // Load the DTS core lazily so builds with `dts: false` never pull in
+    // dts-plugin (and its TypeScript toolchain). `__non_webpack_require__`
+    // keeps the ESM build from hoisting this into a static import.
+    const { isTSProject, retrieveTypesAssetsInfo } = (
+      typeof __non_webpack_require__ === 'function'
+        ? __non_webpack_require__
+        : require
+    )(
+      '@module-federation/dts-plugin/core',
+    ) as typeof import('@module-federation/dts-plugin/core');
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
         isTSProject(pluginOptions.dts, context),
