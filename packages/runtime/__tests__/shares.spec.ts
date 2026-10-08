@@ -903,4 +903,89 @@ describe('load share while shared has multiple versions', () => {
     assert(sharedRes, "sharedRes can't be null");
     expect(sharedRes.version).toEqual('16.0.0');
   });
+
+  // Regression tests for https://github.com/module-federation/core/issues/2497
+  // A share scope entry registered without a get() factory (e.g. a dep the
+  // remote doesn't declare) must make loadShare miss instead of crashing, and
+  // the miss must never mark the entry as loaded.
+  it('loadShare misses when the selected share scope entry has no get factory', async () => {
+    let hostGetCalls = 0;
+    let selectedShared: unknown;
+    const host = new ModuleFederation({
+      name: '@federation/host-registered-missing-get',
+      remotes: [],
+      shared: {
+        moment: {
+          version: '2.29.0',
+          scope: ['default'],
+          get: () => {
+            hostGetCalls++;
+            return Promise.resolve(() => ({ version: '2.29.0' }));
+          },
+          shareConfig: {
+            singleton: false,
+            requiredVersion: '^2.29.0',
+          },
+        },
+      },
+      plugins: [
+        {
+          name: 'observe-selected-share',
+          resolveShare(args) {
+            const { resolver } = args;
+            args.resolver = () => {
+              const res = resolver();
+              selectedShared = res?.shared;
+              return res;
+            };
+            return args;
+          },
+        },
+      ],
+    });
+
+    // Inject a newer version without get() so version selection picks it.
+    const injected = {
+      version: '2.30.0',
+      from: 'remote-without-moment',
+      scope: ['default'],
+      shareConfig: {
+        singleton: false,
+        requiredVersion: '^2.30.0',
+      },
+    } as any;
+    host.shareScopeMap['default']['moment']['2.30.0'] = injected;
+
+    expect(await host.loadShare('moment')).toBe(false);
+    expect(selectedShared).toBe(injected);
+    expect(await host.loadShare('moment')).toBe(false);
+    expect(
+      await Promise.all([host.loadShare('moment'), host.loadShare('moment')]),
+    ).toEqual([false, false]);
+    expect(hostGetCalls).toBe(0);
+    expect(injected.loaded).toBeFalsy();
+    expect(injected.lib).toBeFalsy();
+    expect(injected.loading).toBeFalsy();
+  });
+
+  it('loadShare misses when an undeclared shared has no get factory', async () => {
+    const host = new ModuleFederation({
+      name: '@federation/host-undeclared-missing-get',
+      remotes: [],
+      shared: {},
+    });
+
+    expect(await host.loadShare('moment')).toBe(false);
+    expect(await host.loadShare('moment')).toBe(false);
+    expect(
+      await Promise.all([host.loadShare('moment'), host.loadShare('moment')]),
+    ).toEqual([false, false]);
+    Object.values(host.shareScopeMap).forEach((scope) => {
+      Object.values(scope['moment'] || {}).forEach((shared) => {
+        expect(shared.loaded).toBeFalsy();
+        expect(shared.lib).toBeFalsy();
+        expect(shared.loading).toBeFalsy();
+      });
+    });
+  });
 });

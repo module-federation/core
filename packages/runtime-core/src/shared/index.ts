@@ -353,6 +353,16 @@ export class SharedHandler {
           });
           return factory;
         } else {
+          if (typeof targetShared.get !== 'function') {
+            this.emitErrorLoadShare({
+              lifecycle: 'loadShare',
+              pkgName,
+              shareInfo: resolvedShareOptions,
+              recovered: true,
+              loadContext,
+            });
+            return false;
+          }
           const asyncLoadProcess = async () => {
             const factory = await targetShared.get!();
             addUseIn(targetShared, host.options.name);
@@ -397,6 +407,16 @@ export class SharedHandler {
           resolvedShareOptions.treeShaking,
         );
         const targetShared = directShare(resolvedShareOptions, _useTreeShaking);
+        if (typeof targetShared.get !== 'function') {
+          this.emitErrorLoadShare({
+            lifecycle: 'loadShare',
+            pkgName,
+            shareInfo: resolvedShareOptions,
+            recovered: true,
+            loadContext,
+          });
+          return false;
+        }
 
         const asyncLoadProcess = async () => {
           const factory = await targetShared.get!();
