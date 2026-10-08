@@ -85,6 +85,16 @@ const retryPlugin = () => RetryPlugin({
 export default retryPlugin;
 ```
 
+When the options contain no functions, list the package itself and pass the options as the entry's params:
+
+```ts title="rspack.config.ts"
+pluginModuleFederation({
+  runtimePlugins: [
+    [require.resolve('@module-federation/retry-plugin'), { retryTimes: 3, retryDelay: 1000 }],
+  ],
+});
+```
+
 ### Method2: Used in the pure runtime
 
 ```ts
