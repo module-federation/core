@@ -22,7 +22,7 @@ patchedDependencies:
     hash: 1e8d3d760dba67925d08d2a52e3894f8955ca2dca8c4641c104e28d71e8d4404
     path: patches/@modern-js__runtime@0.0.0-canary-20260914082926.patch
   '@modern-js/server-core@0.0.0-canary-20260914082926':
-    hash: 0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d
+    hash: da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c
     path: patches/@modern-js__server-core@0.0.0-canary-20260914082926.patch
 
 importers:
@@ -1275,7 +1275,7 @@ importers:
         version: 0.0.0-canary-20260914082926(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-core':
         specifier: 0.0.0-canary-20260914082926
-        version: 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@rspack/core':
         specifier: npm:@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656
         version: '@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(@swc/helpers@0.5.17)'
@@ -1306,7 +1306,7 @@ importers:
         version: 0.0.0-canary-20260914082926(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-core':
         specifier: 0.0.0-canary-20260914082926
-        version: 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@rspack/core':
         specifier: npm:@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656
         version: '@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
@@ -1340,7 +1340,7 @@ importers:
         version: 0.0.0-canary-20260914082926(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-core':
         specifier: 0.0.0-canary-20260914082926
-        version: 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@rspack/core':
         specifier: npm:@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656
         version: '@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
@@ -1377,7 +1377,7 @@ importers:
         version: 0.0.0-canary-20260914082926(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-core':
         specifier: 0.0.0-canary-20260914082926
-        version: 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@rspack/core':
         specifier: npm:@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656
         version: '@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
@@ -1408,7 +1408,7 @@ importers:
         version: 0.0.0-canary-20260914082926(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-core':
         specifier: 0.0.0-canary-20260914082926
-        version: 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@rspack/core':
         specifier: npm:@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656
         version: '@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
@@ -1442,7 +1442,7 @@ importers:
         version: 0.0.0-canary-20260914082926(patch_hash=1e8d3d760dba67925d08d2a52e3894f8955ca2dca8c4641c104e28d71e8d4404)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       '@modern-js/server-core':
         specifier: 0.0.0-canary-20260914082926
-        version: 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../packages/modernjs-v3
@@ -33659,7 +33659,7 @@ snapshots:
       '@modern-js/plugin-data-loader': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/prod-server': 0.0.0-canary-20260914082926(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server': 0.0.0-canary-20260914082926(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(@types/node@26.2.0)(typescript@5.9.3))(tsconfig-paths@4.2.0)
-      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/types': 0.0.0-canary-20260914082926
       '@modern-js/utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -33711,7 +33711,7 @@ snapshots:
       '@modern-js/plugin-data-loader': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/prod-server': 0.0.0-canary-20260914082926(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server': 0.0.0-canary-20260914082926(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@26.2.0)(typescript@5.9.3))(tsconfig-paths@4.2.0)
-      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/types': 0.0.0-canary-20260914082926
       '@modern-js/utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -33763,7 +33763,7 @@ snapshots:
       '@modern-js/plugin-data-loader': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/prod-server': 0.0.0-canary-20260914082926(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server': 0.0.0-canary-20260914082926(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@26.2.0)(typescript@5.9.3))(tsconfig-paths@4.2.0)
-      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/types': 0.0.0-canary-20260914082926
       '@modern-js/utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -34829,7 +34829,7 @@ snapshots:
   '@modern-js/prod-server@0.0.0-canary-20260914082926(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@modern-js/runtime-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@swc/helpers': 0.5.17
     transitivePeerDependencies:
@@ -34841,7 +34841,7 @@ snapshots:
   '@modern-js/prod-server@0.0.0-canary-20260914082926(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@modern-js/runtime-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@swc/helpers': 0.5.17
     transitivePeerDependencies:
@@ -34853,7 +34853,7 @@ snapshots:
   '@modern-js/prod-server@0.0.0-canary-20260914082926(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@modern-js/runtime-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@swc/helpers': 0.5.17
     transitivePeerDependencies:
@@ -35265,7 +35265,7 @@ snapshots:
       - core-js
       - react-server-dom-rspack
 
-  '@modern-js/server-core@0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@modern-js/server-core@0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@modern-js/plugin': 0.0.0-canary-20260914082926(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/runtime-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -35284,7 +35284,7 @@ snapshots:
       - react
       - react-dom
 
-  '@modern-js/server-core@0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@modern-js/server-core@0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@modern-js/plugin': 0.0.0-canary-20260914082926(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/runtime-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -35303,7 +35303,7 @@ snapshots:
       - react
       - react-dom
 
-  '@modern-js/server-core@0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@modern-js/server-core@0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@modern-js/plugin': 0.0.0-canary-20260914082926(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/runtime-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -35505,7 +35505,7 @@ snapshots:
   '@modern-js/server@0.0.0-canary-20260914082926(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(@types/node@26.2.0)(typescript@5.9.3))(tsconfig-paths@4.2.0)':
     dependencies:
       '@modern-js/runtime-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@0.0.0-feat-mf-ssr-clear-cache-20260914081229)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/types': 0.0.0-canary-20260914082926
       '@modern-js/utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -35532,7 +35532,7 @@ snapshots:
   '@modern-js/server@0.0.0-canary-20260914082926(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@26.2.0)(typescript@5.9.3))(tsconfig-paths@4.2.0)':
     dependencies:
       '@modern-js/runtime-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/types': 0.0.0-canary-20260914082926
       '@modern-js/utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -35559,7 +35559,7 @@ snapshots:
   '@modern-js/server@0.0.0-canary-20260914082926(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@26.2.0)(typescript@5.9.3))(tsconfig-paths@4.2.0)':
     dependencies:
       '@modern-js/runtime-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=0e4c5ec77b0fd0b440af35043b8042e522284251dae04425607e3109a67f547d)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@modern-js/server-core': 0.0.0-canary-20260914082926(patch_hash=da084242d6d9c401fa525f233e901641029173bd933f8e76ed24be7161ac801c)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/server-utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/types': 0.0.0-canary-20260914082926
       '@modern-js/utils': 0.0.0-canary-20260914082926(react-dom@19.2.8(react@19.2.8))(react@19.2.8)

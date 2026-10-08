@@ -1,8 +1,38 @@
+diff --git a/dist/cjs/adapters/node/application.js b/dist/cjs/adapters/node/application.js
+index d151c0e6140b9c835dc9c0c91b39bc81969dce68..20146f96c5a3d92792e2246078d556931d76369d 100644
+--- a/dist/cjs/adapters/node/application.js
++++ b/dist/cjs/adapters/node/application.js
+@@ -54,7 +54,11 @@ async function createSSRApplication(options) {
+             c.set('ssrCacheNamespace', scope?.length === 1 ? entryNamespaces.get(scope[0]) || cacheNamespace : cacheNamespace);
+             await next();
+             return c.res;
+-        }, scope);
++        }, scope, options.renderCSR ? async (context)=>options.renderCSR(c.req.raw, {
++                ...context,
++                templates: resources.templates,
++                entryScope: scope
++            }) : void 0);
+         c.res = response;
+         return response;
+     };
+@@ -63,6 +67,12 @@ async function createSSRApplication(options) {
+         get status () {
+             return coordinator.status;
+         },
++        defer (operation) {
++            return coordinator.defer(operation);
++        },
++        assertUpdateAllowed () {
++            coordinator.assertUpdateAllowed();
++        },
+         update (invalidate, entries) {
+             if (entries && !options.resolveScope) return Promise.reject(new Error('Scoped SSR updates require an owned request scope resolver'));
+             if ('function' != typeof invalidate) return Promise.reject(new TypeError('An owned module invalidator is required'));
 diff --git a/dist/cjs/adapters/node/plugins/resource.js b/dist/cjs/adapters/node/plugins/resource.js
-index 85b04b22bfadff1c7e769c3c79a41691cdc5ab99..b609cea8e7309f415cf40d324671d0cb9eff5986 100644
+index 85b04b22bfadff1c7e769c3c79a41691cdc5ab99..ee483625f81653b75549254ac5c37b1e5d7e961b 100644
 --- a/dist/cjs/adapters/node/plugins/resource.js
 +++ b/dist/cjs/adapters/node/plugins/resource.js
-@@ -48,6 +48,7 @@ __webpack_require__.d(__webpack_exports__, {
+@@ -48,13 +48,16 @@ __webpack_require__.d(__webpack_exports__, {
      injectTemplates: ()=>injectTemplates
  });
  const external_node_module_namespaceObject = require("node:module");
@@ -10,7 +40,16 @@ index 85b04b22bfadff1c7e769c3c79a41691cdc5ab99..b609cea8e7309f415cf40d324671d0cb
  const external_path_namespaceObject = require("path");
  var external_path_default = /*#__PURE__*/ __webpack_require__.n(external_path_namespaceObject);
  const fileReader_namespaceObject = require("@modern-js/runtime-utils/fileReader");
-@@ -122,6 +123,10 @@ async function getServerManifest(pwd, routes, monitors, options = {}) {
+ const utils_namespaceObject = require("@modern-js/utils");
+ const inject_js_namespaceObject = require("../../../plugins/render/inject.js");
++const render_js_namespaceObject = require("../../../plugins/render/render.js");
+ const index_js_namespaceObject = require("../../../utils/index.js");
+ const external_application_js_namespaceObject = require("../application.js");
++const external_static_js_namespaceObject = require("./static.js");
+ async function getHtmlTemplates(pwd, routes, options = {}) {
+     const htmlRoutes = routes.filter((route)=>route.entryName);
+     const htmls = await Promise.all(htmlRoutes.map(async (route)=>{
+@@ -122,6 +125,10 @@ async function getServerManifest(pwd, routes, monitors, options = {}) {
          const renderBundle = options.reloadEntry ? await options.reloadEntry(entryName) : await loadBundle(renderBundlePath, monitors, options.reloadable);
          if (options.reloadable && route.isSSR && 'function' != typeof await renderBundle?.requestHandler) throw new Error(`Invalid SSR entry: ${entryName}`);
          const loaderBundle = options.reloadEntry && await utils_namespaceObject.fs.pathExists(loaderBundlePath) ? await options.reloadEntry(`${entryName}-server-loaders`) : await loadBundle(loaderBundlePath, monitors, options.reloadable);
@@ -21,7 +60,15 @@ index 85b04b22bfadff1c7e769c3c79a41691cdc5ab99..b609cea8e7309f415cf40d324671d0cb
          renderBundle && (renderBundles[entryName] = renderBundle);
          loaderBundle && (loaderBundles[entryName] = loaderBundle?.loadModules ? await loaderBundle?.loadModules() : loaderBundle);
      }));
-@@ -227,13 +232,17 @@ const injectResourcePlugin = (applicationOptions)=>({
+@@ -211,6 +218,7 @@ const injectResourcePlugin = (applicationOptions)=>({
+                     let published;
+                     const application = await (0, external_application_js_namespaceObject.createSSRApplication)({
+                         ...applicationOptions,
++                        renderCSR: applicationOptions.renderCSR || (0, render_js_namespaceObject.createCSRRender)(routes, context.metaName),
+                         load: async (rebuilding, entries)=>{
+                             const selectedRoutes = entries ? routes.filter((route)=>entries.includes(route.entryName || utils_namespaceObject.MAIN_ENTRY_NAME)) : routes;
+                             if (entries?.some((entry)=>!selectedRoutes.some((route)=>(route.entryName || utils_namespaceObject.MAIN_ENTRY_NAME) === entry))) throw new Error('Unknown SSR entry in update scope');
+@@ -227,13 +235,17 @@ const injectResourcePlugin = (applicationOptions)=>({
                                      delete require1.cache[require1.resolve(filename)];
                                  }
                              }
@@ -40,7 +87,7 @@ index 85b04b22bfadff1c7e769c3c79a41691cdc5ab99..b609cea8e7309f415cf40d324671d0cb
                                  }),
                                  (0, inject_js_namespaceObject.getRenderHandler)(context.getRenderOptions)
                              ]);
-@@ -277,6 +286,38 @@ const injectResourcePlugin = (applicationOptions)=>({
+@@ -277,11 +289,59 @@ const injectResourcePlugin = (applicationOptions)=>({
                                  render
                              };
                              await applicationOptions.validate?.(resources);
@@ -79,17 +126,468 @@ index 85b04b22bfadff1c7e769c3c79a41691cdc5ab99..b609cea8e7309f415cf40d324671d0cb
                              published = resources;
                              return resources;
                          }
+                     });
+-                    context.serverBase.setRequestMiddleware(application.middleware);
++                    const config = api.getServerConfig();
++                    const assets = (0, external_static_js_namespaceObject.createStaticMiddleware)({
++                        pwd: pwd,
++                        routes,
++                        output: config.output || {},
++                        html: config.html || {},
++                        server: config.server || {},
++                        buildAssetsOnly: true
++                    });
++                    const requestMiddleware = async (c, next)=>{
++                        if ('GET' !== c.req.method && 'HEAD' !== c.req.method) return application.middleware(c, next);
++                        return assets(c, async ()=>{
++                            const response = await application.middleware(c, next);
++                            if (response) c.res = response;
++                        });
++                    };
++                    context.serverBase.setRequestMiddleware(requestMiddleware);
+                     applicationOptions.onReady(application);
+                     return;
+                 }
+diff --git a/dist/cjs/adapters/node/plugins/static.js b/dist/cjs/adapters/node/plugins/static.js
+index 1985e4a4421b89433f2629c68ad1ca70952c51f1..14c1e18ed2209502df054e2fd4820dd4d9d2a2b2 100644
+--- a/dist/cjs/adapters/node/plugins/static.js
++++ b/dist/cjs/adapters/node/plugins/static.js
+@@ -117,14 +117,25 @@ function createStaticMiddleware(options) {
+         jsPath,
+         mediaPath
+     ].filter((v)=>Boolean(v));
++    const emittedRoots = [
++        'static',
++        ...staticFiles
++    ].flatMap((directory)=>{
++        const root = external_path_default().resolve(pwd, directory);
++        return root !== external_path_default().resolve(pwd) && isPathInside(root, pwd) ? [
++            root
++        ] : [];
++    });
+     const publicDirPatterns = (0, publicDir_js_namespaceObject.getPublicDirPatterns)(publicDir);
+     const staticReg = [
+         'static/',
+-        'upload/',
++        ...options.buildAssetsOnly ? [] : [
++            'upload/'
++        ],
+         ...staticFiles,
+-        ...publicDirPatterns
++        ...options.buildAssetsOnly ? [] : publicDirPatterns
+     ];
+-    const iconReg = [
++    const iconReg = options.buildAssetsOnly ? [] : [
+         'favicon.ico',
+         'icon.png',
+         ...favicons
+@@ -139,24 +150,46 @@ function createStaticMiddleware(options) {
+         const pathname = c.req.path;
+         if (pageRoute && '' === external_path_default().extname(pathname)) return next();
+         const hit = staticPathRegExp.test(pathname);
+-        if (!hit) return createPublicMiddleware({
+-            pwd,
+-            routes: routes || []
+-        })(c, next);
+-        {
++        if (hit) {
+             const filepath = external_path_default().join(pwd, pathname.replace(pathPrefix, ()=>''));
+             if (!isPathInside(filepath, pwd)) return next();
+             if (!await utils_namespaceObject.fs.pathExists(filepath)) return next();
++            let readPath = filepath;
++            if (options.buildAssetsOnly) {
++                const roots = emittedRoots.filter((root)=>isPathInside(filepath, root));
++                if (!roots.length) return next();
++                const realPwd = await utils_namespaceObject.fs.realpath(pwd);
++                readPath = await utils_namespaceObject.fs.realpath(filepath);
++                const canonical = (filename)=>utils_namespaceObject.fs.realpath(external_path_default().resolve(pwd, filename)).catch(()=>external_path_default().resolve(realPwd, filename));
++                const protectedRoots = await Promise.all([
++                    utils_namespaceObject.SERVER_BUNDLE_DIRECTORY,
++                    'upload',
++                    'public',
++                    ...(0, publicDir_js_namespaceObject.normalizePublicDir)(publicDir)
++                ].map(canonical));
++                const protectedFiles = await Promise.all((routes || []).flatMap((route)=>route.bundle ? [
++                        canonical(route.bundle)
++                    ] : []));
++                if (!isPathInside(readPath, realPwd) || protectedRoots.some((root)=>isPathInside(readPath, root)) || protectedFiles.includes(readPath)) return next();
++                const realRoots = await Promise.all(roots.map((root)=>utils_namespaceObject.fs.realpath(root).catch(()=>void 0)));
++                if (!realRoots.some((root)=>root && root !== realPwd && isPathInside(root, realPwd) && isPathInside(readPath, root))) return next();
++                if (!(await utils_namespaceObject.fs.stat(readPath)).isFile()) return next();
++            }
+             const mimeType = (0, mime_namespaceObject.getMimeType)(filepath);
+             if (mimeType) c.header('Content-Type', mimeType);
+-            const stat = await utils_namespaceObject.fs.lstat(filepath);
++            const stat = await utils_namespaceObject.fs.lstat(readPath);
+             const { size } = stat;
+-            const chunk = await fileReader_namespaceObject.fileReader.readFileFromSystem(filepath, 'buffer');
++            const chunk = await fileReader_namespaceObject.fileReader.readFileFromSystem(readPath, 'buffer');
+             c.header('Content-Length', String(size));
+             if (null === chunk) return next();
+             const body = new Uint8Array(chunk.buffer, chunk.byteOffset, chunk.byteLength);
+             return c.body(body, 200);
+         }
++        if (options.buildAssetsOnly) return next();
++        return createPublicMiddleware({
++            pwd,
++            routes: routes || []
++        })(c, next);
+     };
+ }
+ const prepareFavicons = (favicon)=>{
+diff --git a/dist/cjs/adapters/node/requestCoordinator.js b/dist/cjs/adapters/node/requestCoordinator.js
+index 4f911cd5cd48fe548a2618663d43f61630e4c0e9..bd4c5715889fab0013ec0f93581b09d6f91a97aa 100644
+--- a/dist/cjs/adapters/node/requestCoordinator.js
++++ b/dist/cjs/adapters/node/requestCoordinator.js
+@@ -40,10 +40,15 @@ const copyScope = (scope)=>{
+     ];
+ };
+ class AdmissionError extends Error {
++    constructor(message, reason){
++        super(message), this.reason = reason;
++    }
+ }
+ function createSSRRequestCoordinator(options) {
+-    const { maxPendingRequests, requestTimeoutMs, drainTimeoutMs } = options;
++    const { maxPendingRequests, requestTimeoutMs, drainTimeoutMs, maxResumeConcurrency = 8, maxPendingUpdates = 32 } = options;
+     if (!Number.isSafeInteger(maxPendingRequests) || maxPendingRequests < 0) throw new Error('maxPendingRequests must be a non-negative safe integer');
++    if (!Number.isSafeInteger(maxPendingUpdates) || maxPendingUpdates < 0) throw new Error('maxPendingUpdates must be a non-negative safe integer');
++    if (!Number.isSafeInteger(maxResumeConcurrency) || maxResumeConcurrency < 1) throw new Error('maxResumeConcurrency must be a positive safe integer');
+     for (const timeout of [
+         requestTimeoutMs,
+         drainTimeoutMs
+@@ -53,35 +58,48 @@ function createSSRRequestCoordinator(options) {
+     const drainListeners = new Set();
+     let phase = 'serving';
+     let active = 0;
++    let resumed = 0;
++    let pendingUpdates = 0;
++    let evaluatingPolicy = false;
+     let closedScope;
+     const leases = new Map();
+     const blocked = (scope)=>'serving' !== phase && intersects(scope, closedScope);
+     let generation = 0;
+     let updates = Promise.resolve();
++    let deferredUpdates = Promise.resolve();
+     const wake = (error)=>{
+         for (const waiter of Array.from(waiters))if (error && blocked(waiter.scope)) waiter.reject(error);
+-        else if (!blocked(waiter.scope)) waiter.resume();
++        else if (!blocked(waiter.scope) && resumed < maxResumeConcurrency) {
++            resumed++;
++            let released = false;
++            waiter.resume(()=>{
++                if (released) return;
++                released = true;
++                resumed--;
++                wake();
++            });
++        }
+     };
+     const waitForAdmission = (signal, deadline, scope)=>new Promise((resolve, reject)=>{
+             if (signal.aborted) return reject(signal.reason);
+-            if ('unavailable' === phase && blocked(scope)) return reject(new AdmissionError('SSR application is unavailable'));
+-            if (waiters.size >= maxPendingRequests) return reject(new AdmissionError('SSR request queue is full'));
++            if ('unavailable' === phase && blocked(scope)) return reject(new AdmissionError('SSR application is unavailable', 'unavailable'));
++            if (waiters.size >= maxPendingRequests) return reject(new AdmissionError('SSR request queue is full', 'queue-full'));
+             const remaining = deadline - Date.now();
+-            if (remaining <= 0) return reject(new AdmissionError('SSR request wait timed out'));
+-            const finish = (error)=>{
++            if (remaining <= 0) return reject(new AdmissionError('SSR request wait timed out', 'timeout'));
++            const finish = (error, release)=>{
+                 clearTimeout(timer);
+                 waiters.delete(waiter);
+                 signal.removeEventListener('abort', abort);
+                 if (void 0 !== error) reject(error);
+-                else resolve();
++                else resolve(release);
+             };
+             const abort = ()=>finish(signal.reason);
+             const waiter = {
+                 scope,
+-                resume: ()=>finish(),
++                resume: (release)=>finish(void 0, release),
+                 reject: finish
+             };
+-            const timer = setTimeout(()=>finish(new AdmissionError('SSR request wait timed out')), remaining);
++            const timer = setTimeout(()=>finish(new AdmissionError('SSR request wait timed out', 'timeout')), remaining);
+             waiters.add(waiter);
+             signal.addEventListener('abort', abort, {
+                 once: true
+@@ -102,6 +120,46 @@ function createSSRRequestCoordinator(options) {
+             }, drainTimeoutMs);
+             drainListeners.add(finish);
+         });
++    const rejectRequest = (message)=>new Response(message, {
++            status: 503,
++            headers: {
++                'Retry-After': '1'
++            }
++        });
++    const decide = (request, started, reason)=>{
++        const policyContext = Object.freeze({
++            request,
++            update: Object.freeze({
++                phase,
++                generation,
++                affectedEntries: 'serving' === phase ? Object.freeze([]) : closedScope && Object.freeze([
++                    ...closedScope
++                ]),
++                activeRequests: active,
++                pendingRequests: waiters.size,
++                waitedMs: Math.max(0, Date.now() - started),
++                reason
++            })
++        });
++        let decision = 'reject';
++        evaluatingPolicy = true;
++        try {
++            const policy = options.requestPolicy ?? 'wait';
++            const result = 'function' == typeof policy ? policy(policyContext) : policy;
++            if ('wait' === result || 'csr' === result || 'reject' === result) decision = result;
++            else Promise.resolve(result).catch(()=>{});
++        } catch  {} finally{
++            evaluatingPolicy = false;
++        }
++        return {
++            decision,
++            policyContext
++        };
++    };
++    const assertUpdateAllowed = ()=>{
++        if (evaluatingPolicy) throw new Error('Cannot update SSR from an admission policy');
++        if (context.getStore()?.active) throw new Error(context.getStore()?.updating ? 'Cannot nest SSR updates' : 'Cannot update SSR from a request being drained');
++    };
+     return {
+         get status () {
+             return {
+@@ -111,28 +169,66 @@ function createSSRRequestCoordinator(options) {
+                 ],
+                 generation,
+                 activeRequests: active,
+-                pendingRequests: waiters.size
++                pendingRequests: waiters.size,
++                pendingUpdates
+             };
+         },
+-        async handle (request, render, requestScope) {
++        assertUpdateAllowed,
++        defer (operation) {
++            if ('function' != typeof operation) throw new TypeError('A deferred update operation is required');
++            if (evaluatingPolicy) throw new Error('Cannot submit SSR updates from an admission policy');
++            const owner = context.getStore();
++            if (owner?.active && owner.updating) throw new Error('Cannot defer a nested SSR update');
++            if (pendingUpdates >= maxPendingUpdates) throw new Error('SSR deferred update queue is full');
++            pendingUpdates++;
++            const completion = owner?.active ? owner.completion : void 0;
++            const completed = context.exit(()=>deferredUpdates.then(()=>completion).then(operation));
++            deferredUpdates = completed.then(()=>{
++                pendingUpdates--;
++            }, ()=>{
++                pendingUpdates--;
++            });
++            return Object.freeze({
++                accepted: true,
++                completed
++            });
++        },
++        async handle (request, render, requestScope, renderCSR) {
+             if (context.getStore()?.active && (context.getStore()?.updating || 'serving' !== phase)) throw new Error('Cannot wait on SSR admission from its active request or update');
+             const scope = copyScope(requestScope);
+-            const deadline = Date.now() + requestTimeoutMs;
++            const started = Date.now();
++            const deadline = started + requestTimeoutMs;
++            let releaseAdmission;
++            const respond = (reason, message)=>{
++                const { decision, policyContext } = decide(request, started, reason);
++                return 'csr' === decision && renderCSR ? renderCSR(policyContext) : rejectRequest(message);
++            };
+             try {
+-                while(blocked(scope))await waitForAdmission(request.signal, deadline, scope);
+                 request.signal.throwIfAborted();
+-            } catch (error) {
+-                if (error instanceof AdmissionError) return new Response(error.message, {
+-                    status: 503,
+-                    headers: {
+-                        'Retry-After': '1'
++                while(blocked(scope)){
++                    const reason = 'unavailable' === phase ? 'unavailable' : 'updating';
++                    const { decision, policyContext } = decide(request, started, reason);
++                    if ('csr' === decision && renderCSR) return renderCSR(policyContext);
++                    if ('wait' !== decision || 'unavailable' === reason) return rejectRequest('SSR application is unavailable');
++                    releaseAdmission = await waitForAdmission(request.signal, deadline, scope);
++                    if (blocked(scope)) {
++                        releaseAdmission();
++                        releaseAdmission = void 0;
+                     }
+-                });
++                }
++                request.signal.throwIfAborted();
++            } catch (error) {
++                releaseAdmission?.();
++                if (error instanceof AdmissionError) return respond(error.reason, error.message);
+                 throw error;
+             }
+             active++;
++            let settle;
+             const lease = {
+-                active: true
++                active: true,
++                completion: new Promise((resolve)=>{
++                    settle = resolve;
++                })
+             };
+             leases.set(lease, scope);
+             let pending = 1;
+@@ -142,6 +238,8 @@ function createSSRRequestCoordinator(options) {
+                 active--;
+                 leases.delete(lease);
+                 for (const finish of Array.from(drainListeners))finish();
++                releaseAdmission?.();
++                settle();
+             };
+             const work = {
+                 track (task) {
+@@ -207,11 +305,11 @@ function createSSRRequestCoordinator(options) {
+         update (publish, requestedScope) {
+             let scope;
+             try {
++                assertUpdateAllowed();
+                 scope = 'function' == typeof requestedScope ? void 0 : copyScope(requestedScope);
+             } catch (error) {
+                 return Promise.reject(error);
+             }
+-            if (context.getStore()?.active) return Promise.reject(new Error(context.getStore()?.updating ? 'Cannot nest SSR updates' : 'Cannot update SSR from a request being drained'));
+             const operation = updates.then(async ()=>{
+                 if ('function' == typeof requestedScope) scope = copyScope(requestedScope());
+                 const previous = phase;
+@@ -239,7 +337,7 @@ function createSSRRequestCoordinator(options) {
+                     return generation;
+                 } catch (error) {
+                     phase = 'unavailable';
+-                    wake(new AdmissionError('SSR application update failed'));
++                    wake(new AdmissionError('SSR application update failed', 'unavailable'));
+                     throw error;
+                 } finally{
+                     publication.active = false;
+diff --git a/dist/cjs/plugins/render/render.js b/dist/cjs/plugins/render/render.js
+index 6cf105ac411e2873ca8a0e880bb9afcb63e25b1c..a7a0d2eedf60f2271d8d0b1ee0376a0cb6a20c5e 100644
+--- a/dist/cjs/plugins/render/render.js
++++ b/dist/cjs/plugins/render/render.js
+@@ -43,6 +43,7 @@ var __webpack_exports__ = {};
+ (()=>{
+     __webpack_require__.r(__webpack_exports__);
+     __webpack_require__.d(__webpack_exports__, {
++        createCSRRender: ()=>createCSRRender,
+         createRender: ()=>createRender,
+         matchRoute: ()=>matchRoute
+     });
+@@ -108,6 +109,45 @@ var __webpack_exports__ = {};
+         delete _headers.cookie;
+         return _headers;
+     }
++    function createCSRRender(routes, metaName = 'modern-js') {
++        const router = getRouter(routes);
++        const framework = (0, universal_namespaceObject.cutNameByHyphen)(metaName);
++        return (request, options)=>{
++            const url = new URL(request.url);
++            const accept = request.headers.get('accept');
++            if (![
++                'GET',
++                'HEAD'
++            ].includes(request.method) || url.searchParams.has('__loader') || request.headers.has('x-rsc-action') || request.headers.has('x-rsc-tree') || accept && !accept.includes('text/html') && !accept.includes('*/*')) return new Response('CSR fallback requires an HTML navigation', {
++                status: 503,
++                headers: {
++                    'retry-after': '1'
++                }
++            });
++            const [route] = matchRoute(router, url.pathname);
++            const html = route && options.templates[(0, index_js_namespaceObject.uniqueKeyByRoute)(route)];
++            if (!route?.entryName || route.isApi || route.isRSC || !html || options.entryScope && !options.entryScope.includes(route.entryName)) return new Response('CSR fallback is unavailable for this route', {
++                status: 503,
++                headers: {
++                    'retry-after': '1'
++                }
++            });
++            const headers = new Headers();
++            for (const [key, value] of Object.entries(route.responseHeaders || {}))headers.set(key, value);
++            headers.set('content-type', 'text/html; charset=UTF-8');
++            headers.set(external_constants_js_namespaceObject.X_MODERNJS_RENDER, 'client');
++            headers.set(`x-${framework}-ssr-fallback`, '1;reason=updating');
++            headers.set('cache-control', 'no-store');
++            return new Response('HEAD' === request.method ? null : injectFallbackReasonToHtml({
++                html,
++                framework,
++                reason: 'updating'
++            }), {
++                status: 200,
++                headers
++            });
++        };
++    }
+     async function createRender({ routes, pwd, metaName, staticGenerate, cacheConfig, forceCSR, forceCSRMap, config }) {
+         const router = getRouter(routes);
+         return async (req, { monitors, nodeReq, templates, serverManifest, rscClientManifest, rscSSRManifest, rscServerManifest, locals, matchEntryName, matchPathname, loaderContext, contextForceCSR, reporter, work, cacheNamespace, entryScope })=>{
+@@ -279,9 +319,11 @@ var __webpack_exports__ = {};
+         return (0, external_csrRscRender_js_namespaceObject.csrRscRender)(request, options);
+     }
+ })();
++exports.createCSRRender = __webpack_exports__.createCSRRender;
+ exports.createRender = __webpack_exports__.createRender;
+ exports.matchRoute = __webpack_exports__.matchRoute;
+ for(var __rspack_i in __webpack_exports__)if (-1 === [
++    "createCSRRender",
+     "createRender",
+     "matchRoute"
+ ].indexOf(__rspack_i)) exports[__rspack_i] = __webpack_exports__[__rspack_i];
+diff --git a/dist/esm/adapters/node/application.mjs b/dist/esm/adapters/node/application.mjs
+index cebf2ee1dd065a6d12549e9d2c5011bbd3170bdd..8c7eed6ef37fb6d142f87605ffe5a7b6e88b570c 100644
+--- a/dist/esm/adapters/node/application.mjs
++++ b/dist/esm/adapters/node/application.mjs
+@@ -22,7 +22,11 @@ async function createSSRApplication(options) {
+             c.set('ssrCacheNamespace', scope?.length === 1 ? entryNamespaces.get(scope[0]) || cacheNamespace : cacheNamespace);
+             await next();
+             return c.res;
+-        }, scope);
++        }, scope, options.renderCSR ? async (context)=>options.renderCSR(c.req.raw, {
++                ...context,
++                templates: resources.templates,
++                entryScope: scope
++            }) : void 0);
+         c.res = response;
+         return response;
+     };
+@@ -31,6 +35,12 @@ async function createSSRApplication(options) {
+         get status () {
+             return coordinator.status;
+         },
++        defer (operation) {
++            return coordinator.defer(operation);
++        },
++        assertUpdateAllowed () {
++            coordinator.assertUpdateAllowed();
++        },
+         update (invalidate, entries) {
+             if (entries && !options.resolveScope) return Promise.reject(new Error('Scoped SSR updates require an owned request scope resolver'));
+             if ('function' != typeof invalidate) return Promise.reject(new TypeError('An owned module invalidator is required'));
 diff --git a/dist/esm/adapters/node/plugins/resource.mjs b/dist/esm/adapters/node/plugins/resource.mjs
-index a19c3b8cdcb79e033cae889db9f910b2efe6dd05..3b5139ff89581472fb7b64eddfd5ab2247dc88c3 100644
+index a19c3b8cdcb79e033cae889db9f910b2efe6dd05..77683ace9501b83aedc65c0c1a58a0d03a92f8b4 100644
 --- a/dist/esm/adapters/node/plugins/resource.mjs
 +++ b/dist/esm/adapters/node/plugins/resource.mjs
-@@ -1,4 +1,4 @@
+@@ -1,10 +1,12 @@
 -import { createRequire } from "node:module";
 +import node_module, { createRequire } from "node:module";
  import path from "path";
  import { fileReader } from "@modern-js/runtime-utils/fileReader";
  import { LOADABLE_STATS_FILE, MAIN_ENTRY_NAME, NESTED_ROUTE_SPEC_FILE, ROUTE_MANIFEST_FILE, SERVER_BUNDLE_DIRECTORY, compatibleRequire, fs, isProd } from "@modern-js/utils";
-@@ -72,6 +72,10 @@ async function getServerManifest(pwd, routes, monitors, options = {}) {
+ import { getRenderHandler } from "../../../plugins/render/inject.mjs";
++import { createCSRRender } from "../../../plugins/render/render.mjs";
+ import { uniqueKeyByRoute } from "../../../utils/index.mjs";
+ import { createSSRApplication } from "../application.mjs";
++import { createStaticMiddleware } from "./static.mjs";
+ async function getHtmlTemplates(pwd, routes, options = {}) {
+     const htmlRoutes = routes.filter((route)=>route.entryName);
+     const htmls = await Promise.all(htmlRoutes.map(async (route)=>{
+@@ -72,6 +74,10 @@ async function getServerManifest(pwd, routes, monitors, options = {}) {
          const renderBundle = options.reloadEntry ? await options.reloadEntry(entryName) : await loadBundle(renderBundlePath, monitors, options.reloadable);
          if (options.reloadable && route.isSSR && 'function' != typeof await renderBundle?.requestHandler) throw new Error(`Invalid SSR entry: ${entryName}`);
          const loaderBundle = options.reloadEntry && await fs.pathExists(loaderBundlePath) ? await options.reloadEntry(`${entryName}-server-loaders`) : await loadBundle(loaderBundlePath, monitors, options.reloadable);
@@ -100,7 +598,15 @@ index a19c3b8cdcb79e033cae889db9f910b2efe6dd05..3b5139ff89581472fb7b64eddfd5ab22
          renderBundle && (renderBundles[entryName] = renderBundle);
          loaderBundle && (loaderBundles[entryName] = loaderBundle?.loadModules ? await loaderBundle?.loadModules() : loaderBundle);
      }));
-@@ -177,13 +181,17 @@ const injectResourcePlugin = (applicationOptions)=>({
+@@ -161,6 +167,7 @@ const injectResourcePlugin = (applicationOptions)=>({
+                     let published;
+                     const application = await createSSRApplication({
+                         ...applicationOptions,
++                        renderCSR: applicationOptions.renderCSR || createCSRRender(routes, context.metaName),
+                         load: async (rebuilding, entries)=>{
+                             const selectedRoutes = entries ? routes.filter((route)=>entries.includes(route.entryName || MAIN_ENTRY_NAME)) : routes;
+                             if (entries?.some((entry)=>!selectedRoutes.some((route)=>(route.entryName || MAIN_ENTRY_NAME) === entry))) throw new Error('Unknown SSR entry in update scope');
+@@ -177,13 +184,17 @@ const injectResourcePlugin = (applicationOptions)=>({
                                      delete require.cache[require.resolve(filename)];
                                  }
                              }
@@ -119,7 +625,7 @@ index a19c3b8cdcb79e033cae889db9f910b2efe6dd05..3b5139ff89581472fb7b64eddfd5ab22
                                  }),
                                  getRenderHandler(context.getRenderOptions)
                              ]);
-@@ -227,6 +235,38 @@ const injectResourcePlugin = (applicationOptions)=>({
+@@ -227,11 +238,59 @@ const injectResourcePlugin = (applicationOptions)=>({
                                  render
                              };
                              await applicationOptions.validate?.(resources);
@@ -158,18 +664,467 @@ index a19c3b8cdcb79e033cae889db9f910b2efe6dd05..3b5139ff89581472fb7b64eddfd5ab22
                              published = resources;
                              return resources;
                          }
+                     });
+-                    context.serverBase.setRequestMiddleware(application.middleware);
++                    const config = api.getServerConfig();
++                    const assets = createStaticMiddleware({
++                        pwd: pwd,
++                        routes,
++                        output: config.output || {},
++                        html: config.html || {},
++                        server: config.server || {},
++                        buildAssetsOnly: true
++                    });
++                    const requestMiddleware = async (c, next)=>{
++                        if ('GET' !== c.req.method && 'HEAD' !== c.req.method) return application.middleware(c, next);
++                        return assets(c, async ()=>{
++                            const response = await application.middleware(c, next);
++                            if (response) c.res = response;
++                        });
++                    };
++                    context.serverBase.setRequestMiddleware(requestMiddleware);
+                     applicationOptions.onReady(application);
+                     return;
+                 }
+diff --git a/dist/esm/adapters/node/plugins/static.mjs b/dist/esm/adapters/node/plugins/static.mjs
+index dcb16e826cbb7e6ee75d25b89eebd7404bd8301a..f28aaf5cc915dcd102504797f460d6c827d40ea2 100644
+--- a/dist/esm/adapters/node/plugins/static.mjs
++++ b/dist/esm/adapters/node/plugins/static.mjs
+@@ -1,9 +1,9 @@
+ import path from "path";
+ import { fileReader } from "@modern-js/runtime-utils/fileReader";
+-import { fs } from "@modern-js/utils";
++import { SERVER_BUNDLE_DIRECTORY, fs } from "@modern-js/utils";
+ import { getMimeType } from "hono/utils/mime";
+ import { sortRoutes } from "../../../utils/index.mjs";
+-import { getPublicDirPatterns } from "../../../utils/publicDir.mjs";
++import { getPublicDirPatterns, normalizePublicDir } from "../../../utils/publicDir.mjs";
+ const serverStaticPlugin = ()=>({
+         name: '@modern-js/plugin-server-static',
+         setup (api) {
+@@ -73,14 +73,25 @@ function createStaticMiddleware(options) {
+         jsPath,
+         mediaPath
+     ].filter((v)=>Boolean(v));
++    const emittedRoots = [
++        'static',
++        ...staticFiles
++    ].flatMap((directory)=>{
++        const root = path.resolve(pwd, directory);
++        return root !== path.resolve(pwd) && isPathInside(root, pwd) ? [
++            root
++        ] : [];
++    });
+     const publicDirPatterns = getPublicDirPatterns(publicDir);
+     const staticReg = [
+         'static/',
+-        'upload/',
++        ...options.buildAssetsOnly ? [] : [
++            'upload/'
++        ],
+         ...staticFiles,
+-        ...publicDirPatterns
++        ...options.buildAssetsOnly ? [] : publicDirPatterns
+     ];
+-    const iconReg = [
++    const iconReg = options.buildAssetsOnly ? [] : [
+         'favicon.ico',
+         'icon.png',
+         ...favicons
+@@ -95,24 +106,46 @@ function createStaticMiddleware(options) {
+         const pathname = c.req.path;
+         if (pageRoute && '' === path.extname(pathname)) return next();
+         const hit = staticPathRegExp.test(pathname);
+-        if (!hit) return createPublicMiddleware({
+-            pwd,
+-            routes: routes || []
+-        })(c, next);
+-        {
++        if (hit) {
+             const filepath = path.join(pwd, pathname.replace(pathPrefix, ()=>''));
+             if (!isPathInside(filepath, pwd)) return next();
+             if (!await fs.pathExists(filepath)) return next();
++            let readPath = filepath;
++            if (options.buildAssetsOnly) {
++                const roots = emittedRoots.filter((root)=>isPathInside(filepath, root));
++                if (!roots.length) return next();
++                const realPwd = await fs.realpath(pwd);
++                readPath = await fs.realpath(filepath);
++                const canonical = (filename)=>fs.realpath(path.resolve(pwd, filename)).catch(()=>path.resolve(realPwd, filename));
++                const protectedRoots = await Promise.all([
++                    SERVER_BUNDLE_DIRECTORY,
++                    'upload',
++                    'public',
++                    ...normalizePublicDir(publicDir)
++                ].map(canonical));
++                const protectedFiles = await Promise.all((routes || []).flatMap((route)=>route.bundle ? [
++                        canonical(route.bundle)
++                    ] : []));
++                if (!isPathInside(readPath, realPwd) || protectedRoots.some((root)=>isPathInside(readPath, root)) || protectedFiles.includes(readPath)) return next();
++                const realRoots = await Promise.all(roots.map((root)=>fs.realpath(root).catch(()=>void 0)));
++                if (!realRoots.some((root)=>root && root !== realPwd && isPathInside(root, realPwd) && isPathInside(readPath, root))) return next();
++                if (!(await fs.stat(readPath)).isFile()) return next();
++            }
+             const mimeType = getMimeType(filepath);
+             if (mimeType) c.header('Content-Type', mimeType);
+-            const stat = await fs.lstat(filepath);
++            const stat = await fs.lstat(readPath);
+             const { size } = stat;
+-            const chunk = await fileReader.readFileFromSystem(filepath, 'buffer');
++            const chunk = await fileReader.readFileFromSystem(readPath, 'buffer');
+             c.header('Content-Length', String(size));
+             if (null === chunk) return next();
+             const body = new Uint8Array(chunk.buffer, chunk.byteOffset, chunk.byteLength);
+             return c.body(body, 200);
+         }
++        if (options.buildAssetsOnly) return next();
++        return createPublicMiddleware({
++            pwd,
++            routes: routes || []
++        })(c, next);
+     };
+ }
+ const prepareFavicons = (favicon)=>{
+diff --git a/dist/esm/adapters/node/requestCoordinator.mjs b/dist/esm/adapters/node/requestCoordinator.mjs
+index b2af74eefb90d3d3c9c5eedeab633aa424dc5726..084f403ff035714fa0043d30da448815b2ee79eb 100644
+--- a/dist/esm/adapters/node/requestCoordinator.mjs
++++ b/dist/esm/adapters/node/requestCoordinator.mjs
+@@ -8,10 +8,15 @@ const copyScope = (scope)=>{
+     ];
+ };
+ class AdmissionError extends Error {
++    constructor(message, reason){
++        super(message), this.reason = reason;
++    }
+ }
+ function createSSRRequestCoordinator(options) {
+-    const { maxPendingRequests, requestTimeoutMs, drainTimeoutMs } = options;
++    const { maxPendingRequests, requestTimeoutMs, drainTimeoutMs, maxResumeConcurrency = 8, maxPendingUpdates = 32 } = options;
+     if (!Number.isSafeInteger(maxPendingRequests) || maxPendingRequests < 0) throw new Error('maxPendingRequests must be a non-negative safe integer');
++    if (!Number.isSafeInteger(maxPendingUpdates) || maxPendingUpdates < 0) throw new Error('maxPendingUpdates must be a non-negative safe integer');
++    if (!Number.isSafeInteger(maxResumeConcurrency) || maxResumeConcurrency < 1) throw new Error('maxResumeConcurrency must be a positive safe integer');
+     for (const timeout of [
+         requestTimeoutMs,
+         drainTimeoutMs
+@@ -21,35 +26,48 @@ function createSSRRequestCoordinator(options) {
+     const drainListeners = new Set();
+     let phase = 'serving';
+     let active = 0;
++    let resumed = 0;
++    let pendingUpdates = 0;
++    let evaluatingPolicy = false;
+     let closedScope;
+     const leases = new Map();
+     const blocked = (scope)=>'serving' !== phase && intersects(scope, closedScope);
+     let generation = 0;
+     let updates = Promise.resolve();
++    let deferredUpdates = Promise.resolve();
+     const wake = (error)=>{
+         for (const waiter of Array.from(waiters))if (error && blocked(waiter.scope)) waiter.reject(error);
+-        else if (!blocked(waiter.scope)) waiter.resume();
++        else if (!blocked(waiter.scope) && resumed < maxResumeConcurrency) {
++            resumed++;
++            let released = false;
++            waiter.resume(()=>{
++                if (released) return;
++                released = true;
++                resumed--;
++                wake();
++            });
++        }
+     };
+     const waitForAdmission = (signal, deadline, scope)=>new Promise((resolve, reject)=>{
+             if (signal.aborted) return reject(signal.reason);
+-            if ('unavailable' === phase && blocked(scope)) return reject(new AdmissionError('SSR application is unavailable'));
+-            if (waiters.size >= maxPendingRequests) return reject(new AdmissionError('SSR request queue is full'));
++            if ('unavailable' === phase && blocked(scope)) return reject(new AdmissionError('SSR application is unavailable', 'unavailable'));
++            if (waiters.size >= maxPendingRequests) return reject(new AdmissionError('SSR request queue is full', 'queue-full'));
+             const remaining = deadline - Date.now();
+-            if (remaining <= 0) return reject(new AdmissionError('SSR request wait timed out'));
+-            const finish = (error)=>{
++            if (remaining <= 0) return reject(new AdmissionError('SSR request wait timed out', 'timeout'));
++            const finish = (error, release)=>{
+                 clearTimeout(timer);
+                 waiters.delete(waiter);
+                 signal.removeEventListener('abort', abort);
+                 if (void 0 !== error) reject(error);
+-                else resolve();
++                else resolve(release);
+             };
+             const abort = ()=>finish(signal.reason);
+             const waiter = {
+                 scope,
+-                resume: ()=>finish(),
++                resume: (release)=>finish(void 0, release),
+                 reject: finish
+             };
+-            const timer = setTimeout(()=>finish(new AdmissionError('SSR request wait timed out')), remaining);
++            const timer = setTimeout(()=>finish(new AdmissionError('SSR request wait timed out', 'timeout')), remaining);
+             waiters.add(waiter);
+             signal.addEventListener('abort', abort, {
+                 once: true
+@@ -70,6 +88,46 @@ function createSSRRequestCoordinator(options) {
+             }, drainTimeoutMs);
+             drainListeners.add(finish);
+         });
++    const rejectRequest = (message)=>new Response(message, {
++            status: 503,
++            headers: {
++                'Retry-After': '1'
++            }
++        });
++    const decide = (request, started, reason)=>{
++        const policyContext = Object.freeze({
++            request,
++            update: Object.freeze({
++                phase,
++                generation,
++                affectedEntries: 'serving' === phase ? Object.freeze([]) : closedScope && Object.freeze([
++                    ...closedScope
++                ]),
++                activeRequests: active,
++                pendingRequests: waiters.size,
++                waitedMs: Math.max(0, Date.now() - started),
++                reason
++            })
++        });
++        let decision = 'reject';
++        evaluatingPolicy = true;
++        try {
++            const policy = options.requestPolicy ?? 'wait';
++            const result = 'function' == typeof policy ? policy(policyContext) : policy;
++            if ('wait' === result || 'csr' === result || 'reject' === result) decision = result;
++            else Promise.resolve(result).catch(()=>{});
++        } catch  {} finally{
++            evaluatingPolicy = false;
++        }
++        return {
++            decision,
++            policyContext
++        };
++    };
++    const assertUpdateAllowed = ()=>{
++        if (evaluatingPolicy) throw new Error('Cannot update SSR from an admission policy');
++        if (context.getStore()?.active) throw new Error(context.getStore()?.updating ? 'Cannot nest SSR updates' : 'Cannot update SSR from a request being drained');
++    };
+     return {
+         get status () {
+             return {
+@@ -79,28 +137,66 @@ function createSSRRequestCoordinator(options) {
+                 ],
+                 generation,
+                 activeRequests: active,
+-                pendingRequests: waiters.size
++                pendingRequests: waiters.size,
++                pendingUpdates
+             };
+         },
+-        async handle (request, render, requestScope) {
++        assertUpdateAllowed,
++        defer (operation) {
++            if ('function' != typeof operation) throw new TypeError('A deferred update operation is required');
++            if (evaluatingPolicy) throw new Error('Cannot submit SSR updates from an admission policy');
++            const owner = context.getStore();
++            if (owner?.active && owner.updating) throw new Error('Cannot defer a nested SSR update');
++            if (pendingUpdates >= maxPendingUpdates) throw new Error('SSR deferred update queue is full');
++            pendingUpdates++;
++            const completion = owner?.active ? owner.completion : void 0;
++            const completed = context.exit(()=>deferredUpdates.then(()=>completion).then(operation));
++            deferredUpdates = completed.then(()=>{
++                pendingUpdates--;
++            }, ()=>{
++                pendingUpdates--;
++            });
++            return Object.freeze({
++                accepted: true,
++                completed
++            });
++        },
++        async handle (request, render, requestScope, renderCSR) {
+             if (context.getStore()?.active && (context.getStore()?.updating || 'serving' !== phase)) throw new Error('Cannot wait on SSR admission from its active request or update');
+             const scope = copyScope(requestScope);
+-            const deadline = Date.now() + requestTimeoutMs;
++            const started = Date.now();
++            const deadline = started + requestTimeoutMs;
++            let releaseAdmission;
++            const respond = (reason, message)=>{
++                const { decision, policyContext } = decide(request, started, reason);
++                return 'csr' === decision && renderCSR ? renderCSR(policyContext) : rejectRequest(message);
++            };
+             try {
+-                while(blocked(scope))await waitForAdmission(request.signal, deadline, scope);
+                 request.signal.throwIfAborted();
+-            } catch (error) {
+-                if (error instanceof AdmissionError) return new Response(error.message, {
+-                    status: 503,
+-                    headers: {
+-                        'Retry-After': '1'
++                while(blocked(scope)){
++                    const reason = 'unavailable' === phase ? 'unavailable' : 'updating';
++                    const { decision, policyContext } = decide(request, started, reason);
++                    if ('csr' === decision && renderCSR) return renderCSR(policyContext);
++                    if ('wait' !== decision || 'unavailable' === reason) return rejectRequest('SSR application is unavailable');
++                    releaseAdmission = await waitForAdmission(request.signal, deadline, scope);
++                    if (blocked(scope)) {
++                        releaseAdmission();
++                        releaseAdmission = void 0;
+                     }
+-                });
++                }
++                request.signal.throwIfAborted();
++            } catch (error) {
++                releaseAdmission?.();
++                if (error instanceof AdmissionError) return respond(error.reason, error.message);
+                 throw error;
+             }
+             active++;
++            let settle;
+             const lease = {
+-                active: true
++                active: true,
++                completion: new Promise((resolve)=>{
++                    settle = resolve;
++                })
+             };
+             leases.set(lease, scope);
+             let pending = 1;
+@@ -110,6 +206,8 @@ function createSSRRequestCoordinator(options) {
+                 active--;
+                 leases.delete(lease);
+                 for (const finish of Array.from(drainListeners))finish();
++                releaseAdmission?.();
++                settle();
+             };
+             const work = {
+                 track (task) {
+@@ -175,11 +273,11 @@ function createSSRRequestCoordinator(options) {
+         update (publish, requestedScope) {
+             let scope;
+             try {
++                assertUpdateAllowed();
+                 scope = 'function' == typeof requestedScope ? void 0 : copyScope(requestedScope);
+             } catch (error) {
+                 return Promise.reject(error);
+             }
+-            if (context.getStore()?.active) return Promise.reject(new Error(context.getStore()?.updating ? 'Cannot nest SSR updates' : 'Cannot update SSR from a request being drained'));
+             const operation = updates.then(async ()=>{
+                 if ('function' == typeof requestedScope) scope = copyScope(requestedScope());
+                 const previous = phase;
+@@ -207,7 +305,7 @@ function createSSRRequestCoordinator(options) {
+                     return generation;
+                 } catch (error) {
+                     phase = 'unavailable';
+-                    wake(new AdmissionError('SSR application update failed'));
++                    wake(new AdmissionError('SSR application update failed', 'unavailable'));
+                     throw error;
+                 } finally{
+                     publication.active = false;
+diff --git a/dist/esm/plugins/render/render.mjs b/dist/esm/plugins/render/render.mjs
+index eacea79833d4fa84970c50fed88689376c733ece..118f0728345edb0180c063efe14cdc53e23e325e 100644
+--- a/dist/esm/plugins/render/render.mjs
++++ b/dist/esm/plugins/render/render.mjs
+@@ -66,6 +66,45 @@ function getHeadersWithoutCookie(headers) {
+     delete _headers.cookie;
+     return _headers;
+ }
++function createCSRRender(routes, metaName = 'modern-js') {
++    const router = getRouter(routes);
++    const framework = cutNameByHyphen(metaName);
++    return (request, options)=>{
++        const url = new URL(request.url);
++        const accept = request.headers.get('accept');
++        if (![
++            'GET',
++            'HEAD'
++        ].includes(request.method) || url.searchParams.has('__loader') || request.headers.has('x-rsc-action') || request.headers.has('x-rsc-tree') || accept && !accept.includes('text/html') && !accept.includes('*/*')) return new Response('CSR fallback requires an HTML navigation', {
++            status: 503,
++            headers: {
++                'retry-after': '1'
++            }
++        });
++        const [route] = matchRoute(router, url.pathname);
++        const html = route && options.templates[uniqueKeyByRoute(route)];
++        if (!route?.entryName || route.isApi || route.isRSC || !html || options.entryScope && !options.entryScope.includes(route.entryName)) return new Response('CSR fallback is unavailable for this route', {
++            status: 503,
++            headers: {
++                'retry-after': '1'
++            }
++        });
++        const headers = new Headers();
++        for (const [key, value] of Object.entries(route.responseHeaders || {}))headers.set(key, value);
++        headers.set('content-type', 'text/html; charset=UTF-8');
++        headers.set(X_MODERNJS_RENDER, 'client');
++        headers.set(`x-${framework}-ssr-fallback`, '1;reason=updating');
++        headers.set('cache-control', 'no-store');
++        return new Response('HEAD' === request.method ? null : injectFallbackReasonToHtml({
++            html,
++            framework,
++            reason: 'updating'
++        }), {
++            status: 200,
++            headers
++        });
++    };
++}
+ async function createRender({ routes, pwd, metaName, staticGenerate, cacheConfig, forceCSR, forceCSRMap, config }) {
+     const router = getRouter(routes);
+     return async (req, { monitors, nodeReq, templates, serverManifest, rscClientManifest, rscSSRManifest, rscServerManifest, locals, matchEntryName, matchPathname, loaderContext, contextForceCSR, reporter, work, cacheNamespace, entryScope })=>{
+@@ -236,4 +275,4 @@ async function csrRender(request, options) {
+     });
+     return csrRscRender(request, options);
+ }
+-export { createRender, matchRoute };
++export { createCSRRender, createRender, matchRoute };
+diff --git a/dist/esm-node/adapters/node/application.mjs b/dist/esm-node/adapters/node/application.mjs
+index 2271770bda2ae1f9d8958a73447284756101dd91..18fdc472699461b8805b7c917a56b2df41161ce9 100644
+--- a/dist/esm-node/adapters/node/application.mjs
++++ b/dist/esm-node/adapters/node/application.mjs
+@@ -23,7 +23,11 @@ async function createSSRApplication(options) {
+             c.set('ssrCacheNamespace', scope?.length === 1 ? entryNamespaces.get(scope[0]) || cacheNamespace : cacheNamespace);
+             await next();
+             return c.res;
+-        }, scope);
++        }, scope, options.renderCSR ? async (context)=>options.renderCSR(c.req.raw, {
++                ...context,
++                templates: resources.templates,
++                entryScope: scope
++            }) : void 0);
+         c.res = response;
+         return response;
+     };
+@@ -32,6 +36,12 @@ async function createSSRApplication(options) {
+         get status () {
+             return coordinator.status;
+         },
++        defer (operation) {
++            return coordinator.defer(operation);
++        },
++        assertUpdateAllowed () {
++            coordinator.assertUpdateAllowed();
++        },
+         update (invalidate, entries) {
+             if (entries && !options.resolveScope) return Promise.reject(new Error('Scoped SSR updates require an owned request scope resolver'));
+             if ('function' != typeof invalidate) return Promise.reject(new TypeError('An owned module invalidator is required'));
 diff --git a/dist/esm-node/adapters/node/plugins/resource.mjs b/dist/esm-node/adapters/node/plugins/resource.mjs
-index f121ceae4d879df631a10528cf814ce3de678097..4cd9688e6b6c09e99af4bdc52e443df4ed177558 100644
+index f121ceae4d879df631a10528cf814ce3de678097..bf66fdf382984f59353c1fd829f0922d71581c6c 100644
 --- a/dist/esm-node/adapters/node/plugins/resource.mjs
 +++ b/dist/esm-node/adapters/node/plugins/resource.mjs
-@@ -1,5 +1,5 @@
+@@ -1,11 +1,13 @@
  import "node:module";
 -import { createRequire } from "node:module";
 +import node_module, { createRequire } from "node:module";
  import path from "path";
  import { fileReader } from "@modern-js/runtime-utils/fileReader";
  import { LOADABLE_STATS_FILE, MAIN_ENTRY_NAME, NESTED_ROUTE_SPEC_FILE, ROUTE_MANIFEST_FILE, SERVER_BUNDLE_DIRECTORY, compatibleRequire, fs, isProd } from "@modern-js/utils";
-@@ -73,6 +73,10 @@ async function getServerManifest(pwd, routes, monitors, options = {}) {
+ import { getRenderHandler } from "../../../plugins/render/inject.mjs";
++import { createCSRRender } from "../../../plugins/render/render.mjs";
+ import { uniqueKeyByRoute } from "../../../utils/index.mjs";
+ import { createSSRApplication } from "../application.mjs";
++import { createStaticMiddleware } from "./static.mjs";
+ async function getHtmlTemplates(pwd, routes, options = {}) {
+     const htmlRoutes = routes.filter((route)=>route.entryName);
+     const htmls = await Promise.all(htmlRoutes.map(async (route)=>{
+@@ -73,6 +75,10 @@ async function getServerManifest(pwd, routes, monitors, options = {}) {
          const renderBundle = options.reloadEntry ? await options.reloadEntry(entryName) : await loadBundle(renderBundlePath, monitors, options.reloadable);
          if (options.reloadable && route.isSSR && 'function' != typeof await renderBundle?.requestHandler) throw new Error(`Invalid SSR entry: ${entryName}`);
          const loaderBundle = options.reloadEntry && await fs.pathExists(loaderBundlePath) ? await options.reloadEntry(`${entryName}-server-loaders`) : await loadBundle(loaderBundlePath, monitors, options.reloadable);
@@ -180,7 +1135,15 @@ index f121ceae4d879df631a10528cf814ce3de678097..4cd9688e6b6c09e99af4bdc52e443df4
          renderBundle && (renderBundles[entryName] = renderBundle);
          loaderBundle && (loaderBundles[entryName] = loaderBundle?.loadModules ? await loaderBundle?.loadModules() : loaderBundle);
      }));
-@@ -178,13 +182,17 @@ const injectResourcePlugin = (applicationOptions)=>({
+@@ -162,6 +168,7 @@ const injectResourcePlugin = (applicationOptions)=>({
+                     let published;
+                     const application = await createSSRApplication({
+                         ...applicationOptions,
++                        renderCSR: applicationOptions.renderCSR || createCSRRender(routes, context.metaName),
+                         load: async (rebuilding, entries)=>{
+                             const selectedRoutes = entries ? routes.filter((route)=>entries.includes(route.entryName || MAIN_ENTRY_NAME)) : routes;
+                             if (entries?.some((entry)=>!selectedRoutes.some((route)=>(route.entryName || MAIN_ENTRY_NAME) === entry))) throw new Error('Unknown SSR entry in update scope');
+@@ -178,13 +185,17 @@ const injectResourcePlugin = (applicationOptions)=>({
                                      delete require.cache[require.resolve(filename)];
                                  }
                              }
@@ -199,7 +1162,7 @@ index f121ceae4d879df631a10528cf814ce3de678097..4cd9688e6b6c09e99af4bdc52e443df4
                                  }),
                                  getRenderHandler(context.getRenderOptions)
                              ]);
-@@ -228,6 +236,38 @@ const injectResourcePlugin = (applicationOptions)=>({
+@@ -228,11 +239,59 @@ const injectResourcePlugin = (applicationOptions)=>({
                                  render
                              };
                              await applicationOptions.validate?.(resources);
@@ -238,3 +1201,568 @@ index f121ceae4d879df631a10528cf814ce3de678097..4cd9688e6b6c09e99af4bdc52e443df4
                              published = resources;
                              return resources;
                          }
+                     });
+-                    context.serverBase.setRequestMiddleware(application.middleware);
++                    const config = api.getServerConfig();
++                    const assets = createStaticMiddleware({
++                        pwd: pwd,
++                        routes,
++                        output: config.output || {},
++                        html: config.html || {},
++                        server: config.server || {},
++                        buildAssetsOnly: true
++                    });
++                    const requestMiddleware = async (c, next)=>{
++                        if ('GET' !== c.req.method && 'HEAD' !== c.req.method) return application.middleware(c, next);
++                        return assets(c, async ()=>{
++                            const response = await application.middleware(c, next);
++                            if (response) c.res = response;
++                        });
++                    };
++                    context.serverBase.setRequestMiddleware(requestMiddleware);
+                     applicationOptions.onReady(application);
+                     return;
+                 }
+diff --git a/dist/esm-node/adapters/node/plugins/static.mjs b/dist/esm-node/adapters/node/plugins/static.mjs
+index 491135d6de8fbb76c4dbee7f20f514588b66b03b..42584c3f81ecd3a9f095bc4636775dac9ab51759 100644
+--- a/dist/esm-node/adapters/node/plugins/static.mjs
++++ b/dist/esm-node/adapters/node/plugins/static.mjs
+@@ -1,10 +1,10 @@
+ import "node:module";
+ import path from "path";
+ import { fileReader } from "@modern-js/runtime-utils/fileReader";
+-import { fs } from "@modern-js/utils";
++import { SERVER_BUNDLE_DIRECTORY, fs } from "@modern-js/utils";
+ import { getMimeType } from "hono/utils/mime";
+ import { sortRoutes } from "../../../utils/index.mjs";
+-import { getPublicDirPatterns } from "../../../utils/publicDir.mjs";
++import { getPublicDirPatterns, normalizePublicDir } from "../../../utils/publicDir.mjs";
+ const serverStaticPlugin = ()=>({
+         name: '@modern-js/plugin-server-static',
+         setup (api) {
+@@ -74,14 +74,25 @@ function createStaticMiddleware(options) {
+         jsPath,
+         mediaPath
+     ].filter((v)=>Boolean(v));
++    const emittedRoots = [
++        'static',
++        ...staticFiles
++    ].flatMap((directory)=>{
++        const root = path.resolve(pwd, directory);
++        return root !== path.resolve(pwd) && isPathInside(root, pwd) ? [
++            root
++        ] : [];
++    });
+     const publicDirPatterns = getPublicDirPatterns(publicDir);
+     const staticReg = [
+         'static/',
+-        'upload/',
++        ...options.buildAssetsOnly ? [] : [
++            'upload/'
++        ],
+         ...staticFiles,
+-        ...publicDirPatterns
++        ...options.buildAssetsOnly ? [] : publicDirPatterns
+     ];
+-    const iconReg = [
++    const iconReg = options.buildAssetsOnly ? [] : [
+         'favicon.ico',
+         'icon.png',
+         ...favicons
+@@ -96,24 +107,46 @@ function createStaticMiddleware(options) {
+         const pathname = c.req.path;
+         if (pageRoute && '' === path.extname(pathname)) return next();
+         const hit = staticPathRegExp.test(pathname);
+-        if (!hit) return createPublicMiddleware({
+-            pwd,
+-            routes: routes || []
+-        })(c, next);
+-        {
++        if (hit) {
+             const filepath = path.join(pwd, pathname.replace(pathPrefix, ()=>''));
+             if (!isPathInside(filepath, pwd)) return next();
+             if (!await fs.pathExists(filepath)) return next();
++            let readPath = filepath;
++            if (options.buildAssetsOnly) {
++                const roots = emittedRoots.filter((root)=>isPathInside(filepath, root));
++                if (!roots.length) return next();
++                const realPwd = await fs.realpath(pwd);
++                readPath = await fs.realpath(filepath);
++                const canonical = (filename)=>fs.realpath(path.resolve(pwd, filename)).catch(()=>path.resolve(realPwd, filename));
++                const protectedRoots = await Promise.all([
++                    SERVER_BUNDLE_DIRECTORY,
++                    'upload',
++                    'public',
++                    ...normalizePublicDir(publicDir)
++                ].map(canonical));
++                const protectedFiles = await Promise.all((routes || []).flatMap((route)=>route.bundle ? [
++                        canonical(route.bundle)
++                    ] : []));
++                if (!isPathInside(readPath, realPwd) || protectedRoots.some((root)=>isPathInside(readPath, root)) || protectedFiles.includes(readPath)) return next();
++                const realRoots = await Promise.all(roots.map((root)=>fs.realpath(root).catch(()=>void 0)));
++                if (!realRoots.some((root)=>root && root !== realPwd && isPathInside(root, realPwd) && isPathInside(readPath, root))) return next();
++                if (!(await fs.stat(readPath)).isFile()) return next();
++            }
+             const mimeType = getMimeType(filepath);
+             if (mimeType) c.header('Content-Type', mimeType);
+-            const stat = await fs.lstat(filepath);
++            const stat = await fs.lstat(readPath);
+             const { size } = stat;
+-            const chunk = await fileReader.readFileFromSystem(filepath, 'buffer');
++            const chunk = await fileReader.readFileFromSystem(readPath, 'buffer');
+             c.header('Content-Length', String(size));
+             if (null === chunk) return next();
+             const body = new Uint8Array(chunk.buffer, chunk.byteOffset, chunk.byteLength);
+             return c.body(body, 200);
+         }
++        if (options.buildAssetsOnly) return next();
++        return createPublicMiddleware({
++            pwd,
++            routes: routes || []
++        })(c, next);
+     };
+ }
+ const prepareFavicons = (favicon)=>{
+diff --git a/dist/esm-node/adapters/node/requestCoordinator.mjs b/dist/esm-node/adapters/node/requestCoordinator.mjs
+index 599c4af5a28a228550db39b53ab779cac3c0ebef..5475df4f2de6544198c93add4be1eb96ac09556a 100644
+--- a/dist/esm-node/adapters/node/requestCoordinator.mjs
++++ b/dist/esm-node/adapters/node/requestCoordinator.mjs
+@@ -9,10 +9,15 @@ const copyScope = (scope)=>{
+     ];
+ };
+ class AdmissionError extends Error {
++    constructor(message, reason){
++        super(message), this.reason = reason;
++    }
+ }
+ function createSSRRequestCoordinator(options) {
+-    const { maxPendingRequests, requestTimeoutMs, drainTimeoutMs } = options;
++    const { maxPendingRequests, requestTimeoutMs, drainTimeoutMs, maxResumeConcurrency = 8, maxPendingUpdates = 32 } = options;
+     if (!Number.isSafeInteger(maxPendingRequests) || maxPendingRequests < 0) throw new Error('maxPendingRequests must be a non-negative safe integer');
++    if (!Number.isSafeInteger(maxPendingUpdates) || maxPendingUpdates < 0) throw new Error('maxPendingUpdates must be a non-negative safe integer');
++    if (!Number.isSafeInteger(maxResumeConcurrency) || maxResumeConcurrency < 1) throw new Error('maxResumeConcurrency must be a positive safe integer');
+     for (const timeout of [
+         requestTimeoutMs,
+         drainTimeoutMs
+@@ -22,35 +27,48 @@ function createSSRRequestCoordinator(options) {
+     const drainListeners = new Set();
+     let phase = 'serving';
+     let active = 0;
++    let resumed = 0;
++    let pendingUpdates = 0;
++    let evaluatingPolicy = false;
+     let closedScope;
+     const leases = new Map();
+     const blocked = (scope)=>'serving' !== phase && intersects(scope, closedScope);
+     let generation = 0;
+     let updates = Promise.resolve();
++    let deferredUpdates = Promise.resolve();
+     const wake = (error)=>{
+         for (const waiter of Array.from(waiters))if (error && blocked(waiter.scope)) waiter.reject(error);
+-        else if (!blocked(waiter.scope)) waiter.resume();
++        else if (!blocked(waiter.scope) && resumed < maxResumeConcurrency) {
++            resumed++;
++            let released = false;
++            waiter.resume(()=>{
++                if (released) return;
++                released = true;
++                resumed--;
++                wake();
++            });
++        }
+     };
+     const waitForAdmission = (signal, deadline, scope)=>new Promise((resolve, reject)=>{
+             if (signal.aborted) return reject(signal.reason);
+-            if ('unavailable' === phase && blocked(scope)) return reject(new AdmissionError('SSR application is unavailable'));
+-            if (waiters.size >= maxPendingRequests) return reject(new AdmissionError('SSR request queue is full'));
++            if ('unavailable' === phase && blocked(scope)) return reject(new AdmissionError('SSR application is unavailable', 'unavailable'));
++            if (waiters.size >= maxPendingRequests) return reject(new AdmissionError('SSR request queue is full', 'queue-full'));
+             const remaining = deadline - Date.now();
+-            if (remaining <= 0) return reject(new AdmissionError('SSR request wait timed out'));
+-            const finish = (error)=>{
++            if (remaining <= 0) return reject(new AdmissionError('SSR request wait timed out', 'timeout'));
++            const finish = (error, release)=>{
+                 clearTimeout(timer);
+                 waiters.delete(waiter);
+                 signal.removeEventListener('abort', abort);
+                 if (void 0 !== error) reject(error);
+-                else resolve();
++                else resolve(release);
+             };
+             const abort = ()=>finish(signal.reason);
+             const waiter = {
+                 scope,
+-                resume: ()=>finish(),
++                resume: (release)=>finish(void 0, release),
+                 reject: finish
+             };
+-            const timer = setTimeout(()=>finish(new AdmissionError('SSR request wait timed out')), remaining);
++            const timer = setTimeout(()=>finish(new AdmissionError('SSR request wait timed out', 'timeout')), remaining);
+             waiters.add(waiter);
+             signal.addEventListener('abort', abort, {
+                 once: true
+@@ -71,6 +89,46 @@ function createSSRRequestCoordinator(options) {
+             }, drainTimeoutMs);
+             drainListeners.add(finish);
+         });
++    const rejectRequest = (message)=>new Response(message, {
++            status: 503,
++            headers: {
++                'Retry-After': '1'
++            }
++        });
++    const decide = (request, started, reason)=>{
++        const policyContext = Object.freeze({
++            request,
++            update: Object.freeze({
++                phase,
++                generation,
++                affectedEntries: 'serving' === phase ? Object.freeze([]) : closedScope && Object.freeze([
++                    ...closedScope
++                ]),
++                activeRequests: active,
++                pendingRequests: waiters.size,
++                waitedMs: Math.max(0, Date.now() - started),
++                reason
++            })
++        });
++        let decision = 'reject';
++        evaluatingPolicy = true;
++        try {
++            const policy = options.requestPolicy ?? 'wait';
++            const result = 'function' == typeof policy ? policy(policyContext) : policy;
++            if ('wait' === result || 'csr' === result || 'reject' === result) decision = result;
++            else Promise.resolve(result).catch(()=>{});
++        } catch  {} finally{
++            evaluatingPolicy = false;
++        }
++        return {
++            decision,
++            policyContext
++        };
++    };
++    const assertUpdateAllowed = ()=>{
++        if (evaluatingPolicy) throw new Error('Cannot update SSR from an admission policy');
++        if (context.getStore()?.active) throw new Error(context.getStore()?.updating ? 'Cannot nest SSR updates' : 'Cannot update SSR from a request being drained');
++    };
+     return {
+         get status () {
+             return {
+@@ -80,28 +138,66 @@ function createSSRRequestCoordinator(options) {
+                 ],
+                 generation,
+                 activeRequests: active,
+-                pendingRequests: waiters.size
++                pendingRequests: waiters.size,
++                pendingUpdates
+             };
+         },
+-        async handle (request, render, requestScope) {
++        assertUpdateAllowed,
++        defer (operation) {
++            if ('function' != typeof operation) throw new TypeError('A deferred update operation is required');
++            if (evaluatingPolicy) throw new Error('Cannot submit SSR updates from an admission policy');
++            const owner = context.getStore();
++            if (owner?.active && owner.updating) throw new Error('Cannot defer a nested SSR update');
++            if (pendingUpdates >= maxPendingUpdates) throw new Error('SSR deferred update queue is full');
++            pendingUpdates++;
++            const completion = owner?.active ? owner.completion : void 0;
++            const completed = context.exit(()=>deferredUpdates.then(()=>completion).then(operation));
++            deferredUpdates = completed.then(()=>{
++                pendingUpdates--;
++            }, ()=>{
++                pendingUpdates--;
++            });
++            return Object.freeze({
++                accepted: true,
++                completed
++            });
++        },
++        async handle (request, render, requestScope, renderCSR) {
+             if (context.getStore()?.active && (context.getStore()?.updating || 'serving' !== phase)) throw new Error('Cannot wait on SSR admission from its active request or update');
+             const scope = copyScope(requestScope);
+-            const deadline = Date.now() + requestTimeoutMs;
++            const started = Date.now();
++            const deadline = started + requestTimeoutMs;
++            let releaseAdmission;
++            const respond = (reason, message)=>{
++                const { decision, policyContext } = decide(request, started, reason);
++                return 'csr' === decision && renderCSR ? renderCSR(policyContext) : rejectRequest(message);
++            };
+             try {
+-                while(blocked(scope))await waitForAdmission(request.signal, deadline, scope);
+                 request.signal.throwIfAborted();
+-            } catch (error) {
+-                if (error instanceof AdmissionError) return new Response(error.message, {
+-                    status: 503,
+-                    headers: {
+-                        'Retry-After': '1'
++                while(blocked(scope)){
++                    const reason = 'unavailable' === phase ? 'unavailable' : 'updating';
++                    const { decision, policyContext } = decide(request, started, reason);
++                    if ('csr' === decision && renderCSR) return renderCSR(policyContext);
++                    if ('wait' !== decision || 'unavailable' === reason) return rejectRequest('SSR application is unavailable');
++                    releaseAdmission = await waitForAdmission(request.signal, deadline, scope);
++                    if (blocked(scope)) {
++                        releaseAdmission();
++                        releaseAdmission = void 0;
+                     }
+-                });
++                }
++                request.signal.throwIfAborted();
++            } catch (error) {
++                releaseAdmission?.();
++                if (error instanceof AdmissionError) return respond(error.reason, error.message);
+                 throw error;
+             }
+             active++;
++            let settle;
+             const lease = {
+-                active: true
++                active: true,
++                completion: new Promise((resolve)=>{
++                    settle = resolve;
++                })
+             };
+             leases.set(lease, scope);
+             let pending = 1;
+@@ -111,6 +207,8 @@ function createSSRRequestCoordinator(options) {
+                 active--;
+                 leases.delete(lease);
+                 for (const finish of Array.from(drainListeners))finish();
++                releaseAdmission?.();
++                settle();
+             };
+             const work = {
+                 track (task) {
+@@ -176,11 +274,11 @@ function createSSRRequestCoordinator(options) {
+         update (publish, requestedScope) {
+             let scope;
+             try {
++                assertUpdateAllowed();
+                 scope = 'function' == typeof requestedScope ? void 0 : copyScope(requestedScope);
+             } catch (error) {
+                 return Promise.reject(error);
+             }
+-            if (context.getStore()?.active) return Promise.reject(new Error(context.getStore()?.updating ? 'Cannot nest SSR updates' : 'Cannot update SSR from a request being drained'));
+             const operation = updates.then(async ()=>{
+                 if ('function' == typeof requestedScope) scope = copyScope(requestedScope());
+                 const previous = phase;
+@@ -208,7 +306,7 @@ function createSSRRequestCoordinator(options) {
+                     return generation;
+                 } catch (error) {
+                     phase = 'unavailable';
+-                    wake(new AdmissionError('SSR application update failed'));
++                    wake(new AdmissionError('SSR application update failed', 'unavailable'));
+                     throw error;
+                 } finally{
+                     publication.active = false;
+diff --git a/dist/esm-node/plugins/render/render.mjs b/dist/esm-node/plugins/render/render.mjs
+index 2f585c98fc495b84b39cfebf2ac4045a3bc5986b..89acb5efb3abfafc431f2fa754c7b13c9d7892e7 100644
+--- a/dist/esm-node/plugins/render/render.mjs
++++ b/dist/esm-node/plugins/render/render.mjs
+@@ -69,6 +69,45 @@ function getHeadersWithoutCookie(headers) {
+     delete _headers.cookie;
+     return _headers;
+ }
++function createCSRRender(routes, metaName = 'modern-js') {
++    const router = getRouter(routes);
++    const framework = cutNameByHyphen(metaName);
++    return (request, options)=>{
++        const url = new URL(request.url);
++        const accept = request.headers.get('accept');
++        if (![
++            'GET',
++            'HEAD'
++        ].includes(request.method) || url.searchParams.has('__loader') || request.headers.has('x-rsc-action') || request.headers.has('x-rsc-tree') || accept && !accept.includes('text/html') && !accept.includes('*/*')) return new Response('CSR fallback requires an HTML navigation', {
++            status: 503,
++            headers: {
++                'retry-after': '1'
++            }
++        });
++        const [route] = matchRoute(router, url.pathname);
++        const html = route && options.templates[uniqueKeyByRoute(route)];
++        if (!route?.entryName || route.isApi || route.isRSC || !html || options.entryScope && !options.entryScope.includes(route.entryName)) return new Response('CSR fallback is unavailable for this route', {
++            status: 503,
++            headers: {
++                'retry-after': '1'
++            }
++        });
++        const headers = new Headers();
++        for (const [key, value] of Object.entries(route.responseHeaders || {}))headers.set(key, value);
++        headers.set('content-type', 'text/html; charset=UTF-8');
++        headers.set(X_MODERNJS_RENDER, 'client');
++        headers.set(`x-${framework}-ssr-fallback`, '1;reason=updating');
++        headers.set('cache-control', 'no-store');
++        return new Response('HEAD' === request.method ? null : injectFallbackReasonToHtml({
++            html,
++            framework,
++            reason: 'updating'
++        }), {
++            status: 200,
++            headers
++        });
++    };
++}
+ async function createRender({ routes, pwd, metaName, staticGenerate, cacheConfig, forceCSR, forceCSRMap, config }) {
+     const router = getRouter(routes);
+     return async (req, { monitors, nodeReq, templates, serverManifest, rscClientManifest, rscSSRManifest, rscServerManifest, locals, matchEntryName, matchPathname, loaderContext, contextForceCSR, reporter, work, cacheNamespace, entryScope })=>{
+@@ -239,4 +278,4 @@ async function csrRender(request, options) {
+     });
+     return csrRscRender(request, options);
+ }
+-export { createRender, matchRoute };
++export { createCSRRender, createRender, matchRoute };
+diff --git a/dist/types/adapters/node/application.d.ts b/dist/types/adapters/node/application.d.ts
+index 448d814d3c5cddabfb2d53dfc85c75795279c46a..02952e4cd5b6805ed55054eb7bd5a0330b0f0465 100644
+--- a/dist/types/adapters/node/application.d.ts
++++ b/dist/types/adapters/node/application.d.ts
+@@ -1,5 +1,5 @@
+ import type { Middleware, Render, ServerEnv, ServerManifest } from '../../types/index.js';
+-import { type SSRRequestCoordinatorOptions } from './requestCoordinator.js';
++import { type SSRRequestCoordinatorOptions, type SSRRequestPolicyContext } from './requestCoordinator.js';
+ export interface SSRApplicationResources {
+     templates: Record<string, string>;
+     serverManifest: ServerManifest;
+@@ -13,17 +13,27 @@ export interface SSRApplicationOptions extends SSRRequestCoordinatorOptions {
+     dispose?: (resources: SSRApplicationResources, entries?: readonly string[]) => Promise<void>;
+     /** Must respond directly; bypass handlers cannot fall through into application code. */
+     bypass?: (request: Request) => Promise<Response | undefined>;
++    /** Server-owned HTML fallback. It must not execute application bundles or loaders. */
++    renderCSR?: (request: Request, context: SSRRequestPolicyContext & {
++        templates: Readonly<Record<string, string>>;
++        entryScope?: readonly string[];
++    }) => Response | Promise<Response>;
+ }
+ /** One process-local resource owner. Module invalidation belongs to its bundler adapter. */
+ export declare function createSSRApplication(options: SSRApplicationOptions): Promise<{
+     middleware: Middleware<ServerEnv>;
+     readonly status: {
+-        phase: "serving" | "draining" | "updating" | "unavailable";
++        phase: import("./requestCoordinator.js").SSRUpdatePhase;
+         closedScope: string[] | undefined;
+         generation: number;
+         activeRequests: number;
+         pendingRequests: number;
++        pendingUpdates: number;
+     };
++    /** Submit control-plane work after this request's response and producers finish. */
++    defer<T>(operation: () => Promise<T>): import("./requestCoordinator.js").SSRDeferredUpdate<T>;
++    /** Let adapters enforce request boundaries before their own deduplication. */
++    assertUpdateAllowed(): void;
+     /** Called only by the control plane; invalidate must detach/reset owned bundler state. */
+     update(invalidate: (entries?: readonly string[]) => Promise<void>, entries?: readonly string[] | (() => readonly string[] | undefined)): Promise<number>;
+ }>;
+diff --git a/dist/types/adapters/node/index.d.ts b/dist/types/adapters/node/index.d.ts
+index b1f9fc839bc8936afb4199170be9ea8a43fe995b..f2de9385846477004b4480add8eca3584f60b791 100644
+--- a/dist/types/adapters/node/index.d.ts
++++ b/dist/types/adapters/node/index.d.ts
+@@ -4,7 +4,7 @@ export { createNodeServer, sendResponse, createWebRequest, } from './node.js';
+ export { serverStaticPlugin, injectResourcePlugin, getHtmlTemplates, getServerManifest, injectNodeSeverPlugin, injectRscManifestPlugin, } from './plugins/index.js';
+ export { loadServerPlugins, loadServerEnv, loadServerRuntimeConfig, loadServerCliConfig, loadCacheConfig, } from './helper/index.js';
+ export { createSSRRequestCoordinator } from './requestCoordinator.js';
+-export type { SSRRequestCoordinatorOptions, SSRRequestScope, SSRRequestWork, } from './requestCoordinator.js';
++export type { SSRRequestCoordinatorOptions, SSRRequestScope, SSRRequestWork, SSRRequestPolicyDecision, SSRRequestPolicyReason, SSRRequestPolicyContext, SSRRequestPolicy, SSRUpdatePhase, SSRDeferredUpdate, } from './requestCoordinator.js';
+ export { createSSRApplication } from './application.js';
+ export type { SSRApplication, SSRApplicationOptions, SSRApplicationResources, } from './application.js';
+ export type { SSRResourceApplicationOptions } from './plugins/resource.js';
+diff --git a/dist/types/adapters/node/plugins/resource.d.ts b/dist/types/adapters/node/plugins/resource.d.ts
+index d9d4276d572dc83e1ddc3b388c96a9c65f06a095..e80096759df016dd0bb3d78440dd18b0a0698487 100644
+--- a/dist/types/adapters/node/plugins/resource.d.ts
++++ b/dist/types/adapters/node/plugins/resource.d.ts
+@@ -15,6 +15,7 @@ export declare function injectTemplates(pwd: string, routes?: ServerRoute[], htm
+ export declare function getServerManifest(pwd: string, routes: ServerRoute[], monitors?: Monitors, options?: {
+     reloadable?: boolean;
+     reloadEntry?: (entry: string) => Promise<any>;
++    onReloadedBundle?: (filename: string, exports: any) => void;
+ }): Promise<ServerManifest>;
+ export declare function injectServerManifest(pwd: string, routes?: ServerRoute[], manifestPromise?: Promise<ServerManifest>): Middleware<ServerEnv>;
+ export declare function getRscServerManifest(pwd: string): Promise<any>;
+diff --git a/dist/types/adapters/node/plugins/static.d.ts b/dist/types/adapters/node/plugins/static.d.ts
+index c614f4230f8ca6c9d8977f201e0528359ad30b86..7bdaf65e4108b0efb6491b2b824616f4a42c1eb1 100644
+--- a/dist/types/adapters/node/plugins/static.d.ts
++++ b/dist/types/adapters/node/plugins/static.d.ts
+@@ -12,6 +12,8 @@ export interface ServerStaticOptions {
+     html: HtmlNormalizedConfig;
+     server: ServerNormalizedConfig;
+     routes?: ServerRoute[];
++    /** Only emitted assets; excludes uploads and public files from an early SSR bypass. */
++    buildAssetsOnly?: boolean;
+ }
+ /**
+  * This middleware is used to serve static assets
+diff --git a/dist/types/adapters/node/requestCoordinator.d.ts b/dist/types/adapters/node/requestCoordinator.d.ts
+index 001c4daee33d8ad881f2f62ff66f7b2dcd5a0f35..e6149b0ccf5e69075a8f951c49c2409e80189130 100644
+--- a/dist/types/adapters/node/requestCoordinator.d.ts
++++ b/dist/types/adapters/node/requestCoordinator.d.ts
+@@ -4,8 +4,34 @@ export interface SSRRequestCoordinatorOptions {
+     maxPendingRequests: number;
+     requestTimeoutMs: number;
+     drainTimeoutMs: number;
++    /** Evaluated before SSR admission. Must be synchronous and must not submit updates. */
++    requestPolicy?: SSRRequestPolicy;
++    /** Maximum queued requests released together after an update. Defaults to 8. */
++    maxResumeConcurrency?: number;
++    /** Bounds deferred submissions, including those awaiting response completion. Defaults to 32. */
++    maxPendingUpdates?: number;
++}
++export type SSRUpdatePhase = 'serving' | 'draining' | 'updating' | 'unavailable';
++export type SSRRequestPolicyDecision = 'wait' | 'csr' | 'reject';
++export type SSRRequestPolicyReason = 'updating' | 'unavailable' | 'timeout' | 'queue-full';
++export interface SSRRequestPolicyContext {
++    readonly request: Request;
++    readonly update: Readonly<{
++        phase: SSRUpdatePhase;
++        generation: number;
++        affectedEntries: readonly string[] | undefined;
++        activeRequests: number;
++        pendingRequests: number;
++        waitedMs: number;
++        reason: SSRRequestPolicyReason;
++    }>;
++}
++export type SSRRequestPolicy = SSRRequestPolicyDecision | ((context: SSRRequestPolicyContext) => SSRRequestPolicyDecision);
++export interface SSRDeferredUpdate<T> {
++    readonly accepted: true;
++    /** Do not await this from the submitting SSR request: it completes after that request. */
++    readonly completed: Promise<T>;
+ }
+-type Phase = 'serving' | 'draining' | 'updating' | 'unavailable';
+ export type SSRRequestScope = readonly string[] | undefined;
+ /**
+  * Node application-owner primitive. It must wrap resource/handler selection, not
+@@ -14,13 +40,17 @@ export type SSRRequestScope = readonly string[] | undefined;
+  */
+ export declare function createSSRRequestCoordinator(options: SSRRequestCoordinatorOptions): {
+     readonly status: {
+-        phase: Phase;
++        phase: SSRUpdatePhase;
+         closedScope: string[] | undefined;
+         generation: number;
+         activeRequests: number;
+         pendingRequests: number;
++        pendingUpdates: number;
+     };
+-    handle(request: Request, render: (work: SSRRequestWork) => Promise<Response>, requestScope?: readonly string[]): Promise<Response>;
++    assertUpdateAllowed: () => void;
++    /** Accept work now and execute it outside the request after its complete lease settles. */
++    defer<T>(operation: () => Promise<T>): SSRDeferredUpdate<T>;
++    handle(request: Request, render: (work: SSRRequestWork) => Promise<Response>, requestScope?: readonly string[], renderCSR?: (context: SSRRequestPolicyContext) => Promise<Response>): Promise<Response>;
+     /** Serialize updates. A mutation failure stays closed; retry explicitly. */
+     update(publish: (scope: SSRRequestScope) => Promise<void>, requestedScope?: readonly string[] | (() => SSRRequestScope)): Promise<number>;
+ };
+diff --git a/dist/types/plugins/render/render.d.ts b/dist/types/plugins/render/render.d.ts
+index 7e395d82d7c33ceec87be50a3cfb42c0e062e3b1..7d6950a1b88fbb509ca93f4162534dd395f4c36f 100644
+--- a/dist/types/plugins/render/render.d.ts
++++ b/dist/types/plugins/render/render.d.ts
+@@ -16,5 +16,10 @@ interface CreateRenderOptions {
+ }
+ type MatchedRoute = [ServerRoute | undefined, Params];
+ export declare function matchRoute(router: Router<ServerRoute>, pathname: string, entryName?: string): MatchedRoute;
++/** Render only a published HTML shell, without selecting SSR bundles or loaders. */
++export declare function createCSRRender(routes: ServerRoute[], metaName?: string): (request: Request, options: {
++    templates: Readonly<Record<string, string>>;
++    entryScope?: readonly string[];
++}) => Response;
+ export declare function createRender({ routes, pwd, metaName, staticGenerate, cacheConfig, forceCSR, forceCSRMap, config, }: CreateRenderOptions): Promise<Render>;
+ export {};

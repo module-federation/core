@@ -17,6 +17,12 @@ function createFederationServer(options) {
     updateRemotes(remotes, input) {
       return adapter.updateRemotes(ready(), remotes, input);
     },
+    shouldUpdateRemotes(remotes, input) {
+      return adapter.shouldUpdateRemotes(ready(), remotes, input);
+    },
+    get updateStatus() {
+      return adapter.status(ready());
+    },
     get status() {
       return ready().status;
     },

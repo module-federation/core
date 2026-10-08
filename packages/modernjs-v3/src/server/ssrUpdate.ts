@@ -22,6 +22,24 @@ export type SSRUpdatePlan = {
   reasons: string[];
 };
 
+export interface SSRRemoteReplacement {
+  name: string;
+  entry: string;
+  type?: string;
+  entryGlobalName?: string;
+  client?: Omit<SSRClientRemote, 'name'>;
+}
+export interface SSRUpdateOptions {
+  revision?: number;
+  /** Submit from SSR without waiting for the response that must drain first. */
+  defer?: 'after-response';
+}
+export interface SSRUpdateReceipt {
+  operationId: string;
+  revision: number;
+  phase: 'scheduled' | 'pending' | 'applied';
+}
+
 /**
  * Opt-in contract: all request-side MF consumption uses compiled static imports,
  * entry middleware cannot consume another entry, and mutations use this owner.
@@ -71,7 +89,7 @@ export function createSSRUpdateAdapter(options: {
   const canonicalName = (name: string) => {
     for (const instance of instances()) {
       const remote =
-        instance.options.remotes.find(
+        instance.options?.remotes.find(
           (item: any) => item.name === name || item.alias === name,
         ) ||
         [...(registrations.get(instance)?.values() || [])].find(
@@ -159,16 +177,13 @@ export function createSSRUpdateAdapter(options: {
       return { mode: 'application', reasons: ['unknown-runtime-owner'] };
     return { mode: 'entries', entries: [...owners].sort(), reasons: [] };
   };
-  type Replacement = {
-    entry: string;
-    type?: string;
-    entryGlobalName?: string;
-    client?: Omit<SSRClientRemote, 'name'>;
-  };
+  type Replacement = Omit<SSRRemoteReplacement, 'name'>;
   type Change = { name: string; replacement: Replacement };
   async function performUpdate(
     application: {
       readonly status?: { phase: string };
+      assertUpdateAllowed?(): void;
+      defer?<T>(operation: () => Promise<T>): { completed: Promise<T> };
       update(
         invalidate: (entries?: readonly string[]) => Promise<void>,
         scope?: () => readonly string[] | undefined,
@@ -375,27 +390,18 @@ export function createSSRUpdateAdapter(options: {
       mutationStarted: boolean;
       stage: string;
       timingsMs: Record<string, number>;
-      phase: 'pending' | 'applied' | 'failed';
+      phase: 'scheduled' | 'pending' | 'applied' | 'failed';
       appliedRevision?: number;
       promise: Promise<Result>;
       error?: unknown;
     }
   >();
   let attempt = 0;
-  function submit(
-    application: Application,
-    changes: Change[],
-    input?: { revision: number },
-  ): Promise<Result> {
-    const previous = updates.get(application);
-    const revision = input?.revision ?? (previous?.revision ?? 0) + 1;
+  function capture(changes: Change[], revision: number) {
     if (!Number.isSafeInteger(revision) || revision < 1)
-      return Promise.reject(
-        new TypeError('revision must be a positive safe integer'),
-      );
+      throw new TypeError('revision must be a positive safe integer');
     if (
       !changes.length ||
-      new Set(changes.map((item) => item.name)).size !== changes.length ||
       changes.some(
         ({ name, replacement }) =>
           typeof name !== 'string' ||
@@ -404,52 +410,114 @@ export function createSSRUpdateAdapter(options: {
           !replacement.entry,
       )
     )
-      return Promise.reject(
-        new TypeError(
-          'Unique remote names and replacement entries are required',
-        ),
+      throw new TypeError(
+        'Unique remote names and replacement entries are required',
       );
-    if (options.hydration) {
-      try {
-        for (const { name, replacement } of changes)
-          clientRemote({ ...replacement.client, name } as SSRClientRemote);
-      } catch (error) {
-        return Promise.reject(error);
-      }
-    }
-    const captured = changes.map(({ name, replacement }) => ({
-      name,
-      replacement: {
-        ...replacement,
-        ...(replacement.client ? { client: { ...replacement.client } } : {}),
-      },
+    const captured = changes
+      .map(({ name, replacement }) => {
+        const { entry, type, entryGlobalName, client } = replacement;
+        const publicTarget =
+          options.hydration || client
+            ? clientRemote({ ...client, name } as SSRClientRemote)
+            : undefined;
+        return {
+          name,
+          replacement: {
+            entry,
+            ...(type !== undefined ? { type } : {}),
+            ...(entryGlobalName !== undefined ? { entryGlobalName } : {}),
+            ...(publicTarget
+              ? {
+                  client: {
+                    entry: publicTarget.entry,
+                    ...(publicTarget.type ? { type: publicTarget.type } : {}),
+                    ...(publicTarget.entryGlobalName
+                      ? { entryGlobalName: publicTarget.entryGlobalName }
+                      : {}),
+                  },
+                }
+              : {}),
+          },
+        };
+      })
+      .sort((a, b) =>
+        canonicalName(a.name).localeCompare(canonicalName(b.name)),
+      );
+    // Bundler graph keys retain the declared alias. Canonical identity is only
+    // for revision comparison and duplicate detection, not entry-scope planning.
+    const normalized = captured.map(({ name, replacement }) => ({
+      name: canonicalName(name),
+      replacement,
     }));
-    const fingerprint = JSON.stringify(
-      captured.map(({ name, replacement }) => [
-        name,
-        Object.entries(replacement)
-          .filter(([, value]) => value !== undefined)
-          .sort(([a], [b]) => a.localeCompare(b)),
-      ]),
-    );
-    if (previous) {
-      if (revision < previous.revision)
-        return Promise.reject(new Error('Stale SSR update revision'));
-      if (revision === previous.revision) {
-        if (fingerprint !== previous.fingerprint)
-          return Promise.reject(
-            new Error('SSR revision already has a different replacement'),
-          );
-        if (previous.phase !== 'failed') return previous.promise;
+    if (new Set(normalized.map(({ name }) => name)).size !== captured.length)
+      throw new TypeError(
+        'Unique remote names and replacement entries are required',
+      );
+    return { captured, fingerprint: JSON.stringify(normalized) };
+  }
+  const receipt = (
+    state: NonNullable<ReturnType<typeof updates.get>>,
+  ): SSRUpdateReceipt => ({
+    operationId: state.operationId,
+    revision: state.revision,
+    phase: state.phase === 'failed' ? 'scheduled' : state.phase,
+  });
+  function submit(
+    application: Application,
+    changes: Change[],
+    input: SSRUpdateOptions & { defer: 'after-response' },
+  ): Promise<SSRUpdateReceipt>;
+  function submit(
+    application: Application,
+    changes: Change[],
+    input?: SSRUpdateOptions & { defer?: undefined },
+  ): Promise<Result>;
+  function submit(
+    application: Application,
+    changes: Change[],
+    input?: SSRUpdateOptions,
+  ): Promise<Result | SSRUpdateReceipt>;
+  function submit(
+    application: Application,
+    changes: Change[],
+    input?: SSRUpdateOptions,
+  ): Promise<Result | SSRUpdateReceipt> {
+    const previous = updates.get(application);
+    const revision = input?.revision ?? (previous?.revision ?? 0) + 1;
+    let captured: Change[], fingerprint: string;
+    try {
+      if (!input?.defer) application.assertUpdateAllowed?.();
+      if (input?.defer && !application.defer)
+        throw new Error(
+          'Modern SSR application does not support deferred updates',
+        );
+      ({ captured, fingerprint } = capture(changes, revision));
+      if (previous) {
+        if (revision < previous.revision)
+          throw new Error('Stale SSR update revision');
+        if (revision === previous.revision) {
+          if (fingerprint !== previous.fingerprint)
+            throw new Error('SSR revision already has a different replacement');
+          if (previous.phase !== 'failed')
+            return input?.defer
+              ? Promise.resolve(receipt(previous))
+              : previous.promise;
+        }
       }
+    } catch (error) {
+      return Promise.reject(error);
     }
     const state = {
       revision,
       fingerprint,
       operationId: `${revision}:${++attempt}`,
       mutationStarted: false,
-      phase: 'pending' as 'pending' | 'applied' | 'failed',
-      stage: 'queue',
+      phase: (input?.defer ? 'scheduled' : 'pending') as
+        | 'scheduled'
+        | 'pending'
+        | 'applied'
+        | 'failed',
+      stage: input?.defer ? 'after-response' : 'queue',
       timingsMs: {} as Record<string, number>,
       appliedRevision: previous?.appliedRevision,
       promise: undefined as unknown as Promise<Result>,
@@ -467,29 +535,54 @@ export function createSSRUpdateAdapter(options: {
       stageStarted = now;
       state.stage = stage;
     };
-    state.promise = performUpdate(
-      application,
-      captured,
-      () => {
-        state.mutationStarted = true;
-        if (options.hydration) {
-          const normalized = canonicalClientTargets();
-          clientTargets.clear();
-          for (const [name, remote] of normalized)
-            clientTargets.set(name, remote);
-          for (const { name, replacement } of captured)
-            clientTargets.set(
-              canonicalName(name),
-              clientRemote({
-                ...replacement.client,
-                name: canonicalName(name),
-              } as SSRClientRemote),
-            );
-          targetRevision = revision;
-        }
-      },
-      onStage,
-    ).then(
+    const execute = () => {
+      // A newer notification may have arrived while the triggering SSR streamed.
+      // Never apply this older release after the newer one.
+      if (revision < (updates.get(application)?.revision ?? revision))
+        return Promise.reject(new Error('Stale SSR update revision'));
+      state.phase = 'pending';
+      onStage('queue');
+      return performUpdate(
+        application,
+        captured,
+        () => {
+          state.mutationStarted = true;
+          if (options.hydration) {
+            const normalized = canonicalClientTargets();
+            clientTargets.clear();
+            for (const [name, remote] of normalized)
+              clientTargets.set(name, remote);
+            for (const { name, replacement } of captured)
+              clientTargets.set(
+                canonicalName(name),
+                clientRemote({
+                  ...replacement.client,
+                  name: canonicalName(name),
+                } as SSRClientRemote),
+              );
+            targetRevision = revision;
+          }
+        },
+        onStage,
+      );
+    };
+    let operation: Promise<Awaited<ReturnType<typeof performUpdate>>>;
+    let submissionError: unknown;
+    try {
+      operation = input?.defer
+        ? application.defer!(execute).completed
+        : execute();
+    } catch (error) {
+      submissionError = error;
+      // Capacity rejection is not acceptance: keep an earlier accepted release
+      // eligible to run, and allow this revision to be submitted again later.
+      if (input?.defer && updates.get(application) === state) {
+        if (previous) updates.set(application, previous);
+        else updates.delete(application);
+      }
+      operation = Promise.reject(error);
+    }
+    state.promise = operation.then(
       (result) => {
         onStage('applied');
         state.timingsMs.total = performance.now() - started;
@@ -531,10 +624,61 @@ export function createSSRUpdateAdapter(options: {
         throw failure;
       },
     );
+    if (input?.defer) {
+      // The caller owns a receipt, not a completion promise. Failure is exposed by
+      // status(); handle the rejection here so a failed background update is safe.
+      void state.promise.catch(() => {});
+      if (submissionError) return Promise.reject(submissionError);
+      return Promise.resolve(receipt(state));
+    }
     return state.promise;
+  }
+  function updateRemotes(
+    application: Application,
+    remotes: SSRRemoteReplacement[],
+    input: SSRUpdateOptions & { defer: 'after-response' },
+  ): Promise<SSRUpdateReceipt>;
+  function updateRemotes(
+    application: Application,
+    remotes: SSRRemoteReplacement[],
+    input?: SSRUpdateOptions & { defer?: undefined },
+  ): Promise<Result>;
+  function updateRemotes(
+    application: Application,
+    remotes: SSRRemoteReplacement[],
+    input?: SSRUpdateOptions,
+  ): Promise<Result | SSRUpdateReceipt>;
+  function updateRemotes(
+    application: Application,
+    remotes: SSRRemoteReplacement[],
+    input?: SSRUpdateOptions,
+  ) {
+    return submit(
+      application,
+      remotes.map(({ name, ...replacement }) => ({ name, replacement })),
+      input,
+    );
   }
   return {
     plan,
+    /** Compare an application-wide release revision; never fetch or mutate caches. */
+    shouldUpdateRemotes(
+      application: Application,
+      remotes: SSRRemoteReplacement[],
+      input: { revision: number },
+    ): boolean {
+      const { fingerprint } = capture(
+        remotes.map(({ name, ...replacement }) => ({ name, replacement })),
+        input.revision,
+      );
+      const previous = updates.get(application);
+      if (!previous || input.revision > previous.revision) return true;
+      if (input.revision < previous.revision) return false;
+      if (fingerprint !== previous.fingerprint)
+        throw new Error('SSR revision already has a different replacement');
+      return previous.phase !== 'applied';
+    },
+    updateRemotes,
     /** Run in Modern's unpublished resource validation hook, before publication. */
     prepareResources(resources: { templates: Record<string, string> }) {
       handoffs.delete(options.name);
@@ -581,18 +725,6 @@ export function createSSRUpdateAdapter(options: {
       input?: { revision: number },
     ): Promise<Result> {
       return submit(application, [{ name, replacement }], input);
-    },
-    /** One Modern publication for a batch; unknown names are registered. */
-    updateRemotes(
-      application: Application,
-      remotes: Array<Replacement & { name: string }>,
-      input?: { revision: number },
-    ) {
-      return submit(
-        application,
-        remotes.map(({ name, ...replacement }) => ({ name, replacement })),
-        input,
-      );
     },
     async reload(entry: string) {
       const record = registry()?.get(JSON.stringify([options.name, entry]));

@@ -104,7 +104,7 @@ updates through this adapter. Source scanning is an additional conservative chec
 not the sole proof. Do not independently mutate the same instance from another
 control plane.
 
-After mutation/publication failure, affected scopes return 503. Explicit retry
+After mutation/publication failure, affected SSR scopes stay closed. The default request policy returns 503; an explicit CSR policy may serve the last published public HTML shell. Explicit retry
 expands to whole-application rebuilding, including when removal succeeded but
 registration failed. `updateRemotes` also registers unknown names; a runtime-only
 remote uses whole-application rebuilding.
@@ -115,6 +115,92 @@ This owner does not restart deployment workers, undo arbitrary globals/listeners
 or discover unregistered background promises. Work that outlives rendering must
 be explicitly tracked. CommonJS application roots are supported; native ESM roots
 and RSC are outside this implementation.
+
+### Request policy and notifications detected during SSR
+
+Configure a server-owned function in `ssrApplication.requestPolicy` (or choose the
+fixed value `wait`, `csr`, or `reject`). Import the function from a server file; it
+must not live in the retiring SSR bundle. It runs synchronously before SSR
+admission, only for affected requests during updates and terminal wait conditions.
+
+```ts
+// host/server/request-policy.ts
+export default function requestPolicy({ request, update }) {
+  const url = new URL(request.url);
+  // Public HTML shells only; loaders/actions still need the server application.
+  if (request.method === 'GET' && url.pathname === '/public-weather' && !url.searchParams.has('__loader')) return 'csr';
+  return update.reason === 'updating' ? 'wait' : 'reject';
+}
+```
+
+`update` contains `phase`, `generation`, `affectedEntries` (undefined means the
+whole application), `activeRequests`, `pendingRequests`, `waitedMs` and `reason`.
+Reasons are `updating`, `timeout`, `queue-full`, or `unavailable`. `wait` at a
+terminal reason returns 503. Policy errors and unsupported async results also
+return 503. Queued requests resume in arrival order, with at most
+`maxResumeConcurrency` complete request leases at once (default 8); this does not
+limit ordinary or unaffected traffic.
+
+CSR responds from the last successfully published template, including its public
+release mapping, without executing SSR handlers, loaders or downstream business
+middleware. Use it for public shells or enforce authorization before the admission
+gate; downstream authentication, rewrite and per-request CSP middleware do not run
+for this response. Loader/action requests cannot be converted into HTML. Pages
+requiring server loaders must wait for their data requests or use an independent
+client data path. CSR responses are `no-store`; old client assets must remain
+available at immutable URLs.
+
+A version service or deployment platform supplies an application-wide monotonic
+`revision` and complete replacement information. The adapter does not poll or
+infer changes behind the same URL. A newer revision can refresh an unchanged URL.
+
+```ts
+const release = await fetchRelease(); // Your version service; bounded timeout.
+if (
+  adapter.shouldUpdateRemotes(application, release.remotes, {
+    revision: release.revision,
+  })
+) {
+  // Outside SSR: resolves only after successful publication.
+  await adapter.updateRemotes(application, release.remotes, {
+    revision: release.revision,
+  });
+}
+```
+
+The check is read-only. Already applied/stale revisions return false; pending or
+failed revisions return true. Duplicate pending calls reuse the operation; a
+conflicting payload under one revision throws. Remote aliases, batch order and
+client metadata use the same normalization for checking and updating. Keep one
+adapter per application, and use the same authoritative revision sequence across
+all remotes in that application.
+
+When server-side business code discovers a change while rendering, submit it
+through the bound service with an explicit deferred option:
+
+```ts
+const receipt = await adapter.updateRemotes(application, release.remotes, {
+  revision: release.revision,
+  defer: 'after-response',
+});
+// receipt: { operationId, revision, phase: 'scheduled' | 'pending' | 'applied' }
+// Continue producing the current response; this receipt does not await mutation.
+```
+
+Modern waits for that response stream and its registered producer work to settle,
+then executes the submission outside the request context and enters its normal
+update queue. Other affected in-flight requests are drained before mutation.
+`adapter.status(application)` reports scheduled/pending/applied/failed state;
+`appliedRevision` advances only on successful publication. Catch submission errors
+(e.g. the deferred queue is full) and monitor background failures through status.
+`maxPendingUpdates` bounds deferred operations (default 32). Newer accepted
+notifications supersede older deferred revisions that have not started. A rejected
+submission does not supersede an earlier accepted release.
+
+The ordinary completion-waiting API still rejects inside an active SSR request,
+including duplicate notifications. Do not use timers to escape this rule: they
+inherit the request context. The `updateRemotes` bound above belongs to this Modern
+adapter, not the generic `@module-federation/enhanced/runtime` API.
 
 ### Public release mapping and hydration
 

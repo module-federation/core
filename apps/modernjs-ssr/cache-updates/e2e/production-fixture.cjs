@@ -104,11 +104,19 @@ if (!root || !installed || !assetURL)
         ? `export default () => <p>provider</p>;`
         : `import Counter from 'remote/Counter'; import {Suspense,use} from 'react'; function Held(){if(typeof document==='undefined' && globalThis.__r6Stream){globalThis.__r6Stream.started();use(globalThis.__r6Stream.promise);} return <span>stream complete</span>;} export default () => <main><h1>SSR release</h1><Counter /><Suspense fallback={<span>stream pending</span>}><Held /></Suspense></main>;`,
     );
-    if (app === 'host')
+    if (app === 'host') {
       await fs.writeFile(
         path.join(dir, 'src/routes/page.data.ts'),
         `export const loader = async ({request}) => {await globalThis.__r6Loader?.(request);return {data:'loader-ready'}}; export const action=async({request})=>{globalThis.__r6Actions=(globalThis.__r6Actions||0)+1;return {action:await request.text()}};`,
       );
+      // This route can boot from a CSR shell without a gated server loader.
+      // Keep the index route's real loader for drain/deferred-update coverage.
+      await fs.mkdir(path.join(dir, 'src/routes/client'), { recursive: true });
+      await fs.writeFile(
+        path.join(dir, 'src/routes/client/page.tsx'),
+        `import Counter from 'remote/Counter'; export default () => <main><h1>Client-ready counter</h1><Counter /></main>;`,
+      );
+    }
     if (app === 'remote')
       await fs.writeFile(
         path.join(dir, 'src/Counter.tsx'),

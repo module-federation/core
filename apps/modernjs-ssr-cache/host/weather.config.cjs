@@ -1,4 +1,5 @@
 const path = require('node:path');
+const requestPolicy = require('./server/request-policy.cjs');
 
 // Application-specific demo actions; server lifecycle belongs to the local package.
 module.exports = ({ createFederationServer }) => {
@@ -153,6 +154,9 @@ module.exports = ({ createFederationServer }) => {
   return {
     federation,
     application: {
+      requestPolicy,
+      maxResumeConcurrency: 8,
+      maxPendingUpdates: 32,
       maxPendingRequests: 16,
       requestTimeoutMs: 3000,
       drainTimeoutMs: 15000,
@@ -180,6 +184,7 @@ module.exports = ({ createFederationServer }) => {
               dynamic,
               versions,
               status: federation.status,
+              updateStatus: federation.updateStatus,
               plan: federation.plan('remote'),
               result,
               history,

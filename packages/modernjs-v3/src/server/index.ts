@@ -49,4 +49,9 @@ export default staticServePlugin;
 export { staticServePlugin };
 
 export { createSSRUpdateAdapter } from './ssrUpdate';
-export type { SSRUpdatePlan } from './ssrUpdate';
+export type {
+  SSRUpdatePlan,
+  SSRRemoteReplacement,
+  SSRUpdateOptions,
+  SSRUpdateReceipt,
+} from './ssrUpdate';

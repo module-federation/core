@@ -18,6 +18,18 @@ const { createProdServer } = packageRequire('@modern-js/prod-server');
 const { createSSRUpdateAdapter } = packageRequire(
   '@module-federation/modern-js-v3/server',
 );
+const deferred = () => {
+  let resolve;
+  const promise = new Promise((r) => (resolve = r));
+  return { promise, resolve };
+};
+const waitFor = async (predicate) => {
+  const deadline = Date.now() + 5000;
+  while (!predicate()) {
+    assert.ok(Date.now() < deadline, 'state transition timed out');
+    await new Promise((r) => setTimeout(r, 5));
+  }
+};
 (async () => {
   root = await fs.mkdtemp(
     path.join(require('node:os').tmpdir(), 'mf-production-'),
@@ -106,6 +118,15 @@ const { createSSRUpdateAdapter } = packageRequire(
   let application;
   let server;
   let failValidation = false;
+  let browserUpdate;
+  let validationBarrier;
+  const targets = (version) => [
+    {
+      name: 'remote',
+      entry: `${assetURL}/${version}/mf-manifest.json`,
+      client: { entry: `${assetURL}/${version}/mf-manifest.json` },
+    },
+  ];
   try {
     server = await createProdServer({
       pwd: path.join(root, 'host/dist'),
@@ -128,6 +149,11 @@ const { createSSRUpdateAdapter } = packageRequire(
         maxPendingRequests: 16,
         requestTimeoutMs: 500,
         drainTimeoutMs: 1000,
+        requestPolicy({ request }) {
+          return new URL(request.url).searchParams.get('updatePolicy') === 'csr'
+            ? 'csr'
+            : 'wait';
+        },
         onReady(a) {
           application = a;
         },
@@ -140,6 +166,10 @@ const { createSSRUpdateAdapter } = packageRequire(
         },
         async validate(resources) {
           if (failValidation) throw new Error('injected validation failure');
+          if (validationBarrier) {
+            validationBarrier.entered.resolve();
+            await validationBarrier.release.promise;
+          }
           adapter.prepareResources(resources);
         },
         async bypass(request) {
@@ -149,6 +179,33 @@ const { createSSRUpdateAdapter } = packageRequire(
             return new Response(application.status.phase, {
               status: application.status.phase === 'serving' ? 200 : 503,
             });
+          if (url.pathname === '/__hold-update') {
+            if (browserUpdate)
+              return new Response('An update is already held', { status: 409 });
+            validationBarrier = {
+              entered: deferred(),
+              release: deferred(),
+            };
+            browserUpdate = adapter.updateRemotes(application, targets('v1'));
+            // Observe errors even if a browser assertion aborts the experiment.
+            void browserUpdate.catch(() => {});
+            await Promise.race([
+              validationBarrier.entered.promise,
+              browserUpdate.then(() => {
+                throw new Error('Update missed its publication barrier');
+              }),
+            ]);
+            return Response.json(application.status);
+          }
+          if (url.pathname === '/__release-update') {
+            if (!browserUpdate)
+              return new Response('No held update', { status: 409 });
+            validationBarrier.release.resolve();
+            const result = await browserUpdate;
+            browserUpdate = undefined;
+            validationBarrier = undefined;
+            return Response.json(result);
+          }
           if (url.pathname === '/__update') {
             const version = url.searchParams.get('v') || 'v2';
             if (!['v1', 'v2'].includes(version))
@@ -196,21 +253,9 @@ const { createSSRUpdateAdapter } = packageRequire(
       browser: 'electron',
       headless: true,
     });
-    assert.equal(result.totalTests, 1);
-    assert.equal(result.totalPassed, 1);
+    assert.equal(result.totalTests, 3);
+    assert.equal(result.totalPassed, 3);
     assert.equal(result.totalFailed, 0);
-    const deferred = () => {
-      let resolve;
-      const promise = new Promise((r) => (resolve = r));
-      return { promise, resolve };
-    };
-    const waitFor = async (predicate) => {
-      const deadline = Date.now() + 5000;
-      while (!predicate()) {
-        assert.ok(Date.now() < deadline, 'state transition timed out');
-        await new Promise((r) => setTimeout(r, 5));
-      }
-    };
     const update = (version = 'v1') =>
       adapter.update(application, 'remote', {
         entry: `${assetURL}/${version}/mf-manifest.json`,
@@ -251,6 +296,19 @@ const { createSSRUpdateAdapter } = packageRequire(
     const streamUpdate = update();
     await waitFor(() => application.status.phase === 'draining');
     await health(503);
+    const fallback = await fetch(`${hostURL}/?updatePolicy=csr`);
+    assert.equal(fallback.status, 200);
+    assert.equal(fallback.headers.get('x-modernjs-render'), 'client');
+    const fallbackHTML = await fallback.text();
+    assert.equal(fallbackHTML.includes('id="remote-counter"'), false);
+    const fallbackRelease = JSON.parse(
+      fallbackHTML.match(/data-modern-mf-release>(.*?)<\/script>/)[1],
+    );
+    assert.ok(fallbackRelease.remotes[0].entry.includes('/v1/'));
+    assert.equal(
+      (await fetch(`${hostURL}/?updatePolicy=csr&__loader=page`)).status,
+      503,
+    );
     stream.resolve();
     delete globalThis.__r6Stream;
     while (!(await reader.read()).done) {}
@@ -313,7 +371,65 @@ const { createSSRUpdateAdapter } = packageRequire(
     assert.equal(reentry.status, 200);
     await reentry.text();
     delete globalThis.__r6Loader;
+    // A request can accept an update without waiting for its own producer lease.
+    const deferredProducer = deferred();
+    const revision = adapter.status(application).revision + 1;
+    const deferredTargets = targets('v1');
+    const generation = application.status.generation;
+    let receipt;
+    assert.equal(
+      adapter.shouldUpdateRemotes(application, deferredTargets, { revision }),
+      true,
+    );
+    globalThis.__r6Loader = async () => {
+      receipt = await adapter.updateRemotes(application, deferredTargets, {
+        revision,
+        defer: 'after-response',
+      });
+      await deferredProducer.promise;
+    };
+    const deferredAbort = new AbortController();
+    const deferredRequest = fetch(`${hostURL}/?__loader=page`, {
+      signal: deferredAbort.signal,
+    }).catch((error) => error);
+    await waitFor(() => receipt !== undefined);
+    assert.equal(receipt.phase, 'scheduled');
+    assert.equal(receipt.revision, revision);
+    assert.equal(application.status.phase, 'serving');
+    assert.equal(application.status.generation, generation);
+    assert.equal(adapter.status(application).mutationStarted, false);
+    assert.equal(
+      adapter.shouldUpdateRemotes(application, deferredTargets, { revision }),
+      true,
+    );
+    deferredAbort.abort();
+    await deferredRequest;
+    // Disconnect ends transport, while the real Modern loader remains tracked.
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(application.status.activeRequests, 1);
+    assert.equal(adapter.status(application).phase, 'scheduled');
+    assert.equal(adapter.status(application).mutationStarted, false);
+    delete globalThis.__r6Loader;
+    deferredProducer.resolve();
+    await waitFor(() => adapter.status(application).phase === 'applied');
+    assert.equal(adapter.status(application).appliedRevision, revision);
+    assert.equal(
+      adapter.shouldUpdateRemotes(application, deferredTargets, { revision }),
+      false,
+    );
+    assert.equal(
+      adapter.shouldUpdateRemotes(application, deferredTargets, {
+        revision: revision - 1,
+      }),
+      false,
+    );
+    const deferredFresh = await fetch(`${hostURL}/`);
+    assert.equal(deferredFresh.status, 200);
+    assert.match(await deferredFresh.text(), /id="remote-counter"[^>]*>v1:/);
     // A runtime-only registration has no compiler-known edge and uses full rebuild.
+    // Both aliases below use the same provider/container identity. Align their
+    // release; simultaneous versions of one container are a separate scenario.
+    await update('v2');
     const dynamic = await adapter.updateRemotes(application, [
       {
         name: 'runtime_only',
@@ -331,8 +447,8 @@ const { createSSRUpdateAdapter } = packageRequire(
       assert.equal(loaded.release, 'v2');
     };
     const dynamicData = await fetch(`${hostURL}/?__loader=page`);
-    assert.equal(dynamicData.status, 200);
-    await dynamicData.text();
+    const dynamicBody = await dynamicData.text();
+    assert.equal(dynamicData.status, 200, dynamicBody);
     delete globalThis.__r6Loader;
     // Failed publication keeps the listener alive and readiness closed until recovery.
     failValidation = true;
@@ -439,6 +555,8 @@ const { createSSRUpdateAdapter } = packageRequire(
     console.error(e);
     process.exitCode = 1;
   } finally {
+    validationBarrier?.release.resolve();
+    await browserUpdate?.catch(() => {});
     server?.closeAllConnections();
     if (server) await new Promise((r) => server.close(r));
     asset.closeAllConnections();

@@ -205,8 +205,10 @@ describe('SSR entry startup exports', () => {
       entrypoints: new Map([['tomorrow', point]]),
       hooks: {
         additionalTreeRuntimeRequirements: {
-          tap: (_name: string, callback: Function) =>
-            callback(chunk, requirements),
+          tap: (
+            _name: string,
+            callback: (chunk: object, requirements: Set<unknown>) => void,
+          ) => callback(chunk, requirements),
         },
       },
       chunkGraph: {
@@ -231,7 +233,8 @@ describe('SSR entry startup exports', () => {
       },
       hooks: {
         thisCompilation: {
-          tap: (_name: string, callback: Function) => callback(compilation),
+          tap: (_name: string, callback: (value: typeof compilation) => void) =>
+            callback(compilation),
         },
       },
     } as any);
