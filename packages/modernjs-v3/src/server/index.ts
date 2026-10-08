@@ -1,4 +1,5 @@
 import type { ServerPlugin } from '@modern-js/server-runtime';
+import helpers from '@module-federation/runtime/helpers';
 import {
   createCorsMiddleware,
   createStaticMiddleware,
@@ -7,6 +8,15 @@ import {
 const staticServePlugin = (): ServerPlugin => ({
   name: '@modern-js/module-federation/server',
   setup: (api) => {
+    // A dev rebuild clears the SSR bundles from the require cache, but their
+    // federation runtime lives on globalThis. Reset it, or the re-required
+    // bundles reuse the previous build's containers and shared singletons.
+    api.onReset(({ event }) => {
+      if (event.type === 'repack') {
+        helpers.global.resetFederationRuntime();
+      }
+    });
+
     api.onPrepare(() => {
       // In development, we don't need to serve the manifest file, bundler dev server will handle it
       if (process.env.NODE_ENV === 'development') {
