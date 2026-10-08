@@ -53,14 +53,14 @@ workspace links. The accepted combination is:
     "@modern-js/runtime": "0.0.0-canary-20260914082926",
     "@modern-js/prod-server": "0.0.0-canary-20260914082926",
     "@modern-js/server-core": "0.0.0-canary-20260914082926",
-    "@rspack/core": "npm:@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204",
+    "@rspack/core": "npm:@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "typescript": "5.9.3"
   },
   "pnpm": {
     "overrides": {
-      "@rspack/core": "npm:@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204"
+      "@rspack/core": "npm:@rspack-canary/core@2.2.3-canary-ba52386c-20260916132656"
     }
   }
 }

@@ -22,6 +22,24 @@ export type SSRUpdatePlan = {
   reasons: string[];
 };
 
+export interface SSRRemoteReplacement {
+  name: string;
+  entry: string;
+  type?: string;
+  entryGlobalName?: string;
+  client?: Omit<SSRClientRemote, 'name'>;
+}
+export interface SSRUpdateOptions {
+  revision?: number;
+  /** Submit from SSR without waiting for the response that must drain first. */
+  defer?: 'after-response';
+}
+export interface SSRUpdateReceipt {
+  operationId: string;
+  revision: number;
+  phase: 'scheduled' | 'pending' | 'applied';
+}
+
 /**
  * Opt-in contract: all request-side MF consumption uses compiled static imports,
  * entry middleware cannot consume another entry, and mutations use this owner.
@@ -35,6 +53,9 @@ export function createSSRUpdateAdapter(options: {
   hydration?: { remotes: SSRClientRemote[] };
 }) {
   options = { ...options, entries: [...options.entries] };
+  const handoffKey = Symbol.for('modern-js.mf.ssr.registrations');
+  const handoffs: Map<string, any[]> = ((globalThis as any)[handoffKey] ||=
+    new Map());
   const clientTargets = new Map(
     options.hydration?.remotes.map((value) => {
       const remote = clientRemote(value);
@@ -68,7 +89,7 @@ export function createSSRUpdateAdapter(options: {
   const canonicalName = (name: string) => {
     for (const instance of instances()) {
       const remote =
-        instance.options.remotes.find(
+        instance.options?.remotes.find(
           (item: any) => item.name === name || item.alias === name,
         ) ||
         [...(registrations.get(instance)?.values() || [])].find(
@@ -156,16 +177,13 @@ export function createSSRUpdateAdapter(options: {
       return { mode: 'application', reasons: ['unknown-runtime-owner'] };
     return { mode: 'entries', entries: [...owners].sort(), reasons: [] };
   };
-  type Replacement = {
-    entry: string;
-    type?: string;
-    entryGlobalName?: string;
-    client?: Omit<SSRClientRemote, 'name'>;
-  };
+  type Replacement = Omit<SSRRemoteReplacement, 'name'>;
   type Change = { name: string; replacement: Replacement };
   async function performUpdate(
     application: {
       readonly status?: { phase: string };
+      assertUpdateAllowed?(): void;
+      defer?<T>(operation: () => Promise<T>): { completed: Promise<T> };
       update(
         invalidate: (entries?: readonly string[]) => Promise<void>,
         scope?: () => readonly string[] | undefined,
@@ -192,8 +210,28 @@ export function createSSRUpdateAdapter(options: {
               };
             for (const state of ownedStates) state.selective = Boolean(entries);
             const hosts = instances();
-            if (!hosts.length)
-              throw new Error('Missing MF application instance');
+            if (!hosts.length) {
+              const previous = handoffs.get(options.name);
+              if (!previous) throw new Error('Missing MF application instance');
+              const targets = new Map(
+                previous.map((remote) => [remote.name, remote]),
+              );
+              for (const { name, replacement } of changes) {
+                const existing = previous.find(
+                  (remote) => remote.name === name || remote.alias === name,
+                );
+                const { client: _client, ...server } = replacement;
+                targets.set(existing?.name || name, {
+                  ...existing,
+                  ...server,
+                  name: existing?.name || name,
+                });
+              }
+              handoffs.set(options.name, [...targets.values()]);
+              onMutation();
+              onStage('rebuild');
+              return;
+            }
             const outcomes = await Promise.allSettled(
               hosts.map(async (instance) => {
                 const next = changes.map(({ name, replacement }) => {
@@ -252,7 +290,7 @@ export function createSSRUpdateAdapter(options: {
           () => {
             onStage('analyze');
             const hosts = instances();
-            if (!hosts.length)
+            if (!hosts.length && !handoffs.has(options.name))
               throw new Error('Missing MF application instance');
             recovering = application.status?.phase === 'unavailable';
             for (const instance of hosts) {
@@ -306,7 +344,27 @@ export function createSSRUpdateAdapter(options: {
           (next, state) => () => state.context.run(token, next),
           execute,
         );
-      const generation = await authorized();
+      let generation: number;
+      try {
+        generation = await authorized();
+      } catch (error) {
+        if (
+          selected.mode !== 'entries' ||
+          application.status?.phase !== 'unavailable'
+        )
+          throw error;
+        // Modern keeps a failed scope closed and widens its next update to the
+        // whole application. Retry once using the same intended remote targets.
+        onStage('fallback');
+        try {
+          generation = await authorized();
+        } catch (recoveryError) {
+          throw new AggregateError(
+            [error, recoveryError],
+            'SSR update and application recovery failed',
+          );
+        }
+      }
       return { ...selected, generation };
     } finally {
       for (const state of ownedStates)
@@ -332,27 +390,18 @@ export function createSSRUpdateAdapter(options: {
       mutationStarted: boolean;
       stage: string;
       timingsMs: Record<string, number>;
-      phase: 'pending' | 'applied' | 'failed';
+      phase: 'scheduled' | 'pending' | 'applied' | 'failed';
       appliedRevision?: number;
       promise: Promise<Result>;
       error?: unknown;
     }
   >();
   let attempt = 0;
-  function submit(
-    application: Application,
-    changes: Change[],
-    input?: { revision: number },
-  ): Promise<Result> {
-    const previous = updates.get(application);
-    const revision = input?.revision ?? (previous?.revision ?? 0) + 1;
+  function capture(changes: Change[], revision: number) {
     if (!Number.isSafeInteger(revision) || revision < 1)
-      return Promise.reject(
-        new TypeError('revision must be a positive safe integer'),
-      );
+      throw new TypeError('revision must be a positive safe integer');
     if (
       !changes.length ||
-      new Set(changes.map((item) => item.name)).size !== changes.length ||
       changes.some(
         ({ name, replacement }) =>
           typeof name !== 'string' ||
@@ -361,52 +410,113 @@ export function createSSRUpdateAdapter(options: {
           !replacement.entry,
       )
     )
-      return Promise.reject(
-        new TypeError(
-          'Unique remote names and replacement entries are required',
-        ),
+      throw new TypeError(
+        'Unique remote names and replacement entries are required',
       );
-    if (options.hydration) {
-      try {
-        for (const { name, replacement } of changes)
-          clientRemote({ ...replacement.client, name } as SSRClientRemote);
-      } catch (error) {
-        return Promise.reject(error);
-      }
-    }
-    const captured = changes.map(({ name, replacement }) => ({
-      name,
-      replacement: {
-        ...replacement,
-        ...(replacement.client ? { client: { ...replacement.client } } : {}),
-      },
+    const captured = changes
+      .map(({ name, replacement }) => {
+        const { entry, type, entryGlobalName, client } = replacement;
+        const publicTarget =
+          options.hydration || client
+            ? clientRemote({ ...client, name } as SSRClientRemote)
+            : undefined;
+        return {
+          name,
+          replacement: {
+            entry,
+            ...(type !== undefined ? { type } : {}),
+            ...(entryGlobalName !== undefined ? { entryGlobalName } : {}),
+            ...(publicTarget
+              ? {
+                  client: {
+                    entry: publicTarget.entry,
+                    ...(publicTarget.type ? { type: publicTarget.type } : {}),
+                    ...(publicTarget.entryGlobalName
+                      ? { entryGlobalName: publicTarget.entryGlobalName }
+                      : {}),
+                  },
+                }
+              : {}),
+          },
+        };
+      })
+      .sort((a, b) =>
+        canonicalName(a.name).localeCompare(canonicalName(b.name)),
+      );
+    // Bundler graph keys retain the declared alias. Canonical identity is only
+    // for revision comparison and duplicate detection, not entry-scope planning.
+    const normalized = captured.map(({ name, replacement }) => ({
+      name: canonicalName(name),
+      replacement,
     }));
-    const fingerprint = JSON.stringify(
-      captured.map(({ name, replacement }) => [
-        name,
-        Object.entries(replacement)
-          .filter(([, value]) => value !== undefined)
-          .sort(([a], [b]) => a.localeCompare(b)),
-      ]),
-    );
-    if (previous) {
-      if (revision < previous.revision)
-        return Promise.reject(new Error('Stale SSR update revision'));
-      if (revision === previous.revision) {
-        if (fingerprint !== previous.fingerprint)
-          return Promise.reject(
-            new Error('SSR revision already has a different replacement'),
-          );
-        if (previous.phase !== 'failed') return previous.promise;
+    if (new Set(normalized.map(({ name }) => name)).size !== captured.length)
+      throw new TypeError(
+        'Unique remote names and replacement entries are required',
+      );
+    return { captured, fingerprint: JSON.stringify(normalized) };
+  }
+  const receipt = (
+    state: NonNullable<ReturnType<typeof updates.get>>,
+  ): SSRUpdateReceipt => ({
+    operationId: state.operationId,
+    revision: state.revision,
+    phase: state.phase === 'failed' ? 'scheduled' : state.phase,
+  });
+  function submit(
+    application: Application,
+    changes: Change[],
+    input: SSRUpdateOptions & { defer: 'after-response' },
+  ): SSRUpdateReceipt;
+  function submit(
+    application: Application,
+    changes: Change[],
+    input?: SSRUpdateOptions & { defer?: undefined },
+  ): Promise<Result>;
+  function submit(
+    application: Application,
+    changes: Change[],
+    input?: SSRUpdateOptions,
+  ): Promise<Result> | SSRUpdateReceipt;
+  function submit(
+    application: Application,
+    changes: Change[],
+    input?: SSRUpdateOptions,
+  ): Promise<Result> | SSRUpdateReceipt {
+    const previous = updates.get(application);
+    const revision = input?.revision ?? (previous?.revision ?? 0) + 1;
+    let captured: Change[], fingerprint: string;
+    try {
+      if (!input?.defer) application.assertUpdateAllowed?.();
+      if (input?.defer && !application.defer)
+        throw new Error(
+          'Modern SSR application does not support deferred updates',
+        );
+      ({ captured, fingerprint } = capture(changes, revision));
+      if (previous) {
+        if (revision < previous.revision)
+          throw new Error('Stale SSR update revision');
+        if (revision === previous.revision) {
+          if (fingerprint !== previous.fingerprint)
+            throw new Error('SSR revision already has a different replacement');
+          if (previous.phase !== 'failed')
+            return input?.defer ? receipt(previous) : previous.promise;
+        }
       }
+    } catch (error) {
+      if (input?.defer) throw error;
+      return Promise.reject(error);
     }
     const state = {
       revision,
       fingerprint,
       operationId: `${revision}:${++attempt}`,
       mutationStarted: false,
-      phase: 'pending' as 'pending' | 'applied' | 'failed',
-      stage: 'queue',
+      phase: (input?.defer ? 'scheduled' : 'pending') as
+        | 'scheduled'
+        | 'pending'
+        | 'applied'
+        | 'failed',
+      stage: input?.defer ? 'after-response' : 'queue',
       timingsMs: {} as Record<string, number>,
       appliedRevision: previous?.appliedRevision,
       promise: undefined as unknown as Promise<Result>,
@@ -424,29 +534,55 @@ export function createSSRUpdateAdapter(options: {
       stageStarted = now;
       state.stage = stage;
     };
-    state.promise = performUpdate(
-      application,
-      captured,
-      () => {
-        state.mutationStarted = true;
-        if (options.hydration) {
-          const normalized = canonicalClientTargets();
-          clientTargets.clear();
-          for (const [name, remote] of normalized)
-            clientTargets.set(name, remote);
-          for (const { name, replacement } of captured)
-            clientTargets.set(
-              canonicalName(name),
-              clientRemote({
-                ...replacement.client,
-                name: canonicalName(name),
-              } as SSRClientRemote),
-            );
-          targetRevision = revision;
+    const execute = () => {
+      // A newer notification may have arrived while the triggering SSR streamed.
+      // Never apply this older release after the newer one.
+      if (revision < (updates.get(application)?.revision ?? revision))
+        return Promise.reject(new Error('Stale SSR update revision'));
+      state.phase = 'pending';
+      onStage('queue');
+      return performUpdate(
+        application,
+        captured,
+        () => {
+          state.mutationStarted = true;
+          if (options.hydration) {
+            const normalized = canonicalClientTargets();
+            clientTargets.clear();
+            for (const [name, remote] of normalized)
+              clientTargets.set(name, remote);
+            for (const { name, replacement } of captured)
+              clientTargets.set(
+                canonicalName(name),
+                clientRemote({
+                  ...replacement.client,
+                  name: canonicalName(name),
+                } as SSRClientRemote),
+              );
+            targetRevision = revision;
+          }
+        },
+        onStage,
+      );
+    };
+    let operation: Promise<Awaited<ReturnType<typeof performUpdate>>>;
+    try {
+      operation = input?.defer
+        ? application.defer!(execute).completed
+        : execute();
+    } catch (error) {
+      // Capacity rejection is not acceptance: keep an earlier accepted release
+      // eligible to run, and allow this revision to be submitted again later.
+      if (input?.defer) {
+        if (updates.get(application) === state) {
+          if (previous) updates.set(application, previous);
+          else updates.delete(application);
         }
-      },
-      onStage,
-    ).then(
+        throw error;
+      }
+      operation = Promise.reject(error);
+    }
+    state.promise = operation.then(
       (result) => {
         onStage('applied');
         state.timingsMs.total = performance.now() - started;
@@ -488,12 +624,68 @@ export function createSSRUpdateAdapter(options: {
         throw failure;
       },
     );
+    if (input?.defer) {
+      // The caller owns a receipt, not a completion promise. Failure is exposed by
+      // status(); handle the rejection here so a failed background update is safe.
+      void state.promise.catch(() => {});
+      return receipt(state);
+    }
     return state.promise;
+  }
+  function updateRemotes(
+    application: Application,
+    remotes: SSRRemoteReplacement[],
+    input: SSRUpdateOptions & { defer: 'after-response' },
+  ): SSRUpdateReceipt;
+  function updateRemotes(
+    application: Application,
+    remotes: SSRRemoteReplacement[],
+    input?: SSRUpdateOptions & { defer?: undefined },
+  ): Promise<Result>;
+  function updateRemotes(
+    application: Application,
+    remotes: SSRRemoteReplacement[],
+    input?: SSRUpdateOptions,
+  ): Promise<Result> | SSRUpdateReceipt;
+  function updateRemotes(
+    application: Application,
+    remotes: SSRRemoteReplacement[],
+    input?: SSRUpdateOptions,
+  ): Promise<Result> | SSRUpdateReceipt {
+    try {
+      return submit(
+        application,
+        remotes.map(({ name, ...replacement }) => ({ name, replacement })),
+        input,
+      );
+    } catch (error) {
+      if (input?.defer) throw error;
+      return Promise.reject(error);
+    }
   }
   return {
     plan,
+    /** Compare an application-wide release revision; never fetch or mutate caches. */
+    shouldUpdateRemotes(
+      application: Application,
+      remotes: SSRRemoteReplacement[],
+      input: { revision: number },
+    ): boolean {
+      const { fingerprint } = capture(
+        remotes.map(({ name, ...replacement }) => ({ name, replacement })),
+        input.revision,
+      );
+      const previous = updates.get(application);
+      if (!previous || input.revision > previous.revision) return true;
+      if (input.revision < previous.revision) return false;
+      if (fingerprint !== previous.fingerprint)
+        throw new Error('SSR revision already has a different replacement');
+      return previous.phase !== 'applied';
+    },
+    updateRemotes,
     /** Run in Modern's unpublished resource validation hook, before publication. */
     prepareResources(resources: { templates: Record<string, string> }) {
+      handoffs.delete(options.name);
       if (!options.hydration) return;
       const script = releaseScript(options.name, targetRevision, [
         ...canonicalClientTargets().values(),
@@ -538,18 +730,6 @@ export function createSSRUpdateAdapter(options: {
     ): Promise<Result> {
       return submit(application, [{ name, replacement }], input);
     },
-    /** One Modern publication for a batch; unknown names are registered. */
-    updateRemotes(
-      application: Application,
-      remotes: Array<Replacement & { name: string }>,
-      input?: { revision: number },
-    ) {
-      return submit(
-        application,
-        remotes.map(({ name, ...replacement }) => ({ name, replacement })),
-        input,
-      );
-    },
     async reload(entry: string) {
       const record = registry()?.get(JSON.stringify([options.name, entry]));
       if (!record || record.reasons.length || record.rootIds.length !== 1)
@@ -558,7 +738,10 @@ export function createSSRUpdateAdapter(options: {
       // unrelated modules and shared singleton closures.
       return await record.load();
     },
-    dispose(entries?: readonly string[]) {
+    async dispose(
+      entries?: readonly string[],
+      { preserveRemotes = true } = {},
+    ) {
       // Partial updates reuse runtimes. Full rebuilds release their registrations.
       if (entries) return;
       const owned = records();
@@ -568,6 +751,97 @@ export function createSSRUpdateAdapter(options: {
           Symbol.for('module-federation.clear-cache.adapters')
         ]?.bindings || [])
           runtimes.add(runtime);
+      const hosts = instances();
+      // Carry only declarative registrations across generations, never factories
+      // or plugins from the old application bundle.
+      if (!preserveRemotes) handoffs.delete(options.name);
+      if (preserveRemotes && hosts.length)
+        handoffs.set(
+          options.name,
+          hosts[0].options.remotes.map((remote: any) => ({ ...remote })),
+        );
+      const providers = new Set<any>(
+        hosts.flatMap((host) => [...(host.retainedProviders || [])]),
+      );
+      const globalInstances: any[] =
+        (globalThis as any).__FEDERATION__?.__INSTANCES__ || [];
+      for (const host of hosts)
+        for (const module of host.moduleCache?.values() || []) {
+          const info = module.remoteInfo;
+          for (const candidate of globalInstances)
+            if (
+              [info.providerName, info.name, info.entryGlobalName].includes(
+                candidate.name,
+              )
+            )
+              providers.add(candidate);
+        }
+      const names = new Set(
+        [...hosts, ...providers].map((instance) => instance.name),
+      );
+      // Full application rebuilds retire all consumers together. Release their
+      // shared usage before any provider decides whether its runtime must survive.
+      // Include registrations already removed from the instance registry by update.
+      const retiringNames = new Set([
+        ...names,
+        ...hosts.flatMap((host) =>
+          (host.options.remotes || []).map((remote: any) => remote.name),
+        ),
+      ]);
+      const sharedScopes = (globalThis as any).__FEDERATION__?.__SHARE__ || {};
+      for (const scopes of Object.values(sharedScopes) as any[])
+        for (const packages of Object.values(scopes) as any[])
+          for (const versions of Object.values(packages) as any[])
+            for (const shared of Object.values(versions) as any[])
+              shared.useIn = (shared.useIn || []).filter(
+                (name: string) => !retiringNames.has(name),
+              );
+      for (const provider of providers) {
+        const scopes = (globalThis as any).__FEDERATION__?.__SHARE__ || {};
+        const externallyUsed = Object.values(scopes).some((scope: any) =>
+          Object.values(scope).some((packages: any) =>
+            Object.values(packages).some((versions: any) =>
+              Object.values(versions).some(
+                (shared: any) =>
+                  shared.from === provider.name &&
+                  shared.useIn?.some((name: string) => !names.has(name)),
+              ),
+            ),
+          ),
+        );
+        const externallyLoaded = globalInstances.some(
+          (other) =>
+            !names.has(other.name) &&
+            !other.disposed &&
+            [...(other.moduleCache?.values() || [])].some((module: any) =>
+              [
+                module.remoteInfo.providerName,
+                module.remoteInfo.name,
+                module.remoteInfo.entryGlobalName,
+              ].includes(provider.name),
+            ),
+        );
+        if (externallyUsed || externallyLoaded) providers.delete(provider);
+      }
+      for (const host of [...hosts, ...providers]) {
+        const state = host[Symbol.for('modern-js.mf.ssr.consumption')];
+        if (state)
+          state.disposingNames = new Set(
+            [...hosts, ...providers].map((instance) => instance.name),
+          );
+      }
+      // Close the entire owned generation before releasing shared ownership.
+      const disposed = await Promise.allSettled(
+        [...new Set([...hosts, ...providers])].map((host) => host.destroy()),
+      );
+      const failures = disposed.filter(
+        (result) => result.status === 'rejected',
+      );
+      if (failures.length)
+        throw new AggregateError(
+          failures.map((result) => result.reason),
+          'SSR instance disposal failed',
+        );
       for (const runtime of runtimes) runtime.federation?.disposeClearCache?.();
       for (const [key, record] of registry() || [])
         if (owned.includes(record)) registry()!.delete(key);

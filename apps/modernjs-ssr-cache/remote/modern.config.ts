@@ -20,10 +20,7 @@ export default defineConfig({
           'react-dom': { singleton: true },
         },
         filename: 'remoteEntry.js',
-        exposes: {
-          './Counter': './src/Counter.tsx',
-          './Palette': './src/Palette.tsx',
-        },
+        exposes: { './Weather': './src/Weather.tsx' },
       },
     }),
   ],

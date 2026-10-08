@@ -6,12 +6,19 @@ export default defineConfig({
   output: { disableTsChecker: true },
   source: {
     disableDefaultEntries: true,
-    entries: { index: 'src/routes', b: 'src/b' },
+    entries: {
+      tomorrow: 'src/tomorrow',
+      'day-after': 'src/day-after',
+      memo: 'src/memo',
+    },
   },
   // Shared server chunks cannot initialize these MPA entries in the current preview.
   tools: {
     rspack(config, { isServer }) {
       if (isServer) config.optimization.splitChunks = false;
+      config.resolve.alias['@weather/dynamic'] = require.resolve(
+        isServer ? './src/dynamic.server.tsx' : './src/dynamic.client.tsx',
+      );
     },
   },
   plugins: [

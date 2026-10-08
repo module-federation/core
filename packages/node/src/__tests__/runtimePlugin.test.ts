@@ -904,6 +904,18 @@ describe('runtimePlugin', () => {
 
   // Original tests
   describe('Plugin structure', () => {
+    it('installs a fresh bundle handler even when instance hooks are deduplicated', () => {
+      const nativeHandler = jest.fn();
+      (global as any).__webpack_require__.f = { readFileVm: nativeHandler };
+      const reused = runtimePlugin();
+      expect(reused.name).toBe('node-federation-plugin');
+      expect((global as any).__webpack_require__.f.readFileVm).not.toBe(
+        nativeHandler,
+      );
+      expect(typeof (global as any).__webpack_require__.f.readFileVm).toBe(
+        'function',
+      );
+    });
     it('should return a plugin with the correct name', () => {
       expect(plugin.name).toBe('node-federation-plugin');
     });

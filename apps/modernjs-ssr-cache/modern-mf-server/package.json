@@ -1,0 +1,16 @@
+{
+  "name": "@demo/modern-mf-server",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.cjs",
+  "exports": {
+    ".": "./index.cjs",
+    "./serve": "./serve.cjs"
+  },
+  "dependencies": {
+    "@module-federation/modern-js-v3": "workspace:*"
+  },
+  "scripts": {
+    "test": "node --test index.test.cjs"
+  }
+}
