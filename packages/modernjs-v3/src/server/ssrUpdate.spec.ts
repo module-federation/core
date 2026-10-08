@@ -505,19 +505,27 @@ describe('release checks and response-deferred notifications', () => {
       f.adapter.shouldUpdateRemotes(f.application, remotes, { revision: 2 }),
     ).toBe(true);
     expect(f.adapter.status(f.application)).toBeUndefined();
-    const accepted = await f.adapter.updateRemotes(f.application, remotes, {
+    let microtaskRan = false;
+    queueMicrotask(() => {
+      microtaskRan = true;
+    });
+    const accepted = f.adapter.updateRemotes(f.application, remotes, {
       revision: 2,
       defer: 'after-response',
     });
     expect(accepted).toMatchObject({ phase: 'scheduled', revision: 2 });
     expect(accepted).not.toHaveProperty('completed');
+    expect(accepted).not.toHaveProperty('then');
+    expect(microtaskRan).toBe(false);
+    expect(f.instance.options.remotes[0].entry).toBe('v1');
     remotes[0].entry = 'mutated-by-caller';
-    const duplicate = await f.adapter.updateRemotes(
+    const duplicate = f.adapter.updateRemotes(
       f.application,
       [{ name: 'remote', entry: 'v2' }],
       { revision: 2, defer: 'after-response' },
     );
     expect(duplicate).toEqual(accepted);
+    expect(duplicate).not.toHaveProperty('then');
     expect(
       f.adapter.shouldUpdateRemotes(
         f.application,
@@ -575,11 +583,10 @@ describe('release checks and response-deferred notifications', () => {
   it('reports background failures and permits retry without claiming the revision was applied', async () => {
     const f = deferredFixture();
     f.fail();
-    await f.adapter.updateRemotes(
-      f.application,
-      [{ name: 'remote', entry: 'v2' }],
-      { revision: 2, defer: 'after-response' },
-    );
+    f.adapter.updateRemotes(f.application, [{ name: 'remote', entry: 'v2' }], {
+      revision: 2,
+      defer: 'after-response',
+    });
     f.finish();
     await expect(
       f.adapter.updateRemotes(
@@ -603,16 +610,14 @@ describe('release checks and response-deferred notifications', () => {
 
   it('does not replay an older deferred release after a newer notification', async () => {
     const f = deferredFixture();
-    await f.adapter.updateRemotes(
-      f.application,
-      [{ name: 'remote', entry: 'v2' }],
-      { revision: 2, defer: 'after-response' },
-    );
-    await f.adapter.updateRemotes(
-      f.application,
-      [{ name: 'remote', entry: 'v3' }],
-      { revision: 3, defer: 'after-response' },
-    );
+    f.adapter.updateRemotes(f.application, [{ name: 'remote', entry: 'v2' }], {
+      revision: 2,
+      defer: 'after-response',
+    });
+    f.adapter.updateRemotes(f.application, [{ name: 'remote', entry: 'v3' }], {
+      revision: 3,
+      defer: 'after-response',
+    });
     f.finish();
     await f.adapter.updateRemotes(
       f.application,
@@ -720,18 +725,18 @@ describe('release checks and response-deferred notifications', () => {
         throw new Error('SSR deferred update queue is full');
       return defer(operation);
     };
-    const accepted = await f.adapter.updateRemotes(
+    const accepted = f.adapter.updateRemotes(
       f.application,
       [{ name: 'remote', entry: 'v2' }],
       { revision: 2, defer: 'after-response' },
     );
-    await expect(
+    expect(() =>
       f.adapter.updateRemotes(
         f.application,
         [{ name: 'remote', entry: 'v3' }],
         { revision: 3, defer: 'after-response' },
       ),
-    ).rejects.toThrow('queue is full');
+    ).toThrow('queue is full');
     expect(f.adapter.status(f.application)).toMatchObject({
       revision: 2,
       operationId: accepted.operationId,
@@ -754,18 +759,85 @@ describe('release checks and response-deferred notifications', () => {
     ).toBe(true);
   });
 
-  it('rejects unsupported deferred integration without starting a mutation', async () => {
+  it('throws for unsupported deferred integration without starting a mutation', () => {
     const { adapter } = fixture();
     let calls = 0;
     const application = { update: async () => ++calls };
-    await expect(
+    expect(() =>
       adapter.updateRemotes(application, [{ name: 'remote', entry: 'v2' }], {
         revision: 2,
         defer: 'after-response',
       }),
-    ).rejects.toThrow('does not support deferred');
+    ).toThrow('does not support deferred');
     expect(calls).toBe(0);
     expect(adapter.status(application)).toBeUndefined();
+  });
+
+  it('throws deferred validation errors synchronously while ordinary updates reject asynchronously', async () => {
+    const f = deferredFixture();
+    f.finish();
+    const remotes = [{ name: 'remote', entry: '' }];
+    expect(() =>
+      f.adapter.updateRemotes(f.application, remotes, {
+        revision: 2,
+        defer: 'after-response',
+      }),
+    ).toThrow('replacement entries');
+    expect(() =>
+      f.adapter.updateRemotes(
+        f.application,
+        [{ name: 'remote', entry: 'v2' }],
+        {
+          revision: 0,
+          defer: 'after-response',
+        },
+      ),
+    ).toThrow('positive safe integer');
+    const ordinary = f.adapter.updateRemotes(f.application, remotes, {
+      revision: 2,
+    });
+    expect(ordinary).toBeInstanceOf(Promise);
+    await expect(ordinary).rejects.toThrow('replacement entries');
+    expect(f.adapter.status(f.application)).toBeUndefined();
+    expect(f.publications()).toBe(0);
+    expect(f.instance.options.remotes[0].entry).toBe('v1');
+  });
+
+  it('throws deferred revision conflicts synchronously without replacing an accepted receipt', async () => {
+    const f = deferredFixture();
+    const accepted = f.adapter.updateRemotes(
+      f.application,
+      [{ name: 'remote', entry: 'v2' }],
+      { revision: 2, defer: 'after-response' },
+    );
+    expect(() =>
+      f.adapter.updateRemotes(
+        f.application,
+        [{ name: 'remote', entry: 'conflict' }],
+        { revision: 2, defer: 'after-response' },
+      ),
+    ).toThrow('different replacement');
+    expect(() =>
+      f.adapter.updateRemotes(
+        f.application,
+        [{ name: 'remote', entry: 'v1' }],
+        { revision: 1, defer: 'after-response' },
+      ),
+    ).toThrow('Stale');
+    expect(f.adapter.status(f.application)).toMatchObject({
+      revision: 2,
+      phase: 'scheduled',
+      operationId: accepted.operationId,
+    });
+    expect(f.publications()).toBe(0);
+    f.finish();
+    await f.adapter.updateRemotes(
+      f.application,
+      [{ name: 'remote', entry: 'v2' }],
+      { revision: 2 },
+    );
+    expect(f.publications()).toBe(1);
+    expect(f.instance.options.remotes[0].entry).toBe('v2');
   });
 });
 

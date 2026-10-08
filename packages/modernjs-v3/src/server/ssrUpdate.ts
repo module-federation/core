@@ -466,7 +466,7 @@ export function createSSRUpdateAdapter(options: {
     application: Application,
     changes: Change[],
     input: SSRUpdateOptions & { defer: 'after-response' },
-  ): Promise<SSRUpdateReceipt>;
+  ): SSRUpdateReceipt;
   function submit(
     application: Application,
     changes: Change[],
@@ -476,12 +476,12 @@ export function createSSRUpdateAdapter(options: {
     application: Application,
     changes: Change[],
     input?: SSRUpdateOptions,
-  ): Promise<Result | SSRUpdateReceipt>;
+  ): Promise<Result> | SSRUpdateReceipt;
   function submit(
     application: Application,
     changes: Change[],
     input?: SSRUpdateOptions,
-  ): Promise<Result | SSRUpdateReceipt> {
+  ): Promise<Result> | SSRUpdateReceipt {
     const previous = updates.get(application);
     const revision = input?.revision ?? (previous?.revision ?? 0) + 1;
     let captured: Change[], fingerprint: string;
@@ -499,12 +499,11 @@ export function createSSRUpdateAdapter(options: {
           if (fingerprint !== previous.fingerprint)
             throw new Error('SSR revision already has a different replacement');
           if (previous.phase !== 'failed')
-            return input?.defer
-              ? Promise.resolve(receipt(previous))
-              : previous.promise;
+            return input?.defer ? receipt(previous) : previous.promise;
         }
       }
     } catch (error) {
+      if (input?.defer) throw error;
       return Promise.reject(error);
     }
     const state = {
@@ -567,18 +566,19 @@ export function createSSRUpdateAdapter(options: {
       );
     };
     let operation: Promise<Awaited<ReturnType<typeof performUpdate>>>;
-    let submissionError: unknown;
     try {
       operation = input?.defer
         ? application.defer!(execute).completed
         : execute();
     } catch (error) {
-      submissionError = error;
       // Capacity rejection is not acceptance: keep an earlier accepted release
       // eligible to run, and allow this revision to be submitted again later.
-      if (input?.defer && updates.get(application) === state) {
-        if (previous) updates.set(application, previous);
-        else updates.delete(application);
+      if (input?.defer) {
+        if (updates.get(application) === state) {
+          if (previous) updates.set(application, previous);
+          else updates.delete(application);
+        }
+        throw error;
       }
       operation = Promise.reject(error);
     }
@@ -628,8 +628,7 @@ export function createSSRUpdateAdapter(options: {
       // The caller owns a receipt, not a completion promise. Failure is exposed by
       // status(); handle the rejection here so a failed background update is safe.
       void state.promise.catch(() => {});
-      if (submissionError) return Promise.reject(submissionError);
-      return Promise.resolve(receipt(state));
+      return receipt(state);
     }
     return state.promise;
   }
@@ -637,7 +636,7 @@ export function createSSRUpdateAdapter(options: {
     application: Application,
     remotes: SSRRemoteReplacement[],
     input: SSRUpdateOptions & { defer: 'after-response' },
-  ): Promise<SSRUpdateReceipt>;
+  ): SSRUpdateReceipt;
   function updateRemotes(
     application: Application,
     remotes: SSRRemoteReplacement[],
@@ -647,17 +646,22 @@ export function createSSRUpdateAdapter(options: {
     application: Application,
     remotes: SSRRemoteReplacement[],
     input?: SSRUpdateOptions,
-  ): Promise<Result | SSRUpdateReceipt>;
+  ): Promise<Result> | SSRUpdateReceipt;
   function updateRemotes(
     application: Application,
     remotes: SSRRemoteReplacement[],
     input?: SSRUpdateOptions,
-  ) {
-    return submit(
-      application,
-      remotes.map(({ name, ...replacement }) => ({ name, replacement })),
-      input,
-    );
+  ): Promise<Result> | SSRUpdateReceipt {
+    try {
+      return submit(
+        application,
+        remotes.map(({ name, ...replacement }) => ({ name, replacement })),
+        input,
+      );
+    } catch (error) {
+      if (input?.defer) throw error;
+      return Promise.reject(error);
+    }
   }
   return {
     plan,

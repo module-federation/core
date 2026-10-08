@@ -179,25 +179,32 @@ When server-side business code discovers a change while rendering, submit it
 through the bound service with an explicit deferred option:
 
 ```ts
-const receipt = await adapter.updateRemotes(application, release.remotes, {
+const receipt = adapter.updateRemotes(application, release.remotes, {
   revision: release.revision,
   defer: 'after-response',
 });
 // receipt: { operationId, revision, phase: 'scheduled' | 'pending' | 'applied' }
-// Continue producing the current response; this receipt does not await mutation.
+// Returned synchronously; continue producing the current response.
 ```
+
+The deferred overload returns `SSRUpdateReceipt` synchronously, not a Promise.
+Submission errors, such as invalid input or a full deferred queue, throw
+synchronously and can be caught around this call. Receiving a receipt does not
+mean the release has been published.
 
 Modern waits for that response stream and its registered producer work to settle,
 then executes the submission outside the request context and enters its normal
 update queue. Other affected in-flight requests are drained before mutation.
 `adapter.status(application)` reports scheduled/pending/applied/failed state;
-`appliedRevision` advances only on successful publication. Catch submission errors
-(e.g. the deferred queue is full) and monitor background failures through status.
+`appliedRevision` advances only on successful publication. Accepted operations
+that later fail record their errors in this status; they do not throw back into
+the completed render.
 `maxPendingUpdates` bounds deferred operations (default 32). Newer accepted
 notifications supersede older deferred revisions that have not started. A rejected
 submission does not supersede an earlier accepted release.
 
-The ordinary completion-waiting API still rejects inside an active SSR request,
+The ordinary overload still returns a Promise that resolves after publication,
+and rejects inside an active SSR request,
 including duplicate notifications. Do not use timers to escape this rule: they
 inherit the request context. The `updateRemotes` bound above belongs to this Modern
 adapter, not the generic `@module-federation/enhanced/runtime` API.

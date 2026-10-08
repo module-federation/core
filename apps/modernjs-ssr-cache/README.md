@@ -58,14 +58,16 @@ CSR 直接使用上次发布成功的模板和公开 remote 信息，不执行�
 
 ```js
 // 这里是服务端执行的业务代码，通过已绑定当前 application 的服务函数调用。
-const receipt = await federation.updateRemotes(release.remotes, {
+const receipt = federation.updateRemotes(release.remotes, {
   revision: release.revision,
   defer: 'after-response',
 });
 ```
 
-这只等待受理，当前响应继续使用旧版本；响应流和注册的异步任务结束后才进入更新队列。
-通过 `federation.updateStatus` 查看 applied/failed，不能把 receipt 当成更新成功。
+该调用同步返回 `SSRUpdateReceipt`，无需 await；参数错误、队列已满等受理失败会同步抛错。
+当前响应继续使用旧版本；响应流和注册的异步任务结束后才进入更新队列。
+受理后的执行失败记录在 `federation.updateStatus` 中，通过该状态查看 applied/failed，
+不能把 receipt 当成更新成功。普通调用仍返回表示实际更新完成的 Promise。
 普通 `updateRemotes` 仍拒绝在 SSR 内等待自己更新。上述能力是本轮适配器与 Modern 改动；
 正式 `@modern-js/runtime/mf` 出口还未发布。
 
@@ -111,23 +113,20 @@ node apps/modernjs-ssr-cache/start.cjs --memory
 
 天气与内存的操作步骤统一见[中文体验指南](./DEMO_GUIDE.zh-CN.md)，不再保留历次运行日志。GC 后 Heap 是宿主存活 JS 对象的采样，不是 Remote 文件大小；不能用单次数字判断是否泄漏，RSS 也不保证立即下降。
 
-本轮验证记录：
+本轮同步 receipt 改动后的验证（从仓库根目录执行）：
 
-| 仓库   | 命令 / 检查                                                                            | 结果                                                        |
-| ------ | -------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| MF     | `pnpm exec turbo run build --filter=@module-federation/modern-js-v3`                   | 20 个构建任务通过                                           |
-| MF     | `pnpm --filter @module-federation/modern-js-v3 build`                                  | 最后一次适配器修改后重新构建通过                            |
-| MF     | `pnpm --filter @module-federation/modern-js-v3 run test`                               | 53 个测试通过                                               |
-| MF     | `pnpm --filter @demo/modern-mf-server test`                                            | 2 个测试通过                                                |
-| Modern | `pnpm --filter @modern-js/server-core test`                                            | 63 个测试通过                                               |
-| Modern | `NODE_ENV=production node --test packages/server/core/tests/application.http.test.cjs` | 3 个测试通过                                                |
-| MF     | `pnpm --filter modernjs-ssr-cache-updates run e2e`                                     | 静态产物、生产与 playground 全部通过；两组浏览器各 3 个测试 |
-| MF     | `node apps/modernjs-ssr-cache/e2e.cjs`                                                 | 3 个真实浏览器测试通过                                      |
+| 命令 / 检查                                                           | 结果                                             |
+| --------------------------------------------------------------------- | ------------------------------------------------ |
+| `pnpm --filter @module-federation/modern-js-v3 build`                 | 构建及类型声明生成通过                           |
+| `pnpm --filter @module-federation/modern-js-v3 test`                  | 55 个测试通过                                    |
+| `pnpm --filter @module-federation/modern-js-v3 lint`                  | 通过                                             |
+| `pnpm --filter @demo/modern-mf-server test`                           | 3 个测试通过                                     |
+| `node --expose-gc apps/modernjs-ssr/cache-updates/e2e/production.cjs` | 生产回归通过，3 个真实浏览器测试及 70 轮更新通过 |
 
-浏览器 E2E 覆盖真实 SSR、水合、局部更新、连续整体重建、重置后恢复静态更新和 GC 返回值。它需要当前 MF 构建产物与 Modern patch；同一 checkout 运行 E2E 前先停止体验服务。
+生产回归覆盖同步返回的非 Promise receipt、响应与生产任务完成前不清缓存、更新期间的 CSR 页面壳、客户端交互和 loader 拒绝。70 轮更新中，第 20～70 轮 GC 后 Heap 从 30.41 到 31.34 MiB；实例与绑定数量稳定。这是本次运行证据，不是内存上限承诺。
 
-生产回归还验证了更新期间的 CSR 页面壳、客户端交互、loader 拒绝，以及断开连接后仍等待生产任务的延迟提交。70 轮更新中，第 20～70 轮 GC 后 Heap 从 30.56 到 31.31 MiB；实例与绑定数量稳定。这是本次运行证据，不是内存上限承诺。
+上一轮完整验证还通过静态产物、playground 与天气 demo E2E，以及 Modern 的 63 个单元测试、3 个真实 HTTP 测试。本轮只调整 receipt 的返回语义，没有修改上述产物或 Modern 代码，因此没有重复这些检查。浏览器 E2E 需要当前 MF 构建产物与 Modern patch；同一 checkout 运行 E2E 前先停止体验服务。
 
-另外执行并通过 `pnpm install --frozen-lockfile --ignore-scripts`、`pnpm --filter @module-federation/modern-js-v3 lint`、`pnpm exec prettier --check .`、`python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --json` 与 `git diff --check`。Changesets 仍提示 demo 锁定的预览版本不同于 workspace 版本；没有改变既有预览依赖设计。
+本轮也通过 `pnpm exec prettier --check .`、`python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --verbose` 与 `git diff --check`。Changesets 仍提示 demo 锁定的预览版本不同于 workspace 版本；没有改变既有预览依赖设计，也没有重新安装依赖。
 
-此独立 demo 没有替换旧 `e2e-modern-ssr` CI 入口。worktree 按约定直接运行上述对应 package 脚本，没有重复包含其他示例的整个 CI job、无关包测试或 Modern/Rspack 全仓构建。Modern 的完整命令与边界见其 `SSR_REQUEST_COORDINATION.md`。
+此独立 demo 没有替换旧 `e2e-modern-ssr` CI 入口。worktree 按约定直接运行对应 package 脚本，没有重复包含其他示例的整个 CI job、无关包测试或 Modern/Rspack 全仓构建。Modern 的完整命令与边界见其 `SSR_REQUEST_COORDINATION.md`。

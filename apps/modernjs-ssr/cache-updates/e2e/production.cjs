@@ -382,10 +382,12 @@ const waitFor = async (predicate) => {
       true,
     );
     globalThis.__r6Loader = async () => {
-      receipt = await adapter.updateRemotes(application, deferredTargets, {
+      receipt = adapter.updateRemotes(application, deferredTargets, {
         revision,
         defer: 'after-response',
       });
+      assert.equal(typeof receipt.then, 'undefined');
+      assert.equal(receipt.phase, 'scheduled');
       await deferredProducer.promise;
     };
     const deferredAbort = new AbortController();

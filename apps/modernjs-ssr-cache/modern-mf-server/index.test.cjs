@@ -77,3 +77,34 @@ test('reset replaces the adapter behind existing hooks and exported functions', 
     /owns hook/,
   );
 });
+
+test('bound updates preserve synchronous receipts, errors and completion promises', async () => {
+  const { createFederationServer, adapters } = fixture();
+  const integration = createFederationServer({});
+  const app = { status: { phase: 'serving' } };
+  integration.configureApplication({}).onReady(app);
+  const { updateRemotes } = integration;
+  const remotes = [{ name: 'weather', entry: '/remote-v2.js' }];
+  const options = { revision: 2, defer: 'after-response' };
+  const receipt = { operationId: '2:1', revision: 2, phase: 'scheduled' };
+  adapters[0].updateRemotes = (application, targets, input) => {
+    assert.equal(application, app);
+    assert.equal(targets, remotes);
+    assert.equal(input, options);
+    return receipt;
+  };
+  const accepted = updateRemotes(remotes, options);
+  assert.equal(accepted, receipt);
+  assert.equal(typeof accepted.then, 'undefined');
+
+  const submissionError = new Error('SSR deferred update queue is full');
+  adapters[0].updateRemotes = () => {
+    throw submissionError;
+  };
+  assert.throws(() => updateRemotes(remotes, options), submissionError);
+
+  const completion = Promise.resolve({ revision: 3 });
+  adapters[0].updateRemotes = () => completion;
+  assert.equal(updateRemotes(remotes, { revision: 3 }), completion);
+  assert.deepEqual(await completion, { revision: 3 });
+});
