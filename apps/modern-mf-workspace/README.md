@@ -4,6 +4,16 @@
 
 **这是应用目录中的原型，不是已经发布或正式内置于 Modern 的 `moduleFederation.applications` 功能。** 通用发现执行器目前位于本应用的 `src/runtime`，平台服务位于 `server`。本例只验证 CSR，不代表已完成 SSR 或内部 Goofy 接入。
 
+## 对话与页面引用
+
+首次打开工作台只显示对话。点击“打开预览”可以手动展开应用入口；Agent 打开或操作页面时会自动过渡到左右布局。收起预览保留页面状态，“新对话”则关闭页面并清空本轮上下文。
+
+在推荐页点击输入框旁的“选择内容”，悬停可高亮页面声明的元素。点击商品卡会引用商品；点击卡内按钮只会引用按钮，不执行其原操作。也可从选择栏的下拉列表按名称选择，按 Esc 取消。选区显示在输入框上方，可展开查看数据或移除；发送问题时一并传给 Agent，例如“这个价格是多少？”或“为什么推荐它？”。
+
+页面通过 `runtime.registerSelectables(context, elements)` 主动暴露 `{ id, label, kind, element, getData }`，`useSelectable` 负责组件生命周期。宿主只向模型传递显式提供的 JSON 数据及来源，不发送 DOM。当前覆盖商品卡、推荐按钮、嵌套详情与推荐理由区域；卸载、导航、快照过期会使引用失效，多实例按 mountId 隔离。
+
+Agent 可调用两个工作台 function tools：`workspace_start_element_selection` 打开选择并结束本轮等待用户；`workspace_get_selected_element` 读取当前有效引用。这两个属于宿主编排工具；页面原有业务工具仍走 WebMCP / Local registry。无可选元素时不会进入选择模式，选择本身不授权执行或修改。
+
 ## 安装和启动
 
 在仓库根目录使用 Node.js 24、pnpm 10.28.0：
@@ -128,7 +138,7 @@ const result = await applications.discoverApplications({
 
 | 命令                                                     | 结果                                                                |
 | -------------------------------------------------------- | ------------------------------------------------------------------- |
-| `pnpm --filter modern-mf-workspace test`                 | 37 / 37 个 Node 测试通过                                            |
+| `pnpm --filter modern-mf-workspace test`                 | 56 / 56 个 Node 测试通过                                            |
 | `pnpm --filter modern-mf-workspace typecheck`            | 类型检查通过                                                        |
 | `pnpm exec turbo run build --filter=modern-mf-workspace` | 21 个任务成功，包含依赖、远程应用产物及宿主构建                     |
 | `pnpm run ci:local --only=e2e-modern`                    | Modern 的 22 个、Modern v3 的 24 个测试通过                         |
@@ -143,4 +153,6 @@ const result = await applications.discoverApplications({
 
 另验证了 1 秒网络延迟下开启新对话不会回写旧消息或迟到挂载页面；390px 窄屏采用上下布局。验证后已恢复正常网络条件和初始部署配置。构建排查时也单独执行过 `pnpm exec turbo run build --filter=@module-federation/modern-js-v3 --filter=@module-federation/bridge-react --concurrency=6`、`pnpm --filter modern-mf-workspace run build:remotes` 和 `pnpm --filter modern-mf-workspace exec modern build`，均通过。
 
-尚未验证浏览器原生 WebMCP 和真实模型调用：当前验证浏览器使用 `Local registry`，且未配置模型凭据。本例是 CSR 本地原型，因此未运行 SSR 或真实 Goofy 集成检查；未运行其他无关 CI 任务。本例为私有应用，没有修改可发布包的行为，因此未添加 changeset。
+元素引用迭代另执行 `pnpm --filter modern-mf-workspace build`，并重新通过上述 test、typecheck、Prettier、diff 和 `e2e-modern` 检查（Modern CI 任务命中缓存）。新增测试覆盖选择边界、过期与卸载、最新数据读取、Agent 等待用户选择、引用传递及指定商品动作。浏览器验证了首屏全屏对话、手动/自动展开、整卡与按钮不同粒度、选择按钮不执行操作、嵌套详情引用、新对话清理，以及 390px 无横向溢出。真实 DeepSeek 对选中的第二件商品正确回答名称与价格。
+
+浏览器使用 `Local registry`，尚未验证原生 WebMCP。本例是 CSR 本地原型，因此未运行 SSR 或真实 Goofy 集成检查；未运行其他无关 CI 任务。本例为私有应用，没有修改可发布包的行为，因此未添加 changeset。

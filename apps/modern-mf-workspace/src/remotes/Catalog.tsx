@@ -83,7 +83,12 @@ function Catalog({ context, runtime }: RemotePageProps) {
           {visibleProducts.length ? (
             <div className="mf-product-grid">
               {visibleProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  context={context}
+                  runtime={runtime}
+                />
               ))}
             </div>
           ) : (

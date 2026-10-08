@@ -10,6 +10,7 @@ import {
   ResourceNotice,
   useLiveState,
   useResource,
+  useSelectable,
   useTools,
 } from './common';
 
@@ -89,6 +90,34 @@ function Details({
     },
   ]);
   const product = products.value?.find((item) => item.id === selectedId);
+  const detailRef = useSelectable<HTMLDivElement>(
+    context,
+    runtime,
+    product
+      ? {
+          id: `details:product:${product.id}`,
+          label: `${product.name} · 商品详情`,
+          kind: 'product',
+          getData: () => ({ ...product, productId: product.id }),
+        }
+      : null,
+  );
+  const reasonsRef = useSelectable<HTMLDivElement>(
+    context,
+    runtime,
+    product
+      ? {
+          id: `details:reasons:${product.id}`,
+          label: `${product.name} · 推荐理由`,
+          kind: 'section',
+          getData: () => ({
+            productId: product.id,
+            name: product.name,
+            reasons: reasons(product, effectivePreferences),
+          }),
+        }
+      : null,
+  );
   return (
     <section className="mf-page mf-detail-page" aria-label="商品推荐理由">
       <ResourceNotice
@@ -98,7 +127,7 @@ function Details({
       />
       {product ? (
         <>
-          <div className="mf-detail-hero">
+          <div ref={detailRef} className="mf-detail-hero">
             <ProductArt product={product} />
             <div className="mf-detail-intro">
               <p className="mf-eyebrow">{product.brand} · THE DETAILS</p>
@@ -115,7 +144,7 @@ function Details({
               </div>
             </div>
           </div>
-          <div className="mf-detail-reasons">
+          <div ref={reasonsRef} className="mf-detail-reasons">
             <h3 className="mf-section-title">为什么推荐给你</h3>
             {reasons(product, effectivePreferences).map((reason, index) => (
               <div className="mf-reason" key={reason.title}>

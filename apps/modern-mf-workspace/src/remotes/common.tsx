@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Json, Preferences, Product } from '../../shared/contracts';
-import type { RemoteContext, RemoteRuntime, RemoteTool } from './types';
+import type {
+  RemoteContext,
+  RemoteRuntime,
+  RemoteSelectable,
+  RemoteTool,
+} from './types';
 import './remote.css';
 
 export const money = (value: number) =>
@@ -168,6 +173,50 @@ export function useTools(
       unregister();
     };
   }, [context.mountId, context.consumerKey, context.sid, runtime]);
+}
+
+/** Pages explicitly choose both the selectable DOM boundary and its shared data. */
+export function useSelectable<T extends HTMLElement>(
+  context: RemoteContext,
+  runtime: RemoteRuntime,
+  declaration: Omit<RemoteSelectable, 'element'> | null,
+) {
+  const [element, setElement] = useState<T | null>(null);
+  const latest = useRef(declaration);
+  latest.current = declaration;
+  const ref = useCallback((node: T | null) => setElement(node), []);
+  const id = declaration?.id;
+  const label = declaration?.label;
+  const kind = declaration?.kind;
+
+  useEffect(() => {
+    if (!element || !id || !label || !kind) return;
+    return runtime.registerSelectables(context, [
+      {
+        id,
+        label,
+        kind,
+        element,
+        getData: () => {
+          if (!latest.current || latest.current.id !== id) {
+            throw new Error('此页面元素已不可用');
+          }
+          return latest.current.getData();
+        },
+      },
+    ]);
+  }, [
+    element,
+    id,
+    label,
+    kind,
+    context.mountId,
+    context.consumerKey,
+    context.sid,
+    runtime,
+  ]);
+
+  return ref;
 }
 
 export type SortOrder = 'recommended' | 'price_asc' | 'price_desc' | 'rating';
@@ -664,13 +713,48 @@ export function ProductCard({
   product,
   index,
   onOpen,
+  context,
+  runtime,
+  reason,
 }: {
   product: Product;
   index?: number;
   onOpen?: () => void;
+  context: RemoteContext;
+  runtime: RemoteRuntime;
+  reason?: string;
 }) {
+  const getProductData = (): Record<string, Json> => ({
+    ...product,
+    productId: product.id,
+    ...(reason ? { reason } : {}),
+    ...(index !== undefined ? { recommendationRank: index + 1 } : {}),
+  });
+  const cardRef = useSelectable<HTMLElement>(context, runtime, {
+    id: `product:${product.id}`,
+    label: product.name,
+    kind: 'product',
+    getData: getProductData,
+  });
+  const actionRef = useSelectable<HTMLButtonElement>(
+    context,
+    runtime,
+    onOpen
+      ? {
+          id: `action:open-details:${product.id}`,
+          label: `${product.name} · 查看推荐理由`,
+          kind: 'action',
+          getData: () => ({
+            productId: product.id,
+            action: 'open_details',
+            description: `查看 ${product.name} 的详情与推荐理由`,
+            product: getProductData(),
+          }),
+        }
+      : null,
+  );
   return (
-    <article className="mf-product-card">
+    <article ref={cardRef} className="mf-product-card">
       <div className="mf-product-image-wrap">
         <ProductArt product={product} />
         {index !== undefined && (
@@ -694,7 +778,11 @@ export function ProductCard({
         <div className="mf-product-footer">
           <strong className="mf-product-price">{money(product.price)}</strong>
           {onOpen ? (
-            <button className="mf-open-product" onClick={onOpen}>
+            <button
+              ref={actionRef}
+              className="mf-open-product"
+              onClick={onOpen}
+            >
               查看推荐理由 <span aria-hidden="true">↗</span>
             </button>
           ) : (

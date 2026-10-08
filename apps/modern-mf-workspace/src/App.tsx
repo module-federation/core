@@ -1,11 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { AgentMessage, Json } from '../shared/contracts';
 import { ApplicationsService, SnapshotExpiredError } from './runtime/discovery';
 import type { ResolvedApplication } from './runtime/discovery';
 import { ToolRegistry } from './runtime/tools';
 import { TraceLog } from './runtime/events';
 import { applicationKey, RemoteMount } from './runtime/RemoteMount';
-import { runModel, runReplay } from './runtime/agent';
+import { encodeSelectionMessage, runModel, runReplay } from './runtime/agent';
+import { ElementSelectionRegistry } from './runtime/selection';
+import type { ElementSelection } from './runtime/selection';
+import { ElementPicker } from './ElementPicker';
 import { DeployPage } from './DeployPage';
 import './style.css';
 
@@ -20,6 +23,7 @@ interface ChatItem {
   role: 'user' | 'assistant';
   content: string;
   error?: boolean;
+  selection?: ElementSelection;
 }
 interface Step {
   id: number;
@@ -51,6 +55,12 @@ function Workspace() {
   const [registry] = useState(
     () => new ToolRegistry((event, detail) => trace.add('工具', event, detail)),
   );
+  const [selection] = useState(
+    () =>
+      new ElementSelectionRegistry((event, detail) =>
+        trace.add('引用', event, detail),
+      ),
+  );
   const [expired, setExpired] = useState<SnapshotExpiredError | null>(null);
   const [service] = useState(
     () =>
@@ -59,6 +69,11 @@ function Workspace() {
         trace: (event, detail) => trace.add('发现', event, detail),
         onExpired: (error) => {
           registry.expire(error.endpoint, error.consumerKey, error.expectedSid);
+          selection.expire(
+            error.endpoint,
+            error.consumerKey,
+            error.expectedSid,
+          );
           setExpired(error);
         },
       }),
@@ -86,6 +101,23 @@ function Workspace() {
   >('trace');
   const [dual, setDual] = useState(false);
   const [chatWidth, setChatWidth] = useState(36);
+  const [preview, setPreview] = useState(false);
+  const [picking, setPicking] = useState(false);
+  const canvas = useRef<HTMLDivElement>(null);
+  const composer = useRef<HTMLTextAreaElement>(null);
+  const finishSelection = useCallback(() => {
+    setPicking(false);
+    composer.current?.focus();
+  }, []);
+  const beginSelection = () => {
+    setPreview(true);
+    setPicking(true);
+  };
+  const hidePreview = () => {
+    setPicking(false);
+    selection.clear();
+    setPreview(false);
+  };
   const [deferred, setDeferred] = useState(false);
   const currentRun = useRef<AbortController>();
   const transportReady =
@@ -94,6 +126,7 @@ function Workspace() {
   const navigationSequence = useRef(0);
   const bump = () => setRevision((value) => value + 1);
   useEffect(() => registry.subscribe(bump), [registry]);
+  useEffect(() => selection.subscribe(bump), [selection]);
   useEffect(() => trace.subscribe(bump), [trace]);
   const entries = () => {
     const root = service
@@ -133,6 +166,10 @@ function Workspace() {
     const url = new URL(path, location.origin);
     if (url.origin !== location.origin)
       throw new Error('只允许工作区内的应用路径');
+    signal?.throwIfAborted();
+    if (url.pathname !== '/') setPreview(true);
+    setPicking(false);
+    selection.clear();
     setLoading(true);
     setError('');
     try {
@@ -207,6 +244,16 @@ function Workspace() {
   }, [messages, steps]);
   const submit = async (text = input) => {
     if (!text.trim() || currentRun.current || !ready || !transportReady) return;
+    let selected: ElementSelection | null;
+    try {
+      selected = selection.readSelection();
+    } catch {
+      selection.clear();
+      setError('无法读取这个元素的信息，请重新选择后发送。');
+      return;
+    }
+    setError('');
+    setPicking(false);
     setInput('');
     setBusy(true);
     setSteps([]);
@@ -215,11 +262,19 @@ function Workspace() {
     const isCurrentRun = () => currentRun.current === controller;
     setMessages((previous) => [
       ...previous,
-      { id: Date.now(), role: 'user', content: text },
+      {
+        id: Date.now(),
+        role: 'user',
+        content: text,
+        selection: selected ?? undefined,
+      },
     ]);
     const host = {
       entries,
       registry,
+      selection,
+      beginSelection,
+      showPreview: () => setPreview(true),
       open: async (path: string, signal?: AbortSignal) => {
         await navigate(path, signal);
         const result = await service.discoverApplications({
@@ -256,7 +311,10 @@ function Workspace() {
           modelMessages.current = modelMessages.current.slice(
             turns[turns.length - 5],
           );
-        modelMessages.current.push({ role: 'user', content: text });
+        modelMessages.current.push({
+          role: 'user',
+          content: encodeSelectionMessage(text, selected),
+        });
         content = await runModel(
           host,
           modelMessages.current,
@@ -313,6 +371,7 @@ function Workspace() {
         application={app}
         path={navigation.path}
         registry={registry}
+        selection={selection}
         navigate={navigateRemote}
         extra={extra}
         trace={(event, detail) => trace.add('加载', event, detail)}
@@ -360,7 +419,7 @@ function Workspace() {
           : 'WebMCP 不可用';
   return (
     <div
-      className="workspace"
+      className={`workspace ${preview ? 'preview-open' : 'preview-closed'} ${picking ? 'is-picking' : ''}`}
       style={{ '--chat-width': `${chatWidth}%` } as React.CSSProperties}
     >
       <header className="topbar">
@@ -383,21 +442,41 @@ function Workspace() {
         <section className="chat-panel" aria-label="与 Agent 对话">
           <div className="panel-heading">
             <span>对话</span>
-            <button
-              className="icon-button"
-              title="新对话"
-              onClick={() => {
-                const run = currentRun.current;
-                currentRun.current = undefined;
-                run?.abort();
-                setBusy(false);
-                setMessages([]);
-                modelMessages.current = [];
-                setSteps([]);
-              }}
-            >
-              ＋
-            </button>
+            <div className="panel-heading-actions">
+              <button
+                className="preview-toggle"
+                onClick={() => (preview ? hidePreview() : setPreview(true))}
+                aria-expanded={preview}
+                aria-controls="application-preview"
+              >
+                <span aria-hidden="true">◫</span>{' '}
+                {preview ? '收起预览' : '打开预览'}
+              </button>
+              <button
+                className="icon-button"
+                title="新对话"
+                onClick={() => {
+                  const run = currentRun.current;
+                  currentRun.current = undefined;
+                  run?.abort();
+                  setBusy(false);
+                  setMessages([]);
+                  modelMessages.current = [];
+                  setSteps([]);
+                  selection.clear();
+                  setPicking(false);
+                  setPreview(false);
+                  setDual(false);
+                  setNavigation({ path: '/', chain: [] });
+                  setLoading(false);
+                  setError('');
+                  navigationSequence.current++;
+                  history.pushState(null, '', '/workbench');
+                }}
+              >
+                ＋
+              </button>
+            </div>
           </div>
           <div className="chat-scroll">
             {!messages.length && (
@@ -405,9 +484,9 @@ function Workspace() {
                 <Mark />
                 <h1>想看点什么？</h1>
                 <p>
-                  说出你的想法，应用会在右侧打开。
+                  从一个问题开始，让 Agent 为你打开需要的页面。
                   <br />
-                  也可以让 Agent 帮你操作页面。
+                  选中页面里的内容，还可以接着聊。
                 </p>
                 <div className="suggestions">
                   {suggestions.map((text, i) => (
@@ -439,6 +518,12 @@ function Workspace() {
                   )}
                 </div>
                 <div className="message-content">{message.content}</div>
+                {message.selection && (
+                  <details className="message-selection">
+                    <summary>⌖ {message.selection.label}</summary>
+                    <pre>{JSON.stringify(message.selection.data, null, 2)}</pre>
+                  </details>
+                )}
               </article>
             ))}
             {!!steps.length && (
@@ -467,6 +552,19 @@ function Workspace() {
             <div ref={chatBottom} />
           </div>
           <div className="composer-area">
+            {!preview && error && (
+              <div className="inline-error" role="alert">
+                {error}
+              </div>
+            )}
+            {!preview && registry.mode === 'unavailable' && (
+              <div className="inline-error">
+                页面工具暂不可用。
+                <button onClick={() => registry.useLocalFallback()}>
+                  使用本地注册表
+                </button>
+              </div>
+            )}
             <form
               className="composer"
               onSubmit={(event) => {
@@ -474,7 +572,31 @@ function Workspace() {
                 void submit();
               }}
             >
+              {selection.getSelection() && (
+                <div className="selection-attachment" role="status">
+                  <span className="selection-symbol" aria-hidden="true">
+                    ⌖
+                  </span>
+                  <details>
+                    <summary>
+                      <strong>{selection.getSelection()!.label}</strong>
+                      <span>将随下一条消息发送</span>
+                    </summary>
+                    <pre>
+                      {JSON.stringify(selection.getSelection()!.data, null, 2)}
+                    </pre>
+                  </details>
+                  <button
+                    type="button"
+                    aria-label="移除元素引用"
+                    onClick={() => selection.clear()}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
               <textarea
+                ref={composer}
                 aria-label="输入对话"
                 placeholder={
                   mode === 'replay'
@@ -495,6 +617,23 @@ function Workspace() {
                 }}
               />
               <div className="composer-toolbar">
+                <button
+                  type="button"
+                  className={`select-element-button ${picking ? 'active' : ''}`}
+                  aria-label="选择页面内容"
+                  aria-pressed={picking}
+                  title={
+                    selection.list().length
+                      ? '选择页面主动提供的元素，作为对话引用'
+                      : '打开应用后可选择页面内容'
+                  }
+                  disabled={busy || !selection.list().length}
+                  onClick={() =>
+                    picking ? finishSelection() : beginSelection()
+                  }
+                >
+                  <span aria-hidden="true">⌖</span> 选择内容
+                </button>
                 <select
                   aria-label="Agent 模式"
                   value={mode}
@@ -545,6 +684,8 @@ function Workspace() {
           aria-orientation="vertical"
           aria-valuenow={chatWidth}
           tabIndex={0}
+          aria-hidden={!preview}
+          {...(!preview ? { inert: '' } : {})}
           onPointerDown={resize}
           onKeyDown={(event) => {
             if (event.key === 'ArrowLeft')
@@ -553,7 +694,13 @@ function Workspace() {
               setChatWidth((v) => Math.min(55, v + 2));
           }}
         />
-        <section className="app-panel" aria-label="应用页面">
+        <section
+          id="application-preview"
+          className="app-panel"
+          aria-label="应用页面"
+          aria-hidden={!preview}
+          {...(!preview ? { inert: '' } : {})}
+        >
           <div className="canvas-toolbar">
             <div className="breadcrumb">
               <button
@@ -585,6 +732,13 @@ function Workspace() {
                 disabled={!ready || loading}
               >
                 ↻ 重新发现
+              </button>
+              <button
+                onClick={hidePreview}
+                aria-label="关闭预览"
+                title="关闭预览"
+              >
+                ×
               </button>
             </div>
           </div>
@@ -623,7 +777,17 @@ function Workspace() {
               </button>
             </div>
           )}
-          <div className={`canvas-content ${dual ? 'dual-view' : ''}`}>
+          {picking && (
+            <ElementPicker
+              registry={selection}
+              surface={canvas}
+              onFinish={finishSelection}
+            />
+          )}
+          <div
+            ref={canvas}
+            className={`canvas-content ${dual ? 'dual-view' : ''}`}
+          >
             {!active ? (
               <div className="canvas-home">
                 <div className="canvas-emblem">
@@ -672,6 +836,7 @@ function Workspace() {
                     application={active}
                     path={navigation.path}
                     registry={registry}
+                    selection={selection}
                     navigate={navigateRemote}
                     trace={(event, detail) => trace.add('加载', event, detail)}
                     renderNested={() => null}

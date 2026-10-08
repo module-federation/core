@@ -7,6 +7,7 @@ import type { Json, ToolDeclaration } from '../../shared/contracts';
 import type { RemoteContext, RemoteRuntime } from '../remotes/types';
 import type { ResolvedApplication } from './discovery';
 import { ToolRegistry } from './tools';
+import { ElementSelectionRegistry } from './selection';
 
 interface BridgeProvider {
   render(props: Record<string, unknown>): Promise<void>;
@@ -19,6 +20,7 @@ interface Props {
   application: ResolvedApplication;
   path: string;
   registry: ToolRegistry;
+  selection: ElementSelectionRegistry;
   navigate(path: string, signal?: AbortSignal): Promise<void>;
   renderNested(path: string, props?: Record<string, Json>): React.ReactNode;
   trace(event: string, detail?: unknown): void;
@@ -55,6 +57,9 @@ export function RemoteMount(props: Props) {
       props: { ...app.context.props, ...app.props },
     };
     setMountId(context.mountId);
+    // Set synchronously: a provider's effect can register before React commits
+    // the host's mountId state update.
+    element.setAttribute('data-selection-mount-id', context.mountId);
     const assertActive = () => {
       if (disposed) throw new Error('TOOL_INSTANCE_EXPIRED: 页面已卸载');
     };
@@ -74,6 +79,26 @@ export function RemoteMount(props: Props) {
         if (_context.mountId !== context.mountId)
           throw new Error('工具不能注册到其他挂载实例');
         const dispose = registry.register(context, definitions, declared);
+        disposers.add(dispose);
+        return () => {
+          dispose();
+          disposers.delete(dispose);
+        };
+      },
+      registerSelectables: (_context, definitions) => {
+        if (disposed) return () => {};
+        if (_context.mountId !== context.mountId)
+          throw new Error('可选择元素不能注册到其他挂载实例');
+        if (
+          definitions.some(
+            (definition) =>
+              !element.contains(definition.element) ||
+              definition.element.closest('[data-selection-mount-id]') !==
+                element,
+          )
+        )
+          throw new Error('可选择元素必须位于当前页面容器内');
+        const dispose = latest.current.selection.register(context, definitions);
         disposers.add(dispose);
         return () => {
           dispose();
@@ -177,6 +202,7 @@ export function RemoteMount(props: Props) {
       update.current = undefined;
       disposers.forEach((dispose) => dispose());
       disposers.clear();
+      element.removeAttribute('data-selection-mount-id');
       destroy();
       props.trace('mf.unmount', {
         mountId: context.mountId,

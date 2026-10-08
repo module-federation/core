@@ -22,8 +22,20 @@ export interface RemoteTool {
   ): Json | Promise<Json>;
 }
 
+export interface RemoteSelectable {
+  id: string;
+  label: string;
+  kind: 'product' | 'action' | 'section';
+  element: HTMLElement;
+  getData(): Record<string, Json>;
+}
+
 export interface RemoteRuntime {
   registerTools(context: RemoteContext, tools: RemoteTool[]): () => void;
+  registerSelectables(
+    context: RemoteContext,
+    elements: RemoteSelectable[],
+  ): () => void;
   navigate(path: string, signal?: AbortSignal): Promise<void>;
   renderNested(path: string, props?: Record<string, Json>): ReactNode;
   trace(event: string, detail?: unknown): void;

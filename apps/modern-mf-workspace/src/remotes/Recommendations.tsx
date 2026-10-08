@@ -298,6 +298,19 @@ function Recommendations({
                   key={product.id}
                   product={product}
                   index={index}
+                  context={context}
+                  runtime={runtime}
+                  reason={[
+                    preferences?.categories.includes(product.category)
+                      ? '符合你的偏好品类'
+                      : '来自当前筛选的好物',
+                    preferences && product.price <= preferences.budget
+                      ? '在你的预算之内'
+                      : '',
+                    `${product.rating.toFixed(1)} 分的使用体验`,
+                  ]
+                    .filter(Boolean)
+                    .join('；')}
                   onOpen={
                     detailsEnabled
                       ? () => navigateToProduct(product.id)
