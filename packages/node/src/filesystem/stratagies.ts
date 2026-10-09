@@ -70,9 +70,14 @@ export async function httpEvalStrategy(
   try {
     const urlDirname = url.pathname.split('/').slice(0, -1).join('/');
 
-    eval(
-      '(function(exports, require, __dirname, __filename) {' + data + '\n})',
-    )(chunk, require, urlDirname, chunkName);
+    // `new Function` instead of direct eval: eval'd functions capture this scope
+    // and keep the whole chunk source string alive with the chunk.
+    new Function('exports', 'require', '__dirname', '__filename', data)(
+      chunk,
+      require,
+      urlDirname,
+      chunkName,
+    );
     callback(null, chunk);
   } catch (e: any) {
     callback(e, null);

@@ -1,3 +1,4 @@
+import { compileRemoteCommonJsModule } from '@module-federation/sdk';
 import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
@@ -177,6 +178,43 @@ export const returnFromGlobalInstances = (
   return null;
 };
 
+export const CHUNK_WRAPPER_PARAMS = [
+  'exports',
+  'require',
+  '__dirname',
+  '__filename',
+];
+
+type ChunkFunction = (
+  exports: any,
+  require: any,
+  dirname: string,
+  filename: string,
+) => void;
+
+const getVmConstants = ():
+  | { USE_MAIN_CONTEXT_DEFAULT_LOADER?: any }
+  | undefined => {
+  try {
+    return __non_webpack_require__('vm').constants;
+  } catch {
+    return undefined;
+  }
+};
+
+// Compiles a chunk body into a callable without direct `eval` (whose functions
+// capture the enclosing scope and pin the chunk source string). The compile
+// backend and V8 compilation-cache policy live in the sdk's Node code; this
+// plugin only decides that fetched chunks are remote code that needs them.
+export const compileChunk = (source: string, filename: string): ChunkFunction =>
+  compileRemoteCommonJsModule({
+    source,
+    filename,
+    parameters: CHUNK_WRAPPER_PARAMS,
+    importModuleDynamically:
+      getVmConstants()?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+  }) as ChunkFunction;
+
 // Hoisted utility function to load chunks from filesystem
 export const loadFromFs = (
   filename: string,
@@ -184,23 +222,13 @@ export const loadFromFs = (
 ): void => {
   const fs = __non_webpack_require__('fs') as typeof import('fs');
   const path = __non_webpack_require__('path') as typeof import('path');
-  const vm = __non_webpack_require__('vm') as typeof import('vm');
 
   if (fs.existsSync(filename)) {
     fs.readFile(filename, 'utf-8', (err, content) => {
       if (err) return callback(err, null);
       const chunk = {};
       try {
-        const script = new vm.Script(
-          `(function(exports, require, __dirname, __filename) {${content}\n})`,
-          {
-            filename,
-            importModuleDynamically:
-              //@ts-ignore
-              vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
-          },
-        );
-        script.runInThisContext()(
+        compileChunk(content, filename)(
           chunk,
           __non_webpack_require__,
           path.dirname(filename),
@@ -253,7 +281,7 @@ export const fetchAndRun = (
       const resolution = (url as URL & { mfMetadata?: ChunkUrlMetadata })
         .mfMetadata;
       try {
-        eval(`(function(exports, require, __dirname, __filename) {${data}\n})`)(
+        compileChunk(data, url.href)(
           chunk,
           __non_webpack_require__,
           url.pathname.split('/').slice(0, -1).join('/'),
