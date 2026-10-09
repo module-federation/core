@@ -27,7 +27,7 @@
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.cts",
   "exports": {
     ".": {
       "import": {
@@ -35,7 +35,7 @@
         "default": "./dist/index.mjs"
       },
       "require": {
-        "types": "./dist/index.d.ts",
+        "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
     },
@@ -45,7 +45,7 @@
         "default": "./dist/browser.mjs"
       },
       "require": {
-        "types": "./dist/browser.d.ts",
+        "types": "./dist/browser.d.cts",
         "default": "./dist/browser.cjs"
       }
     },
@@ -55,7 +55,7 @@
         "default": "./dist/node.mjs"
       },
       "require": {
-        "types": "./dist/node.d.ts",
+        "types": "./dist/node.d.cts",
         "default": "./dist/node.cjs"
       }
     }
@@ -63,13 +63,13 @@
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.ts"
+        "./dist/index.d.cts"
       ],
       "browser": [
-        "./dist/browser.d.ts"
+        "./dist/browser.d.cts"
       ],
       "node": [
-        "./dist/node.d.ts"
+        "./dist/node.d.cts"
       ]
     }
   },
