@@ -169,6 +169,129 @@ describe('shared lifecycle hooks', () => {
   });
 });
 
+describe('version-first sharing with an unavailable manifest', () => {
+  beforeEach(() => {
+    resetFederationGlobalInfo();
+  });
+
+  it('uses available shares and retries the remote after its manifest recovers', async () => {
+    const unavailableManifest =
+      'http://localhost:1111/resources/snapshot/remote1/federation-manifest.json';
+    let offline = true;
+    let manifestRequests = 0;
+    const shareErrors: string[] = [];
+    const mf = new ModuleFederation({
+      name: 'manifest-fallback-host',
+      shareStrategy: 'version-first',
+      remotes: [
+        { name: '@snapshot/remote1', entry: unavailableManifest },
+        {
+          name: '@snapshot/remote2',
+          entry:
+            'http://localhost:1111/resources/snapshot/remote2/federation-manifest.json',
+        },
+      ],
+      shared: {
+        'available-share': {
+          version: '1.0.0',
+          lib: () => ({ value: 'host' }),
+        },
+      },
+      plugins: [
+        {
+          name: 'manifest-availability',
+          fetch(url) {
+            if (url === unavailableManifest) {
+              manifestRequests++;
+              if (offline) throw new Error('manifest offline');
+            }
+          },
+          errorLoadRemote(args) {
+            shareErrors.push(args.lifecycle);
+          },
+        },
+      ],
+    });
+
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const factory = await mf.loadShare<{ value: string }>('available-share');
+      expect(factory && factory()).toEqual({ value: 'host' });
+      expect(manifestRequests).toBe(attempt);
+    }
+    expect(
+      shareErrors.filter((lifecycle) => lifecycle === 'beforeLoadShare'),
+    ).toHaveLength(2);
+    expect(mf.moduleCache.has('@snapshot/remote1')).toBe(false);
+    expect(mf.moduleCache.get('@snapshot/remote2')?.inited).toBe(true);
+
+    offline = false;
+    const factory = await mf.loadShare<{ value: string }>('available-share');
+    expect(factory && factory()).toEqual({ value: 'host' });
+    expect(manifestRequests).toBe(3);
+    expect(mf.moduleCache.get('@snapshot/remote1')?.inited).toBe(true);
+  });
+
+  it('initializes a hook-provided container without caching the failed manifest', async () => {
+    const manifestUrl =
+      'http://localhost:1111/resources/snapshot/remote1/federation-manifest.json';
+    let manifestRequests = 0;
+    let fallbackInitializations = 0;
+    const mf = new ModuleFederation({
+      name: 'manifest-entry-fallback-host',
+      shareStrategy: 'version-first',
+      remotes: [{ name: '@snapshot/remote1', entry: manifestUrl }],
+      shared: {
+        'available-share': {
+          version: '1.0.0',
+          lib: () => ({ value: 'host' }),
+        },
+      },
+      plugins: [
+        {
+          name: 'manifest-entry-fallback',
+          fetch(url) {
+            if (url === manifestUrl) {
+              manifestRequests++;
+              throw new Error('manifest offline');
+            }
+          },
+          errorLoadRemote(args) {
+            if (args.lifecycle !== 'beforeLoadShare') return;
+            return {
+              get: () => () => Promise.resolve({ value: 'fallback' }),
+              init(shareScope) {
+                fallbackInitializations++;
+                shareScope['available-share']['2.0.0'] = {
+                  version: '2.0.0',
+                  get: () => () => ({ value: 'fallback' }),
+                  lib: () => ({ value: 'fallback' }),
+                  shareConfig: { requiredVersion: false },
+                  scope: ['default'],
+                  useIn: [],
+                  from: '@snapshot/remote1',
+                  deps: [],
+                  strategy: 'version-first',
+                };
+              },
+            };
+          },
+        },
+      ],
+    });
+
+    await mf.loadShare('available-share');
+    expect(fallbackInitializations).toBe(1);
+    expect(
+      mf.sharedHandler.shareScopeMap.default['available-share']['2.0.0']?.from,
+    ).toBe('@snapshot/remote1');
+    expect(mf.moduleCache.has('@snapshot/remote1')).toBe(false);
+
+    await mf.loadShare('available-share');
+    expect(manifestRequests).toBe(2);
+    expect(fallbackInitializations).toBe(2);
+  });
+});
+
 type RawSharedEvent =
   | {
       type: 'registration';
