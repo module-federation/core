@@ -14,15 +14,16 @@ const { ModuleFederationPlugin } = require(
 );
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-shared-platform-'));
 const requests = [];
+const assets = new Map();
 const server = http.createServer((req, res) => {
   requests.push(req.url);
-  const file = path.join(dir, 'dist', req.url.split('?')[0]);
-  if (!fs.existsSync(file)) {
+  const asset = assets.get(req.url.split('?')[0]);
+  if (asset === undefined) {
     res.writeHead(404);
     res.end();
     return;
   }
-  res.end(fs.readFileSync(file));
+  res.end(asset);
 });
 let compiler;
 async function main() {
@@ -109,6 +110,40 @@ async function main() {
   const files = [...stats.compilation.modules]
     .map((m) => m.resource || '')
     .filter(Boolean);
+  const outputPath = compiler.options.output.path;
+  for (const entry of fs.readdirSync(outputPath, {
+    recursive: true,
+    withFileTypes: true,
+  })) {
+    if (!entry.isFile()) continue;
+    const file = path.join(entry.parentPath, entry.name);
+    const url = '/' + path.relative(outputPath, file).split(path.sep).join('/');
+    assets.set(url, fs.readFileSync(file));
+  }
+  for (const requestPath of [
+    '/../src/node_modules/shared-lib/index.js',
+    '/%2e%2e/src/node_modules/shared-lib/index.js',
+    '/missing.js',
+    '/independent-packages/',
+  ]) {
+    const status = await new Promise((resolve, reject) => {
+      http
+        .get(
+          {
+            hostname: '127.0.0.1',
+            port: server.address().port,
+            path: requestPath,
+          },
+          (response) => {
+            response.resume();
+            response.on('end', () => resolve(response.statusCode));
+            response.on('error', reject);
+          },
+        )
+        .on('error', reject);
+    });
+    assert.equal(status, 404, requestPath);
+  }
   const result = await require(path.join(dir, 'dist/main.cjs'));
   if (publicPathControl)
     assert.equal(
