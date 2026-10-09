@@ -1,0 +1,12 @@
+dist/
+.lynx-e2e-*/
+.turbo/
+test/real-web/artifacts/
+ios/.bundle/
+ios/Pods/
+ios/OrbitControl.xcworkspace/
+ios/Resources/main.lynx.bundle
+ios/Resources/host-native/
+ios/Resources/static/
+ios/build/
+ios/vendor/bundle/

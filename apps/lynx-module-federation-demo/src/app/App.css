@@ -1,0 +1,447 @@
+:root {
+  background-color: #f4f7f8;
+}
+
+.Page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f4f7f8;
+}
+
+.TopBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+  background-color: #f4f7f8;
+}
+
+.Brand {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.BrandMark {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background-color: #17212b;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.BrandMarkText {
+  color: #60e2a4;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.BrandName {
+  color: #17212b;
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.Connection {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.ConnectionDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #30bd78;
+  margin-right: 6px;
+}
+
+.ConnectionText {
+  color: #50606d;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.Content {
+  flex: 1;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.Screen {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 24px;
+}
+
+.Hero {
+  display: flex;
+  flex-direction: column;
+  padding-top: 16px;
+  padding-bottom: 18px;
+}
+
+.HeroTitle {
+  color: #17212b;
+  font-size: 31px;
+  line-height: 36px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  margin-bottom: 8px;
+}
+
+.HeroCopy {
+  color: #64717d;
+  font-size: 13px;
+  line-height: 19px;
+  max-width: 330px;
+}
+
+.PrimaryAction {
+  height: 48px;
+  border-radius: 15px;
+  background-color: #17212b;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-bottom: 14px;
+}
+
+.PrimaryActionText {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.PrimaryActionMeta {
+  color: #8da0af;
+  font-size: 10px;
+}
+
+.PrimaryActionLoading {
+  background-color: #33404c;
+}
+
+.PrimaryActionReady {
+  background-color: #1d6144;
+}
+
+.PrimaryActionError {
+  background-color: #9d392d;
+}
+
+.LoadEvidence {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: -4px;
+  margin-bottom: 14px;
+}
+
+.LoadEvidenceText {
+  color: #788590;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.LoadEvidenceReady {
+  color: #258a5b;
+}
+
+.LoadError {
+  color: #9d392d;
+  font-size: 11px;
+  margin-bottom: 14px;
+}
+
+.SingletonProof {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  margin-bottom: 16px;
+  border: 1px solid #2e3d50;
+  border-radius: 16px;
+  background: #111b29;
+  overflow: hidden;
+}
+
+.SingletonProofCopy {
+  display: flex;
+  width: 112px;
+  padding: 14px 16px;
+  border-right: 1px solid #2e3d50;
+}
+
+.SingletonProofCopyWide {
+  flex: 1;
+  width: auto;
+  border-right: 0;
+}
+
+.SingletonProofLabel {
+  color: #7f93aa;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.SingletonProofValue {
+  margin-top: 6px;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.SingletonProofStatus {
+  margin-top: 8px;
+  color: #9fb0c2;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.SingletonProofStatusReady {
+  color: #61e5a1;
+}
+
+.HealthPanel {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 12px;
+  border-width: 1px;
+  border-color: #e5eaed;
+}
+
+.PanelHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.PanelTitle {
+  color: #17212b;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.PanelMeta {
+  color: #30a66e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.HealthGrid {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.HealthCell {
+  width: 31%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f4f7f8;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.HealthCellValue {
+  color: #17212b;
+  font-size: 16px;
+  font-weight: 750;
+  margin-bottom: 5px;
+}
+
+.HealthCellLabel {
+  color: #788590;
+  font-size: 9px;
+  line-height: 13px;
+}
+
+.SectionHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 14px;
+  margin-bottom: 10px;
+}
+
+.SectionTitle {
+  color: #17212b;
+  font-size: 19px;
+  font-weight: 750;
+}
+
+.SectionMeta {
+  color: #788590;
+  font-size: 10px;
+}
+
+.RemoteFallback {
+  min-height: 148px;
+  background-color: #e8edf1;
+  border-radius: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  margin-bottom: 12px;
+}
+
+.RemoteFallbackText {
+  color: #64717d;
+  font-size: 13px;
+  line-height: 19px;
+  text-align: center;
+}
+
+.QuickActions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.SecondaryAction {
+  width: 48%;
+  height: 44px;
+  border-radius: 14px;
+  border-width: 1px;
+  border-color: #d7dfe4;
+  background-color: #ffffff;
+  align-items: center;
+  justify-content: center;
+}
+
+.SecondaryActionText {
+  color: #33404c;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.ModuleList {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-width: 1px;
+  border-color: #e5eaed;
+}
+
+.ModuleRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 68px;
+  border-bottom-width: 1px;
+  border-bottom-color: #e8edf1;
+}
+
+.ModuleRowLast {
+  border-bottom-width: 0;
+}
+
+.ModuleCopy {
+  display: flex;
+  flex-direction: column;
+}
+
+.ModuleName {
+  color: #17212b;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.ModulePath {
+  color: #788590;
+  font-size: 10px;
+}
+
+.ModuleStatus {
+  color: #30a66e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.SettingsPanel {
+  background-color: #17212b;
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.SettingsTitle {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 750;
+  margin-bottom: 14px;
+}
+
+.SettingsLabel {
+  color: #8da0af;
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+.SettingsValue {
+  color: #f7fbff;
+  font-size: 12px;
+  line-height: 18px;
+  margin-bottom: 14px;
+}
+
+.BottomNav {
+  height: 76px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  background-color: #ffffff;
+  border-top-width: 1px;
+  border-top-color: #e0e6ea;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.NavItem {
+  width: 23%;
+  height: 54px;
+  align-items: center;
+  justify-content: center;
+}
+
+.NavIndicator {
+  width: 18px;
+  height: 4px;
+  border-radius: 2px;
+  background-color: transparent;
+  margin-bottom: 8px;
+}
+
+.NavIndicatorActive {
+  background-color: #ff6c47;
+}
+
+.NavLabel {
+  color: #8b969f;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.NavLabelActive {
+  color: #17212b;
+  font-weight: 750;
+}

@@ -1,0 +1,158 @@
+PODS:
+  - libwebp (1.5.0):
+    - libwebp/demux (= 1.5.0)
+    - libwebp/mux (= 1.5.0)
+    - libwebp/sharpyuv (= 1.5.0)
+    - libwebp/webp (= 1.5.0)
+  - libwebp/demux (1.5.0):
+    - libwebp/webp
+  - libwebp/mux (1.5.0):
+    - libwebp/demux
+  - libwebp/sharpyuv (1.5.0)
+  - libwebp/webp (1.5.0):
+    - libwebp/sharpyuv
+  - Lynx (3.9.0):
+    - Lynx/Framework (= 3.9.0)
+  - Lynx/Framework (3.9.0):
+    - Lynx/ReleaseResource
+    - LynxBase/Framework
+    - LynxServiceAPI
+    - PrimJS/napi/env
+    - PrimJS/napi/jsc
+    - PrimJS/napi/quickjs
+    - PrimJS/quickjs (= 3.8.0-alpha.6)
+  - Lynx/ReleaseResource (3.9.0)
+  - LynxBase (3.9.0):
+    - LynxBase/Framework (= 3.9.0)
+  - LynxBase/Framework (3.9.0):
+    - LynxServiceAPI/Core
+  - LynxService/Http (3.9.0):
+    - Lynx (= 3.9.0)
+    - LynxServiceAPI (= 3.9.0)
+  - LynxService/Image (3.9.0):
+    - Lynx (= 3.9.0)
+    - LynxServiceAPI (= 3.9.0)
+    - SDWebImage (= 5.15.5)
+    - SDWebImageWebPCoder (= 0.11.0)
+  - LynxService/Log (3.9.0):
+    - Lynx (= 3.9.0)
+    - LynxBase (= 3.9.0)
+    - LynxServiceAPI (= 3.9.0)
+  - LynxServiceAPI (3.9.0):
+    - LynxServiceAPI/Core (= 3.9.0)
+  - LynxServiceAPI/Core (3.9.0)
+  - LynxTextra (0.1.6)
+  - MJRefresh (3.7.9)
+  - PrimJS/log (3.8.0-alpha.6)
+  - PrimJS/napi (3.8.0-alpha.6):
+    - PrimJS/napi/adapter (= 3.8.0-alpha.6)
+    - PrimJS/napi/core (= 3.8.0-alpha.6)
+    - PrimJS/napi/env (= 3.8.0-alpha.6)
+    - PrimJS/napi/jsc (= 3.8.0-alpha.6)
+    - PrimJS/napi/quickjs (= 3.8.0-alpha.6)
+  - PrimJS/napi/adapter (3.8.0-alpha.6):
+    - PrimJS/napi/core
+    - PrimJS/napi/env
+  - PrimJS/napi/core (3.8.0-alpha.6)
+  - PrimJS/napi/env (3.8.0-alpha.6):
+    - PrimJS/napi/core
+  - PrimJS/napi/jsc (3.8.0-alpha.6):
+    - PrimJS/log
+    - PrimJS/napi/core
+    - PrimJS/quickjs
+  - PrimJS/napi/quickjs (3.8.0-alpha.6):
+    - PrimJS/napi/core
+    - PrimJS/quickjs
+  - PrimJS/quickjs (3.8.0-alpha.6):
+    - PrimJS/log
+  - SDWebImage (5.15.5):
+    - SDWebImage/Core (= 5.15.5)
+  - SDWebImage/Core (5.15.5)
+  - SDWebImageWebPCoder (0.11.0):
+    - libwebp (~> 1.0)
+    - SDWebImage/Core (~> 5.15)
+  - ServalMarkdown (0.0.28-alpha.4):
+    - LynxTextra
+  - ServalSVG (0.1.1)
+  - XElement (3.9.0):
+    - XElement/Behavior (= 3.9.0)
+    - XElement/Input (= 3.9.0)
+    - XElement/Markdown (= 3.9.0)
+    - XElement/Overlay (= 3.9.0)
+    - XElement/Refresh (= 3.9.0)
+    - XElement/ScrollCoordinator (= 3.9.0)
+    - XElement/SVG (= 3.9.0)
+    - XElement/ViewPager (= 3.9.0)
+  - XElement/Behavior (3.9.0):
+    - Lynx (= 3.9.0)
+    - XElement/Input
+    - XElement/Markdown
+    - XElement/Overlay
+    - XElement/Refresh
+    - XElement/ScrollCoordinator
+    - XElement/SVG
+    - XElement/ViewPager
+  - XElement/Input (3.9.0):
+    - Lynx (= 3.9.0)
+  - XElement/Markdown (3.9.0):
+    - Lynx (= 3.9.0)
+    - ServalMarkdown (= 0.0.28-alpha.4)
+  - XElement/Overlay (3.9.0):
+    - Lynx (= 3.9.0)
+  - XElement/Refresh (3.9.0):
+    - Lynx (= 3.9.0)
+    - MJRefresh (>= 3.6.1)
+  - XElement/ScrollCoordinator (3.9.0):
+    - Lynx (= 3.9.0)
+    - XElement/ViewPager
+  - XElement/SVG (3.9.0):
+    - Lynx (= 3.9.0)
+    - ServalSVG (>= 0.0.17)
+  - XElement/ViewPager (3.9.0):
+    - Lynx (= 3.9.0)
+
+DEPENDENCIES:
+  - Lynx/Framework (= 3.9.0)
+  - LynxService/Http (= 3.9.0)
+  - LynxService/Image (= 3.9.0)
+  - LynxService/Log (= 3.9.0)
+  - PrimJS/napi (= 3.8.0-alpha.6)
+  - PrimJS/quickjs (= 3.8.0-alpha.6)
+  - SDWebImage (= 5.15.5)
+  - SDWebImageWebPCoder (= 0.11.0)
+  - XElement (= 3.9.0)
+
+SPEC REPOS:
+  trunk:
+    - libwebp
+    - Lynx
+    - LynxBase
+    - LynxService
+    - LynxServiceAPI
+    - LynxTextra
+    - MJRefresh
+    - PrimJS
+    - SDWebImage
+    - SDWebImageWebPCoder
+    - ServalMarkdown
+    - ServalSVG
+    - XElement
+
+SPEC CHECKSUMS:
+  libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
+  Lynx: ad5ed649ccf1d761e6697bc5d6d4fa6f30ad13e3
+  LynxBase: 046fe3d218a88ff0b1a3f058ee8d9a07aa9ae387
+  LynxService: a1728eea1ecb9d4bd9a37430b14d431ae000fce0
+  LynxServiceAPI: d7fe4bc006716867e5d7cf2d3a4bcaa5207cfa0f
+  LynxTextra: e1a22775e880e000605091aad8dec614ca2ca79a
+  MJRefresh: ff9e531227924c84ce459338414550a05d2aea78
+  PrimJS: a917134ed564e22594bcda526b940bc9a1de4e4d
+  SDWebImage: fd7e1a22f00303e058058278639bf6196ee431fe
+  SDWebImageWebPCoder: 295a6573c512f54ad2dd58098e64e17dcf008499
+  ServalMarkdown: 60f8b7502cecce269275d38363740cd4b0deeff6
+  ServalSVG: 6990830fdd5c1e7d545fc8c842a98bea6007dd86
+  XElement: 49b95dcd304c4a3bd4af335962c45a65173033b3
+
+PODFILE CHECKSUM: d603a00b878c420aad0fb9115986e2c845592bea
+
+COCOAPODS: 1.16.2
