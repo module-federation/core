@@ -5,12 +5,13 @@ import type {
 } from 'webpack/lib/dependencies/ModuleDependency';
 declare class ContainerExposedDependency extends dependencies.ModuleDependency {
   exposedName: string;
+  layer?: string;
   request: string;
   /**
    * @param {string} exposedName public name
    * @param {string} request request to module
    */
-  constructor(exposedName: string, request: string);
+  constructor(exposedName: string, request: string, layer?: string);
   get type(): string;
   get category(): string;
   /**
