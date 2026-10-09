@@ -96,6 +96,7 @@ __mocks__/
 /.env
 
 # Local AI/unpack cache (not part of source)
+/graphify-out/
 packages/enhanced/.unpack-cache/**
 packages/enhanced/.codex/**
 packages/enhanced/generated/**
