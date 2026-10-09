@@ -385,6 +385,43 @@ module.exports = {
 };
 ```
 
+Vite 把构建观测插件放在 `@module-federation/vite` 的 `federation()` 旁边。可以显式传入同一份 Module Federation 配置，也可以让适配器从已解析的 Vite 插件列表读取。运行时观测仍然使用 `ObservabilityPlugin`，通过 `createInstance` 或 `runtimePlugins` 接入，不要把它放到 Vite 构建适配器里。
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import { federation } from '@module-federation/vite';
+import { ObservabilityVitePlugin } from '@module-federation/observability-plugin/vite';
+
+const moduleFederationOptions = {
+  name: 'runtime_host',
+  remotes: {
+    remote1: {
+      type: 'module',
+      name: 'remote1',
+      entry: 'https://example.com/mf-manifest.json',
+    },
+  },
+  exposes: {
+    './Button': './src/Button.tsx',
+  },
+  shared: {
+    react: { singleton: true, requiredVersion: '^18.0.0' },
+  },
+  manifest: true,
+};
+
+export default defineConfig({
+  plugins: [
+    federation(moduleFederationOptions),
+    ObservabilityVitePlugin({
+      moduleFederation: moduleFederationOptions,
+    }),
+  ],
+});
+```
+
+`ObservabilityBuildPlugin` 和 `ObservabilityVitePlugin` 使用同一套参数。Vite 适配器会把 `bundler` 设为 `"vite"`，并在产物写出后从磁盘读取 `mf-manifest.json` / `mf-stats.json`，而不是从 webpack assets 读取。
+
 构建观测可以写出：
 
 - `.mf/observability/build-info.json`
@@ -392,7 +429,7 @@ module.exports = {
 
 运行时报告不会内嵌这两个文件。排查时如果需要构建侧证据，单独读取构建文件，再和运行时报告对照。
 
-`ObservabilityBuildPlugin(options)` 支持以下参数：
+`ObservabilityBuildPlugin(options)` 和 `ObservabilityVitePlugin(options)` 支持以下参数：
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -401,7 +438,7 @@ module.exports = {
 | `errorReport` | `false \| object` | `{}` | 构建失败时是否写出构建错误观测报告。设为 `false` 可关闭。 |
 | `errorReport.outputFile` | `string` | `'.mf/observability/build-report.json'` | 构建错误观测报告文件路径。 |
 | `cwd` | `string` | 编译上下文 | 输出文件的相对目录基准。 |
-| `bundler` | `string` | 自动识别 | 手动指定 bundler 名称。 |
+| `bundler` | `string` | 自动识别（webpack / rspack / vite） | 手动指定 bundler 名称。 |
 | `bundlerVersion` | `string` | 自动识别 | 手动指定 bundler 版本。 |
 | `pluginVersion` | `string` | 自动识别 | 手动指定 Module Federation 构建插件版本。 |
 | `moduleFederation` | `unknown` | 自动读取 | 显式传入 Module Federation 配置，便于构建观测采集 remotes、exposes、shared 等信息。 |
