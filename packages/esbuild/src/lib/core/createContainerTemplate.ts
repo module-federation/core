@@ -22,7 +22,7 @@ const createContainer = (federationOptions) => {
         const pluginsToAdd = plugins || [];
         __webpack_require__.federation.initOptions.plugins = __webpack_require__.federation.initOptions.plugins ?
           __webpack_require__.federation.initOptions.plugins.concat(pluginsToAdd) : pluginsToAdd;
-        __webpack_require__.federation.instance = __webpack_require__.federation.runtime.init(__webpack_require__.federation.initOptions);
+        __webpack_require__.federation.instance = __webpack_require__.federation.bundlerRuntime.init({ webpackRequire: __webpack_require__ });
         if (__webpack_require__.federation.attachShareScopeMap) {
           __webpack_require__.federation.attachShareScopeMap(__webpack_require__);
         }
