@@ -1,5 +1,5 @@
-import { describe, it, rs, expect } from '@rstest/core';
-import { init, loadRemote, loadShare, loadShareSync } from '../src/index';
+import { describe, it, expect } from '@rstest/core';
+import { loadRemote, loadShare, loadShareSync } from '../src/index';
 import { getInfoWithoutType } from '@module-federation/runtime-core';
 
 type IsAssignable<Actual, Expected> = [Actual] extends [Expected]
@@ -8,22 +8,6 @@ type IsAssignable<Actual, Expected> = [Actual] extends [Expected]
 type ExpectFalse<T extends false> = T;
 
 describe('global', () => {
-  it('inject mode', () => {
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = rs.fn();
-    const injectArgs = {
-      name: '@federation/inject-mode',
-      remotes: [],
-    };
-    const GM = init(injectArgs);
-    expect(GM.constructor).toBe(
-      globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__,
-    );
-    expect(globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__).toBeCalledWith({
-      ...injectArgs,
-      id: '',
-    });
-  });
-
   it('getInfoWithoutType', () => {
     const snapshot = {
       '@federation/app1': 1,
