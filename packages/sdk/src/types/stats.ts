@@ -79,8 +79,16 @@ interface StatsAssetsInfo {
   async: string[];
 }
 
+export interface StatsSharedProvider {
+  version: string;
+  import: string;
+  assets: StatsAssets;
+}
+
 export interface StatsShared {
   id: string;
+  /** Concrete providers when more than one version/import pair is available. */
+  providers?: StatsSharedProvider[];
   name: string;
   version: string;
   singleton: boolean;
