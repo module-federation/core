@@ -22,7 +22,7 @@
     "@module-federation/modern-js-v3": "workspace:*",
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@rsbuild/plugin-react": "^1.4.5",
-    "@rslib/core": "^0.9.0",
+    "@rslib/core": "^1.0.2",
     "@types/react": "^18.3.11",
     "http-server": "^14.1.1"
   }

@@ -44,7 +44,7 @@
     "@module-federation/metro": "workspace:*",
     "@rock-js/config": "^0.13.0",
     "@rock-js/tools": "^0.13.0",
-    "@rslib/core": "^0.23.2",
+    "@rslib/core": "^1.0.2",
     "@typescript-eslint/eslint-plugin": "8.56.1",
     "@typescript-eslint/parser": "8.56.1",
     "@types/node": "^20.0.0",
