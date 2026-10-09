@@ -23,9 +23,7 @@ import type { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declara
 const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
+import makeSerializable from '../makeSerializable';
 
 const TYPES = new Set(['share-init']);
 
