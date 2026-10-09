@@ -19,6 +19,14 @@ on:
         description: 'Previous release tag for generated notes (empty = GitHub automatic selection)'
         required: false
         type: string
+      package:
+        description: 'Package scope'
+        type: choice
+        required: true
+        default: all
+        options:
+          - all
+          - '@module-federation/typescript'
 
 # Serialize publishing and draft updates, including dispatches from different refs.
 concurrency:
@@ -41,6 +49,12 @@ jobs:
       sha: ${{ steps.source.outputs.sha }}
       artifact_name: ${{ steps.source.outputs.artifact_name }}
     steps:
+      - name: Validate package release channel
+        if: inputs.package == '@module-federation/typescript' && inputs.version != 'latest'
+        run: |
+          echo 'The TypeScript package release supports latest only.' >&2
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
@@ -100,15 +114,22 @@ jobs:
           npx changeset version --snapshot "$SAFE_BRANCH"
 
       - name: Build and test Packages
+        if: inputs.package != '@module-federation/typescript'
         run: |
           git fetch origin main
           pnpm run build:packages
           ls -l packages/*/dist packages/*/package.json
 
+      - name: Build and test TypeScript package
+        if: inputs.package == '@module-federation/typescript'
+        run: |
+          pnpm --filter @module-federation/typescript run pre-release
+          pnpm --filter @module-federation/typescript exec publint
+
       # Prepare the downloadable extension before npm publishing. Move extension
       # output out of dist so the existing npm library tarball is not enlarged.
       - name: Build Browser release asset
-        if: inputs.version == 'latest'
+        if: inputs.version == 'latest' && inputs.package != '@module-federation/typescript'
         env:
           RELEASE_CHANNEL: ${{ inputs.version }}
         run: |
@@ -118,7 +139,7 @@ jobs:
           mv packages/chrome-devtools/dist/{browser,chrome,.extension-build} "$RUNNER_TEMP/mf-extension-build/"
 
       - name: Save Browser release asset
-        if: inputs.version == 'latest'
+        if: inputs.version == 'latest' && inputs.package != '@module-federation/typescript'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ steps.source.outputs.artifact_name }}
@@ -127,10 +148,16 @@ jobs:
           retention-days: 30
 
       - name: Publish latest version
-        if: github.event.inputs.version == 'latest'
+        if: inputs.version == 'latest' && inputs.package != '@module-federation/typescript'
         env:
           RELEASE_BRANCH: ${{ inputs.branch }}
         run: pnpm -r publish --tag latest --publish-branch "$RELEASE_BRANCH"
+
+      - name: Publish TypeScript package
+        if: inputs.version == 'latest' && inputs.package == '@module-federation/typescript'
+        env:
+          RELEASE_BRANCH: ${{ inputs.branch }}
+        run: pnpm --filter @module-federation/typescript publish --tag latest --publish-branch "$RELEASE_BRANCH"
 
       - name: Publish preview version
         if: github.event.inputs.version == 'next'
@@ -138,7 +165,7 @@ jobs:
           pnpm -r publish --tag next --no-git-checks
 
       - name: Latest release summary
-        if: inputs.version == 'latest'
+        if: inputs.version == 'latest' && inputs.package != '@module-federation/typescript'
         run: |
           node --input-type=module <<'JS'
           import { appendFileSync, readFileSync } from 'node:fs';
@@ -164,7 +191,7 @@ jobs:
   release-draft:
     name: Prepare GitHub Release draft
     needs: release
-    if: inputs.version == 'latest'
+    if: inputs.version == 'latest' && inputs.package != '@module-federation/typescript'
     runs-on: ubuntu-latest
     permissions:
       contents: write
