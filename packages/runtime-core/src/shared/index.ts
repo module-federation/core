@@ -19,6 +19,7 @@ import {
   LoadShareExtraOptions,
   SharedLoadContext,
   SharedLoadTrigger,
+  ResourceLoadContext,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
@@ -46,7 +47,118 @@ import {
 } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
 import type { LoadRemoteMatch } from '../remote';
+import type { Module } from '../module';
 import { createRemoteEntryInitOptions } from '../module';
+
+function createShareScopeTransaction(
+  shareScopeMap: ShareScopeMap,
+  remoteName: string,
+) {
+  type Mutation = {
+    target: object;
+    key: PropertyKey;
+    previous: unknown;
+    assigned: unknown;
+    hadPrevious: boolean;
+    depth: number;
+  };
+  const mutations: Mutation[] = [];
+  const proxies = new WeakMap<object, object>();
+  const targets = new WeakMap<object, object>();
+  let active = true;
+
+  const unwrap = (value: unknown): unknown =>
+    value && typeof value === 'object' ? targets.get(value) || value : value;
+
+  const wrap = <T extends object>(target: T, depth: number): T => {
+    const cached = proxies.get(target);
+    if (cached) return cached as T;
+    const proxy = new Proxy(target, {
+      get(current, key) {
+        const value = Reflect.get(current, key);
+        return depth < 2 && value && typeof value === 'object'
+          ? wrap(value, depth + 1)
+          : value;
+      },
+      set(current, key, value) {
+        const assigned = unwrap(value);
+        const previous = Reflect.get(current, key);
+        const hadPrevious = Object.prototype.hasOwnProperty.call(current, key);
+        const updated = Reflect.set(current, key, assigned);
+        if (active && updated && previous !== assigned) {
+          mutations.push({
+            target: current,
+            key,
+            previous,
+            assigned,
+            hadPrevious,
+            depth,
+          });
+        }
+        return updated;
+      },
+    });
+    proxies.set(target, proxy);
+    targets.set(proxy, target);
+    return proxy;
+  };
+
+  const removeFailedShares = (
+    container: Record<string, unknown>,
+    depth: number,
+    previous?: Record<string, unknown>,
+  ) => {
+    for (const [key, value] of Object.entries(container)) {
+      if (depth === 1) {
+        const shared = value as Shared;
+        if (shared.from === remoteName && previous?.[key] !== shared) {
+          delete container[key];
+        }
+      } else if (value && typeof value === 'object') {
+        removeFailedShares(
+          value as Record<string, unknown>,
+          depth + 1,
+          previous?.[key] as Record<string, unknown> | undefined,
+        );
+        if (!Object.keys(value).length) delete container[key];
+      }
+    }
+  };
+
+  return {
+    shareScopeMap: wrap(shareScopeMap, 0),
+    complete() {
+      active = false;
+    },
+    rollback() {
+      active = false;
+      for (const mutation of mutations.reverse()) {
+        const { target, key, previous, assigned, hadPrevious, depth } =
+          mutation;
+        if (Reflect.get(target, key) !== assigned) continue;
+        if (depth < 2 && assigned && typeof assigned === 'object') {
+          const container = assigned as Record<string, unknown>;
+          const prior =
+            previous && typeof previous === 'object'
+              ? (previous as Record<string, unknown>)
+              : undefined;
+          removeFailedShares(container, depth, prior);
+          if (prior) {
+            Object.assign(prior, container);
+            Reflect.set(target, key, prior);
+            continue;
+          }
+          if (Object.keys(container).length) continue;
+        }
+        if (hadPrevious) {
+          Reflect.set(target, key, previous);
+        } else {
+          Reflect.deleteProperty(target, key);
+        }
+      }
+    },
+  };
+}
 
 export class SharedHandler {
   host: ModuleFederation;
@@ -526,17 +638,19 @@ export class SharedHandler {
     };
 
     const initRemoteModule = async (key: string): Promise<void> => {
-      const { module } = await host.remoteHandler.getRemoteModuleAndOptions({
-        id: key,
-      });
+      let module: Module | undefined;
       let remoteEntryExports: RemoteEntryExports | undefined = undefined;
-      const resourceContext = {
-        initiator: 'loadShare' as const,
-        id: key,
-        resourceType: 'remoteEntry' as const,
-        url: module.remoteInfo.entry,
-      };
+      let resourceContext: ResourceLoadContext | undefined;
       try {
+        ({ module } = await host.remoteHandler.getRemoteModuleAndOptions({
+          id: key,
+        }));
+        resourceContext = {
+          initiator: 'loadShare',
+          id: key,
+          resourceType: 'remoteEntry',
+          url: module.remoteInfo.entry,
+        };
         remoteEntryExports = await module.getEntry(undefined, resourceContext);
       } catch (error) {
         remoteEntryExports =
@@ -545,23 +659,38 @@ export class SharedHandler {
             error,
             from: 'runtime',
             lifecycle: 'beforeLoadShare',
-            remote: module.remoteInfo,
+            remote: module?.remoteInfo,
             origin: host,
           })) as RemoteEntryExports;
-        if (!remoteEntryExports) {
-          return;
-        }
-      } finally {
-        // prevent self load loop: when host load self , the initTokens is not the same
-        if (remoteEntryExports?.init && !module.initing) {
-          module.remoteEntryExports = remoteEntryExports;
+      }
+      // prevent self load loop: when host load self , the initTokens is not the same
+      if (module && remoteEntryExports?.init && !module.initing) {
+        module.remoteEntryExports = remoteEntryExports;
+        const transaction = createShareScopeTransaction(
+          this.shareScopeMap,
+          module.remoteInfo.name,
+        );
+        try {
           await module.init(
             undefined,
             undefined,
             initScope,
             undefined,
             resourceContext,
+            transaction.shareScopeMap,
           );
+          transaction.complete();
+        } catch (error) {
+          if (module.inited) transaction.complete();
+          else transaction.rollback();
+          await host.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
+            id: key,
+            error,
+            from: 'runtime',
+            lifecycle: 'beforeLoadShare',
+            remote: module.remoteInfo,
+            origin: host,
+          });
         }
       }
     };
