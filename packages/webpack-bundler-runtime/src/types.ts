@@ -1,4 +1,4 @@
-import * as runtime from '@module-federation/runtime';
+import type * as runtime from '@module-federation/runtime';
 import type {
   Remote,
   RemoteEntryInitOptions,
@@ -253,4 +253,14 @@ export interface Federation {
   libraryType?: string;
   // { react: [  [ react/19.0.0/index.js , 19.0.0, react_global_name,  ]  ] }
   sharedFallback?: Record<string, Array<[string, string, string]>>;
+}
+
+export type BundlerRuntime = NonNullable<Federation['bundlerRuntime']>;
+
+export interface Adapter {
+  bundlerRuntime: Partial<BundlerRuntime>;
+  beforeInit?: (
+    webpackRequire: WebpackRequire,
+    initOptions: InitOptions,
+  ) => void;
 }
