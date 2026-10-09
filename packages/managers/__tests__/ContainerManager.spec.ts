@@ -1,5 +1,13 @@
 import { ContainerManager } from '../src/ContainerManager';
 
+const exposeOf = (manager: ContainerManager, key: string) =>
+  (
+    manager.containerPluginExposesOptions as Record<
+      string,
+      { name: string; import: string[] }
+    >
+  )[key];
+
 describe('ContainerManager', () => {
   it('will not use containerPlugin while expose is empty', () => {
     const options = {
@@ -63,9 +71,9 @@ describe('ContainerManager', () => {
     const containerManager = new ContainerManager();
     containerManager.init(options);
 
-    expect(
-      containerManager.containerPluginExposesOptions['./Button'].name,
-    ).toEqual('__federation_expose_Button');
+    expect(exposeOf(containerManager, './Button').name).toEqual(
+      '__federation_expose_Button',
+    );
   });
 
   it('set expose import as array', () => {
@@ -77,9 +85,7 @@ describe('ContainerManager', () => {
     containerManager.init(options);
 
     expect(
-      Array.isArray(
-        containerManager.containerPluginExposesOptions['./Button'].import,
-      ),
+      Array.isArray(exposeOf(containerManager, './Button').import),
     ).toEqual(true);
   });
 

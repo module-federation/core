@@ -3518,6 +3518,9 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
+      enhanced-resolve:
+        specifier: ^5.0.0
+        version: 5.20.1
     devDependencies:
       webpack:
         specifier: 5.104.1
