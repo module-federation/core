@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, rs, afterEach } from '@rstest/core';
-import { ModuleFederation } from '../src/core';
+import { ModuleFederation } from '../src';
 import type { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
 import { resetFederationGlobalInfo } from '../src/global';

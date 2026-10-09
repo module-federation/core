@@ -4,7 +4,7 @@ import {
   getRemoteEntryUniqueKey,
   getRemoteInfo,
 } from '../src/utils/load';
-import { ModuleFederation } from '../src/core';
+import { ModuleFederation } from '../src';
 import { globalLoading, resetFederationGlobalInfo } from '../src/global';
 import {
   RUNTIME_001,

@@ -1,16 +1,16 @@
 import {
-  isBrowserEnvValue,
   warn,
   composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
 import {
   Global,
   getInfoWithoutType,
   globalLoading,
   CurrentGlobal,
+  getGlobalShareScope,
 } from '../global';
 import {
   Options,
@@ -23,9 +23,10 @@ import {
   RemoteInfo,
   RemoteEntryExports,
   CallFrom,
+  RemoteCapability,
   ResourceLoadContext,
 } from '../type';
-import { ModuleFederation } from '../core';
+import type { ModuleFederation } from '../index';
 import {
   PluginSystem,
   AsyncHook,
@@ -47,8 +48,10 @@ import {
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
-import { getGlobalShareScope } from '../utils/share';
-import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
+import {
+  getGlobalRemoteInfo,
+  SnapshotHandler,
+} from '../plugins/snapshot/SnapshotHandler';
 
 export interface LoadRemoteMatch {
   id: string;
@@ -665,7 +668,7 @@ export class RemoteHandler {
       // Set the remote entry to a complete path
       if ('entry' in remote) {
         if (
-          isBrowserEnvValue &&
+          host.platform.isBrowser() &&
           typeof window !== 'undefined' &&
           !remote.entry.startsWith('http')
         ) {
@@ -847,3 +850,10 @@ export class RemoteHandler {
     }
   }
 }
+
+export const remote: RemoteCapability = {
+  create: (host) => ({
+    snapshot: new SnapshotHandler(host),
+    remote: new RemoteHandler(host),
+  }),
+};
