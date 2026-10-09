@@ -2,7 +2,7 @@ import { assert, describe, test, it } from '@rstest/core';
 import { ModuleFederation } from '../src/core';
 import { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
-import { addGlobalSnapshot } from '../src/global';
+import { Global, addGlobalSnapshot } from '../src/global';
 import {
   AsyncHook,
   AsyncWaterfallHook,
@@ -493,7 +493,7 @@ describe('hooks', () => {
     reset();
   });
 
-  it('uses exact expose ids when preloadRemote is configured with exposes', async () => {
+  it('uses exact expose ids when URL recording is disabled', async () => {
     const remotePublicPath = 'http://localhost:1111/';
     const reset = addGlobalSnapshot({
       '@loader-hooks/globalinfo': {
@@ -541,11 +541,10 @@ describe('hooks', () => {
           name: 'force-expose-preload-assets',
           async generatePreloadAssets(args) {
             generatedExposes.push(args.preloadOptions.preloadConfig.exposes);
-            const expose = args.preloadOptions.preloadConfig.exposes?.[0];
             return {
               cssAssets: [],
               jsAssetsWithoutEntry: [
-                `http://localhost:1111/__virtual__/${expose}.js`,
+                'http://localhost:1111/__virtual__/shared-expose.js',
               ],
               entryAssets: [],
             } as any;
@@ -564,7 +563,11 @@ describe('hooks', () => {
     });
 
     await INSTANCE.preloadRemote([
-      { nameOrAlias: '@loader-hooks/app3', exposes: ['Button', 'Card'] },
+      {
+        nameOrAlias: '@loader-hooks/app3',
+        exposes: ['Button', 'Card'],
+        recordPreloadedAssets: false,
+      },
     ]);
 
     expect(generatedExposes).toEqual([['Button'], ['Card']]);
@@ -572,6 +575,11 @@ describe('hooks', () => {
       '@loader-hooks/app3/Button',
       '@loader-hooks/app3/Card',
     ]);
+    expect(
+      Global.__FEDERATION__.__PRELOADED_ASSETS__.has(
+        'http://localhost:1111/__virtual__/shared-expose.js',
+      ),
+    ).toBe(false);
 
     reset();
   });
@@ -608,6 +616,8 @@ describe('hooks', () => {
       headers: { 'Content-Type': 'application/json' },
     });
     let lastFetchRemoteInfo: any;
+    const manifestStarts: Array<Record<string, unknown>> = [];
+    const manifestResults: Array<Record<string, unknown>> = [];
     const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'fetch-plugin',
       fetch(url, options, remoteInfo, resourceContext) {
@@ -630,7 +640,18 @@ describe('hooks', () => {
           entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
         },
       ],
-      plugins: [fetchPlugin()],
+      plugins: [
+        fetchPlugin(),
+        {
+          name: 'manifest-resource-recorder',
+          beforeLoadManifest(args) {
+            manifestStarts.push(args);
+          },
+          afterLoadManifest(args) {
+            manifestResults.push(args);
+          },
+        },
+      ],
     });
 
     const res = await INSTANCE.loadRemote<() => string>(
@@ -642,6 +663,31 @@ describe('hooks', () => {
       name: '@loader-hooks/app2',
       entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
     });
+    expect(manifestStarts).toHaveLength(1);
+    expect(manifestStarts[0]).toMatchObject({
+      manifestUrl: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+      moduleInfo: {
+        name: '@loader-hooks/app2',
+      },
+      resourceOptions: {
+        id: '@loader-hooks/app2/say',
+        initiator: 'loadRemote',
+      },
+    });
+    expect(manifestResults).toHaveLength(1);
+    expect(manifestResults[0]).toMatchObject({
+      manifestUrl: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+      moduleInfo: {
+        name: '@loader-hooks/app2',
+      },
+      resourceOptions: {
+        id: '@loader-hooks/app2/say',
+        initiator: 'loadRemote',
+      },
+    });
+    expect(manifestResults[0].response).toBe(responseBody);
+    expect(manifestResults[0]).not.toHaveProperty('cached');
+    expect(manifestResults[0].recovered).toBeUndefined();
   });
 
   it('emits manifest snapshot lifecycle once when loading a manifest remote', async () => {

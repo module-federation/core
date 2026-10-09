@@ -23,7 +23,10 @@ export interface Federation {
   __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __PRELOADED_MAP__: Map<string, boolean>;
+  __PRELOADED_ASSETS__: Set<string>;
 }
+
+const MAX_PRELOADED_ASSETS = 2000;
 export const CurrentGlobal =
   typeof globalThis === 'object' ? globalThis : window;
 export const nativeGlobal: typeof global = (() => {
@@ -90,6 +93,7 @@ function setGlobalDefaultVal(target: typeof CurrentGlobal) {
       __SHARE__: {},
       __MANIFEST_LOADING__: {},
       __PRELOADED_MAP__: new Map(),
+      __PRELOADED_ASSETS__: new Set(),
     });
 
     definePropertyGlobalVal(target, '__VMOK__', target.__FEDERATION__);
@@ -101,6 +105,7 @@ function setGlobalDefaultVal(target: typeof CurrentGlobal) {
   target.__FEDERATION__.__SHARE__ ??= {};
   target.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
   target.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
+  target.__FEDERATION__.__PRELOADED_ASSETS__ ??= new Set();
 }
 
 setGlobalDefaultVal(CurrentGlobal);
@@ -112,6 +117,7 @@ export function resetFederationGlobalInfo(): void {
   CurrentGlobal.__FEDERATION__.moduleInfo = {};
   CurrentGlobal.__FEDERATION__.__SHARE__ = {};
   CurrentGlobal.__FEDERATION__.__MANIFEST_LOADING__ = {};
+  CurrentGlobal.__FEDERATION__.__PRELOADED_ASSETS__.clear();
 
   Object.keys(globalLoading).forEach((key) => {
     delete globalLoading[key];
@@ -291,3 +297,18 @@ export const getPreloaded = (id: string) =>
 
 export const setPreloaded = (id: string) =>
   CurrentGlobal.__FEDERATION__.__PRELOADED_MAP__.set(id, true);
+
+export const getPreloadedAsset = (url: string) =>
+  CurrentGlobal.__FEDERATION__.__PRELOADED_ASSETS__.has(url);
+
+export const setPreloadedAsset = (url: string): void => {
+  const preloadedAssets = CurrentGlobal.__FEDERATION__.__PRELOADED_ASSETS__;
+  preloadedAssets.add(url);
+
+  if (preloadedAssets.size > MAX_PRELOADED_ASSETS) {
+    const oldestUrl = preloadedAssets.values().next().value;
+    if (oldestUrl !== undefined) {
+      preloadedAssets.delete(oldestUrl);
+    }
+  }
+};

@@ -46,17 +46,34 @@ npx skills add module-federation/agent-skills --skill mf -y
 - 帮你分析类型问题
 - 帮你看共享依赖冲突
 - 帮你分析远端模块信息
-- 帮你读取观测报告并排查 MF 加载失败
+- 帮你通过 Divebell MF Extension 定位运行时错误、加载链路和性能瓶颈
+- 帮你分析本地、SSR 或生产环境保留的观测报告
 
 👉 [查看 Agent Skills 详细说明](/ai/skill.html)
 
 ## 观测和调试 MF 加载
 
-如果你希望 AI coding agent 基于真实运行时信息排查 Module Federation
-加载问题，需要先接入 [观测插件](/plugin/plugins/observability-plugin.html)。
-`/mf observability` 这个 skill 负责帮你接入、读取和分析报告；真正的运行时证据由观测插件采集。
+MF 的 Remote 解析、Shared 选择、Bridge 生命周期和模块性能问题通常只存在于
+页面运行现场。如果只是一次性诊断，`mf` skill 可以使用
+[Divebell](/guide/debug/divebell.html) MF Extension 获取有边界的结构化证据，
+不需要先给应用接入观测插件。页面操作只用于触发对应加载路径。
 
-加载失败后，浏览器控制台会打印 `traceId`，开发环境还会打印 `read:` 命令。把这段提示交给 Agent：
+直接告诉 Agent 目标页面和复现路径：
+
+```text
+/mf observability
+请用 Divebell 打开 https://example.com，复现结算失败流程，
+并告诉我 Remote 或 Shared 加载失败发生在哪个阶段。
+```
+
+需要时，skill 会在 Agent 所在机器全局安装 Divebell，读取
+`divebell skill` 返回的 CLI Skill，再安装 `@divebell/extension-mf`
+并读取 `divebell mf --skill` 返回的 Extension Skill。这些工具不会加入
+应用依赖。
+
+如果需要长期采集、Node/SSR 文件、生产上报或保留历史报告，再给应用接入
+[观测插件](/plugin/plugins/observability-plugin.html)。加载失败后，把可访问的
+`traceId`、`read:` 命令或已上传报告交给 Agent：
 
 ```text
 /mf observability
@@ -69,7 +86,10 @@ read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-..."
 请读取报告并帮我修复问题。
 ```
 
-如果是 Node 或 SSR，让 Agent 读取 `.mf/observability/latest.json`。如果是生产环境，建议通过插件的 `onReport` 回调把报告上传到自己的系统，然后把上传报告或 traceId 交给 Agent。
+如果是 Node 或 SSR，让 Agent 读取 `.mf/observability/latest.json`。如果是
+生产环境，建议通过插件的 `onReport` 回调把报告上传到自己的系统，然后把
+已保存报告交给 Agent。已经关闭的浏览器会话只剩一个 traceId 时，不能据此
+还原完整报告。
 
 ## 不装 Skill 也能先用
 
@@ -109,5 +129,6 @@ https://module-federation.io/guide/basic/runtime.md
 
 1. 先装 `mf`
 2. 问一个你当前最关心的问题
-3. 需要 MF 加载可观测时，先接入 [观测插件](/plugin/plugins/observability-plugin.html)
-4. 再看 [Skills 说明](/ai/skill.html)，了解它支持哪些子命令
+3. 一次性定位 MF 运行时、加载链路或性能问题时使用 [Divebell](/guide/debug/divebell.html)
+4. 需要长期保留或上传加载证据时，再接入 [观测插件](/plugin/plugins/observability-plugin.html)
+5. 再看 [Skills 说明](/ai/skill.html)，了解它支持哪些子命令

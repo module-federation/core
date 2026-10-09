@@ -1,0 +1,30 @@
+For a one-off live page investigation, first install the MF Extension manually
+on the agent machine. Divebell can then enable the diagnostics provided by the
+Extension before navigation. You do not need to add the Observability Plugin to
+the application:
+
+```bash
+npm install --global @divebell/cli
+divebell extensions add @divebell/extension-mf
+divebell setup
+divebell open "https://example.com" --mf
+```
+
+An AI coding agent should first read the CLI Skill returned by
+`divebell skill` and the Extension Skill returned by
+`divebell mf --skill`. It can then inspect current MF state, loading traces,
+Shared selection, Bridge operations, or module performance. For example:
+
+```bash
+divebell mf module-perf --report --view timeline
+```
+
+[![Divebell Module Federation performance timeline](https://raw.githubusercontent.com/2heal1/divebell/main/assets/mf-module-perf-timeline.png)](https://github.com/2heal1/divebell#quick-start)
+
+See the
+[Divebell MF Extension documentation](https://github.com/2heal1/divebell/blob/main/packages/extensions/mf/README.md)
+for the complete command surface, or follow
+[Troubleshoot Runtime Issues](/guide/debug/divebell.html).
+
+Keep the application Observability Plugin when reports must be collected
+continuously, retained, or uploaded from production.

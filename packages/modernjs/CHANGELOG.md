@@ -1,5 +1,50 @@
 # @module-federation/modern-js
 
+## 2.9.2
+
+### Patch Changes
+
+- Updated dependencies [412f62e]
+- Updated dependencies [c130946]
+- Updated dependencies [4364cb6]
+- Updated dependencies [923b55d]
+  - @module-federation/enhanced@2.9.2
+  - @module-federation/bridge-react@2.9.2
+  - @module-federation/node@2.7.52
+  - @module-federation/rsbuild-plugin@2.9.2
+  - @module-federation/runtime@2.9.2
+  - @module-federation/cli@2.9.2
+  - @module-federation/sdk@2.9.2
+
+## 2.9.1
+
+### Patch Changes
+
+- @module-federation/cli@2.9.1
+- @module-federation/enhanced@2.9.1
+- @module-federation/bridge-react@2.9.1
+- @module-federation/runtime@2.9.1
+- @module-federation/node@2.7.51
+- @module-federation/rsbuild-plugin@2.9.1
+- @module-federation/sdk@2.9.1
+
+## 2.9.0
+
+### Patch Changes
+
+- e68f1b5: Fix misleading splitChunks warning under stream SSR so it only fires when chunks was not already async.
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+- Updated dependencies [0ebae56]
+- Updated dependencies [60e6b82]
+  - @module-federation/runtime@2.9.0
+  - @module-federation/bridge-react@2.9.0
+  - @module-federation/rsbuild-plugin@2.9.0
+  - @module-federation/node@2.7.50
+  - @module-federation/enhanced@2.9.0
+  - @module-federation/sdk@2.9.0
+  - @module-federation/cli@2.9.0
+
 ## 2.8.2
 
 ### Patch Changes

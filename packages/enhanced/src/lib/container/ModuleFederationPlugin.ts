@@ -171,7 +171,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     const { _options: options } = this;
     const { name, experiments, dts, remotes, shared, shareScope } = options;
     if (!name) {
-      // TODO: remove the comment
       throw new Error('ModuleFederationPlugin name is required');
     }
     // must before ModuleFederationPlugin

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/inject-external-runtime-core-plugin",
-  "version": "2.8.2",
+  "version": "2.9.2",
   "type": "module",
   "license": "MIT",
   "description": "A sdk for support module federation",
@@ -32,7 +32,7 @@
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
+        "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
     }
