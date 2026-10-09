@@ -3,6 +3,7 @@
   "description": "Tool for Module Federation",
   "version": "versionPlaceholder",
   "manifest_version": 3,
+  "minimum_chrome_version": "114",
   "action": {
     "default_title": "Module Federation",
     "default_icon": {
