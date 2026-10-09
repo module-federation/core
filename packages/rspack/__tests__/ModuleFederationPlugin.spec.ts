@@ -133,3 +133,61 @@ describe('runtime capability optimization defines', () => {
     });
   });
 });
+
+describe('canonical shared plugin integration', () => {
+  it('applies CanonicalSharedPlugin when shared options are configured', () => {
+    const plugin = new ModuleFederationPlugin({
+      name: 'host',
+      dts: false,
+      manifest: false,
+      shared: {
+        react: { singleton: true },
+        '@repro/context-lib/FeatureTypeContext': { singleton: true },
+      },
+    });
+
+    let beforeResolveHook: any;
+    const compiler = {
+      options: {
+        plugins: [],
+        optimization: { splitChunks: {} },
+        resolve: { alias: {} },
+      },
+      hooks: {
+        afterPlugins: { tap: jest.fn() },
+        normalModuleFactory: {
+          tap: jest.fn((name: string, fn: any) => {
+            const nmf = {
+              hooks: {
+                beforeResolve: {
+                  tap: jest.fn((_subName: string, subFn: any) => {
+                    beforeResolveHook = subFn;
+                  }),
+                },
+              },
+            };
+            fn(nmf);
+          }),
+        },
+      },
+      webpack: {
+        DefinePlugin: class {
+          apply() {}
+        },
+        container: {
+          ModuleFederationPlugin: class {
+            apply() {}
+          },
+        },
+      },
+    } as any;
+
+    plugin.apply(compiler);
+
+    expect(compiler.hooks.normalModuleFactory.tap).toHaveBeenCalledWith(
+      'CanonicalSharedPlugin',
+      expect.any(Function),
+    );
+    expect(beforeResolveHook).toBeDefined();
+  });
+});
