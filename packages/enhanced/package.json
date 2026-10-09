@@ -94,7 +94,7 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/cli": "workspace:*",
-    "schema-utils": "4.3.0",
+    "schema-utils": "4.5.0",
     "tapable": "2.3.0"
   },
   "scripts": {
