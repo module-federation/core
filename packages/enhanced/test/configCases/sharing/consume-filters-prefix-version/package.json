@@ -1,0 +1,10 @@
+{
+  "name": "consume-filters-prefix-version-test",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "lib": "^1.0.0",
+    "lib-included": "^1.0.0",
+    "lib-excluded": "^1.0.0"
+  }
+}
