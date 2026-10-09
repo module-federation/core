@@ -2,9 +2,9 @@
 
 本章介绍如何使用 `createLazyComponent` 在宿主应用中按需加载远程 React 组件。
 
-`createLazyComponent` 是面向 React 组件场景的高阶加载方式。相比直接使用模块后再自己接 `React.lazy` / `Suspense` / 错误边界，它把这些工作内置在 API 中，并额外提供：
+`createLazyComponent` 是面向 React 组件场景的高阶加载方式。相比直接加载模块后再自行接入 `React.lazy` 与 `Suspense`，它把这些能力内置在 API 中，并额外提供：
 
-- **声明式 loading 与 fallback**：无需手动包 `React.Suspense` 与错误边界
+- **声明式 loading 与失败 fallback**：通过 `React.Suspense` 处理 loading 状态，并为远程模块加载或数据获取失败提供 fallback
 - **数据预取**：配合 `prefetch` 在组件加载前发起依赖请求，避免组件就绪后才串行请求数据带来的瀑布
 - **SSR 控制**：可精细控制远程组件是否在服务端渲染，避免出现 CSS 闪烁问题
 
@@ -182,7 +182,9 @@ export default App;
 - 是否必填：是
 - 默认值：`undefined`
 
-当组件**加载**或**渲染**失败时，所渲染的容错组件。
+远程模块加载或数据获取失败时所渲染的容错组件，例如 `ERROR_TYPE.LOAD_REMOTE` 或 `ERROR_TYPE.DATA_FETCH`。
+
+它不会捕获懒加载组件解析期间抛出的错误，例如配置的 `export` 不存在或不是函数，或 `React.lazy` 执行的第二次 loader 调用被拒绝。它也不会捕获已加载组件或其后代在 React 渲染期间抛出的错误。若要处理这些客户端错误，请在宿主应用中使用 Error Boundary 包裹该懒加载组件。服务端渲染错误需要由服务端渲染流程处理，因为 React Error Boundary 无法捕获这类错误。
 
 #### export
 
