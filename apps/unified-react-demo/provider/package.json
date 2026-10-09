@@ -1,0 +1,47 @@
+{
+  "name": "unified-react-provider",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "TS_NODE_COMPILER=typescript-compiler modern dev",
+    "build": "TS_NODE_COMPILER=typescript-compiler modern build",
+    "start": "TS_NODE_COMPILER=typescript-compiler modern start"
+  },
+  "engines": {
+    "node": ">=16.18.1"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "node --max_old_space_size=8192 ./node_modules/eslint/bin/eslint.js --fix --color --cache --quiet"
+    ]
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "dist/"
+  ],
+  "dependencies": {
+    "@babel/runtime": "7.28.2",
+    "@modern-js/runtime": "3.5.0",
+    "@module-federation/modern-js-v3": "workspace:*",
+    "react": "~18.3.1",
+    "react-dom": "~18.3.1",
+    "@module-federation/bridge-react": "workspace:*",
+    "@module-federation/sdk": "workspace:*",
+    "@modern-js/server-runtime": "3.5.0"
+  },
+  "devDependencies": {
+    "@modern-js-app/eslint-config": "2.59.0",
+    "@modern-js/app-tools": "3.5.0",
+    "@modern-js/eslint-config": "2.59.0",
+    "@modern-js/tsconfig": "3.0.1",
+    "@types/node": "^20.19.5",
+    "@types/react": "~18.2.0",
+    "@types/react-dom": "~18.3.0",
+    "lint-staged": "~13.1.0",
+    "prettier": "~3.3.3",
+    "rimraf": "~3.0.2",
+    "ts-node": "10.9.2",
+    "typescript": "6.0.3",
+    "typescript-compiler": "npm:typescript@6.0.3"
+  }
+}
