@@ -1,7 +1,71 @@
 import { describe, it, expect } from '@rstest/core';
 import { assert, getRegisteredShare } from '@module-federation/runtime-core';
+import { TreeShakingStatus } from '@module-federation/sdk';
+
+type ResolveShare = Parameters<typeof getRegisteredShare>[3];
+type ResolveShareParams = Parameters<ResolveShare['emit']>[0];
 
 describe('get expected shared', () => {
+  const resolveShare = {
+    emit: (data: ResolveShareParams) => data,
+  } as ResolveShare;
+
+  const createShared = (
+    version: string,
+    treeShaking = false,
+    strategy: 'version-first' | 'loaded-first' = 'version-first',
+  ) => ({
+    deps: [],
+    useIn: [],
+    from: `v${version}`,
+    get: () => () => ({}),
+    loaded: false,
+    loading: null,
+    version,
+    scope: ['default'],
+    shareConfig: {
+      requiredVersion: '^1.0.0',
+      singleton: false,
+      eager: false,
+      strictVersion: false,
+    },
+    strategy,
+    ...(treeShaking
+      ? {
+          treeShaking: {
+            status: TreeShakingStatus.CALCULATED,
+          },
+        }
+      : {}),
+  });
+
+  const getSelectedVersion = (
+    versions: string[],
+    treeShaking = false,
+    strategy: 'version-first' | 'loaded-first' = 'version-first',
+  ) => {
+    const { shared } =
+      getRegisteredShare(
+        // @ts-ignore
+        {
+          default: {
+            example: Object.fromEntries(
+              versions.map((version) => [
+                version,
+                createShared(version, treeShaking, strategy),
+              ]),
+            ),
+          },
+        },
+        'example',
+        createShared('consumer', treeShaking, strategy),
+        resolveShare,
+      ) || {};
+
+    assert(shared, 'must get registered shared');
+    return shared.version;
+  };
+
   it('get loading shared if sharedStrategy is "loaded-first"', () => {
     let res;
     const promise = new Promise((resolve) => {
@@ -253,5 +317,32 @@ describe('get expected shared', () => {
       ) || {};
     assert(registeredShared, 'must get registeredShared');
     expect(registeredShared.from).toEqual('remote');
+  });
+
+  it('gets the highest compatible non-singleton shared version for version-first regardless of registration order', () => {
+    const orders = [
+      ['1.0.0', '1.9.0', '2.0.0'],
+      ['1.9.0', '1.0.0', '2.0.0'],
+    ];
+
+    orders.forEach((versions) => {
+      expect(getSelectedVersion(versions)).toEqual('1.9.0');
+      expect(getSelectedVersion(versions, true)).toEqual('1.9.0');
+    });
+  });
+
+  it('preserves registration-order fallback for loaded-first', () => {
+    expect(
+      getSelectedVersion(['1.0.0', '1.9.0', '2.0.0'], false, 'loaded-first'),
+    ).toEqual('1.0.0');
+    expect(
+      getSelectedVersion(['1.9.0', '1.0.0', '2.0.0'], false, 'loaded-first'),
+    ).toEqual('1.9.0');
+    expect(
+      getSelectedVersion(['1.0.0', '1.9.0', '2.0.0'], true, 'loaded-first'),
+    ).toEqual('1.0.0');
+    expect(
+      getSelectedVersion(['1.9.0', '1.0.0', '2.0.0'], true, 'loaded-first'),
+    ).toEqual('1.9.0');
   });
 });
