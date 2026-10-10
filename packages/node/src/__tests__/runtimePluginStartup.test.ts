@@ -1,5 +1,8 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import runtimePlugin from '../runtimePlugin';
+import runtimePlugin, {
+  setupChunkHandler,
+  setupWebpackRequirePatching,
+} from '../runtimePlugin';
 
 jest.mock('fs', () => ({ existsSync: jest.fn(), readFile: jest.fn() }));
 
@@ -295,4 +298,91 @@ test('readFileVm reuses pending promises installed by the native HMR loader', as
   resolve();
   await Promise.all(promises);
   expect(runtime.O.readFileVm('vendor')).toBe(true);
+});
+
+test.each(['require', 'readFileVm', 'both'])(
+  'mixed loaders share one pending load with %s HMR tables',
+  async (mode) => {
+    const runtime = createRuntime();
+    const requireChunks: Record<string, unknown> = {};
+    const vmChunks: Record<string, unknown> = {};
+    runtime.f.require = jest.fn();
+    runtime.testRuns = 0;
+    runtime.O.require = (id: string) => requireChunks[id];
+    runtime.O.readFileVm = (id: string) => vmChunks[id] === 0;
+    if (mode !== 'readFileVm') runtime.hmrS_require = requireChunks;
+    if (mode !== 'require') runtime.hmrS_readFileVm = vmChunks;
+    runtimePlugin();
+    let complete!: (error: Error | null, source: string) => void;
+    fs.readFile.mockImplementationOnce(
+      (_path: string, _encoding: string, callback: typeof complete) => {
+        complete = callback;
+      },
+    );
+    const entry = jest.fn();
+    runtime.O(undefined, ['vendor'], entry);
+    const promises: Promise<unknown>[] = [];
+    for (const handler of Object.values(runtime.f))
+      (handler as any)('vendor', promises);
+    expect(promises).toHaveLength(2);
+    expect(promises[0]).toBe(promises[1]);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    runtime.O();
+    expect(entry).not.toHaveBeenCalled();
+    complete(
+      null,
+      "exports.ids = ['vendor']; exports.modules = {}; exports.runtime = function(r) { r.testRuns++; };",
+    );
+    await Promise.all(promises);
+    expect(runtime.testRuns).toBe(1);
+    expect(entry).toHaveBeenCalledTimes(1);
+    expect(runtime.O.require('vendor')).toBe(true);
+    expect(runtime.O.readFileVm('vendor')).toBe(true);
+    if (mode !== 'readFileVm') expect(requireChunks.vendor).toBe(1);
+    if (mode !== 'require') expect(vmChunks.vendor).toBe(0);
+  },
+);
+
+test('mixed HMR loaders clear both tables after failure and share the retry', async () => {
+  const runtime = createRuntime();
+  const requireChunks: Record<string, unknown> = {};
+  const vmChunks: Record<string, unknown> = {};
+  runtime.f.require = jest.fn();
+  runtime.hmrS_require = requireChunks;
+  runtime.hmrS_readFileVm = vmChunks;
+  runtime.O.require = (id: string) => requireChunks[id];
+  runtime.O.readFileVm = (id: string) => vmChunks[id] === 0;
+  runtimePlugin();
+  fs.readFile.mockImplementationOnce(
+    (
+      _path: string,
+      _encoding: string,
+      callback: (error: Error | null, source?: string) => void,
+    ) => callback(new Error('read failed')),
+  );
+  const ensure = () => {
+    const promises: Promise<unknown>[] = [];
+    runtime.f.require('vendor', promises);
+    runtime.f.readFileVm('vendor', promises);
+    return Promise.all(promises);
+  };
+  await expect(ensure()).rejects.toThrow('read failed');
+  expect(requireChunks.vendor).toBeUndefined();
+  expect(vmChunks.vendor).toBeUndefined();
+  await ensure();
+  expect(fs.readFile).toHaveBeenCalledTimes(2);
+  expect(requireChunks.vendor).toBe(1);
+  expect(vmChunks.vendor).toBe(0);
+});
+
+test('one-argument patching preserves the native readiness predicate', async () => {
+  const runtime = createRuntime(['native']);
+  const ready = runtime.O.readFileVm;
+  const chunks: Record<string, unknown> = {};
+  const handler = setupChunkHandler(chunks, { origin });
+  setupWebpackRequirePatching(handler);
+  expect(runtime.O.readFileVm).toBe(ready);
+  await load(runtime);
+  expect(chunks.vendor).toBe(0);
+  expect(runtime.O.readFileVm('native')).toBe(true);
 });

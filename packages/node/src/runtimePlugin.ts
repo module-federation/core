@@ -414,12 +414,27 @@ export const setupChunkHandler = (
   args: any,
   isChunkLoaded?: (chunkId: string) => boolean,
   loadedState = 0,
+  inFlight: { [key: string]: any } = {},
 ): ((chunkId: string, promises: any[]) => void) => {
   return (chunkId: string, promises: any[]): void => {
     if (!Array.isArray(installedChunks[chunkId]) && isChunkLoaded?.(chunkId))
       return;
     let installedChunkData = installedChunks[chunkId];
     if (installedChunkData !== loadedState) {
+      const pending = inFlight[chunkId];
+      if (!installedChunkData && pending) {
+        installedChunkData = installedChunks[chunkId] = pending;
+        pending[2].then(
+          () => {
+            installedChunks[chunkId] = loadedState;
+            if (typeof __webpack_require__.O === 'function')
+              __webpack_require__.O();
+          },
+          () => {
+            deleteChunk(chunkId, installedChunks);
+          },
+        );
+      }
       if (installedChunkData) {
         promises.push(installedChunkData[2]);
       } else {
@@ -478,6 +493,13 @@ export const setupChunkHandler = (
           installedChunks[chunkId] = loadedState;
         }
       }
+      if (Array.isArray(installedChunkData) && !inFlight[chunkId]) {
+        inFlight[chunkId] = installedChunkData;
+        const clear = () => {
+          delete inFlight[chunkId];
+        };
+        installedChunkData[2].then(clear, clear);
+      }
     }
   };
 };
@@ -491,7 +513,7 @@ type ChunkLoadingType = 'require' | 'readFileVm';
 // Keep startup readiness aligned with the handler that actually loads chunks.
 export const setupWebpackRequirePatching = (
   handle: ChunkHandler,
-  installedChunks: { [key: string]: any } = {},
+  installedChunks?: { [key: string]: any },
   chunkLoadingTypes: ChunkLoadingType[] = ['require', 'readFileVm'],
   loadedState = 0,
 ): void => {
@@ -506,7 +528,7 @@ export const setupWebpackRequirePatching = (
       );
     }
     const ready = __webpack_require__.O?.[key];
-    if (ready) {
+    if (ready && installedChunks) {
       __webpack_require__.O![key] = (chunkId) =>
         installedChunks[chunkId] === loadedState ||
         (!Array.isArray(installedChunks[chunkId]) && !!ready(chunkId));
@@ -527,6 +549,7 @@ export default function (): ModuleFederationRuntimePlugin {
   // plugins by name. Patching in beforeInit resets state and misses bundles.
   setupScriptLoader();
   const privateChunks = {};
+  const inFlight = {};
   for (const key of ['require', 'readFileVm'] as const) {
     const previous = __webpack_require__.f?.[key] as ChunkHandler | undefined;
     if (!previous || previous[chunkHandlerMarker]) continue;
@@ -538,6 +561,7 @@ export default function (): ModuleFederationRuntimePlugin {
       loaderArgs,
       __webpack_require__.O?.[key],
       loadedState,
+      inFlight,
     );
     setupWebpackRequirePatching(handle, installedChunks, [key], loadedState);
   }
