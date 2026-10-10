@@ -9,6 +9,12 @@ type WebpackRequire = {
   m: { [key: string]: any };
   o: (obj: any, prop: string) => boolean;
   C?: (chunk: any) => void;
+  O?: (() => any) & {
+    require?: (chunkId: string) => boolean;
+    readFileVm?: (chunkId: string) => boolean;
+  };
+  hmrS_require?: { [key: string]: any };
+  hmrS_readFileVm?: { [key: string]: any };
   l: (
     url: string,
     done: (res: any) => void,
@@ -238,14 +244,15 @@ export const fetchAndRun = (
     : Promise.resolve(fetch)
   )
     .then((fetchFunction) => {
-      return args.origin.loaderHook.lifecycle.fetch
-        .emit(url.href, {})
-        .then((res: Response | null) => {
-          if (!res || !(res instanceof Response)) {
-            return fetchFunction(url.href).then((response) => response.text());
-          }
-          return res.text();
-        });
+      return (
+        args?.origin?.loaderHook?.lifecycle?.fetch?.emit(url.href, {}) ??
+        Promise.resolve(null)
+      ).then((res: Response | null) => {
+        if (!res || !(res instanceof Response)) {
+          return fetchFunction(url.href).then((response) => response.text());
+        }
+        return res.text();
+      });
     })
     .then((data) => {
       const chunk = {};
@@ -353,15 +360,17 @@ export const loadChunk = (
 export const installChunk = (
   chunk: any,
   installedChunks: { [key: string]: any },
+  loadedState = 0,
 ): void => {
   for (const moduleId in chunk.modules) {
     __webpack_require__.m[moduleId] = chunk.modules[moduleId];
   }
   if (chunk.runtime) chunk.runtime(__webpack_require__);
   for (const chunkId of chunk.ids) {
-    if (installedChunks[chunkId]) installedChunks[chunkId][0]();
-    installedChunks[chunkId] = 0;
+    if (Array.isArray(installedChunks[chunkId])) installedChunks[chunkId][0]();
+    installedChunks[chunkId] = loadedState;
   }
+  if (typeof __webpack_require__.O === 'function') __webpack_require__.O();
 };
 
 // Hoisted utility function to remove a chunk on fail
@@ -403,10 +412,29 @@ export const setupScriptLoader = (): void => {
 export const setupChunkHandler = (
   installedChunks: { [key: string]: any },
   args: any,
+  isChunkLoaded?: (chunkId: string) => boolean,
+  loadedState = 0,
+  inFlight: { [key: string]: any } = {},
 ): ((chunkId: string, promises: any[]) => void) => {
   return (chunkId: string, promises: any[]): void => {
+    if (!Array.isArray(installedChunks[chunkId]) && isChunkLoaded?.(chunkId))
+      return;
     let installedChunkData = installedChunks[chunkId];
-    if (installedChunkData !== 0) {
+    if (installedChunkData !== loadedState) {
+      const pending = inFlight[chunkId];
+      if (!installedChunkData && pending) {
+        installedChunkData = installedChunks[chunkId] = pending;
+        pending[2].then(
+          () => {
+            installedChunks[chunkId] = loadedState;
+            if (typeof __webpack_require__.O === 'function')
+              __webpack_require__.O();
+          },
+          () => {
+            deleteChunk(chunkId, installedChunks);
+          },
+        );
+      }
       if (installedChunkData) {
         promises.push(installedChunkData[2]);
       } else {
@@ -437,7 +465,7 @@ export const setupChunkHandler = (
                 (err, chunk) => {
                   if (err)
                     return deleteChunk(chunkId, installedChunks) && reject(err);
-                  if (chunk) installChunk(chunk, installedChunks);
+                  if (chunk) installChunk(chunk, installedChunks, loadedState);
                   resolve(chunk);
                 },
                 args,
@@ -453,7 +481,7 @@ export const setupChunkHandler = (
                 (err, chunk) => {
                   if (err)
                     return deleteChunk(chunkId, installedChunks) && reject(err);
-                  if (chunk) installChunk(chunk, installedChunks);
+                  if (chunk) installChunk(chunk, installedChunks, loadedState);
                   resolve(chunk);
                 },
                 args,
@@ -462,51 +490,85 @@ export const setupChunkHandler = (
           });
           promises.push((installedChunkData[2] = promise));
         } else {
-          installedChunks[chunkId] = 0;
+          installedChunks[chunkId] = loadedState;
         }
+      }
+      if (Array.isArray(installedChunkData) && !inFlight[chunkId]) {
+        inFlight[chunkId] = installedChunkData;
+        const clear = () => {
+          delete inFlight[chunkId];
+        };
+        installedChunkData[2].then(clear, clear);
       }
     }
   };
 };
 
-// Hoisted function to set up webpack require patching
+const chunkHandlerMarker = Symbol.for('mf.node.chunkHandler');
+type ChunkHandler = ((chunkId: string, promises: any[]) => void) & {
+  [chunkHandlerMarker]?: boolean;
+};
+type ChunkLoadingType = 'require' | 'readFileVm';
+
+// Keep startup readiness aligned with the handler that actually loads chunks.
 export const setupWebpackRequirePatching = (
-  handle: (chunkId: string, promises: any[]) => void,
+  handle: ChunkHandler,
+  installedChunks?: { [key: string]: any },
+  chunkLoadingTypes: ChunkLoadingType[] = ['require', 'readFileVm'],
+  loadedState = 0,
 ): void => {
-  if (__webpack_require__.f) {
-    if (__webpack_require__.f.require) {
+  for (const key of chunkLoadingTypes) {
+    if (!__webpack_require__.f?.[key]) continue;
+    if ((__webpack_require__.f[key] as ChunkHandler)[chunkHandlerMarker])
+      continue;
+    if (key === 'require') {
       console.warn(
         '\x1b[33m%s\x1b[0m',
         'CAUTION: build target is not set to "async-node", attempting to patch additional chunk handlers. This may not work',
       );
-      __webpack_require__.f.require = handle;
     }
-
-    if (__webpack_require__.f.readFileVm) {
-      __webpack_require__.f.readFileVm = handle;
+    const ready = __webpack_require__.O?.[key];
+    if (ready && installedChunks) {
+      __webpack_require__.O![key] = (chunkId) =>
+        installedChunks[chunkId] === loadedState ||
+        (!Array.isArray(installedChunks[chunkId]) && !!ready(chunkId));
     }
+    handle[chunkHandlerMarker] = true;
+    __webpack_require__.f[key] = handle;
   }
 };
 
 export default function (): ModuleFederationRuntimePlugin {
+  let origin: ModuleFederation | undefined;
+  const loaderArgs = {
+    get origin() {
+      return origin || __webpack_require__.federation.instance;
+    },
+  };
+  // Factories run for every bundle, even when the shared instance deduplicates
+  // plugins by name. Patching in beforeInit resets state and misses bundles.
+  setupScriptLoader();
+  const privateChunks = {};
+  const inFlight = {};
+  for (const key of ['require', 'readFileVm'] as const) {
+    const previous = __webpack_require__.f?.[key] as ChunkHandler | undefined;
+    if (!previous || previous[chunkHandlerMarker]) continue;
+    const hmrChunks = __webpack_require__[`hmrS_${key}`];
+    const installedChunks = hmrChunks || privateChunks;
+    const loadedState = hmrChunks && key === 'require' ? 1 : 0;
+    const handle = setupChunkHandler(
+      installedChunks,
+      loaderArgs,
+      __webpack_require__.O?.[key],
+      loadedState,
+      inFlight,
+    );
+    setupWebpackRequirePatching(handle, installedChunks, [key], loadedState);
+  }
   return {
     name: 'node-federation-plugin',
     beforeInit(args) {
-      // Patch webpack chunk loading handlers
-      (() => {
-        // Create the chunk tracking object
-        const installedChunks: { [key: string]: any } = {};
-
-        // Set up webpack script loader
-        setupScriptLoader();
-
-        // Create and set up the chunk handler
-        const handle = setupChunkHandler(installedChunks, args);
-
-        // Patch webpack require
-        setupWebpackRequirePatching(handle);
-      })();
-
+      origin = args.origin;
       return args;
     },
   };
