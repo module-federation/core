@@ -4,6 +4,10 @@ import { PackageManagerTabs } from '@theme';
 
 O [Vinext](https://github.com/cloudflare/vinext) executa aplicações Next.js sobre o Vite, então uma aplicação Vinext usa o [`@module-federation/vite`](/integrations/build-tool/vite.html) em vez do `@module-federation/nextjs-mf`. Isso funciona com o App Router: um host Vinext renderiza componentes remotos no servidor e os hidrata no navegador.
 
+:::info
+A renderização de remotes no servidor vem do `@module-federation/vite`, não do Vinext. A [ponte de Module Federation](https://github.com/cloudflare/vinext#module-federation-client-side) do próprio Vinext roda apenas no navegador e só fornece os hooks do React usados pelos componentes cliente dos remotes, conforme descrito em [Escrever componentes remotos](#write-remote-components).
+:::
+
 ## Suporte
 
 - Hosts Vinext usando o App Router do Next.js com renderização no servidor
@@ -73,7 +77,27 @@ export default defineConfig({
 });
 ```
 
-As chaves `react/` e `react-dom/` compartilham imports de subcaminhos, como `react/jsx-runtime` e `react-dom/client`, para que o host e o remote usem uma única instância do React.
+As chaves `react/` e `react-dom/` compartilham imports de subcaminhos, como `react/jsx-runtime` e `react-dom/client`, entre o host e o remote.
+
+### Escrever componentes remotos {#write-remote-components}
+
+Compartilhar os pacotes do React não basta para os hooks. Um componente cliente do remote precisa ler seus hooks por meio de `getVinextReact()`, de `vinext/client`, para que eles venham da instância do React do host. Adicione `vinext` às dependências do remote e então:
+
+```tsx title="remote/src/widget.tsx"
+'use client';
+
+import * as React from 'react';
+import { getVinextReact } from 'vinext/client';
+
+const { useState } = getVinextReact(React);
+
+export default function Widget() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount((value) => value + 1)}>{count}</button>;
+}
+```
+
+Sem isso, um componente que importa `useState` ou `useContext` diretamente pode rodar com outra instância do React e falhar com chamadas de hook inválidas. `getVinextReact()` não reescreve imports do React dentro de pacotes de terceiros empacotados pelo remote.
 
 ## Configurar o host Vinext
 

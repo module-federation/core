@@ -4,6 +4,10 @@ import { PackageManagerTabs } from '@theme';
 
 [Vinext](https://github.com/cloudflare/vinext) 在 Vite 上运行 Next.js 应用，因此 Vinext 应用使用 [`@module-federation/vite`](/integrations/build-tool/vite.html)，而不是 `@module-federation/nextjs-mf`。该方案适用于 App Router：Vinext 宿主应用会在服务端渲染远程组件，并在浏览器中进行水合。
 
+:::info
+远程组件的服务端渲染由 `@module-federation/vite` 提供，而不是 Vinext。Vinext 自带的 [Module Federation 桥接](https://github.com/cloudflare/vinext#module-federation-client-side)仅在浏览器中运行，只负责为远程客户端组件提供 React Hooks，详见[编写远程组件](#write-remote-components)。
+:::
+
 ## 支持
 
 - 使用 Next.js App Router 并开启服务端渲染的 Vinext 宿主应用
@@ -73,7 +77,27 @@ export default defineConfig({
 });
 ```
 
-`react/` 和 `react-dom/` 这两个键用于共享 `react/jsx-runtime`、`react-dom/client` 等子路径导入，从而使宿主应用和远程应用使用同一个 React 实例。
+`react/` 和 `react-dom/` 这两个键用于在宿主应用和远程应用之间共享 `react/jsx-runtime`、`react-dom/client` 等子路径导入。
+
+### 编写远程组件 {#write-remote-components}
+
+仅共享 React 包并不足以让 Hooks 正常工作。远程客户端组件必须通过 `vinext/client` 中的 `getVinextReact()` 读取 Hooks，使其来自宿主应用的 React 实例。在远程应用的依赖中添加 `vinext`，然后：
+
+```tsx title="remote/src/widget.tsx"
+'use client';
+
+import * as React from 'react';
+import { getVinextReact } from 'vinext/client';
+
+const { useState } = getVinextReact(React);
+
+export default function Widget() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount((value) => value + 1)}>{count}</button>;
+}
+```
+
+否则，直接导入 `useState` 或 `useContext` 的组件可能会使用另一个 React 实例，并因无效的 Hook 调用而失败。`getVinextReact()` 不会改写远程应用打包的第三方包中的 React 导入。
 
 ## 配置 Vinext 宿主应用
 

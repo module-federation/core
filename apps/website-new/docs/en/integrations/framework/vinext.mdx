@@ -4,6 +4,10 @@ import { PackageManagerTabs } from '@theme';
 
 [Vinext](https://github.com/cloudflare/vinext) runs Next.js apps on Vite, so a Vinext app uses [`@module-federation/vite`](/integrations/build-tool/vite.html) instead of `@module-federation/nextjs-mf`. This works with the App Router: a Vinext host renders remote components on the server and hydrates them in the browser.
 
+:::info
+Server rendering of remotes comes from `@module-federation/vite`, not from Vinext. Vinext's own [Module Federation bridge](https://github.com/cloudflare/vinext#module-federation-client-side) is browser-only and only supplies the React hooks that remote client components use, as described in [Write remote components](#write-remote-components).
+:::
+
 ## Supports
 
 - Vinext hosts using the Next.js App Router with server-side rendering
@@ -73,7 +77,27 @@ export default defineConfig({
 });
 ```
 
-The `react/` and `react-dom/` keys share subpath imports such as `react/jsx-runtime` and `react-dom/client`, so the host and remote use one React instance.
+The `react/` and `react-dom/` keys share subpath imports such as `react/jsx-runtime` and `react-dom/client` between the host and the remote.
+
+### Write remote components {#write-remote-components}
+
+Sharing the React packages is not enough for hooks. A remote client component must read its hooks through `getVinextReact()` from `vinext/client`, so they come from the host's React instance. Add `vinext` to the remote's dependencies, then:
+
+```tsx title="remote/src/widget.tsx"
+'use client';
+
+import * as React from 'react';
+import { getVinextReact } from 'vinext/client';
+
+const { useState } = getVinextReact(React);
+
+export default function Widget() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount((value) => value + 1)}>{count}</button>;
+}
+```
+
+Without it, a component that imports `useState` or `useContext` directly can run against a different React instance and fail with invalid hook calls. `getVinextReact()` does not rewrite React imports inside third-party packages the remote bundles.
 
 ## Configure the Vinext host
 
