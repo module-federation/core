@@ -1,0 +1,175 @@
+import { PackageManagerTabs } from '@theme';
+
+# Vinext
+
+O [Vinext](https://github.com/cloudflare/vinext) executa aplicações Next.js sobre o Vite, então uma aplicação Vinext usa o [`@module-federation/vite`](/integrations/build-tool/vite.html) em vez do `@module-federation/nextjs-mf`. Isso funciona com o App Router: um host Vinext renderiza componentes remotos no servidor e os hidrata no navegador.
+
+## Suporte
+
+- Hosts Vinext usando o App Router do Next.js com renderização no servidor
+- Remotes com build em Vite que compartilham o React com o host
+- Ilhas React isoladas para remotes que trazem sua própria versão do React
+
+## Instalação
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/vite',
+    yarn: 'yarn add @module-federation/vite',
+    pnpm: 'pnpm add @module-federation/vite',
+    bun: 'bun add @module-federation/vite',
+  }}
+/>
+
+## Configurar o remote
+
+O remote é uma aplicação Vite React. Faça o build tanto de um ambiente client quanto de um ambiente SSR, para que o host possa renderizar os componentes expostos no servidor:
+
+```ts title="remote/vite.config.ts"
+import { federation } from '@module-federation/vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  builder: {},
+  plugins: [
+    federation({
+      name: 'remote',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Widget': './src/widget.tsx',
+      },
+      shared: {
+        react: { singleton: true },
+        'react/': { singleton: true },
+        'react-dom': { singleton: true },
+        'react-dom/': { singleton: true },
+      },
+    }),
+    react(),
+  ],
+  environments: {
+    client: {
+      build: { outDir: 'dist/client' },
+    },
+    ssr: {
+      build: {
+        outDir: 'dist/server',
+        ssr: './src/widget.tsx',
+      },
+    },
+  },
+  build: {
+    target: 'chrome89',
+  },
+  server: {
+    cors: true,
+    origin: 'http://localhost:4174',
+  },
+  preview: {
+    cors: true,
+    port: 4174,
+  },
+});
+```
+
+As chaves `react/` e `react-dom/` compartilham imports de subcaminhos, como `react/jsx-runtime` e `react-dom/client`, para que o host e o remote usem uma única instância do React.
+
+## Configurar o host Vinext
+
+Adicione `federation()` antes de `vinext()`:
+
+```ts title="host/vite.config.ts"
+import { federation } from '@module-federation/vite';
+import vinext from 'vinext';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    federation({
+      name: 'host',
+      hostInitInjectLocation: 'entry',
+      remotes: {
+        remote: {
+          type: 'module',
+          name: 'remote',
+          entry: 'http://localhost:4174/remoteEntry.js',
+          entryGlobalName: 'remote',
+          shareScope: 'default',
+        },
+      },
+      shared: {
+        react: { singleton: true },
+        'react/': { singleton: true },
+        'react-dom': { singleton: true },
+        'react-dom/': { singleton: true },
+      },
+    }),
+    vinext(),
+  ],
+});
+```
+
+`hostInitInjectLocation: 'entry'` injeta a inicialização do host no script de entrada, já que uma aplicação com App Router não tem um `index.html` para o plugin atualizar.
+
+## Carregar componentes remotos
+
+Carregue os remotes a partir de um client component com `React.lazy` e `Suspense`. Use `React.lazy` em vez de `next/dynamic`, o que evita erros de hidratação com componentes federados:
+
+```tsx title="host/app/remote-widget.tsx"
+'use client';
+
+import { lazy, Suspense } from 'react';
+
+const LazyRemoteWidget = lazy(() => import('remote/Widget'));
+
+export function RemoteWidget() {
+  return (
+    <Suspense fallback={<div>Loading remote widget...</div>}>
+      <LazyRemoteWidget />
+    </Suspense>
+  );
+}
+```
+
+Depois, renderize-o em qualquer página ou layout:
+
+```tsx title="host/app/page.tsx"
+import { RemoteWidget } from './remote-widget';
+
+export default function Home() {
+  return <RemoteWidget />;
+}
+```
+
+## Ilhas React isoladas
+
+Um remote que não pode compartilhar o React com o host, como um remote React 18 dentro de um host React 19, pode optar pelo modo ilha. Configure os builds client e SSR dele como no remote acima, deixe `react` fora de `shared` e habilite `experiments.ssrMode`:
+
+```ts title="island/vite.config.ts"
+federation({
+  name: 'island',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './Counter': './src/counter.tsx',
+  },
+  experiments: { ssrMode: 'ISLAND' },
+  shared: {},
+});
+```
+
+O host importa o expose com a query `?mf-island` para usar o adaptador React do plugin. Ele renderiza o HTML da ilha no servidor e a hidrata com o React do próprio remote, fora da árvore React do host:
+
+```tsx title="host/app/page.tsx"
+import RemoteIsland from 'island/Counter?mf-island';
+
+export default function Home() {
+  return <RemoteIsland />;
+}
+```
+
+Importar `island/Counter` sem a query continua retornando o componente original.
+
+## Exemplos
+
+- [Host Vinext, remote compartilhado e ilha](https://github.com/gioboa/module-federation-vite-examples/tree/main/vinext): host Vinext + Next.js 16 + React 19 com um remote compartilhado e uma ilha React 18
