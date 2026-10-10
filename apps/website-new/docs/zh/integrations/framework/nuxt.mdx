@@ -1,0 +1,190 @@
+import { Badge, PackageManagerTabs } from '@theme';
+
+<div style={{float:"right"}}><Badge text="Beta" type="warning" /></div>
+
+# Nuxt
+
+`@module-federation/nuxt` 是一个 Nuxt 模块，用于为 Nuxt 的宿主应用和远程应用接入 Module Federation。在 Nuxt 默认的 Vite 构建器下，它使用 `@module-federation/vite`；当应用使用 Rspack 构建器时，它使用 `@module-federation/enhanced/rspack`。因此无论使用哪种构建器，你只需在 `nuxt.config.ts` 中配置一次 federation。
+
+:::warning Beta
+`@module-federation/nuxt` 仍处于 Beta 阶段，在集成趋于稳定之前，其 API 可能会发生变化。如遇到 bug 或边界情况，请在 [module-federation/nuxt](https://github.com/module-federation/nuxt) 中反馈。
+:::
+
+## 支持
+
+- Nuxt `>=4.5.1`，使用默认的 Vite 构建器或版本匹配的 `@nuxt/rspack-builder`
+- Node.js `^22.18.0`、`^24.11.0` 或 `>=26.0.0`
+- 在可写入文件系统的 Node 部署环境中，开发和生产环境均支持服务端渲染远程组件
+- 基于约定从 `~/components/exposed` 导出组件
+- 远程 Vue 组件会注册到 Nuxt 模板的自动导入中
+- 默认以单例形式共享 `vue` 和 `vue-router`
+
+## 安装
+
+在宿主应用和远程应用中都安装该模块：
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/nuxt',
+    yarn: 'yarn add @module-federation/nuxt',
+    pnpm: 'pnpm add @module-federation/nuxt',
+    bun: 'bun add @module-federation/nuxt',
+  }}
+/>
+
+## 配置远程应用
+
+注册该模块，并为每个部署的容器设置唯一的名称：
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  modules: ['@module-federation/nuxt'],
+  moduleFederation: {
+    config: {
+      name: 'catalog',
+    },
+  },
+});
+```
+
+放在 `app/components/exposed` 中的组件会被自动导出。例如，`app/components/exposed/ProductCard.vue` 会以 `./ProductCard` 的形式导出给宿主应用。
+
+你也可以直接配置 `exposes`。相对路径基于 Nuxt 应用根目录解析：
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  modules: ['@module-federation/nuxt'],
+  moduleFederation: {
+    config: {
+      name: 'catalog',
+      exposes: {
+        './catalog-app': './app/app.vue',
+      },
+    },
+  },
+});
+```
+
+## 配置宿主应用
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  modules: ['@module-federation/nuxt'],
+  moduleFederation: {
+    remoteComponents: {
+      catalog: ['ProductCard'],
+    },
+    config: {
+      name: 'shell',
+      hostInitInjectLocation: 'entry',
+      remotes: {
+        catalog: {
+          type: 'module',
+          name: 'catalog',
+          entry: 'https://catalog.example.com/mf-manifest.json',
+          entryGlobalName: 'catalog',
+          shareScope: 'default',
+        },
+      },
+    },
+  },
+});
+```
+
+之后即可通过 Nuxt 的组件自动导入使用导出的组件：
+
+```vue title="app/app.vue"
+<template>
+  <RemoteProductCard product-id="123" />
+</template>
+```
+
+在初始化阶段，该模块会拉取每个远程应用的 `mf-manifest.json` 并注册其导出的组件。`remoteComponents` 是无法访问 manifest 时使用的兜底列表，例如远程应用与宿主应用的构建是分开部署的情况。
+
+对于 SSR 宿主应用，推荐使用 manifest URL：运行时会根据 manifest 选择浏览器端或服务端入口，并且无需重启宿主应用即可检测到新的服务端构建。
+
+### 组件名称
+
+只有一个远程应用时，`./ProductCard` 会变为 `RemoteProductCard`。有多个远程应用时，为避免命名冲突，名称中会包含远程应用名，因此 `catalog/ProductCard` 会变为 `RemoteCatalogProductCard`。
+
+只有以字母开头、且仅包含字母、数字、下划线或连字符的导出名称才会被注册为 Nuxt 组件。其他导出仍可通过常规的运行时导入使用。
+
+## 服务端渲染
+
+远程组件默认在 Nuxt 服务端渲染。生产环境的远程应用会同时发布供浏览器使用的 `remoteEntry.js` 和供服务端使用的 `remoteEntry.ssr.js`；宿主应用在渲染时加载服务端入口，将远程模块的 HTML 包含在响应中，并在浏览器中对同一组件进行水合。
+
+默认的 SSR 加载器会将拉取到的模块写入服务端工作目录下的 `node_modules/.ssr-cache`。对于只读或 Serverless 部署环境，请关闭远程 SSR：
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  moduleFederation: {
+    ssr: false,
+    config: {
+      // ...
+    },
+  },
+});
+```
+
+如果某个远程应用在服务端请求期间出错，宿主应用会为该请求渲染一个空的兜底内容，以确保页面仍能正常响应，后续请求会重新尝试加载该远程应用。
+
+:::warning
+远程 SSR 会以宿主进程的权限执行远程应用的服务端入口。请只配置可信的远程应用，并在生产环境中使用直接的 HTTPS URL。
+:::
+
+## 共享依赖
+
+未设置 `config.shared` 时，`vue` 和 `vue-router` 会以单例形式共享，并使用已安装的版本。提供 `config.shared` 即可覆盖默认值：
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  moduleFederation: {
+    config: {
+      shared: {
+        vue: { singleton: true, requiredVersion: '^3.5.0' },
+        'vue-router': { singleton: true, requiredVersion: '^5.1.0' },
+        pinia: { singleton: true },
+      },
+    },
+  },
+});
+```
+
+## 使用 Rspack 构建器
+
+默认使用 Vite。如需使用 Rspack，请安装与 Nuxt 版本相同的 `@nuxt/rspack-builder`，并在应用中设置 `builder: 'rspack'`：
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  builder: 'rspack',
+  modules: ['@module-federation/nuxt'],
+  moduleFederation: {
+    config: { name: 'catalog' },
+  },
+});
+```
+
+两种构建器使用相同的 `moduleFederation` 配置，并且可以互相消费对方的 manifest。`hostInitInjectLocation` 等仅适用于 Vite 的选项会被 Rspack 忽略。
+
+## 配置项
+
+在 `nuxt.config.ts` 的 `moduleFederation` 下配置以下选项：
+
+| 选项 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `base` | `string` | `"/"` | federation 入口文件和 manifest 的公共路由及输出目录。 |
+| `exposedDir` | `string` | `"~/components/exposed"` | 其中的组件会被自动导出的目录。 |
+| `manifestFetchTimeoutMs` | `number` | `500` | 初始化阶段拉取每个远程 manifest 的最长时间。 |
+| `manifestMetadata` | `Record<string, unknown>` | `{}` | 合并到生成的 manifest 和 stats 文件中 `metaData.custom` 的值。 |
+| `remoteComponents` | `Record<string, string[]>` | `{}` | 当 manifest 发现不可用或被禁用时需要注册的组件导出。 |
+| `ssr` | `boolean` | `true` | 在 Nuxt 服务端渲染所消费的远程组件。设置为 `false` 时仍会发布服务端导出。 |
+| `ssrFetchTimeoutMs` | `number` | `10000` | 每个 SSR 远程网络请求的最长时间；`0` 表示禁用超时。 |
+| `ssrManifestMaxAgeMs` | `number` | `30000` | 服务端重新检查远程 manifest 是否有新版本的间隔时间。 |
+| `config` | `FederationOptions` | | 传递给所选构建器的 Module Federation 配置。参见 [Config 总览](/configure/index.html)。 |
+
+关于类型化的远程组件、Bridge 应用导出以及完整的部署约定，请参阅 [包参考文档](https://github.com/module-federation/nuxt/blob/main/packages/nuxt/README.md)。
+
+## 示例
+
+- [module-federation/nuxt 示例应用](https://github.com/module-federation/nuxt/tree/main/apps)：Vite 和 Rspack 的宿主应用与远程应用
+- [Nuxt 宿主应用与远程应用](https://github.com/gioboa/module-federation-vite-examples/tree/main/nuxt)：使用 SSR 远程组件的 Nuxt 4 应用
