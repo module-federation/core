@@ -1010,6 +1010,8 @@ describe('runtimePlugin', () => {
         },
       };
 
+      plugin = runtimePlugin();
+
       const mockArgs = {
         origin: {
           loaderHook: {
