@@ -27,8 +27,8 @@ const addWait = (caller: string, name: string, promise: Promise<unknown>) => {
   initWaits.set(caller, waits);
   waits.set(name, (waits.get(name) || 0) + 1);
   const done = () => {
-    const count = waits.get(name)! - 1;
-    if (count) waits.set(name, count);
+    const count = (waits.get(name) || 0) - 1;
+    if (count > 0) waits.set(name, count);
     else waits.delete(name);
   };
   promise.then(done, done);

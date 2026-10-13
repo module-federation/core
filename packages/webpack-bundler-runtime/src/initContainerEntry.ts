@@ -3,7 +3,7 @@ import { withInitCaller } from './initializeSharing';
 
 export function initContainerEntry(
   options: InitContainerEntryOptions,
-): WebpackRequire['I'] | void {
+): ReturnType<WebpackRequire['I']> {
   const {
     webpackRequire,
     shareScope,
@@ -82,15 +82,14 @@ export function initContainerEntry(
     webpackRequire.federation.attachShareScopeMap(webpackRequire);
   }
 
+  const { initOptions } = webpackRequire.federation;
   return withInitCaller(remoteEntryInitOptions?.initFrom, () => {
     if (!Array.isArray(shareScopeKey)) {
       // @ts-ignore
       return webpackRequire.I(shareScopeKey || 'default', initScope);
     }
 
-    var proxyInitializeSharing = Boolean(
-      webpackRequire.federation.initOptions!.shared,
-    );
+    var proxyInitializeSharing = Boolean(initOptions.shared);
 
     if (proxyInitializeSharing) {
       // @ts-ignore
