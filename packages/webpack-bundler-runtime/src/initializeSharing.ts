@@ -2,10 +2,10 @@ import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { RemoteEntryExports, InitializeSharingOptions } from './types';
 
-const pendingInitScopes = new WeakMap<
-  Promise<unknown>,
-  InitializeSharingOptions['initScope']
->();
+// Set on a container's token while its init is pending, to the chain that started it
+const PENDING_INIT_SCOPE = Symbol.for(
+  'mf.pendingInitScope',
+) as unknown as string;
 
 export function initializeSharing({
   shareScopeName,
@@ -31,12 +31,13 @@ export function initializeSharing({
 
     const promise = initPromises[shareScopeKey];
     if (promise) {
-      // A cycle across two init chains: the pending chain already entered a container in ours
-      const pendingScope = pendingInitScopes.get(promise as Promise<unknown>);
+      // A cycle across two init chains: the pending chain entered a container ours is still initializing
+      const pendingScope = initToken[PENDING_INIT_SCOPE];
       if (
         pendingScope &&
-        initScope.some(
-          (token) => token !== initToken && pendingScope.indexOf(token) >= 0,
+        pendingScope.some(
+          (token: InitializeSharingOptions['initScope'][number]) =>
+            token[PENDING_INIT_SCOPE] === initScope,
         )
       )
         return;
@@ -102,11 +103,11 @@ export function initializeSharing({
       return (initPromises[shareScopeKey] = true);
     }
 
-    const pending = (initPromises[shareScopeKey] = Promise.all(promises).then(
-      () => (initPromises[shareScopeKey] = true),
-    ));
-    pendingInitScopes.set(pending, initScope);
-    return pending;
+    initToken[PENDING_INIT_SCOPE] = initScope;
+    return (initPromises[shareScopeKey] = Promise.all(promises).then(() => {
+      delete initToken[PENDING_INIT_SCOPE];
+      return (initPromises[shareScopeKey] = true);
+    }));
   };
 
   shareScopeKeys.forEach((key) => {
