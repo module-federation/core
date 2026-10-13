@@ -183,6 +183,84 @@ describe('initializeSharing', () => {
     ).not.toHaveBeenCalled();
   });
 
+  test('should not deadlock when cyclic remotes initialize from two chains', async () => {
+    const containers: Record<string, { init: (initScope: any[]) => any }> = {};
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+
+    const createContainer = (name: string, remote: string) => {
+      const initPromises = {};
+      const initTokens = {};
+      const instance = createMockFederationInstance({
+        shareStrategy: 'version-first',
+      });
+      instance.name = name;
+      instance.initializeSharing = jest.fn((_key, { initScope }) => [
+        gate.then(() => containers[remote].init(initScope)),
+      ]);
+      const webpackRequire = createMockWebpackRequire({
+        federationInstance: instance,
+      });
+      containers[name] = {
+        init: (initScope) =>
+          initializeSharing({
+            shareScopeName: 'default',
+            webpackRequire: webpackRequire as any,
+            initPromises,
+            initTokens,
+            initScope,
+          }),
+      };
+    };
+    createContainer('remoteA', 'remoteB');
+    createContainer('remoteB', 'remoteA');
+
+    // remote-a's own chain, then the host's chain reaching remote-b
+    const a = containers.remoteA.init([]);
+    const b = containers.remoteB.init([]);
+    release();
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise(
+      (resolve) => (timer = setTimeout(() => resolve('timeout'), 1000)),
+    );
+    const result = await Promise.race([
+      Promise.all([a, b]).then(() => 'resolved'),
+      timeout,
+    ]);
+    clearTimeout(timer);
+    expect(result).toBe('resolved');
+  });
+
+  test('should still wait for a pending init when the nested caller is unrelated', async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const instance = createMockFederationInstance({
+      shareStrategy: 'version-first',
+    });
+    instance.initializeSharing = jest.fn(() => [gate]);
+    const options = createMockOptions({
+      webpackRequire: createMockWebpackRequire({
+        federationInstance: instance,
+      }),
+    });
+
+    initializeSharing({ ...options, initScope: [] });
+    let settled = false;
+    (
+      initializeSharing({
+        ...options,
+        initScope: [{ from: 'unrelated' }],
+      }) as Promise<boolean>
+    ).then(() => (settled = true));
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(settled).toBe(false);
+    release();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(settled).toBe(true);
+  });
+
   test('should initialize sharing with no promises', async () => {
     // Setup
     const mockOptions = createMockOptions();

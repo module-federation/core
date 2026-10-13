@@ -2,6 +2,11 @@ import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { RemoteEntryExports, InitializeSharingOptions } from './types';
 
+const pendingInitScopes = new WeakMap<
+  Promise<unknown>,
+  InitializeSharingOptions['initScope']
+>();
+
 export function initializeSharing({
   shareScopeName,
   webpackRequire,
@@ -25,7 +30,18 @@ export function initializeSharing({
     initScope.push(initToken);
 
     const promise = initPromises[shareScopeKey];
-    if (promise) return promise;
+    if (promise) {
+      // A cycle across two init chains: the pending chain already entered a container in ours
+      const pendingScope = pendingInitScopes.get(promise as Promise<unknown>);
+      if (
+        pendingScope &&
+        initScope.some(
+          (token) => token !== initToken && pendingScope.indexOf(token) >= 0,
+        )
+      )
+        return;
+      return promise;
+    }
     var warn = (msg: string) =>
       typeof console !== 'undefined' && console.warn && console.warn(msg);
 
@@ -86,9 +102,11 @@ export function initializeSharing({
       return (initPromises[shareScopeKey] = true);
     }
 
-    return (initPromises[shareScopeKey] = Promise.all(promises).then(
+    const pending = (initPromises[shareScopeKey] = Promise.all(promises).then(
       () => (initPromises[shareScopeKey] = true),
     ));
+    pendingInitScopes.set(pending, initScope);
+    return pending;
   };
 
   shareScopeKeys.forEach((key) => {
