@@ -200,6 +200,12 @@ class Module {
           this.host.shareScopeMap,
           rawInitScope,
         );
+      // Only a sharing init passes its initScope, so only it is recorded as the caller
+      if (rawInitScope) {
+        Object.defineProperty(remoteEntryInitOptions, 'initFrom', {
+          value: this.host.name,
+        });
+      }
 
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({

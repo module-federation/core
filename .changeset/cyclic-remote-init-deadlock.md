@@ -1,5 +1,6 @@
 ---
 '@module-federation/webpack-bundler-runtime': patch
+'@module-federation/runtime-core': patch
 ---
 
 Fix a deadlock in `initializeSharing` when two remotes that list each other

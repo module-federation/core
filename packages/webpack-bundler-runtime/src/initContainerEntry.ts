@@ -1,4 +1,5 @@
 import { InitContainerEntryOptions, WebpackRequire } from './types';
+import { withInitCaller } from './initializeSharing';
 
 export function initContainerEntry(
   options: InitContainerEntryOptions,
@@ -81,24 +82,26 @@ export function initContainerEntry(
     webpackRequire.federation.attachShareScopeMap(webpackRequire);
   }
 
-  if (!Array.isArray(shareScopeKey)) {
-    // @ts-ignore
-    return webpackRequire.I(shareScopeKey || 'default', initScope);
-  }
-
-  var proxyInitializeSharing = Boolean(
-    webpackRequire.federation.initOptions.shared,
-  );
-
-  if (proxyInitializeSharing) {
-    // @ts-ignore
-    return webpackRequire.I(shareScopeKey, initScope);
-  }
-  // @ts-ignore
-  return Promise.all(
-    shareScopeKey.map((key) => {
+  return withInitCaller(remoteEntryInitOptions?.initFrom, () => {
+    if (!Array.isArray(shareScopeKey)) {
       // @ts-ignore
-      return webpackRequire.I(key, initScope);
-    }),
-  ).then(() => true);
+      return webpackRequire.I(shareScopeKey || 'default', initScope);
+    }
+
+    var proxyInitializeSharing = Boolean(
+      webpackRequire.federation.initOptions!.shared,
+    );
+
+    if (proxyInitializeSharing) {
+      // @ts-ignore
+      return webpackRequire.I(shareScopeKey, initScope);
+    }
+    // @ts-ignore
+    return Promise.all(
+      shareScopeKey.map((key) => {
+        // @ts-ignore
+        return webpackRequire.I(key, initScope);
+      }),
+    ).then(() => true);
+  });
 }

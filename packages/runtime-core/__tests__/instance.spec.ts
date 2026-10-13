@@ -91,4 +91,37 @@ describe('ModuleFederation', () => {
     expect(module.initing).toBe(false);
     expect((module as any).initPromise).toBeUndefined();
   });
+
+  it('passes the host name to a remote init only when a sharing init triggers it', async () => {
+    const GM = new ModuleFederation({
+      name: '@federation/caller',
+      remotes: [],
+    });
+    const createModule = () => {
+      const module = new Module({
+        remoteInfo: {
+          name: '@test/remote',
+          entry:
+            'http://localhost:1111/resources/main/federation-remote-entry.js',
+          type: 'global',
+          entryGlobalName: '__test_remote__',
+          shareScope: 'default',
+        },
+        host: GM,
+      });
+      const init = rs.fn();
+      module.remoteEntryExports = { init, get: rs.fn() } as any;
+      return { module, init };
+    };
+
+    const nested = createModule();
+    await nested.module.init('nested', undefined, []);
+    const nestedOptions = nested.init.mock.calls[0][2];
+    expect(nestedOptions.initFrom).toBe('@federation/caller');
+    expect(Object.keys(nestedOptions)).not.toContain('initFrom');
+
+    const load = createModule();
+    await load.module.init('load');
+    expect(load.init.mock.calls[0][2].initFrom).toBeUndefined();
+  });
 });

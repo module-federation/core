@@ -1,4 +1,4 @@
-import { initializeSharing } from '../src/initializeSharing';
+import { initializeSharing, withInitCaller } from '../src/initializeSharing';
 import { InitializeSharingOptions, WebpackRequire } from '../src/types';
 
 // Mock the attachShareScopeMap function
@@ -183,11 +183,16 @@ describe('initializeSharing', () => {
     ).not.toHaveBeenCalled();
   });
 
-  // Containers whose sharing init calls init on the listed containers, or waits on the listed promises
-  const createContainers = (
-    deps: Record<string, Array<string | Promise<unknown>>>,
-  ) => {
+  type Dep =
+    | string
+    | Promise<unknown>
+    | { after: Promise<unknown>; call: string };
+
+  // Containers whose sharing init calls init on the listed containers, as their caller, or waits on the listed promises
+  const createContainers = (deps: Record<string, Dep[]>) => {
     const containers: Record<string, (initScope: any[]) => any> = {};
+    const callFrom = (name: string, dep: string, initScope: any[]) =>
+      withInitCaller(name, () => containers[dep](initScope));
     Object.keys(deps).forEach((name) => {
       const initPromises = {};
       const initTokens = {};
@@ -196,11 +201,13 @@ describe('initializeSharing', () => {
       });
       instance.name = name;
       instance.initializeSharing = jest.fn((_key, { initScope }) =>
-        deps[name].map((dep) =>
-          typeof dep === 'string'
-            ? Promise.resolve().then(() => containers[dep](initScope))
-            : dep,
-        ),
+        deps[name].map((dep) => {
+          if (typeof dep === 'string')
+            return Promise.resolve().then(() => callFrom(name, dep, initScope));
+          if ('call' in dep)
+            return dep.after.then(() => callFrom(name, dep.call, initScope));
+          return dep;
+        }),
       );
       const webpackRequire = createMockWebpackRequire({
         federationInstance: instance,
@@ -255,7 +262,9 @@ describe('initializeSharing', () => {
 
     initializeSharing({ ...options, initScope: [] });
     const second = trackSettled(
-      initializeSharing({ ...options, initScope: [{ from: 'unrelated' }] }),
+      withInitCaller('unrelated', () =>
+        initializeSharing({ ...options, initScope: [{ from: 'unrelated' }] }),
+      ),
     );
 
     await flush();
@@ -286,7 +295,9 @@ describe('initializeSharing', () => {
 
     initializeSharing({ ...options, initScope: [] });
     const second = trackSettled(
-      initializeSharing({ ...options, initScope: [] }),
+      withInitCaller('unrelated', () =>
+        initializeSharing({ ...options, initScope: [] }),
+      ),
     );
     releaseDefault();
 
@@ -308,6 +319,44 @@ describe('initializeSharing', () => {
 
     await flush();
     expect(d.settled).toBe(false);
+  });
+
+  test('should still wait when two unrelated chains each started a different shared remote first', async () => {
+    let releaseLate!: () => void;
+    const late = new Promise<void>((resolve) => (releaseLate = resolve));
+    let releaseLeafW!: () => void;
+    const leafW = new Promise<void>((resolve) => (releaseLeafW = resolve));
+    const containers = createContainers({
+      leafT: [new Promise(() => {})],
+      leafW: [leafW],
+      remoteP: ['leafT', { after: late, call: 'leafW' }],
+      remoteQ: ['leafW', { after: late, call: 'leafT' }],
+    });
+
+    containers.remoteP([]);
+    const q = trackSettled(containers.remoteQ([]));
+    await flush();
+    releaseLate();
+    await flush();
+    releaseLeafW();
+
+    await flush();
+    expect(q.settled).toBe(false);
+  });
+
+  test('should not deadlock when three cyclic remotes initialize from three chains', async () => {
+    const containers = createContainers({
+      cycleA: ['cycleB'],
+      cycleB: ['cycleC'],
+      cycleC: ['cycleA'],
+    });
+
+    const inits = ['cycleA', 'cycleB', 'cycleC'].map((name) =>
+      trackSettled(containers[name]([])),
+    );
+
+    await flush();
+    expect(inits.every((init) => init.settled)).toBe(true);
   });
 
   test('should initialize sharing with no promises', async () => {

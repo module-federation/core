@@ -1,11 +1,51 @@
+import helpers from '@module-federation/runtime/helpers';
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { RemoteEntryExports, InitializeSharingOptions } from './types';
 
-// Set on a container's token while its init is pending, to the chain that started it
-const PENDING_INIT_SCOPE = Symbol.for(
-  'mf.pendingInitScope',
-) as unknown as string;
+const INIT_WAITS = Symbol.for('mf.initWaits');
+// Containers each container's sharing init is waiting on, shared by every container on the page
+const pageGlobal = helpers.global.Global as any;
+if (!pageGlobal[INIT_WAITS]) pageGlobal[INIT_WAITS] = new Map();
+const initWaits: Map<string, Map<string, number>> = pageGlobal[INIT_WAITS];
+
+const waitsOn = (
+  from: string,
+  to: string,
+  seen = new Set<string>(),
+): boolean => {
+  if (from === to) return true;
+  if (seen.has(from)) return false;
+  seen.add(from);
+  return Array.from(initWaits.get(from)?.keys() || []).some((next) =>
+    waitsOn(next, to, seen),
+  );
+};
+
+const addWait = (caller: string, name: string, promise: Promise<unknown>) => {
+  const waits = initWaits.get(caller) || new Map<string, number>();
+  initWaits.set(caller, waits);
+  waits.set(name, (waits.get(name) || 0) + 1);
+  const done = () => {
+    const count = waits.get(name)! - 1;
+    if (count) waits.set(name, count);
+    else waits.delete(name);
+  };
+  promise.then(done, done);
+};
+
+let initCaller: string | undefined;
+
+// Runs fn with the name of the container whose sharing init is calling into this one
+export function withInitCaller<T>(caller: string | undefined, fn: () => T): T {
+  const previous = initCaller;
+  initCaller = caller;
+  try {
+    return fn();
+  } finally {
+    initCaller = previous;
+  }
+}
 
 export function initializeSharing({
   shareScopeName,
@@ -14,6 +54,7 @@ export function initializeSharing({
   initTokens,
   initScope,
 }: InitializeSharingOptions): Promise<boolean> | boolean | void {
+  const caller = initCaller;
   const shareScopeKeys = Array.isArray(shareScopeName)
     ? shareScopeName
     : [shareScopeName];
@@ -31,16 +72,11 @@ export function initializeSharing({
 
     const promise = initPromises[shareScopeKey];
     if (promise) {
-      // A cycle across two init chains: the pending chain entered a container ours is still initializing
-      const pendingScope = initToken[PENDING_INIT_SCOPE];
-      if (
-        pendingScope &&
-        pendingScope.some(
-          (token: InitializeSharingOptions['initScope'][number]) =>
-            token[PENDING_INIT_SCOPE] === initScope,
-        )
-      )
-        return;
+      if (caller && promise !== true) {
+        // Waiting would close a cycle when this pending init already waits on the caller
+        if (waitsOn(mfInstance.name, caller)) return;
+        addWait(caller, mfInstance.name, promise);
+      }
       return promise;
     }
     var warn = (msg: string) =>
@@ -52,14 +88,18 @@ export function initializeSharing({
       try {
         var module = webpackRequire(id);
         if (!module) return;
+        var initOptions = {
+          shareScopeMap: webpackRequire.S || {},
+          shareScopeKeys: shareScopeName,
+        };
+        Object.defineProperty(initOptions, 'initFrom', {
+          value: mfInstance.name,
+        });
         var initFn = (module: RemoteEntryExports) =>
           module &&
           module.init &&
           // @ts-ignore compat legacy mf shared behavior
-          module.init(webpackRequire.S![shareScopeKey], initScope, {
-            shareScopeMap: webpackRequire.S || {},
-            shareScopeKeys: shareScopeName,
-          });
+          module.init(webpackRequire.S![shareScopeKey], initScope, initOptions);
         if (module.then) return promises.push(module.then(initFn, handleError));
         var initResult = initFn(module);
         // @ts-ignore
@@ -103,11 +143,11 @@ export function initializeSharing({
       return (initPromises[shareScopeKey] = true);
     }
 
-    initToken[PENDING_INIT_SCOPE] = initScope;
-    return (initPromises[shareScopeKey] = Promise.all(promises).then(() => {
-      delete initToken[PENDING_INIT_SCOPE];
-      return (initPromises[shareScopeKey] = true);
-    }));
+    const pending = (initPromises[shareScopeKey] = Promise.all(promises).then(
+      () => (initPromises[shareScopeKey] = true),
+    ));
+    if (caller) addWait(caller, mfInstance.name, pending);
+    return pending;
   };
 
   shareScopeKeys.forEach((key) => {
