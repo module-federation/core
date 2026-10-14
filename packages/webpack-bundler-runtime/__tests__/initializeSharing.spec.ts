@@ -186,7 +186,8 @@ describe('initializeSharing', () => {
   type Dep =
     | string
     | Promise<unknown>
-    | { after: Promise<unknown>; call: string };
+    | { after: Promise<unknown>; call: string }
+    | { syncCall: string };
 
   // Containers whose sharing init calls init on the listed containers, passing the init token it gets as their caller, or waits on the listed promises
   const createContainers = <Name extends string>(deps: Record<Name, Dep[]>) => {
@@ -210,6 +211,8 @@ describe('initializeSharing', () => {
             return dep.after.then(() =>
               callFrom(initFrom, dep.call, initScope),
             );
+          if ('syncCall' in dep)
+            return Promise.resolve(callFrom(initFrom, dep.syncCall, initScope));
           return dep;
         }),
       );
@@ -361,6 +364,45 @@ describe('initializeSharing', () => {
 
     await flush();
     expect(inits.every((init) => init.settled)).toBe(true);
+  });
+
+  test('should not deadlock when a fresh init synchronously reaches a container that waits on its caller', async () => {
+    let releaseLate!: () => void;
+    const late = new Promise<void>((resolve) => (releaseLate = resolve));
+    const containers = createContainers({
+      syncA: [{ after: late, call: 'syncB' }],
+      syncB: [{ syncCall: 'syncX' }],
+      syncX: ['syncA'],
+    });
+
+    // syncX waits on syncA, then syncA starts syncB, which synchronously enters syncX
+    const a = trackSettled(containers.syncA([]));
+    const x = trackSettled(containers.syncX([]));
+    await flush();
+    releaseLate();
+
+    await flush();
+    expect(a.settled).toBe(true);
+    expect(x.settled).toBe(true);
+  });
+
+  test('should still reject when a caller joins an init that already failed', async () => {
+    let releaseLate!: () => void;
+    const late = new Promise<void>((resolve) => (releaseLate = resolve));
+    const failed = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('remote failed')), 10),
+    );
+    const containers = createContainers({
+      failX: [{ after: late, call: 'failR' }],
+      failR: [failed, 'failX'],
+    });
+
+    // failR waits on failX and then fails, before failX calls back into it
+    const x = containers.failX([]);
+    await expect(containers.failR([])).rejects.toThrow('remote failed');
+    releaseLate();
+
+    await expect(x).rejects.toThrow('remote failed');
   });
 
   // A container whose sharing init for each share scope runs init with the init token it passes as caller

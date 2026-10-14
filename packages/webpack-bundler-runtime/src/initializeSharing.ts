@@ -6,8 +6,8 @@ import { RemoteEntryExports, InitializeSharingOptions } from './types';
 const INIT_WAITS: unique symbol = Symbol.for('mf.initWaits');
 
 interface InitToken {
-  // Pending inits this container share scope init is waiting on
-  [INIT_WAITS]?: Map<InitToken, number>;
+  // Pending inits this container share scope init is waiting on, null once its own init settled
+  [INIT_WAITS]?: Set<InitToken> | null;
 }
 
 const waitsOn = (
@@ -18,22 +18,24 @@ const waitsOn = (
   if (from === to) return true;
   if (seen.has(from)) return false;
   seen.add(from);
-  return Array.from(from[INIT_WAITS]?.keys() || []).some((next) =>
+  return Array.from(from[INIT_WAITS] || []).some((next) =>
     waitsOn(next, to, seen),
   );
 };
 
-const addWait = (from: InitToken, to: InitToken, promise: Promise<unknown>) => {
-  const waits = from[INIT_WAITS] || new Map<InitToken, number>();
-  if (!from[INIT_WAITS])
-    Object.defineProperty(from, INIT_WAITS, { value: waits });
-  waits.set(to, (waits.get(to) || 0) + 1);
-  const done = () => {
-    const count = (waits.get(to) || 0) - 1;
-    if (count > 0) waits.set(to, count);
-    else waits.delete(to);
-  };
+// Records that from waits on to's pending init, unless waiting would close a cycle
+const wait = (from: InitToken, to: InitToken, promise: Promise<unknown>) => {
+  if (waitsOn(to, from)) return false;
+  if (from[INIT_WAITS] === null) return true;
+  const waits = (from[INIT_WAITS] = from[INIT_WAITS] || new Set());
+  waits.add(to);
+  const done = () => waits.delete(to);
   promise.then(done, done);
+  return true;
+};
+
+const settle = (token: InitToken) => () => {
+  token[INIT_WAITS] = null;
 };
 
 let initCaller: InitToken | undefined;
@@ -77,11 +79,9 @@ export function initializeSharing({
 
     const promise = initPromises[shareScopeKey];
     if (promise) {
-      if (caller && promise !== true) {
-        // Waiting would close a cycle when this pending init already waits on the caller
-        if (waitsOn(initToken, caller)) return;
-        addWait(caller, initToken, promise);
-      }
+      // Waiting would close a cycle when this pending init already waits on the caller
+      if (caller && promise !== true && !wait(caller, initToken, promise))
+        return;
       return promise;
     }
     var warn = (msg: string) =>
@@ -97,9 +97,7 @@ export function initializeSharing({
           shareScopeMap: webpackRequire.S || {},
           shareScopeKeys: shareScopeName,
         };
-        Object.defineProperty(initOptions, 'initFrom', {
-          value: initToken,
-        });
+        Object.defineProperty(initOptions, 'initFrom', { value: initToken });
         var initFn = (module: RemoteEntryExports) =>
           module &&
           module.init &&
@@ -152,7 +150,10 @@ export function initializeSharing({
     const pending = (initPromises[shareScopeKey] = Promise.all(promises).then(
       () => (initPromises[shareScopeKey] = true),
     ));
-    if (caller) addWait(caller, initToken, pending);
+    // A failed init no longer waits on anything, even while its waits are pending
+    pending.then(settle(initToken), settle(initToken));
+    // Inits started synchronously above may already wait on the caller
+    if (caller && !wait(caller, initToken, pending)) return;
     return pending;
   };
 

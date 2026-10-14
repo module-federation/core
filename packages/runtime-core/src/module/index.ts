@@ -202,11 +202,9 @@ class Module {
           this.host.shareScopeMap,
           rawInitScope,
         );
-      if (initFrom) {
-        Object.defineProperty(remoteEntryInitOptions, 'initFrom', {
-          value: initFrom,
-        });
-      }
+      Object.defineProperty(remoteEntryInitOptions, 'initFrom', {
+        value: initFrom,
+      });
 
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({
