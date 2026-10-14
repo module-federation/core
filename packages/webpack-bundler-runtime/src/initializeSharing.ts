@@ -34,10 +34,6 @@ const wait = (from: InitToken, to: InitToken, promise: Promise<unknown>) => {
   return true;
 };
 
-const settle = (token: InitToken) => () => {
-  token[INIT_WAITS] = null;
-};
-
 let initCaller: InitToken | undefined;
 
 // Runs fn with the init token of the sharing init that is calling into this container
@@ -151,7 +147,8 @@ export function initializeSharing({
       () => (initPromises[shareScopeKey] = true),
     ));
     // A failed init no longer waits on anything, even while its waits are pending
-    pending.then(settle(initToken), settle(initToken));
+    const settle = () => ((initToken as InitToken)[INIT_WAITS] = null);
+    pending.then(settle, settle);
     // Inits started synchronously above may already wait on the caller
     if (caller && !wait(caller, initToken, pending)) return;
     return pending;

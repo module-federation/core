@@ -3,7 +3,7 @@ import { withInitCaller } from './initializeSharing';
 
 export function initContainerEntry(
   options: InitContainerEntryOptions,
-): ReturnType<WebpackRequire['I']> {
+): WebpackRequire['I'] | void {
   const {
     webpackRequire,
     shareScope,
@@ -82,25 +82,30 @@ export function initContainerEntry(
     webpackRequire.federation.attachShareScopeMap(webpackRequire);
   }
 
-  const { initOptions } = webpackRequire.federation;
-  return withInitCaller(remoteEntryInitOptions?.initFrom, () => {
-    if (!Array.isArray(shareScopeKey)) {
-      // @ts-ignore
-      return webpackRequire.I(shareScopeKey || 'default', initScope);
-    }
+  // Runs this container's sharing init as called by the remote init that triggered it
+  const initSharing = (...args: Parameters<WebpackRequire['I']>) =>
+    withInitCaller(remoteEntryInitOptions?.initFrom, () =>
+      webpackRequire.I(...args),
+    );
 
-    var proxyInitializeSharing = Boolean(initOptions.shared);
-
-    if (proxyInitializeSharing) {
-      // @ts-ignore
-      return webpackRequire.I(shareScopeKey, initScope);
-    }
+  if (!Array.isArray(shareScopeKey)) {
     // @ts-ignore
-    return Promise.all(
-      shareScopeKey.map((key) => {
-        // @ts-ignore
-        return webpackRequire.I(key, initScope);
-      }),
-    ).then(() => true);
-  });
+    return initSharing(shareScopeKey || 'default', initScope);
+  }
+
+  var proxyInitializeSharing = Boolean(
+    webpackRequire.federation.initOptions.shared,
+  );
+
+  if (proxyInitializeSharing) {
+    // @ts-ignore
+    return initSharing(shareScopeKey, initScope);
+  }
+  // @ts-ignore
+  return Promise.all(
+    shareScopeKey.map((key) => {
+      // @ts-ignore
+      return initSharing(key, initScope);
+    }),
+  ).then(() => true);
 }
