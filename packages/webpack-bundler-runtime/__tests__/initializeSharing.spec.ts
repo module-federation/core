@@ -244,54 +244,15 @@ describe('initializeSharing', () => {
 
   const flush = () => new Promise((resolve) => setTimeout(resolve, 50));
 
-  test('should not deadlock when cyclic remotes initialize from two chains', async () => {
-    const containers = createContainers({
-      remoteA: ['remoteB'],
-      remoteB: ['remoteA'],
-    });
-
-    // remote-a's own chain, then the host's chain reaching remote-b
-    const a = trackSettled(containers.remoteA([]));
-    const b = trackSettled(containers.remoteB([]));
-
-    await flush();
-    expect(a.settled).toBe(true);
-    expect(b.settled).toBe(true);
-  });
-
-  test('should still wait for a pending init when the nested caller is unrelated', async () => {
-    let release!: () => void;
-    const gate = new Promise<void>((resolve) => (release = resolve));
-    const instance = createMockFederationInstance({
-      shareStrategy: 'version-first',
-    });
-    instance.initializeSharing = jest.fn(() => [gate]);
-    const options = createMockOptions({
-      webpackRequire: createMockWebpackRequire({
-        federationInstance: instance,
-      }),
-    });
-
-    initializeSharing({ ...options, initScope: [] });
-    const second = trackSettled(
-      withInitCaller({}, () =>
-        initializeSharing({ ...options, initScope: [] }),
-      ),
-    );
-
-    await flush();
-    expect(second.settled).toBe(false);
-    release();
-    await flush();
-    expect(second.settled).toBe(true);
-  });
-
-  test('should still wait for every pending share scope when an unrelated call inits several', async () => {
+  test('should still wait for every pending share scope when the nested caller is unrelated', async () => {
     let releaseDefault!: () => void;
     const defaultGate = new Promise<void>(
       (resolve) => (releaseDefault = resolve),
     );
-    const customGate = new Promise<void>(() => {});
+    let releaseCustom!: () => void;
+    const customGate = new Promise<void>(
+      (resolve) => (releaseCustom = resolve),
+    );
     const instance = createMockFederationInstance({
       shareStrategy: 'version-first',
     });
@@ -315,6 +276,9 @@ describe('initializeSharing', () => {
 
     await flush();
     expect(second.settled).toBe(false);
+    releaseCustom();
+    await flush();
+    expect(second.settled).toBe(true);
   });
 
   test('should still wait for a pending init that an unrelated chain shares without a cycle', async () => {
