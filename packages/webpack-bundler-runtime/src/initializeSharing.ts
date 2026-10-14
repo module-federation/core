@@ -6,7 +6,7 @@ import { RemoteEntryExports, InitializeSharingOptions } from './types';
 const INIT_WAITS: unique symbol = Symbol.for('mf.initWaits');
 
 interface InitToken {
-  // Inits this container share scope init has waited on, null once its own init settled
+  // Pending inits this container share scope init is waiting on, null once its own init settled
   [INIT_WAITS]?: Set<InitToken> | null;
 }
 
@@ -24,10 +24,13 @@ const waitsOn = (
 };
 
 // Records that from waits on to's pending init, unless waiting would close a cycle
-const wait = (from: InitToken, to: InitToken) => {
+const wait = (from: InitToken, to: InitToken, promise: Promise<unknown>) => {
   if (waitsOn(to, from)) return false;
-  if (from[INIT_WAITS] !== null)
-    (from[INIT_WAITS] = from[INIT_WAITS] || new Set()).add(to);
+  if (from[INIT_WAITS] === null) return true;
+  const waits = (from[INIT_WAITS] = from[INIT_WAITS] || new Set());
+  waits.add(to);
+  const done = () => waits.delete(to);
+  promise.then(done, done);
   return true;
 };
 
@@ -73,7 +76,8 @@ export function initializeSharing({
     const promise = initPromises[shareScopeKey];
     if (promise) {
       // Waiting would close a cycle when this pending init already waits on the caller
-      if (caller && promise !== true && !wait(caller, initToken)) return;
+      if (caller && promise !== true && !wait(caller, initToken, promise))
+        return;
       return promise;
     }
     var warn = (msg: string) =>
@@ -146,7 +150,7 @@ export function initializeSharing({
     const settle = () => ((initToken as InitToken)[INIT_WAITS] = null);
     pending.then(settle, settle);
     // Inits started synchronously above may already wait on the caller
-    if (caller && !wait(caller, initToken)) return;
+    if (caller && !wait(caller, initToken, pending)) return;
     return pending;
   };
 
