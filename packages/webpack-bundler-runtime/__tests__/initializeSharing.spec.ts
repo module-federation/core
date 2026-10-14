@@ -188,13 +188,11 @@ describe('initializeSharing', () => {
     | Promise<unknown>
     | { after: Promise<unknown>; call: string };
 
-  // Containers whose sharing init calls init on the listed containers, as their caller, or waits on the listed promises
+  // Containers whose sharing init calls init on the listed containers, passing the init token it gets as their caller, or waits on the listed promises
   const createContainers = <Name extends string>(deps: Record<Name, Dep[]>) => {
     const containers = {} as Record<Name, (initScope: any[]) => any>;
-    const callFrom = (name: string, dep: string, initScope: any[]) =>
-      withInitCaller({ name, shareScope: 'default' }, () =>
-        containers[dep as Name](initScope),
-      );
+    const callFrom = (initFrom: object, dep: string, initScope: any[]) =>
+      withInitCaller(initFrom, () => containers[dep as Name](initScope));
     (Object.keys(deps) as Name[]).forEach((name) => {
       const initPromises = {};
       const initTokens = {};
@@ -202,12 +200,16 @@ describe('initializeSharing', () => {
         shareStrategy: 'version-first',
       });
       instance.name = name;
-      instance.initializeSharing = jest.fn((_key, { initScope }) =>
+      instance.initializeSharing = jest.fn((_key, { initScope, initFrom }) =>
         deps[name].map((dep) => {
           if (typeof dep === 'string')
-            return Promise.resolve().then(() => callFrom(name, dep, initScope));
+            return Promise.resolve().then(() =>
+              callFrom(initFrom, dep, initScope),
+            );
           if ('call' in dep)
-            return dep.after.then(() => callFrom(name, dep.call, initScope));
+            return dep.after.then(() =>
+              callFrom(initFrom, dep.call, initScope),
+            );
           return dep;
         }),
       );
@@ -264,7 +266,7 @@ describe('initializeSharing', () => {
 
     initializeSharing({ ...options, initScope: [] });
     const second = trackSettled(
-      withInitCaller({ name: 'unrelated', shareScope: 'default' }, () =>
+      withInitCaller({}, () =>
         initializeSharing({ ...options, initScope: [] }),
       ),
     );
@@ -297,7 +299,7 @@ describe('initializeSharing', () => {
 
     initializeSharing({ ...options, initScope: [] });
     const second = trackSettled(
-      withInitCaller({ name: 'unrelated', shareScope: 'default' }, () =>
+      withInitCaller({}, () =>
         initializeSharing({ ...options, initScope: [] }),
       ),
     );
@@ -361,10 +363,10 @@ describe('initializeSharing', () => {
     expect(inits.every((init) => init.settled)).toBe(true);
   });
 
-  // A container whose sharing init for each share scope runs init(key, initScope)
+  // A container whose sharing init for each share scope runs init with the init token it passes as caller
   const createScopedContainer = (
     name: string,
-    init: (key: string, initScope: any[]) => Promise<unknown>,
+    init: (key: string, initScope: any[], initFrom: object) => Promise<unknown>,
   ) => {
     const initPromises = {};
     const initTokens = {};
@@ -372,8 +374,8 @@ describe('initializeSharing', () => {
       shareStrategy: 'version-first',
     });
     instance.name = name;
-    instance.initializeSharing = jest.fn((key, { initScope }) => [
-      init(key, initScope),
+    instance.initializeSharing = jest.fn((key, { initScope, initFrom }) => [
+      init(key, initScope, initFrom),
     ]);
     const webpackRequire = createMockWebpackRequire({
       federationInstance: instance,
@@ -388,22 +390,22 @@ describe('initializeSharing', () => {
       });
   };
 
-  const callFrom = (name: string, shareScope: string, init: () => unknown) =>
-    Promise.resolve().then(() => withInitCaller({ name, shareScope }, init));
+  const callFrom = (initFrom: object, init: () => unknown) =>
+    Promise.resolve().then(() => withInitCaller(initFrom, init));
 
   test('should still wait when containers only wait on each other in different share scopes', async () => {
     // scopeA's default init waits on scopeB, and scopeB's custom init calls scopeA
     const scopeA: ReturnType<typeof createScopedContainer> =
-      createScopedContainer('scopeA', (key, initScope) =>
+      createScopedContainer('scopeA', (key, initScope, initFrom) =>
         key === 'custom'
           ? new Promise(() => {})
-          : callFrom('scopeA', key, () => scopeB('default', initScope)),
+          : callFrom(initFrom, () => scopeB('default', initScope)),
       );
     const scopeB: ReturnType<typeof createScopedContainer> =
-      createScopedContainer('scopeB', (key, initScope) =>
+      createScopedContainer('scopeB', (key, initScope, initFrom) =>
         key === 'default'
           ? new Promise(() => {})
-          : callFrom('scopeB', key, () => scopeA('custom', initScope)),
+          : callFrom(initFrom, () => scopeA('custom', initScope)),
       );
 
     scopeA('custom', []);
@@ -418,12 +420,12 @@ describe('initializeSharing', () => {
   test('should not deadlock when cyclic remotes are configured with a different share scope than their callers use', async () => {
     // Each container inits its own share scope, while its caller inits the other one
     const mismatchA: ReturnType<typeof createScopedContainer> =
-      createScopedContainer('mismatchA', (key, initScope) =>
-        callFrom('mismatchA', key, () => mismatchB('scopeB', initScope)),
+      createScopedContainer('mismatchA', (_key, initScope, initFrom) =>
+        callFrom(initFrom, () => mismatchB('scopeB', initScope)),
       );
     const mismatchB: ReturnType<typeof createScopedContainer> =
-      createScopedContainer('mismatchB', (key, initScope) =>
-        callFrom('mismatchB', key, () => mismatchA('scopeA', initScope)),
+      createScopedContainer('mismatchB', (_key, initScope, initFrom) =>
+        callFrom(initFrom, () => mismatchA('scopeA', initScope)),
       );
 
     const a = trackSettled(mismatchA('scopeA', []));
@@ -451,6 +453,7 @@ describe('initializeSharing', () => {
       strategy: 'eager',
       initScope: expect.any(Array),
       from: 'build',
+      initFrom: mockOptions.initTokens['default'],
     });
   });
 
@@ -480,6 +483,7 @@ describe('initializeSharing', () => {
       strategy: 'eager',
       initScope: expect.any(Array),
       from: 'build',
+      initFrom: mockOptions.initTokens['default'],
     });
   });
 
@@ -503,6 +507,7 @@ describe('initializeSharing', () => {
       strategy: 'eager',
       initScope: expect.any(Array),
       from: 'build',
+      initFrom: mockOptions.initTokens['default'],
     });
     expect(
       mockOptions.webpackRequire.federation.instance?.initializeSharing,
@@ -510,6 +515,7 @@ describe('initializeSharing', () => {
       strategy: 'eager',
       initScope: expect.any(Array),
       from: 'build',
+      initFrom: mockOptions.initTokens['custom'],
     });
   });
 
@@ -887,6 +893,7 @@ describe('initializeSharing', () => {
       strategy: 'eager',
       initScope: [{ from: 'test-app' }], // The actual implementation adds a token
       from: 'build',
+      initFrom: mockOptions.initTokens['default'],
     });
   });
 

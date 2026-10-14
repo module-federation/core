@@ -20,7 +20,7 @@ import {
   InitScope,
   ShareScopeMap,
   ResourceLoadContext,
-  RemoteEntryInitOptions,
+  InitTokens,
 } from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
@@ -144,7 +144,7 @@ class Module {
     rawInitScope?: InitScope,
     expose?: string,
     resourceContext?: ResourceLoadContext,
-    initFrom?: RemoteEntryInitOptions['initFrom'],
+    initFrom?: InitTokens[string],
   ) {
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry(expose, resourceContext);

@@ -92,7 +92,7 @@ describe('ModuleFederation', () => {
     expect((module as any).initPromise).toBeUndefined();
   });
 
-  it('passes the host name and share scope to a remote init only when a sharing init triggers it', async () => {
+  it('passes the caller init token to a remote init only when a sharing init triggers it', async () => {
     const GM = new ModuleFederation({
       name: '@federation/caller',
       remotes: [],
@@ -125,16 +125,15 @@ describe('ModuleFederation', () => {
     rs.spyOn(GM.remoteHandler, 'getRemoteModuleAndOptions').mockResolvedValue({
       module: nested.module,
     } as any);
+    const initFrom = { from: '@federation/caller' };
     await Promise.all(
       GM.sharedHandler.initializeSharing('custom', {
         strategy: 'version-first',
+        initFrom,
       }),
     );
     const nestedOptions = nested.init.mock.calls[0][2];
-    expect(nestedOptions.initFrom).toEqual({
-      name: '@federation/caller',
-      shareScope: 'custom',
-    });
+    expect(nestedOptions.initFrom).toBe(initFrom);
     expect(Object.keys(nestedOptions)).not.toContain('initFrom');
 
     const load = createModule();
