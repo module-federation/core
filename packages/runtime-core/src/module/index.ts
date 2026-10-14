@@ -202,9 +202,6 @@ class Module {
           this.host.shareScopeMap,
           rawInitScope,
         );
-      Object.defineProperty(remoteEntryInitOptions, 'initFrom', {
-        value: initFrom,
-      });
 
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({
@@ -215,6 +212,13 @@ class Module {
           remoteInfo: this.remoteInfo,
           origin: this.host,
         });
+      // Set after the hook so plugins that copy the options don't drop it
+      if (Object.isExtensible(initContainerOptions.remoteEntryInitOptions))
+        Object.defineProperty(
+          initContainerOptions.remoteEntryInitOptions,
+          'initFrom',
+          { value: initFrom, configurable: true },
+        );
 
       if (typeof remoteEntryExports?.init === 'undefined') {
         error(

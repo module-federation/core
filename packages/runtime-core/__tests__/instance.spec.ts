@@ -96,6 +96,15 @@ describe('ModuleFederation', () => {
     const GM = new ModuleFederation({
       name: '@federation/caller',
       remotes: [],
+      plugins: [
+        {
+          name: 'copy-init-options',
+          beforeInitContainer: (args) => ({
+            ...args,
+            remoteEntryInitOptions: { ...args.remoteEntryInitOptions },
+          }),
+        },
+      ],
     });
     const createModule = () => {
       const module = new Module({
