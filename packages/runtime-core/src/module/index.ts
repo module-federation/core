@@ -20,6 +20,7 @@ import {
   InitScope,
   ShareScopeMap,
   ResourceLoadContext,
+  RemoteEntryInitOptions,
 } from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
@@ -143,6 +144,7 @@ class Module {
     rawInitScope?: InitScope,
     expose?: string,
     resourceContext?: ResourceLoadContext,
+    initFrom?: RemoteEntryInitOptions['initFrom'],
   ) {
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry(expose, resourceContext);
@@ -200,10 +202,9 @@ class Module {
           this.host.shareScopeMap,
           rawInitScope,
         );
-      // Only a sharing init passes its initScope, so only it is recorded as the caller
-      if (rawInitScope) {
+      if (initFrom) {
         Object.defineProperty(remoteEntryInitOptions, 'initFrom', {
-          value: this.host.name,
+          value: initFrom,
         });
       }
 

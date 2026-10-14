@@ -1,6 +1,7 @@
 import helpers from '@module-federation/runtime/helpers';
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { attachShareScopeMap } from './attachShareScopeMap';
+import type { RemoteEntryInitOptions } from '@module-federation/runtime/types';
 import { RemoteEntryExports, InitializeSharingOptions } from './types';
 
 const INIT_WAITS = Symbol.for('mf.initWaits');
@@ -22,22 +23,25 @@ const waitsOn = (
   );
 };
 
-const addWait = (caller: string, name: string, promise: Promise<unknown>) => {
-  const waits = initWaits.get(caller) || new Map<string, number>();
-  initWaits.set(caller, waits);
-  waits.set(name, (waits.get(name) || 0) + 1);
+const addWait = (from: string, to: string, promise: Promise<unknown>) => {
+  const waits = initWaits.get(from) || new Map<string, number>();
+  initWaits.set(from, waits);
+  waits.set(to, (waits.get(to) || 0) + 1);
   const done = () => {
-    const count = (waits.get(name) || 0) - 1;
-    if (count > 0) waits.set(name, count);
-    else waits.delete(name);
+    const count = (waits.get(to) || 0) - 1;
+    if (count > 0) waits.set(to, count);
+    else waits.delete(to);
   };
   promise.then(done, done);
 };
 
-let initCaller: string | undefined;
+const initNode = (name: string, shareScope: string) => `${name}|${shareScope}`;
 
-// Runs fn with the name of the container whose sharing init is calling into this one
-export function withInitCaller<T>(caller: string | undefined, fn: () => T): T {
+type InitCaller = RemoteEntryInitOptions['initFrom'];
+let initCaller: InitCaller;
+
+// Runs fn with the container and share scope whose sharing init is calling into this one
+export function withInitCaller<T>(caller: InitCaller, fn: () => T): T {
   const previous = initCaller;
   initCaller = caller;
   try {
@@ -70,14 +74,14 @@ export function initializeSharing({
     if (initScope.indexOf(initToken) >= 0) return;
     initScope.push(initToken);
 
-    // A caller only initializes a remote for the share scope it is initializing, so both use this key
-    const node = (name: string) => `${name}|${shareScopeKey}`;
+    const self = initNode(mfInstance.name, shareScopeKey);
+    const from = caller && initNode(caller.name, caller.shareScope);
     const promise = initPromises[shareScopeKey];
     if (promise) {
-      if (caller && promise !== true) {
+      if (from && promise !== true) {
         // Waiting would close a cycle when this pending init already waits on the caller
-        if (waitsOn(node(mfInstance.name), node(caller))) return;
-        addWait(node(caller), node(mfInstance.name), promise);
+        if (waitsOn(self, from)) return;
+        addWait(from, self, promise);
       }
       return promise;
     }
@@ -95,7 +99,7 @@ export function initializeSharing({
           shareScopeKeys: shareScopeName,
         };
         Object.defineProperty(initOptions, 'initFrom', {
-          value: mfInstance.name,
+          value: { name: mfInstance.name, shareScope: shareScopeKey },
         });
         var initFn = (module: RemoteEntryExports) =>
           module &&
@@ -148,7 +152,7 @@ export function initializeSharing({
     const pending = (initPromises[shareScopeKey] = Promise.all(promises).then(
       () => (initPromises[shareScopeKey] = true),
     ));
-    if (caller) addWait(node(caller), node(mfInstance.name), pending);
+    if (from) addWait(from, self, pending);
     return pending;
   };
 

@@ -561,6 +561,7 @@ export class SharedHandler {
             initScope,
             undefined,
             resourceContext,
+            { name: host.name, shareScope: shareScopeName },
           );
         }
       }
