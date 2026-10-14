@@ -4,7 +4,7 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { RemoteEntryExports, InitializeSharingOptions } from './types';
 
 const INIT_WAITS = Symbol.for('mf.initWaits');
-// Containers each container's sharing init is waiting on, shared by every container on the page
+// Container share scope inits each one is waiting on, shared by every container on the page
 const pageGlobal = helpers.global.Global as any;
 if (!pageGlobal[INIT_WAITS]) pageGlobal[INIT_WAITS] = new Map();
 const initWaits: Map<string, Map<string, number>> = pageGlobal[INIT_WAITS];
@@ -70,12 +70,14 @@ export function initializeSharing({
     if (initScope.indexOf(initToken) >= 0) return;
     initScope.push(initToken);
 
+    // A caller only initializes a remote for the share scope it is initializing, so both use this key
+    const node = (name: string) => `${name}|${shareScopeKey}`;
     const promise = initPromises[shareScopeKey];
     if (promise) {
       if (caller && promise !== true) {
         // Waiting would close a cycle when this pending init already waits on the caller
-        if (waitsOn(mfInstance.name, caller)) return;
-        addWait(caller, mfInstance.name, promise);
+        if (waitsOn(node(mfInstance.name), node(caller))) return;
+        addWait(node(caller), node(mfInstance.name), promise);
       }
       return promise;
     }
@@ -146,7 +148,7 @@ export function initializeSharing({
     const pending = (initPromises[shareScopeKey] = Promise.all(promises).then(
       () => (initPromises[shareScopeKey] = true),
     ));
-    if (caller) addWait(caller, mfInstance.name, pending);
+    if (caller) addWait(node(caller), node(mfInstance.name), pending);
     return pending;
   };
 

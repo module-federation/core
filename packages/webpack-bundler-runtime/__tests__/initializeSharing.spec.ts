@@ -189,11 +189,11 @@ describe('initializeSharing', () => {
     | { after: Promise<unknown>; call: string };
 
   // Containers whose sharing init calls init on the listed containers, as their caller, or waits on the listed promises
-  const createContainers = (deps: Record<string, Dep[]>) => {
-    const containers: Record<string, (initScope: any[]) => any> = {};
+  const createContainers = <Name extends string>(deps: Record<Name, Dep[]>) => {
+    const containers = {} as Record<Name, (initScope: any[]) => any>;
     const callFrom = (name: string, dep: string, initScope: any[]) =>
-      withInitCaller(name, () => containers[dep](initScope));
-    Object.keys(deps).forEach((name) => {
+      withInitCaller(name, () => containers[dep as Name](initScope));
+    (Object.keys(deps) as Name[]).forEach((name) => {
       const initPromises = {};
       const initTokens = {};
       const instance = createMockFederationInstance({
@@ -263,7 +263,7 @@ describe('initializeSharing', () => {
     initializeSharing({ ...options, initScope: [] });
     const second = trackSettled(
       withInitCaller('unrelated', () =>
-        initializeSharing({ ...options, initScope: [{ from: 'unrelated' }] }),
+        initializeSharing({ ...options, initScope: [] }),
       ),
     );
 
@@ -351,12 +351,65 @@ describe('initializeSharing', () => {
       cycleC: ['cycleA'],
     });
 
-    const inits = ['cycleA', 'cycleB', 'cycleC'].map((name) =>
+    const inits = (['cycleA', 'cycleB', 'cycleC'] as const).map((name) =>
       trackSettled(containers[name]([])),
     );
 
     await flush();
     expect(inits.every((init) => init.settled)).toBe(true);
+  });
+
+  test('should still wait when containers only wait on each other in different share scopes', async () => {
+    const createContainer = (
+      name: string,
+      init: (key: string, initScope: any[]) => Promise<unknown>,
+    ) => {
+      const initPromises = {};
+      const initTokens = {};
+      const instance = createMockFederationInstance({
+        shareStrategy: 'version-first',
+      });
+      instance.name = name;
+      instance.initializeSharing = jest.fn((key, { initScope }) => [
+        init(key, initScope),
+      ]);
+      const webpackRequire = createMockWebpackRequire({
+        federationInstance: instance,
+      });
+      return (key: string, initScope: any[]) =>
+        initializeSharing({
+          shareScopeName: key,
+          webpackRequire: webpackRequire as any,
+          initPromises,
+          initTokens,
+          initScope,
+        });
+    };
+    const callFrom = (caller: string, init: () => unknown) =>
+      Promise.resolve().then(() => withInitCaller(caller, init));
+    // scopeA's default init waits on scopeB, and scopeB's custom init calls scopeA
+    const scopeA: ReturnType<typeof createContainer> = createContainer(
+      'scopeA',
+      (key, initScope) =>
+        key === 'custom'
+          ? new Promise(() => {})
+          : callFrom('scopeA', () => scopeB('default', initScope)),
+    );
+    const scopeB: ReturnType<typeof createContainer> = createContainer(
+      'scopeB',
+      (key, initScope) =>
+        key === 'default'
+          ? new Promise(() => {})
+          : callFrom('scopeB', () => scopeA('custom', initScope)),
+    );
+
+    scopeA('custom', []);
+    scopeA('default', []);
+    await flush();
+    const bCustom = trackSettled(scopeB('custom', []));
+
+    await flush();
+    expect(bCustom.settled).toBe(false);
   });
 
   test('should initialize sharing with no promises', async () => {
