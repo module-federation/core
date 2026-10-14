@@ -103,7 +103,7 @@
     }
   },
   "devDependencies": {
-    "@rstest/core": "^0.10.6",
+    "@rstest/core": "^0.12.3",
     "directory-tree": "3.5.2",
     "typescript": "6.0.3",
     "upath": "2.0.1",

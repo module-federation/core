@@ -206,7 +206,7 @@
     "@rspack/cli": "2.1.10",
     "@rspack/core": "2.1.10",
     "@rspack/dev-server": "2.2.1",
-    "@rstest/core": "^0.10.6",
+    "@rstest/core": "^0.12.3",
     "@storybook/addon-docs": "9.0.17",
     "@storybook/nextjs": "9.0.9",
     "@svgr/webpack": "8.1.0",
