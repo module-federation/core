@@ -1,5 +1,11 @@
 # @module-federation/typescript
 
+## 3.1.10
+
+### Patch Changes
+
+- Publish the Axios 1.18.0 security update already present in the package source.
+
 ## 3.1.9
 
 ### Patch Changes
