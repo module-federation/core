@@ -17,7 +17,6 @@ export default defineConfig([
       },
       external: ['@module-federation/*', 'isomorphic-rslog', 'webpack'],
       define: {},
-      outExtensions: undefined,
       copyLicense: true,
       unbundle: true,
     }),

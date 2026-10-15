@@ -1,5 +1,14 @@
 # @module-federation/esbuild
 
+## 0.0.116
+
+### Patch Changes
+
+- 1b4ff2e: Resolve the remote entry, the `mf-manifest.json` output path, and the manifest's shared package versions from esbuild's `absWorkingDir` instead of `process.cwd()`.
+  - @module-federation/runtime@2.9.2
+  - @module-federation/webpack-bundler-runtime@2.9.2
+  - @module-federation/sdk@2.9.2
+
 ## 0.0.115
 
 ### Patch Changes
