@@ -4,7 +4,8 @@
   "type": "module",
   "description": "Rstest suite that loads the built Node federation remotes.",
   "scripts": {
-    "e2e": "pnpm exec rstest run -c rstest.config.ts",
+    "build": "pnpm exec webpack-cli --config webpack.config.cjs",
+    "e2e": "pnpm run build && pnpm exec rstest run -c rstest.config.ts",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules --ext .js,.ts ."
   },
   "devDependencies": {
@@ -13,8 +14,10 @@
     "@rstest/core": "0.12.3",
     "node-dynamic-remote": "workspace:*",
     "node-dynamic-remote-new-version": "workspace:*",
+    "node-host": "workspace:*",
     "node-local-remote": "workspace:*",
     "node-remote": "workspace:*",
-    "sirv": "3.0.2"
+    "sirv": "3.0.2",
+    "webpack-cli": "^5.1.4"
   }
 }

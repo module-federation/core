@@ -8,7 +8,7 @@ import federationOptions from './module-federation.config';
 export default defineConfig({
   root: import.meta.dirname,
   globalSetup: ['./tests/remote-servers.ts'],
-  include: ['./tests/*.test.tsx'],
+  include: ['./tests/*.rstest.tsx'],
   browser: {
     enabled: true,
     provider: 'playwright',

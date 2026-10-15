@@ -29,21 +29,57 @@ it('passes props and a DOM ref to the React 17 remote', async () => {
   await expect.element(page.getByText('Remote1 home page')).toBeVisible();
   await expect.element(page.getByText('name: Ming, age: 12')).toBeVisible();
   await expect.element(page.getByText('Some text')).toBeVisible();
-  await page.getByText('Detail', { exact: true }).last().click();
+  await page
+    .locator('.ant-menu-submenu-title')
+    .filter({ hasText: 'Remote1-React17' })
+    .hover();
+  await page.locator('.menu-remote1-detail-link').click();
+  await expect.element(page.getByText('Remote1 detail page')).toBeVisible();
+  await page
+    .locator('.ant-menu-submenu-title')
+    .filter({ hasText: 'Remote1-React17' })
+    .hover();
+  await page.locator('.menu-remote1-home-link').click();
+  await expect.element(page.getByText('Remote1 home page')).toBeVisible();
+  await page.locator('.self-remote1-detail-link').click();
   await expect.element(page.getByText('Remote1 detail page')).toBeVisible();
 });
 
 it('renders the named React 18 provider export', async () => {
   await renderRoute('/remote2');
   await expect.element(page.getByText('Remote2 home page')).toBeVisible();
-  await page.getByText('Detail', { exact: true }).last().click();
+  await page
+    .locator('.ant-menu-submenu-title')
+    .filter({ hasText: 'Remote2-React18' })
+    .hover();
+  await page.locator('.menu-remote2-detail-link').click();
+  await expect.element(page.getByText('Remote2 detail page')).toBeVisible();
+  await page
+    .locator('.ant-menu-submenu-title')
+    .filter({ hasText: 'Remote2-React18' })
+    .hover();
+  await page.locator('.menu-remote2-home-link').click();
+  await expect.element(page.getByText('Remote2 home page')).toBeVisible();
+  await page.locator('.self-remote2-detail-link').click();
   await expect.element(page.getByText('Remote2 detail page')).toBeVisible();
 });
 
 it('renders and navigates a Vue remote in the React host', async () => {
   await renderRoute('/remote3');
   await expect.element(page.getByText('Remote3 home page')).toBeVisible();
-  await page.getByText('Detail', { exact: true }).last().click();
+  await page
+    .locator('.ant-menu-submenu-title')
+    .filter({ hasText: 'Remote3-Vue3' })
+    .hover();
+  await page.locator('.menu-remote3-detail-link').click();
+  await expect.element(page.getByText('Remote3 detail page')).toBeVisible();
+  await page
+    .locator('.ant-menu-submenu-title')
+    .filter({ hasText: 'Remote3-Vue3' })
+    .hover();
+  await page.locator('.menu-remote3-home-link').click();
+  await expect.element(page.getByText('Remote3 home page')).toBeVisible();
+  await page.locator('.self-remote3-detail-link').click();
   await expect.element(page.getByText('Remote3 detail page')).toBeVisible();
 });
 

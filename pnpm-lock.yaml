@@ -1868,6 +1868,9 @@ importers:
       node-dynamic-remote-new-version:
         specifier: workspace:*
         version: link:../node-dynamic-remote-new-version
+      node-host:
+        specifier: workspace:*
+        version: link:../node-host
       node-local-remote:
         specifier: workspace:*
         version: link:../node-local-remote
@@ -1877,6 +1880,9 @@ importers:
       sirv:
         specifier: 3.0.2
         version: 3.0.2
+      webpack-cli:
+        specifier: ^5.1.4
+        version: 5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)
 
   apps/node-local-remote:
     dependencies:

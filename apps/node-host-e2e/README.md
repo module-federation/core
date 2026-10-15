@@ -8,7 +8,7 @@ Run from the repository root:
 pnpm run e2e:node
 ```
 
-The command builds the four remotes, then runs the tests. Rstest starts three static remote servers and closes them after the run. It does not start the Express demo host or webpack dev servers.
+The command builds the Rstest plugin and four remotes, then runs the tests. Rstest starts three static remote servers and closes them after the run. A separate webpack consumer reuses the demo host's configuration to verify `asyncStartup`. It does not start Express or webpack dev servers.
 
 After building the remotes, rerun only the tests:
 

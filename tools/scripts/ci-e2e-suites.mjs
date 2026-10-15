@@ -97,6 +97,7 @@ export const E2E_SUITE_DEFINITIONS = {
       '.github/workflows/e2e-router.yml',
       'tools/scripts/run-router-e2e.mjs',
       'apps/router-demo/router-host-2000/rstest.config.ts',
+      'apps/router-demo/router-host-2000/rstest.standalone.config.ts',
       'apps/router-demo/router-host-2000/module-federation.config.ts',
     ],
   },

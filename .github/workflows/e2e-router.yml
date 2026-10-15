@@ -42,9 +42,6 @@ jobs:
       - name: Install Cypress
         run: npx cypress install
 
-      - name: Install Playwright browser
-        run: node scripts/ensure-playwright.js
-
       - name: Build shared packages
         run: pnpm run build:packages
 

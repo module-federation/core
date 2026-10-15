@@ -1,9 +1,26 @@
+import { execFile } from 'node:child_process';
+import path from 'node:path';
+import { promisify } from 'node:util';
 import { loadRemote, registerRemotes } from '@module-federation/runtime';
 import { describe, expect, it } from '@rstest/core';
 import nodeLocalRemote from 'node_local_remote/test';
 import { remoteEntryUrl } from '../../remotes';
 
+const execute = promisify(execFile);
+
 describe('node host federation', () => {
+  it('starts a webpack consumer with static local and HTTP remotes', async () => {
+    const { stdout } = await execute(
+      process.execPath,
+      [path.resolve(import.meta.dirname, '../../dist/webpack-consumer.cjs')],
+      { timeout: 30_000 },
+    );
+
+    expect(JSON.parse(stdout)).toEqual({
+      nodeLocalRemote: 'module from node-local-remote',
+      nodeRemote: 'module from node-remote',
+    });
+  });
   it('imports a local CommonJS remote statically', () => {
     expect(nodeLocalRemote).toBe('module from node-local-remote');
   });
