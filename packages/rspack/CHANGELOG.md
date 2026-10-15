@@ -1,5 +1,19 @@
 # @module-federation/rspack
 
+## 2.9.2
+
+### Patch Changes
+
+- Updated dependencies [000f3fa]
+- Updated dependencies [7f0ac8b]
+  - @module-federation/dts-plugin@2.9.2
+  - @module-federation/manifest@2.9.2
+  - @module-federation/runtime-tools@2.9.2
+  - @module-federation/inject-external-runtime-core-plugin@2.9.2
+  - @module-federation/sdk@2.9.2
+  - @module-federation/managers@2.9.2
+  - @module-federation/bridge-react-webpack-plugin@2.9.2
+
 ## 2.9.1
 
 ### Patch Changes
