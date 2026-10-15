@@ -340,9 +340,20 @@ export default class IndependentSharedPlugin {
       parentCompiler.outputPath,
       outputDirWithShareName,
     );
+    const { currentShare } = extraOptions;
+    const parentCache = parentConfig.cache;
+    const cacheSuffix = `__shared_${encodeName(currentShare.shareName)}_${currentShare.version}__`;
     // @ts-ignore webpack version is not the same as the one used in the plugin
     const compilerConfig: Configuration = {
       ...parentConfig,
+      cache:
+        parentCache && parentCache.type === 'filesystem'
+          ? {
+              ...parentCache,
+              name: `${parentCache.name}${cacheSuffix}`,
+              cacheLocation: `${parentCache.cacheLocation}${cacheSuffix}`,
+            }
+          : parentCache,
       mode: parentConfig.mode || 'development',
       ignoreWarnings: [],
       entry: {
@@ -381,56 +392,59 @@ export default class IndependentSharedPlugin {
       compiler.intermediateFileSystem = parentCompiler.intermediateFileSystem;
     }
 
-    const { currentShare } = extraOptions;
-
     return new Promise<any>((resolve, reject) => {
-      compiler.run((err: any, stats: any) => {
-        const shareName = currentShare?.shareName || 'unknown shared package';
-        const hasStatsErrors =
-          !!stats &&
-          (stats.hasErrors?.() || stats.toJson?.()?.errors?.length > 0);
-        if (err || hasStatsErrors) {
-          const lines: string[] = [];
-          if (err) {
-            const errMsg = (err && (err.stack || err.message)) || String(err);
-            lines.push(`Compiler error: ${errMsg}`);
-          }
-          if (stats?.toJson) {
-            const json = stats.toJson({
-              all: false,
-              errors: true,
-              warnings: false,
-              errorDetails: true,
-              moduleTrace: true,
-            } as any);
-            const errors = (json && json.errors) || [];
-            if (errors.length) {
-              lines.push(`Webpack errors (${errors.length}):`);
-              const max = 5;
-              for (let i = 0; i < Math.min(errors.length, max); i++) {
-                const e: any = errors[i];
-                const where =
-                  e.moduleName || e.file || e.moduleIdentifier || '';
-                const loc = e.loc ? ` @ ${e.loc}` : '';
-                const msg = e.message || e.details || String(e);
-                lines.push(`  [${i + 1}] ${where}${loc}`);
-                lines.push(`      ${msg}`);
-              }
-              if (errors.length > max) {
-                lines.push(`  ... and ${errors.length - max} more errors`);
+      compiler.run((runErr: any, stats: any) => {
+        compiler.close((closeErr: any) => {
+          const err = runErr || closeErr;
+          const shareName = currentShare?.shareName || 'unknown shared package';
+          const hasStatsErrors =
+            !!stats &&
+            (stats.hasErrors?.() || stats.toJson?.()?.errors?.length > 0);
+          if (err || hasStatsErrors) {
+            const lines: string[] = [];
+            if (err) {
+              const errMsg = (err && (err.stack || err.message)) || String(err);
+              lines.push(`Compiler error: ${errMsg}`);
+            }
+            if (stats?.toJson) {
+              const json = stats.toJson({
+                all: false,
+                errors: true,
+                warnings: false,
+                errorDetails: true,
+                moduleTrace: true,
+              } as any);
+              const errors = (json && json.errors) || [];
+              if (errors.length) {
+                lines.push(`Webpack errors (${errors.length}):`);
+                const max = 5;
+                for (let i = 0; i < Math.min(errors.length, max); i++) {
+                  const e: any = errors[i];
+                  const where =
+                    e.moduleName || e.file || e.moduleIdentifier || '';
+                  const loc = e.loc ? ` @ ${e.loc}` : '';
+                  const msg = e.message || e.details || String(e);
+                  lines.push(`  [${i + 1}] ${where}${loc}`);
+                  lines.push(`      ${msg}`);
+                }
+                if (errors.length > max) {
+                  lines.push(`  ... and ${errors.length - max} more errors`);
+                }
               }
             }
+            console.error(
+              `❌ Shared "${shareName}" compilation failed\n${lines.join('\n')}`,
+            );
+            reject(
+              err || new Error(`Shared "${shareName}" compilation failed`),
+            );
+            return;
           }
-          console.error(
-            `❌ Shared "${shareName}" compilation failed\n${lines.join('\n')}`,
-          );
-          reject(err || new Error(`Shared "${shareName}" compilation failed`));
-          return;
-        }
 
-        console.log(`Shared "${shareName}" compilation succeeded`);
+          console.log(`Shared "${shareName}" compilation succeeded`);
 
-        resolve(extraPlugin.getData());
+          resolve(extraPlugin.getData());
+        });
       });
     });
   }
