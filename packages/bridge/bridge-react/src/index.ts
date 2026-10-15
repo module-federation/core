@@ -32,6 +32,9 @@ export type { CreateRootOptions, Root } from './provider/versions/legacy';
 export type {
   ProviderParams,
   ProviderFnParams,
+  HydrateParams,
+  BridgeSSRRequest,
+  BridgeSSRResult,
   RootType,
   DestroyParams,
   RenderParams,

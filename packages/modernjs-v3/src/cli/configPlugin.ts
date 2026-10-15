@@ -503,6 +503,13 @@ export const moduleFederationConfigPlugin = (
           }
         : undefined;
 
+      const runtimeAlias: Record<string, string> = {};
+      if (!userConfig.originPluginOptions.bridge) {
+        // Deprecated: import MF runtime methods from enhanced/runtime.
+        runtimeAlias['@modern-js/runtime/mf'] =
+          require.resolve('@module-federation/modern-js-v3/runtime');
+      }
+
       return {
         tools: {
           devServer: {
@@ -510,11 +517,10 @@ export const moduleFederationConfigPlugin = (
           },
         },
         resolve: {
-          alias: {
-            // TODO: deprecated
-            '@modern-js/runtime/mf':
-              require.resolve('@module-federation/modern-js-v3/runtime'),
-          },
+          // In Bridge mode this is the framework's real renderer entry. The
+          // legacy alias only exports MF runtime methods, so keeping it would
+          // silently remove the producer's render/hydrate callbacks.
+          alias: runtimeAlias,
         },
         source: {
           enableAsyncEntry: modernjsConfig.source?.enableAsyncEntry ?? true,

@@ -32,6 +32,20 @@ function setup(
 }
 
 describe('independent Modern application configuration', () => {
+  it('retains an explicit provider expose in both targets without replacing its source', async () => {
+    const { api, options, callbacks } = setup('/unused', {
+      revision: 'callbacks-1',
+    });
+    options.csrConfig!.exposes = { './app': './src/bridge.tsx' };
+    options.ssrConfig!.exposes = { './app': './src/bridge.tsx' };
+    configureBridgeApplications(api as any, options);
+    expect(options.csrConfig!.exposes).toEqual({ './app': './src/bridge.tsx' });
+    expect(options.ssrConfig!.exposes).toEqual({ './app': './src/bridge.tsx' });
+    // With explicit exposes there is no generated application provider.
+    // Generation may still be registered for compatibility with legacy exposes.
+    expect(callbacks.chain).toBeDefined();
+  });
+
   it('generates separate target exposes using the real named Modern registry', async () => {
     const directory = await fs.mkdtemp(
       path.join(os.tmpdir(), 'modern-bridge-entry-'),
