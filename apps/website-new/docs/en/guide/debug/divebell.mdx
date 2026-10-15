@@ -1,0 +1,159 @@
+# Troubleshoot Runtime Issues
+
+Diagnosing Module Federation runtime problems is complex. Remote resolution,
+Shared version selection, Bridge lifecycle, and module performance evidence
+exist only in the live page runtime. Source code or Console output alone rarely
+reconstructs the complete chain.
+
+We built the [Divebell](https://github.com/2heal1/divebell) MF Extension on top
+of the MF runtime and observability capabilities. It identifies MF instances,
+traces Remote, Shared, and Bridge loading, and analyzes the relationship between
+module loading, resource requests, and page paint timing.
+
+## Install the CLI and discover its Skill
+
+Install Divebell globally on the agent machine:
+
+```bash
+npm install --global @divebell/cli
+```
+
+Inspect the installed commands and print the bundled CLI Skill path:
+
+```bash
+divebell --help
+divebell skill
+```
+
+An AI coding agent should read the returned `SKILL.md` in full before running
+commands. Installed help is the source of truth for commands and options.
+
+## Install the Module Federation Extension
+
+```bash
+divebell extensions add @divebell/extension-mf
+divebell --help
+divebell mf --help
+divebell mf --skill
+```
+
+`divebell mf --skill` prints the Skill packaged with the installed Extension.
+The agent should read it before choosing an MF command or interpreting command
+output.
+
+The CLI and Extension are agent-side tools. They are not application
+dependencies and do not modify the inspected project.
+
+## Open the page with MF diagnostics
+
+```bash
+divebell setup
+divebell open "https://example.com" --mf
+```
+
+The bare `--mf` flag enables the Extension before navigation, so it can
+capture the initial MF loading history. It is different from `--mf <name>` on
+some `divebell mf` commands, which selects one visible MF instance after the
+page is open.
+
+Use the authorized account and environment required by the task. Never bypass
+an authorization boundary.
+
+## Runtime Diagnostic Capabilities
+
+| Command | Use it for |
+| --- | --- |
+| `divebell mf status` | Identify MF instances, roles, and loaded Shared entries |
+| `divebell mf module-info [remote]` | Resolved Remote metadata and declarations |
+| `divebell mf remote status <remote>` | Determine whether a Remote currently succeeded, failed, or lacks evidence |
+| `divebell mf remote trace [remote/expose]` | Locate manifest, remoteEntry, expose, or preload phases |
+| `divebell mf shared status [package]` | Inspect the current Shared registry and version candidates |
+| `divebell mf shared trace [package]` | Trace Shared registration, version choice, reuse, and loading history |
+| `divebell mf bridge trace [remote]` | Trace Bridge render, update, destroy, commit, and route synchronization |
+| `divebell mf module-perf [remote/expose]` | Find producer-module, Shared, and resource bottlenecks and their paint impact |
+
+Use `divebell mf status` only when the target is unknown. When the target is
+clear, go directly to the smallest specialized command instead of scanning all
+browser logs.
+
+Use `module-perf --report --view timeline` only when a consolidated,
+human-readable performance timeline is needed:
+
+```bash
+divebell mf module-perf --report --view timeline
+```
+
+`module-perf --report` reorganizes the same evidence; it does not rerun the
+module load. The terminal timeline relates Page Paint, Consumer, Provider,
+module, Shared, and resource-request timing.
+
+## Usage
+
+After installation, describe the page symptom and the decision you need from
+the agent.
+
+**Diagnose an MF runtime failure**
+
+```text
+/mf observability
+Visit https://example.com. The checkout Remote fails to load. Use Divebell to
+determine whether manifest, remoteEntry, or expose loading failed, with evidence.
+```
+
+**Locate a performance bottleneck**
+
+```text
+/mf observability
+Visit https://example.com/products. The product Remote renders slowly on first
+load. Analyze module, Shared, and resource timing and its FP, FCP, and LCP impact.
+```
+
+**Trace Shared or Bridge behavior**
+
+```text
+/mf observability
+Visit https://example.com. Inspect the selected Shared version of react and
+trace the cart Remote from Bridge render through commit. Identify missing stages.
+```
+
+The agent should diagnose in this order:
+
+1. Start collection before navigation with `divebell open <url> --mf`.
+2. Use `mf status` when the target is unknown; otherwise run the relevant
+   specialized command directly.
+3. Reproduce browser interaction only when it triggers the lazy load, then read
+   the specialized MF evidence again.
+4. Read `warnings`, `recommendedActions`, `selection`, capabilities, and
+   completeness before concluding. Reopen with `--mf` when history is partial.
+5. State what the evidence proves, what it does not prove, and the exact command
+   used.
+
+## Proxy a Remote before MF starts
+
+`--mf-proxy` replaces a Remote before navigation. The key can be the
+configured Remote name or alias:
+
+```bash
+divebell open "https://example.com" \
+  --mf-proxy "checkout=http://localhost:3001/mf-manifest.json" \
+  --mf
+```
+
+The proxy applies only to that open operation. Add `--mf` when the same run
+also needs structured diagnostics.
+
+## Evidence boundaries
+
+- A successful MF load proves that the runtime completed that layer. It does
+  not prove that the UI rendered or that business data is ready.
+- Verify the final page result through Divebell after inspecting MF evidence.
+- The MF Extension returns bounded, serializable evidence. It does not read
+  cookies, tokens, factories, container objects, or business response bodies.
+- Do not add the Runtime SDK or Observability Plugin merely to start a one-off
+  investigation.
+- Use the application Observability Plugin when reports must be retained,
+  uploaded, or collected continuously in development or production.
+
+See the
+[Divebell MF Extension documentation](https://github.com/2heal1/divebell/blob/main/packages/extensions/mf/README.md)
+for the complete installed command surface.

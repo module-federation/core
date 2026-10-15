@@ -9,6 +9,11 @@ Module Federation now exposes one unified **`mf` skill**.
 
 You do not need to pick from a long list of separate skills, and you do not need to read the docs first and then translate them back to your agent. The simpler approach is to install this one skill and let the agent decide whether it should read docs, inspect config, or troubleshoot a problem.
 
+When a problem exists only in the live page runtime, the skill uses the
+Divebell MF Extension for structured Remote, Shared, Bridge, and module
+performance evidence. The browser is only the entry point and loading trigger.
+Divebell is installed on the agent machine, not in the application.
+
 If you have not read it yet, start with [AI Quick Start](/ai/index.html).
 
 ## Installation
@@ -66,7 +71,7 @@ With natural language:
 | `config-check` | Troubleshoot config mistakes, missing files, and plugin mismatches |
 | `bridge-check` | Troubleshoot Bridge integration issues |
 | `runtime-error` | Troubleshoot explicit runtime error codes, especially `RUNTIME-001` and `RUNTIME-008` |
-| `observability` | Read observability reports, trace loading phases, and debug runtime/build loading failures |
+| `observability` | Diagnose MF runtime failures, loading chains, and performance bottlenecks through Divebell, or read observability reports |
 
 ## The most common workflows
 
@@ -104,11 +109,33 @@ If you already have a concrete problem:
 
 At that point, the goal is not for you to manually investigate first. The goal is to let the agent start diagnosing immediately.
 
-### 4. Let the agent read MF observability
+### 4. Let the agent debug a live MF page
 
-For full loading observability, install the [Observability Plugin](/plugin/plugins/observability-plugin.html)
-in your app. When a browser console error prints a `traceId` and `read:`
-command, pass it to the skill:
+For a one-off investigation, give the target URL and user path to the skill:
+
+```text
+/mf observability
+Open https://example.com with Divebell, reproduce the failing checkout flow,
+and inspect the Remote and Shared loading chain.
+```
+
+The skill discovers the installed Divebell CLI and MF Extension Skills, opens
+the page with `divebell open <url> --mf`, and selects the smallest relevant
+`divebell mf` command. Page interaction is used only to trigger the relevant
+lazy load; conclusions should come from structured Remote, Shared, Bridge, or
+module performance evidence.
+
+See [Troubleshoot Runtime Issues](/guide/debug/divebell.html) for the
+installation commands, command map, Remote proxy workflow, and evidence
+boundaries.
+
+### 5. Let the agent read retained observability
+
+Install the [Observability Plugin](/plugin/plugins/observability-plugin.html)
+in your app when reports must be collected continuously, uploaded from
+production, or written by Node/SSR. When a browser console error prints a
+`traceId` and `read:` command, pass the accessible report source to the
+skill:
 
 ```text
 /mf observability

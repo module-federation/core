@@ -23,10 +23,7 @@ import {
   generateInstallChunk,
   generateExternalInstallChunkCode,
 } from './webpackChunkUtilities';
-import {
-  createInfrastructureLogger,
-  createLogger,
-} from '@module-federation/sdk';
+import { createBundlerLogger } from './createBundlerLogger';
 import {
   fileSystemRunInContextStrategy,
   httpEvalStrategy,
@@ -49,11 +46,6 @@ interface DynamicFilesystemChunkLoadingRuntimeModuleOptions {
 interface ChunkLoadingContext {
   webpack: Compiler['webpack'];
 }
-
-const createBundlerLogger: typeof createLogger =
-  typeof createInfrastructureLogger === 'function'
-    ? (createInfrastructureLogger as unknown as typeof createLogger)
-    : createLogger;
 
 class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   private runtimeRequirements: Set<string>;

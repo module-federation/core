@@ -1,33 +1,32 @@
-# @examples/mf-react-component
+# @module-federation/rspress-plugin
 
-This example demonstrates how to use Rslib to build a simple Module Federation React component.
+Module Federation plugin for [Rspress](https://rspress.dev/). Wraps the Rsbuild Module Federation plugin and can rebuild search / LLM indexes from HTML after the build.
 
-### Command
+## Install
 
-Build package
-
-```
-nx build rslib-module
+```bash
+pnpm add @module-federation/rspress-plugin
 ```
 
-Serve package
+## Build
 
-```
-nx serve rslib-module
-```
-
-Dev package
-
-1.
-
-```
-nx dev rslib-module
+```bash
+pnpm --filter @module-federation/rspress-plugin run build
 ```
 
-2.
+## Usage
 
-```
-nx storybook rslib-module
+```ts
+import { pluginModuleFederation } from '@module-federation/rspress-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'doc-app',
+      // ...Module Federation options
+    }),
+  ],
+};
 ```
 
-visit http://localhost:6006
+Optional second argument controls Rspress-specific behavior (`autoShared`, `rebuildSearchIndex`, `rebuildLlms`).

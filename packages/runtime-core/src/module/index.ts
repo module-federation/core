@@ -19,6 +19,7 @@ import {
   RemoteInfo,
   InitScope,
   ShareScopeMap,
+  ResourceLoadContext,
 } from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
@@ -107,20 +108,22 @@ class Module {
     this.host = host;
   }
 
-  async getEntry(expose?: string): Promise<RemoteEntryExports> {
-    if (this.remoteEntryExports) {
-      return this.remoteEntryExports;
-    }
-
+  async getEntry(
+    expose?: string,
+    resourceContext?: ResourceLoadContext,
+  ): Promise<RemoteEntryExports> {
+    const effectiveResourceContext = resourceContext || {
+      initiator: 'loadRemote',
+      id: composeRemoteRequestId(this.remoteInfo.name, expose),
+      resourceType: 'remoteEntry' as const,
+      url: this.remoteInfo.entry,
+      expose,
+    };
     const remoteEntryExports = await getRemoteEntry({
       origin: this.host,
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
-      resourceContext: {
-        initiator: 'loadRemote',
-        id: composeRemoteRequestId(this.remoteInfo.name, expose),
-        resourceType: 'remoteEntry',
-      },
+      resourceContext: effectiveResourceContext,
     });
 
     assert(
@@ -139,9 +142,10 @@ class Module {
     remoteSnapshot?: ModuleInfo,
     rawInitScope?: InitScope,
     expose?: string,
+    resourceContext?: ResourceLoadContext,
   ) {
     // Get remoteEntry.js
-    const remoteEntryExports = await this.getEntry(expose);
+    const remoteEntryExports = await this.getEntry(expose, resourceContext);
 
     if (this.inited) {
       await this.host.loaderHook.lifecycle.afterInitRemote.emit({

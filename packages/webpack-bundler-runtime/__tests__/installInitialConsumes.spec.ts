@@ -183,4 +183,48 @@ describe('installInitialConsumes', () => {
     // Verify
     expect(mockWebpackRequire.m[mockModuleId]).toBeDefined();
   });
+
+  test('should pass build and module context to the real sync loader', () => {
+    const actualInstallInitialConsumes = jest.requireActual(
+      '../src/installInitialConsumes',
+    ).installInitialConsumes as typeof installInitialConsumes;
+    const moduleId = 'context-module';
+    const factory = jest.fn(() => ({ loaded: true }));
+    const loadShareSync = jest.fn(() => factory);
+    const webpackRequire = {
+      m: {},
+      c: {},
+      federation: {
+        instance: { loadShareSync },
+      },
+    };
+    const options: InstallInitialConsumesOptions = {
+      moduleToHandlerMapping: {
+        [moduleId]: {
+          shareKey: 'context-share',
+          getter: jest.fn(),
+          shareInfo: {
+            scope: ['default'],
+            shareConfig: { singleton: true, requiredVersion: '*' },
+          },
+        },
+      },
+      webpackRequire: webpackRequire as any,
+      installedModules: {},
+      initialConsumes: [moduleId],
+    };
+
+    actualInstallInitialConsumes(options);
+    const module = { exports: undefined };
+    webpackRequire.m[moduleId](module);
+
+    expect(loadShareSync).toHaveBeenCalledWith('context-share', {
+      customShareInfo: options.moduleToHandlerMapping[moduleId].shareInfo,
+      context: {
+        trigger: 'build',
+        moduleId,
+      },
+    });
+    expect(module.exports).toEqual({ loaded: true });
+  });
 });

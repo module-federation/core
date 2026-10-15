@@ -1,5 +1,60 @@
 # @module-federation/enhanced
 
+## 2.9.2
+
+### Patch Changes
+
+- 412f62e: Restore BUILD-001 logging and diagnostic context when an expose cannot resolve. Webpack still reports the build error, and `container.get()` rejects the missing expose.
+- c130946: An exposed module that fails to resolve no longer exits the Node process during code generation. The build finishes with webpack's "Module not found" error in `compilation.errors`, and the container's `get()` for that expose throws `MODULE_NOT_FOUND`, as in upstream webpack. Watch mode and dev servers keep running.
+- 923b55d: Fix the tree-shaking shared entry build finishing its `make` phase before the shared entry module tree was built. Large shared packages with a filesystem cache could crash in `createModuleAssets` or emit a fallback bundle with missing modules, and an entry error was thrown instead of reported.
+- Updated dependencies [000f3fa]
+- Updated dependencies [7f0ac8b]
+  - @module-federation/dts-plugin@2.9.2
+  - @module-federation/cli@2.9.2
+  - @module-federation/manifest@2.9.2
+  - @module-federation/rspack@2.9.2
+  - @module-federation/runtime-tools@2.9.2
+  - @module-federation/webpack-bundler-runtime@2.9.2
+  - @module-federation/inject-external-runtime-core-plugin@2.9.2
+  - @module-federation/sdk@2.9.2
+  - @module-federation/managers@2.9.2
+  - @module-federation/bridge-react-webpack-plugin@2.9.2
+  - @module-federation/error-codes@2.9.2
+
+## 2.9.1
+
+### Patch Changes
+
+- Updated dependencies [796d6ad]
+  - @module-federation/dts-plugin@2.9.1
+  - @module-federation/cli@2.9.1
+  - @module-federation/manifest@2.9.1
+  - @module-federation/rspack@2.9.1
+  - @module-federation/runtime-tools@2.9.1
+  - @module-federation/webpack-bundler-runtime@2.9.1
+  - @module-federation/inject-external-runtime-core-plugin@2.9.1
+  - @module-federation/sdk@2.9.1
+  - @module-federation/managers@2.9.1
+  - @module-federation/bridge-react-webpack-plugin@2.9.1
+  - @module-federation/error-codes@2.9.1
+
+## 2.9.0
+
+### Patch Changes
+
+- Updated dependencies [df8b40f]
+  - @module-federation/webpack-bundler-runtime@2.9.0
+  - @module-federation/dts-plugin@2.9.0
+  - @module-federation/runtime-tools@2.9.0
+  - @module-federation/rspack@2.9.0
+  - @module-federation/inject-external-runtime-core-plugin@2.9.0
+  - @module-federation/sdk@2.9.0
+  - @module-federation/managers@2.9.0
+  - @module-federation/manifest@2.9.0
+  - @module-federation/bridge-react-webpack-plugin@2.9.0
+  - @module-federation/error-codes@2.9.0
+  - @module-federation/cli@2.9.0
+
 ## 2.8.2
 
 ### Patch Changes

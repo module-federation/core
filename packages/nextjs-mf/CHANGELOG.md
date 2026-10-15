@@ -1,5 +1,50 @@
 # @module-federation/nextjs-mf
 
+## 8.8.76
+
+### Patch Changes
+
+- Updated dependencies [412f62e]
+- Updated dependencies [c130946]
+- Updated dependencies [47d9b46]
+- Updated dependencies [923b55d]
+  - @module-federation/enhanced@2.9.2
+  - @module-federation/runtime-core@2.9.2
+  - @module-federation/node@2.7.52
+  - @module-federation/runtime@2.9.2
+  - @module-federation/webpack-bundler-runtime@2.9.2
+  - @module-federation/sdk@2.9.2
+
+## 8.8.75
+
+### Patch Changes
+
+- 85d78e2: Fix server-side onLoad crash when async remote module factories are used during the webpack build/SSR path. Await async factory results before proxy-wrapping, return a wrapper factory for exposeModuleFactory, and preserve class constructor semantics via Proxy apply/construct traps.
+- Updated dependencies [92afef1]
+  - @module-federation/runtime-core@2.9.1
+  - @module-federation/enhanced@2.9.1
+  - @module-federation/runtime@2.9.1
+  - @module-federation/node@2.7.51
+  - @module-federation/webpack-bundler-runtime@2.9.1
+  - @module-federation/sdk@2.9.1
+
+## 8.8.74
+
+### Patch Changes
+
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+- Updated dependencies [a59681f]
+- Updated dependencies [df8b40f]
+- Updated dependencies [08fdc4d]
+- Updated dependencies [df8b40f]
+  - @module-federation/runtime-core@2.9.0
+  - @module-federation/runtime@2.9.0
+  - @module-federation/webpack-bundler-runtime@2.9.0
+  - @module-federation/node@2.7.50
+  - @module-federation/enhanced@2.9.0
+  - @module-federation/sdk@2.9.0
+
 ## 8.8.73
 
 ### Patch Changes

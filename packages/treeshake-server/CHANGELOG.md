@@ -1,5 +1,15 @@
 # @module-federation/treeshake-server
 
+## 2.9.2
+
+### Patch Changes
+
+- 7f0ac8b: Upgrade Undici to 7.29.1 to include the latest 7.x security fixes while preserving Node 20 compatibility.
+
+## 2.9.1
+
+## 2.9.0
+
 ## 2.8.2
 
 ## 2.8.1

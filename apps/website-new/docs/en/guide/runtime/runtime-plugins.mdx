@@ -15,7 +15,8 @@ If you only need to **register** a plugin path in build config, see [`runtimePlu
 
 ## Mental model
 
-A runtime plugin is a function that returns a `ModuleFederationRuntimePlugin`:
+A runtime plugin is a function that returns a `ModuleFederationRuntimePlugin`.
+New plugins should return their hooks from `apply(instance)`:
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -23,6 +24,11 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function myRuntimePlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'my-runtime-plugin',
+    apply(instance) {
+      return {
+        // Declare runtime hooks here.
+      };
+    },
   };
 }
 ```
@@ -121,6 +127,55 @@ const mf = createInstance({
 
 `registerGlobalPlugins(...)` deduplicates plugins by `name`. In practice, call it before creating or using runtime instances so the global plugins are incorporated consistently.
 
+## Access the runtime instance in a plugin
+
+Previously, only a few hooks provided the runtime instance as an argument. If a
+plugin needs to access its runtime instance from any hook, implement
+`apply(instance)`. It is called once per plugin name on each instance, where the
+plugin can access the current instance and return the hooks to register for it.
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const instanceTracePlugin: ModuleFederationRuntimePlugin = {
+  name: 'instance-trace-plugin',
+  apply(instance) {
+    let completedLoads = 0;
+
+    return {
+      afterLoadRemote(args) {
+        completedLoads += 1;
+        console.log(instance.name, args.id, completedLoads);
+      },
+    };
+  },
+};
+```
+
+The `instance` passed to `apply(instance)` is the current runtime instance. Use
+it to read instance information or call instance methods. Because each instance
+calls `apply` separately, counters, caches, and subscriptions declared there
+also remain isolated. The returned object is the hook set registered for that
+instance.
+
+### Legacy syntax and compatibility
+
+Previously, hooks could be declared directly on the plugin object:
+
+```ts
+const legacyPlugin: ModuleFederationRuntimePlugin = {
+  name: 'legacy-plugin',
+  beforeRequest(args) {
+    return args;
+  },
+};
+```
+
+This syntax is still supported, but will be deprecated. To migrate, move the
+existing hooks into the object returned by `apply(instance)`. When `apply`
+returns nothing, the current version still falls back to hooks declared on the
+plugin object.
+
 ## Choose the right hook
 
 | Job                                              | Hook                                                | Use it when                                                                                                                                                           |
@@ -132,7 +187,9 @@ const mf = createInstance({
 | Align or rewrite share scopes before remote init | `beforeInitContainer`, `initContainerShareScopeMap` | You need to change which share scope a remote initializes against                                                                                                     |
 | Override the shared winner                       | `resolveShare`                                      | You want to force a different shared implementation than the runtime would normally pick                                                                              |
 | Observe remote load status                       | `afterMatchRemote`, `afterLoadRemote`               | You need request tracing or final success/failure status for `loadRemote`                                                                                             |
-| Observe shared dependency status                 | `afterLoadShare`, `errorLoadShare`                  | You need to diagnose missing shared dependencies, version mismatch, or eager configuration errors                                                                     |
+| Observe shared dependency status                 | `afterRegisterShare`, `afterLoadShare`, `errorLoadShare` | You need to diagnose provider registration, missing shared dependencies, version mismatch, or eager configuration errors                                         |
+| Observe manifest loading                         | `beforeLoadManifest`, `afterLoadManifest`           | You need manifest timing, cache, validation, or recovery diagnostics                                                                                                  |
+| Observe Bridge operations                        | `beforeBridgeRender`, `afterBridgeRender`, `beforeBridgeDestroy`, `afterBridgeDestroy`, `afterBridgeRouteSync` | You need framework, producer/consumer, render, teardown, or route synchronization context                              |
 | Recover from load failures                       | `errorLoadRemote`                                   | You need fallback modules, offline behavior, or layered recovery                                                                                                      |
 | Implement a new remote loading strategy          | `loadEntry`                                         | You want to fully customize how a remote entry is loaded or support a new remote type                                                                                 |
 
@@ -160,26 +217,30 @@ export default function rewriteRemoteEntryPlugin(
 ): ModuleFederationRuntimePlugin {
   return {
     name: 'rewrite-remote-entry',
-    async afterResolve(args) {
-      const entry = args.remoteInfo?.entry;
-      if (!entry) {
-        return args;
-      }
+    apply() {
+      return {
+        async afterResolve(args) {
+          const entry = args.remoteInfo?.entry;
+          if (!entry) {
+            return args;
+          }
 
-      try {
-        const currentUrl = new URL(entry);
-        if (currentUrl.hostname !== options.fromHost) {
+          try {
+            const currentUrl = new URL(entry);
+            if (currentUrl.hostname !== options.fromHost) {
+              return args;
+            }
+
+            const nextUrl = new URL(entry);
+            nextUrl.hostname = options.toHost;
+            args.remoteInfo.entry = nextUrl.toString();
+          } catch {
+            // Ignore non-URL entries and keep the original resolution.
+          }
+
           return args;
-        }
-
-        const nextUrl = new URL(entry);
-        nextUrl.hostname = options.toHost;
-        args.remoteInfo.entry = nextUrl.toString();
-      } catch {
-        // Ignore non-URL entries and keep the original resolution.
-      }
-
-      return args;
+        },
+      };
     },
   };
 }
@@ -207,18 +268,22 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function fetchManifestWithCredentials(): ModuleFederationRuntimePlugin {
   return {
     name: 'fetch-manifest-with-credentials',
-    fetch(manifestUrl, requestInit, remoteInfo) {
-      const headers = new Headers(requestInit?.headers);
-      headers.set('x-mf-host', 'host');
-      if (remoteInfo?.name) {
-        headers.set('x-mf-remote', remoteInfo.name);
-      }
+    apply() {
+      return {
+        fetch(manifestUrl, requestInit, remoteInfo) {
+          const headers = new Headers(requestInit?.headers);
+          headers.set('x-mf-host', 'host');
+          if (remoteInfo?.name) {
+            headers.set('x-mf-remote', remoteInfo.name);
+          }
 
-      return fetch(manifestUrl, {
-        ...requestInit,
-        credentials: 'include',
-        headers,
-      });
+          return fetch(manifestUrl, {
+            ...requestInit,
+            credentials: 'include',
+            headers,
+          });
+        },
+      };
     },
   };
 }
@@ -245,28 +310,32 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function preferHostReact(): ModuleFederationRuntimePlugin {
   return {
     name: 'prefer-host-react',
-    resolveShare(args) {
-      if (args.pkgName !== 'react') {
-        return args;
-      }
+    apply() {
+      return {
+        resolveShare(args) {
+          if (args.pkgName !== 'react') {
+            return args;
+          }
 
-      const hostVersionMap = args.shareScopeMap.default?.react;
-      if (!hostVersionMap) {
-        return args;
-      }
+          const hostVersionMap = args.shareScopeMap.default?.react;
+          if (!hostVersionMap) {
+            return args;
+          }
 
-      const preferredShared =
-        hostVersionMap[args.version] ?? Object.values(hostVersionMap)[0];
-      if (!preferredShared) {
-        return args;
-      }
+          const preferredShared =
+            hostVersionMap[args.version] ?? Object.values(hostVersionMap)[0];
+          if (!preferredShared) {
+            return args;
+          }
 
-      args.resolver = () => ({
-        shared: preferredShared,
-        useTreesShaking: false,
-      });
+          args.resolver = () => ({
+            shared: preferredShared,
+            useTreesShaking: false,
+          });
 
-      return args;
+          return args;
+        },
+      };
     },
   };
 }

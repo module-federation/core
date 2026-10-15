@@ -1,5 +1,26 @@
 # @module-federation/bridge-react
 
+## 2.9.2
+
+### Patch Changes
+
+- 4364cb6: Deduplicate module loader calls and keep delayed loading continuous for
+  client-rendered lazy React components.
+  - @module-federation/sdk@2.9.2
+
+## 2.9.1
+
+### Patch Changes
+
+- @module-federation/sdk@2.9.1
+
+## 2.9.0
+
+### Patch Changes
+
+- df8b40f: Extend the existing Bridge render and destroy hooks with semantic context, add a route synchronization hook, and keep timing, sanitization, and correlation in the observability plugin.
+  - @module-federation/sdk@2.9.0
+
 ## 2.8.2
 
 ### Patch Changes

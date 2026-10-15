@@ -225,3 +225,45 @@
   justify-content: center;
   display: flex;
 }
+
+:global(html[data-devtools-view='popup']) {
+  .wrapper,
+  .rules {
+    gap: 10px;
+  }
+  .sectionHeader {
+    padding: 8px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .titleRow {
+    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .subtitle {
+    display: none;
+  }
+  .ruleCard {
+    padding: 10px;
+    gap: 6px;
+    border-radius: 6px;
+    box-shadow: none;
+  }
+  .inputs {
+    gap: 8px;
+  }
+  .field {
+    min-width: 0;
+    margin-bottom: 0;
+  }
+  .field :global(.arco-select-view) {
+    min-height: 32px;
+    border-radius: 5px;
+    padding: 2px 8px;
+  }
+  .emptyWrapper {
+    padding: 16px;
+    border-radius: 6px;
+  }
+}
