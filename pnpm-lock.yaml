@@ -1852,10 +1852,31 @@ importers:
         version: link:../../packages/runtime
 
   apps/node-host-e2e:
-    dependencies:
-      '@module-federation/node':
+    devDependencies:
+      '@module-federation/rstest':
         specifier: workspace:*
-        version: link:../../packages/node
+        version: link:../../packages/rstest
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+      '@rstest/core':
+        specifier: 0.12.3
+        version: 0.12.3(@module-federation/runtime-tools@2.9.2)(core-js@3.49.0)(jsdom@20.0.3)
+      node-dynamic-remote:
+        specifier: workspace:*
+        version: link:../node-dynamic-remote
+      node-dynamic-remote-new-version:
+        specifier: workspace:*
+        version: link:../node-dynamic-remote-new-version
+      node-local-remote:
+        specifier: workspace:*
+        version: link:../node-local-remote
+      node-remote:
+        specifier: workspace:*
+        version: link:../node-remote
+      sirv:
+        specifier: 3.0.2
+        version: 3.0.2
 
   apps/node-local-remote:
     dependencies:
@@ -2052,18 +2073,36 @@ importers:
       '@module-federation/rsbuild-plugin':
         specifier: workspace:*
         version: link:../../../packages/rsbuild-plugin
+      '@module-federation/rstest':
+        specifier: workspace:*
+        version: link:../../../packages/rstest
       '@rsbuild/core':
         specifier: 2.1.4
         version: 2.1.4(@module-federation/runtime-tools@2.9.2)(core-js@3.49.0)
       '@rsbuild/plugin-react':
         specifier: ^2.1.0
         version: 2.1.0(@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.2)(core-js@3.49.0))(@rspack/core@2.2.9(@module-federation/runtime-tools@2.9.2)(@swc/helpers@0.5.23))
+      '@rstest/browser':
+        specifier: 0.12.3
+        version: 0.12.3(@rstest/core@0.12.3(@module-federation/runtime-tools@2.9.2)(core-js@3.49.0)(jsdom@20.0.3))(playwright@1.57.0)
+      '@rstest/browser-react':
+        specifier: 0.12.3
+        version: 0.12.3(@rstest/core@0.12.3(@module-federation/runtime-tools@2.9.2)(core-js@3.49.0)(jsdom@20.0.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@rstest/core':
+        specifier: 0.12.3
+        version: 0.12.3(@module-federation/runtime-tools@2.9.2)(core-js@3.49.0)(jsdom@20.0.3)
       '@types/react':
         specifier: ^18.2.79
         version: 18.3.28
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.7(@types/react@18.3.28)
+      playwright:
+        specifier: 1.57.0
+        version: 1.57.0
+      sirv:
+        specifier: 3.0.2
+        version: 3.0.2
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.13(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@26.6.4)(typescript@5.9.3))

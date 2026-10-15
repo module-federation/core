@@ -7,6 +7,7 @@
     "build": "rsbuild build",
     "preview": "rsbuild preview",
     "test": "pnpm exec vitest --passWithNoTests",
+    "test:federation": "pnpm exec rstest run -c rstest.config.ts",
     "serve": "pnpm run dev",
     "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:2000 --browser chrome",
     "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://localhost:2000 --browser electron",
@@ -25,10 +26,16 @@
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "workspace:*",
+    "@module-federation/rstest": "workspace:*",
     "@rsbuild/core": "2.1.4",
     "@rsbuild/plugin-react": "^2.1.0",
+    "@rstest/browser": "0.12.3",
+    "@rstest/browser-react": "0.12.3",
+    "@rstest/core": "0.12.3",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.3.0",
+    "playwright": "1.57.0",
+    "sirv": "3.0.2",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5"
   }

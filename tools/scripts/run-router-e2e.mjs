@@ -15,7 +15,6 @@ const ROUTER_WAIT_TARGETS = [
   'tcp:2002',
   'tcp:2003',
   'tcp:2004',
-  'tcp:2005',
   'tcp:2006',
   'tcp:2100',
   'tcp:2200',
@@ -29,7 +28,6 @@ const KILL_PORT_ARGS = [
   '2002',
   '2003',
   '2004',
-  '2005',
   '2006',
   '2100',
   '2200',
@@ -41,7 +39,7 @@ const ROUTER_CI_STABILIZE_WAIT_MS = 20_000;
 const SCENARIOS = {
   dev: {
     label: 'router development',
-    serveCmd: ['pnpm', 'run', 'app:router:dev'],
+    serveCmd: ['pnpm', 'run', 'app:router:e2e:dev'],
     e2eCmd: ['pnpm', '--filter', 'host', 'run', 'e2e:ci'],
     waitTargets: ROUTER_WAIT_TARGETS,
   },

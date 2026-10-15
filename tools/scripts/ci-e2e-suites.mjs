@@ -69,7 +69,8 @@ export const E2E_SUITE_DEFINITIONS = {
     ],
     inputs: [
       '.github/workflows/e2e-node.yml',
-      'tools/scripts/run-node-e2e.mjs',
+      'apps/node-host-e2e/remotes.ts',
+      'apps/node-host-e2e/rstest.config.ts',
     ],
   },
   rstest: {
@@ -95,6 +96,8 @@ export const E2E_SUITE_DEFINITIONS = {
     inputs: [
       '.github/workflows/e2e-router.yml',
       'tools/scripts/run-router-e2e.mjs',
+      'apps/router-demo/router-host-2000/rstest.config.ts',
+      'apps/router-demo/router-host-2000/module-federation.config.ts',
     ],
   },
   runtime: {

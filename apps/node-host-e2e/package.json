@@ -1,13 +1,20 @@
 {
   "name": "node-host-e2e",
   "private": true,
-  "description": "Federation example for node-host-e2e",
-  "dependencies": {
-    "@module-federation/node": "workspace:*"
-  },
+  "type": "module",
+  "description": "Rstest suite that loads the built Node federation remotes.",
   "scripts": {
-    "e2e": "pnpm exec jest --config jest.config.ts --passWithNoTests",
-    "test:e2e": "sleep 10 && pnpm --filter node-host-e2e run e2e && lsof -ti tcp:3022,3023,3333,3026,3027 | xargs kill",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules **/*.{js,ts}"
+    "e2e": "pnpm exec rstest run -c rstest.config.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules --ext .js,.ts ."
+  },
+  "devDependencies": {
+    "@module-federation/rstest": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
+    "@rstest/core": "0.12.3",
+    "node-dynamic-remote": "workspace:*",
+    "node-dynamic-remote-new-version": "workspace:*",
+    "node-local-remote": "workspace:*",
+    "node-remote": "workspace:*",
+    "sirv": "3.0.2"
   }
 }
