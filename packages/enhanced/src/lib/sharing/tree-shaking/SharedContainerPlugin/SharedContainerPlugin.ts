@@ -77,7 +77,7 @@ class SharedContainerPlugin {
 
     compiler.hooks.make.tapAsync(
       PLUGIN_NAME,
-      async (
+      (
         compilation: Compilation,
         callback: (error?: WebpackError | null | undefined) => void,
       ) => {
@@ -95,14 +95,8 @@ class SharedContainerPlugin {
               name: this._globalName,
             },
           },
-          (error: WebpackError | null | undefined) => {
-            if (error) {
-              throw error;
-            }
-          },
+          (error: WebpackError | null | undefined) => callback(error),
         );
-
-        callback();
       },
     );
 
