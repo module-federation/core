@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/treeshake-frontend",
-  "version": "2.9.1",
+  "version": "2.9.2",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build && rslib build",
@@ -27,7 +27,7 @@
     "@radix-ui/react-label": "2.1.1",
     "@radix-ui/react-menubar": "1.1.4",
     "@radix-ui/react-navigation-menu": "1.2.3",
-    "@radix-ui/react-popover": "1.1.4",
+    "@radix-ui/react-popover": "1.1.23",
     "@radix-ui/react-progress": "1.1.1",
     "@radix-ui/react-radio-group": "1.2.2",
     "@radix-ui/react-scroll-area": "1.2.2",
