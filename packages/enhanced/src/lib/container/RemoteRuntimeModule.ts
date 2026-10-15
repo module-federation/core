@@ -20,6 +20,9 @@ const extractUrlAndGlobal = require(
 const { Template, RuntimeModule, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
+const { compareModulesByIdentifier } = require(
+  normalizeWebpackPath('webpack/lib/util/comparators'),
+) as typeof import('webpack/lib/util/comparators');
 
 class RemoteRuntimeModule extends RuntimeModule {
   constructor() {
@@ -45,9 +48,10 @@ class RemoteRuntimeModule extends RuntimeModule {
       if (chunk.id === null || chunk.id === undefined) {
         continue;
       }
-      const modules = chunkGraph?.getChunkModulesIterableBySourceType(
+      const modules = chunkGraph?.getOrderedChunkModulesIterableBySourceType(
         chunk,
         'remote',
+        compareModulesByIdentifier,
       );
       if (!modules) {
         continue;
