@@ -110,6 +110,11 @@
       "types": "./dist/remote-lifecycle.server.d.ts",
       "import": "./dist/remote-lifecycle.server.es.js",
       "require": "./dist/remote-lifecycle.server.cjs.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.es.js",
+      "require": "./dist/server.cjs.js"
     }
   },
   "typesVersions": {
@@ -167,6 +172,9 @@
       ],
       "remote-lifecycle.server": [
         "./dist/remote-lifecycle.server.d.ts"
+      ],
+      "server": [
+        "./dist/server.d.ts"
       ]
     }
   },

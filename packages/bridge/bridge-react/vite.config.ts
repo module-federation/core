@@ -11,6 +11,7 @@ export default defineConfig({
         index: path.resolve(__dirname, 'src/index.ts'),
         base: path.resolve(__dirname, 'src/base.ts'),
         ssr: path.resolve(__dirname, 'src/ssr.ts'),
+        server: path.resolve(__dirname, 'src/server.ts'),
         'remote-lifecycle': path.resolve(
           __dirname,
           'src/remote/remoteLifecycle.ts',
