@@ -1,5 +1,35 @@
 # @module-federation/playground
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [4364cb6]
+  - @module-federation/bridge-react@2.9.2
+  - @module-federation/runtime@2.9.2
+
+## 0.1.1
+
+### Patch Changes
+
+- 7ecde91: Defer loading the TypeScript compiler until the sandbox is run and allow the
+  federated build public path to be overridden for pinned or self-hosted assets.
+  - @module-federation/bridge-react@2.9.1
+  - @module-federation/runtime@2.9.1
+
+## 0.1.0
+
+### Minor Changes
+
+- df8b40f: Add a Divebell quickstart preset on `@divebell/core` 0.0.23 with observable Playground state and actions for updating the manifest, props, and remote preview.
+
+### Patch Changes
+
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+  - @module-federation/runtime@2.9.0
+  - @module-federation/bridge-react@2.9.0
+
 ## 0.0.5
 
 ### Patch Changes

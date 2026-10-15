@@ -1,2 +1,11 @@
-export type { RenderFnParams, ProviderParams } from './type';
+export type {
+  RenderFnParams,
+  ProviderParams,
+  BridgeFramework,
+  BridgeOperation,
+  BridgeOperationContext,
+  BridgeOperationResult,
+  BridgeOperationSide,
+  BridgeRouteSummary,
+} from './type';
 export { dispatchPopstateEnv } from './env';

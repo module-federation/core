@@ -1,12 +1,59 @@
 import { ModuleFederation } from '../core';
-import { UserOptions } from '../type';
+import {
+  ModuleFederationRuntimePlugin,
+  RuntimePluginHooks,
+  UserOptions,
+} from '../type';
 import { getGlobalHostPlugins } from '../global';
+import { assert } from './logger';
+import { isPlainObject } from './tool';
+
+function getPluginsToRegister(
+  plugins: UserOptions['plugins'],
+): Array<ModuleFederationRuntimePlugin> {
+  const pluginsByName = new Map<string, ModuleFederationRuntimePlugin>();
+
+  [...(plugins || []), ...getGlobalHostPlugins()].forEach((plugin) => {
+    if (!plugin) {
+      return;
+    }
+
+    assert(isPlainObject(plugin), 'Plugin configuration is invalid.');
+    assert(plugin.name, 'A name must be provided by the plugin.');
+
+    if (!pluginsByName.has(plugin.name)) {
+      pluginsByName.set(plugin.name, plugin);
+    }
+  });
+
+  return Array.from(pluginsByName.values());
+}
+
+function getInstancePlugin(
+  plugin: ModuleFederationRuntimePlugin,
+  instanceHooks: void | RuntimePluginHooks,
+): ModuleFederationRuntimePlugin {
+  if (instanceHooks === undefined) {
+    return plugin;
+  }
+
+  return {
+    ...instanceHooks,
+    name: plugin.name,
+    version: plugin.version,
+  };
+}
 
 export function registerPlugins(
   plugins: UserOptions['plugins'],
   instance: ModuleFederation,
 ) {
-  const globalPlugins = getGlobalHostPlugins();
+  const registeredPlugins = new Map<string, ModuleFederationRuntimePlugin>();
+  instance.options.plugins.forEach((plugin) => {
+    if (plugin) {
+      registeredPlugins.set(plugin.name, plugin);
+    }
+  });
   const hookInstances = [
     instance.hooks,
     instance.remoteHandler.hooks,
@@ -15,21 +62,19 @@ export function registerPlugins(
     instance.loaderHook,
     instance.bridgeHook,
   ];
-  // Incorporate global plugins
-  if (globalPlugins.length > 0) {
-    globalPlugins.forEach((plugin) => {
-      if (plugins?.find((item) => item.name !== plugin.name)) {
-        plugins.push(plugin);
-      }
-    });
-  }
 
-  if (plugins && plugins.length > 0) {
-    plugins.forEach((plugin) => {
-      hookInstances.forEach((hookInstance) => {
-        hookInstance.applyPlugin(plugin, instance);
-      });
+  getPluginsToRegister(plugins).forEach((plugin) => {
+    registeredPlugins.set(plugin.name, plugin);
+
+    if (instance.hooks.registerPlugins[plugin.name]) {
+      return;
+    }
+
+    const instancePlugin = getInstancePlugin(plugin, plugin.apply?.(instance));
+    hookInstances.forEach((hookInstance) => {
+      hookInstance.applyPlugin(instancePlugin);
     });
-  }
-  return plugins;
+  });
+
+  return Array.from(registeredPlugins.values());
 }

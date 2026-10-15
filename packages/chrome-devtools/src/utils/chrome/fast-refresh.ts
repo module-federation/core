@@ -1,5 +1,5 @@
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
-import { getUnpkgUrl } from '../index';
+import { getUnpkgUrl, REACT_19_DEV_VERSION } from '../index';
 import { definePropertyGlobalVal } from '../sdk';
 import {
   __FEDERATION_DEVTOOLS__,
@@ -253,6 +253,27 @@ const getDevtoolsMessage = () => {
 };
 
 const devtoolsMessage = getDevtoolsMessage();
+// ReactDOM registers its renderer before the remote's Refresh runtime arrives.
+// Preserve a real DevTools hook; otherwise retain renderers for Refresh to find.
+if (
+  devtoolsMessage?.[__ENABLE_FAST_REFRESH__] &&
+  !(window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__
+) {
+  let nextId = 0;
+  const renderers = new Map<number, unknown>();
+  (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
+    supportsFiber: true,
+    renderers,
+    inject(renderer: unknown) {
+      const id = nextId++;
+      renderers.set(id, renderer);
+      return id;
+    },
+    onScheduleFiberRoot() {},
+    onCommitFiberRoot() {},
+    onCommitFiberUnmount() {},
+  };
+}
 const eagerShareInfo = getEagerShareInfo(devtoolsMessage?.[__EAGER_SHARE__]);
 if (devtoolsMessage?.[__ENABLE_FAST_REFRESH__] && eagerShareInfo) {
   const { version, scopes } = eagerShareInfo;
@@ -265,6 +286,53 @@ if (devtoolsMessage?.[__ENABLE_FAST_REFRESH__] && eagerShareInfo) {
 }
 
 const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
+  // One pair per share scope, including react-dom/client. ReactDOM must be able
+  // to load React itself when the client entry is requested before React.get().
+  const react19Pending = new Map<string, Promise<any>>();
+  const loadReact19 = (
+    pkg: SupportPkg,
+    scopes: string[],
+    sync = false,
+  ): any => {
+    const existing = getScopeGlobal(pkg, scopes);
+    if (existing?.version === REACT_19_DEV_VERSION) {
+      return setScopeGlobals(pkg, scopes, existing);
+    }
+    const save = (library: any) => {
+      // A synchronous eager load can win while an async request is in flight.
+      const cached = getScopeGlobal(pkg, scopes);
+      if (cached?.version === REACT_19_DEV_VERSION)
+        return setScopeGlobals(pkg, scopes, cached);
+      if (library?.version !== REACT_19_DEV_VERSION)
+        throw new Error(`Expected development ${pkg}@${REACT_19_DEV_VERSION}.`);
+      if (
+        pkg === 'react' &&
+        (typeof library.createElement !== 'function' ||
+          !Object.isFrozen(library.createElement('div')))
+      )
+        throw new Error('React provider is not a development build.');
+      return setScopeGlobals(pkg, scopes, library);
+    };
+    if (sync) {
+      if (pkg === 'react-dom') loadReact19('react', scopes, true);
+      return save(loadUmdModuleSync(pkg, REACT_19_DEV_VERSION, scopes));
+    }
+    const key = `${pkg}:${JSON.stringify([...scopes].sort())}`;
+    let pending = react19Pending.get(key);
+    if (!pending) {
+      pending = (async () => {
+        if (pkg === 'react-dom') await loadReact19('react', scopes);
+        // Recheck after awaiting React: another request may have filled this scope.
+        const cached = getScopeGlobal(pkg, scopes);
+        if (cached?.version === REACT_19_DEV_VERSION)
+          return setScopeGlobals(pkg, scopes, cached);
+        return save(await loadUmdModule(pkg, REACT_19_DEV_VERSION, scopes));
+      })();
+      react19Pending.set(key, pending);
+      void pending.catch(() => react19Pending.delete(key));
+    }
+    return pending;
+  };
   let orderResolve: (value?: unknown) => void;
   const orderPromise = new Promise((resolve) => {
     orderResolve = resolve;
@@ -274,10 +342,16 @@ const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
     name: 'mf-fast-refresh-plugin',
     beforeRegisterShare(args: BeforeRegisterShareArgs) {
       const { pkgName, shared } = args;
-      if (!SUPPORT_PKGS.includes(pkgName)) {
+      const isReact19 = /^19\./.test(shared.version);
+      if (
+        !SUPPORT_PKGS.includes(pkgName) &&
+        !(isReact19 && pkgName === 'react-dom/client')
+      ) {
         return args;
       }
-      const supportPkgName = pkgName as SupportPkg;
+      const supportPkgName = (
+        pkgName === 'react-dom/client' ? 'react-dom' : pkgName
+      ) as SupportPkg;
       const shareScopes = getShareScopes(shared.scope);
 
       let enableFastRefresh = false;
@@ -296,6 +370,29 @@ const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
       }
 
       if (!enableFastRefresh) {
+        return args;
+      }
+
+      if (isReact19) {
+        shared.version = REACT_19_DEV_VERSION;
+        shared.get = async () => {
+          const library = await loadReact19(supportPkgName, shareScopes);
+          return () => library;
+        };
+        if (shared.shareConfig?.eager || shared.lib) {
+          const library = loadReact19(supportPkgName, shareScopes, true);
+          shared.lib = () => library;
+          updateEagerShareInfo(
+            devtoolsMessage,
+            pkgName,
+            REACT_19_DEV_VERSION,
+            shareScopes,
+          );
+          localStorage.setItem(
+            __FEDERATION_DEVTOOLS__,
+            JSON.stringify(devtoolsMessage),
+          );
+        }
         return args;
       }
 

@@ -66,3 +66,35 @@
   border: 1px solid rgba(228, 228, 231, 0.5);
   background: var(--color-bg-1, rgba(255, 255, 255, 0.9));
 }
+
+:global(html[data-devtools-view='popup']) {
+  .wrapper {
+    gap: 10px;
+  }
+  .summaryCard {
+    padding: 10px;
+    min-height: 0;
+    gap: 6px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .summaryHeader {
+    flex: 1 1 100%;
+  }
+  .summaryTitle {
+    font-size: 13px;
+  }
+  .summaryHint {
+    display: none;
+  }
+  .chip,
+  .moreChip,
+  .chipPlaceholder {
+    padding: 3px 7px;
+    border-radius: 4px;
+  }
+  .formSection {
+    padding: 10px;
+  }
+}

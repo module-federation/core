@@ -20,6 +20,9 @@ const extractUrlAndGlobal = require(
 const { Template, RuntimeModule, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
+const { compareModulesByIdentifier } = require(
+  normalizeWebpackPath('webpack/lib/util/comparators'),
+) as typeof import('webpack/lib/util/comparators');
 
 class RemoteRuntimeModule extends RuntimeModule {
   constructor() {
@@ -37,18 +40,6 @@ class RemoteRuntimeModule extends RuntimeModule {
     const idToRemoteMap: RemotesOptions['idToRemoteMap'] = {};
     const moduleIdToRemoteDataMapping: ModuleIdToRemoteDataMapping = {};
 
-    // let chunkReferences: Set<Chunk> = new Set();
-
-    // if (this.chunk && chunkGraph) {
-    //   const requirements = chunkGraph.getTreeRuntimeRequirements(this.chunk);
-    //   if (requirements.has('federation-entry-startup')) {
-    //     chunkReferences = this.chunk.getAllReferencedChunks();
-    //   } else {
-    //     // remote entry doesnt need federation startup, can have async chunk map only
-    //     chunkReferences = this.chunk.getAllAsyncChunks();
-    //   }
-    // }
-
     const allChunks = [
       ...Array.from(this.chunk?.getAllReferencedChunks() || []),
     ];
@@ -57,9 +48,10 @@ class RemoteRuntimeModule extends RuntimeModule {
       if (chunk.id === null || chunk.id === undefined) {
         continue;
       }
-      const modules = chunkGraph?.getChunkModulesIterableBySourceType(
+      const modules = chunkGraph?.getOrderedChunkModulesIterableBySourceType(
         chunk,
         'remote',
+        compareModulesByIdentifier,
       );
       if (!modules) {
         continue;

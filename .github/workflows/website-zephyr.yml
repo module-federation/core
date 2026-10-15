@@ -24,9 +24,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  DEBUG: 'zephyr*'
   SITE_ORIGIN: https://module-federation.io
+  ZE_FAIL_BUILD: true
   ZE_SECRET_TOKEN: ${{ secrets.ZE_SECRET_TOKEN }}
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 jobs:
   deploy:
@@ -70,7 +71,7 @@ jobs:
 
       - name: Update Zephyr preview environment
         if: ${{ env.ZE_SECRET_TOKEN != '' && github.event_name == 'pull_request' }}
-        uses: ZephyrCloudIO/zephyr-preview-environment-action@b3ada4d42eb404c8af6da6299c1b0585d238fdd0 # main, pending Node 24 release
+        uses: ZephyrCloudIO/zephyr-preview-environment-action@05822254ff8661c4e68f9dd12b83db7815ca2cf8 # v1.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 

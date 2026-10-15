@@ -155,17 +155,14 @@ class ProvideSharedPlugin {
             config.layer,
           );
           if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
-            // relative request - apply filtering if include/exclude are defined
-            if (this.shouldProvideSharedModule(config)) {
-              resolvedProvideMap.set(lookupKey, {
-                config,
-                version: config.version,
-                resource: actualRequest,
-              });
-            }
-          } else if (/^(\/|[A-Za-z]:\\|\\\\)/.test(actualRequest)) {
-            // absolute path - apply filtering if include/exclude are defined
-            if (this.shouldProvideSharedModule(config)) {
+            if (
+              this.shouldProvideSharedModule(config) &&
+              testRequestFilters(
+                actualRequest,
+                config.include?.request,
+                config.exclude?.request,
+              )
+            ) {
               resolvedProvideMap.set(lookupKey, {
                 config,
                 version: config.version,
@@ -305,7 +302,6 @@ class ProvideSharedPlugin {
                     ...originalPrefixConfig,
                     shareKey: finalShareKey,
                     request: originalRequestString,
-                    _originalPrefix: configuredPrefix, // Store the original prefix for filtering
                     include: originalPrefixConfig.include
                       ? { ...originalPrefixConfig.include }
                       : undefined,
@@ -346,7 +342,12 @@ class ProvideSharedPlugin {
                 if (
                   configFromReconstructedDirect !== undefined &&
                   configFromReconstructedDirect.allowNodeModulesSuffixMatch &&
-                  !resolvedProvideMap.has(lookupKeyForResource)
+                  !resolvedProvideMap.has(lookupKeyForResource) &&
+                  testRequestFilters(
+                    modulePathAfterNodeModules,
+                    configFromReconstructedDirect.include?.request,
+                    configFromReconstructedDirect.exclude?.request,
+                  )
                 ) {
                   this.provideSharedModule(
                     compilation,
@@ -441,7 +442,6 @@ class ProvideSharedPlugin {
                         ...originalPrefixConfig,
                         shareKey: finalShareKey,
                         request: modulePathAfterNodeModules,
-                        _originalPrefix: configuredPrefix, // Store the original prefix for filtering
                         include: originalPrefixConfig.include
                           ? {
                               ...originalPrefixConfig.include,
@@ -481,108 +481,25 @@ class ProvideSharedPlugin {
         const resolvedProvideMap = compilationData.get(compilation);
         if (!resolvedProvideMap) return;
 
-        // Filter out modules that don't pass include/exclude conditions
         const filteredEntries = Array.from(resolvedProvideMap).filter(
-          ([resourceKey, { config, version, resource }]) => {
-            // Apply the same filtering logic as in provideSharedModule
-            const actualResource = resource || resourceKey;
-
-            // Check include conditions
-            if (config.include) {
-              let versionIncludeFailed = false;
-              if (typeof config.include.version === 'string') {
-                if (typeof version === 'string' && version) {
-                  if (!satisfy(parseRange(config.include.version), version)) {
-                    versionIncludeFailed = true;
-                  }
-                } else {
-                  versionIncludeFailed = true;
-                }
-              }
-
-              let requestIncludeFailed = false;
-              if (config.include.request) {
-                const includeRequestValue = config.include.request;
-                // For prefix matches, we need to check the remainder after the prefix
-                let testString = actualResource;
-
-                // If this is a prefix match (indicated by _originalPrefix being present)
-                // then we should test against the remainder
-                if (
-                  config._originalPrefix &&
-                  actualResource.startsWith(config._originalPrefix)
-                ) {
-                  const remainder = actualResource.slice(
-                    config._originalPrefix.length,
-                  );
-                  testString = remainder;
-                }
-
-                const requestActuallyMatches =
-                  includeRequestValue instanceof RegExp
-                    ? includeRequestValue.test(testString)
-                    : testString === includeRequestValue;
-                if (!requestActuallyMatches) {
-                  requestIncludeFailed = true;
-                }
-              }
-
-              // Skip if any specified include condition failed
-              const shouldSkipVersion =
-                typeof config.include.version === 'string' &&
-                versionIncludeFailed;
-              const shouldSkipRequest =
-                config.include.request && requestIncludeFailed;
-
-              if (shouldSkipVersion || shouldSkipRequest) {
+          ([, { config, version }]) => {
+            if (typeof config.include?.version === 'string') {
+              if (
+                typeof version !== 'string' ||
+                !version ||
+                !satisfy(parseRange(config.include.version), version)
+              ) {
                 return false;
               }
             }
 
-            // Check exclude conditions
-            if (config.exclude) {
-              let versionExcludeMatches = false;
-              if (
-                typeof config.exclude.version === 'string' &&
-                typeof version === 'string' &&
-                version
-              ) {
-                if (satisfy(parseRange(config.exclude.version), version)) {
-                  versionExcludeMatches = true;
-                }
-              }
-
-              let requestExcludeMatches = false;
-              if (config.exclude.request) {
-                const excludeRequestValue = config.exclude.request;
-                // For prefix matches, we need to check the remainder after the prefix
-                let testString = actualResource;
-
-                // If this is a prefix match (indicated by _originalPrefix being present)
-                // then we should test against the remainder
-                if (
-                  config._originalPrefix &&
-                  actualResource.startsWith(config._originalPrefix)
-                ) {
-                  const remainder = actualResource.slice(
-                    config._originalPrefix.length,
-                  );
-                  testString = remainder;
-                }
-
-                const requestActuallyMatchesExclude =
-                  excludeRequestValue instanceof RegExp
-                    ? excludeRequestValue.test(testString)
-                    : testString === excludeRequestValue;
-                if (requestActuallyMatchesExclude) {
-                  requestExcludeMatches = true;
-                }
-              }
-
-              // Skip if any specified exclude condition matched
-              if (versionExcludeMatches || requestExcludeMatches) {
-                return false;
-              }
+            if (
+              typeof config.exclude?.version === 'string' &&
+              typeof version === 'string' &&
+              version &&
+              satisfy(parseRange(config.exclude.version), version)
+            ) {
+              return false;
             }
 
             return true;
@@ -719,32 +636,12 @@ class ProvideSharedPlugin {
         }
       }
 
-      let requestIncludeFailed = false;
-      if (config.include.request) {
-        const includeRequestValue = config.include.request;
-        const requestActuallyMatches =
-          includeRequestValue instanceof RegExp
-            ? includeRequestValue.test(resource)
-            : resource === includeRequestValue;
-        if (!requestActuallyMatches) {
-          requestIncludeFailed = true;
-        }
-      }
-
-      // Skip if any specified include condition failed
-      const shouldSkipVersion =
-        typeof config.include.version === 'string' && versionIncludeFailed;
-      const shouldSkipRequest = config.include.request && requestIncludeFailed;
-
-      if (shouldSkipVersion || shouldSkipRequest) {
-        // Generate warning for better debugging (combining both approaches)
-        if (shouldSkipVersion) {
-          const error = new WebpackError(
-            `Provided module "${key}" version "${version}" does not satisfy include filter "${config.include.version}"`,
-          );
-          error.file = `shared module ${key} -> ${resource}`;
-          compilation.warnings.push(error);
-        }
+      if (versionIncludeFailed) {
+        const error = new WebpackError(
+          `Provided module "${key}" version "${version}" does not satisfy include filter "${config.include.version}"`,
+        );
+        error.file = `shared module ${key} -> ${resource}`;
+        compilation.warnings.push(error);
         return;
       }
 
@@ -774,28 +671,12 @@ class ProvideSharedPlugin {
         }
       }
 
-      let requestExcludeMatches = false;
-      if (config.exclude.request) {
-        const excludeRequestValue = config.exclude.request;
-        const requestActuallyMatchesExclude =
-          excludeRequestValue instanceof RegExp
-            ? excludeRequestValue.test(resource)
-            : resource === excludeRequestValue;
-        if (requestActuallyMatchesExclude) {
-          requestExcludeMatches = true;
-        }
-      }
-
-      // Skip if any specified exclude condition matched
-      if (versionExcludeMatches || requestExcludeMatches) {
-        // Generate warning for better debugging (combining both approaches)
-        if (versionExcludeMatches) {
-          const error = new WebpackError(
-            `Provided module "${key}" version "${version}" matches exclude filter "${config.exclude.version}"`,
-          );
-          error.file = `shared module ${key} -> ${resource}`;
-          compilation.warnings.push(error);
-        }
+      if (versionExcludeMatches) {
+        const error = new WebpackError(
+          `Provided module "${key}" version "${version}" matches exclude filter "${config.exclude.version}"`,
+        );
+        error.file = `shared module ${key} -> ${resource}`;
+        compilation.warnings.push(error);
         return;
       }
 

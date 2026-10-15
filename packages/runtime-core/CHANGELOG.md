@@ -1,5 +1,39 @@
 # @module-federation/runtime
 
+## 2.9.2
+
+### Patch Changes
+
+- 47d9b46: Import `ResourceLoadContext` in the remote handler so the published
+  `remote/index.d.ts` declares it. Consumers that type-check dependencies with
+  `skipLibCheck: false` no longer get TS2304.
+  - @module-federation/sdk@2.9.2
+  - @module-federation/error-codes@2.9.2
+
+## 2.9.1
+
+### Patch Changes
+
+- 92afef1: Clear rejected remote-entry loading promises from `globalLoading` so a later independent request can start a fresh load.
+  - @module-federation/sdk@2.9.1
+  - @module-federation/error-codes@2.9.1
+
+## 2.9.0
+
+### Minor Changes
+
+- df8b40f: Bind runtime plugins once per Module Federation instance and support instance-specific lifecycle handlers.
+
+### Patch Changes
+
+- df8b40f: Extend the existing Bridge render and destroy hooks with semantic context, add a route synchronization hook, and keep timing, sanitization, and correlation in the observability plugin.
+- df8b40f: Extend the semantic shared registration and resolution hooks with explicit load context, re-export the shared-version `satisfy` helper, and keep provider, candidate, and selection diagnostics in the observability plugin while ignoring legacy share-scope metadata.
+- a59681f: Allow automatic preload configuration through `beforePreloadRemote` and skip JS or CSS URLs that are already loading or loaded using a bounded, configurable URL cache.
+- 08fdc4d: Cache factories returned by synchronous shared getters for subsequent loads.
+- df8b40f: Extend the semantic manifest, remote entry, and preload hooks with resource context and results, while keeping cache, timing, timeout, failure, and recovery diagnostics in the observability plugin.
+  - @module-federation/sdk@2.9.0
+  - @module-federation/error-codes@2.9.0
+
 ## 2.8.2
 
 ### Patch Changes

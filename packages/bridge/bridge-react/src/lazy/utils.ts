@@ -110,6 +110,15 @@ export function setDataFetchItemLoadedStatus(id: string) {
   dataFetchItem[2] = MF_DATA_FETCH_STATUS.LOADED;
 }
 
+export function resetDataFetchResult(id: string) {
+  const dataFetchItem = getDataFetchItem(id);
+  if (!dataFetchItem) {
+    return;
+  }
+  dataFetchItem[1] = undefined;
+  dataFetchItem[2] = MF_DATA_FETCH_STATUS.AWAIT;
+}
+
 export const wrapDataFetchId = (id?: string) => {
   return `${WRAP_DATA_FETCH_ID_IDENTIFIER}${id}${WRAP_DATA_FETCH_ID_IDENTIFIER}`;
 };

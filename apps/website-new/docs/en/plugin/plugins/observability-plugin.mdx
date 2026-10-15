@@ -114,6 +114,7 @@ window.__FEDERATION__.__OBSERVABILITY__.runtime_host.findReports({
   remote: 'remote1',
 });
 window.__FEDERATION__.__OBSERVABILITY__.runtime_host.exportReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getRuntimeState();
 ```
 
 If you want to observe loading chains in development, or if the page stays in a
@@ -255,6 +256,12 @@ Please tell me whether the load succeeded, where it failed, who likely owns the 
 
 <paste report JSON>
 ```
+
+import DivebellObservability from '@docs/en/_components/divebell-observability.mdx';
+
+## Observe {props.observabilityTargetName || 'Module Federation'} with {props.observabilityToolName || 'Divebell'}
+
+{props.observabilityToolContent || <DivebellObservability />}
 
 ## Runtime Options
 
