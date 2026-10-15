@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime-core",
-  "version": "2.9.1",
+  "version": "2.9.2",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs",
@@ -26,7 +26,7 @@
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
+        "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
     },
@@ -36,7 +36,7 @@
         "default": "./dist/types.js"
       },
       "require": {
-        "types": "./dist/types.d.ts",
+        "types": "./dist/types.d.cts",
         "default": "./dist/types.cjs"
       }
     }

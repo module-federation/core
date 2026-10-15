@@ -281,6 +281,12 @@ const webpack = require(normalizeWebpackPath('webpack')) as typeof import('webpa
 - Avoid introducing new direct webpack package imports for internals when the existing module uses normalized `require(...)` conventions.
 - When editing an existing file, preserve the local webpack-loading style already used there unless there is a deliberate reason to migrate the file consistently.
 
+## Sokra Mode
+
+When asked to use Sokra mode, invoke `$sokra-mode` from
+`.agents/skills/sokra-mode/SKILL.md`. It loads the shared guidance in
+`.claude/skills/sokra-mode/SKILL.md`. The skill is opt-in in both clients.
+
 ## Operating Rules
 
 - Keep changes minimal and directly scoped to the user request.
