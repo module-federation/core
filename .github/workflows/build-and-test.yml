@@ -60,7 +60,7 @@ jobs:
         run: node tools/scripts/check-format-changed.mjs
 
       - name: Test CI and release tooling
-        run: node --test tools/scripts/ci-is-affected.test.mjs tools/scripts/create-release-draft.test.mjs tools/scripts/prepare-browser-release.test.mjs
+        run: node --test tools/scripts/ci-is-affected.test.mjs tools/scripts/create-release-draft.test.mjs tools/scripts/prepare-browser-release.test.mjs tools/scripts/tsdown/config-helpers.test.mjs
 
       - name: Verify Rslib Template Publint Wiring
         run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
