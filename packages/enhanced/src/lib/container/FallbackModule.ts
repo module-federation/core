@@ -30,9 +30,7 @@ const { sources: webpackSources } = require(
 const { Template, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
+import makeSerializable from '../makeSerializable';
 
 const TYPES = new Set(['javascript']);
 const RUNTIME_REQUIREMENTS = new Set([RuntimeGlobals.module]);
