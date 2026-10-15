@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rspack",
-  "version": "2.9.1",
+  "version": "2.9.2",
   "license": "MIT",
   "keywords": [
     "Module Federation",
@@ -33,7 +33,7 @@
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
-    "@rspack/core": "^1.0.2",
+    "@rspack/core": "2.1.10",
     "typescript": "7.0.2"
   },
   "exports": {
