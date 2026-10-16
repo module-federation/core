@@ -582,3 +582,458 @@ describe('Bridge service HTTP transport', () => {
     expect(live.aborted).toBeInstanceOf(Error);
   });
 });
+
+describe('Bridge service render caching', () => {
+  function post(info = request(), hydration = 'complete') {
+    const { signal, ...input } = info;
+    return new Request('http://service.test', {
+      method: 'POST',
+      signal,
+      body: JSON.stringify({
+        protocol: BRIDGE_SERVICE_PROTOCOL,
+        revision,
+        hydration,
+        request: input,
+      }),
+    });
+  }
+
+  function completed(info: BridgeSSRRequest): BridgeSSRResult {
+    const { signal, ...snapshot } = info;
+    return {
+      revision,
+      stream: new ReadableStream({
+        start(controller) {
+          controller.enqueue(Buffer.from('<p>库存🌿</p>'));
+          controller.close();
+        },
+      }),
+      snapshot: Promise.resolve(snapshot),
+      abort() {},
+    };
+  }
+
+  it('reuses completed renders over real HTTP with independent, delayed consumers', async () => {
+    let renders = 0;
+    const statuses: (string | null)[] = [];
+    const handler = createBridgeServiceHandler({
+      revision,
+      cache: { maxAgeMs: 60000 },
+      async render(info) {
+        renders++;
+        return completed(info);
+      },
+    });
+    const service = await listen(async (input) => {
+      const response = await handler(input);
+      statuses.push(response.headers.get('x-mf-bridge-cache'));
+      expect(response.headers.get('cache-control')).toBe('no-store');
+      return response;
+    });
+    try {
+      const options = {
+        url: service.url,
+        revision,
+        hydrationMode: 'complete' as const,
+      };
+      const first = await fetchBridgeService(request(), options);
+      const original = await collect(first.stream);
+      const snapshot = await first.snapshot;
+      const [second, third] = await Promise.all([
+        fetchBridgeService(request(), options),
+        fetchBridgeService(request(), options),
+      ]);
+      second.abort(new Error('one consumer left'));
+      await expect(collect(second.stream)).rejects.toThrow();
+      // The transport may finish before the application starts reading a hit.
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(await collect(third.stream)).toBe(original);
+      expect(await third.snapshot).toEqual(snapshot);
+      expect(renders).toBe(1);
+      expect(statuses).toEqual(['miss', 'hit', 'hit']);
+    } finally {
+      await service.close();
+    }
+  });
+
+  it('streams live when a cached transcript exceeds a slow consumer budget and reuses it for a larger budget', async () => {
+    let renders = 0;
+    const statuses: (string | null)[] = [];
+    const budgets: (string | null)[] = [];
+    const handler = createBridgeServiceHandler({
+      revision,
+      cache: { maxAgeMs: 60000 },
+      async render(info) {
+        renders++;
+        // This header configures transport replay, never the application render.
+        expect(info.headers).toEqual({ cookie: 'application-only' });
+        let emitted = 0;
+        return {
+          revision,
+          stream: new ReadableStream<Uint8Array>({
+            async pull(controller) {
+              await new Promise((resolve) => setTimeout(resolve, 20));
+              controller.enqueue(Buffer.alloc(64, 65));
+              if (++emitted === 10) controller.close();
+            },
+          }),
+          snapshot: Promise.resolve({ complete: true }),
+          abort() {},
+        };
+      },
+    });
+    const localFetch: typeof fetch = async (url, init) => {
+      const input = new Request(url, init);
+      budgets.push(input.headers.get('x-mf-bridge-buffer-bytes'));
+      const response = await handler(input);
+      statuses.push(response.headers.get('x-mf-bridge-cache'));
+      return response;
+    };
+    for (const maxBufferedBytes of [128, 128, undefined]) {
+      const result = await fetchBridgeService(request(), {
+        url: 'http://service.test',
+        revision,
+        hydrationMode: 'complete',
+        maxBufferedBytes,
+        fetch: localFetch,
+      });
+      const reader = result.stream.getReader();
+      const chunks: Uint8Array[] = [];
+      try {
+        while (true) {
+          const next = await reader.read();
+          if (next.done) break;
+          chunks.push(next.value);
+          await new Promise((resolve) => setTimeout(resolve, 5));
+        }
+      } finally {
+        reader.releaseLock();
+      }
+      expect(Buffer.concat(chunks).toString()).toBe('A'.repeat(640));
+      expect(await result.snapshot).toEqual({ complete: true });
+    }
+    expect(statuses).toEqual(['miss', 'miss', 'hit']);
+    expect(budgets).toEqual(['128', '128', String(4 * 1024 * 1024)]);
+    expect(renders).toBe(2);
+  });
+
+  it('rejects malformed replay budgets before rendering', async () => {
+    let renders = 0;
+    const handler = createBridgeServiceHandler({
+      revision,
+      cache: { maxAgeMs: 60000 },
+      async render(info) {
+        renders++;
+        return completed(info);
+      },
+    });
+    for (const budget of [
+      '',
+      '0',
+      '-1',
+      '1.5',
+      '1e3',
+      'Infinity',
+      '9007199254740992',
+    ]) {
+      const input = post();
+      input.headers.set('x-mf-bridge-buffer-bytes', budget);
+      expect((await handler(input)).status).toBe(400);
+    }
+    expect(renders).toBe(0);
+  });
+
+  it('uses the default replay budget when a client omits the transport header', async () => {
+    let renders = 0;
+    const handler = createBridgeServiceHandler({
+      revision,
+      cache: { maxAgeMs: 60000, maxEntryBytes: 8 * 1024 * 1024 },
+      async render() {
+        renders++;
+        let emitted = 0;
+        return {
+          revision,
+          stream: new ReadableStream<Uint8Array>({
+            async pull(controller) {
+              await new Promise((resolve) => setTimeout(resolve, 1));
+              controller.enqueue(Buffer.alloc(512 * 1024, 65));
+              if (++emitted === 7) controller.close();
+            },
+          }),
+          snapshot: Promise.resolve({ complete: true }),
+          abort() {},
+        };
+      },
+    });
+    for (let i = 0; i < 2; i++) {
+      const response = await handler(post());
+      expect(response.headers.get('x-mf-bridge-cache')).toBe('miss');
+      expect(await response.text()).toContain('"type":"done"');
+    }
+    const input = post();
+    input.headers.set('x-mf-bridge-buffer-bytes', String(8 * 1024 * 1024));
+    const hit = await handler(input);
+    expect(hit.headers.get('x-mf-bridge-cache')).toBe('hit');
+    expect(await hit.text()).toContain('"type":"done"');
+    expect(renders).toBe(2);
+  });
+
+  it('keeps every render input in the key instead of normalizing away identity or user context', async () => {
+    let renders = 0;
+    const handler = createBridgeServiceHandler({
+      revision,
+      cache: { maxAgeMs: 60000 },
+      async render(info) {
+        renders++;
+        return completed(info);
+      },
+    });
+    const variants: Partial<BridgeSSRRequest>[] = [
+      {},
+      { instanceId: 'inventory-2' },
+      { identifierPrefix: 'inventory-2-' },
+      { props: { shop: '南区' } },
+      { url: 'http://host.example/other' },
+      { headers: { cookie: 'other-user' } },
+      { nonce: 'this-document' },
+      { moduleName: 'another/app' },
+      { basename: '/nested' },
+      { memoryRoute: { entryPath: '/another' } },
+    ];
+    for (const variant of variants) {
+      const info = { ...request(), ...variant };
+      const first = await handler(post(info));
+      expect(first.headers.get('x-mf-bridge-cache')).toBe('miss');
+      const text = await first.text();
+      const second = await handler(post(info));
+      expect(second.headers.get('x-mf-bridge-cache')).toBe('hit');
+      expect(await second.text()).toBe(text);
+    }
+    expect(renders).toBe(variants.length);
+    const differentMode = await handler(post(request(), 'progressive'));
+    expect(differentMode.headers.get('x-mf-bridge-cache')).toBe('miss');
+    await differentMode.text();
+    const stale = post();
+    const body = await stale.json();
+    body.revision = 'stale-build';
+    expect(
+      (
+        await handler(
+          new Request(stale.url, {
+            method: 'POST',
+            body: JSON.stringify(body),
+          }),
+        )
+      ).status,
+    ).toBe(409);
+  });
+
+  it('streams misses immediately and records all progressive updates before publishing a hit', async () => {
+    const live = producer();
+    let renders = 0;
+    const handler = createBridgeServiceHandler({
+      revision,
+      cache: { maxAgeMs: 60000 },
+      async render() {
+        renders++;
+        return live.result;
+      },
+    });
+    const first = await handler(post(request(), 'progressive'));
+    const reader = first.body!.getReader();
+    const chunks = [(await reader.read()).value!];
+    expect(JSON.parse(Buffer.from(chunks[0]).toString()).type).toBe('meta');
+    live.html.controller.enqueue(Buffer.from('<div>shell</div>'));
+    chunks.push((await reader.read()).value!);
+    live.html.controller.close();
+    live.updates.controller.enqueue({ id: '0', value: 'later' });
+    live.updates.controller.close();
+    live.final.resolve({ complete: true });
+    while (true) {
+      const next = await reader.read();
+      if (next.done) break;
+      chunks.push(next.value);
+    }
+    reader.releaseLock();
+    const second = await handler(post(request(), 'progressive'));
+    expect(second.headers.get('x-mf-bridge-cache')).toBe('hit');
+    expect(await second.text()).toBe(Buffer.concat(chunks).toString());
+    expect(renders).toBe(1);
+  });
+
+  it('does not merge distinct producer inputs when JSON re-serialization would change numeric values', async () => {
+    let renders = 0;
+    const handler = createBridgeServiceHandler({
+      revision,
+      cache: { maxAgeMs: 60000 },
+      async render(info) {
+        renders++;
+        const value = info.props.value;
+        const label = Object.is(value, -0)
+          ? 'negative zero'
+          : value === Infinity
+            ? 'infinity'
+            : value === null
+              ? 'null'
+              : 'zero';
+        return {
+          revision,
+          stream: new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(Buffer.from(`<p>${label}</p>`));
+              controller.close();
+            },
+          }),
+          snapshot: Promise.resolve({ label }),
+          abort() {},
+        };
+      },
+    });
+    const { signal: _signal, ...info } = request();
+    const template = JSON.stringify({
+      protocol: BRIDGE_SERVICE_PROTOCOL,
+      revision,
+      hydration: 'complete',
+      request: { ...info, props: { value: 0 } },
+    });
+    for (const [literal, label] of [
+      ['-0', 'negative zero'],
+      ['0', 'zero'],
+      ['1e400', 'infinity'],
+      ['null', 'null'],
+    ]) {
+      const body = template.replace('"value":0', `"value":${literal}`);
+      const input = () =>
+        new Request('http://service.test', { method: 'POST', body });
+      const first = await handler(input());
+      expect(first.headers.get('x-mf-bridge-cache')).toBe('miss');
+      const text = await first.text();
+      expect(text).toContain(`"snapshot":{"label":"${label}"}`);
+      const second = await handler(input());
+      expect(second.headers.get('x-mf-bridge-cache')).toBe('hit');
+      expect(await second.text()).toBe(text);
+    }
+    expect(renders).toBe(4);
+  });
+
+  for (const field of ['initial', 'final', 'update'] as const) {
+    for (const kind of ['undefined', 'toJSON'] as const) {
+      it(`rejects a ${field} value omitted by ${kind} serialization and never caches the failed transcript`, async () => {
+        let renders = 0;
+        const handler = createBridgeServiceHandler({
+          revision,
+          cache: { maxAgeMs: 60000 },
+          async render(info) {
+            if (++renders > 1) return completed(info);
+            const invalid =
+              kind === 'undefined' ? undefined : { toJSON: () => undefined };
+            const result = completed(info);
+            if (field === 'final') result.snapshot = Promise.resolve(invalid);
+            else {
+              result.hydration = {
+                snapshot: Promise.resolve(field === 'initial' ? invalid : {}),
+                shellMarker: 'shell',
+                updates: new ReadableStream<unknown>({
+                  start(controller) {
+                    if (field === 'update') controller.enqueue(invalid);
+                    controller.close();
+                  },
+                }),
+              };
+            }
+            return result;
+          },
+        });
+        const mode = field === 'final' ? 'complete' : 'progressive';
+        const first = await handler(post(request(), mode));
+        if (field === 'initial') {
+          expect(first.status).toBe(500);
+          await first.text();
+        } else {
+          expect(first.status).toBe(200);
+          await expect(first.text()).rejects.toThrow('during serialization');
+        }
+        const second = await handler(post(request(), mode));
+        expect(second.headers.get('x-mf-bridge-cache')).toBe('miss');
+        const recovered = await second.text();
+        expect(recovered).toContain('"type":"done"');
+        const third = await handler(post(request(), mode));
+        expect(third.headers.get('x-mf-bridge-cache')).toBe('hit');
+        expect(await third.text()).toBe(recovered);
+        expect(renders).toBe(2);
+      });
+    }
+  }
+
+  it('discards failed or cancelled recordings and does not cache partial output', async () => {
+    for (const failure of ['html', 'updates', 'cancel', 'snapshot']) {
+      const live = producer();
+      let renders = 0;
+      const handler = createBridgeServiceHandler({
+        revision,
+        cache: { maxAgeMs: 60000 },
+        async render(info) {
+          return ++renders === 1 ? live.result : completed(info);
+        },
+      });
+      const aborter = new AbortController();
+      const first = await handler(post(request(aborter.signal)));
+      const reading = first.text();
+      const rejected = expect(reading).rejects.toThrow();
+      if (failure === 'html')
+        live.html.controller.error(new Error('render failed'));
+      else if (failure === 'updates')
+        live.updates.controller.error(new Error('update failed'));
+      else if (failure === 'cancel') aborter.abort(new Error('client left'));
+      else {
+        live.html.controller.close();
+        live.updates.controller.close();
+        live.final.reject(new Error('snapshot failed'));
+      }
+      await rejected;
+      const second = await handler(post());
+      expect(second.headers.get('x-mf-bridge-cache')).toBe('miss');
+      await second.text();
+      const third = await handler(post());
+      expect(third.headers.get('x-mf-bridge-cache')).toBe('hit');
+      await third.text();
+      expect(renders).toBe(2);
+    }
+  });
+
+  it('keeps oversized renders working while bypassing cache storage', async () => {
+    let renders = 0;
+    const handler = createBridgeServiceHandler({
+      revision,
+      cache: { maxAgeMs: 60000, maxEntryBytes: 1 },
+      async render(info) {
+        renders++;
+        return completed(info);
+      },
+    });
+    for (let i = 0; i < 2; i++) {
+      const response = await handler(post());
+      expect(response.status).toBe(200);
+      expect(response.headers.get('x-mf-bridge-cache')).toBe('miss');
+      expect(await response.text()).toContain('"type":"done"');
+    }
+    expect(renders).toBe(2);
+  });
+
+  it('cancels one cache replay without evicting or consuming the stored render', async () => {
+    const handler = createBridgeServiceHandler({
+      revision,
+      cache: { maxAgeMs: 60000 },
+      render: async (info) => completed(info),
+    });
+    const original = await (await handler(post())).text();
+    const aborter = new AbortController();
+    const hit = await handler(post(request(aborter.signal)));
+    const reader = hit.body!.getReader();
+    expect((await reader.read()).done).toBe(false);
+    aborter.abort(new Error('replay cancelled'));
+    await expect(reader.read()).rejects.toThrow('replay cancelled');
+    reader.releaseLock();
+    expect(await (await handler(post())).text()).toBe(original);
+  });
+});

@@ -1,6 +1,9 @@
 import { createInstance } from '@module-federation/runtime';
 import type { BridgeRemoteModule } from './remote';
-import { createBridgeServiceHandler } from './service-http';
+import {
+  createBridgeServiceHandler,
+  type BridgeServiceCacheOptions,
+} from './service-http';
 import { bridgeStylesheets } from './styles.server';
 
 export interface BridgeServiceMiddlewareOptions {
@@ -8,6 +11,8 @@ export interface BridgeServiceMiddlewareOptions {
   manifest: string;
   module: string;
   revision: string;
+  /** Cache completed renders; choose an acceptable freshness lifetime. */
+  cache?: BridgeServiceCacheOptions;
 }
 
 /** Expose the producer's real MF Node application through Modern's HTTP server. */
@@ -17,6 +22,7 @@ export function createBridgeServiceMiddleware(
   let runtime: ReturnType<typeof createInstance> | undefined;
   const handler = createBridgeServiceHandler({
     revision: options.revision,
+    cache: options.cache,
     async render(info) {
       runtime ||= createInstance({
         name: `bridge_service_${options.module.replace(/\W/g, '_')}_${options.revision}`,
@@ -60,3 +66,7 @@ export function createBridgeServiceMiddleware(
 }
 
 export { createBridgeServiceHandler, fetchBridgeService } from './service-http';
+export type {
+  BridgeServiceCacheOptions,
+  BridgeServiceHandlerOptions,
+} from './service-http';

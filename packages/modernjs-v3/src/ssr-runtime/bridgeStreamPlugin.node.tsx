@@ -17,6 +17,7 @@ import {
   containsShellMarker,
 } from '../bridge-stream/frames.server';
 import { hostPieces } from '../bridge-stream/host-stream';
+import { bridgeIdentifierPrefix } from '../bridge-stream/identity.server';
 import { isolateReactStreamScripts } from '../bridge-stream/script-isolation.server';
 import {
   BRIDGE_STREAM_PROTOCOL,
@@ -122,7 +123,7 @@ export function bridgeStreamPlugin(
               once: true,
             });
             if (request?.signal.aborted) abortFromRequest();
-            const prefix = `mf-${randomUUID()}-`;
+            const prefix = bridgeIdentifierPrefix(id);
             let activate: (params: BridgeSSRRenderParams) => void = () => {};
             const renderParams = new Promise<BridgeSSRRenderParams>(
               (resolve) => {

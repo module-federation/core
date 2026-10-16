@@ -2,11 +2,18 @@ import type {
   BridgeSSRRequest,
   BridgeSSRResult,
 } from '@module-federation/bridge-react/ssr';
+import {
+  createBridgeServiceCache,
+  type BridgeServiceCacheOptions,
+} from './service-cache.server';
+
+export type { BridgeServiceCacheOptions } from './service-cache.server';
 
 export const BRIDGE_SERVICE_PROTOCOL = 'mf-bridge-service/1';
 const CONTENT_TYPE = 'application/x-ndjson';
 const DEFAULT_FRAME_BYTES = 1024 * 1024;
 const DEFAULT_BUFFER_BYTES = 4 * 1024 * 1024;
+const BUFFER_HEADER = 'x-mf-bridge-buffer-bytes';
 
 type HydrationMode = 'progressive' | 'complete';
 export interface BridgeServiceFetchOptions {
@@ -21,6 +28,8 @@ export interface BridgeServiceFetchOptions {
 export interface BridgeServiceHandlerOptions {
   revision: string;
   render(info: BridgeSSRRequest): Promise<BridgeSSRResult>;
+  /** Reuse completed renders for identical inputs within this handler. */
+  cache?: BridgeServiceCacheOptions;
   maxFrameBytes?: number;
   maxBufferedBytes?: number;
 }
@@ -254,7 +263,11 @@ export async function fetchBridgeService(
         method: 'POST',
         // Application headers stay inside the body; never forward Host cookies
         // or credentials as service HTTP request headers.
-        headers: { 'content-type': 'application/json', accept: CONTENT_TYPE },
+        headers: {
+          'content-type': 'application/json',
+          accept: CONTENT_TYPE,
+          [BUFFER_HEADER]: String(bound.buffer),
+        },
         signal: aborter.signal,
         redirect: 'error',
         body: JSON.stringify({
@@ -400,10 +413,23 @@ export function createBridgeServiceHandler(
   const bound = limits(options);
   if (!options.revision)
     throw new Error('Bridge service revision is required.');
+  const cache = options.cache && createBridgeServiceCache(options.cache);
   return async (request: Request): Promise<Response> => {
     if (request.method !== 'POST')
       return new Response('Method not allowed', { status: 405 });
+    const bufferHeader = request.headers.get(BUFFER_HEADER);
+    const maxReplayBytes =
+      bufferHeader === null ? DEFAULT_BUFFER_BYTES : Number(bufferHeader);
+    if (
+      bufferHeader !== null &&
+      (!/^[1-9]\d*$/.test(bufferHeader) ||
+        !Number.isSafeInteger(maxReplayBytes))
+    )
+      return new Response('Invalid Bridge service buffer limit', {
+        status: 400,
+      });
     let input: any;
+    let serializedInput = '';
     try {
       const reader = request.body?.getReader();
       if (!reader) throw new Error('Missing request body.');
@@ -418,11 +444,10 @@ export function createBridgeServiceHandler(
             throw new Error('Bridge service request exceeds limit.');
           chunks.push(next.value);
         }
-        input = JSON.parse(
-          new TextDecoder('utf-8', { fatal: true }).decode(
-            Buffer.concat(chunks),
-          ),
+        serializedInput = new TextDecoder('utf-8', { fatal: true }).decode(
+          Buffer.concat(chunks),
         );
+        input = JSON.parse(serializedInput);
       } catch (reason) {
         void reader.cancel(reason).catch(() => {});
         throw reason;
@@ -445,6 +470,54 @@ export function createBridgeServiceHandler(
     }
     if (input.revision !== options.revision)
       return new Response('Bridge service revision mismatch', { status: 409 });
+    // Keep all render inputs, including instance identity, headers and nonce.
+    // A cache hit is a replay of this exact render, not a new instance with IDs
+    // rewritten in its opaque HTML or hydration data.
+    // Re-serializing parsed JSON would collapse observable values such as -0
+    // and overflowing numeric literals into 0/null for arbitrary producers.
+    const cacheKey = cache?.key(serializedInput);
+    // Wire bytes conservatively bound all decoded HTML and update bytes. Only
+    // replay a transcript that fits even before the consumer starts reading.
+    // Larger renders retain the live transport's existing buffering behavior.
+    const cached = cacheKey && cache?.get(cacheKey, maxReplayBytes);
+    const responseHeaders = {
+      'content-type': `${CONTENT_TYPE}; charset=utf-8`,
+      // The POST body selects the representation. An intermediary's ordinary
+      // URL cache cannot safely reuse it; the render cache above is independent.
+      'cache-control': 'no-store',
+      'x-accel-buffering': 'no',
+      ...(cache ? { 'x-mf-bridge-cache': cached ? 'hit' : 'miss' } : {}),
+    };
+    if (cached) {
+      let index = 0;
+      let controller: ReadableStreamDefaultController<Uint8Array>;
+      const cleanup = () => request.signal.removeEventListener('abort', abort);
+      const abort = () => {
+        cleanup();
+        controller.error(request.signal.reason);
+      };
+      const replay = new ReadableStream<Uint8Array>(
+        {
+          start(value) {
+            controller = value;
+            request.signal.addEventListener('abort', abort, { once: true });
+            if (request.signal.aborted) abort();
+          },
+          pull(value) {
+            if (index < cached.length) value.enqueue(cached[index++]);
+            if (index === cached.length) {
+              cleanup();
+              value.close();
+            }
+          },
+          cancel: cleanup,
+        },
+        { highWaterMark: 0 },
+      );
+      return new Response(replay, { headers: responseHeaders });
+    }
+    let recording: Uint8Array[] | undefined = cache ? [] : undefined;
+    let recordedBytes = 0;
     const aborter = new AbortController();
     const interrupted = deferred<never>();
     let result: BridgeSSRResult | undefined;
@@ -457,6 +530,7 @@ export function createBridgeServiceHandler(
     ) => {
       if (ended) return;
       ended = true;
+      recording = undefined;
       cleanup();
       aborter.abort(reason);
       interrupted.reject(reason);
@@ -483,7 +557,27 @@ export function createBridgeServiceHandler(
       const text = JSON.stringify(frame);
       if (Buffer.byteLength(text) > bound.frame)
         throw new Error('Bridge service frame exceeds limit.');
-      output.push(Buffer.from(`${text}\n`), Buffer.byteLength(text) + 1);
+      const requiredField =
+        frame.type === 'update'
+          ? 'value'
+          : frame.type === 'data' ||
+              (frame.type === 'meta' && frame.hydration === 'progressive')
+            ? 'snapshot'
+            : undefined;
+      // Opaque producer values may be undefined, functions, symbols, or expose
+      // toJSON(). Check their actual wire representation before recording it;
+      // JSON can silently omit a required field without throwing.
+      if (requiredField && !Object.hasOwn(JSON.parse(text), requiredField))
+        throw new Error(
+          `Bridge service ${frame.type} frame lost its ${requiredField} during serialization.`,
+        );
+      const bytes = Buffer.from(`${text}\n`);
+      output.push(bytes, bytes.byteLength);
+      if (recording && cache) {
+        recordedBytes += bytes.byteLength;
+        if (recordedBytes > cache.maxEntryBytes) recording = undefined;
+        else recording.push(Buffer.from(bytes));
+      }
     };
     try {
       if (ended) throw error(request.signal.reason);
@@ -579,6 +673,10 @@ export function createBridgeServiceHandler(
               ]),
             });
           send({ type: 'done' });
+          // Commit only the complete transcript, after both channels and any
+          // required final snapshot have succeeded. Misses remain streaming.
+          if (cache && cacheKey && recording) cache.set(cacheKey, recording);
+          recording = undefined;
           ended = true;
           cleanup();
           output.close();
@@ -590,11 +688,7 @@ export function createBridgeServiceHandler(
         }
       })();
       return new Response(output.stream, {
-        headers: {
-          'content-type': `${CONTENT_TYPE}; charset=utf-8`,
-          'cache-control': 'no-store',
-          'x-accel-buffering': 'no',
-        },
+        headers: responseHeaders,
       });
     } catch (reason) {
       abort(reason);

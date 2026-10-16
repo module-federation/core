@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import { Readable } from 'node:stream';
 import type {
   BridgeSSRRequest,
@@ -9,6 +8,7 @@ import { fetchBridgeService } from './service-http';
 import { byteStream, htmlFrames } from './frames.server';
 import { isolateReactStreamScripts } from './script-isolation.server';
 import { BRIDGE_STREAM_PROTOCOL, type BridgeStreamFrame } from './protocol';
+import { bridgeIdentifierPrefix } from './identity.server';
 
 export interface BridgeClientServiceMiddlewareOptions {
   path: string;
@@ -73,6 +73,9 @@ export function createBridgeClientServiceMiddleware(
         ) ||
         typeof input.instanceId !== 'string' ||
         !/^[^\s<>"']{1,256}$/.test(input.instanceId) ||
+        (input.renderInstanceId !== undefined &&
+          (typeof input.renderInstanceId !== 'string' ||
+            !/^[^\s<>"']{1,256}$/.test(input.renderInstanceId))) ||
         typeof input.url !== 'string' ||
         !input.props ||
         typeof input.props !== 'object' ||
@@ -99,10 +102,11 @@ export function createBridgeClientServiceMiddleware(
       const value = request.headers.get(name);
       if (value !== null) headers[name] = value;
     }
+    const renderInstanceId = input.renderInstanceId ?? input.instanceId;
     const info: BridgeSSRRequest = {
       moduleName: input.moduleName,
-      instanceId: input.instanceId,
-      identifierPrefix: `mf-client-${randomUUID()}-`,
+      instanceId: renderInstanceId,
+      identifierPrefix: bridgeIdentifierPrefix(renderInstanceId, 'mf-client'),
       url: pageURL.href,
       basename: input.basename,
       memoryRoute: input.memoryRoute,

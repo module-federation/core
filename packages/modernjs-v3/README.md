@@ -203,6 +203,7 @@ const handler = createBridgeServiceMiddleware({
   manifest: 'http://127.0.0.1:4801/static/mf-manifest.json',
   module: 'weekend_provider/app',
   revision: 'weekend-demo-v2',
+  cache: { maxAgeMs: 60_000 },
 });
 ```
 
@@ -212,6 +213,20 @@ The middleware loads that producer's actual MF Node application and calls its `r
 
 The fetch executor returns once valid metadata arrives. HTML and deferred updates then drain concurrently. Neither HTTP nor local execution waits for an entire HTML string before emitting content or starting initial-document hydration. The final `done` requires both channels to complete. Frame and queue limits, request cancellation, and timeouts remain active during streaming.
 
+### Render caching
+
+The producer example above enables an in-process render cache with a 60-second lifetime. The same `cache` option is available on `createBridgeServiceHandler`. Choose a lifetime acceptable for that application's data; caching is not enabled when the option is omitted. A hit skips the producer render and replays its completed `mf-bridge-service/1` transcript, including HTML, snapshots, deferred updates, stylesheets and completion. A miss still streams immediately. Only successfully completed transcripts are committed; failed, interrupted or oversized recordings do not enter the cache. The cache never rewrites React HTML, IDs, completion scripts or opaque snapshots.
+
+The defaults are 128 entries, 32 MiB of retained transcript bytes and 1 MiB per entry. Override them with `maxEntries`, `maxBytes` and `maxEntryBytes`; all limits and `maxAgeMs` must be positive safe integers, and the entry limit cannot exceed the total byte limit. Entries expire from their completion time, and reads do not extend that lifetime. Capacity eviction uses least-recently-used order. Concurrent misses render independently. Each handler owns its cache; workers and replicas do not share it, and a process restart clears it.
+
+The cache key hashes the complete serialized protocol request, including revision, hydration mode, module, URL, props, routing options, instance ID, React prefix, headers and nonce. Nothing is silently omitted. Initial SSR uses a stable, collision-free encoding of the Bridge instance ID as the Remote's React prefix: the same slot can hit across page requests, while two slots on one page have separate cached variants. A changed Host tree or any changed render input can cause a miss. A new build revision cannot consume an older revision's entries. Database changes and other state outside the request remain subject to the configured lifetime.
+
+Cookies, request-specific headers and CSP nonces can reduce reuse or prevent hits across requests. Those values are available to arbitrary producers and may affect their HTML or hydration state, so the cache does not discard or replace them to manufacture hits. Cache eligibility and input normalization must follow the application's actual rendering contract. For example, a provider that renders a nonce into its HTML and snapshot cannot share that exact output with a request carrying a different nonce.
+
+`x-mf-bridge-cache: hit` or `miss` reports the producer lookup when caching is enabled. Service POST responses retain `Cache-Control: no-store`: an ordinary HTTP cache keyed by URL cannot distinguish their render request bodies. This header does not disable the producer's render cache. HTTP/CDN caching and a shared persistent cache backend are not implemented by this option.
+
+Fast replay must fit the consumer's pending-byte budget. The fetch executor advertises `maxBufferedBytes` in the `x-mf-bridge-buffer-bytes` transport header; it is not exposed as a producer render input. A transcript larger than that budget is rendered live instead of replayed, even if stored. Clients omitting the header use the existing 4 MiB default; clients with a custom smaller budget must advertise it. This preserves the existing bounded multiplexed transport without claiming end-to-end backpressure. Increasing a cache entry limit alone does not increase a consumer's buffer budget.
+
 An HTTP error before metadata is accepted may retry the local Node application when `localFallback` is enabled. Once a result is accepted, a later stream, protocol, stylesheet, or hydration error uses the existing whole-page `csr=1` recovery. It never splices output from a second render into the first root. A local fallback with a different revision is rejected. Keep the service URL in trusted deployment configuration and apply the service's normal authentication/network access controls; forwarded page context is input to rendering, not service authentication.
 
 ### Service requests from a CSR page
@@ -219,6 +234,8 @@ An HTTP error before metadata is accepted may retry the local Node application w
 For requests initiated after the document has loaded, use `loadBridgeServiceRemote(moduleName, { url: '/services/render' })` from `@module-federation/modern-js-v3/bridge/client-service`. Install `createBridgeClientServiceMiddleware({ path: '/services/render', services })` from `@module-federation/modern-js-v3/bridge/client-service/server` on that consumer. This middleware accepts only configured module names and frames the upstream HTTP output with the same consumer-owned implementation. Request headers are forwarded only when explicitly listed in `forwardHeaders`.
 
 This path still reveals HTML fragments as they arrive, but uses a final snapshot and hydrates after the remote stream completes. It does not opt into initial-document early hydration after the browser document has closed. `csr=1` skips the service and mounts the real browser application; updates and destruction always delegate to that application's normal Bridge lifecycle. `bridge: true` is supported on a CSR-only consumer; generating producer SSR application exposes still requires Modern SSR.
+
+Delivery sessions retain random IDs. For the first use of a unique, valid container ID in a document, the client sends a separate stable render identity, allowing that slot to reuse a producer cache entry across documents. Missing, duplicate, invalid or previously used container identities fall back to the random session identity. In particular, remounting within one document does not reuse an old React instruction namespace. Older clients without a separate render identity remain supported.
 
 ## Planned React compatibility matrix
 

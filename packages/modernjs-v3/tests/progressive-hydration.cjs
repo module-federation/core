@@ -7,6 +7,8 @@
  * never receives a server Promise: actual Modern snapshots and update frames
  * reconstruct its data. Only registry content and deliberately held loaders are
  * fixtures; renderers, application lifecycle, framing and transport are real.
+ * Service-cache scenarios reuse a completed real Modern transcript in a fresh
+ * document. A fetch adapter delays unchanged replay bytes to test early hydration.
  */
 const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
@@ -19,6 +21,10 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 const {
   bridgeStreamPlugin,
 } = require('../dist/cjs/ssr-runtime/bridgeStreamPlugin.node.js');
+const {
+  createBridgeServiceHandler,
+  fetchBridgeService,
+} = require('../dist/cjs/bridge-stream/service.server.js');
 
 process.env.NODE_ENV = 'production';
 const directories = process.argv.slice(2);
@@ -100,6 +106,7 @@ export const provider = createModernServerBridge({ renderApplication(request, op
   return renderApplication(request, { ...options, onError(error) { console.error(error); } });
 } });
 export const version = React.version;
+export function loaderCalls() { return metrics.loaderCalls; }
 export function settle(label, boundary, reject = false) {
   const key = label + ':' + boundary;
   const pending = gates.get(key);
@@ -229,7 +236,148 @@ async function build(directory, appDirectory, name) {
   return outputs;
 }
 
-function extenderFor(instances) {
+function loadServers(bundles) {
+  return bundles.map((bundle) => {
+    delete require.cache[bundle.server];
+    return require(bundle.server);
+  });
+}
+
+function cachedServices(bundles) {
+  const servers = loadServers(bundles);
+  const initialLoaderCalls = servers.map((server) => server.loaderCalls());
+  const revision = 'real-modern-cache-test-build';
+  const records = new Map();
+  let states;
+  let replay;
+  let renders = 0;
+  const statuses = [];
+  const handlers = new Map(
+    servers.map((server) => [
+      server,
+      createBridgeServiceHandler({
+        revision,
+        cache: { maxAgeMs: 60000 },
+        async render(info) {
+          renders++;
+          const result = await server.provider().renderStream(info);
+          // Supply a build revision without changing Modern HTML or snapshots.
+          return { ...result, revision };
+        },
+      }),
+    ]),
+  );
+  function state(id) {
+    if (!states.has(id)) {
+      const releases = [];
+      const gates = [Promise.resolve()];
+      for (const phase of [1, 2])
+        gates[phase] = new Promise((resolve) => {
+          releases[phase] = resolve;
+        });
+      states.set(id, { phase: 0, gates, releases, received: 0 });
+    }
+    return states.get(id);
+  }
+  return {
+    servers,
+    start(mode) {
+      replay = mode === 'hit';
+      states = new Map();
+    },
+    provider(instance) {
+      return () => ({
+        renderStream(info) {
+          return fetchBridgeService(info, {
+            url: 'https://bridge.example/render',
+            revision,
+            hydrationMode: 'progressive',
+            async fetch(url, init) {
+              const response = await handlers.get(instance.server)(
+                new Request(url, init),
+              );
+              const status = response.headers.get('x-mf-bridge-cache');
+              assert.equal(status, replay ? 'hit' : 'miss');
+              statuses.push({ id: info.instanceId, status });
+              const current = state(info.instanceId);
+              if (!replay) records.set(info.instanceId, []);
+              const baseline = records.get(info.instanceId);
+              const reader = response.body.getReader();
+              let cancelled = false;
+              // Keep the service's exact NDJSON chunks, including ordering. On a
+              // hit, only delivery timing changes: each chunk waits for the same
+              // loader phase that produced it during the successful warm render.
+              const stream = new ReadableStream(
+                {
+                  async pull(controller) {
+                    const next = await reader.read();
+                    if (next.done) {
+                      assert.equal(current.received, baseline.length);
+                      reader.releaseLock();
+                      controller.close();
+                      return;
+                    }
+                    const index = current.received++;
+                    if (replay) {
+                      assert.deepEqual(
+                        Buffer.from(next.value),
+                        baseline[index].bytes,
+                      );
+                      await current.gates[baseline[index].phase];
+                      if (cancelled) return;
+                    } else {
+                      baseline.push({
+                        phase: current.phase,
+                        bytes: Buffer.from(next.value),
+                      });
+                    }
+                    controller.enqueue(next.value);
+                  },
+                  cancel(reason) {
+                    cancelled = true;
+                    current.releases.forEach((release) => release());
+                    return reader.cancel(reason);
+                  },
+                },
+                { highWaterMark: 0 },
+              );
+              return new Response(stream, {
+                status: response.status,
+                headers: response.headers,
+              });
+            },
+          });
+        },
+      });
+    },
+    settle(instance, boundary, reject) {
+      const current = state(instance.id);
+      const phase = boundary === 'details' ? 1 : 2;
+      current.phase = phase;
+      current.releases[phase]();
+      if (!replay) instance.server.settle(instance.label, boundary, reject);
+    },
+    report() {
+      assert.equal(renders, 3, 'a cache hit must not render Modern again');
+      const loaderCalls = servers.map(
+        (server, index) => server.loaderCalls() - initialLoaderCalls[index],
+      );
+      assert.deepEqual(
+        loaderCalls,
+        [2, 1],
+        'cached hydration must not rerun server loaders',
+      );
+      assert.equal(statuses.filter((item) => item.status === 'miss').length, 3);
+      assert.equal(
+        statuses.filter((item) => item.status === 'hit').length,
+        replay ? 3 : 0,
+      );
+      return { renders, loaderCalls, statuses: [...statuses] };
+    },
+  };
+}
+
+function extenderFor(instances, services) {
   let create;
   bridgeStreamPlugin({ timeoutMs: 10000 }).setup({
     extendStreamSSR(callback) {
@@ -244,35 +392,41 @@ function extenderFor(instances) {
   });
   const context = extender.modifyRootElement(null).props.value;
   for (const instance of instances) {
-    context.register(instance.id, instance.server.provider, {
-      moduleName: instance.name,
-      basename: '/',
-      props: {},
-      memoryRoute: { entryPath: '/?label=' + instance.label },
-    });
+    context.register(
+      instance.id,
+      services?.provider(instance) || instance.server.provider,
+      {
+        moduleName: instance.name,
+        basename: '/',
+        props: {},
+        memoryRoute: { entryPath: '/?label=' + instance.label },
+      },
+    );
   }
   return extender;
 }
 
 async function scenario(
   bundles,
-  { reversed = false, rejectIndex, cancel = false } = {},
+  { reversed = false, rejectIndex, cancel = false, services, cacheMode } = {},
 ) {
   const errors = [];
   const virtualConsole = new VirtualConsole();
   virtualConsole.on('jsdomError', (error) => errors.push(error.message));
   // Load fresh server modules so registries, loader gates and counters are scoped
   // to this scenario, just like fresh application processes in the Demo.
-  const servers = bundles.map((bundle) => {
-    delete require.cache[bundle.server];
-    return require(bundle.server);
-  });
+  const servers = services?.servers || loadServers(bundles);
+  services?.start(cacheMode);
   const instances = [
     { id: 'react18-a', name: 'react18', label: 'apple', server: servers[0] },
     { id: 'react19-a', name: 'react19', label: 'banana', server: servers[1] },
     { id: 'react18-b', name: 'react18', label: 'cherry', server: servers[0] },
   ];
-  const extender = extenderFor(instances);
+  const extender = extenderFor(instances, services);
+  const settle = (instance, boundary, reject) => {
+    if (services) services.settle(instance, boundary, reject);
+    else instance.server.settle(instance.label, boundary, reject);
+  };
   const markup = instances
     .map((instance) => `<div id="${instance.id}"></div>`)
     .join('');
@@ -391,8 +545,8 @@ async function scenario(
       const container = window.document.getElementById(cancelled.id);
       runtime.release(cancelled.id, container);
       window.producers[cancelled.name].provider.destroy({ dom: container });
-      cancelled.server.settle(cancelled.label, 'details');
-      cancelled.server.settle(cancelled.label, 'secondary');
+      settle(cancelled, 'details');
+      settle(cancelled, 'secondary');
       await until(() => !container.firstChild, 'cancelled root unmounted');
     }
     const active = instances.filter((instance) => instance !== cancelled);
@@ -400,7 +554,7 @@ async function scenario(
     const order = reversed ? [...active].reverse() : active;
     const boundaryNodes = new Map();
     for (const instance of order) {
-      instance.server.settle(instance.label, 'details', instance === rejected);
+      settle(instance, 'details', instance === rejected);
       if (instance === rejected) {
         await until(() => {
           const error = window.document.querySelector(
@@ -450,8 +604,7 @@ async function scenario(
         false,
       );
     }
-    for (const instance of [...order].reverse())
-      instance.server.settle(instance.label, 'secondary');
+    for (const instance of [...order].reverse()) settle(instance, 'secondary');
     await completed;
     documentState = 'interactive';
     window.document.dispatchEvent(new window.Event('DOMContentLoaded'));
@@ -534,6 +687,8 @@ async function scenario(
       );
     assert.deepEqual(errors, []);
     return {
+      transport: services ? `service-cache-${cacheMode}` : 'local',
+      ...(services ? { cache: services.report() } : {}),
       order: order.map((instance) => instance.id),
       rejected: rejected?.id,
       cancelled: cancelled?.id,
@@ -668,6 +823,11 @@ async function csrScenario(bundles) {
     ])
       results.push(await scenario(bundles, options));
     results.push(await csrScenario(bundles));
+    const services = cachedServices(bundles);
+    results.push(await scenario(bundles, { services, cacheMode: 'miss' }));
+    results.push(
+      await scenario(bundles, { services, cacheMode: 'hit', reversed: true }),
+    );
     console.log(JSON.stringify({ results }, null, 2));
   } finally {
     await fs.rm(temp, { recursive: true, force: true });

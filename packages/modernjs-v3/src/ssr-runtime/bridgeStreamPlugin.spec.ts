@@ -127,6 +127,46 @@ describe('Modern Bridge stream plugin', () => {
       extender.init({ shellEndMarker: MODERN_SHELL_MARKER }),
     ).toThrow('identifierPrefix');
   });
+  it('keeps each complete instance identity stable across requests without merging distinct slots', async () => {
+    const ids = ['slot:a', 'slot_a', 'slot-商品', '\ud800', '\ud801'];
+    const params = {
+      moduleName: 'weekend/app',
+      basename: '/reports',
+      memoryRoute: { entryPath: '/summary' },
+      props: { city: 'London' },
+    };
+    const render = async () => {
+      const { extender, context } = createExtender();
+      const remotes = ids.map((id) => {
+        const remote = producer(id);
+        context.register(id, remote.factory, params);
+        remote.write('<p>Ready</p>');
+        remote.end();
+        return remote;
+      });
+      const input = new PassThrough();
+      const output = extender.processStream(input);
+      output.resume();
+      const done = once(output, 'end');
+      input.end('<main></main>' + MODERN_SHELL_MARKER);
+      await done;
+      return remotes.map((remote) => remote.request!);
+    };
+    const first = await render();
+    const second = await render();
+    const prefixes = first.map((request) => request.identifierPrefix);
+    expect(new Set(prefixes).size).toBe(ids.length);
+    expect(second.map((request) => request.identifierPrefix)).toEqual(prefixes);
+    first.forEach((request, index) => {
+      expect(request).toMatchObject({
+        ...params,
+        instanceId: ids[index],
+        url: 'https://host.example/dashboard?tab=goods',
+        headers: { cookie: 'user=a' },
+        nonce: 'test-nonce',
+      });
+    });
+  });
   for (const query of ['csr=1&csr=', 'csr=1']) {
     it(`honors Modern's selected SSR mode without reinterpreting ${query}`, async () => {
       const { extender, context } = createExtender(

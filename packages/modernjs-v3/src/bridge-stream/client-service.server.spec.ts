@@ -105,6 +105,67 @@ describe('browser HTTP service consumer endpoint', () => {
     ).toBe(400);
     expect(fetchBridgeService).not.toHaveBeenCalled();
   });
+  it('keeps rendering stable across delivery sessions and isolates distinct render slots', async () => {
+    rs.mocked(fetchBridgeService).mockImplementation(async () =>
+      result('<p>Ready</p>'),
+    );
+    const requests = [
+      { instanceId: 'delivery-a', renderInstanceId: 'slot:a' },
+      { instanceId: 'delivery-b', renderInstanceId: 'slot:a' },
+      { instanceId: 'delivery-c', renderInstanceId: 'slot_a' },
+    ];
+    for (const identity of requests) {
+      const response = await invoke(
+        {
+          ...input,
+          ...identity,
+          basename: '/reports',
+          memoryRoute: { entryPath: '/summary' },
+        },
+        { headers: { 'accept-language': 'en' } },
+      );
+      expect(response.status).toBe(200);
+      await response.text();
+    }
+    const rendered = rs.mocked(fetchBridgeService).mock.calls.map(([info]) => {
+      const { signal: _signal, ...request } = info;
+      return request;
+    });
+    expect(rendered[0]).toEqual(rendered[1]);
+    expect(rendered[0].identifierPrefix).not.toBe(rendered[2].identifierPrefix);
+    expect(rendered[0]).toMatchObject({
+      moduleName: input.moduleName,
+      instanceId: 'slot:a',
+      url: input.url,
+      basename: '/reports',
+      memoryRoute: { entryPath: '/summary' },
+      props: input.props,
+      headers: { 'accept-language': 'en' },
+    });
+  });
+  it('retains the instance identity for older clients without a render identity', async () => {
+    rs.mocked(fetchBridgeService).mockResolvedValueOnce(result('<p>Ready</p>'));
+    const response = await invoke(input);
+    await response.text();
+    expect(rs.mocked(fetchBridgeService).mock.calls[0][0].instanceId).toBe(
+      input.instanceId,
+    );
+  });
+  it('rejects invalid render identities before requesting a producer', async () => {
+    for (const renderInstanceId of [
+      '',
+      'two slots',
+      '<slot>',
+      '"slot"',
+      'a'.repeat(257),
+      null,
+      7,
+      {},
+    ]) {
+      expect((await invoke({ ...input, renderInstanceId })).status).toBe(400);
+    }
+    expect(fetchBridgeService).not.toHaveBeenCalled();
+  });
   it('reports a malformed partial HTML stream and never emits done', async () => {
     const rendered = result('<div>incomplete');
     rs.mocked(fetchBridgeService).mockResolvedValueOnce(rendered);
