@@ -62,6 +62,24 @@ describe('SharedManager', () => {
     expect(sharedManager.normalizedOptions['react-dom']).toMatchSnapshot();
   });
 
+  it('inherits the plugin-level shareScope like the runtime', () => {
+    const options = {
+      name: '@module-federation/shared-managers-test',
+      shareScope: 'custom',
+      shared: {
+        react: {},
+        'react-dom': { shareScope: 'legacy' },
+      },
+    };
+    const sharedManager = new SharedManager();
+    sharedManager.init(options);
+
+    expect(sharedManager.normalizedOptions['react'].shareScope).toBe('custom');
+    expect(sharedManager.normalizedOptions['react-dom'].shareScope).toBe(
+      'legacy',
+    );
+  });
+
   it('sharedPluginOptions', () => {
     const options = {
       name: '@module-federation/shared-managers-test',
