@@ -62,6 +62,21 @@ describe('SharedManager', () => {
     expect(sharedManager.normalizedOptions['react-dom']).toMatchSnapshot();
   });
 
+  it('defaults singleton to false like the runtime', () => {
+    const options = {
+      name: '@module-federation/shared-managers-test',
+      shared: {
+        react: {},
+        'react-dom': { singleton: true },
+      },
+    };
+    const sharedManager = new SharedManager();
+    sharedManager.init(options);
+
+    expect(sharedManager.normalizedOptions['react'].singleton).toBe(false);
+    expect(sharedManager.normalizedOptions['react-dom'].singleton).toBe(true);
+  });
+
   it('sharedPluginOptions', () => {
     const options = {
       name: '@module-federation/shared-managers-test',
