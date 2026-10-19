@@ -12,7 +12,14 @@ const siteIcon = '/svg.svg';
 const socialImageUrl = `${canonicalSiteOrigin}/module-federation-social.svg`;
 const socialImageAlt = 'Module Federation icon';
 const googleAnalyticsMeasurementId = 'G-DRPXW0EEVT';
-const enableZephyr = Boolean(process.env.CI || process.env.ZE_SECRET_TOKEN);
+const enableZephyr = Boolean(process.env.ZE_SECRET_TOKEN);
+
+if (enableZephyr) {
+  // Fail the build when a deploy fails, and wait for Zephyr to update tags and
+  // environments so a release can't pass without reaching production.
+  process.env.ZE_FAIL_BUILD ??= 'true';
+  process.env.ZE_WAIT_FOR_DEPLOYMENTS ??= 'true';
+}
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),

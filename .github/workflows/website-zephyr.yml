@@ -24,10 +24,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DEBUG: 'zephyr*'
   SITE_ORIGIN: https://module-federation.io
   ZE_FAIL_BUILD: true
   ZE_SECRET_TOKEN: ${{ secrets.ZE_SECRET_TOKEN }}
+  ZE_WAIT_FOR_DEPLOYMENTS: true
 
 jobs:
   deploy:
@@ -67,7 +67,34 @@ jobs:
 
       - name: Build and deploy website with Zephyr
         if: ${{ env.ZE_SECRET_TOKEN != '' && github.event.action != 'closed' }}
+        env:
+          # Zephyr's debug output includes account details, so only print it
+          # when a run is re-run with debug logging.
+          DEBUG: ${{ runner.debug == '1' && 'zephyr*' || '' }}
         run: pnpm run build:website
+
+      - name: Verify module-federation.io serves this release
+        if: ${{ env.ZE_SECRET_TOKEN != '' && github.event_name == 'release' }}
+        shell: bash
+        run: |
+          manifest=apps/website-new/doc_build/zephyr-manifest.json
+          if [ ! -f "$manifest" ]; then
+            echo "::error::The build didn't write $manifest, so there is nothing to verify."
+            exit 1
+          fi
+          expected="$(jq -r '.timestamp' "$manifest")"
+          served=''
+          for attempt in $(seq 1 30); do
+            served="$(curl -fsS "$SITE_ORIGIN/zephyr-manifest.json?run=$GITHUB_RUN_ID-$attempt" | jq -r '.timestamp' || true)"
+            if [ "$served" = "$expected" ]; then
+              echo "$SITE_ORIGIN serves the build from $expected."
+              exit 0
+            fi
+            echo "Attempt $attempt: $SITE_ORIGIN serves the build from ${served:-unknown}, expected $expected."
+            sleep 10
+          done
+          echo "::error::$SITE_ORIGIN still serves the build from ${served:-unknown}, not this release's build from $expected."
+          exit 1
 
       - name: Update Zephyr preview environment
         if: ${{ env.ZE_SECRET_TOKEN != '' && github.event_name == 'pull_request' }}
