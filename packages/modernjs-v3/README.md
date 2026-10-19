@@ -2,25 +2,17 @@
 
 This plugin integrates Module Federation with Modern.js. See the [Modern.js integration documentation](https://module-federation.io/guide/framework/modernjs.html) for general configuration.
 
-## Consolidated review and built-in integration follow-up
+## Implementation and review
 
-The complete framework work is reviewed in two PRs: [MF #5164](https://github.com/module-federation/core/pull/5164) and [Modern #8941](https://github.com/web-infra-dev/modern.js/pull/8941). MF #5164 includes the independent-root SSR and lifecycle work previously reviewed in #5112, progressive hydration from #5162, and Service HTTP execution. Modern #8941 includes the application APIs and commerce demo from Modern #8926 plus deferred-data hydration. The older PRs are superseded review history, not additional prerequisites.
+The current integration combines [Bridge rendering callbacks in MF #5200](https://github.com/module-federation/core/pull/5200), [Modern callbacks in #9002](https://github.com/web-infra-dev/modern.js/pull/9002), and [Service render caching in MF #5201](https://github.com/module-federation/core/pull/5201). The cache PR includes the callback changes and is stacked on #5200. Joint HTTP/browser results and exact commands are in [CACHE-CALLBACKS-VERIFICATION.md](CACHE-CALLBACKS-VERIFICATION.md). These draft PRs build on the earlier SSR branches and are not published package capabilities.
 
-Both consolidated PRs are held as drafts for the upcoming Modern built-in MF integration. The current implementation still uses `@module-federation/modern-js-v3`; the package migration below has not been implemented:
-
-- Modern will declare `@module-federation/enhanced` as a peer in each published package that imports it, and obtain MF APIs from `@module-federation/enhanced/runtime`.
-- Framework-independent Bridge loaders, lifecycle/SSR contracts, framing and transport can live in Bridge. Modern application adapters, registry/expose generation and `extendStreamSSR` integration belong in Modern, with dedicated `@modern-js/runtime/mf` and server exports.
-- Preserve Node/browser entry selection, lazy local loading for HTTP-only hosts, runtime instance/Bridge plugin identity, and explicit Bridge/Node-support dependencies. The current legacy `@modern-js/runtime/mf` alias must be replaced as part of that migration.
-
-Review the shared Bridge components and server/browser lifecycle first, then the Modern application APIs, progressive data contract, and finally the HTTP executor/protocol. The commerce example and its verification history live in the companion Modern PR at `examples/module-federation/bridge-ssr`. The separate Service App demo is retained in `code.byted.org/zhanghang.heal/mf-sdc`, branch `feat/bridge-progressive-service-ssr`; its React 18 pnpm patch, Node-artifact guard, README and VERIFICATION.md are validation material, not files included in these two framework PRs.
-
-This consolidation merges the missing documentation history and updates its conclusions. It does not change runtime code, merge either PR into main, or publish packages. Existing build/browser evidence remains historical; consolidation checks verify ancestry, Markdown formatting, whitespace and that only Markdown differs from the previously validated tips.
+Review the explicit provider and framework callbacks in [BRIDGE-RENDERER-CALLBACKS.md](BRIDGE-RENDERER-CALLBACKS.md), then the Service transport and cache below. The Service App demo uses the same provider for HTTP SSR, local SSR and browser hydration. A future move of the plugin integration into Modern itself is separate work.
 
 ## Independent Bridge application SSR
 
 Bridge applications can render in the host's Node process or in a producer-owned HTTP service while keeping their own React root, React version, router, and Modern runtime. The host forwards complete HTML fragments as they become available; it does not wait for the entire remote application to become a string. The browser hydrates each application with its own renderer after the shell and initial loader snapshot arrive, while deferred content continues streaming. Legacy providers without a progressive snapshot hydrate after completion.
 
-This integration requires the Modern application APIs `@modern-js/runtime/application` and `@modern-js/runtime/application/server`, plus request context, `shellEndMarker`, and `identifierPrefix` support in Modern's streaming SSR extension. Use a Modern build that includes these APIs; installing this MF plugin alone does not add them to older Modern releases. Generated entries use the producer's actual Modern route tree and loaders through `createApplication` and `renderApplication`.
+This integration requires the matching Modern build with `@modern-js/runtime/mf` rendering callbacks and its underlying independent application APIs. Installing the MF plugin alone does not add them to older Modern releases. Modern's streaming SSR extension must also supply request context, `shellEndMarker` and `identifierPrefix`.
 
 Configure a host in `modern.config.ts`:
 
@@ -45,7 +37,24 @@ export default defineConfig({
 });
 ```
 
-Configure a producer application in its own `modern.config.ts`:
+Export the producer's root application from `src/bridge.tsx`:
+
+```tsx
+import '@modern-js/runtime/registry/index';
+import { createRoot } from '@modern-js/runtime/react';
+import { render, hydrate, renderStream } from '@modern-js/runtime/mf';
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v19';
+
+const ModernRoot = createRoot();
+export default createBridgeComponent({
+  rootComponent: ModernRoot,
+  render,
+  hydrate,
+  renderStream,
+});
+```
+
+Use `react-v18` for a React 18 producer. Configure its ordinary MF expose in `modern.config.ts`:
 
 ```ts
 import { appTools, defineConfig } from '@modern-js/app-tools';
@@ -57,14 +66,17 @@ export default defineConfig({
   plugins: [
     appTools(),
     moduleFederationPlugin({
-      bridge: { exposes: { './App': true } },
-      config: { name: 'commerce_products' },
+      bridge: { revision: 'products-v1' },
+      config: {
+        name: 'commerce_products',
+        exposes: { './App': './src/bridge.tsx' },
+      },
     }),
   ],
 });
 ```
 
-`true` selects the main Modern application entry. For a named entry, use `bridge: { exposes: { './App': 'entryName' } }`. The entry must use Modern's automatic application mounting. Expose names must start with `./` and must not duplicate `config.exposes`. To change the default 30-second SSR deadline, use `bridge: { timeoutMs: 10000 }` on the host.
+The same provider source is compiled for Node and browser. The build plugin selects the framework and Bridge server entries for Node while preserving the root component. The older generated `bridge.exposes` providers remain supported, but are not required for this callback entry. To change the default 30-second SSR deadline, use `bridge: { timeoutMs: 10000 }` on the host.
 
 Consume the application in a host component:
 
@@ -87,9 +99,9 @@ export default function Dashboard() {
 
 ## Rendering and hydration sequence
 
-The producer owns its Modern application definition, loaders, runtime context, and React renderer. At build time, `bridge.exposes` generates two entries that import the producer's registry: the Node entry exports `createModernServerBridge({ renderApplication })`, and the browser entry exports `createModernBrowserBridge({ createApplication })`. The build generates these calls; it does not execute SSR. Automatic detection of application exports in ordinary `config.exposes` is not implemented.
+The producer owns its Modern application definition, loaders, runtime context and React renderer. Bridge constructs the tree from `rootComponent` and the request props, then passes it to the injected `renderStream` callback. Modern calls `renderApplication` with that tree and request, without a second document template. The browser uses the corresponding `hydrate` callback to restore the same application in its own container.
 
-`renderApplication(request, options)` returns an HTML `stream`, a final `snapshot` promise, and `cancel`. Progressive mode additionally returns `hydration.snapshot`, `hydration.updates`, and `hydration.shellMarker`. It reuses Modern's request preparation and loaders but renders application content without the outer document template. `createApplication()` provides browser `mount`, `hydrate`, `update`, and `destroy`. The snapshot contains serializable initial state (including props, URL, basename, identifier prefix, initial data, and route loader data/errors), not the complete runtime context or React component state. MF transports it as opaque data; the producer's browser runtime consumes it. Consumer prop/URL changes reach `update` through subsequent Bridge `render` calls on the existing instance.
+The callback returns `stream`, `snapshot`, `abort` and optional `hydration: { snapshot, updates, shellMarker }`. The snapshot contains serializable props, route and loader data, URL and React prefix. MF transports it as opaque data. Modern restores it through `createApplication(element)`, and later Bridge renders update the existing instance. Callback types and build entry selection are described in [BRIDGE-RENDERER-CALLBACKS.md](BRIDGE-RENDERER-CALLBACKS.md).
 
 On the host, `createRemoteAppComponent` derives an instance ID from host `useId` and pre-registers work before the lazy module settles, using `deferRender: true`. The server lifecycle in `RemoteAppWrapper` later activates the same job with final routing parameters. `bridgeStreamPlugin` supplies `BridgeSSRContext` and a separate job map for each request through Modern's `api.extendStreamSSR`; these are not global jobs shared across requests. Each job selects an executor: the local path loads the producer's Node module and calls `renderStream` in the host process; the HTTP path obtains the same result contract from the producer service. The HTTP-only path never invokes the deferred local provider.
 
@@ -193,7 +205,7 @@ bridge: {
 
 To opt into HTTP-to-local recovery, set `localFallback: true` for that same module and make its matching Node build available through the configured MF remote. This is a separate deployment capability, not a Service App prerequisite; no extra remote alias or expose is needed to express the policy. The fallback is attempted only before HTTP metadata is accepted.
 
-The producer sets `bridge: { exposes: { './app': true }, revision: 'weekend-demo-v2' }` and installs a Modern server middleware:
+The producer uses the explicit callback provider shown above, exposes it as `config.exposes: { './app': './src/bridge.tsx' }`, sets `bridge: { revision: 'weekend-demo-v2' }`, and installs a Modern server middleware:
 
 ```ts
 import { createBridgeServiceMiddleware } from '@module-federation/modern-js-v3/bridge/service';
@@ -216,6 +228,8 @@ The fetch executor returns once valid metadata arrives. HTML and deferred update
 ### Render caching
 
 The producer example above enables an in-process render cache with a 60-second lifetime. The same `cache` option is available on `createBridgeServiceHandler`. Choose a lifetime acceptable for that application's data; caching is not enabled when the option is omitted. A hit skips the producer render and replays its completed `mf-bridge-service/1` transcript, including HTML, snapshots, deferred updates, stylesheets and completion. A miss still streams immediately. Only successfully completed transcripts are committed; failed, interrupted or oversized recordings do not enter the cache. The cache never rewrites React HTML, IDs, completion scripts or opaque snapshots.
+
+A hit also skips provider creation, render lifecycle hooks and Modern request hooks. Put authentication and auditing that must run for every request outside the cached middleware. Renderers must tolerate being skipped and must not rely on SSR to perform writes. Replayed frames retain their order and bytes, not the original delays.
 
 The defaults are 128 entries, 32 MiB of retained transcript bytes and 1 MiB per entry. Override them with `maxEntries`, `maxBytes` and `maxEntryBytes`; all limits and `maxAgeMs` must be positive safe integers, and the entry limit cannot exceed the total byte limit. Entries expire from their completion time, and reads do not extend that lifetime. Capacity eviction uses least-recently-used order. Concurrent misses render independently. Each handler owns its cache; workers and replicas do not share it, and a process restart clears it.
 

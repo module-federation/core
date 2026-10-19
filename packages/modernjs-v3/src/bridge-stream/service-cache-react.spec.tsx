@@ -1,9 +1,18 @@
 import { describe, expect, it } from '@rstest/core';
 import { PassThrough, Readable } from 'node:stream';
+import { createRequire } from 'node:module';
 import React, { Suspense, useEffect, useId, useState } from 'react';
 import { renderToPipeableStream } from 'react-dom/server';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { JSDOM, VirtualConsole } from 'jsdom';
+import {
+  createBridgeComponent,
+  type ProviderFnParams,
+} from '@module-federation/bridge-react/server';
+import BridgeReactPlugin, {
+  federationRuntime,
+} from '@module-federation/bridge-react/plugin';
+import { createInstance } from '@module-federation/runtime';
 import type {
   BridgeSSRRequest,
   BridgeSSRResult,
@@ -14,6 +23,14 @@ import type { BridgeStreamBrowserRuntime } from './protocol';
 import { isolateReactStreamScripts } from './script-isolation.server';
 import { bridgeIdentifierPrefix } from './identity.server';
 import { createBridgeServiceHandler, fetchBridgeService } from './service-http';
+
+// Real deployments load separate Node and browser bundles. Keep their Bridge
+// contexts separate here too, while both use the same installed React version.
+const { createBridgeComponent: createBrowserBridgeComponent } = createRequire(
+  import.meta.url,
+)(
+  '@module-federation/bridge-react/v18',
+) as typeof import('@module-federation/bridge-react/v18');
 
 const revision = 'real-react-cache-build';
 const nonce = 'document-nonce';
@@ -87,6 +104,34 @@ function Application({
     </section>
   );
 }
+function applicationProvider(
+  data: Resource,
+  shellMarker: string,
+  options: Pick<
+    ProviderFnParams<{ label: string }>,
+    'renderStream' | 'hydrate'
+  > & {
+    shellHydrated?: () => void;
+    detailHydrated?: () => void;
+  },
+) {
+  const createProvider = options.hydrate
+    ? createBrowserBridgeComponent
+    : createBridgeComponent;
+  return createProvider<{ label: string }>({
+    rootComponent: ({ label }) => (
+      <Application
+        label={label}
+        data={data}
+        shellMarker={shellMarker}
+        shellHydrated={options.shellHydrated}
+        detailHydrated={options.detailHydrated}
+      />
+    ),
+    renderStream: options.renderStream,
+    hydrate: options.hydrate,
+  })();
+}
 function request(instanceId: string): BridgeSSRRequest {
   return {
     instanceId,
@@ -106,6 +151,28 @@ function fixture() {
   const serverErrors: unknown[] = [];
   const cacheStatus: (string | null)[] = [];
   const wire: Promise<string>[] = [];
+  const calls = {
+    before: [] as BridgeSSRRequest[],
+    after: [] as BridgeSSRRequest[],
+    renderer: [] as BridgeSSRRequest[],
+  };
+  const previousRuntime = federationRuntime.instance;
+  createInstance({
+    name: 'bridge-cache-callback-test',
+    remotes: [],
+    plugins: [
+      BridgeReactPlugin(),
+      {
+        name: 'record-render-lifecycle',
+        beforeBridgeRender(info) {
+          if (!('dom' in info)) calls.before.push(info as BridgeSSRRequest);
+        },
+        afterBridgeRender(info) {
+          if (!('dom' in info)) calls.after.push(info as BridgeSSRRequest);
+        },
+      },
+    ],
+  });
   const handler = createBridgeServiceHandler({
     revision,
     cache: { maxAgeMs: 60_000 },
@@ -122,44 +189,47 @@ function fixture() {
           updates = controller;
         },
       });
-      const rendering = renderToPipeableStream(
-        <Application label={label} data={data} shellMarker={shellMarker} />,
-        {
-          identifierPrefix: info.identifierPrefix,
-          nonce: info.nonce,
-          onShellReady() {
-            rendering.pipe(output);
-            shell.resolve();
-          },
-          onError(error) {
-            serverErrors.push(error);
-          },
+      const provider = applicationProvider(data, shellMarker, {
+        async renderStream(app, request) {
+          calls.renderer.push(request);
+          const rendering = renderToPipeableStream(app, {
+            identifierPrefix: request.identifierPrefix,
+            nonce: request.nonce,
+            onShellReady() {
+              rendering.pipe(output);
+              shell.resolve();
+            },
+            onError(error) {
+              serverErrors.push(error);
+            },
+          });
+          jobs.push({
+            shell: shell.promise,
+            finish() {
+              const value = `${label}-detail`;
+              data.resolve(value);
+              updates.enqueue({ id: 'detail', status: 'fulfilled', value });
+              updates.close();
+              snapshot.resolve({ label, detail: value });
+            },
+            abort: rendering.abort,
+          });
+          // This fixture owns its data protocol. React renders the actual tree
+          // supplied by Bridge, including its provider wrappers and business props.
+          return {
+            revision,
+            stream: Readable.toWeb(output) as ReadableStream<Uint8Array>,
+            snapshot: snapshot.promise,
+            hydration: {
+              snapshot: Promise.resolve({ label, pending: ['detail'] }),
+              shellMarker,
+              updates: updateStream,
+            },
+            abort: rendering.abort,
+          } satisfies BridgeSSRResult;
         },
-      );
-      jobs.push({
-        shell: shell.promise,
-        finish() {
-          const value = `${label}-detail`;
-          data.resolve(value);
-          updates.enqueue({ id: 'detail', status: 'fulfilled', value });
-          updates.close();
-          snapshot.resolve({ label, detail: value });
-        },
-        abort: rendering.abort,
       });
-      // This is a transparent test snapshot protocol, not a Modern loader mock.
-      // Both the shell and the deferred completion are real React SSR bytes.
-      return {
-        revision,
-        stream: Readable.toWeb(output) as ReadableStream<Uint8Array>,
-        snapshot: snapshot.promise,
-        hydration: {
-          snapshot: Promise.resolve({ label, pending: ['detail'] }),
-          shellMarker,
-          updates: updateStream,
-        },
-        abort: rendering.abort,
-      } satisfies BridgeSSRResult;
+      return provider.renderStream!(info);
     },
   });
   const transport = (async (url, init) => {
@@ -173,6 +243,7 @@ function fixture() {
     serverErrors,
     cacheStatus,
     wire,
+    calls,
     fetch(info: BridgeSSRRequest, hydrationMode: 'complete' | 'progressive') {
       return fetchBridgeService(info, {
         url: 'https://bridge.example/render',
@@ -183,6 +254,7 @@ function fixture() {
     },
     dispose() {
       jobs.forEach((job) => job.abort());
+      federationRuntime.instance = previousRuntime;
     },
   };
 }
@@ -313,6 +385,15 @@ describe('Bridge service cache with real React streaming and hydration', () => {
       );
       expect(service.jobs).toHaveLength(2);
       expect(service.cacheStatus).toEqual(['miss', 'miss', 'hit', 'hit']);
+      for (const calls of Object.values(service.calls)) {
+        expect(calls).toHaveLength(2);
+        expect(calls.map((info) => info.instanceId)).toEqual(['left', 'right']);
+        expect(calls.map((info) => info.props)).toEqual(
+          infos.map((info) => info.props),
+        );
+      }
+      expect(service.calls.before).toEqual(service.calls.renderer);
+      expect(service.calls.after).toEqual(service.calls.renderer);
       const wire = await Promise.all(service.wire);
       expect(wire[2]).toBe(wire[0]);
       expect(wire[3]).toBe(wire[1]);
@@ -338,21 +419,27 @@ describe('Bridge service cache with real React streaming and hydration', () => {
         allButtons.push(Array.from(container.querySelectorAll('button')));
         expect(allButtons[index]).toHaveLength(2);
         const snapshot = session.snapshot as { label: string; detail: string };
-        page.roots.push(
-          hydrateRoot(
-            container,
-            <Application
-              label={snapshot.label}
-              data={resource(snapshot.detail)}
-              shellMarker={`${info.instanceId}-shell`}
-              detailHydrated={() => (hydrated[index] = true)}
-            />,
-            {
-              identifierPrefix: session.identifierPrefix,
-              onRecoverableError: (error) => page.errors.push(error),
+        const provider = applicationProvider(
+          resource(snapshot.detail),
+          `${info.instanceId}-shell`,
+          {
+            detailHydrated: () => (hydrated[index] = true),
+            hydrate(app, dom, hydration) {
+              const root = hydrateRoot(dom, app, hydration.rootOptions);
+              page.roots.push(root);
+              return root;
             },
-          ),
+          },
         );
+        await provider.hydrate({
+          dom: container,
+          label: snapshot.label,
+          snapshot,
+          rootOptions: {
+            identifierPrefix: session.identifierPrefix,
+            onRecoverableError: (error) => page.errors.push(error),
+          },
+        });
       }
       await until(() => hydrated.every(Boolean));
       for (const [index, info] of infos.entries()) {
@@ -394,6 +481,13 @@ describe('Bridge service cache with real React streaming and hydration', () => {
       const cached = await capture(await service.fetch(info, 'progressive'));
       expect(service.jobs).toHaveLength(1);
       expect(service.cacheStatus).toEqual(['miss', 'hit']);
+      for (const calls of Object.values(service.calls)) {
+        expect(calls).toHaveLength(1);
+        expect(calls[0].props).toEqual(info.props);
+        expect(calls[0].identifierPrefix).toBe(info.identifierPrefix);
+      }
+      expect(service.calls.before[0]).toBe(service.calls.renderer[0]);
+      expect(service.calls.after[0]).toBe(service.calls.renderer[0]);
       expect(await service.wire[1]).toBe(await service.wire[0]);
       expect(cached.html.equals(cold.html)).toBe(true);
       expect(cached.snapshot).toEqual({
@@ -423,22 +517,25 @@ describe('Bridge service cache with real React streaming and hydration', () => {
       const clientData = resource();
       let shellHydrated = false;
       let detailHydrated = false;
-      page.roots.push(
-        hydrateRoot(
-          container,
-          <Application
-            label={(session.snapshot as { label: string }).label}
-            data={clientData}
-            shellMarker={cached.shellMarker!}
-            shellHydrated={() => (shellHydrated = true)}
-            detailHydrated={() => (detailHydrated = true)}
-          />,
-          {
-            identifierPrefix: session.identifierPrefix,
-            onRecoverableError: (error) => page.errors.push(error),
-          },
-        ),
-      );
+      const provider = applicationProvider(clientData, cached.shellMarker!, {
+        shellHydrated: () => (shellHydrated = true),
+        detailHydrated: () => (detailHydrated = true),
+        hydrate(app, dom, hydration) {
+          const root = hydrateRoot(dom, app, hydration.rootOptions);
+          page.roots.push(root);
+          return root;
+        },
+      });
+      await provider.hydrate({
+        dom: container,
+        label: (session.snapshot as { label: string }).label,
+        snapshot: session.snapshot,
+        updates: session.updates,
+        rootOptions: {
+          identifierPrefix: session.identifierPrefix,
+          onRecoverableError: (error) => page.errors.push(error),
+        },
+      });
       await until(() => shellHydrated);
       expect(container.querySelector('button')).toBe(shellButton);
       expect(container.querySelector('[data-pending]')).not.toBeNull();

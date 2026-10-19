@@ -1,5 +1,7 @@
 # Bridge 渲染回调：实现与验收
 
+回调与 Service 缓存的整合结果见 [联合验证记录](CACHE-CALLBACKS-VERIFICATION.md)。[缓存 PR #5201](https://github.com/module-federation/core/pull/5201) 已包含本分支的回调实现，配套使用 [Modern #9002](https://github.com/web-infra-dev/modern.js/pull/9002)。下文保留回调接入及其原有验收范围。
+
 分支：`feat/bridge-renderer-callbacks`。本轮在已有 Bridge SSR / Service App Demo 上验证完整根应用，不包含指定路由导出。生产者直接导出自己的 provider，构建器保留该入口并选择对应环境的实现。
 
 ## 生产者怎么写
