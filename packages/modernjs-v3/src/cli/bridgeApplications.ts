@@ -156,7 +156,9 @@ export function configureBridgeApplications(
     }
   });
   api.modifyBundlerChain((chain) => {
-    chain.plugin('mf-bridge-server-lifecycle').use(BridgeSSRPlugin);
+    chain
+      .plugin('mf-bridge-server-lifecycle')
+      .use(BridgeSSRPlugin, [{ revision }]);
 
     // Linked framework packages resolve peers relative to their source path.
     // Bind all React imports to this application's dependency, not the toolchain's.

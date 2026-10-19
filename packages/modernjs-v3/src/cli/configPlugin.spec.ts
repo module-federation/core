@@ -21,11 +21,13 @@ const mfConfig = {
 const getModernJsConfig = async (
   moduleFederationConfig: Record<string, unknown>,
   modernjsConfig: Record<string, unknown> = {},
+  bridge = false,
 ) => {
   const configCallbacks: Array<() => unknown> = [];
   const plugin = moduleFederationConfigPlugin({
     originPluginOptions: {
       config: moduleFederationConfig,
+      bridge,
     },
     userConfig: {},
   } as any);
@@ -36,6 +38,11 @@ const getModernJsConfig = async (
     }),
     getConfig: rs.fn(() => modernjsConfig),
     modifyBundlerChain: rs.fn(),
+    getAppContext: () => ({
+      appDirectory: process.cwd(),
+      internalDirectory: '/unused',
+    }),
+    generateEntryCode: rs.fn(),
   } as any);
 
   return configCallbacks[0]();
@@ -220,4 +227,17 @@ describe('moduleFederationConfigPlugin', async () => {
     });
     expect(warnSpy).not.toHaveBeenCalled();
   });
+});
+
+it('keeps framework renderer exports reachable when Bridge is enabled', async () => {
+  const bridge = (await getModernJsConfig(
+    { ...mfConfig, shared: {} },
+    {},
+    true,
+  )) as any;
+  expect(bridge.resolve.alias['@modern-js/runtime/mf']).toBeUndefined();
+  const legacy = (await getModernJsConfig(mfConfig)) as any;
+  expect(legacy.resolve.alias['@modern-js/runtime/mf']).toBe(
+    require.resolve('@module-federation/modern-js-v3/runtime'),
+  );
 });

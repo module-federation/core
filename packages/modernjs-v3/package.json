@@ -125,6 +125,10 @@
       "types": "./dist/types/bridge-stream/client-service.server.d.ts",
       "import": "./dist/esm/bridge-stream/client-service.server.mjs",
       "require": "./dist/cjs/bridge-stream/client-service.server.js"
+    },
+    "./react-server": {
+      "types": "./dist/types/react/server.d.ts",
+      "default": "./dist/esm/react/server.mjs"
     }
   },
   "typesVersions": {
@@ -194,6 +198,9 @@
       ],
       "bridge/client-service/server": [
         "./dist/types/bridge-stream/client-service.server.d.ts"
+      ],
+      "react-server": [
+        "./dist/types/react/server.d.ts"
       ]
     }
   },

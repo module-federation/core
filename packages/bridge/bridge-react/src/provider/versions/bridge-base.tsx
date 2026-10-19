@@ -13,6 +13,7 @@ import type {
   CreateRootOptions,
   ErrorFallbackProps,
   HydrateParams,
+  BridgeSSRRequest,
 } from '../../types';
 import { ErrorBoundary } from '../../error-boundary';
 import { RouterContext } from '../context';
@@ -85,6 +86,36 @@ export function createBaseBridgeComponent<T>({
       </ErrorBoundary>
     );
 
+    // Keep the producer tree identical across stream rendering, hydration and
+    // later updates. Framework renderers receive this tree, never a Host element.
+    const createElement = (
+      info: ProviderParams,
+      propsInfo: Record<string, unknown>,
+      eventInfo: RenderParams | BridgeSSRRequest,
+      operationContext: BridgeOperationContext,
+    ) => {
+      const { basename, moduleName, memoryRoute } = info;
+      const beforeBridgeRenderRes =
+        instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+          eventInfo,
+          operationContext,
+        ) || {};
+      return (
+        <BridgeWrapper
+          basename={basename}
+          moduleName={moduleName}
+          memoryRoute={memoryRoute}
+          propsInfo={
+            {
+              ...omitHostFallback(propsInfo),
+              basename,
+              ...(beforeBridgeRenderRes as any)?.extraProps,
+            } as T
+          }
+        />
+      );
+    };
+
     const render = async (info: RenderParams, hydrate = false) => {
       LoggerInstance.debug(`createBridgeComponent render Info`, info);
       const {
@@ -94,6 +125,7 @@ export function createBaseBridgeComponent<T>({
         memoryRoute,
         rootOptions,
         snapshot: _snapshot,
+        updates: _updates,
         signal,
         ...propsInfo
       } = info;
@@ -109,26 +141,11 @@ export function createBaseBridgeComponent<T>({
         ...defaultRootOptions,
         ...(rootOptions as CreateRootOptions),
       };
-
-      const beforeBridgeRenderRes =
-        instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
-          info,
-          operationContext,
-        ) || {};
-
-      const rootComponentWithErrorBoundary = (
-        <BridgeWrapper
-          basename={basename}
-          moduleName={moduleName}
-          memoryRoute={memoryRoute}
-          propsInfo={
-            {
-              ...omitHostFallback(propsInfo as Record<string, unknown>),
-              basename,
-              ...(beforeBridgeRenderRes as any)?.extraProps,
-            } as T
-          }
-        />
+      const rootComponentWithErrorBoundary = createElement(
+        { moduleName, basename, memoryRoute },
+        propsInfo,
+        info,
+        operationContext,
       );
 
       if (hydrate && !rootMap.has(dom)) {
@@ -157,7 +174,7 @@ export function createBaseBridgeComponent<T>({
         rootMap.set(dom, root);
       } else if (bridgeInfo.render) {
         const root = await Promise.resolve(
-          bridgeInfo.render(rootComponentWithErrorBoundary, dom),
+          bridgeInfo.render(rootComponentWithErrorBoundary, dom, info),
         );
         if (signal?.aborted) {
           if (root && 'unmount' in root) root.unmount();
@@ -184,6 +201,25 @@ export function createBaseBridgeComponent<T>({
     return {
       render,
       hydrate: (info: HydrateParams) => render(info, true),
+      // Absent for CSR-only providers: consumers use this capability to choose
+      // SSR/fallback. The framework owns stream cancellation and data snapshots.
+      ...(bridgeInfo.renderStream && {
+        async renderStream(info: BridgeSSRRequest) {
+          if (info.signal.aborted) throw info.signal.reason;
+          const operationContext: BridgeOperationContext = {
+            side: 'producer',
+            framework: 'react',
+            operation: 'render',
+            reason: 'direct',
+          };
+          const app = createElement(info, info.props, info, operationContext);
+          const result = await bridgeInfo.renderStream!(app, info);
+          instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
+            context: operationContext,
+          });
+          return result;
+        },
+      }),
 
       destroy(info: DestroyParams) {
         const { dom } = info;

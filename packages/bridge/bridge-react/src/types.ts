@@ -91,7 +91,14 @@ export interface ProviderFnParams<T> {
   render?: (
     App: React.ReactElement,
     id?: HTMLElement | string,
+    /** Framework context; the same object passed to provider.render. */
+    info?: RenderParams,
   ) => RootType | Promise<RootType>;
+  /** Render the producer-owned tree without passing React elements across MF. */
+  renderStream?: (
+    App: React.ReactElement,
+    info: BridgeSSRRequest,
+  ) => Promise<BridgeSSRResult>;
   createRoot?: (
     container: Element | DocumentFragment,
     options?: CreateRootOptions,
