@@ -190,18 +190,23 @@ may use `type: 'lynx-js'` and `lynx.requireModuleAsync`.
 
 ## Layers and singletons
 
-Split remote bundles and hosts with `mainThread: true` compile exposes for both
-Lynx issuer layers and register shared declarations in realm-qualified scopes.
-Unqualified shares default to the background realm; use
-`realm: 'main-thread'` only for a module authored for that runtime. The semantic
+Split remote bundles compile exposes for both Lynx issuer layers. Shared
+declarations use realm-qualified scopes and default to the background realm.
+Native Lynx supports background sharing only. Native remote builds reject
+`realm: 'main-thread'` and shared `layer` or `issuerLayer` assignments to the
+main-thread layer, including in split mode and with `mainThread: true`.
+Use `realm: 'main-thread'` only with Lynx for Web and a host configured with
+`mainThread: true`. The semantic
 realm is resolved against the DSL's exposed layer constants, so application
 configs do not hard-code layer names.
 
 A singleton is unique within one JavaScript realm, share scope, and share key.
 The host, compiled imports, runtime API consumers, and remotes can therefore
-share one stateful instance inside the background realm. The main-thread realm
-gets a separate instance by design: Lynx does not transfer JavaScript object
-identity across its thread boundary.
+share one stateful instance inside the background realm. On Lynx for Web,
+main-thread sharing negotiates independently of the background realm. Native
+main-thread modules remain local to their bundles; there is no host/remote
+singleton guarantee for them. Lynx does not transfer JavaScript object identity
+across its thread boundary.
 
 Prefer the official ReactLynx lazy-runtime bridge for UI bundles. An exact
 `@lynx-js/react` share does not cover `/internal`, JSX-runtime, Lepus, and lazy
@@ -211,6 +216,8 @@ state and other ordinary libraries are safe singleton candidates.
 One realm-neutral container program carries internal layer-specific expose
 aliases. Keys ending in `__main_thread` are reserved for those aliases; users
 still import the public key such as `catalog/Card`.
+
+The following sharing diagram describes Lynx for Web:
 
 ```mermaid
 flowchart TB
@@ -225,8 +232,11 @@ flowchart TB
 The enhanced federation runtime itself executes in the native background
 realm. A native split remote also embeds a paired main-thread container runtime
 section so fetched TASM/MTS snapshot chunks install into that realm's registry.
+The paired-section preparation loads the section and installs its chunks; it
+does not call the main-thread container's `init()` with a host share scope.
 Both sections ship in the same external `.lynx.bundle`; there is no second
-network-deployed remote entry. JavaScript object identity remains realm-local.
+network-deployed remote entry. Supporting native main-thread shared negotiation
+requires a separate runtime design and native singleton coverage.
 
 See `apps/lynx-module-federation-demo` for an official Rspeedy native app,
 native artifact checks, and a real Lynx for Web browser E2E.

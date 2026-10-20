@@ -541,9 +541,10 @@ export const configureRemoteBundle = async (
         layers.BACKGROUND,
         plan.backgroundChunkPrefix,
       );
-  const activeRealmLayers = pairedPlan
-    ? [layers.BACKGROUND, layers.MAIN_THREAD]
-    : [layers.BACKGROUND];
+  const activeRealmLayers =
+    plan.mode === 'web-split'
+      ? [layers.BACKGROUND, layers.MAIN_THREAD]
+      : [layers.BACKGROUND];
   const remoteShared = normalizeRealmScopedShared(
     options.shared,
     layers,

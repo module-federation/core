@@ -54,7 +54,7 @@ export type LynxRemoteBundleOptions =
 export type LynxSharedRealm = 'background' | 'main-thread';
 
 export interface LynxSharedConfig extends SharedConfig {
-  /** Select the Lynx JavaScript realm without depending on DSL layer names. */
+  /** Select the Lynx JavaScript realm. Main-thread sharing requires Lynx for Web. */
   realm?: LynxSharedRealm;
 }
 
@@ -77,7 +77,7 @@ export interface LynxModuleFederationAdapterOptions {
   layer?: string;
   /** Emit a manifest-addressable native or web external bundle. */
   remoteBundle?: LynxRemoteBundleOptions;
-  /** Enable main-thread federation. */
+  /** Enable main-thread federation for a Lynx for Web host. */
   mainThread?: boolean;
   /** Override the runtime transport plugin module. */
   runtimePlugin?: string;
@@ -214,9 +214,14 @@ const normalizeSharedValue = (
       issuerLayer,
       context.layers,
     );
-    if (!context.activeRealmLayers.includes(shareScopeLayer)) {
+    const inactiveLayer = [shareScopeLayer, layer, issuerLayer].find(
+      (value) =>
+        Object.values(context.layers).includes(value) &&
+        !context.activeRealmLayers.includes(value),
+    );
+    if (inactiveLayer) {
       throw new Error(
-        `@module-federation/lynx shared module "${key}" uses inactive realm layer "${shareScopeLayer}". Enable its Lynx realm or choose one of: ${context.activeRealmLayers.join(', ')}.`,
+        `@module-federation/lynx shared module "${key}" uses inactive realm layer "${inactiveLayer}". Main-thread sharing requires Lynx for Web with main-thread federation enabled; native Lynx supports background sharing only.`,
       );
     }
     const shareScope = config.shareScope ?? context.shareScope ?? 'default';
