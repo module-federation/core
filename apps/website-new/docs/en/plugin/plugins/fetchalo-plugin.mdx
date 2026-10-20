@@ -1,0 +1,245 @@
+---
+title: Fetchalo Plugin
+description: Load remote manifests, entries, chunks, CSS and media through your own fetch, so every request can carry headers such as Authorization.
+---
+
+import { PackageManagerTabs, Tabs, Tab } from '@theme';
+
+# Fetchalo Plugin
+
+[fetchalo](https://github.com/gioboa/fetchalo) is a community plugin that loads
+JS, CSS and media from the origins you choose through your own `fetch`. Every
+request to those origins can then carry headers such as
+`Authorization: Bearer …`, without a service worker.
+
+Browsers cannot add headers to `<script type="module">`, `import()`, `<link>`,
+`<img>` or CSS `url()` requests. Service workers can, but only in a secure
+context (HTTPS or `localhost`) and one per scope. fetchalo also works on plain
+HTTP hosts, for example remotes on a LAN behind an API key.
+
+With Module Federation, the `fetchalo/federation` runtime plugin loads the
+remotes' manifests, `module`/`esm` remote entries, chunks, CSS and media through
+fetchalo.
+
+## Install
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add fetchalo',
+    yarn: 'yarn add fetchalo',
+    pnpm: 'pnpm add fetchalo',
+    bun: 'bun add fetchalo',
+  }}
+/>
+
+Peer dependencies (all optional): `webpack` 5, `@rspack/core` or `vite` 5-8.
+
+## Configuration
+
+<Tabs>
+  <Tab label="Rspack">
+  The build plugin prepends the fetchalo client, your config file and
+  es-module-shims to every entry, so they run before the app. Add
+  `fetchalo/federation` to `runtimePlugins` to load the manifest and the remote
+  entry through fetchalo.
+
+```js title="rspack.config.js"
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/rspack');
+const { FetchaloPlugin } = require('fetchalo/rspack');
+
+module.exports = {
+  plugins: [
+    new FetchaloPlugin('./src/fetchalo.config.js'),
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: {
+        remote1: 'remote1@https://remote.example/mf-manifest.json',
+      },
+      runtimePlugins: [require.resolve('fetchalo/federation')],
+    }),
+  ],
+};
+```
+
+```js title="src/fetchalo.config.js"
+/** @type {import('fetchalo').FetchaloConfig} */
+export default {
+  origins: ['https://remote.example'],
+  headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+};
+```
+
+  </Tab>
+  <Tab label="Webpack">
+  The build plugin prepends the fetchalo client, your config file and
+  es-module-shims to every entry, so they run before the app. Add
+  `fetchalo/federation` to `runtimePlugins` to load the manifest and the remote
+  entry through fetchalo.
+
+```js title="webpack.config.js"
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
+const { FetchaloPlugin } = require('fetchalo/webpack');
+
+module.exports = {
+  plugins: [
+    new FetchaloPlugin('./src/fetchalo.config.js'),
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: {
+        remote1: 'remote1@https://remote.example/mf-manifest.json',
+      },
+      runtimePlugins: [require.resolve('fetchalo/federation')],
+    }),
+  ],
+};
+```
+
+```js title="src/fetchalo.config.js"
+/** @type {import('fetchalo').FetchaloConfig} */
+export default {
+  origins: ['https://remote.example'],
+  headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+};
+```
+
+  </Tab>
+  <Tab label="Module Federation Runtime">
+  Without a build plugin, pass the origins and headers to
+  `fetchalo/federation` directly. It installs fetchalo and es-module-shims in
+  the page when it is created.
+
+```ts title="app.ts"
+import { createInstance } from '@module-federation/enhanced/runtime';
+import fetchaloFederation from 'fetchalo/federation';
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'remote1',
+      entry: 'https://remote.example/mf-manifest.json',
+      type: 'module',
+    },
+  ],
+  plugins: [
+    fetchaloFederation({
+      origins: ['https://remote.example'],
+      headers: (url) => ({ Authorization: `Bearer ${getToken()}` }),
+    }),
+  ],
+});
+```
+
+`mf.registerPlugins([fetchaloFederation({ ... })])` also works, as long as it
+runs before the first remote loads. Several instances share the first
+installation.
+
+In a webpack or Rspack host, use the build plugin from the Webpack or Rspack
+tab instead: it keeps the bundler from parsing es-module-shims.
+
+  </Tab>
+</Tabs>
+
+For Vite hosts, use the `fetchalo` Vite plugin together with
+`runtimePlugins: ['fetchalo/federation']` in `@module-federation/vite`. See the
+[fetchalo README](https://github.com/gioboa/fetchalo#usage).
+
+## Config file
+
+The build plugins take the path of a config file (`.js` or `.ts`) and load it in
+the browser before the app. Its default export holds:
+
+- `origins`: the origins whose files get the headers.
+- `headers`: called for every request, so it can return a refreshed token.
+
+```ts title="src/fetchalo.config.ts"
+import type { FetchaloConfig } from 'fetchalo';
+
+export default {
+  origins: ['https://remote.example'],
+  headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+} satisfies FetchaloConfig;
+```
+
+The config file must not import files from the `origins`. It is bundled with
+the app, so it can read build-time values such as `DefinePlugin` constants. For
+values computed in the browser, export a function that returns the config, or a
+promise of it:
+
+```ts title="src/fetchalo.config.ts"
+export default async (): Promise<FetchaloConfig> => ({
+  origins: await fetch('/api/remote-origins').then((res) => res.json()),
+  headers: (url) => ({ Authorization: `Bearer ${getToken()}` }),
+});
+```
+
+`fetchaloFederation()` in the Module Federation Runtime tab also accepts a
+promise of `{ origins, headers }`. Until a config given as a promise resolves,
+requests to the origins wait for it, and `window.fetchalo.ready` resolves when
+it has.
+
+## API
+
+```ts
+// fetchalo/federation: installs fetchalo when given a config; without one, uses
+// the fetchalo that a build plugin installed.
+fetchaloFederation(config?: FetchaloConfig | Promise<FetchaloConfig>);
+
+// Build plugins: the path of the config file.
+new FetchaloPlugin(configPath: string); // fetchalo/webpack, fetchalo/rspack
+fetchalo(configPath: string); // Vite
+
+// The config file's default export:
+export default FetchaloConfig | (() => FetchaloConfig | Promise<FetchaloConfig>);
+
+type FetchaloConfig = {
+  origins: string[];
+  headers: (url: string) => HeadersInit | undefined | Promise<HeadersInit | undefined>;
+};
+```
+
+## CORS
+
+The remote server must answer the CORS preflight for the header, with
+`Access-Control-Allow-Origin` and `Access-Control-Allow-Headers: Authorization`.
+
+## Requests covered
+
+For files on the configured `origins`:
+
+| Request                                                                                 | Loaded by                                                                                            |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| JS modules: entries, static imports, `import()`                                         | [es-module-shims](https://github.com/guybedford/es-module-shims) in shim mode, with its `fetch` hook |
+| Module Federation manifests and remote entries                                          | `fetchalo/federation` runtime plugin                                                                 |
+| `<link rel="stylesheet">` and their `@import`s                                          | fetched, served from `blob:` URLs                                                                    |
+| `url()` in those stylesheets, `<style>` text, CSSOM rules (CSS-in-JS) and inline styles | rewritten to `blob:` URLs                                                                            |
+| `<img>`, `<source>`, `<video>`, `<audio>`: `src`, `srcset`, `poster`                    | fetched, served from `blob:` URLs                                                                    |
+
+`<link rel="modulepreload|preload|prefetch">` hints to those origins are
+dropped: es-module-shims fetches the modules, and other files are fetched when
+used.
+
+## Limitations
+
+- Browser only, no SSR.
+- Only `module`/`esm` remotes from built output. `var` remotes load through
+  `<script>` tags, which cannot carry headers.
+- Not covered: elements written in the page's HTML, SVG `<image>`, `<iframe>`,
+  `<object>`, workers, `adoptedStyleSheets`, elements created with `innerHTML`,
+  and `fetch()` calls made by the loaded code itself.
+- Media is downloaded whole into a `blob:` URL: no streaming or range requests.
+  `blob:` URLs are kept for the page's lifetime.
+- It patches DOM prototypes (`appendChild`, `setAttribute`, `insertRule`, media
+  setters), for the configured origins only.
+
+## Examples
+
+The fetchalo repository has
+[complete examples](https://github.com/gioboa/fetchalo/tree/main/examples) that
+run in Chromium, Firefox and WebKit: a remote that serves its files only with
+an `Authorization` header, and hosts built with webpack, Rspack, Vite and the
+Module Federation runtime API.
