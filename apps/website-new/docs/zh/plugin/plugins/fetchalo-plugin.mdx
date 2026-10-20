@@ -33,104 +33,78 @@ Peer dependencies（均为可选）：`webpack` 5、`@rspack/core` 或 `vite` 5-
 
 ## 配置
 
+该插件可以在编译时或运行时使用
+
 <Tabs>
   <Tab label="Rspack">
-  构建插件会把 fetchalo 客户端、你的配置文件和 es-module-shims 插入到每个入口之前，确保它们先于应用执行。在
-  `runtimePlugins` 中添加 `fetchalo/federation`，即可通过 fetchalo 加载 manifest 和 remote 入口。
+  ```js title="rspack.config.js"
+  const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
+  const {FetchaloPlugin} = require('fetchalo/rspack');
 
-```js title="rspack.config.js"
-const {
-  ModuleFederationPlugin,
-} = require('@module-federation/enhanced/rspack');
-const { FetchaloPlugin } = require('fetchalo/rspack');
-
-module.exports = {
-  plugins: [
-    new FetchaloPlugin('./src/fetchalo.config.js'),
-    new ModuleFederationPlugin({
-      name: 'host',
-      remotes: {
-        remote1: 'remote1@https://remote.example/mf-manifest.json',
-      },
-      runtimePlugins: [require.resolve('fetchalo/federation')],
-    }),
-  ],
-};
-```
-
-```js title="src/fetchalo.config.js"
-/** @type {import('fetchalo').FetchaloConfig} */
-export default {
-  origins: ['https://remote.example'],
-  headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
-};
-```
-
+  module.exports = {
+    plugins: [
+      new FetchaloPlugin('./src/fetchalo.config.js'),
+      new ModuleFederationPlugin({
+        // other options
+        runtimePlugins: [
+          require.resolve('fetchalo/federation')
+        ]
+      }),
+    ],
+  };
+  ```
   </Tab>
   <Tab label="Webpack">
-  构建插件会把 fetchalo 客户端、你的配置文件和 es-module-shims 插入到每个入口之前，确保它们先于应用执行。在
-  `runtimePlugins` 中添加 `fetchalo/federation`，即可通过 fetchalo 加载 manifest 和 remote 入口。
+  ```js title="webpack.config.js"
+  const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+  const {FetchaloPlugin} = require('fetchalo/webpack');
 
-```js title="webpack.config.js"
-const {
-  ModuleFederationPlugin,
-} = require('@module-federation/enhanced/webpack');
-const { FetchaloPlugin } = require('fetchalo/webpack');
-
-module.exports = {
-  plugins: [
-    new FetchaloPlugin('./src/fetchalo.config.js'),
-    new ModuleFederationPlugin({
-      name: 'host',
-      remotes: {
-        remote1: 'remote1@https://remote.example/mf-manifest.json',
-      },
-      runtimePlugins: [require.resolve('fetchalo/federation')],
-    }),
-  ],
-};
-```
-
-```js title="src/fetchalo.config.js"
-/** @type {import('fetchalo').FetchaloConfig} */
-export default {
-  origins: ['https://remote.example'],
-  headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
-};
-```
-
+  module.exports = {
+    plugins: [
+      new FetchaloPlugin('./src/fetchalo.config.js'),
+      new ModuleFederationPlugin({
+        // other options
+        runtimePlugins: [
+          require.resolve('fetchalo/federation')
+        ]
+      }),
+    ],
+  };
+  ```
   </Tab>
   <Tab label="Module Federation Runtime">
-  不使用构建插件时，直接把 origins 和 headers 传给 `fetchalo/federation`。插件创建时会在页面中安装 fetchalo 和 es-module-shims。
+    ```ts title="app.ts"
+    import {createInstance} from '@module-federation/enhanced/runtime';
+    import fetchaloFederation from 'fetchalo/federation';
 
-```ts title="app.ts"
-import { createInstance } from '@module-federation/enhanced/runtime';
-import fetchaloFederation from 'fetchalo/federation';
-
-const mf = createInstance({
-  name: 'host',
-  remotes: [
-    {
-      name: 'remote1',
-      entry: 'https://remote.example/mf-manifest.json',
-      type: 'module',
-    },
-  ],
-  plugins: [
-    fetchaloFederation({
-      origins: ['https://remote.example'],
-      headers: (url) => ({ Authorization: `Bearer ${getToken()}` }),
-    }),
-  ],
-});
-```
-
-也可以使用 `mf.registerPlugins([fetchaloFederation({ ... })])`，只要在第一个 remote 加载之前调用即可。多个实例会共用第一次的安装。
-
-在 webpack 或 Rspack 宿主中，请改用 Webpack 或 Rspack 标签页中的构建插件：它可以避免打包工具解析 es-module-shims。
-
+    const mf = createInstance({
+      name: 'host',
+      remotes: [
+        {
+          name: 'remote1',
+          entry: 'https://remote.example/mf-manifest.json',
+          type: 'module',
+        },
+      ],
+      plugins: [
+        fetchaloFederation({
+          origins: ['https://remote.example'],
+          headers: (url) => ({ Authorization: `Bearer ${getToken()}` }),
+        }),
+      ],
+    });
+    ```
   </Tab>
 </Tabs>
+
+使用 Rspack 或 webpack 时，`FetchaloPlugin` 会把 fetchalo 客户端、[配置文件](#配置文件)和
+es-module-shims 插入到每个入口之前，确保它们先于应用执行；`fetchalo/federation` 则通过
+fetchalo 加载 manifest 和 remote 入口。
+
+使用 Module Federation 运行时 API 时，直接把 origins 和 headers 传给
+`fetchalo/federation`，插件创建时会在页面中安装 fetchalo 和 es-module-shims。也可以使用
+`mf.registerPlugins([fetchaloFederation({ ... })])`，只要在第一个 remote 加载之前调用即可。多个实例会共用第一次的安装。在
+webpack 或 Rspack 宿主中，请改用构建插件：它可以避免打包工具解析 es-module-shims。
 
 Vite 宿主请将 `fetchalo` Vite 插件与 `@module-federation/vite` 中的
 `runtimePlugins: ['fetchalo/federation']` 搭配使用，详见

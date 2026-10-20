@@ -37,113 +37,81 @@ Peer dependencies (todas opcionais): `webpack` 5, `@rspack/core` ou `vite` 5-8.
 
 ## Configuração
 
+O plugin pode ser aplicado em tempo de compilação ou em runtime
+
 <Tabs>
   <Tab label="Rspack">
-  O build plugin adiciona o cliente do fetchalo, seu arquivo de configuração e
-  o es-module-shims antes de cada entry, para que rodem antes da aplicação.
-  Adicione `fetchalo/federation` em `runtimePlugins` para carregar o manifest e
-  a remote entry pelo fetchalo.
+  ```js title="rspack.config.js"
+  const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
+  const {FetchaloPlugin} = require('fetchalo/rspack');
 
-```js title="rspack.config.js"
-const {
-  ModuleFederationPlugin,
-} = require('@module-federation/enhanced/rspack');
-const { FetchaloPlugin } = require('fetchalo/rspack');
-
-module.exports = {
-  plugins: [
-    new FetchaloPlugin('./src/fetchalo.config.js'),
-    new ModuleFederationPlugin({
-      name: 'host',
-      remotes: {
-        remote1: 'remote1@https://remote.example/mf-manifest.json',
-      },
-      runtimePlugins: [require.resolve('fetchalo/federation')],
-    }),
-  ],
-};
-```
-
-```js title="src/fetchalo.config.js"
-/** @type {import('fetchalo').FetchaloConfig} */
-export default {
-  origins: ['https://remote.example'],
-  headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
-};
-```
-
+  module.exports = {
+    plugins: [
+      new FetchaloPlugin('./src/fetchalo.config.js'),
+      new ModuleFederationPlugin({
+        // other options
+        runtimePlugins: [
+          require.resolve('fetchalo/federation')
+        ]
+      }),
+    ],
+  };
+  ```
   </Tab>
   <Tab label="Webpack">
-  O build plugin adiciona o cliente do fetchalo, seu arquivo de configuração e
-  o es-module-shims antes de cada entry, para que rodem antes da aplicação.
-  Adicione `fetchalo/federation` em `runtimePlugins` para carregar o manifest e
-  a remote entry pelo fetchalo.
+  ```js title="webpack.config.js"
+  const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+  const {FetchaloPlugin} = require('fetchalo/webpack');
 
-```js title="webpack.config.js"
-const {
-  ModuleFederationPlugin,
-} = require('@module-federation/enhanced/webpack');
-const { FetchaloPlugin } = require('fetchalo/webpack');
-
-module.exports = {
-  plugins: [
-    new FetchaloPlugin('./src/fetchalo.config.js'),
-    new ModuleFederationPlugin({
-      name: 'host',
-      remotes: {
-        remote1: 'remote1@https://remote.example/mf-manifest.json',
-      },
-      runtimePlugins: [require.resolve('fetchalo/federation')],
-    }),
-  ],
-};
-```
-
-```js title="src/fetchalo.config.js"
-/** @type {import('fetchalo').FetchaloConfig} */
-export default {
-  origins: ['https://remote.example'],
-  headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
-};
-```
-
+  module.exports = {
+    plugins: [
+      new FetchaloPlugin('./src/fetchalo.config.js'),
+      new ModuleFederationPlugin({
+        // other options
+        runtimePlugins: [
+          require.resolve('fetchalo/federation')
+        ]
+      }),
+    ],
+  };
+  ```
   </Tab>
   <Tab label="Module Federation Runtime">
-  Sem build plugin, passe as origins e os headers diretamente para
-  `fetchalo/federation`. Ao ser criado, ele instala o fetchalo e o
-  es-module-shims na página.
+    ```ts title="app.ts"
+    import {createInstance} from '@module-federation/enhanced/runtime';
+    import fetchaloFederation from 'fetchalo/federation';
 
-```ts title="app.ts"
-import { createInstance } from '@module-federation/enhanced/runtime';
-import fetchaloFederation from 'fetchalo/federation';
-
-const mf = createInstance({
-  name: 'host',
-  remotes: [
-    {
-      name: 'remote1',
-      entry: 'https://remote.example/mf-manifest.json',
-      type: 'module',
-    },
-  ],
-  plugins: [
-    fetchaloFederation({
-      origins: ['https://remote.example'],
-      headers: (url) => ({ Authorization: `Bearer ${getToken()}` }),
-    }),
-  ],
-});
-```
-
-`mf.registerPlugins([fetchaloFederation({ ... })])` também funciona, desde
-que seja chamado antes do primeiro remote carregar. Várias instâncias
-compartilham a primeira instalação.
-
-Em um host webpack ou Rspack, use o build plugin das abas Webpack ou Rspack:
-ele evita que o bundler processe o es-module-shims.
-
+    const mf = createInstance({
+      name: 'host',
+      remotes: [
+        {
+          name: 'remote1',
+          entry: 'https://remote.example/mf-manifest.json',
+          type: 'module',
+        },
+      ],
+      plugins: [
+        fetchaloFederation({
+          origins: ['https://remote.example'],
+          headers: (url) => ({ Authorization: `Bearer ${getToken()}` }),
+        }),
+      ],
+    });
+    ```
   </Tab>
 </Tabs>
+
+Com Rspack ou webpack, o `FetchaloPlugin` adiciona o cliente do fetchalo, o
+[arquivo de configuração](#arquivo-de-configuração) e o es-module-shims antes de
+cada entry, para que rodem antes da aplicação, e o `fetchalo/federation` carrega
+o manifest e a remote entry pelo fetchalo.
+
+Com a API de runtime do Module Federation, passe as origins e os headers
+diretamente para `fetchalo/federation`: ao ser criado, ele instala o fetchalo e
+o es-module-shims na página. `mf.registerPlugins([fetchaloFederation({ ... })])`
+também funciona, desde que seja chamado antes do primeiro remote carregar.
+Várias instâncias compartilham a primeira instalação. Em um host webpack ou
+Rspack, use o build plugin: ele evita que o bundler processe o es-module-shims.
 
 Em hosts Vite, use o plugin Vite `fetchalo` junto com
 `runtimePlugins: ['fetchalo/federation']` no `@module-federation/vite`. Veja o
