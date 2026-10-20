@@ -1,0 +1,14 @@
+{
+  "name": "node-esm-remote",
+  "private": true,
+  "description": "Federation example: Node.js remote built as native ESM (chunkFormat: 'module', chunkLoading: 'import')",
+  "dependencies": {
+    "@module-federation/enhanced": "workspace:*"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode production",
+    "serve": "node serve.mjs"
+  }
+}
