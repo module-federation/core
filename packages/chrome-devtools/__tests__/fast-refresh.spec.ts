@@ -254,15 +254,10 @@ describe('pinned React 19 development provider', () => {
       'window.ReactDOM = { version: "19.2.4", createRoot() {}, react: window.React };',
   };
 
-  it('maps every 19.x request to the pinned development pair, preserving React 18 URLs', () => {
+  it('does not generate CDN URLs for React 19, preserving React 18 URLs', () => {
     for (const version of ['19.0.0', '19.1.1', '19.2.0', '19.9.0-canary']) {
-      expect(getUnpkgUrl('react', version)).toBe(
-        'https://unpkg.com/umd-react@19.2.4/dist/react.development.js',
-      );
-      for (const pkg of ['react-dom', 'react-dom/client'])
-        expect(getUnpkgUrl(pkg, version)).toBe(
-          'https://unpkg.com/umd-react@19.2.4/dist/react-dom.development.js',
-        );
+      for (const pkg of ['react', 'react-dom', 'react-dom/client'])
+        expect(getUnpkgUrl(pkg, version)).toBeUndefined();
     }
     expect(getUnpkgUrl('react', '18.3.1')).toBe(
       'https://unpkg.com/react@18.3.1/umd/react.development.js',
@@ -294,20 +289,12 @@ describe('pinned React 19 development provider', () => {
     ]);
     const reactFactory = await react.get();
     expect(clientFactory()).toBe(domFactory());
-    expect(clientFactory().react).toBe(reactFactory());
+    expect(Object.isFrozen(reactFactory().createElement('div'))).toBe(true);
+    expect(typeof clientFactory().createRoot).toBe('function');
     expect(client.version).toBe('19.2.4');
     expect(dom.version).toBe('19.2.4');
     expect(react.version).toBe('19.2.4');
-    expect(requests).toEqual([
-      {
-        url: 'https://unpkg.com/umd-react@19.2.4/dist/react.development.js',
-        async: true,
-      },
-      {
-        url: 'https://unpkg.com/umd-react@19.2.4/dist/react-dom.development.js',
-        async: true,
-      },
-    ]);
+    expect(requests).toEqual([]);
   });
 
   it('loads eager client shares synchronously and saves the pinned version for the next navigation', async () => {
@@ -324,9 +311,9 @@ describe('pinned React 19 development provider', () => {
       origin: {},
     });
     expect(client.lib().version).toBe('19.2.4');
-    expect(client.lib().react).toBe((window as any).scope_react);
+    expect((window as any).scope_react.version).toBe('19.2.4');
     expect(requests.every((request) => !request.async)).toBe(true);
-    expect(requests).toHaveLength(2);
+    expect(requests).toHaveLength(0);
     expect(
       JSON.parse(localStorage.getItem(__FEDERATION_DEVTOOLS__)!)[
         __EAGER_SHARE__
@@ -335,7 +322,7 @@ describe('pinned React 19 development provider', () => {
     expect((await client.get())()).toBe(client.lib());
   });
 
-  it('hydrates old React 19 eager caches with pinned URLs', async () => {
+  it('hydrates old React 19 eager caches without network requests', async () => {
     localStorage.setItem(
       __FEDERATION_DEVTOOLS__,
       JSON.stringify({
@@ -345,10 +332,7 @@ describe('pinned React 19 development provider', () => {
     );
     const requests = stubUmdRequest(scripts);
     await getPlugin();
-    expect(requests.map((request) => request.url)).toEqual([
-      'https://unpkg.com/umd-react@19.2.4/dist/react.development.js',
-      'https://unpkg.com/umd-react@19.2.4/dist/react-dom.development.js',
-    ]);
+    expect(requests).toEqual([]);
     expect((window as any).scope_react_dom.version).toBe('19.2.4');
   });
 
@@ -371,16 +355,16 @@ describe('pinned React 19 development provider', () => {
     expect(requests).toHaveLength(0);
   });
 
-  it('rejects an incorrect version or production React instead of returning it', async () => {
-    stubUmdRequest({ reactScript: 'window.React = { version: "19.0.0" };' });
+  it('uses the local development runtime even when the CDN is unavailable', async () => {
+    const requests = stubUmdRequest({
+      reactScript: 'throw new Error("offline");',
+    });
     const plugin = await getPlugin();
     const shared: any = { version: '19.1.1' };
     plugin.beforeRegisterShare({ pkgName: 'react', shared, origin: {} });
-    await expect(shared.get()).rejects.toThrow('19.2.4');
-    stubUmdRequest({
-      reactScript:
-        'window.React = { version: "19.2.4", createElement: () => ({}) };',
-    });
-    await expect(shared.get()).rejects.toThrow('not a development build');
+    const React = (await shared.get())();
+    expect(React.version).toBe('19.2.4');
+    expect(Object.isFrozen(React.createElement('div'))).toBe(true);
+    expect(requests).toEqual([]);
   });
 });
