@@ -40,40 +40,97 @@ The plugin can be applied at compile-time or runtime
 
 <Tabs>
   <Tab label="Rspack">
-  ```js title="rspack.config.js"
-  const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
-  const {FetchaloPlugin} = require('fetchalo/rspack');
+    <Tabs>
+      <Tab label="rspack.config.js">
+      ```js title="rspack.config.js"
+      const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
+      const {FetchaloPlugin} = require('fetchalo/rspack');
 
-  module.exports = {
-    plugins: [
-      new FetchaloPlugin('./src/fetchalo.config.js'),
-      new ModuleFederationPlugin({
-        // other options
-        runtimePlugins: [
-          require.resolve('fetchalo/federation')
-        ]
-      }),
-    ],
-  };
-  ```
+      module.exports = {
+        plugins: [
+          new FetchaloPlugin('./src/fetchalo.config.js'),
+          new ModuleFederationPlugin({
+            // other options
+            runtimePlugins: [
+              require.resolve('fetchalo/federation')
+            ]
+          }),
+        ],
+      };
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.js">
+      ```js title="src/fetchalo.config.js"
+      /** @type {import('fetchalo').FetchaloConfig} */
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      };
+      ```
+      </Tab>
+    </Tabs>
   </Tab>
   <Tab label="Webpack">
-  ```js title="webpack.config.js"
-  const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
-  const {FetchaloPlugin} = require('fetchalo/webpack');
+    <Tabs>
+      <Tab label="webpack.config.js">
+      ```js title="webpack.config.js"
+      const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+      const {FetchaloPlugin} = require('fetchalo/webpack');
 
-  module.exports = {
-    plugins: [
-      new FetchaloPlugin('./src/fetchalo.config.js'),
-      new ModuleFederationPlugin({
-        // other options
-        runtimePlugins: [
-          require.resolve('fetchalo/federation')
-        ]
-      }),
-    ],
-  };
-  ```
+      module.exports = {
+        plugins: [
+          new FetchaloPlugin('./src/fetchalo.config.js'),
+          new ModuleFederationPlugin({
+            // other options
+            runtimePlugins: [
+              require.resolve('fetchalo/federation')
+            ]
+          }),
+        ],
+      };
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.js">
+      ```js title="src/fetchalo.config.js"
+      /** @type {import('fetchalo').FetchaloConfig} */
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      };
+      ```
+      </Tab>
+    </Tabs>
+  </Tab>
+  <Tab label="Vite">
+    <Tabs>
+      <Tab label="vite.config.ts">
+      ```ts title="vite.config.ts"
+      import {defineConfig} from 'vite';
+      import {federation} from '@module-federation/vite';
+      import {fetchalo} from 'fetchalo';
+
+      export default defineConfig({
+        plugins: [
+          fetchalo('./src/fetchalo.config.ts'),
+          federation({
+            // other options
+            runtimePlugins: ['fetchalo/federation'],
+          }),
+        ],
+      });
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.ts">
+      ```ts title="src/fetchalo.config.ts"
+      import type {FetchaloConfig} from 'fetchalo';
+
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      } satisfies FetchaloConfig;
+      ```
+      </Tab>
+    </Tabs>
   </Tab>
   <Tab label="Module Federation Runtime">
     ```ts title="app.ts"
@@ -102,8 +159,9 @@ The plugin can be applied at compile-time or runtime
 
 With Rspack or webpack, `FetchaloPlugin` prepends the fetchalo client, the
 [config file](#config-file) and es-module-shims to every entry, so they run
-before the app, and `fetchalo/federation` loads the manifest and the remote
-entry through fetchalo.
+before the app. With Vite, the `fetchalo` plugin injects them at the top of
+`<head>`. In both cases `fetchalo/federation` in `runtimePlugins` loads the
+manifest and the remote entry through fetchalo.
 
 With the Module Federation runtime API, pass the origins and headers to
 `fetchalo/federation` directly: it installs fetchalo and es-module-shims in the
@@ -112,8 +170,10 @@ also works, as long as it runs before the first remote loads. Several instances
 share the first installation. In a webpack or Rspack host, use the build plugin
 instead: it keeps the bundler from parsing es-module-shims.
 
-For Vite hosts, use the `fetchalo` Vite plugin together with
-`runtimePlugins: ['fetchalo/federation']` in `@module-federation/vite`. See the
+With Vite, you can also install fetchalo through `runtimePlugins` alone,
+without the Vite plugin: list a file of your own that returns
+`fetchaloFederation({ origins, headers })`. Files the app requests before the
+federation runtime starts are then not covered. See the
 [fetchalo README](https://github.com/gioboa/fetchalo#usage).
 
 ## Config file
@@ -124,17 +184,9 @@ the browser before the app. Its default export holds:
 - `origins`: the origins whose files get the headers.
 - `headers`: called for every request, so it can return a refreshed token.
 
-```ts title="src/fetchalo.config.ts"
-import type { FetchaloConfig } from 'fetchalo';
-
-export default {
-  origins: ['https://remote.example'],
-  headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
-} satisfies FetchaloConfig;
-```
-
 The config file must not import files from the `origins`. It is bundled with
-the app, so it can read build-time values such as `DefinePlugin` constants. For
+the app, so it can read build-time values such as `import.meta.env` with Vite
+or `DefinePlugin` constants with webpack/Rspack. For
 values computed in the browser, export a function that returns the config, or a
 promise of it:
 
