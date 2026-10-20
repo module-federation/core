@@ -1,7 +1,11 @@
 import { copyFile, lstat, mkdir, readdir } from 'fs/promises';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
+import { createRequire } from 'node:module';
 import { getTypedName, getPackageRootDir, resolvePackageJson } from './utils';
+
+// See utils.ts: bare `require` is not a real require in tsup's ESM output.
+const require = createRequire(import.meta.url);
 
 const ignoredPkgs = ['typescript'];
 
