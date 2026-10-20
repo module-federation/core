@@ -1,160 +1,154 @@
 # Chrome Devtool
 
-`微前端` 架构不同于传统单体应用的开发模式，其分开开发、部署、调试的特征使其需要一套新的调试工具来满足新的使用场景。例如，在开发时怎么验证模块在实际项目中的效果、某个生产者的依赖是否和宿主环境进行了复用、当前页面加载了哪些模块，模块之间的依赖关系以及数据流转是怎么样的。
+Module Federation Devtools 用于查看页面中的 Federation 模块、依赖关系和共享依赖，也可以将远程模块代理到本地或指定版本，并追踪模块加载过程。
 
-`Chrome Devtool` 提供了以下能力：
+::: tip 使用要求
 
-- 支持代理功能，将线上页面中的远程模块代理到用户本地
-- 切换线上远程页面模块版本，进行快速的功能验证
-- 支持查看模块依赖信息
-- 支持筛选指定模块依赖信息
-- 支持加载追踪，记录 remote、shared、组件加载信号和失败报告
-
-::: tip 关于 Chrome Devtool 的限制
-
-必须使用 `mf-manifest.json` 才可以使用 `Chrome devtool` 提供的可视化和代理能力。
+可视化和代理功能依赖 `mf-manifest.json`。
 
 :::
 
-::: tip 使用 AI Coding Agent 调试
+## 在不同浏览器中使用
 
-当 Agent 需要结构化定位 MF 运行时错误、加载链路或性能瓶颈时，使用
-[Divebell](/guide/debug/divebell.html)。
+Module Federation Devtools 是 Chrome 扩展，提供两个适配不同浏览器环境的版本。两个版本的调试功能相同，仅安装方式和打开入口不同：
+
+| 使用场景 | 扩展版本 | 打开方式 |
+| --- | --- | --- |
+| 标准桌面 Chrome | 桌面 Chrome 版（`dist/chrome`） | 扩展侧边栏或 Chrome DevTools 中的 `Module Federation` 面板 |
+| 支持 Chrome 扩展的 AI 应用内置浏览器，例如 ChatGPT 内置浏览器 | 内置浏览器版（`dist/browser`） | 点击扩展图标打开紧凑弹窗 |
+
+两个版本均支持模块代理与版本切换、模块信息、依赖关系图、共享依赖、React HMR / Fast Refresh、加载追踪、报告导出和 WebMCP。
+
+同一个浏览器中只应启用一个版本，避免重复注入。
+
+::: tip 无头浏览器或 CI 环境
+
+以上两个版本适用于可交互的浏览器环境。对于无头浏览器或 CI 自动化，推荐使用 [Divebell](https://github.com/2heal1/divebell) 及其 [Module Federation Extension](https://github.com/2heal1/divebell/tree/main/packages/extensions/mf)。
+
+Divebell 可以通过 CLI 加载页面、采集 Module Federation 运行时信息并输出结构化诊断结果，无需打开扩展界面。安装和使用方式请参考 [使用 Divebell 排查运行时问题](/guide/debug/divebell.html)。
 
 :::
 
-## 使用场景
+## 安装
 
-DevTools 提供了多个功能面板，适用于开发环境以及生产环境的不同调试需求：
+### 桌面 Chrome 版
 
-- **Proxy (代理)**：用于将线上或测试环境的模块代理到本地开发环境。
-  - 支持本地服务端口号，例如 key: appA -> value: `http://localhost:3000/mf-manifest.json`，页面将直接加载 3000 端口的 Module Federation 内容。
-  - 支持使用 `mf-manifest.json` 文件地址形式，例如：key: appA -> value: `https://xxx/static/mf-manifest.json`， 页面将直接加载指定地址的 Module Federation 内容。
-
-- **Module Info (模块信息)**：用于查看当前页面加载的所有 Federation 模块的详细信息，包括版本、入口地址等。
-
-- **Dependency Graph (依赖关系图)**：以可视化的方式展示模块之间的依赖引用关系，帮助理清复杂的微前端架构。
-
-- **Shared (共享依赖)**：深入分析 Shared Dependencies 的使用情况。
-  - 查看已加载和未加载的共享依赖。
-  - 分析共享依赖的版本复用情况（Loaded / Reused）。
-  - 检查单例（Singleton）、严格版本（Strict Version）等配置的生效状态。
-
-- **加载追踪**：记录当前页面的 Module Federation 加载过程。
-  - 查看 `loadRemote`、`loadShare` 的开始、成功、失败和恢复状态。
-  - 查看当前是谁在加载哪个 remote、哪个 expose，以及 shared 使用了哪个 provider 和版本。
-  - 如果页面已经接入 [观测插件](/plugin/plugins/observability-plugin.html)，面板会读取页面已有报告，状态显示为 `CUSTOM`。
-  - 如果页面没有接入观测插件，可以在面板中点击「开启采集」，Chrome 插件会为当前 Tab 临时注入采集插件。
-
-![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/shared-overview.png)
-
-## 如何安装
-
-1. 打开 [Module Federation 插件详情页](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom?hl=zh-CN&utm_source=ext_sidebar), 点击 `添加到 Chrome` 按钮
+打开 [Module Federation 插件详情页](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom?hl=zh-CN&utm_source=ext_sidebar)，点击 `添加到 Chrome`。
 
 ![](@public/guide/chrome-devtools/chrome-store-add-devtool.png)
 
-## 如何使用
+### 内置浏览器版
 
-插件提供了 Devtools 面板
+1. 打开 [Module Federation Releases](https://github.com/module-federation/core/releases)，在正式版本的 **Assets** 中下载 Browser 版 ZIP。不要下载 GitHub 自动生成的 **Source code** 压缩包。
+2. 解压 ZIP，在内置浏览器的扩展管理页面中加载解压后的目录。
+3. 打开或刷新目标页面，点击扩展图标。
 
-- F12 打开开发者工具，选择点击 `Module Federation` tab，进入代理页面，便可对依赖的模块进行代理调试
+`latest` 正式版会发布 Browser 版附件，`next` 预览版不创建 GitHub Release。若目标版本没有附件，可以在仓库中执行：
+
+```bash
+pnpm --filter @module-federation/devtools run build:devtool
+```
+
+然后加载 `packages/chrome-devtools/dist/browser`。更新插件后，需要重载扩展并刷新已打开的页面。
+
+## 功能
+
+| 面板 | 用途 |
+| --- | --- |
+| Proxy | 将远程模块切换到本地服务、指定版本或自定义 `mf-manifest.json` 地址 |
+| Module Info | 查看当前页面加载的 Federation 模块、版本和入口地址 |
+| Dependency Graph | 查看和筛选模块之间的依赖关系 |
+| Shared | 查看共享依赖的加载状态、复用版本以及 Singleton、Strict Version 等配置 |
+| Loading Trace | 追踪 remote、shared 和组件的加载过程，查看失败原因并导出报告 |
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/shared-overview.png)
+
+## 使用插件
+
+在桌面 Chrome 中，打开目标页面后按 F12，在开发者工具中选择 `Module Federation`。在内置浏览器中，点击扩展图标打开插件。
+
 ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
 
-## 整体交互
+### 代理模块
 
-如下图所示，代理页面上提供了 `add new proxy module`、`producer selector`、 `version or local port or custom entry` 等选项操作。
-
-- 通过选择 `producer selector` 选择出目标页面需要代理的一个模块;
-- 通过 `version or local port` 选择或者输入指定的地址（包括端口号和 `mf-manifest.json` 结尾的地址），进行代理操作;
-- 如果需要同时代理多个模块，点击 `add new proxy module` 区域，增加对应的代理模块。
-- **支持多 Tab 隔离**：在多个标签页中同时打开使用了 Module Federation 的页面时，每个 Tab 的代理规则和模块信息都是相互独立的。你在 Tab A 中设置的代理规则不会影响 Tab B，反之亦然。这允许你同时调试多个环境或应用状态。
+1. 在 Proxy 面板中选择要代理的模块。
+2. 选择目标版本，或输入本地端口和完整的 `mf-manifest.json` 地址，例如 `http://localhost:3000/mf-manifest.json`。
+3. 如需代理多个模块，点击 `add new proxy module` 添加规则。
+4. 保存配置并刷新页面。
 
 ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
 
-## 加载追踪
-
-「加载追踪」Tab 用于回答“当前页面的 MF 加载到底发生了什么”。它适合在页面空白、组件一直 loading、shared 版本不确定、生产者偶发失败时使用。
-
-![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-overview.png)
-
-面板顶部的状态含义如下：
-
-- `OFF`：当前页面还没有可读取的加载报告。
-- `ON`：Chrome 插件已经为当前 Tab 开启采集。
-- `CUSTOM`：当前页面已经自己注册了观测插件，面板正在读取页面已有报告。
-
-常用流程：
-
-1. 打开目标页面。
-2. 打开 Chrome DevTools，进入 `Module Federation` 面板。
-3. 点击「加载追踪」。
-4. 如果状态是 `OFF`，点击「开启采集」，页面会刷新一次。
-5. 复现问题，或者触发需要观察的远程组件加载。
-6. 在报告列表中选择一条记录，查看当前加载、历史加载记录、事件时间线和失败建议。
-7. 点击「导出」保存完整报告。
-
-报告状态可以这样理解：
-
-- `成功`：这条 MF 链路已经完成。remote 加载成功会显示 remote 结果；shared 解析成功会显示 provider 和版本。
-- `失败`：这条链路出现错误，优先看右侧的失败阶段、错误码和建议。
-- `进行中`：只看到了开始事件，还没有看到完成、失败或恢复事件。
-- `兜底成功`：加载过程中出现过问题，但运行时通过 fallback 或恢复路径继续执行。
-- `基础观测`：当前运行时版本较低或无法识别，只能看到基础事件，细阶段可能缺失。
-
-### 导出报告后怎么分析
-
-导出的 JSON 会包含 `config`、`scopes` 和 `reports`。每条 report 里最重要的是：
-
-![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-shared-report.png)
-
-- `diagnosis`：面向排查的结论、证据和下一步建议。
-- `summary`：最终状态，例如 `runtime-loaded`、`component-loaded`、`shared-resolved`、`failed`、`recovered`、`pending`。
-- `remote` / `shared`：当前加载对象。shared 报告里重点看 provider、要求版本、实际版本和可用版本。
-- `loadedBefore`：同一个生产者之前是否已经被其他消费者加载过。
-- `events`：完整事件顺序，用于确认卡在哪一步。
-
-可以把导出的报告直接交给 AI coding agent：
-
-```text
-/mf obs
-
-我这里有一份 Chrome DevTools 导出的 MF 加载追踪报告。
-请帮我判断这次加载是否成功，失败点在哪里，最可能是谁的问题，以及下一步怎么修。
-
-<粘贴导出的 JSON>
-```
-
-
-## 如何将本地开发的模块代理到线上
-
-- 首先需要在本地启动生产者
+本地开发时，先启动生产者，再将其 manifest 地址填入代理规则。修改生产者代码后，消费者页面会自动 Reload。
 
 ![](@public/guide/chrome-devtools/dev-to-proxy.png)
 
-- 然后将启动成功的 manifest 地址，输入到代理页面的版本选择输入框内
-- 之后调整本地的生产者代码，消费者页面将会自动 Reload
-
 ![](@public/guide/chrome-devtools/proxy-to-local.png)
 
-## 常见问题
+### 加载追踪
 
-### 是否支持多 Tab 隔离调试
+Loading Trace 用于排查页面空白、组件持续 loading、shared 版本不符合预期或生产者加载失败等问题。
 
-> 不支持同一域名多个 Tab 同时调试
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-overview.png)
 
-支持，当你同时打开多个标签页（Tabs）进行调试时，Chrome DevTool 插件会自动识别当前的活动 Tab，并隔离存储每个 Tab 的代理规则。
+面板状态：
 
-- **独立存储**：Tab A 的代理配置仅对 Tab A 生效，切换到 Tab B 后，面板会自动加载 Tab B 的配置。
-- **状态保持**：即使多个 Tab 加载的是同一个 URL，它们的代理状态也是物理隔离的，互不干扰。
-- **自动切换**：点击 DevTools 中的 "Focus Tab" 标签可以确认当前正在调试的目标页面。
+- `OFF`：当前页面没有可读取的加载报告。
+- `ON`：插件已为当前 Tab 开启采集。
+- `CUSTOM`：页面已接入[观测插件](/plugin/plugins/observability-plugin.html)，Devtools 正在读取已有报告。
 
-### 配置何时生效
+使用步骤：
 
-- ✅ 符合验证规则
-- ✅ 配置规则被勾选
-- ✅ 配置填写正确，页面显示：代理配置已生效，获取远程模块成功，已自动刷新对应页面
+1. 打开 Loading Trace；如果状态为 `OFF`，点击「开启采集」，页面会刷新一次。
+2. 复现问题或触发需要观察的远程组件加载。
+3. 选择报告，查看加载结果、事件时间线、失败阶段和处理建议。
+4. 点击「导出」保存完整报告。
 
-### 部分配置符合规则
+报告中的主要状态包括成功、失败、进行中和兜底成功。导出的 JSON 包含 `config`、`scopes` 和 `reports`，分析时重点关注：
 
-插件会筛选出**符合配置规则的模块**进行代理
+- `diagnosis`：排查结论、证据和建议。
+- `summary`：最终加载状态。
+- `remote` / `shared`：加载对象、provider 和版本信息。
+- `loadedBefore`：同一生产者此前是否已被其他消费者加载。
+- `events`：完整事件顺序。
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-shared-report.png)
+
+## 通过 WebMCP 与 Coding Agent 配合
+
+::: tip 桌面 Chrome 版发布状态
+
+桌面 Chrome 版的 WebMCP 功能正在 Chrome Web Store 上线审核中。审核通过前，商店版本暂不支持本节介绍的能力。
+
+:::
+
+两个扩展版本都会在页面启动时自动注册 WebMCP 工具，不需要保持插件界面打开，也不需要业务页面额外接入 WebMCP SDK。
+
+| 工具 | 用途 |
+| --- | --- |
+| `mf_get_state` | 读取运行时、代理、HMR 配置和加载报告 |
+| `mf_get_modules` | 查看全部模块或指定模块 |
+| `mf_get_dependencies` | 获取模块依赖关系 |
+| `mf_get_shared` | 查看共享依赖版本和加载状态 |
+| `mf_set_proxy` / `mf_clear_proxy` | 设置或清除模块代理 |
+| `mf_set_hmr` | 开启或关闭 React HMR / Fast Refresh |
+| `mf_configure_loading_trace` | 配置加载追踪 |
+| `mf_get_loading_reports` | 读取加载报告 |
+| `mf_export_snapshot` | 导出诊断快照 JSON |
+
+例如，可以让支持 WebMCP 的 Agent 执行：
+
+```text
+读取当前页面的 MF 状态，保留现有代理规则，
+把 mf_playground 代理到 https://localhost:3006/mf-manifest.json，
+开启 HMR，刷新页面后检查配置是否生效。
+```
+
+`mf_set_proxy` 会替换完整的代理规则列表，因此修改前应先读取现有状态。配置工具会返回 `reloadRequired`，Agent 应根据结果刷新页面。
+
+依赖图布局、筛选、主题和语言等界面操作仍需在 UI 中完成。需要进一步分析运行时错误或性能瓶颈时，可以使用 [Divebell](/guide/debug/divebell.html)。
+
+## 注意事项
+
+- 插件不会绕过 CSP、CORS 或浏览器网络限制。HTTPS 页面代理到本地 HTTP 服务时，仍需正确配置页面策略、协议和跨域响应。
+- Proxy、HMR 和 Loading Trace 配置保存在页面 origin 的 localStorage 中，同源标签页可能共享配置。需要同时使用不同配置时，请使用不同 origin 或独立的浏览器配置文件。
+- 如果 Agent 没有发现 WebMCP 工具，请重载扩展并刷新页面，然后在 Console 检查 `window.__MF_DEVTOOLS_WEBMCP__`。`registered` 表示注册成功，`unavailable` 表示宿主没有提供可用 API，`error` 的具体原因记录在 `error` 字段中。

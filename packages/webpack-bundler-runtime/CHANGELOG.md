@@ -1,5 +1,21 @@
 # @module-federation/webpack-bundler-runtime
 
+## 2.9.2
+
+### Patch Changes
+
+- @module-federation/runtime@2.9.2
+- @module-federation/sdk@2.9.2
+- @module-federation/error-codes@2.9.2
+
+## 2.9.1
+
+### Patch Changes
+
+- @module-federation/runtime@2.9.1
+- @module-federation/sdk@2.9.1
+- @module-federation/error-codes@2.9.1
+
 ## 2.9.0
 
 ### Patch Changes

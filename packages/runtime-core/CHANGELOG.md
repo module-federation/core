@@ -1,5 +1,23 @@
 # @module-federation/runtime
 
+## 2.9.2
+
+### Patch Changes
+
+- 47d9b46: Import `ResourceLoadContext` in the remote handler so the published
+  `remote/index.d.ts` declares it. Consumers that type-check dependencies with
+  `skipLibCheck: false` no longer get TS2304.
+  - @module-federation/sdk@2.9.2
+  - @module-federation/error-codes@2.9.2
+
+## 2.9.1
+
+### Patch Changes
+
+- 92afef1: Clear rejected remote-entry loading promises from `globalLoading` so a later independent request can start a fresh load.
+  - @module-federation/sdk@2.9.1
+  - @module-federation/error-codes@2.9.1
+
 ## 2.9.0
 
 ### Minor Changes
