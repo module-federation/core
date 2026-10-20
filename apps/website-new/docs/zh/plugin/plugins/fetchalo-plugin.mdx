@@ -37,40 +37,97 @@ Peer dependencies（均为可选）：`webpack` 5、`@rspack/core` 或 `vite` 5-
 
 <Tabs>
   <Tab label="Rspack">
-  ```js title="rspack.config.js"
-  const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
-  const {FetchaloPlugin} = require('fetchalo/rspack');
+    <Tabs>
+      <Tab label="rspack.config.js">
+      ```js title="rspack.config.js"
+      const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
+      const {FetchaloPlugin} = require('fetchalo/rspack');
 
-  module.exports = {
-    plugins: [
-      new FetchaloPlugin('./src/fetchalo.config.js'),
-      new ModuleFederationPlugin({
-        // other options
-        runtimePlugins: [
-          require.resolve('fetchalo/federation')
-        ]
-      }),
-    ],
-  };
-  ```
+      module.exports = {
+        plugins: [
+          new FetchaloPlugin('./src/fetchalo.config.js'),
+          new ModuleFederationPlugin({
+            // other options
+            runtimePlugins: [
+              require.resolve('fetchalo/federation')
+            ]
+          }),
+        ],
+      };
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.js">
+      ```js title="src/fetchalo.config.js"
+      /** @type {import('fetchalo').FetchaloConfig} */
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      };
+      ```
+      </Tab>
+    </Tabs>
   </Tab>
   <Tab label="Webpack">
-  ```js title="webpack.config.js"
-  const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
-  const {FetchaloPlugin} = require('fetchalo/webpack');
+    <Tabs>
+      <Tab label="webpack.config.js">
+      ```js title="webpack.config.js"
+      const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+      const {FetchaloPlugin} = require('fetchalo/webpack');
 
-  module.exports = {
-    plugins: [
-      new FetchaloPlugin('./src/fetchalo.config.js'),
-      new ModuleFederationPlugin({
-        // other options
-        runtimePlugins: [
-          require.resolve('fetchalo/federation')
-        ]
-      }),
-    ],
-  };
-  ```
+      module.exports = {
+        plugins: [
+          new FetchaloPlugin('./src/fetchalo.config.js'),
+          new ModuleFederationPlugin({
+            // other options
+            runtimePlugins: [
+              require.resolve('fetchalo/federation')
+            ]
+          }),
+        ],
+      };
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.js">
+      ```js title="src/fetchalo.config.js"
+      /** @type {import('fetchalo').FetchaloConfig} */
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      };
+      ```
+      </Tab>
+    </Tabs>
+  </Tab>
+  <Tab label="Vite">
+    <Tabs>
+      <Tab label="vite.config.ts">
+      ```ts title="vite.config.ts"
+      import {defineConfig} from 'vite';
+      import {federation} from '@module-federation/vite';
+      import {fetchalo} from 'fetchalo';
+
+      export default defineConfig({
+        plugins: [
+          fetchalo('./src/fetchalo.config.ts'),
+          federation({
+            // other options
+            runtimePlugins: ['fetchalo/federation'],
+          }),
+        ],
+      });
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.ts">
+      ```ts title="src/fetchalo.config.ts"
+      import type {FetchaloConfig} from 'fetchalo';
+
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      } satisfies FetchaloConfig;
+      ```
+      </Tab>
+    </Tabs>
   </Tab>
   <Tab label="Module Federation Runtime">
     ```ts title="app.ts"
@@ -98,16 +155,17 @@ Peer dependencies（均为可选）：`webpack` 5、`@rspack/core` 或 `vite` 5-
 </Tabs>
 
 使用 Rspack 或 webpack 时，`FetchaloPlugin` 会把 fetchalo 客户端、[配置文件](#配置文件)和
-es-module-shims 插入到每个入口之前，确保它们先于应用执行；`fetchalo/federation` 则通过
-fetchalo 加载 manifest 和 remote 入口。
+es-module-shims 插入到每个入口之前，确保它们先于应用执行；使用 Vite 时，`fetchalo` 插件会把它们注入到
+`<head>` 顶部。两种情况下，`runtimePlugins` 中的 `fetchalo/federation` 都会通过 fetchalo 加载
+manifest 和 remote 入口。
 
 使用 Module Federation 运行时 API 时，直接把 origins 和 headers 传给
 `fetchalo/federation`，插件创建时会在页面中安装 fetchalo 和 es-module-shims。也可以使用
 `mf.registerPlugins([fetchaloFederation({ ... })])`，只要在第一个 remote 加载之前调用即可。多个实例会共用第一次的安装。在
 webpack 或 Rspack 宿主中，请改用构建插件：它可以避免打包工具解析 es-module-shims。
 
-Vite 宿主请将 `fetchalo` Vite 插件与 `@module-federation/vite` 中的
-`runtimePlugins: ['fetchalo/federation']` 搭配使用，详见
+使用 Vite 时，也可以不使用 Vite 插件，只通过 `runtimePlugins` 安装 fetchalo：传入一个你自己的文件，返回
+`fetchaloFederation({ origins, headers })`。此时在 federation 运行时启动之前应用请求的文件不会被覆盖。详见
 [fetchalo README](https://github.com/gioboa/fetchalo#usage)。
 
 ## 配置文件
@@ -117,17 +175,8 @@ Vite 宿主请将 `fetchalo` Vite 插件与 `@module-federation/vite` 中的
 - `origins`：需要携带请求头的 origin 列表。
 - `headers`：每个请求都会调用，因此可以返回刷新后的 token。
 
-```ts title="src/fetchalo.config.ts"
-import type { FetchaloConfig } from 'fetchalo';
-
-export default {
-  origins: ['https://remote.example'],
-  headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
-} satisfies FetchaloConfig;
-```
-
-配置文件不能导入 `origins` 中的文件。它会和应用一起打包，因此可以读取 `DefinePlugin`
-常量等构建期的值。如果需要在浏览器中计算配置，可以导出一个返回配置（或配置 Promise）的函数：
+配置文件不能导入 `origins` 中的文件。它会和应用一起打包，因此可以读取构建期的值（Vite 中的
+`import.meta.env`，webpack/Rspack 中的 `DefinePlugin` 常量）。如果需要在浏览器中计算配置，可以导出一个返回配置（或配置 Promise）的函数：
 
 ```ts title="src/fetchalo.config.ts"
 export default async (): Promise<FetchaloConfig> => ({

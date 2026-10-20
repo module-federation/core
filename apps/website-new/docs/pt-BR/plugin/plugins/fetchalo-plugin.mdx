@@ -41,40 +41,97 @@ O plugin pode ser aplicado em tempo de compilação ou em runtime
 
 <Tabs>
   <Tab label="Rspack">
-  ```js title="rspack.config.js"
-  const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
-  const {FetchaloPlugin} = require('fetchalo/rspack');
+    <Tabs>
+      <Tab label="rspack.config.js">
+      ```js title="rspack.config.js"
+      const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
+      const {FetchaloPlugin} = require('fetchalo/rspack');
 
-  module.exports = {
-    plugins: [
-      new FetchaloPlugin('./src/fetchalo.config.js'),
-      new ModuleFederationPlugin({
-        // other options
-        runtimePlugins: [
-          require.resolve('fetchalo/federation')
-        ]
-      }),
-    ],
-  };
-  ```
+      module.exports = {
+        plugins: [
+          new FetchaloPlugin('./src/fetchalo.config.js'),
+          new ModuleFederationPlugin({
+            // other options
+            runtimePlugins: [
+              require.resolve('fetchalo/federation')
+            ]
+          }),
+        ],
+      };
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.js">
+      ```js title="src/fetchalo.config.js"
+      /** @type {import('fetchalo').FetchaloConfig} */
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      };
+      ```
+      </Tab>
+    </Tabs>
   </Tab>
   <Tab label="Webpack">
-  ```js title="webpack.config.js"
-  const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
-  const {FetchaloPlugin} = require('fetchalo/webpack');
+    <Tabs>
+      <Tab label="webpack.config.js">
+      ```js title="webpack.config.js"
+      const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+      const {FetchaloPlugin} = require('fetchalo/webpack');
 
-  module.exports = {
-    plugins: [
-      new FetchaloPlugin('./src/fetchalo.config.js'),
-      new ModuleFederationPlugin({
-        // other options
-        runtimePlugins: [
-          require.resolve('fetchalo/federation')
-        ]
-      }),
-    ],
-  };
-  ```
+      module.exports = {
+        plugins: [
+          new FetchaloPlugin('./src/fetchalo.config.js'),
+          new ModuleFederationPlugin({
+            // other options
+            runtimePlugins: [
+              require.resolve('fetchalo/federation')
+            ]
+          }),
+        ],
+      };
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.js">
+      ```js title="src/fetchalo.config.js"
+      /** @type {import('fetchalo').FetchaloConfig} */
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      };
+      ```
+      </Tab>
+    </Tabs>
+  </Tab>
+  <Tab label="Vite">
+    <Tabs>
+      <Tab label="vite.config.ts">
+      ```ts title="vite.config.ts"
+      import {defineConfig} from 'vite';
+      import {federation} from '@module-federation/vite';
+      import {fetchalo} from 'fetchalo';
+
+      export default defineConfig({
+        plugins: [
+          fetchalo('./src/fetchalo.config.ts'),
+          federation({
+            // other options
+            runtimePlugins: ['fetchalo/federation'],
+          }),
+        ],
+      });
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.ts">
+      ```ts title="src/fetchalo.config.ts"
+      import type {FetchaloConfig} from 'fetchalo';
+
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      } satisfies FetchaloConfig;
+      ```
+      </Tab>
+    </Tabs>
   </Tab>
   <Tab label="Module Federation Runtime">
     ```ts title="app.ts"
@@ -103,8 +160,9 @@ O plugin pode ser aplicado em tempo de compilação ou em runtime
 
 Com Rspack ou webpack, o `FetchaloPlugin` adiciona o cliente do fetchalo, o
 [arquivo de configuração](#arquivo-de-configuração) e o es-module-shims antes de
-cada entry, para que rodem antes da aplicação, e o `fetchalo/federation` carrega
-o manifest e a remote entry pelo fetchalo.
+cada entry, para que rodem antes da aplicação. Com Vite, o plugin `fetchalo` os
+injeta no topo do `<head>`. Nos dois casos, o `fetchalo/federation` em
+`runtimePlugins` carrega o manifest e a remote entry pelo fetchalo.
 
 Com a API de runtime do Module Federation, passe as origins e os headers
 diretamente para `fetchalo/federation`: ao ser criado, ele instala o fetchalo e
@@ -113,8 +171,10 @@ também funciona, desde que seja chamado antes do primeiro remote carregar.
 Várias instâncias compartilham a primeira instalação. Em um host webpack ou
 Rspack, use o build plugin: ele evita que o bundler processe o es-module-shims.
 
-Em hosts Vite, use o plugin Vite `fetchalo` junto com
-`runtimePlugins: ['fetchalo/federation']` no `@module-federation/vite`. Veja o
+Com Vite, também é possível instalar o fetchalo apenas por `runtimePlugins`,
+sem o plugin Vite: liste um arquivo seu que retorne
+`fetchaloFederation({ origins, headers })`. Os arquivos que a aplicação pedir
+antes de o runtime do federation iniciar não são cobertos. Veja o
 [README do fetchalo](https://github.com/gioboa/fetchalo#usage).
 
 ## Arquivo de configuração
@@ -125,18 +185,9 @@ Os build plugins recebem o caminho de um arquivo de configuração (`.js` ou
 - `origins`: as origins cujos arquivos recebem os headers.
 - `headers`: chamada a cada requisição, então pode retornar um token renovado.
 
-```ts title="src/fetchalo.config.ts"
-import type { FetchaloConfig } from 'fetchalo';
-
-export default {
-  origins: ['https://remote.example'],
-  headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
-} satisfies FetchaloConfig;
-```
-
 O arquivo de configuração não pode importar arquivos das `origins`. Ele é
 empacotado junto com a aplicação, então pode ler valores de build como
-constantes do `DefinePlugin`. Para valores calculados no navegador, exporte uma
+`import.meta.env` com Vite ou constantes do `DefinePlugin` com webpack/Rspack. Para valores calculados no navegador, exporte uma
 função que retorne a configuração, ou uma promise dela:
 
 ```ts title="src/fetchalo.config.ts"
