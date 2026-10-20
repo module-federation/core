@@ -1,1 +1,7 @@
-["index", "retry-plugin", "observability-plugin", "building-custom-retry-plugin"]
+[
+  "index",
+  "retry-plugin",
+  "observability-plugin",
+  "fetchalo-plugin",
+  "building-custom-retry-plugin"
+]

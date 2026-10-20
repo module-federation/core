@@ -2,5 +2,6 @@
   "index",
   "retry-plugin",
   "observability-plugin",
+  "fetchalo-plugin",
   "building-custom-retry-plugin"
 ]
