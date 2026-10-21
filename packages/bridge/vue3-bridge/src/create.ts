@@ -1,5 +1,6 @@
 import { type AsyncComponentOptions, defineAsyncComponent, h } from 'vue';
 import { useRoute } from 'vue-router';
+import { resolveRemoteBasename } from './basename.js';
 import RemoteApp from './remoteApp.jsx';
 import { LoggerInstance } from './utils.js';
 
@@ -12,6 +13,12 @@ export function createRemoteAppComponent(info: {
   rootAttrs?: Record<string, unknown>;
   memoryRoute?: { entryPath: string };
   hashRoute?: boolean;
+  /**
+   * Host mount prefix for the remote router.
+   * When set, skips route-based basename derivation (recommended for Nuxt /
+   * other meta-framework catch-all pages).
+   */
+  basename?: string;
 }) {
   return defineAsyncComponent({
     // @ts-ignore
@@ -20,16 +27,10 @@ export function createRemoteAppComponent(info: {
     //@ts-ignore
     loader: async () => {
       const route = useRoute();
-
-      let basename = '/';
-      const matchPath = route?.matched?.[0]?.path;
-      if (matchPath) {
-        if (matchPath.endsWith('/:pathMatch(.*)*')) {
-          basename = matchPath.replace('/:pathMatch(.*)*', '');
-        } else {
-          basename = route.matched[0].path;
-        }
-      }
+      const basename = resolveRemoteBasename({
+        basename: info.basename,
+        route,
+      });
 
       const exportName = info?.export || 'default';
       LoggerInstance.debug(
