@@ -184,10 +184,6 @@ async function build(directory, appDirectory, name) {
   aliases['@modern-js/runtime/application/server$'] = requireApp.resolve(
     '@modern-js/runtime/application/server',
   );
-  aliases['@module-federation/modern-js-v3/bridge/application$'] = path.join(
-    packageDirectory,
-    'dist/esm/bridge-stream/application.mjs',
-  );
   const outputs = {};
   for (const target of ['server', 'browser']) {
     const node = target === 'server';
@@ -202,7 +198,13 @@ async function build(directory, appDirectory, name) {
         ...(node ? { library: { type: 'commonjs2' } } : {}),
       },
       resolve: {
-        alias: aliases,
+        alias: {
+          ...aliases,
+          '@module-federation/modern-js-v3/bridge/application$': path.join(
+            packageDirectory,
+            `dist/esm/bridge-stream/application${node ? '.server' : ''}.mjs`,
+          ),
+        },
         ...(node
           ? { extensionAlias: { '.mjs': ['.node.mjs', '.server.mjs', '.mjs'] } }
           : {}),

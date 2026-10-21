@@ -40,7 +40,7 @@ export function createBridgeServiceMiddleware(
         throw Error('Bridge service requires a Node application expose');
       const result = await provider.renderStream(info);
       result.snapshot.catch(() => {});
-      result.hydration?.snapshot.catch(() => {});
+      if (!('protocol' in result)) result.hydration?.snapshot.catch(() => {});
       if (result.revision !== options.revision) {
         result.abort(Error('Bridge service build revision mismatch'));
         throw Error('Bridge service build revision mismatch');

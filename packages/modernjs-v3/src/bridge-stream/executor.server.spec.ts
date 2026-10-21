@@ -3,7 +3,7 @@ import { executeBridgeSSR } from './executor.server';
 import { fetchBridgeService } from './service-http';
 import type {
   BridgeSSRRequest,
-  BridgeSSRResult,
+  BridgeSSRMessageResult,
 } from '@module-federation/bridge-react/ssr';
 
 rs.mock('./service-http', () => ({ fetchBridgeService: rs.fn() }));
@@ -21,10 +21,12 @@ const request = (): BridgeSSRRequest => ({
   props: {},
   signal: new AbortController().signal,
 });
-function result(): BridgeSSRResult {
+function result(): BridgeSSRMessageResult {
   return {
+    protocol: 'mf-bridge-producer/1',
+    hydration: 'complete',
     revision: 'build-a',
-    stream: new ReadableStream(),
+    messages: new ReadableStream(),
     snapshot: Promise.resolve({}),
     abort: rs.fn(),
   };
@@ -72,7 +74,7 @@ describe('Bridge execution selection', () => {
   });
   it('does not retry a returned stream that fails later', async () => {
     const remote = result();
-    remote.stream = new ReadableStream({
+    remote.messages = new ReadableStream({
       start(controller) {
         controller.error(Error('broken stream'));
       },
@@ -84,7 +86,7 @@ describe('Bridge execution selection', () => {
       localProvider.factory,
       service,
     );
-    await expect(response.stream.getReader().read()).rejects.toThrow(
+    await expect(response.messages.getReader().read()).rejects.toThrow(
       'broken stream',
     );
     expect(localProvider.factory).not.toHaveBeenCalled();
@@ -96,6 +98,21 @@ describe('Bridge execution selection', () => {
       executeBridgeSSR(request(), localProvider.factory, service),
     ).rejects.toThrow('revision mismatch');
     expect(localProvider.value.abort).toHaveBeenCalledTimes(1);
+  });
+  it('rejects an outdated raw provider instead of reparsing its HTML in the consumer', async () => {
+    const raw = {
+      stream: new ReadableStream<Uint8Array>(),
+      snapshot: Promise.resolve({}),
+      abort: rs.fn(),
+    };
+    await expect(
+      executeBridgeSSR(request(), () => ({
+        render() {},
+        destroy() {},
+        renderStream: async () => raw,
+      })),
+    ).rejects.toThrow('producer-prepared messages');
+    expect(raw.abort).toHaveBeenCalledTimes(1);
   });
   it('does not retry after cancellation or when fallback is disabled', async () => {
     for (const cancelled of [true, false]) {

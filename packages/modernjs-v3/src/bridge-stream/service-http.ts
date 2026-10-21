@@ -1,6 +1,13 @@
+import {
+  BRIDGE_PRODUCER_PROTOCOL,
+  normalizeBridgeSSR,
+} from './producer.server';
+import { channel } from './message-channel.server';
 import type {
   BridgeSSRRequest,
   BridgeSSRResult,
+  BridgeSSRMessage,
+  BridgeSSRMessageResult,
 } from '@module-federation/bridge-react/ssr';
 import {
   createBridgeServiceCache,
@@ -9,9 +16,9 @@ import {
 
 export type { BridgeServiceCacheOptions } from './service-cache.server';
 
-export const BRIDGE_SERVICE_PROTOCOL = 'mf-bridge-service/1';
+export const BRIDGE_SERVICE_PROTOCOL = 'mf-bridge-service/2';
 const CONTENT_TYPE = 'application/x-ndjson';
-const DEFAULT_FRAME_BYTES = 1024 * 1024;
+const DEFAULT_FRAME_BYTES = 3 * 1024 * 1024;
 const DEFAULT_BUFFER_BYTES = 4 * 1024 * 1024;
 const BUFFER_HEADER = 'x-mf-bridge-buffer-bytes';
 
@@ -27,7 +34,9 @@ export interface BridgeServiceFetchOptions {
 }
 export interface BridgeServiceHandlerOptions {
   revision: string;
-  render(info: BridgeSSRRequest): Promise<BridgeSSRResult>;
+  render(
+    info: BridgeSSRRequest,
+  ): Promise<BridgeSSRResult | BridgeSSRMessageResult>;
   /** Reuse completed renders for identical inputs within this handler. */
   cache?: BridgeServiceCacheOptions;
   maxFrameBytes?: number;
@@ -41,16 +50,8 @@ type Meta = {
   identifierPrefix: string;
   hydration: HydrationMode;
   stylesheets?: string[];
-  snapshot?: unknown;
-  shellMarker?: string;
 };
-type Frame =
-  | Meta
-  | { type: 'html'; bytes: string }
-  | { type: 'update'; value: unknown }
-  | { type: 'data'; snapshot: unknown }
-  | { type: 'done' }
-  | { type: 'error'; message: string };
+type Frame = Meta | BridgeSSRMessage | { type: 'error'; message: string };
 
 function error(value: unknown): Error {
   return value instanceof Error ? value : new Error(String(value));
@@ -77,79 +78,6 @@ function limits(options: {
   )
     throw new Error('Bridge service byte limits must be positive integers.');
   return { frame, buffer };
-}
-
-/** Zero internal HWM lets HTML and data share one exact pending-byte budget. */
-function channel<T>(
-  budget: { bytes: number; limit: number },
-  cancel: (reason: unknown) => void,
-) {
-  const queue: { value: T; bytes: number }[] = [];
-  let controller!: ReadableStreamDefaultController<T>;
-  let waiting: (() => void) | undefined;
-  let ended = false;
-  let failed = false;
-  const flush = () => {
-    if (!waiting) return;
-    if (queue.length) {
-      const next = queue.shift()!;
-      budget.bytes -= next.bytes;
-      controller.enqueue(next.value);
-    } else if (ended) controller.close();
-    else return;
-    const resolve = waiting;
-    waiting = undefined;
-    resolve();
-  };
-  const discard = () => {
-    for (const item of queue) budget.bytes -= item.bytes;
-    queue.length = 0;
-  };
-  const stream = new ReadableStream<T>(
-    {
-      start(value) {
-        controller = value;
-      },
-      pull() {
-        return new Promise<void>((resolve) => {
-          waiting = resolve;
-          flush();
-        });
-      },
-      cancel(reason) {
-        failed = true;
-        discard();
-        waiting?.();
-        waiting = undefined;
-        cancel(reason);
-      },
-    },
-    { highWaterMark: 0 },
-  );
-  return {
-    stream,
-    push(value: T, bytes: number) {
-      if (failed || ended) throw new Error('Bridge service stream is closed.');
-      if (budget.bytes + bytes > budget.limit)
-        throw new Error('Bridge service pending buffer exceeds limit.');
-      budget.bytes += bytes;
-      queue.push({ value, bytes });
-      flush();
-    },
-    close() {
-      if (failed || ended) return;
-      ended = true;
-      flush();
-    },
-    fail(reason: unknown) {
-      if (failed) return;
-      failed = true;
-      discard();
-      controller.error(reason);
-      waiting?.();
-      waiting = undefined;
-    },
-  };
 }
 
 /** Lines are bounded before decoding, including partial UTF-8 sequences. */
@@ -207,11 +135,11 @@ function validateStylesheets(
     throw new Error('Invalid Bridge service stylesheets.');
 }
 
-/** HTTP carries bytes and opaque data; React framing remains entirely in Host. */
+/** Service messages are already framed and isolated by their producer. */
 export async function fetchBridgeService(
   info: BridgeSSRRequest,
   options: BridgeServiceFetchOptions,
-): Promise<BridgeSSRResult> {
+): Promise<BridgeSSRMessageResult> {
   const endpoint = new URL(options.url);
   if (!['http:', 'https:'].includes(endpoint.protocol))
     throw new Error('Bridge service URL must use HTTP or HTTPS.');
@@ -220,7 +148,7 @@ export async function fetchBridgeService(
   const bound = limits(options);
   const mode = options.hydrationMode ?? 'progressive';
   const aborter = new AbortController();
-  const initial = deferred<BridgeSSRResult>();
+  const initial = deferred<BridgeSSRMessageResult>();
   const snapshot = deferred<unknown>();
   const budget = { bytes: 0, limit: bound.buffer };
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
@@ -237,13 +165,11 @@ export async function fetchBridgeService(
     cleanup();
     aborter.abort(failure);
     void reader?.cancel(failure).catch(() => {});
-    html.fail(failure);
-    updates.fail(failure);
+    messages.fail(failure);
     snapshot.reject(failure);
     initial.reject(failure);
   };
-  const html = channel<Uint8Array>(budget, abort);
-  const updates = channel<unknown>(budget, abort);
+  const messages = channel<BridgeSSRMessage>(budget, abort);
   const onAbort = () => abort(info.signal.reason);
   info.signal.addEventListener('abort', onAbort, { once: true });
   if (info.signal.aborted) onAbort();
@@ -305,6 +231,8 @@ export async function fetchBridgeService(
       reader = response.body.getReader();
       let meta: Meta | undefined;
       let data = false;
+      let ready = false;
+      let htmlReceived = false;
       let done = false;
       for await (const frame of frames(reader, bound.frame)) {
         if (done) throw new Error('Bridge service frame after done.');
@@ -319,61 +247,45 @@ export async function fetchBridgeService(
           )
             throw new Error('Bridge service metadata/revision mismatch.');
           validateStylesheets(frame.stylesheets);
-          if (
-            frame.hydration === 'progressive' &&
-            (!Object.hasOwn(frame, 'snapshot') ||
-              typeof frame.shellMarker !== 'string' ||
-              !frame.shellMarker)
-          )
-            throw new Error(
-              'Bridge service progressive metadata is incomplete.',
-            );
           meta = frame;
           if (meta.hydration === 'progressive')
             snapshot.reject(
               new Error(
-                'Progressive Bridge service has no final snapshot; use hydration.snapshot or request complete hydration.',
+                'Progressive Bridge service has no final snapshot; use the ready message or request complete hydration.',
               ),
             );
           initial.resolve({
+            protocol: BRIDGE_PRODUCER_PROTOCOL,
             revision: meta.revision,
             stylesheets: meta.stylesheets,
-            stream: html.stream,
+            hydration: meta.hydration,
+            messages: messages.stream,
             snapshot: snapshot.promise,
-            hydration:
-              meta.hydration === 'progressive'
-                ? {
-                    snapshot: Promise.resolve(meta.snapshot),
-                    shellMarker: meta.shellMarker!,
-                    updates: updates.stream,
-                  }
-                : undefined,
             abort,
           });
         } else if (frame.type === 'html') {
-          if (
-            data ||
-            typeof frame.bytes !== 'string' ||
-            !frame.bytes ||
-            !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
-              frame.bytes,
-            )
-          )
+          if (data || typeof frame.html !== 'string' || !frame.html)
             throw new Error('Invalid Bridge service HTML frame.');
-          const bytes = Buffer.from(frame.bytes, 'base64');
-          if (bytes.toString('base64') !== frame.bytes)
-            throw new Error('Invalid Bridge service base64 bytes.');
-          html.push(bytes, bytes.byteLength);
+          htmlReceived = true;
+          messages.push(frame, Buffer.byteLength(JSON.stringify(frame)));
+        } else if (frame.type === 'ready') {
+          if (
+            meta.hydration !== 'progressive' ||
+            !htmlReceived ||
+            ready ||
+            !Object.hasOwn(frame, 'snapshot')
+          )
+            throw new Error('Unexpected Bridge service readiness.');
+          ready = true;
+          messages.push(frame, Buffer.byteLength(JSON.stringify(frame)));
         } else if (frame.type === 'update') {
           if (
             meta.hydration !== 'progressive' ||
+            !ready ||
             !Object.hasOwn(frame, 'value')
           )
             throw new Error('Unexpected Bridge service update.');
-          updates.push(
-            frame.value,
-            Buffer.byteLength(JSON.stringify(frame.value)),
-          );
+          messages.push(frame, Buffer.byteLength(JSON.stringify(frame)));
         } else if (frame.type === 'data') {
           if (
             meta.hydration !== 'complete' ||
@@ -383,9 +295,10 @@ export async function fetchBridgeService(
             throw new Error('Unexpected Bridge service snapshot.');
           data = true;
           snapshot.resolve(frame.snapshot);
+          messages.push(frame, Buffer.byteLength(JSON.stringify(frame)));
         } else if (frame.type === 'done') {
-          if (meta.hydration === 'complete' && !data)
-            throw new Error('Bridge service ended without a snapshot.');
+          if (meta.hydration === 'complete' ? !data : !ready)
+            throw new Error('Bridge service ended without hydration data.');
           done = true;
         } else if (frame.type === 'error') {
           throw new Error(
@@ -395,8 +308,8 @@ export async function fetchBridgeService(
       }
       if (!done) throw new Error('Truncated Bridge service response.');
       cleanup();
-      html.close();
-      updates.close();
+      messages.push({ type: 'done' }, Buffer.byteLength('{"type":"done"}'));
+      messages.close();
     } catch (reason) {
       abort(reason);
     } finally {
@@ -520,9 +433,10 @@ export function createBridgeServiceHandler(
     let recordedBytes = 0;
     const aborter = new AbortController();
     const interrupted = deferred<never>();
-    let result: BridgeSSRResult | undefined;
-    let htmlReader: ReadableStreamDefaultReader<Uint8Array> | undefined;
-    let updateReader: ReadableStreamDefaultReader<unknown> | undefined;
+    let result: BridgeSSRResult | BridgeSSRMessageResult | undefined;
+    let messageReader:
+      | ReadableStreamDefaultReader<BridgeSSRMessage>
+      | undefined;
     let ended = false;
     const cleanup = () => request.signal.removeEventListener('abort', onAbort);
     const abort = (
@@ -539,11 +453,13 @@ export function createBridgeServiceHandler(
       } catch {
         /* Keep releasing transport readers. */
       }
-      if (htmlReader) void htmlReader.cancel(reason).catch(() => {});
-      else if (result) void result.stream.cancel(reason).catch(() => {});
-      if (updateReader) void updateReader.cancel(reason).catch(() => {});
-      else if (result?.hydration)
-        void result.hydration.updates.cancel(reason).catch(() => {});
+      if (messageReader) void messageReader.cancel(reason).catch(() => {});
+      else if (result && 'messages' in result)
+        void result.messages.cancel(reason).catch(() => {});
+      else if (result) {
+        void result.stream.cancel(reason).catch(() => {});
+        void result.hydration?.updates.cancel(reason).catch(() => {});
+      }
       output.fail(error(reason));
     };
     const output = channel<Uint8Array>(
@@ -560,8 +476,7 @@ export function createBridgeServiceHandler(
       const requiredField =
         frame.type === 'update'
           ? 'value'
-          : frame.type === 'data' ||
-              (frame.type === 'meta' && frame.hydration === 'progressive')
+          : frame.type === 'data' || frame.type === 'ready'
             ? 'snapshot'
             : undefined;
       // Opaque producer values may be undefined, functions, symbols, or expose
@@ -589,7 +504,8 @@ export function createBridgeServiceHandler(
         (value) => {
           if (ended) {
             void value.snapshot.catch(() => {});
-            void value.hydration?.snapshot.catch(() => {});
+            if (!('protocol' in value))
+              void value.hydration?.snapshot.catch(() => {});
             try {
               value.abort(aborter.signal.reason);
             } catch {
@@ -601,7 +517,8 @@ export function createBridgeServiceHandler(
       );
       result = await Promise.race([rendering, interrupted.promise]);
       void result.snapshot.catch(() => {});
-      void result.hydration?.snapshot.catch(() => {});
+      if (!('protocol' in result))
+        void result.hydration?.snapshot.catch(() => {});
       if (ended) {
         result.abort(aborter.signal.reason);
         throw error(aborter.signal.reason);
@@ -609,17 +526,21 @@ export function createBridgeServiceHandler(
       if (result.revision !== options.revision)
         throw new Error('Bridge producer revision mismatch.');
       validateStylesheets(result.stylesheets);
-      const progressive =
-        input.hydration === 'progressive' && !!result.hydration;
-      const initial = progressive
-        ? await Promise.race([result.hydration!.snapshot, interrupted.promise])
-        : undefined;
+      result = await Promise.race([
+        normalizeBridgeSSR(
+          result,
+          { ...input.request, signal: aborter.signal },
+          {
+            hydrationMode: input.hydration,
+            maxFrameBytes: Math.min(2 * 1024 * 1024, bound.frame),
+            maxBufferedBytes: bound.buffer,
+          },
+        ),
+        interrupted.promise,
+      ]);
       if (ended) throw error(aborter.signal.reason);
-      if (
-        progressive &&
-        (!result.hydration!.shellMarker || initial === undefined)
-      )
-        throw new Error('Incomplete producer hydration metadata.');
+      const progressive =
+        input.hydration === 'progressive' && result.hydration === 'progressive';
       send({
         type: 'meta',
         protocol: BRIDGE_SERVICE_PROTOCOL,
@@ -627,44 +548,50 @@ export function createBridgeServiceHandler(
         identifierPrefix: input.request.identifierPrefix,
         hydration: progressive ? 'progressive' : 'complete',
         stylesheets: result.stylesheets,
-        ...(progressive
-          ? { snapshot: initial, shellMarker: result.hydration!.shellMarker }
-          : {}),
       });
-      htmlReader = result.stream.getReader();
-      updateReader = result.hydration?.updates.getReader();
+      messageReader = result.messages.getReader();
       const source = result;
       void (async () => {
         try {
-          await Promise.all([
-            (async () => {
-              // Split arbitrary renderer chunks without decoding or corrupting UTF-8.
-              const chunkSize = Math.max(
-                1,
-                Math.floor(((bound.frame - 40) * 3) / 4),
-              );
-              while (true) {
-                const next = await htmlReader!.read();
-                if (next.done) break;
-                for (let i = 0; i < next.value.length; i += chunkSize)
-                  send({
-                    type: 'html',
-                    bytes: Buffer.from(
-                      next.value.subarray(i, i + chunkSize),
-                    ).toString('base64'),
-                  });
-              }
-            })(),
-            (async () => {
-              if (!updateReader) return;
-              while (true) {
-                const next = await updateReader.read();
-                if (next.done) break;
-                if (progressive) send({ type: 'update', value: next.value });
-              }
-            })(),
-          ]);
-          if (!progressive)
+          let ready = false;
+          let data = false;
+          let done = false;
+          let htmlReceived = false;
+          while (true) {
+            const next = await Promise.race([
+              messageReader!.read(),
+              interrupted.promise,
+            ]);
+            if (next.done) break;
+            if (done) throw Error('Bridge producer message after done');
+            const message = next.value;
+            if (message.type === 'html') {
+              if (data || typeof message.html !== 'string' || !message.html)
+                throw Error('Invalid Bridge producer HTML message');
+              htmlReceived = true;
+              send(message);
+            } else if (message.type === 'ready') {
+              if (source.hydration !== 'progressive' || !htmlReceived || ready)
+                throw Error('Unexpected Bridge producer readiness');
+              ready = true;
+              if (progressive) send(message);
+            } else if (message.type === 'update') {
+              if (source.hydration !== 'progressive' || !ready)
+                throw Error('Unexpected Bridge producer update');
+              if (progressive) send(message);
+            } else if (message.type === 'data') {
+              if (source.hydration !== 'complete' || data)
+                throw Error('Unexpected Bridge producer snapshot');
+              data = true;
+              send(message);
+            } else if (message.type === 'done') {
+              if (source.hydration === 'progressive' ? !ready : !data)
+                throw Error('Bridge producer ended without hydration data');
+              done = true;
+            } else throw Error('Unexpected Bridge producer message');
+          }
+          if (!done) throw Error('Truncated Bridge producer messages');
+          if (!progressive && !data)
             send({
               type: 'data',
               snapshot: await Promise.race([
@@ -673,18 +600,21 @@ export function createBridgeServiceHandler(
               ]),
             });
           send({ type: 'done' });
-          // Commit only the complete transcript, after both channels and any
-          // required final snapshot have succeeded. Misses remain streaming.
+          // Cache only a complete, successful transcript of producer-prepared messages.
           if (cache && cacheKey && recording) cache.set(cacheKey, recording);
           recording = undefined;
           ended = true;
           cleanup();
           output.close();
+          try {
+            source.abort();
+          } catch {
+            // Renderer cleanup cannot invalidate a completed response or cache.
+          }
         } catch (reason) {
           abort(reason);
         } finally {
-          htmlReader?.releaseLock();
-          updateReader?.releaseLock();
+          messageReader?.releaseLock();
         }
       })();
       return new Response(output.stream, {

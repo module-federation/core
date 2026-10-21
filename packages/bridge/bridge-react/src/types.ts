@@ -197,11 +197,33 @@ export interface BridgeSSRResult {
   abort(reason?: unknown): void;
 }
 
+/** Producer-prepared units. HTML is complete and React instructions isolated. */
+export type BridgeSSRMessage =
+  | { type: 'html'; html: string }
+  | { type: 'ready'; snapshot: unknown }
+  | { type: 'update'; value: unknown }
+  | { type: 'data'; snapshot: unknown }
+  | { type: 'done' };
+
+/** Transport-independent producer output; consumers must preserve message order. */
+export interface BridgeSSRMessageResult {
+  protocol: 'mf-bridge-producer/1';
+  revision?: string;
+  stylesheets?: string[];
+  hydration: 'progressive' | 'complete';
+  messages: ReadableStream<BridgeSSRMessage>;
+  /** Kept for callers that explicitly request complete hydration. */
+  snapshot: Promise<unknown>;
+  abort(reason?: unknown): void;
+}
+
 export interface BridgeProvider {
   render(info: RenderParams): void | Promise<void>;
   destroy(info: DestroyParams): void;
   hydrate?(info: HydrateParams): void | Promise<void>;
-  renderStream?(info: BridgeSSRRequest): Promise<BridgeSSRResult>;
+  renderStream?(
+    info: BridgeSSRRequest,
+  ): Promise<BridgeSSRResult | BridgeSSRMessageResult>;
 }
 
 /**

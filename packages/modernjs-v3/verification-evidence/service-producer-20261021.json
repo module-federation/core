@@ -1,0 +1,578 @@
+{
+  "date": "2026-10-21",
+  "runtime": "#5201 producer message implementation (final frozen build)",
+  "environment": {
+    "node": "v24.18.1",
+    "pnpm": "10.28.0",
+    "browser": "Chrome 149.0.0.0 / byted-browser",
+    "apps": [
+      {
+        "app": "provider",
+        "react": "18.3.1",
+        "reactDOM": "18.3.1"
+      },
+      {
+        "app": "host-ssr",
+        "react": "19.2.8",
+        "reactDOM": "19.2.8"
+      },
+      {
+        "app": "host-csr",
+        "react": "19.2.8",
+        "reactDOM": "19.2.8"
+      }
+    ]
+  },
+  "http": [
+    {
+      "name": "initial miss",
+      "cache": "miss",
+      "firstHTMLMs": 145,
+      "featuredMs": 854,
+      "recommendedMs": 2351,
+      "renderCalls": 1,
+      "businessRequests": 2,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "ready",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 1,
+        "htmlFrames": 1,
+        "containsShellMarker": 5,
+        "isolateReactStreamScripts": 11,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "identical input hit",
+      "cache": "hit",
+      "firstHTMLMs": 5,
+      "featuredMs": 5,
+      "recommendedMs": 5,
+      "renderCalls": 0,
+      "businessRequests": 0,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "ready",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 0,
+        "htmlFrames": 0,
+        "containsShellMarker": 0,
+        "isolateReactStreamScripts": 0,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "changed headers miss",
+      "cache": "miss",
+      "firstHTMLMs": 9,
+      "featuredMs": 709,
+      "recommendedMs": 2209,
+      "renderCalls": 1,
+      "businessRequests": 2,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "ready",
+        "update",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 1,
+        "htmlFrames": 1,
+        "containsShellMarker": 5,
+        "isolateReactStreamScripts": 9,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "changed headers hit",
+      "cache": "hit",
+      "firstHTMLMs": 4,
+      "featuredMs": 4,
+      "recommendedMs": 4,
+      "renderCalls": 0,
+      "businessRequests": 0,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "ready",
+        "update",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 0,
+        "htmlFrames": 0,
+        "containsShellMarker": 0,
+        "isolateReactStreamScripts": 0,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "original headers remain hit",
+      "cache": "hit",
+      "firstHTMLMs": 4,
+      "featuredMs": 4,
+      "recommendedMs": 4,
+      "renderCalls": 0,
+      "businessRequests": 0,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "ready",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 0,
+        "htmlFrames": 0,
+        "containsShellMarker": 0,
+        "isolateReactStreamScripts": 0,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "changed route miss",
+      "cache": "miss",
+      "firstHTMLMs": 7,
+      "featuredMs": 708,
+      "recommendedMs": 2208,
+      "renderCalls": 1,
+      "businessRequests": 2,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "ready",
+        "update",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 1,
+        "htmlFrames": 1,
+        "containsShellMarker": 5,
+        "isolateReactStreamScripts": 9,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "changed URL hit",
+      "cache": "hit",
+      "firstHTMLMs": 3,
+      "featuredMs": 3,
+      "recommendedMs": 3,
+      "renderCalls": 0,
+      "businessRequests": 0,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "ready",
+        "update",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 0,
+        "htmlFrames": 0,
+        "containsShellMarker": 0,
+        "isolateReactStreamScripts": 0,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "cancel incomplete miss",
+      "cache": "miss",
+      "firstHTMLMs": 7,
+      "renderCalls": 1,
+      "businessRequests": 2,
+      "aborted": true,
+      "frames": ["meta", "html", "html", "html", "html", "html", "ready"],
+      "processingCalls": {
+        "normalizeBridgeSSR": 1,
+        "htmlFrames": 1,
+        "containsShellMarker": 5,
+        "isolateReactStreamScripts": 5,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "retry after abort remains miss",
+      "cache": "miss",
+      "firstHTMLMs": 7,
+      "featuredMs": 712,
+      "recommendedMs": 2210,
+      "renderCalls": 1,
+      "businessRequests": 2,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "ready",
+        "update",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 1,
+        "htmlFrames": 1,
+        "containsShellMarker": 5,
+        "isolateReactStreamScripts": 9,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "completed retry becomes hit",
+      "cache": "hit",
+      "firstHTMLMs": 4,
+      "featuredMs": 4,
+      "recommendedMs": 4,
+      "renderCalls": 0,
+      "businessRequests": 0,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "ready",
+        "update",
+        "html",
+        "html",
+        "update",
+        "html",
+        "html",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 0,
+        "htmlFrames": 0,
+        "containsShellMarker": 0,
+        "isolateReactStreamScripts": 0,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "complete hydration miss",
+      "cache": "miss",
+      "firstHTMLMs": 8,
+      "featuredMs": 709,
+      "recommendedMs": 2248,
+      "renderCalls": 1,
+      "businessRequests": 2,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "data",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 1,
+        "htmlFrames": 1,
+        "containsShellMarker": 5,
+        "isolateReactStreamScripts": 9,
+        "hostPieces": 0
+      }
+    },
+    {
+      "name": "complete hydration hit",
+      "cache": "hit",
+      "firstHTMLMs": 4,
+      "featuredMs": 4,
+      "recommendedMs": 4,
+      "renderCalls": 0,
+      "businessRequests": 0,
+      "aborted": false,
+      "frames": [
+        "meta",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "html",
+        "data",
+        "done"
+      ],
+      "processingCalls": {
+        "normalizeBridgeSSR": 0,
+        "htmlFrames": 0,
+        "containsShellMarker": 0,
+        "isolateReactStreamScripts": 0,
+        "hostPieces": 0
+      }
+    }
+  ],
+  "browser": [
+    {
+      "host": "SSR",
+      "hydration": "progressive",
+      "cache": "miss",
+      "timingsMs": {
+        "shell-inserted": 111,
+        "shell-interactive": 201,
+        "featured-visible": 1481,
+        "featured-interactive": 1521,
+        "recommended-visible": 5080,
+        "state-retained": 5080,
+        "recommended-interactive": 5164
+      },
+      "errors": [],
+      "retainedOriginalDOM": true,
+      "retainedState": true,
+      "noFallbackNavigation": true,
+      "processing": [
+        {
+          "app": "host-ssr",
+          "calls": {
+            "normalizeBridgeSSR": 0,
+            "htmlFrames": 1,
+            "containsShellMarker": 0,
+            "isolateReactStreamScripts": 1,
+            "hostPieces": 1
+          }
+        },
+        {
+          "app": "provider",
+          "calls": {
+            "normalizeBridgeSSR": 1,
+            "htmlFrames": 1,
+            "containsShellMarker": 5,
+            "isolateReactStreamScripts": 9,
+            "hostPieces": 0
+          }
+        }
+      ]
+    },
+    {
+      "host": "SSR",
+      "hydration": "progressive",
+      "cache": "hit",
+      "timingsMs": {
+        "shell-inserted": 73,
+        "featured-visible": 113,
+        "recommended-visible": 113,
+        "shell-interactive": 197,
+        "featured-interactive": 231,
+        "state-retained": 231,
+        "recommended-interactive": 311
+      },
+      "errors": [],
+      "retainedOriginalDOM": true,
+      "retainedState": true,
+      "noFallbackNavigation": true,
+      "processing": [
+        {
+          "app": "host-ssr",
+          "calls": {
+            "normalizeBridgeSSR": 0,
+            "htmlFrames": 1,
+            "containsShellMarker": 0,
+            "isolateReactStreamScripts": 1,
+            "hostPieces": 1
+          }
+        },
+        {
+          "app": "provider",
+          "calls": {
+            "normalizeBridgeSSR": 0,
+            "htmlFrames": 0,
+            "containsShellMarker": 0,
+            "isolateReactStreamScripts": 0,
+            "hostPieces": 0
+          }
+        }
+      ]
+    },
+    {
+      "host": "CSR",
+      "hydration": "complete",
+      "cache": "miss",
+      "timingsMs": {
+        "shell-inserted": 406,
+        "featured-visible": 1842,
+        "recommended-visible": 5440,
+        "shell-interactive": 5480,
+        "featured-interactive": 5520,
+        "state-retained": 5520,
+        "recommended-interactive": 5600
+      },
+      "errors": [],
+      "retainedOriginalDOM": true,
+      "retainedState": true,
+      "noFallbackNavigation": true,
+      "processing": [
+        {
+          "app": "host-csr",
+          "calls": {
+            "normalizeBridgeSSR": 0,
+            "htmlFrames": 0,
+            "containsShellMarker": 0,
+            "isolateReactStreamScripts": 0,
+            "hostPieces": 0
+          }
+        },
+        {
+          "app": "provider",
+          "calls": {
+            "normalizeBridgeSSR": 1,
+            "htmlFrames": 1,
+            "containsShellMarker": 5,
+            "isolateReactStreamScripts": 9,
+            "hostPieces": 0
+          }
+        }
+      ]
+    },
+    {
+      "host": "CSR",
+      "hydration": "complete",
+      "cache": "hit",
+      "timingsMs": {
+        "shell-inserted": 347,
+        "featured-visible": 349,
+        "recommended-visible": 349,
+        "shell-interactive": 428,
+        "featured-interactive": 469,
+        "state-retained": 469,
+        "recommended-interactive": 548
+      },
+      "errors": [],
+      "retainedOriginalDOM": true,
+      "retainedState": true,
+      "noFallbackNavigation": true,
+      "processing": [
+        {
+          "app": "host-csr",
+          "calls": {
+            "normalizeBridgeSSR": 0,
+            "htmlFrames": 0,
+            "containsShellMarker": 0,
+            "isolateReactStreamScripts": 0,
+            "hostPieces": 0
+          }
+        },
+        {
+          "app": "provider",
+          "calls": {
+            "normalizeBridgeSSR": 0,
+            "htmlFrames": 0,
+            "containsShellMarker": 0,
+            "isolateReactStreamScripts": 0,
+            "hostPieces": 0
+          }
+        }
+      ]
+    }
+  ],
+  "flush": {
+    "versions": ["18.3.1 (existing UTF-8 patch)", "19.2.8"],
+    "environments": ["production", "development"],
+    "scenarios": ["fragment", "nested-backpressure", "document", "abort"],
+    "cases": 16,
+    "result": "Fragment samples closed at each flush. React 19.2.8 document shell still has open html/body. Runtime retains HTML parser; no flush-boundary optimization enabled."
+  }
+}

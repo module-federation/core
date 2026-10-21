@@ -16,11 +16,10 @@ import { createInstance } from '@module-federation/runtime';
 import type {
   BridgeSSRRequest,
   BridgeSSRResult,
+  BridgeSSRMessageResult,
 } from '@module-federation/bridge-react/ssr';
 import { bridgeStreamBootstrap } from './bootstrap';
-import { htmlFrames } from './frames.server';
 import type { BridgeStreamBrowserRuntime } from './protocol';
-import { isolateReactStreamScripts } from './script-isolation.server';
 import { bridgeIdentifierPrefix } from './identity.server';
 import { createBridgeServiceHandler, fetchBridgeService } from './service-http';
 
@@ -271,24 +270,23 @@ async function collect<T>(stream: ReadableStream<T>): Promise<T[]> {
     reader.releaseLock();
   }
 }
-async function capture(result: BridgeSSRResult) {
-  const [chunks, updates, snapshot] = await Promise.all([
-    collect(result.stream),
-    result.hydration ? collect(result.hydration.updates) : [],
-    result.hydration ? result.hydration.snapshot : result.snapshot,
-  ]);
+async function capture(result: BridgeSSRMessageResult) {
+  const messages = await collect(result.messages);
+  const initial = messages.find((message) => message.type === 'ready');
+  const final = messages.find((message) => message.type === 'data');
   return {
-    html: Buffer.concat(chunks),
-    updates,
-    snapshot,
-    shellMarker: result.hydration?.shellMarker,
+    messages,
+    html: Buffer.from(
+      messages
+        .filter((message) => message.type === 'html')
+        .map((message) => message.html)
+        .join(''),
+    ),
+    updates: messages
+      .filter((message) => message.type === 'update')
+      .map((message) => message.value),
+    snapshot: initial?.snapshot ?? final?.snapshot,
   };
-}
-async function fragments(html: Uint8Array): Promise<string[]> {
-  const output: string[] = [];
-  const framed = Readable.from([html]).pipe(htmlFrames());
-  for await (const frame of framed) output.push(String(frame));
-  return output;
 }
 async function until(condition: () => boolean) {
   const deadline = Date.now() + 4000;
@@ -343,11 +341,7 @@ function browser(instanceIds: string[]) {
     html(info: BridgeSSRRequest, html: string) {
       runtime.accept(info.instanceId, {
         type: 'html',
-        html: isolateReactStreamScripts(
-          html,
-          info.instanceId,
-          info.identifierPrefix,
-        ),
+        html,
       });
     },
     dispose() {
@@ -407,13 +401,8 @@ describe('Bridge service cache with real React streaming and hydration', () => {
           protocol: 'mf-bridge/1',
           identifierPrefix: info.identifierPrefix,
         });
-        for (const html of await fragments(cached[index].html))
-          page.html(info, html);
-        page.runtime.accept(info.instanceId, {
-          type: 'data',
-          snapshot: cached[index].snapshot,
-        });
-        page.runtime.accept(info.instanceId, { type: 'done' });
+        for (const message of cached[index].messages)
+          page.runtime.accept(info.instanceId, message);
         const session = await page.runtime.get(info.instanceId)!.done;
         const container = page.container(info.instanceId);
         allButtons.push(Array.from(container.querySelectorAll('button')));
@@ -497,35 +486,42 @@ describe('Bridge service cache with real React streaming and hydration', () => {
       expect(cached.updates).toEqual([
         { id: 'detail', status: 'fulfilled', value: 'progressive-detail' },
       ]);
-      expect(cached.shellMarker).toBe('progressive-shell');
-      const frames = await fragments(cached.html);
-      expect(frames.length).toBeGreaterThan(1);
+      const readyIndex = cached.messages.findIndex(
+        (message) => message.type === 'ready',
+      );
+      expect(readyIndex).toBeGreaterThan(0);
+      expect(
+        cached.messages
+          .slice(0, readyIndex)
+          .every((message) => message.type === 'html'),
+      ).toBe(true);
       page.runtime.accept(info.instanceId, {
         type: 'meta',
         protocol: 'mf-bridge/1',
         identifierPrefix: info.identifierPrefix,
         hydration: 'progressive',
       });
-      page.html(info, frames[0]);
-      page.runtime.accept(info.instanceId, {
-        type: 'ready',
-        snapshot: cached.snapshot,
-      });
+      for (const message of cached.messages.slice(0, readyIndex + 1))
+        page.runtime.accept(info.instanceId, message);
       const session = await page.runtime.get(info.instanceId)!.ready!;
       const container = page.container(info.instanceId);
       const shellButton = container.querySelector('button')!;
       const clientData = resource();
       let shellHydrated = false;
       let detailHydrated = false;
-      const provider = applicationProvider(clientData, cached.shellMarker!, {
-        shellHydrated: () => (shellHydrated = true),
-        detailHydrated: () => (detailHydrated = true),
-        hydrate(app, dom, hydration) {
-          const root = hydrateRoot(dom, app, hydration.rootOptions);
-          page.roots.push(root);
-          return root;
+      const provider = applicationProvider(
+        clientData,
+        `${info.instanceId}-shell`,
+        {
+          shellHydrated: () => (shellHydrated = true),
+          detailHydrated: () => (detailHydrated = true),
+          hydrate(app, dom, hydration) {
+            const root = hydrateRoot(dom, app, hydration.rootOptions);
+            page.roots.push(root);
+            return root;
+          },
         },
-      });
+      );
       await provider.hydrate({
         dom: container,
         label: (session.snapshot as { label: string }).label,
@@ -543,14 +539,12 @@ describe('Bridge service cache with real React streaming and hydration', () => {
         new page.dom.window.MouseEvent('click', { bubbles: true }),
       );
       await until(() => shellButton.textContent === 'progressive: 1');
-      for (const html of frames.slice(1)) page.html(info, html);
+      for (const message of cached.messages.slice(readyIndex + 1))
+        page.runtime.accept(info.instanceId, message);
       const detailButton = container.querySelector(
         '[data-counter="progressive-detail"]',
       );
       expect(detailButton).not.toBeNull();
-      for (const value of cached.updates)
-        page.runtime.accept(info.instanceId, { type: 'update', value });
-      page.runtime.accept(info.instanceId, { type: 'done' });
       const updateReader = session.updates!.getReader();
       const update = (await updateReader.read()).value as { value: string };
       clientData.resolve(update.value);

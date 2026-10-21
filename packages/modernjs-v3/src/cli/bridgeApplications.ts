@@ -14,7 +14,7 @@ export function applicationEntrySource(
   return server
     ? `import ${registry};
 import { renderApplication } from '@modern-js/runtime/application/server';
-import { createModernServerBridge } from '@module-federation/modern-js-v3/bridge/application';
+import { createModernServerBridge } from '@module-federation/modern-js-v3/bridge/application.server';
 export default createModernServerBridge({ renderApplication, revision: ${JSON.stringify(revision)} });
 `
     : `import ${registry};

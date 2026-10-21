@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
-import {
-  createModernBrowserBridge,
-  createModernServerBridge,
-} from './application';
+import { createModernBrowserBridge } from './application';
+import { createModernServerBridge } from './application.server';
 
 function deferred() {
   let resolve!: () => void;
@@ -69,12 +67,13 @@ describe('Modern server Bridge adapter', () => {
       props: { tenant: 'a' },
       nonce: 'nonce-a',
     });
-    expect(rendered.stream).toBe(stream);
+    expect(rendered.protocol).toBe('mf-bridge-producer/1');
+    expect(rendered.messages).toBeInstanceOf(ReadableStream);
     expect(rendered.snapshot).toBe(snapshot);
     controller.abort();
     expect(request.signal.aborted).toBe(true);
     rendered.abort('stop');
-    expect(cancelled).toEqual(['stop']);
+    expect(cancelled).toEqual([controller.signal.reason]);
   });
 });
 
@@ -220,13 +219,22 @@ describe('producer artifact revision', () => {
     const initial = { protocol: 'modern-application/2' };
     const hydration = {
       snapshot: Promise.resolve(initial),
-      updates: new ReadableStream(),
+      updates: new ReadableStream({
+        start(controller) {
+          controller.close();
+        },
+      }),
       shellMarker: 'shell',
     };
     const provider = createModernServerBridge({
       revision: 'build-a',
       renderApplication: async () => ({
-        stream: new ReadableStream(),
+        stream: new ReadableStream({
+          start(controller) {
+            controller.enqueue(Buffer.from('<template id="shell"></template>'));
+            controller.close();
+          },
+        }),
         snapshot: Promise.resolve(snapshot),
         hydration,
         cancel() {},
@@ -244,11 +252,18 @@ describe('producer artifact revision', () => {
       ...snapshot,
       bridgeRevision: 'build-a',
     });
-    expect(await response.hydration!.snapshot).toEqual({
-      ...initial,
-      bridgeRevision: 'build-a',
+    const reader = response.messages.getReader();
+    expect((await reader.read()).value?.type).toBe('html');
+    expect((await reader.read()).value).toEqual({
+      type: 'ready',
+      snapshot: {
+        ...initial,
+        bridgeRevision: 'build-a',
+      },
     });
-    expect(response.hydration!.updates).toBe(hydration.updates);
+    expect((await reader.read()).value).toEqual({ type: 'done' });
+    expect((await reader.read()).done).toBe(true);
+    reader.releaseLock();
   });
   it('rejects mismatched SSR HTML before creating a browser application', async () => {
     browser();

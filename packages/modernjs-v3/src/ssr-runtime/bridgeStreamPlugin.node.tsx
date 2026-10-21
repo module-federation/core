@@ -2,20 +2,17 @@ import React from 'react';
 import { executeBridgeSSR } from '../bridge-stream/executor.server';
 import type { BridgeServiceOptions } from '../types';
 import { randomUUID } from 'node:crypto';
-import { PassThrough, Readable, type Duplex } from 'node:stream';
+import { PassThrough, type Duplex } from 'node:stream';
 import { once } from 'node:events';
 import type { RuntimePlugin } from '@modern-js/runtime';
 import {
   BridgeSSRContext,
   type BridgeSSRContextValue,
-  type BridgeSSRResult,
+  type BridgeSSRMessageResult,
+  type BridgeSSRMessage,
   type BridgeSSRRenderParams,
 } from '@module-federation/bridge-react/ssr';
 import { bridgeStreamBootstrap } from '../bridge-stream/bootstrap';
-import {
-  htmlFrames,
-  containsShellMarker,
-} from '../bridge-stream/frames.server';
 import { hostPieces } from '../bridge-stream/host-stream';
 import { bridgeIdentifierPrefix } from '../bridge-stream/identity.server';
 import { isolateReactStreamScripts } from '../bridge-stream/script-isolation.server';
@@ -53,7 +50,7 @@ type Job = {
   controller: AbortController;
   prefix: string;
   stylesheets: string[];
-  ready: Promise<BridgeSSRResult>;
+  ready: Promise<BridgeSSRMessageResult>;
   done?: Promise<void>;
   activate(params: BridgeSSRRenderParams): void;
   clear(): void;
@@ -131,7 +128,7 @@ export function bridgeStreamPlugin(
               },
             );
             if (!registrationOptions?.deferRender) activate(params);
-            let session: BridgeSSRResult | undefined;
+            let session: BridgeSSRMessageResult | undefined;
             const abortSession = () => session?.abort(signal.reason);
             signal.addEventListener('abort', abortSession, { once: true });
             const render = Promise.resolve()
@@ -156,7 +153,6 @@ export function bridgeStreamPlugin(
                 session = value;
                 // A provider can resolve after the deadline; do not retain its renderer.
                 value.snapshot.catch(() => {});
-                value.hydration?.snapshot.catch(() => {});
                 if (signal.aborted) value.abort(signal.reason);
                 return value;
               });
@@ -247,31 +243,16 @@ export function bridgeStreamPlugin(
             };
             startJob = (id, job) => {
               job.done = (async () => {
-                let source: Readable | undefined;
-                let framed: ReturnType<typeof htmlFrames> | undefined;
-                let complete = false;
-                let updatesReader:
-                  | ReadableStreamDefaultReader<unknown>
+                let reader:
+                  | ReadableStreamDefaultReader<BridgeSSRMessage>
                   | undefined;
-                let updatesTask: Promise<void> | undefined;
-                const abortSource = () => {
-                  source?.destroy(Error('Bridge rendering aborted'));
-                  framed?.destroy(Error('Bridge rendering aborted'));
-                };
-                job.controller.signal.addEventListener('abort', abortSource, {
-                  once: true,
-                });
+                let complete = false;
                 try {
                   await shellReady;
                   if (stopped) return;
                   const result = await job.ready;
                   const signal = job.controller.signal;
-                  source = Readable.fromWeb(
-                    result.stream as Parameters<typeof Readable.fromWeb>[0],
-                  );
-                  framed = htmlFrames();
-                  source.on('error', (error) => framed?.destroy(error));
-                  source.pipe(framed);
+                  reader = result.messages.getReader();
                   await emit(id, {
                     type: 'meta',
                     protocol: BRIDGE_STREAM_PROTOCOL,
@@ -282,57 +263,23 @@ export function bridgeStreamPlugin(
                         ...(result.stylesheets || []),
                       ]),
                     ],
-                    ...(result.hydration
+                    ...(result.hydration === 'progressive'
                       ? { hydration: 'progressive' as const }
                       : {}),
                   });
-                  let hydrationStarted = false;
-                  for await (const html of framed) {
-                    if (signal.aborted) throw signal.reason;
-                    await emit(id, {
-                      type: 'html',
-                      html: isolateReactStreamScripts(
-                        String(html),
-                        job.prefix,
-                        job.prefix,
-                      ),
-                    });
-                    const hydration = result.hydration;
-                    if (
-                      hydration &&
-                      !hydrationStarted &&
-                      containsShellMarker(String(html), hydration.shellMarker)
-                    ) {
-                      hydrationStarted = true;
-                      const snapshot = await withAbort(
-                        hydration.snapshot,
-                        signal,
-                      );
-                      await emit(id, { type: 'ready', snapshot });
-                      updatesReader = hydration.updates.getReader();
-                      const reader = updatesReader;
-                      updatesTask = (async () => {
-                        while (true) {
-                          const next = await withAbort(reader.read(), signal);
-                          if (next.done) return;
-                          await emit(id, { type: 'update', value: next.value });
-                        }
-                      })();
-                      // An update transport error must also unblock the HTML reader.
-                      updatesTask.catch((error) => job.controller.abort(error));
-                    }
+                  while (true) {
+                    const next = await withAbort(reader.read(), signal);
+                    if (next.done) break;
+                    if (complete)
+                      throw Error('Bridge message after completion');
+                    // The producer owns HTML framing, script adaptation and readiness.
+                    await emit(id, next.value);
+                    if (next.value.type === 'done') complete = true;
                   }
-                  if (result.hydration) {
-                    if (!hydrationStarted)
-                      throw Error('Missing Bridge application shell marker');
-                    await updatesTask;
-                  } else {
-                    const snapshot = await withAbort(result.snapshot, signal);
-                    await emit(id, { type: 'data', snapshot });
-                  }
-                  await emit(id, { type: 'done' });
-                  complete = true;
+                  if (!complete)
+                    throw Error('Incomplete Bridge producer messages');
                 } catch (error) {
+                  complete = false;
                   if (!stopped && !output.destroyed) {
                     await emit(id, {
                       type: 'error',
@@ -342,16 +289,10 @@ export function bridgeStreamPlugin(
                 } finally {
                   if (!complete)
                     job.controller.abort(Error('Bridge rendering stopped'));
-                  if (updatesReader) {
-                    await updatesReader.cancel().catch(() => {});
-                    updatesReader.releaseLock();
+                  if (reader) {
+                    await reader.cancel().catch(() => {});
+                    reader.releaseLock();
                   }
-                  source?.destroy();
-                  framed?.destroy();
-                  job.controller.signal.removeEventListener(
-                    'abort',
-                    abortSource,
-                  );
                   job.clear();
                 }
               })();

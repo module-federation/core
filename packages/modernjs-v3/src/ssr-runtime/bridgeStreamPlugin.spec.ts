@@ -13,6 +13,7 @@ import {
 import { loadRemote } from '@module-federation/runtime';
 import { loadBridgeRemote } from '../bridge-stream/remote.server';
 import { createBridgeServiceHandler } from '../bridge-stream/service-http';
+import { normalizeBridgeSSR } from '../bridge-stream/producer.server';
 import type {
   BridgeSSRContextValue,
   BridgeSSRRequest,
@@ -80,13 +81,16 @@ function producer(value: string) {
       destroy() {},
       async renderStream(request: BridgeSSRRequest) {
         received = request;
-        return {
-          stream,
-          snapshot: Promise.resolve({ value }),
-          abort() {
-            aborts++;
+        return normalizeBridgeSSR(
+          {
+            stream,
+            snapshot: Promise.resolve({ value }),
+            abort() {
+              aborts++;
+            },
           },
-        };
+          request,
+        );
       },
     }),
   };

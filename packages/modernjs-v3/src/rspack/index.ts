@@ -43,7 +43,7 @@ export class BridgeSSRPlugin {
           data?.request === '@module-federation/bridge-react/v18' ||
           data?.request === '@module-federation/bridge-react/v19'
         ) {
-          data.request = '@module-federation/bridge-react/server';
+          data.request = '@module-federation/modern-js-v3/react-server';
         }
         if (data?.request === '@module-federation/modern-js-v3/bridge/remote') {
           data.request += '.server';

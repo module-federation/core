@@ -51,6 +51,8 @@ export type {
   BridgeSSRRenderParams,
   BridgeSSRRequest,
   BridgeSSRResult,
+  BridgeSSRMessage,
+  BridgeSSRMessageResult,
   HydrateParams,
 } from './types';
 
