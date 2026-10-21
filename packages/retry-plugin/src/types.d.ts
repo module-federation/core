@@ -17,6 +17,12 @@ export type CommonRetryOptions = {
    */
   retryDelay?: number | ((attempt: number) => number);
   /**
+   * HTTP statuses that trigger a retry when a fetch returns a non-OK response.
+   * Any other non-OK status fails at once. Network errors are always retried.
+   * When unset, every non-OK response is retried.
+   */
+  retryStatuses?: number[];
+  /**
    * retry path
    */
   getRetryPath?: (url: string) => string;

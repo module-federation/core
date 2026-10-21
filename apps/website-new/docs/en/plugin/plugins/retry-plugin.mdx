@@ -123,6 +123,11 @@ const mf = createInstance({
 - Optional
 - Delay between retries in milliseconds, default is 1000
 
+**retryStatuses**
+- Type: `number[]`
+- Optional
+- HTTP statuses that trigger a retry when a fetch (such as the manifest) returns a non-OK response. Any other non-OK status fails at once; network errors are always retried. By default every non-OK response is retried
+
 ### Advanced
 
 **domains**
