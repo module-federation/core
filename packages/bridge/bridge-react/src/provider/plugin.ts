@@ -1,7 +1,7 @@
 import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
-} from '@module-federation/runtime';
+} from '@module-federation/enhanced/runtime';
 
 export type FederationRuntimeType = {
   instance: ModuleFederation | null;

@@ -18,7 +18,7 @@ import {
 } from '../constant';
 
 import type { MF_DATA_FETCH_MAP_VALUE } from '../types';
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const autoFetchData: () => ModuleFederationRuntimePlugin = () => {
   initDataFetchMap();

@@ -1,4 +1,7 @@
-import type { ModuleFederation, getInstance } from '@module-federation/runtime';
+import type {
+  ModuleFederation,
+  getInstance,
+} from '@module-federation/enhanced/runtime';
 import type { BasicProviderModuleInfo } from '@module-federation/sdk';
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import type { ErrorInfo } from './AwaitDataFetch';

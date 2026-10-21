@@ -42,6 +42,7 @@ export default defineConfig({
     rollupOptions: {
       external: [
         ...perDepsKeys,
+        /^@module-federation\/enhanced\//,
         '@remix-run/router',
         /react-dom\/.*/,
         'react-router',
