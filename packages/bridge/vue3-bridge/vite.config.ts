@@ -13,7 +13,7 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: ['vue', 'vue-router'],
+      external: ['vue', 'vue-router', '@module-federation/data-fetch'],
     },
   },
   define: {

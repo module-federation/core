@@ -3039,6 +3039,9 @@ importers:
 
   packages/bridge/bridge-react:
     dependencies:
+      '@module-federation/data-fetch':
+        specifier: workspace:*
+        version: link:../../data-fetch
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../sdk
@@ -3140,6 +3143,9 @@ importers:
       '@module-federation/bridge-shared':
         specifier: workspace:*
         version: link:../bridge-shared
+      '@module-federation/data-fetch':
+        specifier: workspace:*
+        version: link:../../data-fetch
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../runtime
@@ -3339,6 +3345,25 @@ importers:
       rsbuild-plugin-publint:
         specifier: ^0.2.1
         version: 0.2.1(@rsbuild/core@1.7.3)
+
+  packages/data-fetch:
+    dependencies:
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+    devDependencies:
+      hono:
+        specifier: 4.12.26
+        version: 4.12.26
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vite:
+        specifier: ^5.4.21
+        version: 5.4.21(@types/node@26.6.4)(less@4.6.4)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)
 
   packages/dts-plugin:
     dependencies:
@@ -20368,6 +20393,10 @@ packages:
   hono@3.12.12:
     resolution: {integrity: sha512-5IAMJOXfpA5nT+K0MNjClchzz0IhBHs2Szl7WFAhrFOsbtQsYmNynFyJRg/a3IPsmCfxcrf8txUGiNShXpK5Rg==}
     engines: {node: '>=16.0.0'}
+
+  hono@4.12.26:
+    resolution: {integrity: sha512-uyZtpnYxM9CmQ7QsQknM4zN8EftNqhON1qYeIKM0Se67CCEe2c44xyGURwB0axX2fBDu1dqHrHAc1hmNT8ITkw==}
+    engines: {node: '>=16.9.0'}
 
   hono@4.13.5:
     resolution: {integrity: sha512-O6+/eCYRkzzzy0rPWwKLiGBR1nFuUPZynnwjxN1MBA62NNqbT0wQEzQyK2gSO5yDIDB336sXQleAhOHrzlYyKw==}
@@ -51597,6 +51626,8 @@ snapshots:
       parse-passwd: 1.0.0
 
   hono@3.12.12: {}
+
+  hono@4.12.26: {}
 
   hono@4.13.5: {}
 

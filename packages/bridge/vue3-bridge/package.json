@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc -p tsconfig.json",
+    "build": "vite build && tsc -p tsconfig.json && node scripts/write-dts-entrypoints.mjs",
     "preview": "vite preview",
     "test": "rstest"
   },
@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",
+    "@module-federation/data-fetch": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
