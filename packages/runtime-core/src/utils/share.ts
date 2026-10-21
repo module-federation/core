@@ -117,6 +117,72 @@ export function formatShareConfigs(
   return { allShareInfos, newShareInfos };
 }
 
+export function isTreeShakingRequested(treeShaking?: TreeShakingArgs): boolean {
+  if (!treeShaking) {
+    return false;
+  }
+  if (treeShaking.status === TreeShakingStatus.NO_USE) {
+    return false;
+  }
+  if (treeShaking.status === TreeShakingStatus.CALCULATED) {
+    return true;
+  }
+  return treeShaking.mode === 'runtime-infer';
+}
+
+export function getOfferedExports(
+  treeShaking?: TreeShakingArgs,
+): string[] | undefined {
+  if (!treeShaking) {
+    return undefined;
+  }
+  if (treeShaking.providedExports && treeShaking.providedExports.length > 0) {
+    return treeShaking.providedExports;
+  }
+  if (treeShaking.usedExports && treeShaking.usedExports.length > 0) {
+    return treeShaking.usedExports;
+  }
+  return undefined;
+}
+
+const isMatchUsedExports = (
+  treeShaking?: TreeShakingArgs,
+  usedExports?: string[],
+) => {
+  if (!treeShaking || !usedExports || usedExports.length === 0) {
+    return false;
+  }
+
+  const offeredExports = getOfferedExports(treeShaking);
+
+  if (!offeredExports) {
+    return false;
+  }
+
+  return usedExports.every((exportName) => offeredExports.includes(exportName));
+};
+
+export function hasDisjointTreeShakenExports(
+  existing?: Shared,
+  incoming?: Shared,
+): boolean {
+  if (!existing?.treeShaking || !incoming?.treeShaking) {
+    return false;
+  }
+  const existingOffered = getOfferedExports(existing.treeShaking);
+  const incomingOffered = getOfferedExports(incoming.treeShaking);
+  if (!existingOffered || !incomingOffered) {
+    return false;
+  }
+  const incomingCoversExisting = existingOffered.every((exportName) =>
+    incomingOffered.includes(exportName),
+  );
+  const existingCoversIncoming = incomingOffered.every((exportName) =>
+    existingOffered.includes(exportName),
+  );
+  return !incomingCoversExisting && !existingCoversIncoming;
+}
+
 export function shouldUseTreeShaking(
   treeShaking?: TreeShakingArgs,
   usedExports?: string[],
@@ -134,8 +200,8 @@ export function shouldUseTreeShaking(
   }
 
   if (mode === 'runtime-infer') {
-    if (!usedExports) {
-      return true;
+    if (!usedExports || usedExports.length === 0) {
+      return false;
     }
     return isMatchUsedExports(treeShaking, usedExports);
   }
@@ -209,27 +275,6 @@ const isLoading = (shared: {
   return Boolean(shared.loading);
 };
 
-const isMatchUsedExports = (
-  treeShaking?: TreeShakingArgs,
-  usedExports?: string[],
-) => {
-  if (!treeShaking || !usedExports) {
-    return false;
-  }
-
-  const { usedExports: treeShakingUsedExports } = treeShaking;
-
-  if (!treeShakingUsedExports) {
-    return false;
-  }
-
-  if (usedExports.every((e) => treeShakingUsedExports.includes(e))) {
-    return true;
-  }
-
-  return false;
-};
-
 function findSingletonVersionOrderByVersion(
   shareScopeMap: ShareScopeMap,
   scope: string,
@@ -240,11 +285,22 @@ function findSingletonVersionOrderByVersion(
   useTreesShaking: boolean;
 } {
   const versions = shareScopeMap[scope][pkgName];
+  const consumerUsedExports = treeShaking?.usedExports;
   let version = '';
-  let useTreesShaking = shouldUseTreeShaking(treeShaking);
+  let useTreesShaking = isTreeShakingRequested(treeShaking);
+  const coversConsumer = (versionKey: string): boolean =>
+    shouldUseTreeShaking(
+      versions[versionKey]?.treeShaking,
+      consumerUsedExports,
+    );
   // return false means use prev version
   const callback = function (prev: string, cur: string): boolean {
     if (useTreesShaking) {
+      const prevCovers = coversConsumer(prev);
+      const curCovers = coversConsumer(cur);
+      if (prevCovers !== curCovers) {
+        return curCovers;
+      }
       if (!versions[prev].treeShaking) {
         return true;
       }
@@ -258,7 +314,7 @@ function findSingletonVersionOrderByVersion(
 
   if (useTreesShaking) {
     version = findVersion(shareScopeMap[scope][pkgName], callback);
-    if (version) {
+    if (version && coversConsumer(version)) {
       return {
         version,
         useTreesShaking,
@@ -291,12 +347,23 @@ function findSingletonVersionOrderByLoaded(
   useTreesShaking: boolean;
 } {
   const versions = shareScopeMap[scope][pkgName];
+  const consumerUsedExports = treeShaking?.usedExports;
   let version = '';
-  let useTreesShaking = shouldUseTreeShaking(treeShaking);
+  let useTreesShaking = isTreeShakingRequested(treeShaking);
+  const coversConsumer = (versionKey: string): boolean =>
+    shouldUseTreeShaking(
+      versions[versionKey]?.treeShaking,
+      consumerUsedExports,
+    );
 
   // return false means use prev version
   const callback = function (prev: string, cur: string): boolean {
     if (useTreesShaking) {
+      const prevCovers = coversConsumer(prev);
+      const curCovers = coversConsumer(cur);
+      if (prevCovers !== curCovers) {
+        return curCovers;
+      }
       if (!versions[prev].treeShaking) {
         return true;
       }
@@ -330,7 +397,7 @@ function findSingletonVersionOrderByLoaded(
 
   if (useTreesShaking) {
     version = findVersion(shareScopeMap[scope][pkgName], callback);
-    if (version) {
+    if (version && coversConsumer(version)) {
       return {
         version,
         useTreesShaking,
@@ -387,8 +454,24 @@ export function getRegisteredShare(
     ) {
       const { requiredVersion } = shareConfig;
       const findShareFunction = getFindShareFunction(strategy);
-      const { version: maxOrSingletonVersion, useTreesShaking } =
-        findShareFunction(localShareScopeMap, sc, pkgName, treeShaking);
+      const { version: maxOrSingletonVersion } = findShareFunction(
+        localShareScopeMap,
+        sc,
+        pkgName,
+        treeShaking,
+      );
+      const consumerUsedExports = treeShaking?.usedExports;
+      const withCoverage = (shared?: Shared, forceFull = false) => {
+        if (!shared) {
+          return;
+        }
+        return {
+          shared,
+          useTreesShaking: forceFull
+            ? false
+            : shouldUseTreeShaking(shared.treeShaking, consumerUsedExports),
+        };
+      };
 
       const defaultResolver = () => {
         const shared = localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
@@ -409,43 +492,30 @@ export function getRegisteredShare(
               warn(msg);
             }
           }
-          return {
-            shared,
-            useTreesShaking,
-          };
+          return withCoverage(shared);
         } else {
           if (requiredVersion === false || requiredVersion === '*') {
-            return {
-              shared,
-              useTreesShaking,
-            };
+            return withCoverage(shared);
           }
           if (satisfy(maxOrSingletonVersion, requiredVersion)) {
-            return {
-              shared,
-              useTreesShaking,
-            };
+            return withCoverage(shared);
           }
 
-          const _usedTreeShaking = shouldUseTreeShaking(treeShaking);
-          if (_usedTreeShaking) {
+          if (isTreeShakingRequested(treeShaking)) {
             for (const [versionKey, versionValue] of Object.entries(
               localShareScopeMap[sc][pkgName],
             )) {
               if (
                 !shouldUseTreeShaking(
                   versionValue.treeShaking,
-                  treeShaking?.usedExports,
+                  consumerUsedExports,
                 )
               ) {
                 continue;
               }
 
               if (satisfy(versionKey, requiredVersion)) {
-                return {
-                  shared: versionValue,
-                  useTreesShaking: _usedTreeShaking,
-                };
+                return withCoverage(versionValue);
               }
             }
           }
@@ -453,10 +523,7 @@ export function getRegisteredShare(
             localShareScopeMap[sc][pkgName],
           )) {
             if (satisfy(versionKey, requiredVersion)) {
-              return {
-                shared: versionValue,
-                useTreesShaking: false,
-              };
+              return withCoverage(versionValue, true);
             }
           }
         }
@@ -473,7 +540,11 @@ export function getRegisteredShare(
         loadContext,
       };
       const resolveShared = resolveShare.emit(params) || params;
-      return resolveShared.resolver();
+      const result = resolveShared.resolver();
+      if (!result?.shared) {
+        return result;
+      }
+      return withCoverage(result.shared, result.useTreesShaking === false);
     }
   }
 }

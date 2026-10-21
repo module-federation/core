@@ -5,6 +5,7 @@ import {
 } from '@module-federation/runtime';
 import { ShareArgs } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
+import { getUsedExports } from './getUsedExports';
 
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
 
@@ -45,6 +46,16 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
                 if ('get' in sharedArg) {
                   sharedArg.treeShaking ||= {};
                   sharedArg.treeShaking.get = sharedArg.get;
+                  const compiledUsedExports = getUsedExports(
+                    webpackRequire,
+                    sharedName,
+                  );
+                  if (
+                    compiledUsedExports?.length &&
+                    !sharedArg.treeShaking.providedExports?.length
+                  ) {
+                    sharedArg.treeShaking.providedExports = compiledUsedExports;
+                  }
                   sharedArg.get = bundlerRuntime!.getSharedFallbackGetter({
                     shareKey: sharedName,
                     factory: sharedArg.get,
