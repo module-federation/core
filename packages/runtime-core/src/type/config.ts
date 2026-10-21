@@ -141,6 +141,12 @@ export interface Options {
   plugins: Array<ModuleFederationRuntimePlugin>;
   inBrowser: boolean;
   shareStrategy?: ShareStrategy;
+  /**
+   * How long (ms) a remote entry script may take to load before it is reported as RUNTIME-008.
+   * Defaults to 20000; `Infinity` disables the timer. A `createScript` hook returning `timeout` still wins.
+   * When set, it also bounds the fetch of a manifest entry (`mf-manifest.json`), which is otherwise unbounded.
+   */
+  loadEntryTimeout?: number;
 }
 
 export type UserOptions = Omit<
