@@ -143,6 +143,7 @@ class Module {
     rawInitScope?: InitScope,
     expose?: string,
     resourceContext?: ResourceLoadContext,
+    shareScopeMap: ShareScopeMap = this.host.shareScopeMap,
   ) {
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry(expose, resourceContext);
@@ -197,7 +198,7 @@ class Module {
       const { remoteEntryInitOptions, shareScope, initScope } =
         createRemoteEntryInitOptions(
           this.remoteInfo,
-          this.host.shareScopeMap,
+          shareScopeMap,
           rawInitScope,
         );
 
