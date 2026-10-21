@@ -1,4 +1,19 @@
-import { describe, expect, it, rs } from '@rstest/core';
+import path from 'node:path';
+import { beforeEach, describe, expect, it, rs } from '@rstest/core';
+
+const fsMocks = rs.hoisted(() => ({
+  statSync: rs.fn(),
+  createReadStream: rs.fn(() => ({ pipe: rs.fn() })),
+}));
+
+rs.mock('fs', () => ({
+  default: fsMocks,
+  ...fsMocks,
+}));
+
+beforeEach(() => {
+  rs.clearAllMocks();
+});
 
 const createPluginHarness = async () => {
   const { moduleFederationSSRPlugin } = await import('./ssrPlugin');
@@ -18,12 +33,14 @@ const createPluginHarness = async () => {
   } as any;
 
   let rsbuildPlugin: any;
+  let devServerMiddleware: any;
   const api = {
     _internalRuntimePlugins: rs.fn(),
     _internalServerPlugins: rs.fn(),
     config: rs.fn((callback) => {
       const config = callback();
       rsbuildPlugin = config.builderPlugins[0];
+      devServerMiddleware = config.tools.devServer.before[0];
     }),
     getAppContext: rs.fn(() => ({ bundlerType: 'rspack' })),
     getConfig: rs.fn(() => ({ server: { ssr: true } })),
@@ -64,7 +81,7 @@ const createPluginHarness = async () => {
     { name: 'node' },
   );
 
-  return { rsbuildApi };
+  return { rsbuildApi, devServerMiddleware };
 };
 
 describe('moduleFederationSSRPlugin', () => {
@@ -91,4 +108,58 @@ describe('moduleFederationSSRPlugin', () => {
       );
     }
   }, 10_000);
+
+  it('serves JSON assets with query and hash suffixes, including ..-prefixed names', async () => {
+    const { devServerMiddleware } = await createPluginHarness();
+    const response = { setHeader: rs.fn() };
+    const stream = { pipe: rs.fn() };
+    (fsMocks.createReadStream as any).mockReturnValue(stream);
+
+    for (const requestPath of [
+      '/..manifest.json?query=value#hash',
+      '/nested/..generated/app.json',
+    ]) {
+      const next = rs.fn();
+
+      await devServerMiddleware({ url: requestPath }, response, next);
+
+      expect(next).not.toHaveBeenCalled();
+    }
+
+    expect(fsMocks.statSync).toHaveBeenNthCalledWith(
+      1,
+      path.resolve(process.cwd(), 'dist', '..manifest.json'),
+    );
+    expect(fsMocks.statSync).toHaveBeenNthCalledWith(
+      2,
+      path.resolve(process.cwd(), 'dist', 'nested/..generated/app.json'),
+    );
+    expect(stream.pipe).toHaveBeenCalledTimes(2);
+    expect(response.setHeader).toHaveBeenCalledWith(
+      'Access-Control-Allow-Origin',
+      '*',
+    );
+  });
+
+  it('passes through non-JSON and traversal requests', async () => {
+    const { devServerMiddleware } = await createPluginHarness();
+
+    for (const requestPath of [
+      '/manifest.js?query=value#hash',
+      '/../outside.json?query=value#hash',
+    ]) {
+      const next = rs.fn();
+
+      await devServerMiddleware(
+        { url: requestPath },
+        { setHeader: rs.fn() },
+        next,
+      );
+
+      expect(next).toHaveBeenCalledOnce();
+    }
+
+    expect(fsMocks.statSync).not.toHaveBeenCalled();
+    expect(fsMocks.createReadStream).not.toHaveBeenCalled();
+  });
 });

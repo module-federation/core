@@ -369,11 +369,23 @@ export const moduleFederationSSRPlugin = (
                   return;
                 }
                 try {
+                  const requestPath = (req.url ?? '').split(/[?#]/)[0];
                   if (
-                    req.url?.includes('.json') &&
-                    !req.url?.includes('hot-update')
+                    path.extname(requestPath) === '.json' &&
+                    !requestPath.includes('hot-update')
                   ) {
-                    const filepath = path.join(process.cwd(), `dist${req.url}`);
+                    const distRoot = path.resolve(process.cwd(), 'dist');
+                    const relativePath = requestPath.replace(/^\/+/, '');
+                    const filepath = path.resolve(distRoot, relativePath);
+                    const relativeToDist = path.relative(distRoot, filepath);
+                    if (
+                      relativeToDist === '..' ||
+                      relativeToDist.startsWith(`..${path.sep}`) ||
+                      path.isAbsolute(relativeToDist)
+                    ) {
+                      next();
+                      return;
+                    }
                     fs.statSync(filepath);
                     res.setHeader('Access-Control-Allow-Origin', '*');
                     res.setHeader(
