@@ -161,7 +161,8 @@
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0",
     "react-router-dom": "^4 || ^5 || ^6 || ^7",
-    "react-router": "^6 || ^7"
+    "react-router": "^6 || ^7",
+    "@module-federation/enhanced": "workspace:^"
   },
   "peerDependenciesMeta": {
     "react-router-dom": {
@@ -187,8 +188,7 @@
     "react-router": "7.18.2",
     "typescript": "7.0.2",
     "vite": "^5.4.21",
-    "@module-federation/runtime": "workspace:*",
-    "@module-federation/runtime-core": "workspace:*",
-    "hono": "4.13.5"
+    "hono": "4.13.5",
+    "@module-federation/enhanced": "workspace:*"
   }
 }

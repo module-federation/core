@@ -12,8 +12,10 @@ React bridge is used to load the routing module in mf, so that the routing modul
 # 1. Install the react bridge library
 
 ```bash
-pnpm add @module-federation/bridge-react
+pnpm add @module-federation/bridge-react @module-federation/enhanced
 ```
+
+Import runtime APIs and types from `@module-federation/enhanced/runtime`. Use an Enhanced version satisfying Bridge’s peer dependency range. Bridge uses the same entry for its runtime helpers and instance extensions, so applications do not need direct dependencies on `@module-federation/runtime` or `@module-federation/runtime-core`.
 
 # 2. Configure the react bridge library
 

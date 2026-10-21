@@ -22,7 +22,7 @@ import type {
   MF_DATA_FETCH_MAP_VALUE_PROMISE_SET,
   MF_DATA_FETCH_CACHE,
 } from './types';
-import type { ModuleFederation } from '@module-federation/runtime';
+import type { ModuleFederation } from '@module-federation/enhanced/runtime';
 import { clearStore } from './data-fetch/cache';
 
 export const getDataFetchInfo = ({
