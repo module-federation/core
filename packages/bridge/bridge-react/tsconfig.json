@@ -4,7 +4,7 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "rootDir": "./src",
-    "module": "commonjs",
+    "module": "esnext",
     "target": "es2015",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -14,6 +14,7 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "strict": true,
+    "moduleResolution": "bundler",
     "lib": ["esnext", "dom"],
     "jsx": "preserve",
     "esModuleInterop": true,
@@ -21,7 +22,10 @@
     "sourceMap": true,
     "paths": {
       "@/*": ["./src/*"],
-      "*": ["./*"]
+      "*": ["./*"],
+      "@module-federation/bridge-react/router-runtime": [
+        "./src/remote/router-component/router-runtime.ts"
+      ]
     },
     "ignoreDeprecations": "6.0"
   },

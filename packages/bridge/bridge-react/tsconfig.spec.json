@@ -3,13 +3,23 @@
   "compilerOptions": {
     "outDir": "../../../dist/out-tsc",
     "module": "commonjs",
+    "moduleResolution": "node",
     "types": ["jest", "node", "@testing-library/jest-dom"],
     "jsx": "react-jsx",
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@module-federation/bridge-react/router-runtime": [
+        "src/remote/router-component/router-runtime.ts"
+      ],
+      "react-router/dom": [
+        "node_modules/react-router/dist/development/dom-export.d.ts"
+      ]
+    }
   },
   "include": [
     "**/*.test.ts",
