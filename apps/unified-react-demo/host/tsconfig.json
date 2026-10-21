@@ -1,0 +1,19 @@
+{
+  "extends": "@modern-js/tsconfig/base",
+  "compilerOptions": {
+    "declaration": false,
+    "jsx": "preserve",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["./shared/*"],
+      "*": ["./@mf-types/*", "./*"]
+    },
+    "ignoreDeprecations": "6.0",
+    "rootDir": "."
+  },
+  "ts-node": {
+    "compiler": "typescript-compiler"
+  },
+  "include": ["src", "shared", "config", "modern.config.ts", "server"],
+  "exclude": ["**/node_modules"]
+}
