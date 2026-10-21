@@ -7,6 +7,7 @@ import {
 import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
 import logger from '../logger';
 import { isDev } from './utils';
+import { mfSSRDevReloadPlugin } from './ssrDevReload';
 import {
   updateStatsAndManifest,
   type StatsAssetResource,
@@ -261,14 +262,6 @@ export const moduleFederationSSRPlugin = (
           fetchServerQuery,
         },
       });
-      if (!isDev()) {
-        return { entrypoint, plugins };
-      }
-      plugins.push({
-        name: 'mfSSRDev',
-        path: '@module-federation/modern-js-v3/ssr-dev-plugin',
-        config: {},
-      });
       return { entrypoint, plugins };
     });
 
@@ -321,16 +314,13 @@ export const moduleFederationSSRPlugin = (
             .use(UniverseEntryChunkTrackerPlugin);
         }
       }
-
-      if (isDev() && isWeb) {
-        chain.externals({
-          '@module-federation/node/utils': 'NOT_USED_IN_BROWSER',
-        });
-      }
     });
     api.config(() => {
       return {
-        builderPlugins: [mfSSRRsbuildPlugin(pluginOptions)],
+        builderPlugins: [
+          mfSSRRsbuildPlugin(pluginOptions),
+          ...(isDev() ? [mfSSRDevReloadPlugin()] : []),
+        ],
         dev: {
           setupMiddlewares: [
             (middlewares) =>

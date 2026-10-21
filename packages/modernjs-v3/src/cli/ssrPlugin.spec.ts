@@ -189,3 +189,46 @@ describe('moduleFederationSSRPlugin', () => {
     }
   });
 });
+
+describe('moduleFederationSSRPlugin in development', () => {
+  it('reloads through the dev server instead of a runtime plugin', async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+    try {
+      const { moduleFederationSSRPlugin } = await import('./ssrPlugin');
+      let runtimePlugins: { name: string }[] = [];
+      let builderPlugins: { name: string }[] = [];
+      const api = {
+        _internalRuntimePlugins: rs.fn((callback) => {
+          runtimePlugins = callback({ entrypoint: {}, plugins: [] }).plugins;
+        }),
+        _internalServerPlugins: rs.fn(),
+        config: rs.fn((callback) => {
+          builderPlugins = callback().builderPlugins;
+        }),
+        getConfig: rs.fn(() => ({ server: { ssr: true } })),
+        modifyBundlerChain: rs.fn(),
+        onAfterBuild: rs.fn(),
+        onDevCompileDone: rs.fn(),
+      };
+
+      await moduleFederationSSRPlugin({
+        assetFileNames: {},
+        assetResources: {},
+        csrConfig: {},
+        secondarySharedTreeShaking: false,
+        ssrConfig: {},
+        userConfig: { ssr: true },
+      } as any).setup!(api as any);
+
+      expect(runtimePlugins.map(({ name }) => name)).toEqual([
+        'injectDataFetchFunction',
+      ]);
+      expect(builderPlugins.map(({ name }) => name)).toContain(
+        '@module-federation/modern-js-v3/ssr-dev-reload',
+      );
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
+    }
+  });
+});
