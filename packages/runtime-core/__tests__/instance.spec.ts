@@ -91,4 +91,62 @@ describe('ModuleFederation', () => {
     expect(module.initing).toBe(false);
     expect((module as any).initPromise).toBeUndefined();
   });
+
+  it('passes the caller init token to a remote init only when a sharing init triggers it', async () => {
+    const GM = new ModuleFederation({
+      name: '@federation/caller',
+      remotes: [],
+      plugins: [
+        {
+          name: 'copy-init-options',
+          beforeInitContainer: (args) => ({
+            ...args,
+            remoteEntryInitOptions: { ...args.remoteEntryInitOptions },
+          }),
+        },
+      ],
+    });
+    const createModule = () => {
+      const module = new Module({
+        remoteInfo: {
+          name: '@test/remote',
+          entry:
+            'http://localhost:1111/resources/main/federation-remote-entry.js',
+          type: 'global',
+          entryGlobalName: '__test_remote__',
+          shareScope: 'custom',
+        },
+        host: GM,
+      });
+      const init = rs.fn();
+      module.remoteEntryExports = { init, get: rs.fn() } as any;
+      return { module, init };
+    };
+
+    const nested = createModule();
+    GM.options.remotes = [
+      {
+        name: '@test/remote',
+        entry: nested.module.remoteInfo.entry,
+        shareScope: 'custom',
+      },
+    ];
+    rs.spyOn(GM.remoteHandler, 'getRemoteModuleAndOptions').mockResolvedValue({
+      module: nested.module,
+    } as any);
+    const initFrom = { from: '@federation/caller' };
+    await Promise.all(
+      GM.sharedHandler.initializeSharing('custom', {
+        strategy: 'version-first',
+        initFrom,
+      }),
+    );
+    const nestedOptions = nested.init.mock.calls[0][2];
+    expect(nestedOptions.initFrom).toBe(initFrom);
+    expect(Object.keys(nestedOptions)).not.toContain('initFrom');
+
+    const load = createModule();
+    await load.module.init('load');
+    expect(load.init.mock.calls[0][2].initFrom).toBeUndefined();
+  });
 });

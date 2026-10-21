@@ -1,4 +1,4 @@
-import { initializeSharing } from '../src/initializeSharing';
+import { initializeSharing, withInitCaller } from '../src/initializeSharing';
 import { InitializeSharingOptions, WebpackRequire } from '../src/types';
 
 // Mock the attachShareScopeMap function
@@ -183,6 +183,231 @@ describe('initializeSharing', () => {
     ).not.toHaveBeenCalled();
   });
 
+  type Call = {
+    call: string;
+    scope?: string;
+    after?: Promise<unknown>;
+    sync?: boolean;
+  };
+  type Dep = string | Promise<unknown> | Call;
+
+  // Containers whose sharing init, per share scope, calls init on the listed containers with the init token it gets as their caller, or waits on the listed promises
+  const createContainers = <Name extends string>(
+    deps: Record<Name, Dep[] | Record<string, Dep[]>>,
+  ) => {
+    const containers = {} as Record<
+      Name,
+      (initScope: any[], scope?: string) => any
+    >;
+    (Object.keys(deps) as Name[]).forEach((name) => {
+      const initPromises = {};
+      const initTokens = {};
+      const instance = createMockFederationInstance({
+        shareStrategy: 'version-first',
+      });
+      instance.name = name;
+      instance.initializeSharing = jest.fn((key, { initScope, initFrom }) => {
+        const list = deps[name];
+        return (Array.isArray(list) ? list : list[key]).map((dep) => {
+          if (typeof dep !== 'string' && !('call' in dep)) return dep;
+          const { call, scope, after, sync }: Call =
+            typeof dep === 'string' ? { call: dep } : dep;
+          const run = () =>
+            withInitCaller(initFrom, () =>
+              containers[call as Name](initScope, scope),
+            );
+          return sync
+            ? Promise.resolve(run())
+            : (after || Promise.resolve()).then(run);
+        });
+      });
+      const webpackRequire = createMockWebpackRequire({
+        federationInstance: instance,
+      });
+      containers[name] = (initScope, scope = 'default') =>
+        initializeSharing({
+          shareScopeName: scope,
+          webpackRequire: webpackRequire as any,
+          initPromises,
+          initTokens,
+          initScope,
+        });
+    });
+    return containers;
+  };
+
+  const trackSettled = (promise: any) => {
+    const state = { settled: false };
+    Promise.resolve(promise).then(() => (state.settled = true));
+    return state;
+  };
+
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 50));
+
+  test('should still wait for every pending share scope when the nested caller is unrelated', async () => {
+    let releaseDefault!: () => void;
+    const defaultGate = new Promise<void>(
+      (resolve) => (releaseDefault = resolve),
+    );
+    let releaseCustom!: () => void;
+    const customGate = new Promise<void>(
+      (resolve) => (releaseCustom = resolve),
+    );
+    const instance = createMockFederationInstance({
+      shareStrategy: 'version-first',
+    });
+    instance.initializeSharing = jest.fn((key) => [
+      key === 'default' ? defaultGate : customGate,
+    ]);
+    const options = createMockOptions({
+      shareScopeName: ['default', 'custom'],
+      webpackRequire: createMockWebpackRequire({
+        federationInstance: instance,
+      }),
+    });
+
+    initializeSharing({ ...options, initScope: [] });
+    const second = trackSettled(
+      withInitCaller({}, () =>
+        initializeSharing({ ...options, initScope: [] }),
+      ),
+    );
+    releaseDefault();
+
+    await flush();
+    expect(second.settled).toBe(false);
+    releaseCustom();
+    await flush();
+    expect(second.settled).toBe(true);
+  });
+
+  test('should still wait for a pending init that an unrelated chain shares without a cycle', async () => {
+    const containers = createContainers({
+      shared: [],
+      slow: [new Promise(() => {})],
+      remoteA: ['shared', 'slow'],
+      remoteD: ['shared', 'slow'],
+    });
+
+    containers.remoteA([]);
+    await flush();
+    const d = trackSettled(containers.remoteD([]));
+
+    await flush();
+    expect(d.settled).toBe(false);
+  });
+
+  test('should still wait when two unrelated chains each started a different shared remote first', async () => {
+    let releaseLate!: () => void;
+    const late = new Promise<void>((resolve) => (releaseLate = resolve));
+    let releaseLeafW!: () => void;
+    const leafW = new Promise<void>((resolve) => (releaseLeafW = resolve));
+    const containers = createContainers({
+      leafT: [new Promise(() => {})],
+      leafW: [leafW],
+      remoteP: ['leafT', { after: late, call: 'leafW' }],
+      remoteQ: ['leafW', { after: late, call: 'leafT' }],
+    });
+
+    containers.remoteP([]);
+    const q = trackSettled(containers.remoteQ([]));
+    await flush();
+    releaseLate();
+    await flush();
+    releaseLeafW();
+
+    await flush();
+    expect(q.settled).toBe(false);
+  });
+
+  test('should not deadlock when three cyclic remotes initialize from three chains', async () => {
+    const containers = createContainers({
+      cycleA: ['cycleB'],
+      cycleB: ['cycleC'],
+      cycleC: ['cycleA'],
+    });
+
+    const inits = (['cycleA', 'cycleB', 'cycleC'] as const).map((name) =>
+      trackSettled(containers[name]([])),
+    );
+
+    await flush();
+    expect(inits.every((init) => init.settled)).toBe(true);
+  });
+
+  test('should not deadlock when a fresh init synchronously reaches a container that waits on its caller', async () => {
+    let releaseLate!: () => void;
+    const late = new Promise<void>((resolve) => (releaseLate = resolve));
+    const containers = createContainers({
+      syncA: [{ after: late, call: 'syncB' }],
+      syncB: [{ call: 'syncX', sync: true }],
+      syncX: ['syncA'],
+    });
+
+    // syncX waits on syncA, then syncA starts syncB, which synchronously enters syncX
+    const a = trackSettled(containers.syncA([]));
+    const x = trackSettled(containers.syncX([]));
+    await flush();
+    releaseLate();
+
+    await flush();
+    expect(a.settled).toBe(true);
+    expect(x.settled).toBe(true);
+  });
+
+  test('should still reject when a caller joins an init that already failed', async () => {
+    let releaseLate!: () => void;
+    const late = new Promise<void>((resolve) => (releaseLate = resolve));
+    const failed = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('remote failed')), 10),
+    );
+    const containers = createContainers({
+      failX: [{ after: late, call: 'failR' }],
+      failR: [failed, 'failX'],
+    });
+
+    // failR waits on failX and then fails, before failX calls back into it
+    const x = containers.failX([]);
+    await expect(containers.failR([])).rejects.toThrow('remote failed');
+    releaseLate();
+
+    await expect(x).rejects.toThrow('remote failed');
+  });
+
+  test('should still wait when containers only wait on each other in different share scopes', async () => {
+    const containers = createContainers({
+      scopeA: { default: ['scopeB'], custom: [new Promise(() => {})] },
+      scopeB: {
+        default: [new Promise(() => {})],
+        custom: [{ call: 'scopeA', scope: 'custom' }],
+      },
+    });
+
+    // scopeA's default init waits on scopeB, and scopeB's custom init calls scopeA
+    containers.scopeA([], 'custom');
+    containers.scopeA([]);
+    await flush();
+    const bCustom = trackSettled(containers.scopeB([], 'custom'));
+
+    await flush();
+    expect(bCustom.settled).toBe(false);
+  });
+
+  test('should not deadlock when cyclic remotes are configured with a different share scope than their callers use', async () => {
+    // Each container inits its own share scope, while its caller inits the other one
+    const containers = createContainers({
+      mismatchA: { scopeA: [{ call: 'mismatchB', scope: 'scopeB' }] },
+      mismatchB: { scopeB: [{ call: 'mismatchA', scope: 'scopeA' }] },
+    });
+
+    const a = trackSettled(containers.mismatchA([], 'scopeA'));
+    const b = trackSettled(containers.mismatchB([], 'scopeB'));
+
+    await flush();
+    expect(a.settled).toBe(true);
+    expect(b.settled).toBe(true);
+  });
+
   test('should initialize sharing with no promises', async () => {
     // Setup
     const mockOptions = createMockOptions();
@@ -200,6 +425,7 @@ describe('initializeSharing', () => {
       strategy: 'eager',
       initScope: expect.any(Array),
       from: 'build',
+      initFrom: mockOptions.initTokens['default'],
     });
   });
 
@@ -229,6 +455,7 @@ describe('initializeSharing', () => {
       strategy: 'eager',
       initScope: expect.any(Array),
       from: 'build',
+      initFrom: mockOptions.initTokens['default'],
     });
   });
 
@@ -252,6 +479,7 @@ describe('initializeSharing', () => {
       strategy: 'eager',
       initScope: expect.any(Array),
       from: 'build',
+      initFrom: mockOptions.initTokens['default'],
     });
     expect(
       mockOptions.webpackRequire.federation.instance?.initializeSharing,
@@ -259,6 +487,7 @@ describe('initializeSharing', () => {
       strategy: 'eager',
       initScope: expect.any(Array),
       from: 'build',
+      initFrom: mockOptions.initTokens['custom'],
     });
   });
 
@@ -636,6 +865,7 @@ describe('initializeSharing', () => {
       strategy: 'eager',
       initScope: [{ from: 'test-app' }], // The actual implementation adds a token
       from: 'build',
+      initFrom: mockOptions.initTokens['default'],
     });
   });
 
