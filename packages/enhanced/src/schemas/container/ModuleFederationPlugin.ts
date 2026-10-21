@@ -1022,6 +1022,12 @@ export default {
           type: 'boolean',
           default: false,
         },
+        showBridgeRouterLogs: {
+          description:
+            'Prints router alias debug logs emitted by the React bridge webpack plugin when true.',
+          type: 'boolean',
+          default: false,
+        },
       },
       additionalProperties: false,
     },
