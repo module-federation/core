@@ -5,6 +5,7 @@ module.exports = {
     '^.+\\.[tj]sx?$': [
       '@swc/jest',
       {
+        swcrc: false,
         jsc: {
           parser: {
             syntax: 'typescript',

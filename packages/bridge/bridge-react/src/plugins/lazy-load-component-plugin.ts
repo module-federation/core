@@ -1,7 +1,7 @@
 import type {
   ModuleFederation,
   ModuleFederationRuntimePlugin,
-} from '@module-federation/runtime';
+} from '@module-federation/enhanced/runtime';
 import {
   createLazyComponent,
   prefetch,
@@ -10,7 +10,7 @@ import {
 } from '../lazy';
 import type { CreateLazyComponentOptions, PrefetchOptions } from '../lazy';
 
-declare module '@module-federation/runtime-core' {
+declare module '@module-federation/enhanced/runtime' {
   interface ModuleFederation {
     createLazyComponent<T, E extends keyof T>(
       options: Omit<CreateLazyComponentOptions<T, E>, 'instance'>,

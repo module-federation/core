@@ -3046,12 +3046,9 @@ importers:
       '@module-federation/bridge-shared':
         specifier: workspace:*
         version: link:../bridge-shared
-      '@module-federation/runtime':
+      '@module-federation/enhanced':
         specifier: workspace:*
-        version: link:../../runtime
-      '@module-federation/runtime-core':
-        specifier: workspace:*
-        version: link:../../runtime-core
+        version: link:../../enhanced
       '@rsbuild/plugin-react':
         specifier: 2.1.0
         version: 2.1.0(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.2)(core-js@3.49.0))(@rspack/core@2.1.10(@module-federation/runtime-tools@2.9.2)(@swc/helpers@0.5.23))

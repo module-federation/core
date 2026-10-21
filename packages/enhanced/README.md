@@ -14,6 +14,16 @@ The following items are exported:
 - AsyncBoundaryPlugin
 - HoistContainerReferencesPlugin
 
+## Runtime entry
+
+Import runtime APIs, types and helpers from `@module-federation/enhanced/runtime`:
+
+```ts
+import { createInstance, helpers, type ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+```
+
+The `helpers` export provides the existing runtime `global`, `share` and `utils` helpers. It uses the same runtime implementation as the other APIs and works with React Bridge without additional application dependencies on the lower-level runtime packages.
+
 ## Documentation
 
 See [https://module-federation.io/guide/build-plugins/plugins.html](https://module-federation.io/guide/build-plugins/plugins.html) for details.
