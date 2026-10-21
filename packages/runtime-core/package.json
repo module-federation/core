@@ -30,6 +30,76 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./kernel": {
+      "import": {
+        "types": "./dist/kernel.d.ts",
+        "default": "./dist/kernel.js"
+      },
+      "require": {
+        "types": "./dist/kernel.d.ts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./shared": {
+      "import": {
+        "types": "./dist/shared/capability.d.ts",
+        "default": "./dist/shared/capability.js"
+      },
+      "require": {
+        "types": "./dist/shared/capability.d.ts",
+        "default": "./dist/shared/capability.cjs"
+      }
+    },
+    "./remote": {
+      "import": {
+        "types": "./dist/remote/capability.d.ts",
+        "default": "./dist/remote/capability.js"
+      },
+      "require": {
+        "types": "./dist/remote/capability.d.ts",
+        "default": "./dist/remote/capability.cjs"
+      }
+    },
+    "./snapshot": {
+      "import": {
+        "types": "./dist/plugins/snapshot/capability.d.ts",
+        "default": "./dist/plugins/snapshot/capability.js"
+      },
+      "require": {
+        "types": "./dist/plugins/snapshot/capability.d.ts",
+        "default": "./dist/plugins/snapshot/capability.cjs"
+      }
+    },
+    "./platform/web": {
+      "import": {
+        "types": "./dist/platform/web.d.ts",
+        "default": "./dist/platform/web.js"
+      },
+      "require": {
+        "types": "./dist/platform/web.d.ts",
+        "default": "./dist/platform/web.cjs"
+      }
+    },
+    "./platform/node": {
+      "import": {
+        "types": "./dist/platform/node.d.ts",
+        "default": "./dist/platform/node.js"
+      },
+      "require": {
+        "types": "./dist/platform/node.d.ts",
+        "default": "./dist/platform/node.cjs"
+      }
+    },
+    "./platform/universal": {
+      "import": {
+        "types": "./dist/platform/universal.d.ts",
+        "default": "./dist/platform/universal.js"
+      },
+      "require": {
+        "types": "./dist/platform/universal.d.ts",
+        "default": "./dist/platform/universal.cjs"
+      }
+    },
     "./types": {
       "import": {
         "types": "./dist/types.d.ts",
@@ -45,6 +115,27 @@
     "*": {
       ".": [
         "./dist/index.d.ts"
+      ],
+      "kernel": [
+        "./dist/kernel.d.ts"
+      ],
+      "shared": [
+        "./dist/shared/capability.d.ts"
+      ],
+      "remote": [
+        "./dist/remote/capability.d.ts"
+      ],
+      "snapshot": [
+        "./dist/plugins/snapshot/capability.d.ts"
+      ],
+      "platform/web": [
+        "./dist/platform/web.d.ts"
+      ],
+      "platform/node": [
+        "./dist/platform/node.d.ts"
+      ],
+      "platform/universal": [
+        "./dist/platform/universal.d.ts"
       ],
       "types": [
         "./dist/types.d.ts"

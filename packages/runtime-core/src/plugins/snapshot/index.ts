@@ -1,8 +1,4 @@
-import {
-  ModuleInfo,
-  getResourceUrl,
-  isBrowserEnvValue,
-} from '@module-federation/sdk';
+import { ModuleInfo, getResourceUrl } from '@module-federation/sdk/core';
 import { ModuleFederationRuntimePlugin } from '../../type/plugin';
 import { RUNTIME_011, runtimeDescMap } from '@module-federation/error-codes';
 import {
@@ -12,21 +8,31 @@ import {
   isRemoteInfoWithEntry,
   getRemoteEntryInfoFromSnapshot,
 } from '../../utils';
-import { PreloadOptions, PreloadRemoteArgs, RemoteInfo } from '../../type';
+import {
+  PreloadOptions,
+  PreloadRemoteArgs,
+  RemoteInfo,
+  SnapshotCapability,
+} from '../../type';
+import { generatePreloadAssetsPlugin } from '../generate-preload-assets';
 import { preloadAssets } from '../../utils/preload';
 
 export function assignRemoteInfo(
   remoteInfo: RemoteInfo,
   remoteSnapshot: ModuleInfo,
+  inBrowser: boolean,
 ): void {
-  const remoteEntryInfo = getRemoteEntryInfoFromSnapshot(remoteSnapshot);
+  const remoteEntryInfo = getRemoteEntryInfoFromSnapshot(
+    remoteSnapshot,
+    inBrowser,
+  );
   if (!remoteEntryInfo.url) {
     error(RUNTIME_011, runtimeDescMap, { remoteName: remoteInfo.name });
   }
 
-  let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
+  let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url, inBrowser);
 
-  if (!isBrowserEnvValue && !entryUrl.startsWith('http')) {
+  if (!inBrowser && !entryUrl.startsWith('http')) {
     entryUrl = `https:${entryUrl}`;
   }
 
@@ -50,7 +56,11 @@ export function snapshotPlugin(): ModuleFederationRuntimePlugin {
             id: composeRemoteRequestId(remote.name, expose),
           });
 
-        assignRemoteInfo(remoteInfo, remoteSnapshot);
+        assignRemoteInfo(
+          remoteInfo,
+          remoteSnapshot,
+          origin.platform.isBrowser(),
+        );
         // preloading assets
         const preloadOps: PreloadRemoteArgs[] = [
           {
@@ -111,3 +121,7 @@ export function snapshotPlugin(): ModuleFederationRuntimePlugin {
     },
   };
 }
+
+export const snapshot: SnapshotCapability = {
+  plugins: () => [snapshotPlugin(), generatePreloadAssetsPlugin()],
+};

@@ -1,6 +1,6 @@
 import type { ModuleInfo } from '@module-federation/sdk';
 import { describe, it, rs } from '@rstest/core';
-import { ModuleFederation } from '../src/core';
+import { ModuleFederation } from '../src';
 import { Global, setPreloadedAsset } from '../src/global';
 import type { RemoteInfo } from '../src/type';
 import type {
