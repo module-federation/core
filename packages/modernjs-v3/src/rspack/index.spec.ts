@@ -52,7 +52,7 @@ describe('producer callback target selection', () => {
         ).toBe('@module-federation/modern-js-v3/react-server');
         expect(
           select(target, `@module-federation/bridge-react/v${version}`).request,
-        ).toBe('@module-federation/bridge-react/server');
+        ).toBe('@module-federation/modern-js-v3/react-server');
       }
     }
   });

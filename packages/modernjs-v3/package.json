@@ -87,6 +87,11 @@
       "default": "./dist/cjs/server/index.js"
     },
     "./bridge/application": {
+      "node": {
+        "types": "./dist/types/bridge-stream/application.server.d.ts",
+        "import": "./dist/esm/bridge-stream/application.server.mjs",
+        "require": "./dist/cjs/bridge-stream/application.server.js"
+      },
       "types": "./dist/types/bridge-stream/application.d.ts",
       "import": "./dist/esm/bridge-stream/application.mjs",
       "require": "./dist/cjs/bridge-stream/application.js"
@@ -129,6 +134,11 @@
     "./react-server": {
       "types": "./dist/types/react/server.d.ts",
       "default": "./dist/esm/react/server.mjs"
+    },
+    "./bridge/application.server": {
+      "types": "./dist/types/bridge-stream/application.server.d.ts",
+      "import": "./dist/esm/bridge-stream/application.server.mjs",
+      "require": "./dist/cjs/bridge-stream/application.server.js"
     }
   },
   "typesVersions": {
@@ -176,7 +186,7 @@
         "./dist/types/server/index.d.ts"
       ],
       "bridge/application": [
-        "./dist/types/bridge-stream/application.d.ts"
+        "./dist/types/bridge-stream/application.server.d.ts"
       ],
       "ssr-bridge-plugin": [
         "./dist/types/ssr-runtime/bridgeStreamPlugin.d.ts"
@@ -201,6 +211,9 @@
       ],
       "react-server": [
         "./dist/types/react/server.d.ts"
+      ],
+      "bridge/application.server": [
+        "./dist/types/bridge-stream/application.server.d.ts"
       ]
     }
   },

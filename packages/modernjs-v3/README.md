@@ -2,25 +2,17 @@
 
 This plugin integrates Module Federation with Modern.js. See the [Modern.js integration documentation](https://module-federation.io/guide/framework/modernjs.html) for general configuration.
 
-## Consolidated review and built-in integration follow-up
+## Implementation and review
 
-The complete framework work is reviewed in two PRs: [MF #5164](https://github.com/module-federation/core/pull/5164) and [Modern #8941](https://github.com/web-infra-dev/modern.js/pull/8941). MF #5164 includes the independent-root SSR and lifecycle work previously reviewed in #5112, progressive hydration from #5162, and Service HTTP execution. Modern #8941 includes the application APIs and commerce demo from Modern #8926 plus deferred-data hydration. The older PRs are superseded review history, not additional prerequisites.
+The current integration combines [Bridge rendering callbacks in MF #5200](https://github.com/module-federation/core/pull/5200), [Modern callbacks in #9002](https://github.com/web-infra-dev/modern.js/pull/9002), and [Service render caching in MF #5201](https://github.com/module-federation/core/pull/5201). The cache PR includes the callback changes and is stacked on #5200. Joint HTTP/browser results and exact commands are in [CACHE-CALLBACKS-VERIFICATION.md](CACHE-CALLBACKS-VERIFICATION.md). These draft PRs build on the earlier SSR branches and are not published package capabilities.
 
-Both consolidated PRs are held as drafts for the upcoming Modern built-in MF integration. The current implementation still uses `@module-federation/modern-js-v3`; the package migration below has not been implemented:
-
-- Modern will declare `@module-federation/enhanced` as a peer in each published package that imports it, and obtain MF APIs from `@module-federation/enhanced/runtime`.
-- Framework-independent Bridge loaders, lifecycle/SSR contracts, framing and transport can live in Bridge. Modern application adapters, registry/expose generation and `extendStreamSSR` integration belong in Modern, with dedicated `@modern-js/runtime/mf` and server exports.
-- Preserve Node/browser entry selection, lazy local loading for HTTP-only hosts, runtime instance/Bridge plugin identity, and explicit Bridge/Node-support dependencies. The current legacy `@modern-js/runtime/mf` alias must be replaced as part of that migration.
-
-Review the shared Bridge components and server/browser lifecycle first, then the Modern application APIs, progressive data contract, and finally the HTTP executor/protocol. The commerce example and its verification history live in the companion Modern PR at `examples/module-federation/bridge-ssr`. The separate Service App demo is retained in `code.byted.org/zhanghang.heal/mf-sdc`, branch `feat/bridge-progressive-service-ssr`; its React 18 pnpm patch, Node-artifact guard, README and VERIFICATION.md are validation material, not files included in these two framework PRs.
-
-This consolidation merges the missing documentation history and updates its conclusions. It does not change runtime code, merge either PR into main, or publish packages. Existing build/browser evidence remains historical; consolidation checks verify ancestry, Markdown formatting, whitespace and that only Markdown differs from the previously validated tips.
+Review the explicit provider and framework callbacks in [BRIDGE-RENDERER-CALLBACKS.md](BRIDGE-RENDERER-CALLBACKS.md), then the Service transport and cache below. The Service App demo uses the same provider for HTTP SSR, local SSR and browser hydration. A future move of the plugin integration into Modern itself is separate work.
 
 ## Independent Bridge application SSR
 
 Bridge applications can render in the host's Node process or in a producer-owned HTTP service while keeping their own React root, React version, router, and Modern runtime. The host forwards complete HTML fragments as they become available; it does not wait for the entire remote application to become a string. The browser hydrates each application with its own renderer after the shell and initial loader snapshot arrive, while deferred content continues streaming. Legacy providers without a progressive snapshot hydrate after completion.
 
-This integration requires the Modern application APIs `@modern-js/runtime/application` and `@modern-js/runtime/application/server`, plus request context, `shellEndMarker`, and `identifierPrefix` support in Modern's streaming SSR extension. Use a Modern build that includes these APIs; installing this MF plugin alone does not add them to older Modern releases. Generated entries use the producer's actual Modern route tree and loaders through `createApplication` and `renderApplication`.
+This integration requires the matching Modern build with `@modern-js/runtime/mf` rendering callbacks and its underlying independent application APIs. Installing the MF plugin alone does not add them to older Modern releases. Modern's streaming SSR extension must also supply request context, `shellEndMarker` and `identifierPrefix`.
 
 Configure a host in `modern.config.ts`:
 
@@ -45,7 +37,33 @@ export default defineConfig({
 });
 ```
 
-Configure a producer application in its own `modern.config.ts`:
+Export the producer's root application from `src/bridge.tsx`:
+
+```tsx
+import '@modern-js/runtime/registry/index';
+import { createRoot } from '@modern-js/runtime/react';
+import { render, hydrate, renderStream } from '@modern-js/runtime/mf';
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v19';
+
+const ModernRoot = createRoot();
+export default createBridgeComponent({
+  rootComponent: ModernRoot,
+  render,
+  hydrate,
+  renderStream,
+});
+```
+
+Use `react-v18` for a React 18 producer. Declare the ordinary expose in `module-federation.config.ts`:
+
+```ts
+export default {
+  name: 'commerce_products',
+  exposes: { './App': './src/bridge.tsx' },
+};
+```
+
+Configure the current plugin integration in `modern.config.ts`:
 
 ```ts
 import { appTools, defineConfig } from '@modern-js/app-tools';
@@ -57,14 +75,13 @@ export default defineConfig({
   plugins: [
     appTools(),
     moduleFederationPlugin({
-      bridge: { exposes: { './App': true } },
-      config: { name: 'commerce_products' },
+      bridge: { revision: 'products-v1' },
     }),
   ],
 });
 ```
 
-`true` selects the main Modern application entry. For a named entry, use `bridge: { exposes: { './App': 'entryName' } }`. The entry must use Modern's automatic application mounting. Expose names must start with `./` and must not duplicate `config.exposes`. To change the default 30-second SSR deadline, use `bridge: { timeoutMs: 10000 }` on the host.
+The same provider source is compiled for Node and browser. The build plugin selects the framework and Bridge server entries for Node while preserving the root component. The older generated `bridge.exposes` providers remain supported, but are not required for this callback entry. To change the default 30-second SSR deadline, use `bridge: { timeoutMs: 10000 }` on the host.
 
 Consume the application in a host component:
 
@@ -87,28 +104,30 @@ export default function Dashboard() {
 
 ## Rendering and hydration sequence
 
-The producer owns its Modern application definition, loaders, runtime context, and React renderer. At build time, `bridge.exposes` generates two entries that import the producer's registry: the Node entry exports `createModernServerBridge({ renderApplication })`, and the browser entry exports `createModernBrowserBridge({ createApplication })`. The build generates these calls; it does not execute SSR. Automatic detection of application exports in ordinary `config.exposes` is not implemented.
+The producer owns its Modern application definition, loaders, runtime context and React renderer. Bridge constructs the tree from `rootComponent` and the request props, then passes it to the injected `renderStream` callback. Modern calls `renderApplication` with that tree and request, without a second document template. The browser uses the corresponding `hydrate` callback to restore the same application in its own container.
 
-`renderApplication(request, options)` returns an HTML `stream`, a final `snapshot` promise, and `cancel`. Progressive mode additionally returns `hydration.snapshot`, `hydration.updates`, and `hydration.shellMarker`. It reuses Modern's request preparation and loaders but renders application content without the outer document template. `createApplication()` provides browser `mount`, `hydrate`, `update`, and `destroy`. The snapshot contains serializable initial state (including props, URL, basename, identifier prefix, initial data, and route loader data/errors), not the complete runtime context or React component state. MF transports it as opaque data; the producer's browser runtime consumes it. Consumer prop/URL changes reach `update` through subsequent Bridge `render` calls on the existing instance.
+The callback returns `stream`, `snapshot`, `abort` and optional `hydration: { snapshot, updates, shellMarker }`. The snapshot contains serializable props, route and loader data, URL and React prefix. MF transports it as opaque data. Modern restores it through `createApplication(element)`, and later Bridge renders update the existing instance. The producer Node adapter converts that raw result into `BridgeSSRMessageResult` with `protocol: "mf-bridge-producer/1"`, a hydration mode and a stream of prepared messages. Business callbacks keep their existing signature. A local provider that still returns unadapted raw bytes must be rebuilt with the current adapter. Callback types and build entry selection are described in [BRIDGE-RENDERER-CALLBACKS.md](BRIDGE-RENDERER-CALLBACKS.md).
 
 On the host, `createRemoteAppComponent` derives an instance ID from host `useId` and pre-registers work before the lazy module settles, using `deferRender: true`. The server lifecycle in `RemoteAppWrapper` later activates the same job with final routing parameters. `bridgeStreamPlugin` supplies `BridgeSSRContext` and a separate job map for each request through Modern's `api.extendStreamSSR`; these are not global jobs shared across requests. Each job selects an executor: the local path loads the producer's Node module and calls `renderStream` in the host process; the HTTP path obtains the same result contract from the producer service. The HTTP-only path never invokes the deferred local provider.
 
 ```text
 Host raw React stream → hostPieces → isolated Host scripts → raw Host HTML
-Remote React stream   → htmlFrames → isolated Remote scripts → accept(id, frame)
+Producer React stream → producer htmlFrames + script isolation + readiness
                                   ↓
-                  Modern document template → HTTP response
+                    prepared messages (local or HTTP/cache)
+                                  ↓
+              Host accept(id, message) → document response
                                   ↓
        browser bootstrap → Remote container → producer hydrateRoot
 ```
 
-`hostPieces` reads the raw Host React stream before Modern applies the document template. It first emits the shell together with Modern's existing shell marker, then delegates later pieces to `htmlFrames`. Remote output uses `htmlFrames` from the start. The compositor releases Remote frames after writing the initial Host shell; this does not wait for all Host Suspense work, browser paint, or Host hydration. Producer loading/rendering can begin earlier. A Remote discovered by later Host Suspense can have a container that appears later, so the browser still queues its frames.
+`hostPieces` reads the raw Host React stream before Modern applies the document template. It first emits the shell together with Modern's existing shell marker, then delegates later pieces to `htmlFrames`. Each producer uses `htmlFrames` from the start in its Node adapter. The Host consumes the resulting `BridgeSSRMessageResult` without reframing it. The compositor releases Remote frames after writing the initial Host shell; this does not wait for all Host Suspense work, browser paint, or Host hydration. Producer loading/rendering can begin earlier. A Remote discovered by later Host Suspense can have a container that appears later, so the browser still queues its frames.
 
-`htmlFrames` runs on the server. It buffers arbitrary byte chunks into complete top-level HTML fragments while preserving their order. It does not route fragments by ID, execute React scripts, or detect application completion. Host fragments remain raw HTML; Remote fragments become inline `accept(instanceId, frame)` calls. This prevents inserting Remote instructions into a half-written Host tag/script and lets the browser parse each Remote fragment independently. A single stream's byte order is preserved; only complete output units from different renderers are interleaved.
+`htmlFrames` runs in the producer adapter for each Remote and in the document owner for its own Host output. It buffers arbitrary byte chunks into complete top-level HTML fragments while preserving their order. It does not route fragments by ID, execute React scripts, or detect application completion. Host fragments remain raw HTML; Remote fragments become inline `accept(instanceId, frame)` calls. This prevents inserting Remote instructions into a half-written Host tag/script and lets the browser parse each Remote fragment independently. A single stream's byte order is preserved; only complete output units from different renderers are interleaved.
 
-The browser runs `bridgeStreamBootstrap`, not the server HTML framer. It is currently injected through `getStyleTags` to execute before the first `accept` call; a dedicated early-bootstrap hook is a follow-up, and must retain ordering and nonce support. The bootstrap waits for each container and its CSS, parses fragments through a template, inserts them, and executes the producer renderer's inline completion scripts. It removes the initial Host loading content itself; React-generated completion scripts perform the subsequent Suspense fallback replacements. `isolateReactStreamScripts` rewrites known helper identifiers with a per-renderer namespace before transport; it does not replace React's DOM-update algorithm.
+The browser runs `bridgeStreamBootstrap`, not the server HTML framer. It is currently injected through `getStyleTags` to execute before the first `accept` call; a dedicated early-bootstrap hook is a follow-up, and must retain ordering and nonce support. The bootstrap waits for each container and its CSS, parses fragments through a template, inserts them, and executes the producer renderer's inline completion scripts. It removes the initial Host loading content itself; React-generated completion scripts perform the subsequent Suspense fallback replacements. `isolateReactStreamScripts` runs in the producer adapter and rewrites known helper identifiers with a per-renderer namespace before transport; it does not replace React's DOM-update algorithm.
 
-In progressive mode, the producer encodes an initial snapshot with pending-value references. After its complete shell marker passes framing, the host emits `ready`; the browser waits for the container, CSS and browser module, then calls the producer's `hydrate` once. Later HTML and opaque `update` frames resolve deferred boundaries in that same root. `done` signals completed transport and does not call `hydrateRoot` again. Providers without a progressive channel use the complete path: the producer resolves the final snapshot after HTML completion and recursive data resolution, the host emits `data/done`, and the browser hydrates after its completion gate. An SSR instance does not race a separate CSR mount: lifecycle updates queue behind initialization. Without an SSR session, it uses ordinary CSR mounting.
+In progressive mode, the producer encodes an initial snapshot with pending-value references. The producer emits `ready` after its complete shell marker passes framing and its initial snapshot is available. The Host forwards that message; the browser waits for the container, CSS and browser module, then calls the producer's `hydrate` once. Later HTML and opaque `update` frames resolve deferred boundaries in that same root. `done` signals completed transport and does not call `hydrateRoot` again. Providers without a progressive channel use the complete path: the producer resolves the final snapshot after HTML completion and recursive data resolution, the producer emits `data/done`, and the browser hydrates after its completion gate. An SSR instance does not race a separate CSR mount: lifecycle updates queue behind initialization. Without an SSR session, it uses ordinary CSR mounting.
 
 ### Host readiness is separate from Remote readiness
 
@@ -138,7 +157,7 @@ The component factories and `RemoteAppWrapper` keep one shared implementation of
 
 ## Deployment and failure behavior
 
-Publish the producer's MF manifest and browser assets for browser hydration and CSR. For local execution, also make the Node SSR entry and all referenced chunks available to the host: its MF Node loader executes that build in the host process, without an additional server. For HTTP-only execution, deploy the Node build to the producer service instead; the host requests, frames, and forwards that service's rendered output without loading or executing the producer Node expose. Only an explicitly enabled local fallback adds that Node-artifact requirement to an HTTP consumer. Static artifact delivery may itself use HTTP; downloading code is separate from requesting an HTTP rendering service.
+Publish the producer's MF manifest and browser assets for browser hydration and CSR. For local execution, also make the Node SSR entry and all referenced chunks available to the host: its MF Node loader executes that build in the host process, without an additional server. For HTTP-only execution, deploy the Node build to the producer service instead; the host requests and forwards that service's prepared messages without loading or executing the producer Node expose. Only an explicitly enabled local fallback adds that Node-artifact requirement to an HTTP consumer. Static artifact delivery may itself use HTTP; downloading code is separate from requesting an HTTP rendering service.
 
 The default path is SSR. Loading, rendering, stream completion, and hydration failures trigger a single whole-page navigation that sets `csr=1` and preserves other query parameters and the URL hash. Enable Modern's `server.ssr.forceCSR` on the host so that the next request selects CSR; this plugin does not change that Modern setting automatically. In CSR mode, the browser mounts the producer applications through their normal browser entries. A missing browser artifact can still fail and is shown by the component's error fallback.
 
@@ -153,7 +172,7 @@ A received stream is not proof of success: the selected protocol must deliver th
 
 ### Progressive application hydration
 
-Modern application providers now expose an optional early hydration channel. Once the producer's complete shell marker has passed through the HTML framer, the host sends a `ready` frame containing an initial application snapshot. The browser can hydrate that independent root while subsequent `html` and opaque `update` frames are still arriving. Each instance owns its data stream; even repeated mounts of one producer do not share pending values.
+Modern application providers now expose an optional early hydration channel. The producer adapter sends `ready` after framing its complete shell and obtaining the initial snapshot. The Host forwards that message unchanged. The browser can hydrate that independent root while subsequent `html` and opaque `update` frames are still arriving. Each instance owns its data stream; even repeated mounts of one producer do not share pending values.
 
 The producer runtime encodes and restores deferred data. MF does not inspect route IDs or loader results. `done` still means the producer's HTML and data transport have finished; it is distinct from `ready` and from a React commit. Providers without the new channel retain the final snapshot / completion-first hydration path. Late errors, timeouts and cancellation remain active after early hydration begins. Known styles must be ready before the shell is exposed.
 
@@ -193,7 +212,7 @@ bridge: {
 
 To opt into HTTP-to-local recovery, set `localFallback: true` for that same module and make its matching Node build available through the configured MF remote. This is a separate deployment capability, not a Service App prerequisite; no extra remote alias or expose is needed to express the policy. The fallback is attempted only before HTTP metadata is accepted.
 
-The producer sets `bridge: { exposes: { './app': true }, revision: 'weekend-demo-v2' }` and installs a Modern server middleware:
+The producer uses the explicit callback provider shown above, exposes it as `config.exposes: { './app': './src/bridge.tsx' }`, sets `bridge: { revision: 'weekend-demo-v2' }`, and installs a Modern server middleware:
 
 ```ts
 import { createBridgeServiceMiddleware } from '@module-federation/modern-js-v3/bridge/service';
@@ -203,22 +222,41 @@ const handler = createBridgeServiceMiddleware({
   manifest: 'http://127.0.0.1:4801/static/mf-manifest.json',
   module: 'weekend_provider/app',
   revision: 'weekend-demo-v2',
+  cache: { maxAgeMs: 60_000 },
 });
 ```
 
 The middleware loads that producer's actual MF Node application and calls its `renderStream`, which delegates to Modern `renderApplication`. It does not create another React renderer. The producer may instead call `createBridgeServiceHandler({ revision, render })` with an existing Node application loader.
 
-`mf-bridge-service/1` transports initial metadata, raw HTML byte chunks, the initial snapshot, opaque deferred updates, and completion over NDJSON. It is separate from the consumer-to-browser `mf-bridge/1` protocol: HTML framing and React instruction isolation stay with the consumer. Metadata binds the expected protocol, build revision, instance prefix, and hydration mode. Node and browser application adapters also stamp/check the revision on the snapshot. Deploy each revision's manifest and all browser/Node assets together at immutable URLs; this check detects a mismatch but does not repair a stale deployment.
+`mf-bridge-service/2` transports metadata followed by complete `html` string messages, `ready` with the initial snapshot, opaque `update` values, and `done`. Complete mode uses `data` with the final snapshot instead of `ready/update`. Each JSON record ends with a newline, with newlines inside HTML escaped by JSON. The producer adapter performs HTML framing, React instruction isolation and readiness checks once. Consumers validate record order and size and forward messages without parsing HTML or rewriting scripts. The browser envelope remains `mf-bridge/1`. Service producers and consumers must upgrade together; version 1 raw-byte responses are rejected. Metadata binds the expected protocol, build revision, instance prefix, and hydration mode. Node and browser application adapters also stamp/check the revision on the snapshot. Deploy each revision's manifest and all browser/Node assets together at immutable URLs; this check detects a mismatch but does not repair a stale deployment.
 
-The fetch executor returns once valid metadata arrives. HTML and deferred updates then drain concurrently. Neither HTTP nor local execution waits for an entire HTML string before emitting content or starting initial-document hydration. The final `done` requires both channels to complete. Frame and queue limits, request cancellation, and timeouts remain active during streaming.
+The fetch executor returns once valid metadata arrives. HTML and deferred updates then drain concurrently. Neither HTTP nor local execution waits for an entire HTML string before emitting content or starting initial-document hydration. The final `done` requires HTML and deferred data to complete. The default HTML-unit limit is 2 MiB, each serialized HTTP record is limited to 3 MiB, and pending message queues are limited to 4 MiB. JSON escaping can enlarge a record, so a complete HTML unit can still exceed the wire limit and fail. Queue limits do not bound total renderer or parser memory. Request cancellation and timeouts remain active during streaming. Node `destination.flush()` is not used as a framing boundary.
+
+### Render caching
+
+The producer example above enables an in-process render cache with a 60-second lifetime. The same `cache` option is available on `createBridgeServiceHandler`. Choose a lifetime acceptable for that application's data; caching is not enabled when the option is omitted. A hit skips rendering, HTML framing and script isolation and replays its completed `mf-bridge-service/2` transcript, including HTML, snapshots, deferred updates, stylesheets and completion. A miss streams each complete HTML unit as it becomes available, without waiting for the whole render. Only successfully completed transcripts are committed; failed, interrupted or oversized recordings do not enter the cache. The cache never rewrites React HTML, IDs, completion scripts or opaque snapshots.
+
+A hit also skips provider creation, render lifecycle hooks and Modern request hooks. Put authentication and auditing that must run for every request outside the cached middleware. Renderers must tolerate being skipped and must not rely on SSR to perform writes. Replayed frames retain their order and bytes, not the original delays.
+
+The defaults are 128 entries, 32 MiB of retained transcript bytes and 1 MiB per entry. Override them with `maxEntries`, `maxBytes` and `maxEntryBytes`; all limits and `maxAgeMs` must be positive safe integers, and the entry limit cannot exceed the total byte limit. Entries expire from their completion time, and reads do not extend that lifetime. Capacity eviction uses least-recently-used order. Concurrent misses render independently. Each handler owns its cache; workers and replicas do not share it, and a process restart clears it.
+
+The cache key hashes the complete serialized protocol request, including revision, hydration mode, module, URL, props, routing options, instance ID, React prefix, headers and nonce. Nothing is silently omitted. Initial SSR uses a stable, collision-free encoding of the Bridge instance ID as the Remote's React prefix: the same slot can hit across page requests, while two slots on one page have separate cached variants. A changed Host tree or any changed render input can cause a miss. A new build revision cannot consume an older revision's entries. Database changes and other state outside the request remain subject to the configured lifetime.
+
+Cookies, request-specific headers and CSP nonces can reduce reuse or prevent hits across requests. Those values are available to arbitrary producers and may affect their HTML or hydration state, so the cache does not discard or replace them to manufacture hits. Cache eligibility and input normalization must follow the application's actual rendering contract. For example, a provider that renders a nonce into its HTML and snapshot cannot share that exact output with a request carrying a different nonce.
+
+`x-mf-bridge-cache: hit` or `miss` reports the producer lookup when caching is enabled. Service POST responses retain `Cache-Control: no-store`: an ordinary HTTP cache keyed by URL cannot distinguish their render request bodies. This header does not disable the producer's render cache. HTTP/CDN caching and a shared persistent cache backend are not implemented by this option.
+
+Fast replay must fit the consumer's pending-byte budget. The fetch executor advertises `maxBufferedBytes` in the `x-mf-bridge-buffer-bytes` transport header; it is not exposed as a producer render input. A transcript larger than that budget is rendered live instead of replayed, even if stored. Clients omitting the header use the existing 4 MiB default; clients with a custom smaller budget must advertise it. This preserves the existing bounded multiplexed transport without claiming end-to-end backpressure. Increasing a cache entry limit alone does not increase a consumer's buffer budget.
 
 An HTTP error before metadata is accepted may retry the local Node application when `localFallback` is enabled. Once a result is accepted, a later stream, protocol, stylesheet, or hydration error uses the existing whole-page `csr=1` recovery. It never splices output from a second render into the first root. A local fallback with a different revision is rejected. Keep the service URL in trusted deployment configuration and apply the service's normal authentication/network access controls; forwarded page context is input to rendering, not service authentication.
 
 ### Service requests from a CSR page
 
-For requests initiated after the document has loaded, use `loadBridgeServiceRemote(moduleName, { url: '/services/render' })` from `@module-federation/modern-js-v3/bridge/client-service`. Install `createBridgeClientServiceMiddleware({ path: '/services/render', services })` from `@module-federation/modern-js-v3/bridge/client-service/server` on that consumer. This middleware accepts only configured module names and frames the upstream HTTP output with the same consumer-owned implementation. Request headers are forwarded only when explicitly listed in `forwardHeaders`.
+For requests initiated after the document has loaded, use `loadBridgeServiceRemote(moduleName, { url: '/services/render' })` from `@module-federation/modern-js-v3/bridge/client-service`. Install `createBridgeClientServiceMiddleware({ path: '/services/render', services })` from `@module-federation/modern-js-v3/bridge/client-service/server` on that consumer. This middleware accepts only configured module names and forwards upstream prepared messages in the browser envelope. It does not parse the producer HTML or rewrite its scripts. Request headers are forwarded only when explicitly listed in `forwardHeaders`.
 
 This path still reveals HTML fragments as they arrive, but uses a final snapshot and hydrates after the remote stream completes. It does not opt into initial-document early hydration after the browser document has closed. `csr=1` skips the service and mounts the real browser application; updates and destruction always delegate to that application's normal Bridge lifecycle. `bridge: true` is supported on a CSR-only consumer; generating producer SSR application exposes still requires Modern SSR.
+
+Delivery sessions retain random IDs. For the first use of a unique, valid container ID in a document, the client sends a separate stable render identity, allowing that slot to reuse a producer cache entry across documents. Missing, duplicate, invalid or previously used container identities fall back to the random session identity. In particular, remounting within one document does not reuse an old React instruction namespace. Older clients without a separate render identity remain supported.
 
 ## Planned React compatibility matrix
 

@@ -1,7 +1,7 @@
 import type {
   BridgeProvider,
   BridgeSSRRequest,
-  BridgeSSRResult,
+  BridgeSSRMessageResult,
 } from '@module-federation/bridge-react/ssr';
 import type { BridgeServiceOptions } from '../types';
 import { fetchBridgeService } from './service-http';
@@ -11,7 +11,7 @@ export async function executeBridgeSSR(
   info: BridgeSSRRequest,
   factory: () => BridgeProvider | Promise<BridgeProvider>,
   service?: BridgeServiceOptions,
-): Promise<BridgeSSRResult> {
+): Promise<BridgeSSRMessageResult> {
   if (service) {
     try {
       return await fetchBridgeService(info, {
@@ -32,9 +32,20 @@ export async function executeBridgeSSR(
   const result = await provider.renderStream(info);
   if (service && result.revision !== service.revision) {
     result.snapshot.catch(() => {});
-    result.hydration?.snapshot.catch(() => {});
+    if (typeof result.hydration === 'object')
+      result.hydration.snapshot.catch(() => {});
     result.abort(Error('Local Bridge fallback build revision mismatch'));
     throw Error('Local Bridge fallback build revision mismatch');
+  }
+  if (!('protocol' in result) || result.protocol !== 'mf-bridge-producer/1') {
+    const reason = Error(
+      'Bridge SSR requires producer-prepared messages. Rebuild the producer with the current server adapter.',
+    );
+    result.snapshot.catch(() => {});
+    if (typeof result.hydration === 'object')
+      result.hydration.snapshot.catch(() => {});
+    result.abort(reason);
+    throw reason;
   }
   return result;
 }

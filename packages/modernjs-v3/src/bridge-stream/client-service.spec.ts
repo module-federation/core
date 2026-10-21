@@ -47,6 +47,17 @@ const meta = {
 };
 const bytes = (frame: object) =>
   new TextEncoder().encode(`${JSON.stringify(frame)}\n`);
+const completedResponse = () =>
+  new Response(
+    [
+      meta,
+      { type: 'html', html: '<p>Ready</p>' },
+      { type: 'data', snapshot: { protocol: 'modern-application/1' } },
+      { type: 'done' },
+    ]
+      .map((frame) => JSON.stringify(frame))
+      .join('\n') + '\n',
+  );
 async function until(test: () => boolean) {
   for (let i = 0; i < 100; i++) {
     if (test()) return;
@@ -95,12 +106,97 @@ describe('browser service Bridge lifecycle', () => {
     const request = JSON.parse(fetcher.mock.calls[0][1]!.body as string);
     expect(request.props).toEqual({ city: 'London' });
     expect(request.props.dom).toBeUndefined();
+    expect(request.renderInstanceId).toBe('remote');
+    expect(request.instanceId).toBe(element.id);
+    expect(request.instanceId).not.toBe(request.renderInstanceId);
     await wrapped.render({ dom: element, city: 'Paris' });
     expect(provider.render).toHaveBeenCalledTimes(1);
     expect(fetcher).toHaveBeenCalledTimes(1);
     wrapped.destroy({ dom: element, moduleName: 'weekend/app' });
     expect(provider.destroy).toHaveBeenCalledTimes(1);
     expect(element.id).toBe('remote');
+  });
+  it('reuses the first stable slot across documents while keeping delivery sessions independent', async () => {
+    const requests: any[] = [];
+    for (let index = 0; index < 2; index++) {
+      const { element } = browser();
+      const fetcher = rs.fn(async () => completedResponse());
+      rs.stubGlobal('fetch', fetcher);
+      const wrapped = (
+        await loadBridgeServiceRemote('weekend/app', { url: '/bridge-render' })
+      ).default();
+      await wrapped.render({ dom: element, city: 'London' });
+      requests.push(JSON.parse(fetcher.mock.calls[0][1]!.body as string));
+      wrapped.destroy({ dom: element, moduleName: 'weekend/app' });
+    }
+    expect(requests.map((request) => request.renderInstanceId)).toEqual([
+      'remote',
+      'remote',
+    ]);
+    expect(requests[0].instanceId).not.toBe(requests[1].instanceId);
+    expect(requests[0].props).toEqual(requests[1].props);
+  });
+  it('does not reuse a released renderer identity even through another library copy', async () => {
+    const { element, provider } = browser();
+    const fetcher = rs.fn(async () => completedResponse());
+    rs.stubGlobal('fetch', fetcher);
+    const first = (
+      await loadBridgeServiceRemote('weekend/app', { url: '/bridge-render' })
+    ).default();
+    await first.render({ dom: element });
+    first.destroy({ dom: element, moduleName: 'weekend/app' });
+
+    rs.resetModules();
+    const otherRemote = await import('./remote');
+    rs.mocked(otherRemote.loadBridgeRemote).mockResolvedValue({
+      default: () => provider,
+    });
+    const otherLibrary = await import('./client-service');
+    const second = (
+      await otherLibrary.loadBridgeServiceRemote('weekend/app', {
+        url: '/bridge-render',
+      })
+    ).default();
+    await second.render({ dom: element });
+    const [initial, remount] = fetcher.mock.calls.map(([, init]) =>
+      JSON.parse(init!.body as string),
+    );
+    expect(initial.renderInstanceId).toBe('remote');
+    expect(remount.renderInstanceId).toBe(remount.instanceId);
+    expect(remount.instanceId).not.toBe(initial.instanceId);
+    second.destroy({ dom: element, moduleName: 'weekend/app' });
+  });
+  it('falls back to session identities for duplicate or invalid container IDs', async () => {
+    const { element, dom } = browser();
+    const duplicate = dom.window.document.createElement('div');
+    duplicate.id = element.id;
+    dom.window.document.body.appendChild(duplicate);
+    const invalid = dom.window.document.createElement('div');
+    invalid.id = 'invalid slot';
+    dom.window.document.body.appendChild(invalid);
+    const missing = dom.window.document.createElement('div');
+    dom.window.document.body.appendChild(missing);
+    const fetcher = rs.fn(async () => completedResponse());
+    rs.stubGlobal('fetch', fetcher);
+    const remote = await loadBridgeServiceRemote('weekend/app', {
+      url: '/bridge-render',
+    });
+    const roots = [element, duplicate, invalid, missing];
+    const providers = roots.map(() => remote.default());
+    for (const [index, root] of roots.entries())
+      await providers[index].render({ dom: root });
+    const requests = fetcher.mock.calls.map(([, init]) =>
+      JSON.parse(init!.body as string),
+    );
+    requests.forEach((request) =>
+      expect(request.renderInstanceId).toBe(request.instanceId),
+    );
+    expect(
+      new Set(requests.map((request) => request.renderInstanceId)).size,
+    ).toBe(roots.length);
+    providers.forEach((provider, index) =>
+      provider.destroy({ dom: roots[index], moduleName: 'weekend/app' }),
+    );
   });
   it('uses ordinary producer CSR directly after reload fallback', async () => {
     const { provider, element } = browser('?csr=1');

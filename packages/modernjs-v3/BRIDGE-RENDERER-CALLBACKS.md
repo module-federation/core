@@ -1,5 +1,7 @@
 # Bridge 渲染回调：实现与验收
 
+回调与 Service 缓存的整合结果见 [联合验证记录](CACHE-CALLBACKS-VERIFICATION.md)。[缓存 PR #5201](https://github.com/module-federation/core/pull/5201) 已包含本分支的回调实现，配套使用 [Modern #9002](https://github.com/web-infra-dev/modern.js/pull/9002)。下文保留回调接入及其原有验收范围。
+
 分支：`feat/bridge-renderer-callbacks`。本轮在已有 Bridge SSR / Service App Demo 上验证完整根应用，不包含指定路由导出。生产者直接导出自己的 provider，构建器保留该入口并选择对应环境的实现。
 
 ## 生产者怎么写
@@ -22,17 +24,16 @@ export const provider = createBridgeComponent({
 export default provider;
 ```
 
-React 18 使用 `react-v18`。普通 `config.exposes` 指向这个文件：
+React 18 使用 `react-v18`。普通 `module-federation.config.ts` 指向这个文件：
 
 ```ts
-moduleFederationPlugin({
-  bridge: true,
-  config: {
-    name: 'inventory',
-    exposes: { './App': './src/bridge.tsx' },
-  },
-});
+export default {
+  name: 'inventory',
+  exposes: { './App': './src/bridge.tsx' },
+};
 ```
+
+当前插件版在 `modern.config.ts` 使用 `moduleFederationPlugin({ bridge: true })` 接入。
 
 `bridge: true` 是当前插件版的集成开关；本轮没有实现后续 Modern 内置配置，也没有新增自动扫描。不要添加 `bridge.exposes`：那是旧方案生成 provider 的入口，本轮 Demo 不使用它。Service App 使用同样的生产者导出，由服务端 middleware 调用这个 provider 的 `renderStream`。
 
@@ -43,7 +44,7 @@ moduleFederationPlugin({
 | 通用 Bridge React | 在生产者内部构造同一棵树，调用注入的回调，保存挂载句柄，处理更新和销毁 | [bridge-base.tsx](../bridge/bridge-react/src/provider/versions/bridge-base.tsx)、[types.ts](../bridge/bridge-react/src/types.ts) |
 | Modern Node 回调 | 将传入的根树交给 `renderApplication`；运行请求 hooks、Router 与 loader；生成 HTML 流和水合数据 | 本地 Modern `packages/runtime/plugin-runtime/src/mf/server.tsx` |
 | Modern Browser 回调 | 通过 `createApplication(element)` 恢复路由和数据；每个容器持有独立实例，复用同一 root 更新、卸载 | 本地 Modern `packages/runtime/plugin-runtime/src/mf/index.tsx` |
-| MF/Modern 集成 | 选择 Node/Browser 入口；注册本次请求的 Remote 任务；获取、分帧、合并流并传输 snapshot | [rspack/index.ts](src/rspack/index.ts)、[bridgeStreamPlugin.node.tsx](src/ssr-runtime/bridgeStreamPlugin.node.tsx) |
+| MF/Modern 集成 | 选择 Node/Browser 入口；注册本次请求的 Remote 任务；生产者 Node 入口分帧、隔离更新脚本并判断就绪，消费者合并已处理消息 | [rspack/index.ts](src/rspack/index.ts)、[bridgeStreamPlugin.node.tsx](src/ssr-runtime/bridgeStreamPlugin.node.tsx) |
 
 ```text
 Host 本地 SSR：loadRemote(Node provider) ──▶ provider.renderStream(info)
@@ -55,7 +56,9 @@ Service SSR：Host HTTP ──▶ 生产者服务 ──────▶ 同一�
                                 → renderApplication(..., { element: App })
                                 → HTML 流 + 初始 snapshot + 后续数据
                                                 │
-                         MF 分帧、按 instanceId 合流、发送到浏览器
+                         生产者适配层：分帧、脚本隔离、生成 ready
+                                                │
+                         消费者：按 instanceId 合流、发送到浏览器
                                                 │
                          provider.hydrate → Modern hydrate → 独立 root
 ```
@@ -75,7 +78,7 @@ renderStream(App, info) → Promise<{
 }>
 ```
 
-`hydration` 支持 shell 就绪后提前水合；没有它时仍能流式展示，水合等待最终 snapshot。社区 React 框架可实现同样约定；本轮实际适配与浏览器验证仅覆盖 Modern，没有验证其他框架。
+`hydration` 支持 shell 就绪后提前水合。没有它时仍能流式展示，水合等待最终 snapshot。以上是框架回调的原始返回值。Modern 的 Node 入口把它转换为 `BridgeSSRMessageResult`，统一输出完整 HTML、就绪通知和数据消息。消费者不再判断标签闭合或扫描 shell marker，Service App 缓存的也是这些已处理消息。社区 React 框架可实现同样约定；本轮实际适配与浏览器验证仅覆盖 Modern，没有验证其他框架。
 
 ## 构建与兼容
 
@@ -83,7 +86,7 @@ renderStream(App, info) → Promise<{
 | --- | --- | --- |
 | `@modern-js/runtime/mf` | Modern `render/hydrate`，SSR 方法为显式错误入口 | 改为 `@modern-js/runtime/mf/server` |
 | `@module-federation/modern-js-v3/react-v18` 或 `react-v19` | 对应 React 版本的 Bridge | 改为 `react-server`，不导入 `react-dom/client` |
-| `@module-federation/bridge-react/v18` 或 `v19` | 原版本入口 | 改为 `@module-federation/bridge-react/server` |
+| `@module-federation/bridge-react/v18` 或 `v19` | 原版本入口 | 改为 Modern `react-server`，包含生产者消息适配层 |
 
 选择发生在框架构建插件中，同一份 `src/bridge.tsx` 用于两个目标。构建器没有把它替换成 `createModernServerBridge(...)` 生成文件。Node/Browser 编入同一 revision；Bridge 开启时移除旧 `runtime/mf` 别名，避免它覆盖框架回调出口。
 

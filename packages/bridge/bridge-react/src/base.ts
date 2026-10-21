@@ -35,6 +35,8 @@ export type {
   HydrateParams,
   BridgeSSRRequest,
   BridgeSSRResult,
+  BridgeSSRMessage,
+  BridgeSSRMessageResult,
   RootType,
   DestroyParams,
   RenderParams,

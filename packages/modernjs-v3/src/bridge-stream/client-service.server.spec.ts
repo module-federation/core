@@ -1,8 +1,24 @@
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { createBridgeClientServiceMiddleware } from './client-service.server';
 import { fetchBridgeService } from './service-http';
+import type {
+  BridgeSSRMessage,
+  BridgeSSRMessageResult,
+} from '@module-federation/bridge-react/ssr';
 
 rs.mock('./service-http', () => ({ fetchBridgeService: rs.fn() }));
+rs.mock('htmlparser2', () => ({
+  Parser: class {
+    constructor() {
+      throw Error('Consumer must not parse producer HTML');
+    }
+  },
+}));
+rs.mock('./script-isolation.server', () => ({
+  isolateReactStreamScripts: () => {
+    throw Error('Consumer must not rewrite producer scripts');
+  },
+}));
 afterEach(() => rs.clearAllMocks());
 
 const services = {
@@ -30,23 +46,22 @@ function invoke(body: object, init: RequestInit = {}) {
     rs.fn(),
   ) as Promise<Response>;
 }
-function result(html: string) {
+function result(html: string): BridgeSSRMessageResult {
+  const snapshot = { protocol: 'modern-application/1', bridgeRevision: 'r1' };
   return {
+    protocol: 'mf-bridge-producer/1',
+    hydration: 'complete',
     revision: 'r1',
     stylesheets: ['https://service.example/app.css'],
-    stream: new ReadableStream<Uint8Array>({
+    messages: new ReadableStream<BridgeSSRMessage>({
       start(controller) {
-        // Deliberately split an HTML attribute across raw transport chunks.
-        const bytes = new TextEncoder().encode(html);
-        controller.enqueue(bytes.slice(0, 9));
-        controller.enqueue(bytes.slice(9));
+        controller.enqueue({ type: 'html', html });
+        controller.enqueue({ type: 'data', snapshot });
+        controller.enqueue({ type: 'done' });
         controller.close();
       },
     }),
-    snapshot: Promise.resolve({
-      protocol: 'modern-application/1',
-      bridgeRevision: 'r1',
-    }),
+    snapshot: Promise.resolve(snapshot),
     abort: rs.fn(),
   };
 }
@@ -105,8 +120,86 @@ describe('browser HTTP service consumer endpoint', () => {
     ).toBe(400);
     expect(fetchBridgeService).not.toHaveBeenCalled();
   });
-  it('reports a malformed partial HTML stream and never emits done', async () => {
-    const rendered = result('<div>incomplete');
+  it('keeps rendering stable across delivery sessions and isolates distinct render slots', async () => {
+    rs.mocked(fetchBridgeService).mockImplementation(async () =>
+      result('<p>Ready</p>'),
+    );
+    const requests = [
+      { instanceId: 'delivery-a', renderInstanceId: 'slot:a' },
+      { instanceId: 'delivery-b', renderInstanceId: 'slot:a' },
+      { instanceId: 'delivery-c', renderInstanceId: 'slot_a' },
+    ];
+    for (const identity of requests) {
+      const response = await invoke(
+        {
+          ...input,
+          ...identity,
+          basename: '/reports',
+          memoryRoute: { entryPath: '/summary' },
+        },
+        { headers: { 'accept-language': 'en' } },
+      );
+      expect(response.status).toBe(200);
+      await response.text();
+    }
+    const rendered = rs.mocked(fetchBridgeService).mock.calls.map(([info]) => {
+      const { signal: _signal, ...request } = info;
+      return request;
+    });
+    expect(rendered[0]).toEqual(rendered[1]);
+    expect(rendered[0].identifierPrefix).not.toBe(rendered[2].identifierPrefix);
+    expect(rendered[0]).toMatchObject({
+      moduleName: input.moduleName,
+      instanceId: 'slot:a',
+      url: input.url,
+      basename: '/reports',
+      memoryRoute: { entryPath: '/summary' },
+      props: input.props,
+      headers: { 'accept-language': 'en' },
+    });
+  });
+  it('retains the instance identity for older clients without a render identity', async () => {
+    rs.mocked(fetchBridgeService).mockResolvedValueOnce(result('<p>Ready</p>'));
+    const response = await invoke(input);
+    await response.text();
+    expect(rs.mocked(fetchBridgeService).mock.calls[0][0].instanceId).toBe(
+      input.instanceId,
+    );
+  });
+  it('rejects invalid render identities before requesting a producer', async () => {
+    for (const renderInstanceId of [
+      '',
+      'two slots',
+      '<slot>',
+      '"slot"',
+      'a'.repeat(257),
+      null,
+      7,
+      {},
+    ]) {
+      expect((await invoke({ ...input, renderInstanceId })).status).toBe(400);
+    }
+    expect(fetchBridgeService).not.toHaveBeenCalled();
+  });
+  it('forwards prepared scripts unchanged without parsing producer HTML again', async () => {
+    const html =
+      '<div hidden id="slot-S:0">ready</div><script>window.$MF_slot_RC("slot-B:0","slot-S:0")</script>';
+    rs.mocked(fetchBridgeService).mockResolvedValueOnce(result(html));
+    const response = await invoke(input);
+    const frames = (await response.text())
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+    expect(frames[1]).toEqual({ type: 'html', html });
+    expect(frames.at(-1)).toEqual({ type: 'done' });
+  });
+  it('reports a producer message-stream failure and never emits done', async () => {
+    const rendered = result('');
+    rendered.messages = new ReadableStream({
+      start(controller) {
+        controller.error(Error('Producer HTML framing failed'));
+      },
+    });
     rs.mocked(fetchBridgeService).mockResolvedValueOnce(rendered);
     const response = await invoke(input);
     const frames = (await response.text())
@@ -116,10 +209,30 @@ describe('browser HTTP service consumer endpoint', () => {
     expect(frames.map((frame) => frame.type)).toEqual(['meta', 'error']);
     expect(rendered.abort).toHaveBeenCalled();
   });
+  it('rejects a truncated message sequence without inventing a completion message', async () => {
+    const rendered = result('');
+    rendered.messages = new ReadableStream({
+      start(controller) {
+        controller.enqueue({ type: 'html', html: '<p>shell</p>' });
+        controller.close();
+      },
+    });
+    rs.mocked(fetchBridgeService).mockResolvedValueOnce(rendered);
+    const response = await invoke(input);
+    const frames = (await response.text())
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+    expect(frames.map((frame) => frame.type)).toEqual([
+      'meta',
+      'html',
+      'error',
+    ]);
+  });
   it('aborts the producer when the browser cancels its response', async () => {
     const rendered = {
       ...result(''),
-      stream: new ReadableStream<Uint8Array>(),
+      messages: new ReadableStream<BridgeSSRMessage>(),
     };
     rs.mocked(fetchBridgeService).mockResolvedValueOnce(rendered);
     const response = await invoke(input);

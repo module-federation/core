@@ -1,14 +1,12 @@
-import { randomUUID } from 'node:crypto';
-import { Readable } from 'node:stream';
 import type {
   BridgeSSRRequest,
-  BridgeSSRResult,
+  BridgeSSRMessageResult,
 } from '@module-federation/bridge-react/ssr';
 import type { BridgeServiceOptions } from '../types';
 import { fetchBridgeService } from './service-http';
-import { byteStream, htmlFrames } from './frames.server';
-import { isolateReactStreamScripts } from './script-isolation.server';
+import { byteStream } from './frames.server';
 import { BRIDGE_STREAM_PROTOCOL, type BridgeStreamFrame } from './protocol';
+import { bridgeIdentifierPrefix } from './identity.server';
 
 export interface BridgeClientServiceMiddlewareOptions {
   path: string;
@@ -39,7 +37,7 @@ async function readRequest(request: Request, limit: number): Promise<any> {
   }
 }
 
-/** Consumer-owned framing endpoint for a browser requesting SSR after page load. */
+/** Consumer-owned forwarding endpoint for a browser requesting SSR after page load. */
 export function createBridgeClientServiceMiddleware(
   options: BridgeClientServiceMiddlewareOptions,
 ): (
@@ -73,6 +71,9 @@ export function createBridgeClientServiceMiddleware(
         ) ||
         typeof input.instanceId !== 'string' ||
         !/^[^\s<>"']{1,256}$/.test(input.instanceId) ||
+        (input.renderInstanceId !== undefined &&
+          (typeof input.renderInstanceId !== 'string' ||
+            !/^[^\s<>"']{1,256}$/.test(input.renderInstanceId))) ||
         typeof input.url !== 'string' ||
         !input.props ||
         typeof input.props !== 'object' ||
@@ -99,10 +100,11 @@ export function createBridgeClientServiceMiddleware(
       const value = request.headers.get(name);
       if (value !== null) headers[name] = value;
     }
+    const renderInstanceId = input.renderInstanceId ?? input.instanceId;
     const info: BridgeSSRRequest = {
       moduleName: input.moduleName,
-      instanceId: input.instanceId,
-      identifierPrefix: `mf-client-${randomUUID()}-`,
+      instanceId: renderInstanceId,
+      identifierPrefix: bridgeIdentifierPrefix(renderInstanceId, 'mf-client'),
       url: pageURL.href,
       basename: input.basename,
       memoryRoute: input.memoryRoute,
@@ -110,7 +112,7 @@ export function createBridgeClientServiceMiddleware(
       headers,
       signal: controller.signal,
     };
-    let result: BridgeSSRResult;
+    let result: BridgeSSRMessageResult;
     try {
       // A completed document cannot use the initial-document early hydration path.
       result = await fetchBridgeService(info, {
@@ -123,42 +125,43 @@ export function createBridgeClientServiceMiddleware(
       controller.abort();
       return new Response('Bridge service rendering failed', { status: 502 });
     }
-    const source = Readable.fromWeb(result.stream as any);
-    const frames = htmlFrames();
-    source.on('error', (error) => frames.destroy(error));
-    const abort = () => {
-      const reason =
-        controller.signal.reason || Error('Bridge client stream aborted');
-      result.abort(reason);
-      frames.destroy(reason instanceof Error ? reason : Error(String(reason)));
-      source.destroy();
+    const reader = result.messages.getReader();
+    let cleaned = false;
+    const cleanup = async () => {
+      if (cleaned) return;
+      cleaned = true;
+      controller.signal.removeEventListener('abort', abort);
+      request.signal.removeEventListener('abort', abortFromRequest);
+      result.abort(controller.signal.reason);
+      await reader.cancel().catch(() => {});
+      reader.releaseLock();
     };
-    // Attach before piping so a synchronous abort has an observed error path.
-    frames.on('error', () => {});
+    const abort = () => {
+      void cleanup();
+    };
     controller.signal.addEventListener('abort', abort, { once: true });
     if (controller.signal.aborted) abort();
-    source.pipe(frames);
     const encode = (frame: BridgeStreamFrame) => `${JSON.stringify(frame)}\n`;
     async function* output() {
       try {
+        if (controller.signal.aborted) throw controller.signal.reason;
         yield encode({
           type: 'meta',
           protocol: BRIDGE_STREAM_PROTOCOL,
           identifierPrefix: info.identifierPrefix,
           stylesheets: result.stylesheets,
         });
-        for await (const html of frames) {
-          yield encode({
-            type: 'html',
-            html: isolateReactStreamScripts(
-              String(html),
-              info.identifierPrefix,
-              info.identifierPrefix,
-            ),
-          });
+        let complete = false;
+        while (true) {
+          const next = await reader.read();
+          if (controller.signal.aborted) throw controller.signal.reason;
+          if (next.done) break;
+          if (complete) throw Error('Bridge message after completion');
+          // Service protocol validation has already accepted this complete message.
+          yield encode(next.value);
+          if (next.value.type === 'done') complete = true;
         }
-        yield encode({ type: 'data', snapshot: await result.snapshot });
-        yield encode({ type: 'done' });
+        if (!complete) throw Error('Incomplete Bridge producer messages');
       } catch {
         if (!controller.signal.aborted)
           yield encode({
@@ -166,11 +169,7 @@ export function createBridgeClientServiceMiddleware(
             message: 'Bridge service stream failed',
           });
       } finally {
-        controller.signal.removeEventListener('abort', abort);
-        request.signal.removeEventListener('abort', abortFromRequest);
-        result.abort();
-        source.destroy();
-        frames.destroy();
+        await cleanup();
       }
     }
     return new Response(

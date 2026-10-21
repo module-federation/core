@@ -14,6 +14,29 @@ export interface BridgeClientServiceOptions {
   maxFrameBytes?: number;
 }
 
+function renderIdentity(dom: HTMLElement, sessionId: string): string {
+  const original = dom.id;
+  if (!/^[^\s<>"']{1,256}$/.test(original)) return sessionId;
+  // Share reservations across loader wrappers and copies of this library. Never
+  // reuse an old renderer namespace within a document: a completion callback
+  // from a released session may still be scheduled by React.
+  const key = Symbol.for('module-federation.bridge-service.render-identities');
+  const document = dom.ownerDocument as Document & {
+    [key: symbol]: Set<string> | undefined;
+  };
+  const used = (document[key] ||= new Set<string>());
+  const seen = used.has(original);
+  used.add(original);
+  if (
+    seen ||
+    Array.from(document.querySelectorAll('[id]')).some(
+      (element) => element !== dom && element.id === original,
+    )
+  )
+    return sessionId;
+  return original;
+}
+
 async function* readClientFrames(
   stream: ReadableStream<Uint8Array>,
   maxFrameBytes: number,
@@ -97,6 +120,7 @@ export async function loadBridgeServiceRemote(
           const { dom, ...params } = info;
           originalDomId = dom.id;
           id = `mf-client-${crypto.randomUUID()}`;
+          const renderInstanceId = renderIdentity(dom, id);
           dom.id = id;
           bridgeStreamBootstrap({
             timeoutMs: options.timeoutMs,
@@ -127,6 +151,7 @@ export async function loadBridgeServiceRemote(
               body: JSON.stringify({
                 ...getBridgeSSRRenderParams({ ...params, moduleName }),
                 instanceId: id,
+                renderInstanceId,
                 url: window.location.href,
               }),
               signal,
