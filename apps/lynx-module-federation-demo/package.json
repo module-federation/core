@@ -56,9 +56,9 @@
     "@module-federation/lynx": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*",
     "@playwright/test": "1.57.0",
-    "@rsbuild/core": "2.1.4",
-    "@rspack-canary/core": "https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@c3bcff685babc4fa7d58c3249d197c85c6343208",
-    "@rspack/core": "https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@c3bcff685babc4fa7d58c3249d197c85c6343208",
+    "@rsbuild/core": "2.2.9",
+    "@rspack-canary/core": "https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81",
+    "@rspack/core": "https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81",
     "@types/react": "18.3.28"
   },
   "engines": {

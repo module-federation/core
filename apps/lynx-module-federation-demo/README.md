@@ -48,7 +48,7 @@ iOS resource provider; set `LYNX_HOST_ORIGIN` when they live elsewhere.
 
 Rspeedy 0.17 resolves its own `@rspack/core`, while this demo pins the
 pkg.pr.new preview of the [Rspack layers stack](https://github.com/web-infra-dev/rspack/pull/14913)
-at `c3bcff685babc4fa7d58c3249d197c85c6343208`, also installed under the existing
+at `5cb420f33b708229f0c2c35892f3391b13ff2e81`, also installed under the existing
 `@rspack-canary/core` alias. `rspack-canary-rspeedy.mjs` is the single
 compatibility boundary: it starts Rspeedy with Node resolution hooks that map
 `@rspack/core` to the pinned preview and `@rsbuild/core` to the workspace's
