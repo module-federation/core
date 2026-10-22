@@ -203,10 +203,10 @@ configs do not hard-code layer names.
 A singleton is unique within one JavaScript realm, share scope, and share key.
 The host, compiled imports, runtime API consumers, and remotes can therefore
 share one stateful instance inside the background realm. On Lynx for Web,
-main-thread sharing negotiates independently of the background realm. Native
-main-thread modules remain local to their bundles; there is no host/remote
-singleton guarantee for them. Lynx does not transfer JavaScript object identity
-across its thread boundary.
+main-thread sharing negotiates independently of the background realm. The adapter
+does not negotiate host/remote shared dependencies on the native main thread and
+provides no federation singleton guarantee there. Lynx does not transfer
+JavaScript object identity across its thread boundary.
 
 Prefer the official ReactLynx lazy-runtime bridge for UI bundles. An exact
 `@lynx-js/react` share does not cover `/internal`, JSX-runtime, Lepus, and lazy
