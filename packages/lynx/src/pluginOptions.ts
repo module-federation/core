@@ -65,8 +65,9 @@ export type LynxShared =
 
 export type LynxModuleFederationOptions = Omit<
   ModuleFederationPluginOptions,
-  'shared'
+  'shared' | 'name'
 > & {
+  name: string;
   shared?: LynxShared;
 };
 

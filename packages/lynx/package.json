@@ -109,12 +109,12 @@
     }
   },
   "devDependencies": {
-    "@lynx-js/cache-events-webpack-plugin": "0.2.0",
+    "@lynx-js/cache-events-webpack-plugin": "0.2.1",
     "@lynx-js/css-serializer": "0.1.6",
-    "@lynx-js/chunk-loading-webpack-plugin": "0.4.0",
-    "@lynx-js/react": "https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@f382e2203084533ba7b4cb5852ee811ce2e6fb44",
+    "@lynx-js/chunk-loading-webpack-plugin": "0.4.2",
+    "@lynx-js/react": "https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e",
     "@lynx-js/tasm": "0.0.49",
-    "@lynx-js/web-core": "https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@f382e2203084533ba7b4cb5852ee811ce2e6fb44",
+    "@lynx-js/web-core": "https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@348e7f84ef64d775ac6e550d791dea2e84c3096e",
     "@module-federation/runtime-tools": "workspace:*",
     "@rsbuild/core": "2.2.9",
     "@rspack/core": "https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81",
