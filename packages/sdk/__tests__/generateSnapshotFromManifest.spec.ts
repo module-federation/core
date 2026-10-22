@@ -2,6 +2,37 @@ import { manifest, snapshot } from './resources/manifestSnapshotMap';
 import { generateSnapshotFromManifest } from '../src/generateSnapshotFromManifest';
 
 describe('generateSnapshotFromManifest', () => {
+  it('preserves shared layer and scope without adding fields to legacy snapshots', () => {
+    const source = {
+      ...manifest.devAppManifest,
+      shared: [
+        {
+          id: 'pkg:1.0.0',
+          name: 'pkg',
+          version: '1.0.0',
+          singleton: false,
+          requiredVersion: '*',
+          hash: '',
+          assets: { js: { sync: [], async: [] }, css: { sync: [], async: [] } },
+        },
+      ],
+    };
+    const layered = generateSnapshotFromManifest({
+      ...source,
+      shared: source.shared.map((item) => ({
+        ...item,
+        layer: 'server',
+        shareScope: ['app', 'default'],
+      })),
+    });
+    expect(layered.shared[0]).toMatchObject({
+      layer: 'server',
+      shareScope: ['app', 'default'],
+    });
+    const legacy = generateSnapshotFromManifest(source);
+    expect(legacy.shared[0]).not.toHaveProperty('layer');
+    expect(legacy.shared[0]).not.toHaveProperty('shareScope');
+  });
   it('return basic app snapshot with only manifest params in dev', () => {
     const remoteSnapshot = generateSnapshotFromManifest(
       manifest.devAppManifest,

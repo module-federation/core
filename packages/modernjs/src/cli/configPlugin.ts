@@ -344,7 +344,6 @@ export function patchBundlerConfig(options: {
 
   const splitChunkConfig = chain.optimization.splitChunks.entries();
   if (!isServer) {
-    // @ts-expect-error type not the same
     autoDeleteSplitChunkCacheGroups(mfConfig, splitChunkConfig);
   }
 

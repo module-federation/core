@@ -75,7 +75,20 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
 
             const patchShared = (pkgName: string, shared: ShareArgs) => {
               const shareSnapshot = hostGlobalSnapshot.shared.find(
-                (item) => item.sharedName === pkgName,
+                (item) =>
+                  item.sharedName === pkgName &&
+                  (!item.version || item.version === shared.version) &&
+                  item.layer === (shared.shareConfig?.layer ?? undefined) &&
+                  (!item.shareScope ||
+                    (Array.isArray(item.shareScope)
+                      ? item.shareScope
+                      : [item.shareScope]
+                    ).some((scope) =>
+                      (Array.isArray(shared.scope)
+                        ? shared.scope
+                        : [shared.scope || 'default']
+                      ).includes(scope),
+                    )),
               );
               if (!shareSnapshot) {
                 return;
