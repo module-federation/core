@@ -1,9 +1,9 @@
-import type { Compiler } from '@rspack/core';
+import type { Rspack } from '@rsbuild/core';
 
 const PLUGIN_NAME = 'ModuleFederationSSRPublicPathPlugin';
 
 export class SSRPublicPathPlugin {
-  apply(compiler: Compiler) {
+  apply(compiler: Rspack.Compiler) {
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.additionalTreeRuntimeRequirements.tap(
         PLUGIN_NAME,

@@ -175,7 +175,7 @@ describe('pluginModuleFederation node target environment behavior', () => {
       type: 'commonjs-module',
     });
     expect(bundlerConfig.optimization?.runtimeChunk).toBeUndefined();
-    expect(bundlerConfig.plugins).toHaveLength(1);
+    expect(bundlerConfig.plugins).toHaveLength(2);
     expect(warningSpy.mock.calls.flat().map(String).join('\n')).toContain(
       'optimization.runtimeChunk',
     );
