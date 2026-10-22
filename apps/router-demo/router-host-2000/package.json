@@ -6,13 +6,8 @@
     "dev": "FEDERATION_DEBUG=true rsbuild dev --open",
     "build": "rsbuild build",
     "preview": "rsbuild preview",
-    "test": "pnpm exec vitest --passWithNoTests",
-    "test:federation": "node ../../../scripts/ensure-playwright.js && pnpm exec rstest run -c rstest.config.ts && pnpm exec rstest run -c rstest.standalone.config.ts",
-    "serve": "pnpm run dev",
-    "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:2000 --browser chrome",
-    "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://localhost:2000 --browser electron",
-    "e2e:ci": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:2000 --browser chrome",
-    "test:e2e": "pnpm exec concurrently \"lsof -i:2000 || pnpm --filter host run serve\" \"pnpm exec wait-on tcp:2000 && pnpm --filter host run e2e:ci\""
+    "test": "node ../../../scripts/ensure-playwright.js && pnpm exec rstest run -c rstest.config.ts",
+    "serve": "pnpm run dev"
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.6",
@@ -35,6 +30,12 @@
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.3.0",
     "playwright": "1.57.0",
+    "remote1": "workspace:*",
+    "remote2": "workspace:*",
+    "remote3": "workspace:*",
+    "remote4": "workspace:*",
+    "remote5": "workspace:*",
+    "remote6": "workspace:*",
     "sirv": "3.0.2",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5"

@@ -1,0 +1,16 @@
+diff --git a/dist/client/runner.js b/dist/client/runner.js
+index 34d8f170e335054b334bcd8bd4a282b948248ea5..35f7b2a8a3d524aed6d8b1cbe62930be3e901fa0 100644
+--- a/dist/client/runner.js
++++ b/dist/client/runner.js
+@@ -505,9 +505,11 @@ const run = async ()=>{
+     }
+     let activeUnhandledErrors;
+     const onWindowError = (event)=>{
++        if (event.defaultPrevented) return;
+         activeUnhandledErrors?.push(event.error instanceof Error ? event.error : new Error(event.message || String(event.error)));
+     };
+     const onUnhandledRejection = (event)=>{
++        if (event.defaultPrevented) return;
+         const { reason } = event;
+         activeUnhandledErrors?.push(reason instanceof Error ? reason : new Error(String(reason)));
+     };

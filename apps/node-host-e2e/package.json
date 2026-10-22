@@ -5,8 +5,8 @@
   "description": "Rstest suite that loads the built Node federation remotes.",
   "scripts": {
     "build": "pnpm exec webpack-cli --config webpack.config.cjs",
-    "e2e": "pnpm run build && pnpm exec rstest run -c rstest.config.ts",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules --ext .js,.ts ."
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules --ext .js,.ts .",
+    "test": "pnpm run build && pnpm exec rstest run -c rstest.config.ts"
   },
   "devDependencies": {
     "@module-federation/rstest": "workspace:*",

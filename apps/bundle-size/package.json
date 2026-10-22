@@ -12,7 +12,12 @@
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "react-refresh": "0.14.2",
     "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.0"
+    "@types/react-dom": "18.3.0",
+    "@rstest/core": "0.12.3",
+    "@rstest/browser": "0.12.3",
+    "@rstest/browser-react": "0.12.3",
+    "@rsbuild/plugin-react": "^2.1.0",
+    "playwright": "1.57.0"
   },
   "dependencies": {
     "antd": "4.24.15",
@@ -28,9 +33,7 @@
     "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode production --port 3005 --no-hot",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --no-error-on-unmatched-pattern --ignore-pattern node_modules **/*.{ts,tsx,js,jsx}",
     "serve-static": "pnpm exec serve dist -l 3005 --cors",
-    "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
-    "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron",
-    "test:e2e": "pnpm exec concurrently \"lsof -i :3005 || pnpm --filter bundle-size run serve\" \"sleep 4 && pnpm --filter bundle-size run e2e\"",
-    "getsize": "pnpm --filter bundle-size run build:production && sleep 1 && if [ -f dist/remoteEntry.js ] ; then ls -lah dist/remoteEntry.js | awk '{print \"remoteEntry.js size: \" $5}' && gzip -c dist/remoteEntry.js | wc -c | awk '{print \"gzip size: \" $1 \" bytes\"}' && brotli -c dist/remoteEntry.js | wc -c | awk '{print \"brotli size: \" $1 \" bytes\"}' ; else echo \"remoteEntry.js not found\" ; fi"
+    "getsize": "pnpm --filter bundle-size run build:production && sleep 1 && if [ -f dist/remoteEntry.js ] ; then ls -lah dist/remoteEntry.js | awk '{print \"remoteEntry.js size: \" $5}' && gzip -c dist/remoteEntry.js | wc -c | awk '{print \"gzip size: \" $1 \" bytes\"}' && brotli -c dist/remoteEntry.js | wc -c | awk '{print \"brotli size: \" $1 \" bytes\"}' ; else echo \"remoteEntry.js not found\" ; fi",
+    "test": "node ../../scripts/ensure-playwright.js && pnpm exec rstest run"
   }
 }

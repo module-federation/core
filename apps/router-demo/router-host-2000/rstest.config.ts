@@ -13,6 +13,7 @@ export default defineConfig({
     enabled: true,
     provider: 'playwright',
     headless: true,
+    viewport: { width: 1440, height: 900 },
   },
   testTimeout: 30_000,
   resolve: {
@@ -22,6 +23,20 @@ export default defineConfig({
     },
   },
   plugins: [
+    {
+      name: 'expected-render-errors',
+      setup(api) {
+        api.modifyRsbuildConfig((config) => {
+          config.source ??= {};
+          config.source.preEntry = [
+            path.join(
+              import.meta.dirname,
+              '../../../tools/rstest/expected-errors.ts',
+            ),
+          ];
+        });
+      },
+    },
     pluginReact(),
     pluginModuleFederation(
       {

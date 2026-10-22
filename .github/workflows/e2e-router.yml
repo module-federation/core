@@ -39,11 +39,8 @@ jobs:
             ${{ runner.os }}-turbo-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-
 
-      - name: Install Cypress
-        run: npx cypress install
-
       - name: Build shared packages
         run: pnpm run build:packages
 
-      - name: Federation tests and router E2E smoke
-        run: pnpm run e2e:router
+      - name: Rstest router federation tests
+        run: pnpm run test:router:federation

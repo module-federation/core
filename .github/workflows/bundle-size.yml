@@ -48,6 +48,9 @@ jobs:
       - name: Build packages (current)
         run: pnpm run build:packages
 
+      - name: Test bundle-size component
+        run: pnpm run test:bundle-size
+
       - name: Measure bundle sizes (current)
         run: node scripts/bundle-size-report.mjs --output current.json
 
