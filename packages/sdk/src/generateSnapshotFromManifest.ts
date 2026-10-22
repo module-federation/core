@@ -156,6 +156,8 @@ export function generateSnapshotFromManifest(
       assets: item.assets,
       sharedName: item.name,
       version: item.version,
+      ...(item.layer === undefined ? {} : { layer: item.layer }),
+      ...(item.shareScope === undefined ? {} : { shareScope: item.shareScope }),
       // @ts-ignore
       usedExports: item.referenceExports || [],
     })),

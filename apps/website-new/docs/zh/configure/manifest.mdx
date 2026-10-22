@@ -15,6 +15,7 @@
 interface PluginManifestOptions {
   filePath?: string;
   disableAssetsAnalyze?: boolean;
+  useLegacyStats?: boolean;
   fileName?: string;
 }
 ```
@@ -36,6 +37,21 @@ manifest 存放路径
 manifest 文件名称
 
 如果设置了 `fileName`，对应的 stats 文件名会自动附加 `-stats` 后缀（例如 `fileName: 'mf.json'` 时会同时生成 `mf.json` 与 `mf-stats.json`）。所有文件都会写入 `filePath`（若配置）指定的子目录。
+
+## useLegacyStats
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+在 Webpack 中，将此选项设为 `true` 可回退到原有的 JavaScript stats 读取方式。不设置或设为 `false` 时，插件会在所需元数据可用时从编译图收集 manifest 数据，否则使用 stats 读取方式。此选项不影响 Rspack 原生生成的 stats。
+
+```js
+new ModuleFederationPlugin({
+  name: 'host',
+  manifest: { useLegacyStats: true },
+});
+```
 
 ## disableAssetsAnalyze
 

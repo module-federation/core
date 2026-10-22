@@ -10,17 +10,13 @@ import {
   StatsAssets,
   moduleFederationPlugin,
   RemoteEntryType,
-  composeKeyWithSeparator,
   getManifestFileName,
   StatsMetaDataWithGetPublicPath,
   StatsMetaDataWithPublicPath,
   StatsShared,
 } from '@module-federation/sdk';
 import { Compilation, Compiler } from 'webpack';
-import type {
-  StatsCompilation,
-  StatsModule,
-} from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
+import type { StatsCompilation } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import {
   isDev,
   getAssetsByChunk,
@@ -28,7 +24,6 @@ import {
   getAssetsByChunkIDs,
   getSharedModules,
   assert,
-  getFileNameWithOutExt,
   getTypesMetaInfo,
 } from './utils';
 import logger from './logger';
@@ -41,13 +36,9 @@ import {
   UNKNOWN_MODULE_NAME,
 } from '@module-federation/managers';
 import { HOT_UPDATE_SUFFIX } from './constants';
-import {
-  ModuleHandler,
-  getExposeItem,
-  getExposeName,
-  getShareItem,
-} from './ModuleHandler';
+import { ModuleHandler, getExposeItem, getShareItem } from './ModuleHandler';
 import { StatsInfo } from './types';
+import { collectGraph } from './collectGraph';
 
 class StatsManager {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
@@ -186,83 +177,86 @@ class StatsManager {
     return this.setMetaDataPublicPath(metaData, compiler);
   }
 
-  private _getFilteredModules(stats: StatsCompilation): StatsModule[] {
-    const filteredModules = stats.modules!.filter((module) => {
-      if (!module || !module.name) {
-        return false;
-      }
-      const array = [
-        module.name.includes('container entry'),
-        module.name.includes('remote '),
-        module.name.includes('shared module '),
-        module.name.includes('provide module '),
-      ];
-      return array.some((item) => item);
-    });
-
-    return filteredModules;
-  }
-
   private _getModuleAssets(
     compilation: Compilation,
     entryPointNames: string[],
   ): Record<string, StatsAssets> {
     const { chunks } = compilation;
-    const { exposeFileNameImportMap } = this._containerManager;
+    const exposes = this._containerManager.containerPluginExposesOptions;
+    const exposeKeysByChunk = new Map<string, string[]>();
+    for (const [key, options] of Object.entries(exposes)) {
+      if (
+        typeof options === 'object' &&
+        !Array.isArray(options) &&
+        options.name
+      ) {
+        const keys = exposeKeysByChunk.get(options.name) || [];
+        keys.push(key);
+        exposeKeysByChunk.set(options.name, keys);
+      }
+    }
     const assets: Record<string, StatsAssets> = {};
 
     chunks.forEach((chunk) => {
-      if (typeof chunk.name !== 'string') return;
-
-      // Support split chunks caused by splitChunks.maxSize:
-      // A chunk named "__federation_expose_Foo" may be split into
-      // "__federation_expose_Foo-<hash>" chunks, so we match both exact
-      // and prefix+dash patterns.
-      const matchedKey =
-        exposeFileNameImportMap[chunk.name] !== undefined
-          ? chunk.name
-          : Object.keys(exposeFileNameImportMap).find((key) =>
-              chunk.name!.startsWith(key + '-'),
+      // Optimizers can merge equal expose chunks under just one chunk name.
+      // Their named groups still identify every expose that loads those assets.
+      const names = new Set([
+        chunk.name,
+        ...[...chunk.groupsIterable].map((group) => group.name),
+      ]);
+      const assetKeys = new Set<string>();
+      for (const name of names) {
+        if (typeof name !== 'string') continue;
+        // Split chunks retain the expose name followed by a hash suffix.
+        const matchedKey = exposeKeysByChunk.has(name)
+          ? name
+          : [...exposeKeysByChunk.keys()].find((key) =>
+              name.startsWith(key + '-'),
             );
-
-      if (!matchedKey) return;
-
-      // TODO: support multiple import
-      const exposeKey = exposeFileNameImportMap[matchedKey][0];
-      const assetKey = getFileNameWithOutExt(exposeKey);
+        if (matchedKey) {
+          for (const key of exposeKeysByChunk.get(matchedKey)!)
+            assetKeys.add(key);
+        }
+      }
+      if (!assetKeys.size) return;
       const chunkAssets = getAssetsByChunk(chunk, entryPointNames);
 
-      if (!assets[assetKey]) {
-        assets[assetKey] = chunkAssets;
-      } else {
-        // Merge split chunk assets, deduplicating with Set
-        assets[assetKey] = {
-          js: {
-            sync: [
-              ...new Set([...assets[assetKey].js.sync, ...chunkAssets.js.sync]),
-            ],
-            async: [
-              ...new Set([
-                ...assets[assetKey].js.async,
-                ...chunkAssets.js.async,
-              ]),
-            ],
-          },
-          css: {
-            sync: [
-              ...new Set([
-                ...assets[assetKey].css.sync,
-                ...chunkAssets.css.sync,
-              ]),
-            ],
-            async: [
-              ...new Set([
-                ...assets[assetKey].css.async,
-                ...chunkAssets.css.async,
-              ]),
-            ],
-          },
-        };
+      for (const assetKey of assetKeys) {
+        if (!assets[assetKey]) {
+          assets[assetKey] = chunkAssets;
+        } else {
+          // Merge split chunk assets, deduplicating with Set
+          assets[assetKey] = {
+            js: {
+              sync: [
+                ...new Set([
+                  ...assets[assetKey].js.sync,
+                  ...chunkAssets.js.sync,
+                ]),
+              ],
+              async: [
+                ...new Set([
+                  ...assets[assetKey].js.async,
+                  ...chunkAssets.js.async,
+                ]),
+              ],
+            },
+            css: {
+              sync: [
+                ...new Set([
+                  ...assets[assetKey].css.sync,
+                  ...chunkAssets.css.sync,
+                ]),
+              ],
+              async: [
+                ...new Set([
+                  ...assets[assetKey].css.async,
+                  ...chunkAssets.css.async,
+                ]),
+              ],
+            },
+          };
+        }
       }
     });
 
@@ -379,6 +373,7 @@ class StatsManager {
             name: name!,
             file: {
               import: exposes[exposeKey].import,
+              layer: exposes[exposeKey].layer,
             },
           });
         });
@@ -399,162 +394,102 @@ class StatsManager {
         return stats;
       }
 
-      const liveStats = compilation.getStats();
-      const statsOptions: Record<string, boolean> = {
-        all: false,
-        modules: true,
-        builtAt: true,
-        hash: true,
-        ids: true,
-        version: true,
-        entrypoints: true,
-        assets: false,
-        chunks: false,
-        reasons: true,
-      };
-      if (this._bundler === 'webpack') {
-        statsOptions['cached'] = true;
-      }
-      statsOptions['cachedModules'] = true;
+      const graph =
+        this._bundler === 'webpack' &&
+        !(typeof manifestOptions === 'object' && manifestOptions.useLegacyStats)
+          ? collectGraph(compilation, {
+              name: name!,
+              exposes: this._containerManager.containerPluginExposesOptions,
+              shared: this._sharedManager.normalizedOptions,
+              remotes: this._remoteManager.normalizedOptions,
+            })
+          : undefined;
 
-      const webpackStats = liveStats.toJson(statsOptions);
-
-      const filteredModules = this._getFilteredModules(webpackStats);
-      const moduleHandler = new ModuleHandler(this._options, filteredModules, {
-        bundler: this._bundler,
-      });
-      const { remotes, exposesMap, sharedMap } = moduleHandler.collect();
-      const entryPointNames = [...compilation.entrypoints.values()]
-        .map((e) => e.name)
-        .filter((v) => !!v) as Array<string>;
-
-      await Promise.all([
-        new Promise<void>((resolve) => {
-          const sharedAssets = this._getProvideSharedAssets(
-            compilation,
-            webpackStats,
-            entryPointNames,
-          );
-
-          Object.keys(sharedMap).forEach((sharedKey) => {
-            const assets = sharedAssets[sharedKey];
-            if (assets) {
-              sharedMap[sharedKey].assets = assets;
-            }
-          });
-          resolve();
-        }),
-        new Promise<void>((resolve) => {
-          const moduleAssets = this._getModuleAssets(
-            compilation,
-            entryPointNames,
-          );
-
-          Object.keys(exposesMap).forEach((exposeKey) => {
-            const assets = moduleAssets[exposeKey];
-            if (assets) {
-              exposesMap[exposeKey].assets = assets;
-            }
-            exposesMap[exposeKey].requires = Array.from(
-              new Set(exposesMap[exposeKey].requires),
-            );
-          });
-          resolve();
-        }),
-      ]);
-
-      await Promise.all([
-        new Promise<void>((resolve) => {
-          const remoteMemo: Set<string> = new Set();
-          stats.remotes = remotes.map((remote) => {
-            remoteMemo.add(remote.federationContainerName);
-            return {
-              ...remote,
-              usedIn: Array.from(remote.usedIn.values()),
-            };
-          });
-          const statsRemoteWithEmptyUsedIn =
-            this._remoteManager.statsRemoteWithEmptyUsedIn;
-          statsRemoteWithEmptyUsedIn.forEach((remoteInfo) => {
-            if (!remoteMemo.has(remoteInfo.federationContainerName)) {
-              stats.remotes.push(remoteInfo);
-            }
-          });
-          resolve();
-        }),
-        new Promise<void>((resolve) => {
-          stats.shared = Object.values(sharedMap).map((shared) => ({
-            ...shared,
-            usedIn: Array.from(shared.usedIn),
-          }));
-          resolve();
-        }),
-      ]);
-
-      await new Promise<void>((resolve) => {
-        const sharedAssets = stats.shared.reduce((sum, shared) => {
-          const { js, css } = shared.assets;
-          [...js.sync, ...js.async, ...css.async, css.sync].forEach((asset) => {
-            sum.add(asset);
-          });
-          return sum;
-        }, new Set());
-        const { fileExposeKeyMap } = this._containerManager;
-
-        stats.exposes = [];
-        Object.entries(fileExposeKeyMap).forEach(
-          ([exposeFileWithoutExt, exposeKeySet]) => {
-            const expose = exposesMap[exposeFileWithoutExt] || {
-              assets: {
-                js: { sync: [], async: [] },
-                css: { sync: [], async: [] },
-              },
-            };
-            exposeKeySet.forEach((exposeKey) => {
-              const { js, css } = expose.assets;
-              const exposeModuleName = getExposeName(exposeKey);
-              stats.exposes.push({
-                ...expose,
-                path: exposeKey,
-                id: composeKeyWithSeparator(
-                  this._options.name!,
-                  exposeModuleName,
-                ),
-                name: exposeModuleName,
-                assets: {
-                  js: {
-                    sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
-                    async: js.async.filter((asset) => !sharedAssets.has(asset)),
-                  },
-                  css: {
-                    sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
-                    async: css.async.filter(
-                      (asset) => !sharedAssets.has(asset),
-                    ),
-                  },
-                },
-              });
-            });
-          },
-        );
-
-        Object.values(exposesMap).map((expose) => {
-          const { js, css } = expose.assets;
-          return {
-            ...expose,
-            assets: {
-              js: {
-                sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
-                async: js.async.filter((asset) => !sharedAssets.has(asset)),
-              },
-              css: {
-                sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
-                async: css.async.filter((asset) => !sharedAssets.has(asset)),
-              },
-            },
-          };
+      if (graph) {
+        Object.assign(stats, graph);
+      } else {
+        const webpackStats = compilation.getStats().toJson({
+          all: false,
+          modules: true,
+          builtAt: true,
+          hash: true,
+          ids: true,
+          version: true,
+          entrypoints: true,
+          assets: false,
+          chunks: false,
+          reasons: true,
+          ...(this._bundler === 'webpack' ? { cached: true } : {}),
+          cachedModules: true,
         });
-        resolve();
+        const moduleHandler = new ModuleHandler(
+          this._options,
+          webpackStats.modules || [],
+          { bundler: this._bundler },
+        );
+        const { remotes, exposesMap, sharedMap } = moduleHandler.collect();
+        const entryPointNames = [...compilation.entrypoints.keys()];
+        const sharedAssets = this._getProvideSharedAssets(
+          compilation,
+          webpackStats,
+          entryPointNames,
+        );
+        const moduleAssets = this._getModuleAssets(
+          compilation,
+          entryPointNames,
+        );
+        for (const [key, shared] of Object.entries(sharedMap)) {
+          if (sharedAssets[key]) shared.assets = sharedAssets[key];
+        }
+        for (const [key, expose] of Object.entries(exposesMap)) {
+          if (moduleAssets[key]) expose.assets = moduleAssets[key];
+        }
+        stats.remotes = remotes;
+        stats.shared = Object.values(sharedMap);
+        stats.exposes = Object.values(exposesMap);
+      }
+
+      const remoteNames = new Set(
+        stats.remotes.map((remote) => remote.federationContainerName),
+      );
+      stats.remotes = stats.remotes.map((remote) => ({
+        ...remote,
+        usedIn: Array.from(remote.usedIn),
+      }));
+      for (const remote of this._remoteManager.statsRemoteWithEmptyUsedIn) {
+        if (!remoteNames.has(remote.federationContainerName))
+          stats.remotes.push(remote);
+      }
+      stats.shared = stats.shared.map((shared) => ({
+        ...shared,
+        usedIn: Array.from(shared.usedIn),
+      }));
+      const sharedAssets = new Set<unknown>(
+        stats.shared.flatMap(({ assets: { js, css } }) => [
+          ...js.sync,
+          ...js.async,
+          ...css.async,
+          css.sync,
+        ]),
+      );
+      stats.exposes = stats.exposes.map((expose) => {
+        const { js, css } = expose.assets;
+        return {
+          ...expose,
+          ...(expose.requires
+            ? { requires: [...new Set(expose.requires)] }
+            : {}),
+          assets: {
+            js: {
+              sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
+              async: js.async.filter((asset) => !sharedAssets.has(asset)),
+            },
+            css: {
+              sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
+              async: css.async.filter((asset) => !sharedAssets.has(asset)),
+            },
+          },
+        };
       });
 
       return stats;
