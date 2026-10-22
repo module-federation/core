@@ -19,3 +19,5 @@ export {
   SSR_DIR,
   SSR_ENV_NAME,
 } from './ssr';
+
+export { SSRPublicPathPlugin } from './SSRPublicPathPlugin';

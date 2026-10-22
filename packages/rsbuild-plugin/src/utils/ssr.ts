@@ -2,6 +2,7 @@ import path from 'path';
 import { createRequire } from 'node:module';
 import { encodeName } from '@module-federation/sdk';
 import { CALL_NAME_MAP } from '../constant';
+import { SSRPublicPathPlugin } from './SSRPublicPathPlugin';
 
 import type {
   EnvironmentConfig,
@@ -76,6 +77,9 @@ export function patchNodeConfig(
   const UniverseEntryChunkTrackerPlugin =
     UniverseEntryChunkTrackerPluginModule?.default;
   config.plugins ||= [];
+  if (!config.plugins.some((plugin) => plugin instanceof SSRPublicPathPlugin)) {
+    config.plugins.push(new SSRPublicPathPlugin());
+  }
   if (isDev() && UniverseEntryChunkTrackerPlugin) {
     config.plugins.push(new UniverseEntryChunkTrackerPlugin());
   }
