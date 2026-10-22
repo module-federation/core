@@ -39,11 +39,8 @@ jobs:
             ${{ runner.os }}-turbo-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-
 
-      - name: Install Cypress
-        run: npx cypress install
-
       - name: Build shared packages
         run: pnpm run build:packages
 
-      - name: E2E Test for Runtime Demo
-        run: pnpm exec turbo run test:e2e --filter=runtime-host
+      - name: Rstest runtime federation tests
+        run: pnpm run test:runtime:federation

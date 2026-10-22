@@ -13,7 +13,19 @@
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "react-refresh": "0.14.2",
     "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.0"
+    "@types/react-dom": "18.3.0",
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@module-federation/rstest": "workspace:*",
+    "@rsbuild/core": "2.1.4",
+    "@rsbuild/plugin-react": "^2.1.0",
+    "@rstest/browser": "0.12.3",
+    "@rstest/browser-react": "0.12.3",
+    "@rstest/core": "0.12.3",
+    "playwright": "1.57.0",
+    "sirv": "3.0.2",
+    "runtime-remote1": "workspace:*",
+    "runtime-remote2": "workspace:*",
+    "express": "4.21.2"
   },
   "dependencies": {
     "antd": "4.24.15",
@@ -28,10 +40,8 @@
     "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode production --port 3005 --no-hot",
     "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode development --port 3005",
     "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode production --port 3005 --no-hot",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --no-error-on-unmatched-pattern --ignore-pattern node_modules src/**/*.{ts,tsx,js,jsx} cypress/**/*.{ts,tsx,js,jsx} cypress.config.ts webpack.config.js remotes.d.ts @mf-types/**/*.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --no-error-on-unmatched-pattern --ignore-pattern node_modules src/**/*.{ts,tsx,js,jsx} tests/**/*.{ts,tsx} rstest*.ts webpack.config.js remotes.d.ts @mf-types/**/*.ts",
     "serve-static": "pnpm exec serve dist -l 3005 --cors",
-    "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
-    "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron",
-    "test:e2e": "pnpm -w exec node tools/scripts/run-runtime-e2e.mjs --mode=dev"
+    "test": "node ../../../scripts/ensure-playwright.js && pnpm exec rstest run -c rstest.config.ts && pnpm exec rstest run -c rstest.node.config.ts"
   }
 }

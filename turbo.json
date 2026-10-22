@@ -82,6 +82,20 @@
     "pre-release": {
       "dependsOn": ["build", "test"],
       "outputs": []
+    },
+    "runtime-host#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".mf/observability/**"]
+    },
+    "host#test": {
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tools/rstest/**"],
+      "dependsOn": ["build", "^build"],
+      "outputs": []
+    },
+    "runtime-host#test": {
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tools/rstest/**"],
+      "dependsOn": ["build", "^build"],
+      "outputs": []
     }
   }
 }

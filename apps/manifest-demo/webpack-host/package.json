@@ -9,7 +9,20 @@
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "react-refresh": "0.14.2",
     "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.0"
+    "@types/react-dom": "18.3.0",
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@module-federation/rstest": "workspace:*",
+    "@rsbuild/core": "2.1.4",
+    "@rsbuild/plugin-react": "^2.1.0",
+    "@rstest/browser": "0.12.3",
+    "@rstest/browser-react": "0.12.3",
+    "@rstest/core": "0.12.3",
+    "playwright": "1.57.0",
+    "sirv": "3.0.2",
+    "3010-rspack-provider": "workspace:*",
+    "3011-rspack-manifest-provider": "workspace:*",
+    "3009-webpack-provider": "workspace:*",
+    "3012-rspack-js-entry-provider": "workspace:*"
   },
   "dependencies": {
     "antd": "4.24.15",
@@ -25,9 +38,6 @@
     "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode development --port 3013",
     "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode production --port 3013 --no-hot",
     "serve-static": "pnpm exec serve dist -l 3013 --cors",
-    "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:3013 --browser chrome",
-    "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://localhost:3013 --browser electron",
-    "test:e2e": "pnpm -w exec node tools/scripts/run-manifest-e2e.mjs --mode=dev",
-    "test:e2e:production": "pnpm -w exec node tools/scripts/run-manifest-e2e.mjs --mode=prod"
+    "test": "node ../../../scripts/ensure-playwright.js && pnpm exec rstest run"
   }
 }

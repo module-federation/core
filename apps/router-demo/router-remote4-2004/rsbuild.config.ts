@@ -4,7 +4,11 @@ import { pluginReact } from '@rsbuild/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  html: {
+    crossorigin: 'anonymous',
+  },
   output: {
+    assetPrefix: 'http://localhost:2004',
     injectStyles: true,
   },
   resolve: {
