@@ -37,7 +37,8 @@ export function getSharedVersions(
 ): SharedVersions | undefined {
   if (!scope) return;
   if (layer == null) {
-    if (create) scope[pkgName] ||= {};
+    // The native Lynx bytecode parser does not support logical assignment.
+    if (create && !scope[pkgName]) scope[pkgName] = {};
     return scope[pkgName];
   }
   const layeredScope = scope as LayeredShareScope;
