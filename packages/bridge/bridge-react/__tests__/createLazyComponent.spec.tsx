@@ -1,10 +1,11 @@
 import React, { Suspense } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
 import {
   createLazyComponent,
   collectSSRAssets,
 } from '../src/lazy/createLazyComponent';
+import { ERROR_TYPE } from '../src/lazy/constant';
 import * as runtime from '@module-federation/runtime';
 import * as utils from '../src/lazy/utils';
 
@@ -16,10 +17,19 @@ const mockGetInstance = runtime.getInstance as jest.Mock;
 const mockGetLoadedRemoteInfos = utils.getLoadedRemoteInfos as jest.Mock;
 const mockGetDataFetchMapKey = utils.getDataFetchMapKey as jest.Mock;
 const mockFetchData = utils.fetchData as jest.Mock;
+const mockResetDataFetchResult = utils.resetDataFetchResult as jest.Mock;
 
 const MockComponent = () => <div>Mock Component</div>;
 const LoadingComponent = () => <div>Loading...</div>;
 const ErrorComponent = () => <div>Error!</div>;
+
+const createDeferred = <T,>() => {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+};
 
 const renderAssetsToFragment = (assets: React.ReactNode[]) => {
   const template = document.createElement('template');
@@ -95,6 +105,230 @@ describe('createLazyComponent', () => {
     await waitFor(() => {
       expect(screen.getByText('Mock Component')).toBeInTheDocument();
     });
+  });
+
+  it('should load a CSR component without a data loader once', async () => {
+    mockGetDataFetchMapKey.mockReturnValue(undefined);
+    const loader = jest.fn().mockResolvedValue({
+      default: MockComponent,
+      [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+    });
+    const LazyComponent = createLazyComponent({
+      loader,
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback: <ErrorComponent />,
+      noSSR: true,
+    });
+
+    render(
+      <Suspense fallback={<LoadingComponent />}>
+        <LazyComponent />
+      </Suspense>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Mock Component')).toBeInTheDocument();
+    });
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(mockFetchData).not.toHaveBeenCalled();
+  });
+
+  it('should keep one delayed loading instance while loading module and data', async () => {
+    const moduleDeferred = createDeferred<any>();
+    const dataDeferred = createDeferred<{ message: string }>();
+    const loadingMounted = jest.fn();
+    const Loading = () => {
+      React.useEffect(() => {
+        loadingMounted();
+      }, []);
+      return <div>Loading continuously...</div>;
+    };
+    const loader = jest.fn(() => moduleDeferred.promise);
+    mockFetchData.mockReturnValue(dataDeferred.promise);
+
+    const LazyComponent = createLazyComponent({
+      loader,
+      instance: mockInstance,
+      loading: <Loading />,
+      delayLoading: 10,
+      fallback: <ErrorComponent />,
+      noSSR: true,
+      dataFetchParams: {
+        query: { source: 'test' },
+        isDowngrade: true,
+      },
+    });
+
+    render(<LazyComponent />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Loading continuously...')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      moduleDeferred.resolve({
+        default: (props: { mfData: { message: string } }) => (
+          <div>{props.mfData.message}</div>
+        ),
+        [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+      });
+      await moduleDeferred.promise;
+    });
+
+    expect(screen.getByText('Loading continuously...')).toBeInTheDocument();
+
+    await act(async () => {
+      dataDeferred.resolve({ message: 'Loaded with data' });
+      await dataDeferred.promise;
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Loaded with data')).toBeInTheDocument();
+    });
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(loadingMounted).toHaveBeenCalledTimes(1);
+    expect(mockFetchData).toHaveBeenCalledTimes(1);
+    expect(mockFetchData).toHaveBeenCalledWith(
+      'data-fetch-key',
+      {
+        query: { source: 'test' },
+        isDowngrade: false,
+      },
+      expect.any(Object),
+    );
+  });
+
+  it('should not fetch data again on a CSR component rerender', async () => {
+    const dataDeferred = createDeferred<{ message: string }>();
+    mockFetchData.mockReturnValue(dataDeferred.promise);
+    const LazyComponent = createLazyComponent({
+      loader: jest.fn().mockResolvedValue({
+        default: (props: { mfData: { message: string } }) => (
+          <div>{props.mfData.message}</div>
+        ),
+        [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+      }),
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback: <ErrorComponent />,
+      noSSR: true,
+    });
+
+    const { rerender } = render(<LazyComponent />);
+    rerender(<LazyComponent />);
+
+    await waitFor(() => {
+      expect(mockFetchData).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      dataDeferred.resolve({ message: 'Rerendered data' });
+      await dataDeferred.promise;
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Rerendered data')).toBeInTheDocument();
+    });
+    expect(mockFetchData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reuse the in-flight CSR request when StrictMode replays effects', async () => {
+    mockFetchData.mockResolvedValue({ message: 'Strict mode data' });
+    const loader = jest.fn().mockResolvedValue({
+      default: (props: { mfData: { message: string } }) => (
+        <div>{props.mfData.message}</div>
+      ),
+      [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+    });
+    const LazyComponent = createLazyComponent({
+      loader,
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback: <ErrorComponent />,
+      noSSR: true,
+    });
+
+    render(
+      <React.StrictMode>
+        <LazyComponent />
+      </React.StrictMode>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Strict mode data')).toBeInTheDocument();
+    });
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(mockFetchData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should fetch data again after the CSR component remounts', async () => {
+    mockFetchData
+      .mockResolvedValueOnce({ message: 'First mount' })
+      .mockResolvedValueOnce({ message: 'Second mount' });
+    const LazyComponent = createLazyComponent({
+      loader: jest.fn().mockResolvedValue({
+        default: (props: { mfData: { message: string } }) => (
+          <div>{props.mfData.message}</div>
+        ),
+        [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+      }),
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback: <ErrorComponent />,
+      noSSR: true,
+    });
+
+    const firstRender = render(<LazyComponent />);
+    await waitFor(() => {
+      expect(screen.getByText('First mount')).toBeInTheDocument();
+    });
+    firstRender.unmount();
+
+    render(<LazyComponent />);
+    await waitFor(() => {
+      expect(screen.getByText('Second mount')).toBeInTheDocument();
+    });
+    expect(mockFetchData).toHaveBeenCalledTimes(2);
+    expect(mockResetDataFetchResult).toHaveBeenCalledTimes(2);
+    expect(mockResetDataFetchResult).toHaveBeenNthCalledWith(
+      1,
+      'data-fetch-key',
+    );
+    expect(mockResetDataFetchResult).toHaveBeenNthCalledWith(
+      2,
+      'data-fetch-key',
+    );
+  });
+
+  it('should preserve load error details in a CSR fallback', async () => {
+    const fallback = jest.fn(({ error, errorType }) => (
+      <div>
+        {errorType}: {error.message}
+      </div>
+    ));
+    const LazyComponent = createLazyComponent({
+      loader: jest.fn().mockRejectedValue(new Error('Remote unavailable')),
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback,
+      noSSR: true,
+    });
+
+    render(<LazyComponent />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          `${ERROR_TYPE.LOAD_REMOTE}: Error: Remote unavailable`,
+        ),
+      ).toBeInTheDocument();
+    });
+    expect(fallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        errorType: ERROR_TYPE.LOAD_REMOTE,
+      }),
+    );
   });
 
   it('should render fallback component on data fetch error', async () => {

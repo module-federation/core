@@ -199,6 +199,13 @@ export class NextFederationPlugin {
     if (this._extraOptions.debug) {
       compiler.options.devtool = false;
     }
+    if (this._extraOptions.scriptTimeout !== undefined) {
+      new compiler.webpack.DefinePlugin({
+        FEDERATION_NEXTJS_SCRIPT_TIMEOUT: JSON.stringify(
+          this._extraOptions.scriptTimeout,
+        ),
+      }).apply(compiler);
+    }
 
     if (isServer) {
       configureServerCompilerOptions(compiler);

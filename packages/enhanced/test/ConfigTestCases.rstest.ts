@@ -832,7 +832,28 @@ export const describeCases = (config: any) => {
                     { run: 3, options },
                   );
                 stderr.reset();
-                if (unhandled.length) {
+                // Focused runs can route this log to Rstest instead of webpack's infrastructure logger.
+                if (
+                  unhandled.length &&
+                  fs.existsSync(
+                    path.join(testDirectory, 'infrastructure-log.js'),
+                  )
+                ) {
+                  checkArrayExpectation(
+                    testDirectory,
+                    {
+                      infrastructureLogs: unhandled.map((message) => ({
+                        message,
+                      })),
+                    },
+                    'infrastructureLog',
+                    'infrastructure-log',
+                    'InfrastructureLog',
+                    (e: any) => {
+                      throw e;
+                    },
+                  );
+                } else if (unhandled.length) {
                   throw new Error(
                     'Errors/Warnings during build:\n' + unhandled.join('\n'),
                   );

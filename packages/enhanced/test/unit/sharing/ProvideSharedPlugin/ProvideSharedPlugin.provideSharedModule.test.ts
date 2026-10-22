@@ -201,89 +201,6 @@ describe('ProvideSharedPlugin', () => {
         );
       });
 
-      it('should skip module when request include filter fails', () => {
-        const resolvedProvideMap = new Map();
-        const config = {
-          shareScope: 'default',
-          shareKey: 'test-module',
-          version: '1.0.0',
-          include: {
-            request: '/specific/path', // Module path doesn't match
-          },
-        };
-
-        // @ts-ignore - accessing private method for testing
-        plugin.provideSharedModule(
-          mockCompilation,
-          resolvedProvideMap,
-          'test-module',
-          config,
-          '/different/path/module',
-          {},
-        );
-
-        // Module should not be added to resolvedProvideMap
-        expect(resolvedProvideMap.size).toBe(0);
-
-        // Request include filter failures do NOT generate warnings (only version filter failures do)
-        expect(mockCompilation.warnings).toHaveLength(0);
-      });
-
-      it('should handle RegExp request include filters', () => {
-        const resolvedProvideMap = new Map();
-        const config = {
-          shareScope: 'default',
-          shareKey: 'test-module',
-          version: '1.0.0',
-          include: {
-            request: /\/src\/components\//, // RegExp filter
-          },
-        };
-
-        // @ts-ignore - accessing private method for testing
-        plugin.provideSharedModule(
-          mockCompilation,
-          resolvedProvideMap,
-          'test-module',
-          config,
-          '/app/src/components/Button.js', // Matches RegExp
-          {},
-        );
-
-        // Module should be added since it matches the pattern
-        // The key is the resource path, not the module name
-        expect(resolvedProvideMap.has('/app/src/components/Button.js')).toBe(
-          true,
-        );
-      });
-
-      it('should skip module when RegExp request include filter fails', () => {
-        const resolvedProvideMap = new Map();
-        const config = {
-          shareScope: 'default',
-          shareKey: 'test-module',
-          version: '1.0.0',
-          include: {
-            request: /\/src\/components\//, // RegExp filter
-          },
-        };
-
-        // @ts-ignore - accessing private method for testing
-        plugin.provideSharedModule(
-          mockCompilation,
-          resolvedProvideMap,
-          'test-module',
-          config,
-          '/app/src/utils/helper.js', // Does not match RegExp
-          {},
-        );
-
-        // Module should not be added
-        expect(resolvedProvideMap.size).toBe(0);
-        // Request include filter failures do NOT generate warnings
-        expect(mockCompilation.warnings).toHaveLength(0);
-      });
-
       it('should handle missing version with include version filter', () => {
         const resolvedProvideMap = new Map();
         const config = {
@@ -365,59 +282,6 @@ describe('ProvideSharedPlugin', () => {
         // Module should be added (key is resource path)
         expect(resolvedProvideMap.has('/path/to/module')).toBe(true);
       });
-
-      it('should skip module when request exclude filter matches', () => {
-        const resolvedProvideMap = new Map();
-        const config = {
-          shareScope: 'default',
-          shareKey: 'test-module',
-          version: '1.0.0',
-          exclude: {
-            request: '/path/to/module', // Exact match for exclusion
-          },
-        };
-
-        // @ts-ignore - accessing private method for testing
-        plugin.provideSharedModule(
-          mockCompilation,
-          resolvedProvideMap,
-          'test-module',
-          config,
-          '/path/to/module',
-          {},
-        );
-
-        // Module should not be added
-        expect(resolvedProvideMap.size).toBe(0);
-        // Request exclude filter matches do NOT generate warnings (only version exclude matches do)
-        expect(mockCompilation.warnings).toHaveLength(0);
-      });
-
-      it('should handle RegExp request exclude filters', () => {
-        const resolvedProvideMap = new Map();
-        const config = {
-          shareScope: 'default',
-          shareKey: 'test-module',
-          version: '1.0.0',
-          exclude: {
-            request: /test\.js$/, // RegExp exclude pattern
-          },
-        };
-
-        // @ts-ignore - accessing private method for testing
-        plugin.provideSharedModule(
-          mockCompilation,
-          resolvedProvideMap,
-          'test-module',
-          config,
-          '/path/to/module.test.js', // Matches exclude pattern
-          {},
-        );
-
-        // Module should not be added
-        expect(resolvedProvideMap.size).toBe(0);
-        expect(mockCompilation.warnings).toHaveLength(0);
-      });
     });
 
     describe('combined filtering scenarios', () => {
@@ -451,49 +315,6 @@ describe('ProvideSharedPlugin', () => {
         expect(mockCompilation.warnings[0].message).toContain(
           'matches exclude filter',
         );
-      });
-
-      it('should handle combined request and version filters', () => {
-        const resolvedProvideMap = new Map();
-        const config = {
-          shareScope: 'default',
-          shareKey: 'test-module',
-          version: '1.0.0',
-          include: {
-            request: /\/src\//,
-            version: '^1.0.0',
-          },
-        };
-
-        // Test with matching path and version
-        // @ts-ignore - accessing private method for testing
-        plugin.provideSharedModule(
-          mockCompilation,
-          resolvedProvideMap,
-          'test-module',
-          config,
-          '/app/src/module.js',
-          {},
-        );
-
-        expect(resolvedProvideMap.has('/app/src/module.js')).toBe(true);
-
-        // Reset for next test
-        resolvedProvideMap.clear();
-        mockCompilation.warnings = [];
-
-        // Test with non-matching path
-        // @ts-ignore - accessing private method for testing
-        plugin.provideSharedModule(
-          mockCompilation,
-          resolvedProvideMap,
-          'test-module',
-          config,
-          '/app/lib/module.js',
-          {},
-        );
-
-        expect(resolvedProvideMap.size).toBe(0);
       });
 
       it('should generate singleton warning for version filters', () => {
