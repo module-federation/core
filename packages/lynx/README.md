@@ -11,6 +11,10 @@ at `c3bcff685babc4fa7d58c3249d197c85c6343208`. The bundle transport uses
 `lynx.loadScript`, available in Lynx SDK 3.7 and later; `remoteBundle.engineVersion`
 therefore defaults to `3.7`.
 
+Native builds must use the same `@lynx-js/tasm` version as the Lynx template
+plugin. This repository uses `0.0.49`; loading different native encoder versions
+in one process can crash on macOS.
+
 Split federation also requires `@lynx-js/web-core >= 0.22.3` and
 `@lynx-js/template-webpack-plugin >= 0.13.1`. Those releases provide
 bundle-relative Web execution URLs, valid empty main-thread chunks, and

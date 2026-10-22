@@ -3600,8 +3600,8 @@ importers:
         specifier: 0.1.6
         version: 0.1.6
       '@lynx-js/tasm':
-        specifier: 0.0.39
-        version: 0.0.39
+        specifier: 0.0.49
+        version: 0.0.49
       '@module-federation/runtime-tools':
         specifier: workspace:*
         version: link:../runtime-tools
@@ -8463,10 +8463,6 @@ packages:
     resolution: {tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@f382e2203084533ba7b4cb5852ee811ce2e6fb44}
     version: 0.2.4
     engines: {node: '>=18'}
-
-  '@lynx-js/tasm@0.0.39':
-    resolution: {integrity: sha512-FNIV6Cc2K0wCKOHVMfpr3M6kpIZqHHNI02GpVl+h0ClyyK44jxEO+lf58gLFD5E3o0hJ1cp3H2OBIxSUJGkPDw==}
-    hasBin: true
 
   '@lynx-js/tasm@0.0.49':
     resolution: {integrity: sha512-sI+xmLXaMvXWFN5n47kYNHFEMIEpkrz/bVvU2GwvhB26lXfYPdSNedE3bh85vfW/vAmYsB/TbKwtiNhXgN3LDw==}
@@ -34597,8 +34593,6 @@ snapshots:
   '@lynx-js/runtime-wrapper-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@f382e2203084533ba7b4cb5852ee811ce2e6fb44':
     dependencies:
       '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@f382e2203084533ba7b4cb5852ee811ce2e6fb44
-
-  '@lynx-js/tasm@0.0.39': {}
 
   '@lynx-js/tasm@0.0.49': {}
 

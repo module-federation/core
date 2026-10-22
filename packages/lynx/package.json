@@ -81,7 +81,7 @@
   "peerDependencies": {
     "@lynx-js/cache-events-webpack-plugin": "^0.1.0 || ^0.2.0",
     "@lynx-js/css-serializer": "^0.1.6",
-    "@lynx-js/tasm": "^0.0.39",
+    "@lynx-js/tasm": "^0.0.39 || ^0.0.49",
     "@lynx-js/react": ">=0.123.1",
     "@lynx-js/template-webpack-plugin": "^0.13.1 || ^0.16.0",
     "@lynx-js/web-core": "^0.22.3 || ^0.26.0",
@@ -113,7 +113,7 @@
     "@lynx-js/css-serializer": "0.1.6",
     "@lynx-js/chunk-loading-webpack-plugin": "0.4.0",
     "@lynx-js/react": "https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@f382e2203084533ba7b4cb5852ee811ce2e6fb44",
-    "@lynx-js/tasm": "0.0.39",
+    "@lynx-js/tasm": "0.0.49",
     "@lynx-js/web-core": "https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@f382e2203084533ba7b4cb5852ee811ce2e6fb44",
     "@module-federation/runtime-tools": "workspace:*",
     "@rsbuild/core": "2.1.4",
