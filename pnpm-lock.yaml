@@ -6,12 +6,12 @@ settings:
 
 overrides:
   '@changesets/assemble-release-plan': workspace:*
-  '@lynx-js/lynx-bundle-rslib-config': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@348e7f84ef64d775ac6e550d791dea2e84c3096e
-  '@lynx-js/react': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e
-  '@lynx-js/react-rsbuild-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e
-  '@lynx-js/rspeedy': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e
-  '@lynx-js/template-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e
-  '@lynx-js/web-core': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@348e7f84ef64d775ac6e550d791dea2e84c3096e
+  '@lynx-js/lynx-bundle-rslib-config': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+  '@lynx-js/react': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+  '@lynx-js/react-rsbuild-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+  '@lynx-js/rspeedy': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+  '@lynx-js/template-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+  '@lynx-js/web-core': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
   ajv: 8.18.0
   eslint>ajv: 6.14.0
   '@eslint/eslintrc>ajv': 6.14.0
@@ -641,30 +641,30 @@ importers:
   apps/lynx-module-federation-demo:
     dependencies:
       '@lynx-js/react':
-        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e
-        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28)
+        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28)
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
     devDependencies:
       '@lynx-js/lynx-bundle-rslib-config':
-        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@348e7f84ef64d775ac6e550d791dea2e84c3096e
-        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@348e7f84ef64d775ac6e550d791dea2e84c3096e(@rslib/core@0.23.2(@microsoft/api-extractor@7.57.7(@types/node@26.6.4))(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(typescript@6.0.3))
+        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@rslib/core@0.23.2(@microsoft/api-extractor@7.57.7(@types/node@26.6.4))(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(typescript@6.0.3))
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: 0.6.0
-        version: 0.6.0(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))
+        version: 0.6.0(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))
       '@lynx-js/react-rsbuild-plugin':
-        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e
-        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(tslib@2.8.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
+        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(tslib@2.8.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
       '@lynx-js/rspeedy':
-        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e
-        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
+        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
       '@lynx-js/types':
         specifier: 4.0.0
         version: 4.0.0
       '@lynx-js/web-core':
-        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@348e7f84ef64d775ac6e550d791dea2e84c3096e
-        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)
+        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)
       '@lynx-js/web-elements':
         specifier: 0.12.14
         version: 0.12.14(tslib@2.8.1)
@@ -681,11 +681,11 @@ importers:
         specifier: 2.2.9
         version: 2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)
       '@rspack-canary/core':
-        specifier: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81
-        version: '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)'
+        specifier: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b
+        version: '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)'
       '@rspack/core':
-        specifier: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81
-        version: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
+        specifier: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b
+        version: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
       '@types/react':
         specifier: 18.3.28
         version: 18.3.28
@@ -3574,14 +3574,14 @@ importers:
   packages/lynx:
     dependencies:
       '@lynx-js/react':
-        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e
-        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@19.2.14)
+        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@19.2.14)
       '@lynx-js/template-webpack-plugin':
-        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e
-        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)
+        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)
       '@lynx-js/web-core':
-        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@348e7f84ef64d775ac6e550d791dea2e84c3096e
-        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)
+        specifier: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+        version: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)
       '@module-federation/runtime-core':
         specifier: workspace:*
         version: link:../runtime-core
@@ -3608,8 +3608,8 @@ importers:
         specifier: 2.2.9
         version: 2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)
       '@rspack/core':
-        specifier: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81
-        version: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
+        specifier: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b
+        version: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
       '@rstest/core':
         specifier: ^0.10.6
         version: 0.10.6(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(jsdom@20.0.3)
@@ -8288,9 +8288,9 @@ packages:
     resolution: {integrity: sha512-BclJ0H6tEdI0ZX0YrxNqRLuVcUvm5SyHxgLvvCHUWwRWlYc37xewv2sQTdPHNipNbmq9xvrNuauJIDucdjOouw==}
     engines: {node: '>=18'}
 
-  '@lynx-js/cache-events-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/cache-events-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-/a7I0Jrwf/252Ug3y4jA5pwxKBonNQG9EfyRBNIE1VW4EcxK4WKnT2N2u8QRtIZPKubibZbqz0r1C+OVHwwEzQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/cache-events-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/cache-events-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/cache-events-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-MunvjWRR22AD5IhbulsTHFVZfMptaHaLSBBA/qhpJ3GNmRT6Bq5A2yusKYkdp9MwVcSnd3xBnQrKILAFojq8Pw==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/cache-events-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
 
   '@lynx-js/chunk-loading-webpack-plugin@0.4.0':
@@ -8301,28 +8301,28 @@ packages:
     resolution: {integrity: sha512-iU7rgaDKZwchDnFA3wYK8RWlfUS0EyxtUgL+ojlGmBwWXY4BfysShf1jvv6FcRq7in7nQRss2U4Gfi7x1161wA==}
     engines: {node: '>=18'}
 
-  '@lynx-js/chunk-loading-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/chunk-loading-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-zwjG3s6Jxcxx1vo+1wTuZX0K8KOlFKbC2r7cAL0IYNecfkIMUg9t7exQFxZUY2bthJN+4wXJuLJKuM7Nnq+YSQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/chunk-loading-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/chunk-loading-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/chunk-loading-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-CDzIYyzr7r9TIUVFJLMERKCajzm0JwpJPls4i2VIzWKjXeigVPawiFi8L9RSkouPw9So1DeEll6RSWh6WLGx0w==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/chunk-loading-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
 
-  '@lynx-js/css-extract-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-extract-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-VhrKabxe9aH0kfH7LgWLS+zuiDBJlqZSZqpcu52hbuVKgBSmfc0TDG19fk+dgbLNyFtSEncMkjJFNbmtpLMR2g==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-extract-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/css-extract-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-extract-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-GgjF/w+KTG5yIuZaElcBTCCbKTYF2njKPHK7sNHN00Rvl2e/2mTmx2JJV10Lq1oZ6aCpqDfvQ4jKA/xzOB1dIg==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-extract-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
     peerDependencies:
-      '@lynx-js/template-webpack-plugin': 0.0.0-preview-348e7f8
+      '@lynx-js/template-webpack-plugin': 0.0.0-preview-8cd20c6
 
   '@lynx-js/css-serializer@0.1.6':
     resolution: {integrity: sha512-AgYrhsNljp+xBqO2UUGFTfHR+zPBiH9XE8eD13PDkcTDXWA9uKE/cZ6glZUE3Ze0lUDEtp0cSPCOVlHTMEyKIg==}
 
-  '@lynx-js/css-serializer@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-serializer@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-w9sFZgbzaaY9CoALHg2BcBdT8oe/FJVcA0i/J4wpZ6Cu+ZO2y6tYwPL3QxzzPrIXsb3ILasrdXpv6CedJGTtMA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-serializer@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/css-serializer@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-serializer@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-cn3xdI78aq1+nHRu7x6zq3aZjQMi7lY2r479YWjQeDiySyh1D9T1mY4G163ba2y4sebV44SVPdSW1sMFTI1GGQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-serializer@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
 
-  '@lynx-js/debug-metadata-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-zMbvB/hNoR0/znEmZRcLC1O1EyJjB9LqSICNY1j5uW1yopCnchGpfl3VEBWvmcKCd0RfjhmEB7OCXRh60SudLQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/debug-metadata-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-gLSQ/oFlk2fy13/gpCPdLZe93KW0sk7TRfAFshLE0e5G1t2RQVD8JQ/lSGlliTXhAD+YicOF1djjDYtIxz6aaw==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
     peerDependencies:
       '@rsbuild/core': ^2.0.0
@@ -8330,9 +8330,9 @@ packages:
       '@rsbuild/core':
         optional: true
 
-  '@lynx-js/debug-metadata@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-rIhSeyFVGWvExg5QNQDFntMa+S9l735yNoTcTaj0g9jhxnBLJ28pdcAPW5K83kFqVidGn1TNdbDxAxifz0sZ+Q==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/debug-metadata@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-B6vgDQXIuqFuj3iT3hIcPdO/LgapxZiI18JxnFA9+djnyhBgTFCuwCrmNPyv+nbpYx20f6IYuoC+lGuDZzBnOw==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
     hasBin: true
 
@@ -8344,9 +8344,9 @@ packages:
       preact-render-to-string:
         optional: true
 
-  '@lynx-js/lynx-bundle-rslib-config@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-V9WwjAFTYDKih2KCZoemxuHzpEJHzprxtrv0dCaWhu9krRbj+0TsiEVeOe/9Xozns3D2uu5VEmhTVWz50KF4qA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/lynx-bundle-rslib-config@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-XPKzGsTrRMpTgi+CMmJHyG+IdUeQijhPDkgux4FdCdC3+r9unYUhJ2Mflv2NJcM7esdD9ENvwn5CFajqpnPXLQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@rslib/core': ^1.0.0-beta.1
@@ -8358,13 +8358,13 @@ packages:
     peerDependencies:
       '@lynx-js/rspeedy': ^0.16.0
 
-  '@lynx-js/react-alias-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-alias-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-e3eVbY5l8tBCFJqR0ylZwbRF/SNblKDs43DImrNugZbEx+PJAB/Ikj2xCeg+SRqR7wiZZvhiErco0e0YtEiwqA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-alias-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/react-alias-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-alias-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-bl3qFkJkkucKB/lmFZ1RfFICs14EJFeH3CcK6Z+LZcwsV1RfQo5Ri3CbK1g9dWXl2ddJ7zXskw6wDymT4H5pEw==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-alias-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
     peerDependencies:
-      '@lynx-js/react': 0.0.0-preview-348e7f8
-      '@lynx-js/rspeedy': 0.0.0-preview-348e7f8
+      '@lynx-js/react': 0.0.0-preview-8cd20c6
+      '@lynx-js/rspeedy': 0.0.0-preview-8cd20c6
       '@rsbuild/core': ^2.0.0
     peerDependenciesMeta:
       '@lynx-js/react':
@@ -8374,20 +8374,20 @@ packages:
       '@rsbuild/core':
         optional: true
 
-  '@lynx-js/react-refresh-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-refresh-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-eyP3n5BN7+pGWvVddl9yYOh8ZN42IYdP+nVoWHsRp2/czcpVmARCJ96yQY3NojKrDCotjTjlnFGAx1XgcP0qjw==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-refresh-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/react-refresh-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-refresh-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-nzrkDjXApxB2yKb5jHyInTqxyJ8beTnm7McIKGwyjvXAAfnEFx29iSEdr1s4nwFAnsk2QmWtCPD4/OVaiY1bKw==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-refresh-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
     peerDependencies:
-      '@lynx-js/react-webpack-plugin': 0.0.0-preview-348e7f8
+      '@lynx-js/react-webpack-plugin': 0.0.0-preview-8cd20c6
 
-  '@lynx-js/react-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-itcz1KpB7Ll+W0abmC3nfCn4pHPkEn/SsV/5wgr3zgufMCrPu0cKEZp5IiLteypSTMcEAMcUPel9cFKoGdRcyQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/react-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-FwknALwA+ppPo2X0gjXESkEj1P73q8nBcxYMW8ZDbc9KRKp6kXqpYzKsvSMODAsHUh0U7DTUX3UCRzbiiqzjEg==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
     peerDependencies:
-      '@lynx-js/react': 0.0.0-preview-348e7f8
-      '@lynx-js/rspeedy': 0.0.0-preview-348e7f8
+      '@lynx-js/react': 0.0.0-preview-8cd20c6
+      '@lynx-js/rspeedy': 0.0.0-preview-8cd20c6
       '@rsbuild/core': ^2.0.0
     peerDependenciesMeta:
       '@lynx-js/react':
@@ -8397,20 +8397,20 @@ packages:
       '@rsbuild/core':
         optional: true
 
-  '@lynx-js/react-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-pyvg9Ffdwqek3SNcBzroi5f5JTyy0IfG4DYYGoMKESLgE2DXltp8KcZ0dCzrvddlBsTzpf2JxVSGZVqTJ6ATEg==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/react-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-dyl8k+NngmSkZ+MwfEcQltmeBokoS0PYsnMW60kGh6+ACdIg/eNZy38wj2mTybhj7sHpFOVtdxVOod4briQsvw==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
     peerDependencies:
-      '@lynx-js/react': 0.0.0-preview-348e7f8
-      '@lynx-js/template-webpack-plugin': 0.0.0-preview-348e7f8
+      '@lynx-js/react': 0.0.0-preview-8cd20c6
+      '@lynx-js/template-webpack-plugin': 0.0.0-preview-8cd20c6
     peerDependenciesMeta:
       '@lynx-js/react':
         optional: true
 
-  '@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-Tmwp5kPY7Ij3SAYkp4y3c+mSPU/f39F6qRDg7X7FVtJaQiiF8jl29nGWP5V8CaFle/YOmTsZ4E8oHFnbTz1M/Q==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-k5CMbj/IYbtUhnih1stcyikVh1nEZOObVQc7OOhpWFeN/ZUdIKOKA5gTpqzsmC2e2mpiuYG7EqkesRkTMd+9aA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     peerDependencies:
       '@lynx-js/types': '*'
       '@types/react': ^18 || ^19.0.0
@@ -8418,9 +8418,9 @@ packages:
       '@lynx-js/types':
         optional: true
 
-  '@lynx-js/rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-O1G+eAVyDmkv/nbHSUb0GFCs1QK6CgSUNQ83BUhlzzMzKGap6G/3RJWzMry0liDu2eKNKYeN1FJ3mzQUtQzmhw==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-HmUcAvcvBIk/O0gQAmCN5dBdfflzIH9zfwgYwaR5DpD6pYrC1e2uqDuQZSe2COi8PHdfB0tc7LcQu/BQc4JStA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
     peerDependencies:
       '@rsbuild/core': ^2.0.0
@@ -8428,9 +8428,9 @@ packages:
       '@rsbuild/core':
         optional: true
 
-  '@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-4Im+k+j/GcPak8s9KRxZOsLpNluvcvFpyPN43ozfPl8sQWFH+luny0DvJJVXQqm6CA9fLWRlZ50Z5NuiaPeh0g==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-Pz2D8lf1albSKyiBFI+r2C9VbiktddjXLRcsgiDawvhknU0pNvJkRvL12Nt4YPwMMyjI6anJ2aX+7j2yLIgSAQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -8439,37 +8439,37 @@ packages:
       typescript:
         optional: true
 
-  '@lynx-js/runtime-config-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-config-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-4/nsnXOyxjQ8FsUekQG8XsjUhEhpMbX2HPPO8oyxgUIo2GD8rn5d+lhwG7eY4XKXQKwAk/YjjLljik97Mjx+NQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-config-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/runtime-config-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-config-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-sZyzXh0zJJ5l8jbR3tPm2MArMFCLNkMsc9Iunl5fUsZwD09KFE++wjdYgC0my7VGpApsEMjyaX2dlqrQ5epqGA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-config-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
 
-  '@lynx-js/runtime-wrapper-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-r5i76V+xVEIjP9FiLKYdgQs20rKHR8vNRIZ2Ulw2ScyfxNelk5ZeUOJt08QHaz+hNciswPX+jDyC2CWFeyO8JQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/runtime-wrapper-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-fCCs867O+29EEK5xWe70Douw8Mlk1Z2+hh9TzuKFeTu1fzOf5n6zP1OILHL3LtdjEeXift1XL10z/m8AyHErWQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
 
   '@lynx-js/tasm@0.0.49':
     resolution: {integrity: sha512-sI+xmLXaMvXWFN5n47kYNHFEMIEpkrz/bVvU2GwvhB26lXfYPdSNedE3bh85vfW/vAmYsB/TbKwtiNhXgN3LDw==}
     hasBin: true
 
-  '@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-U87i5MFc3IFLyk1OBzlNWZ5YlqQadSETjze4gL+jgbjS7r7k9y2q/hSpvcd+WYo11MQU4PdBLPEsNKx3gInQQA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-qqg1WKBEhgfVQ9lU3xw+F4KoeUc9vWjYAZR7DkPjWgb0KmhAZIH4FG7mljHHMOL5UpQutAwOEe7h1LSoR4Qo8w==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: ^18.14 || >=19.4}
 
   '@lynx-js/types@4.0.0':
     resolution: {integrity: sha512-FBtBV8wt+9/CAUbTdZwvbhGjJEnyzKLWVpq5gaTHTbhDztbhdP0avZ0nHD6I5HSgAhzYNB9oDrqMt/r6YqBkng==}
 
-  '@lynx-js/use-sync-external-store@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/use-sync-external-store@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-WU3WRdKeGIcopTlx0/CAhwniz7UR5iW4xRC/nWRU5FqBsFxp7GOo9MDRBv1gOucLlkXxVlCu//ygBP5zQXteEQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/use-sync-external-store@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/use-sync-external-store@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/use-sync-external-store@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-m5tkLQqw7F7q7ECDBXp0lgyolp1SwQSZIp+yga/9ijVG1QW/vKd81sqj4wwohVlsyhniIwzz49R3hTUhhM4+uQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/use-sync-external-store@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     peerDependencies:
-      '@lynx-js/react': 0.0.0-preview-348e7f8
+      '@lynx-js/react': 0.0.0-preview-8cd20c6
 
-  '@lynx-js/web-core@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-bqYzlDyNTEJo+Ipp2fblxnKJTDgS1DOXEhEGL3q30BDwhucjBhtx80Xgpv6lVOzbCfmALJ/oKijyDtguUmEMIA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/web-core@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-Lg+W98hjVLxfpgD3rfC0iFJPTFoXEW9UFW5qfd9epSY29z2VNMUxaWZnjVW3YaPrW9vMXZUg6EDTwMusXoCn6Q==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     peerDependencies:
       '@lynx-js/animax': 0.1.0-alpha.0
       '@lynx-js/lynx-core': 0.1.4
@@ -8492,23 +8492,23 @@ packages:
     peerDependencies:
       tslib: ^2.5.0
 
-  '@lynx-js/web-elements@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-elements@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-mhxPtcQHK9j4SJuhtU76hHjVkp/g/nhaLIm0VbKBma2tYVCOVk5+Tj3FM21YjqhT7upZT1AtzFKWSJ9NCqhVsQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-elements@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/web-elements@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-elements@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-oMahF8ANkDCFXlDtGGvKNh8dZL6DJvK9RQdiN9LfedC7RPY2OMJBs+QJuLxrQSNA/70XZ4Wq0i6awpIAamsjHA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-elements@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     peerDependencies:
       tslib: ^2.5.0
 
-  '@lynx-js/web-rsbuild-server-middleware@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-rsbuild-server-middleware@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-Io9iAPo7Uuk+cHl06q5I6RZJ3K5VwCnRBh9JAyTgafSVd9wiFsM0UputMiwFekI/abCgZaPavEvCOokjtfxVfg==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-rsbuild-server-middleware@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/web-rsbuild-server-middleware@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-rsbuild-server-middleware@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-4xpEzMaFM2hnfWtliR5EtWCY8bwHHtJHRbKBTaZrbAyHAj/1qAPSVhSKVP8WNZnUVPc6oQbOZtL4AKLJ2C9DvA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-rsbuild-server-middleware@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
 
-  '@lynx-js/web-worker-rpc@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-worker-rpc@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-c1ChTJvabsd4UB84Dd+SSOEJM3XNPwCCh65tRxrxhzJ2+6E5zBb7oRgsSp+Zu3mIHloduVmjwTcJrhEHhw34iQ==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-worker-rpc@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/web-worker-rpc@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-worker-rpc@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-QRYSo9abNgyVWy32TZYOKR3bBczbCpu1DTA/3TjbkIUc2xsnyfm53IeqOpgPF97aFxLzdamu/0OVpLrnH+aR/Q==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-worker-rpc@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
 
-  '@lynx-js/webpack-dev-transport@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-dev-transport@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-VLEO5QhKKKulcy7EjCYdW/Cxyh53oxsEoallkGsKyUzVWMHyrrkGqs+xXAGOI1hEM6h4hvk8t+QNzQCnEai28g==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-dev-transport@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/webpack-dev-transport@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-dev-transport@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-g8YpZq16AtcutHMJ1t9Uxm9BlIhMSs9hnYYzqaHTmzokmFB2mWYilB1XRwx+O+Ou0IH+HG2tQ42ByznrZQaFqg==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-dev-transport@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
 
   '@lynx-js/webpack-runtime-globals@0.0.6':
@@ -8523,14 +8523,14 @@ packages:
     resolution: {integrity: sha512-TqxsPb58LJgiqgxU3zCBrGybmUFJ8EZtu0Hq9sH0UTPztk2ghcUxn18YrU+816KuYeSqOM2qT2Nh+Q69KZWXvw==}
     engines: {node: '>=18'}
 
-  '@lynx-js/webpack-runtime-globals@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-hP5X4+bQQ+R3xzqBgezp9z6dKHc/NGv0IM3iRYPCEh+NbkqGCntt8q/ZgEBQBY+qFEgwFV/rZpPd3lxjDV5jJg==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/webpack-runtime-globals@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-ogivyaoBGlPsWsmqX4WKW4F1wWbcMARmcq8dDFnvFrjVgHqyioRBmVPUUtHEB8xw6IEE5E9VnwhAoJyhKYVsaw==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
 
-  '@lynx-js/websocket@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/websocket@348e7f84ef64d775ac6e550d791dea2e84c3096e':
-    resolution: {integrity: sha512-C7FomaLsHirSNNYzUvdaHDaFQExjNsjIhPkJ132NqGELAkBjOQD7Dkdlw34Er6UpXwLRP1DVhHG4sGhCjstWIA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/websocket@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  '@lynx-js/websocket@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/websocket@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
+    resolution: {integrity: sha512-1M9iIdV4j3JNWu9WbPdRR805aCA0Od76bae+1qzxqXmK39eovSonhjN0QmadChQJ/rMxzidMZoFAmPm14StnOA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/websocket@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
     engines: {node: '>=18'}
 
   '@manypkg/find-root@1.1.0':
@@ -13218,12 +13218,6 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@5cb420f33b708229f0c2c35892f3391b13ff2e81':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@5cb420f33b708229f0c2c35892f3391b13ff2e81}
-    version: 2.3.0-beta.1
-    cpu: [arm64]
-    os: [darwin]
-
   '@rspack/binding-darwin-x64@0.7.5':
     resolution: {integrity: sha512-teLK0TB1x0CsvaaiCopsFx4EvJe+/Hljwii6R7C9qOZs5zSOfbT/LQ202eA0sAGodCncARCGaXVrsekbrRYqeA==}
     cpu: [x64]
@@ -13616,12 +13610,6 @@ packages:
 
   '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
     resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@44017e21f108fa7abec1c3631a3a7efc7a8f334b}
-    version: 2.3.0-beta.1
-    cpu: [x64]
-    os: [linux]
-
-  '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@5cb420f33b708229f0c2c35892f3391b13ff2e81':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@5cb420f33b708229f0c2c35892f3391b13ff2e81}
     version: 2.3.0-beta.1
     cpu: [x64]
     os: [linux]
@@ -14048,10 +14036,6 @@ packages:
     resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@44017e21f108fa7abec1c3631a3a7efc7a8f334b}
     version: 2.3.0-beta.1
 
-  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@5cb420f33b708229f0c2c35892f3391b13ff2e81':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@5cb420f33b708229f0c2c35892f3391b13ff2e81}
-    version: 2.3.0-beta.1
-
   '@rspack/cli@2.1.10':
     resolution: {integrity: sha512-qkuQQ3PzD2sTS2tBAWyWNeOeZmPxRBzB+eNDBhCZmbm8DoMPujW2VQj0k9CulrkBq9sBxU8fQ+5Z/ELzbz5S8g==}
     hasBin: true
@@ -14229,19 +14213,6 @@ packages:
 
   '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
     resolution: {integrity: sha512-CffYkOCKqblgdTMwDeO1yVgGHDpmWW+p8JJBLTYGZk9luNgg9dAw6y4WkLCZfov0M9RW/qI2niHRh9pSyqdLaA==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b}
-    version: 2.3.0-beta.1
-    engines: {node: ^20.19.0 || >=22.12.0}
-    peerDependencies:
-      '@module-federation/runtime-tools': ^0.24.1 || ^2.0.0
-      '@swc/helpers': ^0.5.23
-    peerDependenciesMeta:
-      '@module-federation/runtime-tools':
-        optional: true
-      '@swc/helpers':
-        optional: true
-
-  '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81}
     version: 2.3.0-beta.1
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
@@ -17529,9 +17500,9 @@ packages:
     resolution: {integrity: sha512-GAwkz0AihzY5bkwIY5QDR+LvsRQgB/B+1foMPvi0FZPMl5fjD7ICiznUiBdLYMH1QYe6vqu4gWYytZOccLouFw==}
     engines: {node: '>= 10.0.0'}
 
-  background-only@https://pkg.pr.new/lynx-family/lynx-stack/background-only@348e7f84ef64d775ac6e550d791dea2e84c3096e:
-    resolution: {integrity: sha512-clRyx7zGe+uwTVGyZGCX4gjIgkXLiI+SNFtFdeQpQ+prDqKtx/BAg8j9GMvjmBhZViBO5OfNyR/S+xbHKlbobw==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/background-only@348e7f84ef64d775ac6e550d791dea2e84c3096e}
-    version: 0.0.0-preview-348e7f8
+  background-only@https://pkg.pr.new/lynx-family/lynx-stack/background-only@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4:
+    resolution: {integrity: sha512-UU+XvXZbnGNPFZlSiZI49dOoRVdm9Awaiqoy0QQE64UMXahmJdqQZxPpn/2HGi7vM3w2D9dV1u/dxCqVbU6sYA==, tarball: https://pkg.pr.new/lynx-family/lynx-stack/background-only@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4}
+    version: 0.0.0-preview-8cd20c6
 
   bail@1.0.5:
     resolution: {integrity: sha512-xFbRxM1tahm08yHBP16MMjVUAvDaBMD38zsM9EMAUN61omwLmKlOpB/Zku5QkjZ8TZ4vn53pj+t518cH0S03RQ==}
@@ -34544,9 +34515,9 @@ snapshots:
     dependencies:
       '@lynx-js/webpack-runtime-globals': 0.0.8
 
-  '@lynx-js/cache-events-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/cache-events-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
+  '@lynx-js/cache-events-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/cache-events-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
     dependencies:
-      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
 
   '@lynx-js/chunk-loading-webpack-plugin@0.4.0':
     dependencies:
@@ -34556,67 +34527,67 @@ snapshots:
     dependencies:
       '@lynx-js/webpack-runtime-globals': 0.0.8
 
-  '@lynx-js/chunk-loading-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/chunk-loading-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
+  '@lynx-js/chunk-loading-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/chunk-loading-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
     dependencies:
-      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
 
-  '@lynx-js/css-extract-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-extract-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1))':
+  '@lynx-js/css-extract-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-extract-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1))':
     dependencies:
-      '@lynx-js/template-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)
+      '@lynx-js/template-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)
 
   '@lynx-js/css-serializer@0.1.6':
     dependencies:
       css-tree: 3.2.1
 
-  '@lynx-js/css-serializer@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-serializer@348e7f84ef64d775ac6e550d791dea2e84c3096e':
+  '@lynx-js/css-serializer@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-serializer@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
     dependencies:
       css-tree: 3.2.1
       pathe: 2.0.3
 
-  '@lynx-js/debug-metadata-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))':
+  '@lynx-js/debug-metadata-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))':
     dependencies:
-      '@lynx-js/debug-metadata': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/debug-metadata': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
     optionalDependencies:
       '@rsbuild/core': 2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)
 
-  '@lynx-js/debug-metadata@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata@348e7f84ef64d775ac6e550d791dea2e84c3096e': {}
+  '@lynx-js/debug-metadata@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4': {}
 
   '@lynx-js/internal-preact@11.0.0-rc.1-20260903085447-f95471a': {}
 
-  '@lynx-js/lynx-bundle-rslib-config@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@348e7f84ef64d775ac6e550d791dea2e84c3096e(@rslib/core@0.23.2(@microsoft/api-extractor@7.57.7(@types/node@26.6.4))(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(typescript@6.0.3))':
+  '@lynx-js/lynx-bundle-rslib-config@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/lynx-bundle-rslib-config@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@rslib/core@0.23.2(@microsoft/api-extractor@7.57.7(@types/node@26.6.4))(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(typescript@6.0.3))':
     dependencies:
       '@rslib/core': 0.23.2(@microsoft/api-extractor@7.57.7(@types/node@26.6.4))(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(typescript@6.0.3)
 
-  '@lynx-js/qrcode-rsbuild-plugin@0.6.0(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))':
+  '@lynx-js/qrcode-rsbuild-plugin@0.6.0(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))':
     dependencies:
-      '@lynx-js/rspeedy': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      '@lynx-js/rspeedy': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
 
-  '@lynx-js/react-alias-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-alias-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))':
+  '@lynx-js/react-alias-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-alias-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))':
     optionalDependencies:
-      '@lynx-js/react': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28)
-      '@lynx-js/rspeedy': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      '@lynx-js/react': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28)
+      '@lynx-js/rspeedy': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
       '@rsbuild/core': 2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)
 
-  '@lynx-js/react-refresh-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-refresh-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)))':
+  '@lynx-js/react-refresh-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-refresh-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)))':
     dependencies:
-      '@lynx-js/react-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1))
+      '@lynx-js/react-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1))
 
-  ? '@lynx-js/react-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(tslib@2.8.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))'
+  ? '@lynx-js/react-rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(tslib@2.8.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))'
   : dependencies:
-      '@lynx-js/css-extract-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-extract-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1))
-      '@lynx-js/react-alias-rsbuild-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-alias-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))
-      '@lynx-js/react-refresh-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-refresh-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)))
-      '@lynx-js/react-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1))
-      '@lynx-js/rsbuild-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(tslib@2.8.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
-      '@lynx-js/runtime-config-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-config-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e
-      '@lynx-js/runtime-wrapper-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e
-      '@lynx-js/template-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)
-      '@lynx-js/use-sync-external-store': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/use-sync-external-store@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))
-      background-only: https://pkg.pr.new/lynx-family/lynx-stack/background-only@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/css-extract-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-extract-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1))
+      '@lynx-js/react-alias-rsbuild-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-alias-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))
+      '@lynx-js/react-refresh-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-refresh-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)))
+      '@lynx-js/react-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1))
+      '@lynx-js/rsbuild-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(tslib@2.8.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      '@lynx-js/runtime-config-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-config-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+      '@lynx-js/runtime-wrapper-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+      '@lynx-js/template-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)
+      '@lynx-js/use-sync-external-store': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/use-sync-external-store@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))
+      background-only: https://pkg.pr.new/lynx-family/lynx-stack/background-only@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
       tiny-invariant: 1.3.3
     optionalDependencies:
-      '@lynx-js/react': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28)
-      '@lynx-js/rspeedy': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      '@lynx-js/react': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28)
+      '@lynx-js/rspeedy': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
       '@rsbuild/core': 2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)
     transitivePeerDependencies:
       - '@lynx-js/animax'
@@ -34630,16 +34601,16 @@ snapshots:
       - tslib
       - webpack
 
-  '@lynx-js/react-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1))':
+  '@lynx-js/react-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))(@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1))':
     dependencies:
-      '@lynx-js/debug-metadata': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata@348e7f84ef64d775ac6e550d791dea2e84c3096e
-      '@lynx-js/template-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)
-      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/debug-metadata': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+      '@lynx-js/template-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)
+      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
       tiny-invariant: 1.3.3
     optionalDependencies:
-      '@lynx-js/react': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28)
+      '@lynx-js/react': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28)
 
-  '@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28)':
+  '@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28)':
     dependencies:
       '@types/react': 18.3.28
       preact: '@lynx-js/internal-preact@11.0.0-rc.1-20260903085447-f95471a'
@@ -34648,7 +34619,7 @@ snapshots:
     transitivePeerDependencies:
       - preact-render-to-string
 
-  '@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@19.2.14)':
+  '@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@19.2.14)':
     dependencies:
       '@types/react': 19.2.14
       preact: '@lynx-js/internal-preact@11.0.0-rc.1-20260903085447-f95471a'
@@ -34657,16 +34628,16 @@ snapshots:
     transitivePeerDependencies:
       - preact-render-to-string
 
-  '@lynx-js/rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(tslib@2.8.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))':
+  '@lynx-js/rsbuild-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(tslib@2.8.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))':
     dependencies:
-      '@lynx-js/cache-events-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/cache-events-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e
-      '@lynx-js/chunk-loading-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/chunk-loading-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e
-      '@lynx-js/debug-metadata-rsbuild-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata-rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))
-      '@lynx-js/runtime-wrapper-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e
-      '@lynx-js/template-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)
-      '@lynx-js/web-rsbuild-server-middleware': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-rsbuild-server-middleware@348e7f84ef64d775ac6e550d791dea2e84c3096e
-      '@lynx-js/webpack-dev-transport': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-dev-transport@348e7f84ef64d775ac6e550d791dea2e84c3096e
-      '@lynx-js/websocket': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/websocket@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/cache-events-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/cache-events-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+      '@lynx-js/chunk-loading-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/chunk-loading-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+      '@lynx-js/debug-metadata-rsbuild-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/debug-metadata-rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))
+      '@lynx-js/runtime-wrapper-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+      '@lynx-js/template-webpack-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)
+      '@lynx-js/web-rsbuild-server-middleware': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-rsbuild-server-middleware@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+      '@lynx-js/webpack-dev-transport': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-dev-transport@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+      '@lynx-js/websocket': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/websocket@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
       '@rsbuild/plugin-css-minimizer': 2.0.1(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
     optionalDependencies:
       '@rsbuild/core': 2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)
@@ -34682,11 +34653,11 @@ snapshots:
       - tslib
       - webpack
 
-  '@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@348e7f84ef64d775ac6e550d791dea2e84c3096e(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))':
+  '@lynx-js/rspeedy@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rspeedy@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@module-federation/runtime-tools@packages+runtime-tools)(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)(core-js@3.49.0)(esbuild@0.28.1)(tslib@2.8.1)(typescript@6.0.3)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))':
     dependencies:
-      '@lynx-js/rsbuild-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rsbuild-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(tslib@2.8.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      '@lynx-js/rsbuild-plugin': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/rsbuild-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@rsbuild/core@2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0))(esbuild@0.28.1)(tslib@2.8.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
       '@rsbuild/core': 2.2.9(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)
-      '@rsdoctor/core': 2.0.0(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)
+      '@rsdoctor/core': 2.0.0(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)
     optionalDependencies:
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -34705,23 +34676,23 @@ snapshots:
       - tslib
       - webpack
 
-  '@lynx-js/runtime-config-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-config-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
+  '@lynx-js/runtime-config-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-config-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
     dependencies:
-      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
 
-  '@lynx-js/runtime-wrapper-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e':
+  '@lynx-js/runtime-wrapper-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/runtime-wrapper-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
     dependencies:
-      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
 
   '@lynx-js/tasm@0.0.49': {}
 
-  '@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)':
+  '@lynx-js/template-webpack-plugin@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/template-webpack-plugin@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      '@lynx-js/css-serializer': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-serializer@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/css-serializer': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-serializer@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
       '@lynx-js/tasm': 0.0.49
-      '@lynx-js/web-core': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)
-      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/web-core': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)
+      '@lynx-js/webpack-runtime-globals': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
       '@rspack/lite-tapable': 1.1.5
       css-tree: 3.2.1
       object.groupby: 1.0.3
@@ -34735,15 +34706,15 @@ snapshots:
     dependencies:
       csstype: 3.1.3
 
-  '@lynx-js/use-sync-external-store@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/use-sync-external-store@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28))':
+  '@lynx-js/use-sync-external-store@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/use-sync-external-store@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/react@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28))':
     dependencies:
-      '@lynx-js/react': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@348e7f84ef64d775ac6e550d791dea2e84c3096e(@lynx-js/types@4.0.0)(@types/react@18.3.28)
+      '@lynx-js/react': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/react@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(@lynx-js/types@4.0.0)(@types/react@18.3.28)
 
-  '@lynx-js/web-core@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)':
+  '@lynx-js/web-core@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-core@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)':
     dependencies:
-      '@lynx-js/css-serializer': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-serializer@348e7f84ef64d775ac6e550d791dea2e84c3096e
-      '@lynx-js/web-elements': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-elements@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)
-      '@lynx-js/web-worker-rpc': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-worker-rpc@348e7f84ef64d775ac6e550d791dea2e84c3096e
+      '@lynx-js/css-serializer': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/css-serializer@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
+      '@lynx-js/web-elements': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-elements@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)
+      '@lynx-js/web-worker-rpc': https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-worker-rpc@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4
       wasm-feature-detect: 1.9.0
     optionalDependencies:
       tslib: 2.8.1
@@ -34760,17 +34731,17 @@ snapshots:
       markdown-it: 14.1.1
       tslib: 2.8.1
 
-  '@lynx-js/web-elements@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-elements@348e7f84ef64d775ac6e550d791dea2e84c3096e(tslib@2.8.1)':
+  '@lynx-js/web-elements@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-elements@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4(tslib@2.8.1)':
     dependencies:
       dompurify: 3.4.17
       markdown-it: 15.0.2
       tslib: 2.8.1
 
-  '@lynx-js/web-rsbuild-server-middleware@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-rsbuild-server-middleware@348e7f84ef64d775ac6e550d791dea2e84c3096e': {}
+  '@lynx-js/web-rsbuild-server-middleware@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-rsbuild-server-middleware@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4': {}
 
-  '@lynx-js/web-worker-rpc@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-worker-rpc@348e7f84ef64d775ac6e550d791dea2e84c3096e': {}
+  '@lynx-js/web-worker-rpc@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/web-worker-rpc@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4': {}
 
-  '@lynx-js/webpack-dev-transport@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-dev-transport@348e7f84ef64d775ac6e550d791dea2e84c3096e': {}
+  '@lynx-js/webpack-dev-transport@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-dev-transport@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4': {}
 
   '@lynx-js/webpack-runtime-globals@0.0.6': {}
 
@@ -34778,9 +34749,9 @@ snapshots:
 
   '@lynx-js/webpack-runtime-globals@0.0.8': {}
 
-  '@lynx-js/webpack-runtime-globals@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@348e7f84ef64d775ac6e550d791dea2e84c3096e': {}
+  '@lynx-js/webpack-runtime-globals@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/webpack-runtime-globals@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4': {}
 
-  '@lynx-js/websocket@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/websocket@348e7f84ef64d775ac6e550d791dea2e84c3096e':
+  '@lynx-js/websocket@https://pkg.pr.new/lynx-family/lynx-stack/@lynx-js/websocket@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4':
     dependencies:
       eventemitter3: 5.0.4
 
@@ -42274,19 +42245,19 @@ snapshots:
 
   '@rsdoctor/client@2.0.0': {}
 
-  '@rsdoctor/core@2.0.0(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)':
+  '@rsdoctor/core@2.0.0(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)':
     dependencies:
       '@rsdoctor/client': 2.0.0
-      '@rsdoctor/shared': 2.0.0(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)
+      '@rsdoctor/shared': 2.0.0(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)
       caniuse-lite: 1.0.30001819
       sirv: 3.0.2
       source-map: 0.8.0
     optionalDependencies:
-      '@rspack/core': https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
+      '@rspack/core': https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rsdoctor/shared@2.0.0(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)':
+  '@rsdoctor/shared@2.0.0(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(@types/node@26.6.4)':
     dependencies:
       '@rspack/lite-tapable': 1.3.0
       '@types/estree': 1.0.5
@@ -42296,7 +42267,7 @@ snapshots:
       path-browserify: 1.0.1
       source-map: 0.8.0
     optionalDependencies:
-      '@rspack/core': https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
+      '@rspack/core': https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
 
   '@rslib/core@0.12.4(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@microsoft/api-extractor@7.57.7(@types/node@20.19.5))(typescript@7.0.2)':
     dependencies:
@@ -42440,9 +42411,6 @@ snapshots:
     optional: true
 
   '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
-    optional: true
-
-  '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@5cb420f33b708229f0c2c35892f3391b13ff2e81':
     optional: true
 
   '@rspack/binding-darwin-x64@0.7.5':
@@ -42680,9 +42648,6 @@ snapshots:
     optional: true
 
   '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
-    optional: true
-
-  '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@5cb420f33b708229f0c2c35892f3391b13ff2e81':
     optional: true
 
   '@rspack/binding-linux-x64-musl@0.7.5':
@@ -43176,11 +43141,6 @@ snapshots:
       '@rspack/binding-linux-x64-gnu': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@44017e21f108fa7abec1c3631a3a7efc7a8f334b
       '@rspack/binding-win32-x64-msvc': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@44017e21f108fa7abec1c3631a3a7efc7a8f334b
 
-  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@5cb420f33b708229f0c2c35892f3391b13ff2e81':
-    optionalDependencies:
-      '@rspack/binding-darwin-arm64': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@5cb420f33b708229f0c2c35892f3391b13ff2e81
-      '@rspack/binding-linux-x64-gnu': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@5cb420f33b708229f0c2c35892f3391b13ff2e81
-
   '@rspack/cli@2.1.10(@rspack/core@2.1.10(@module-federation/runtime-tools@2.9.2)(@swc/helpers@0.5.13))(@rspack/dev-server@2.2.1(@rspack/core@2.1.10(@module-federation/runtime-tools@2.9.2)(@swc/helpers@0.5.13))(selfsigned@5.5.0))':
     dependencies:
       '@rspack/core': 2.1.10(@module-federation/runtime-tools@2.9.2)(@swc/helpers@0.5.13)
@@ -43387,13 +43347,6 @@ snapshots:
   '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)':
     dependencies:
       '@rspack/binding': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@44017e21f108fa7abec1c3631a3a7efc7a8f334b
-    optionalDependencies:
-      '@module-federation/runtime-tools': link:packages/runtime-tools
-      '@swc/helpers': 0.5.23
-
-  '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@5cb420f33b708229f0c2c35892f3391b13ff2e81(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)':
-    dependencies:
-      '@rspack/binding': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@5cb420f33b708229f0c2c35892f3391b13ff2e81
     optionalDependencies:
       '@module-federation/runtime-tools': link:packages/runtime-tools
       '@swc/helpers': 0.5.23
@@ -48446,7 +48399,7 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.8
 
-  background-only@https://pkg.pr.new/lynx-family/lynx-stack/background-only@348e7f84ef64d775ac6e550d791dea2e84c3096e: {}
+  background-only@https://pkg.pr.new/lynx-family/lynx-stack/background-only@8cd20c6a49c9816aa2bd65e50aa5ee331f703ea4: {}
 
   bail@1.0.5: {}
 
