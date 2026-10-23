@@ -6,12 +6,7 @@ import {
   GlobalModuleInfo,
 } from '@module-federation/sdk';
 import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
-import {
-  Global,
-  getInfoWithoutType,
-  globalLoading,
-  CurrentGlobal,
-} from '../global';
+import { getInfoWithoutType, globalLoading, CurrentGlobal } from '../global';
 import {
   Options,
   UserOptions,
@@ -23,6 +18,7 @@ import {
   RemoteInfo,
   RemoteEntryExports,
   CallFrom,
+  ShareScopeMap,
   ResourceLoadContext,
 } from '../type';
 import { ModuleFederation } from '../core';
@@ -47,7 +43,11 @@ import {
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
-import { getGlobalShareScope } from '../utils/share';
+import {
+  getAllSharedVersions,
+  getGlobalShareScope,
+  removeSharedVersion,
+} from '../utils/share';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
 
 export interface LoadRemoteMatch {
@@ -178,7 +178,7 @@ export class RemoteHandler {
           globalSnapshot: GlobalModuleInfo;
         },
       ],
-      Promise<PreloadAssets>
+      Promise<PreloadAssets | undefined>
     >('generatePreloadAssets'),
     afterPreloadRemote: new AsyncHook<
       [
@@ -720,8 +720,7 @@ export class RemoteHandler {
       delete CurrentGlobal.__FEDERATION__.moduleInfo[globalSnapshotKey];
 
       if ('entry' in remote) {
-        host.snapshotHandler.manifestCache.delete(remote.entry);
-        delete Global.__FEDERATION__.__MANIFEST_LOADING__[remote.entry];
+        host.snapshotHandler.clearManifestCache(remote.entry);
       }
 
       const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
@@ -778,49 +777,52 @@ export class RemoteHandler {
           const globalShareScopeMap = getGlobalShareScope();
 
           let isAllSharedNotUsed = true;
-          const needDeleteKeys: Array<[string, string, string, string]> = [];
+          const needDeleteKeys: Array<
+            [ShareScopeMap[string], string, string | undefined, string]
+          > = [];
           Object.keys(globalShareScopeMap).forEach((instId) => {
             const shareScopeMap = globalShareScopeMap[instId];
             shareScopeMap &&
               Object.keys(shareScopeMap).forEach((shareScope) => {
                 const shareScopeVal = shareScopeMap[shareScope];
                 shareScopeVal &&
-                  Object.keys(shareScopeVal).forEach((shareName) => {
-                    const sharedPkgs = shareScopeVal[shareName];
-                    sharedPkgs &&
-                      Object.keys(sharedPkgs).forEach((shareVersion) => {
-                        const shared = sharedPkgs[shareVersion];
-                        if (
-                          shared &&
-                          typeof shared === 'object' &&
-                          shared.from === remoteInfo.name
-                        ) {
-                          if (shared.loaded || shared.loading) {
-                            shared.useIn = shared.useIn.filter(
-                              (usedHostName) =>
-                                usedHostName !== remoteInfo.name,
-                            );
-                            if (shared.useIn.length) {
-                              isAllSharedNotUsed = false;
+                  getAllSharedVersions(shareScopeVal).forEach(
+                    ({ pkgName, layer, versions: sharedPkgs }) => {
+                      sharedPkgs &&
+                        Object.keys(sharedPkgs).forEach((shareVersion) => {
+                          const shared = sharedPkgs[shareVersion];
+                          if (
+                            shared &&
+                            typeof shared === 'object' &&
+                            shared.from === remoteInfo.name
+                          ) {
+                            if (shared.loaded || shared.loading) {
+                              shared.useIn = shared.useIn.filter(
+                                (usedHostName) =>
+                                  usedHostName !== remoteInfo.name,
+                              );
+                              if (shared.useIn.length) {
+                                isAllSharedNotUsed = false;
+                              } else {
+                                needDeleteKeys.push([
+                                  shareScopeVal,
+                                  pkgName,
+                                  layer,
+                                  shareVersion,
+                                ]);
+                              }
                             } else {
                               needDeleteKeys.push([
-                                instId,
-                                shareScope,
-                                shareName,
+                                shareScopeVal,
+                                pkgName,
+                                layer,
                                 shareVersion,
                               ]);
                             }
-                          } else {
-                            needDeleteKeys.push([
-                              instId,
-                              shareScope,
-                              shareName,
-                              shareVersion,
-                            ]);
                           }
-                        }
-                      });
-                  });
+                        });
+                    },
+                  );
               });
           });
 
@@ -828,13 +830,9 @@ export class RemoteHandler {
             remoteIns.shareScopeMap = {};
             delete globalShareScopeMap[remoteInsId];
           }
-          needDeleteKeys.forEach(
-            ([insId, shareScope, shareName, shareVersion]) => {
-              delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
-                shareVersion
-              ];
-            },
-          );
+          needDeleteKeys.forEach(([scope, pkgName, layer, shareVersion]) => {
+            removeSharedVersion(scope, pkgName, layer, shareVersion);
+          });
           CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
         }
 

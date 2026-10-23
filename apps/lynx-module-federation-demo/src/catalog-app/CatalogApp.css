@@ -1,0 +1,285 @@
+:root {
+  background-color: #f2f5f7;
+}
+
+.CatalogPage {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f2f5f7;
+}
+
+.CatalogTopBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+}
+
+.CatalogBrand {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.CatalogBrandMark {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background-color: #ff6c47;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.CatalogBrandMarkText {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.CatalogBrandCopy {
+  display: flex;
+  flex-direction: column;
+}
+
+.CatalogBrandName {
+  color: #17212b;
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.CatalogBrandMeta {
+  color: #89949e;
+  font-size: 9px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.CatalogLiveBadge {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background-color: #e0f8eb;
+}
+
+.CatalogLiveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 4px;
+  background-color: #30bd78;
+  margin-right: 6px;
+}
+
+.CatalogLiveText {
+  color: #247b53;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.CatalogContent {
+  flex: 1;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.CatalogScreen {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 28px;
+}
+
+.CatalogHero {
+  display: flex;
+  flex-direction: column;
+  padding-top: 18px;
+  padding-bottom: 20px;
+}
+
+.CatalogEyebrow {
+  color: #e45331;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 1.2px;
+  margin-bottom: 9px;
+}
+
+.CatalogHeroTitle {
+  color: #17212b;
+  font-size: 32px;
+  line-height: 37px;
+  font-weight: 800;
+  letter-spacing: -0.7px;
+  margin-bottom: 9px;
+}
+
+.CatalogHeroCopy {
+  color: #64717d;
+  font-size: 13px;
+  line-height: 19px;
+  max-width: 350px;
+}
+
+.CatalogProof {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 96px;
+  padding: 16px;
+  border-radius: 20px;
+  background-color: #17212b;
+  margin-bottom: 22px;
+}
+
+.CatalogProofMetric {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  align-items: center;
+}
+
+.CatalogProofMetricWide {
+  flex: 1.25;
+}
+
+.CatalogProofValue {
+  color: #ffffff;
+  font-size: 27px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.CatalogProofValueSmall {
+  color: #60e2a4;
+  font-size: 13px;
+  margin-top: 8px;
+  margin-bottom: 10px;
+}
+
+.CatalogProofLabel {
+  color: #8799a9;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.CatalogProofDivider {
+  width: 1px;
+  height: 48px;
+  background-color: #34424f;
+}
+
+.CatalogSectionHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.CatalogActivityHeader {
+  margin-top: 14px;
+}
+
+.CatalogSectionTitle {
+  color: #17212b;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.CatalogSectionMeta {
+  color: #89949e;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.CatalogExposeList {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-width: 1px;
+  border-color: #e2e8eb;
+  border-radius: 20px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-bottom: 22px;
+}
+
+.CatalogExposeRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 68px;
+  border-bottom-width: 1px;
+  border-bottom-color: #e8edf0;
+}
+
+.CatalogExposeRowLast {
+  border-bottom-width: 0;
+}
+
+.CatalogExposeIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  align-items: center;
+  justify-content: center;
+  background-color: #effcf6;
+  margin-right: 11px;
+}
+
+.CatalogExposeIconText {
+  color: #218559;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.CatalogExposeCopy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.CatalogExposeName {
+  color: #17212b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.CatalogExposePath {
+  color: #7b8791;
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+.CatalogExposeStatus {
+  color: #2a9665;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.CatalogFooter {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border-radius: 18px;
+  background-color: #ffece6;
+  margin-top: 18px;
+}
+
+.CatalogFooterTitle {
+  color: #8e3523;
+  font-size: 14px;
+  font-weight: 750;
+  margin-bottom: 5px;
+}
+
+.CatalogFooterCopy {
+  color: #a04b37;
+  font-size: 11px;
+  line-height: 16px;
+}
