@@ -246,7 +246,7 @@ export const getShareItem = ({
     ...normalizedShareOptions,
     id: `${hostName}:${pkgName}`,
     requiredVersion:
-      normalizedShareOptions?.requiredVersion || `^${pkgVersion}`,
+      normalizedShareOptions?.requiredVersion ?? `^${pkgVersion}`,
     name: pkgName,
     version: pkgVersion,
     assets: {
@@ -331,7 +331,8 @@ class ModuleHandler {
     );
     const layered =
       identity.layer !== undefined || Array.isArray(identity.shareScope);
-    const sharedKey = (name: string) => (layered ? identity.key : name);
+    const sharedKey = (name: string) =>
+      layered || identity.shareScope !== 'default' ? identity.key : name;
     const initShared = (pkgName: string, pkgVersion: string) => {
       const key = sharedKey(pkgName);
       if (sharedMap[key]) {
@@ -340,15 +341,22 @@ class ModuleHandler {
       sharedMap[key] = getShareItem({
         pkgName,
         pkgVersion,
-        normalizedShareOptions: sharedManagerNormalizedOptions[pkgName],
+        normalizedShareOptions:
+          Object.entries(sharedManagerNormalizedOptions).find(
+            ([request, options]) =>
+              (options.shareKey ?? request) === pkgName &&
+              options.layer === identity.layer &&
+              JSON.stringify([options.shareScope ?? 'default'].flat()) ===
+                JSON.stringify([identity.shareScope].flat()),
+          )?.[1] ?? sharedManagerNormalizedOptions[pkgName],
         hostName: this._options.name,
       });
       if (layered) {
         sharedMap[key].id = `${this._options.name}:shared:${identity.key}`;
         if (identity.layer !== undefined) sharedMap[key].layer = identity.layer;
-        if (identity.shareScope !== 'default')
-          sharedMap[key].shareScope = identity.shareScope;
       }
+      if (identity.shareScope !== 'default')
+        sharedMap[key].shareScope = identity.shareScope;
     };
 
     const collectRelationshipMap = (mod: StatsModule, pkgName: string) => {
