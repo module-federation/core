@@ -1,7 +1,11 @@
 import { describe, it, expect, rs, beforeEach, afterEach } from '@rstest/core';
-import { getRemoteEntry, getRemoteInfo } from '../src/utils/load';
+import {
+  getRemoteEntry,
+  getRemoteEntryUniqueKey,
+  getRemoteInfo,
+} from '../src/utils/load';
 import { ModuleFederation } from '../src/core';
-import { resetFederationGlobalInfo } from '../src/global';
+import { globalLoading, resetFederationGlobalInfo } from '../src/global';
 import {
   RUNTIME_001,
   RUNTIME_008,
@@ -450,5 +454,220 @@ describe('getRemoteEntry - script load error discrimination', () => {
         message: expect.stringContaining('network failed'),
       },
     });
+  });
+});
+
+describe('getRemoteEntry - globalLoading rejection cache', () => {
+  beforeEach(() => {
+    resetFederationGlobalInfo();
+  });
+
+  it('keeps a successful remote-entry promise cached', async () => {
+    const container = { get: rs.fn(), init: rs.fn() };
+    let attempts = 0;
+    const origin = new ModuleFederation({
+      name: 'global-loading-success-cache',
+      remotes: [],
+      plugins: [
+        {
+          name: 'success-entry',
+          loadEntry() {
+            attempts += 1;
+            return container;
+          },
+        },
+      ],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'cached-success-remote',
+      entry: 'https://remote.test/cached-success.js',
+    });
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+
+    const first = await getRemoteEntry({ origin, remoteInfo });
+    const cached = globalLoading[uniqueKey];
+    const second = await getRemoteEntry({ origin, remoteInfo });
+
+    expect(first).toBe(container);
+    expect(second).toBe(container);
+    expect(attempts).toBe(1);
+    expect(globalLoading[uniqueKey]).toBe(cached);
+    await expect(cached).resolves.toBe(container);
+  });
+
+  it('shares one in-flight promise across concurrent callers', async () => {
+    const container = { get: rs.fn(), init: rs.fn() };
+    let attempts = 0;
+    let resolveLoad!: (value: typeof container) => void;
+    const origin = new ModuleFederation({
+      name: 'global-loading-concurrent',
+      remotes: [],
+      plugins: [
+        {
+          name: 'deferred-entry',
+          loadEntry() {
+            attempts += 1;
+            return new Promise((resolve) => {
+              resolveLoad = resolve;
+            });
+          },
+        },
+      ],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'concurrent-cache-remote',
+      entry: 'https://remote.test/concurrent-cache.js',
+    });
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+
+    const firstPromise = getRemoteEntry({ origin, remoteInfo });
+    const secondPromise = getRemoteEntry({ origin, remoteInfo });
+    const inFlight = globalLoading[uniqueKey];
+
+    // getRemoteEntry is async, so callers get distinct wrappers around the same cache entry.
+    expect(inFlight).toBeInstanceOf(Promise);
+    expect(attempts).toBe(1);
+
+    resolveLoad(container);
+    const [first, second] = await Promise.all([firstPromise, secondPromise]);
+
+    expect(first).toBe(container);
+    expect(second).toBe(container);
+    expect(globalLoading[uniqueKey]).toBe(inFlight);
+    expect(attempts).toBe(1);
+  });
+
+  it('removes a rejected load so a later call can succeed', async () => {
+    const container = { get: rs.fn(), init: rs.fn() };
+    let attempts = 0;
+    const origin = new ModuleFederation({
+      name: 'global-loading-retry-after-reject',
+      remotes: [],
+      plugins: [
+        {
+          name: 'fail-then-succeed',
+          loadEntry() {
+            attempts += 1;
+            if (attempts === 1) {
+              return Promise.reject(
+                new Error('transient remote-entry failure'),
+              );
+            }
+            return container;
+          },
+        },
+      ],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'retry-after-reject-remote',
+      entry: 'https://remote.test/retry-after-reject.js',
+    });
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+
+    const firstError = await getRemoteEntry({ origin, remoteInfo }).catch(
+      (error) => error,
+    );
+    expect(firstError).toBeInstanceOf(Error);
+    expect(firstError.message).toContain('transient remote-entry failure');
+    expect(globalLoading[uniqueKey]).toBeUndefined();
+
+    const second = await getRemoteEntry({ origin, remoteInfo });
+    expect(second).toBe(container);
+    expect(attempts).toBe(2);
+    await expect(globalLoading[uniqueKey]).resolves.toBe(container);
+  });
+
+  it('does not poison the cache after a permanent failure', async () => {
+    let attempts = 0;
+    const origin = new ModuleFederation({
+      name: 'global-loading-permanent-failure',
+      remotes: [],
+      plugins: [
+        {
+          name: 'always-fail',
+          loadEntry() {
+            attempts += 1;
+            return Promise.reject(new Error(`permanent failure #${attempts}`));
+          },
+        },
+      ],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'permanent-failure-remote',
+      entry: 'https://remote.test/permanent-failure.js',
+    });
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+
+    const firstError = await getRemoteEntry({ origin, remoteInfo }).catch(
+      (error) => error,
+    );
+    const secondError = await getRemoteEntry({ origin, remoteInfo }).catch(
+      (error) => error,
+    );
+
+    expect(firstError.message).toContain('permanent failure #1');
+    expect(secondError.message).toContain('permanent failure #2');
+    expect(attempts).toBe(2);
+    expect(globalLoading[uniqueKey]).toBeUndefined();
+  });
+
+  it('does not let an older rejection delete a newer deferred request', async () => {
+    const container = { get: rs.fn(), init: rs.fn() };
+    let attempts = 0;
+    let resolveSecond!: (value: typeof container) => void;
+    const origin = new ModuleFederation({
+      name: 'global-loading-identity-check',
+      remotes: [],
+      plugins: [
+        {
+          name: 'race-entry',
+          loadEntry() {
+            attempts += 1;
+            if (attempts === 1) {
+              const loadError = new Error(
+                '#RUNTIME-008 ScriptNetworkError: first request failed',
+              );
+              loadError.name = 'ScriptNetworkError';
+              // Reject via promise so AsyncHook emits a rejected chain (sync
+              // throw only rejects when a prior listener already returned).
+              return Promise.reject(loadError);
+            }
+            return new Promise((resolve) => {
+              resolveSecond = resolve;
+            });
+          },
+          async loadEntryError(args) {
+            delete args.globalLoading[args.uniqueKey];
+            // Start a newer in-flight request while the original loading
+            // promise is still settling toward rejection.
+            void args.getRemoteEntry({
+              origin: args.origin,
+              remoteInfo: args.remoteInfo,
+              remoteEntryExports: args.remoteEntryExports,
+            });
+            return undefined;
+          },
+        },
+      ],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'identity-check-remote',
+      entry: 'https://remote.test/identity-check.js',
+    });
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+
+    const firstError = await getRemoteEntry({ origin, remoteInfo }).catch(
+      (error) => error,
+    );
+
+    expect(firstError.message).toContain('first request failed');
+    expect(attempts).toBe(2);
+    const newerInFlight = globalLoading[uniqueKey];
+    expect(newerInFlight).toBeInstanceOf(Promise);
+
+    resolveSecond(container);
+    await expect(newerInFlight).resolves.toBe(container);
+    expect(globalLoading[uniqueKey]).toBe(newerInFlight);
+    expect(attempts).toBe(2);
   });
 });

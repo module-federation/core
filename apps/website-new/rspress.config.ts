@@ -7,9 +7,7 @@ import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginModuleFederation } from '@module-federation/rspress-plugin';
 import mfConfig from './module-federation.config';
 
-const canonicalSiteOrigin = (
-  process.env.SITE_ORIGIN || 'https://module-federation.io'
-).replace(/\/$/, '');
+const canonicalSiteOrigin = 'https://module-federation.io'.replace(/\/$/, '');
 const siteIcon = '/svg.svg';
 const socialImageUrl = `${canonicalSiteOrigin}/module-federation-social.svg`;
 const socialImageAlt = 'Module Federation icon';
@@ -114,8 +112,6 @@ gtag('config', '${googleAnalyticsMeasurementId}');
     },
     plugins: [moduleFederationPluginOverview, pluginSass()],
     output: {
-      // Zephyr only provides the deployment URL after upload, so preview
-      // assets must resolve against the current deployment origin.
       assetPrefix: '/',
     },
     environments: {
@@ -131,12 +127,35 @@ gtag('config', '${googleAnalyticsMeasurementId}');
       writeToDisk: true,
       lazyCompilation: false,
     },
+    server: {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+    },
     performance: {
       buildCache: false,
     },
     tools: {
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);
+      },
+      rspack: (config, { environment }) => {
+        if (
+          environment.name === 'web' &&
+          config.optimization?.splitChunks &&
+          typeof config.optimization.splitChunks === 'object'
+        ) {
+          const splitChunks = config.optimization.splitChunks;
+          splitChunks.cacheGroups ??= {};
+          splitChunks.cacheGroups.reactSharedFallback = {
+            test: /[\\/]node_modules[\\/]\.pnpm[\\/](?:cookie|react(?:-dom|-router(?:-dom)?)?|scheduler|set-cookie-parser)@/,
+            name: 'react-shared-fallback',
+            chunks: 'async',
+            enforce: true,
+            priority: 50,
+            reuseExistingChunk: true,
+          };
+        }
       },
       // rspack: {
       //   optimization: {

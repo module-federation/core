@@ -1,0 +1,27 @@
+Para uma investigação pontual, primeiro instale manualmente a extensão MF na
+máquina do agente. Depois, Divebell pode habilitar antes da navegação o
+diagnóstico fornecido pela extensão. Não é necessário adicionar o
+Observability Plugin à aplicação:
+
+```bash
+npm install --global @divebell/cli
+divebell extensions add @divebell/extension-mf
+divebell setup
+divebell open "https://example.com" --mf
+```
+
+O agente deve ler primeiro a Skill retornada por `divebell skill` e depois a
+Skill da extensão retornada por `divebell mf --skill`. Em seguida, ele pode
+inspecionar estado atual, traces de carregamento, seleção de Shared, operações
+de Bridge e performance dos módulos. Por exemplo:
+
+```bash
+divebell mf module-perf --report --view timeline
+```
+
+Consulte a
+[documentação da extensão MF](https://github.com/2heal1/divebell/blob/main/packages/extensions/mf/README.md)
+ou [Solucionar problemas de runtime](/guide/debug/divebell.html).
+
+Mantenha o Observability Plugin na aplicação quando os relatórios precisarem de
+coleta contínua, retenção ou upload em produção.

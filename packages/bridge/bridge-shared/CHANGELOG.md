@@ -1,5 +1,9 @@
 # @module-federation/bridge-shared
 
+## 2.9.2
+
+## 2.9.1
+
 ## 2.9.0
 
 ### Patch Changes
