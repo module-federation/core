@@ -28,3 +28,13 @@ helpers.utils.matchRemoteWithNameAndExpose(
   instance.options.remotes,
   'remote/component',
 );
+
+import { createReactRemote } from '@module-federation/bridge-react/base';
+import type { ComponentProps } from 'react';
+const Card = createReactRemote<{ label: string }>({
+  remote: 'shop/Card',
+  instance,
+});
+const validProps: ComponentProps<typeof Card> = { label: 'valid' };
+// @ts-expect-error Remote props keep the declared business type.
+const invalidProps: ComponentProps<typeof Card> = { label: 123 };

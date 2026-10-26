@@ -350,7 +350,17 @@ export function createLazyComponent<T, E extends keyof T>(
     ];
 
     const Com = m[exportName] as React.FC<ComponentType>;
-    if (exportName in m && typeof Com === 'function') {
+    if (
+      exportName in m &&
+      (typeof Com === 'function' ||
+        (Com &&
+          typeof Com === 'object' &&
+          [
+            Symbol.for('react.memo'),
+            Symbol.for('react.forward_ref'),
+            Symbol.for('react.lazy'),
+          ].includes((Com as any).$$typeof)))
+    ) {
       return (props: Omit<ComponentType, 'key'> & { mfData?: unknown }) => (
         <>
           {globalThis.FEDERATION_SSR && dataFetchMapKey && (
