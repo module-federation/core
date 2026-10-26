@@ -61,6 +61,14 @@
       ]
     }
   },
+  "peerDependencies": {
+    "webpack": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "webpack": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@jest/globals": "29.7.0",
     "webpack": "^5.0.0",
