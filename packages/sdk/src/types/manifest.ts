@@ -32,7 +32,7 @@ export type ManifestRemote<T = ManifestRemoteCommonInfo> =
 
 export type ManifestExpose = Pick<
   StatsExpose,
-  'assets' | 'id' | 'name' | 'path'
+  'assets' | 'id' | 'name' | 'path' | 'render' | 'isService'
 >;
 
 export interface Manifest<

@@ -7,6 +7,7 @@ import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
+import { annotateBridgeExposes } from './bridgeMetadata';
 
 export class StatsPlugin implements WebpackPluginInstance {
   readonly name = 'StatsPlugin';
@@ -78,6 +79,12 @@ export class StatsPlugin implements WebpackPluginInstance {
                   })) || updatedStats;
               }
 
+              updatedStats = await annotateBridgeExposes(
+                updatedStats,
+                this._options,
+                compiler,
+                compilation,
+              );
               compilation.updateAsset(
                 this._statsManager.fileName,
                 new compiler.webpack.sources.RawSource(
@@ -118,6 +125,12 @@ export class StatsPlugin implements WebpackPluginInstance {
                 })) || stats;
             }
 
+            stats = await annotateBridgeExposes(
+              stats,
+              this._options,
+              compiler,
+              compilation,
+            );
             const manifest = await this._manifestManager.generateManifest({
               compilation,
               stats: stats,

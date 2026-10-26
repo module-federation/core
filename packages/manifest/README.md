@@ -32,3 +32,21 @@ new StatsPlugin(mfOptions, {
   bundler: 'webpack',
 }).apply(compiler);
 ```
+
+## Bridge rendering metadata
+
+Statically identifiable default exports created with `createBridgeComponent` publish
+`render: 'bridge'` and `isService: false` on the corresponding expose. Other exposes
+keep their existing shape. The fields are also preserved in MF runtime Snapshots.
+
+The analyzer follows imported factory bindings, aliases, local variables and static
+re-exports without executing producer code. It recognizes the Bridge root, base,
+v18 and v19 entries. Framework integrations register additional import paths with
+`manifest.bridgeProviderModules`, for example `['@modern-js/runtime/mf']`.
+This setting does not enable Bridge router aliases.
+
+Provider options must be static objects without spreads or computed keys.
+Service App declarations and ambiguous wrappers are diagnosed at build time.
+Loader-generated exposes keep their existing metadata and are not inferred from
+the untransformed source. An unmarked legacy provider requires an explicit
+`render: 'bridge'` hint in the unified consumer.

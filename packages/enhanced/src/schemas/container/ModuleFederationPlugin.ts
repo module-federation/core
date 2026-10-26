@@ -1079,6 +1079,14 @@ export default {
               description: 'Name of the manifest file',
               type: 'string',
             },
+            bridgeProviderModules: {
+              description:
+                'Additional framework modules exporting createBridgeComponent',
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
             additionalData: {
               description:
                 'Function that provides additional data to the manifest',
