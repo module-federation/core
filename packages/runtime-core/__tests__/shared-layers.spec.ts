@@ -27,6 +27,37 @@ const host = (shared: ShareArgs[], name = 'layer-host') =>
   new ModuleFederation({ name, remotes: [], shared: { pkg: shared } });
 
 describe('shared layer selection', () => {
+  it.each([undefined, 'server'])(
+    'uses a hook-replaced version map for layer %s',
+    async (layer) => {
+      const mf = new ModuleFederation({
+        name: `hook-map-${layer}`,
+        remotes: [],
+        shared: {
+          pkg: [
+            provider('original', layer),
+            ...(layer ? [provider('unlayered')] : []),
+          ],
+        },
+        plugins: [
+          {
+            name: 'replace-version-map',
+            resolveShare(args) {
+              const previous =
+                args.shareScopeMap[args.scope][args.pkgName]['1.0.0'];
+              args.shareScopeMap[args.scope][args.pkgName] = {
+                '1.0.0': { ...previous, get: () => () => 'replacement' },
+              };
+              return args;
+            },
+          },
+        ],
+      });
+      const get = await mf.loadShare('pkg', consume(layer));
+      expect(get && get()).toBe('replacement');
+    },
+  );
+
   for (const asyncFactory of [false, true]) {
     it(`loads legacy scope entries without shareConfig (async=${asyncFactory})`, async () => {
       const mf = new ModuleFederation({ name: 'legacy-consumer', remotes: [] });

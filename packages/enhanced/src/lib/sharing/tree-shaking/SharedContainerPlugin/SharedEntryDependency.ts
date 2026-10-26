@@ -8,22 +8,24 @@ const { Dependency } = require(
 class SharedEntryDependency extends Dependency {
   public name: string;
   public request: string;
+  public layer?: string;
 
   /**
    * @param {string} name entry name
    * @param {string} request the request of the entry
    */
-  constructor(name: string, request: string) {
+  constructor(name: string, request: string, layer?: string) {
     super();
     this.name = name;
     this.request = request;
+    this.layer = layer;
   }
 
   /**
    * @returns {string | null} an identifier to merge equal requests
    */
   override getResourceIdentifier(): string | null {
-    return `shared-entry-${this.name}`;
+    return `shared-entry-${this.name}${this.layer === undefined ? '' : `|${this.layer}`}`;
   }
 
   override get type(): string {

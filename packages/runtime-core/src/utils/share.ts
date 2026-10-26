@@ -476,6 +476,7 @@ export function getRegisteredShare(
         findShareFunction(versions, treeShaking);
 
       const defaultResolver = () => {
+        const versions = params.shareScopeMap[sc][pkgName];
         const shared = versions[maxOrSingletonVersion];
         if (shareConfig.singleton) {
           if (

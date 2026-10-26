@@ -55,6 +55,7 @@ export default class TreeShakingSharedPlugin {
       this._independentSharePlugin = new IndependentSharedPlugin({
         name: name,
         shared: shared,
+        shareScope: mfConfig.shareScope,
         outputDir,
         plugins:
           mfConfig.treeShakingSharedPlugins?.map((p) => {
