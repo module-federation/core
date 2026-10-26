@@ -1,3 +1,5 @@
+import { displayCopy } from '../../shared/display-copy.ts';
+import { t } from '../../shared/i18n.ts';
 import type { Json, ToolDeclaration } from '../../shared/contracts.ts';
 import type { RemoteContext, RemoteTool } from '../remotes/types.ts';
 
@@ -48,40 +50,49 @@ function validate(
     Array.isArray(schema.enum) &&
     !schema.enum.some((v) => canonical(v) === canonical(value))
   )
-    throw new Error(`${at} 不在允许值内`);
+    throw new Error(t(`${at} 不在允许值内`, `${at} is not an allowed value`));
   const kind = schema.type;
   if (kind === 'object') {
     if (!value || typeof value !== 'object' || Array.isArray(value))
-      throw new Error(`${at} 必须是对象`);
+      throw new Error(t(`${at} 必须是对象`, `${at} must be an object`));
     const record = value as Record<string, unknown>;
     const properties = (schema.properties || {}) as Record<
       string,
       Record<string, Json>
     >;
     for (const key of (schema.required || []) as string[])
-      if (!Object.hasOwn(record, key)) throw new Error(`${at}.${key} 为必填项`);
+      if (!Object.hasOwn(record, key))
+        throw new Error(t(`${at}.${key} 为必填项`, `${at}.${key} is required`));
     for (const [key, item] of Object.entries(record)) {
       if (Object.hasOwn(properties, key))
         validate(properties[key], item, `${at}.${key}`);
       else if (schema.additionalProperties === false)
-        throw new Error(`${at}.${key} 不是已声明参数`);
+        throw new Error(
+          t(
+            `${at}.${key} 不是已声明参数`,
+            `${at}.${key} is not a declared parameter`,
+          ),
+        );
     }
   } else if (kind === 'array') {
-    if (!Array.isArray(value)) throw new Error(`${at} 必须是数组`);
+    if (!Array.isArray(value))
+      throw new Error(t(`${at} 必须是数组`, `${at} must be an array`));
     if (schema.items)
       value.forEach((item, i) =>
         validate(schema.items as Record<string, Json>, item, `${at}[${i}]`),
       );
   } else if (typeof kind === 'string') {
     if (kind === 'integer' ? !Number.isInteger(value) : typeof value !== kind)
-      throw new Error(`${at} 类型错误`);
+      throw new Error(t(`${at} 类型错误`, `${at} has an invalid type`));
     if (
       typeof value === 'number' &&
       (!Number.isFinite(value) ||
         (typeof schema.minimum === 'number' && value < schema.minimum) ||
         (typeof schema.maximum === 'number' && value > schema.maximum))
     )
-      throw new Error(`${at} 超出允许范围`);
+      throw new Error(
+        t(`${at} 超出允许范围`, `${at} is outside the allowed range`),
+      );
   }
 }
 export class ToolRegistry {
@@ -122,7 +133,10 @@ export class ToolRegistry {
   }
   private async probeTransport() {
     if (!this.native) {
-      this.reason = '浏览器没有完整 Document WebMCP API，使用本地注册表';
+      this.reason = t(
+        '浏览器没有完整 Document WebMCP API，使用本地注册表',
+        'The browser does not support the full Document WebMCP API. Using the local registry.',
+      );
       this.emit();
       return;
     }
@@ -142,7 +156,13 @@ export class ToolRegistry {
       const entry = (await this.native.getTools()).find(
         (tool) => tool.name === name,
       );
-      if (!entry) throw new Error('原生工具已注册但不可枚举');
+      if (!entry)
+        throw new Error(
+          t(
+            '原生工具已注册但不可枚举',
+            'The native tool was registered but cannot be listed',
+          ),
+        );
       await this.native.executeTool(entry, {});
       this.mode = 'native';
     } catch (error) {
@@ -154,10 +174,16 @@ export class ToolRegistry {
     }
   }
   useLocalFallback() {
-    if (this.handles.size) throw new Error('请在挂载页面前切换工具传输');
+    if (this.handles.size)
+      throw new Error(
+        t(
+          '请在挂载页面前切换工具传输',
+          'Switch tool transport before mounting a page',
+        ),
+      );
     this.native = null;
     this.mode = 'local';
-    this.reason = '已选择本地注册表';
+    this.reason = t('已选择本地注册表', 'Using the local registry');
     this.emit();
   }
   subscribe = (listener: () => void) => {
@@ -198,7 +224,12 @@ export class ToolRegistry {
             handle.localName === tool.name,
         )
       )
-        throw new Error(`工具名称重复或不合法：${tool.name}`);
+        throw new Error(
+          t(
+            `工具名称重复或不合法：${tool.name}`,
+            `Duplicate or invalid tool name: ${tool.name}`,
+          ),
+        );
       localNames.add(tool.name);
     }
     const controllers: ToolHandle[] = [];
@@ -209,7 +240,10 @@ export class ToolRegistry {
       const handle: ToolHandle = {
         name,
         localName: tool.name,
-        description: `${tool.description}（当前应用：${context.providerName}，实例：${context.mountId}）`,
+        description: t(
+          `${tool.description}（当前应用：${context.providerName}，实例：${context.mountId}）`,
+          `${displayCopy(tool.description)} (application: ${context.providerName}, instance: ${context.mountId})`,
+        ),
         inputSchema: structuredClone(declaration.inputSchema),
         context: structuredClone(context),
         status: 'registering',
@@ -232,7 +266,10 @@ export class ToolRegistry {
       }
       if (canonical(tool.inputSchema) !== canonical(declaration.inputSchema)) {
         handle.status = 'error';
-        handle.error = '产物声明与页面工具 Schema 不一致';
+        handle.error = t(
+          '产物声明与页面工具 Schema 不一致',
+          'Artifact declarations do not match the page tool schema',
+        );
         this.trace('tool.mismatch', { name });
         continue;
       }
@@ -283,7 +320,8 @@ export class ToolRegistry {
           });
       } else {
         handle.status = 'error';
-        handle.error = this.reason || 'WebMCP 尚未就绪';
+        handle.error =
+          this.reason || t('WebMCP 尚未就绪', 'WebMCP is not ready');
       }
       this.trace('tool.register', {
         name,
@@ -390,7 +428,13 @@ export class ToolRegistry {
       const native = (await this.native.getTools()).find(
         (tool) => tool.name === name,
       );
-      if (!native) throw new Error(`原生注册表缺少工具 ${name}`);
+      if (!native)
+        throw new Error(
+          t(
+            `原生注册表缺少工具 ${name}`,
+            `The native registry is missing tool ${name}`,
+          ),
+        );
       this.assertActive(handle);
       combined.throwIfAborted();
       const response = await this.native.executeTool(native, input, {
@@ -399,11 +443,18 @@ export class ToolRegistry {
       this.assertActive(handle);
       combined.throwIfAborted();
       if (response === null)
-        throw new Error('工具触发了页面导航，当前调用没有返回结果');
+        throw new Error(
+          t(
+            '工具触发了页面导航，当前调用没有返回结果',
+            'The tool triggered navigation and returned no result',
+          ),
+        );
       const content = (response as { content?: Array<{ text?: string }> })
         ?.content;
       if ((response as { isError?: boolean })?.isError)
-        throw new Error(content?.[0]?.text || '原生工具执行失败');
+        throw new Error(
+          content?.[0]?.text || t('原生工具执行失败', 'The native tool failed'),
+        );
       result = content?.[0]?.text
         ? JSON.parse(content[0].text)
         : (response as Json);
@@ -430,10 +481,18 @@ export class ToolRegistry {
       });
       const timer = setTimeout(
         () =>
-          finish(new Error(`${providerName} 页面工具未就绪，请检查加载记录`)),
+          finish(
+            new Error(
+              t(
+                `${providerName} 页面工具未就绪，请检查加载记录`,
+                `Tools for ${providerName} are not ready. Check the loading trace.`,
+              ),
+            ),
+          ),
         12000,
       );
-      const cancel = () => finish(signal?.reason ?? new Error('已取消'));
+      const cancel = () =>
+        finish(signal?.reason ?? new Error(t('已取消', 'Cancelled')));
       signal?.addEventListener('abort', cancel, { once: true });
       if (signal?.aborted) cancel();
     });

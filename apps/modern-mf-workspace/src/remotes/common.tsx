@@ -1,3 +1,9 @@
+import { t, getLocale } from '../../shared/i18n';
+import {
+  localizePageCopy,
+  localizePreferences,
+  localizeProduct,
+} from '../../shared/product-i18n';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Json, Preferences, Product } from '../../shared/contracts';
 import type {
@@ -9,17 +15,17 @@ import type {
 import './remote.css';
 
 export const money = (value: number) =>
-  new Intl.NumberFormat('zh-CN', {
+  new Intl.NumberFormat(getLocale() === 'en' ? 'en-US' : 'zh-CN', {
     style: 'currency',
     currency: 'CNY',
     maximumFractionDigits: 0,
   }).format(value);
 
 const categoryLabels: Record<string, string> = {
-  audio: '声音与音乐',
-  workspace: '桌面与工作',
-  travel: '通勤与旅行',
-  lifestyle: '居家与生活',
+  audio: t('声音与音乐', 'Audio & music'),
+  workspace: t('桌面与工作', 'Workspace'),
+  travel: t('通勤与旅行', 'Travel & commuting'),
+  lifestyle: t('居家与生活', 'Home & living'),
 };
 const categoryLabel = (category: string) =>
   categoryLabels[category] ?? category;
@@ -34,7 +40,9 @@ export function pageCopy(
   fallback: string,
 ) {
   const value = context.props?.[field];
-  return typeof value === 'string' && value.trim() ? value : fallback;
+  return typeof value === 'string' && value.trim()
+    ? localizePageCopy(value)
+    : fallback;
 }
 
 export function preferencesOnly(value: Preferences): Preferences {
@@ -50,9 +58,19 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, init);
   if (!response.ok) {
     const body = await response.json().catch(() => null);
-    throw new Error(body?.error?.message || `请求失败 (${response.status})`);
+    throw new Error(
+      body?.error?.message ||
+        t(
+          `请求失败 (${response.status})`,
+          `Request failed (${response.status})`,
+        ),
+    );
   }
-  return response.json() as Promise<T>;
+  const data = await response.json();
+  if (path === '/api/products')
+    return data.map((product: Product) => localizeProduct(product)) as T;
+  if (path === '/api/preferences') return localizePreferences(data) as T;
+  return data as T;
 }
 
 /** Tool handlers read the same immediately updated value as UI event handlers. */
@@ -101,7 +119,11 @@ export function useResource<T>(path: string) {
         })
         .catch((reason: unknown) => {
           if (mounted.current && !abort.signal.aborted) {
-            setError(reason instanceof Error ? reason.message : '加载失败');
+            setError(
+              reason instanceof Error
+                ? reason.message
+                : t('加载失败', 'Unable to load content'),
+            );
           }
           throw reason;
         })
@@ -155,7 +177,13 @@ export function useTools(
             const handler = handlers.current.find(
               (candidate) => candidate.name === tool.name,
             );
-            if (!handler) throw new Error('此页面工具已不可用');
+            if (!handler)
+              throw new Error(
+                t(
+                  '此页面工具已不可用',
+                  'This page tool is no longer available',
+                ),
+              );
             const result = await handler.execute(input, {
               signal: execution.signal,
             });
@@ -199,7 +227,12 @@ export function useSelectable<T extends HTMLElement>(
         element,
         getData: () => {
           if (!latest.current || latest.current.id !== id) {
-            throw new Error('此页面元素已不可用');
+            throw new Error(
+              t(
+                '此页面元素已不可用',
+                'This page element is no longer available',
+              ),
+            );
           }
           return latest.current.getData();
         },
@@ -250,7 +283,12 @@ export function updateFilters(
       !Number.isFinite(input.maxPrice) ||
       input.maxPrice < 0
     ) {
-      throw new Error('最高价格必须是非负数字');
+      throw new Error(
+        t(
+          '最高价格必须是非负数字',
+          'Maximum price must be a non-negative number',
+        ),
+      );
     }
     next.maxPrice = input.maxPrice;
   }
@@ -260,7 +298,7 @@ export function updateFilters(
         String(input.sort),
       )
     ) {
-      throw new Error('不支持的排序方式');
+      throw new Error(t('不支持的排序方式', 'Unsupported sort order'));
     }
     next.sort = input.sort as SortOrder;
   }
@@ -271,7 +309,12 @@ export function updateFilters(
       input.limit < 1 ||
       input.limit > 12
     ) {
-      throw new Error('展示数量必须是 1–12 的整数');
+      throw new Error(
+        t(
+          '展示数量必须是 1–12 的整数',
+          'Item count must be an integer from 1 to 12',
+        ),
+      );
     }
     next.limit = input.limit;
   }
@@ -356,7 +399,7 @@ export function ResourceNotice({
           className="mf-button mf-button-quiet"
           onClick={() => void retry().catch(() => {})}
         >
-          重新加载
+          {t('重新加载', 'Reload')}
         </button>
       </div>
     );
@@ -364,7 +407,7 @@ export function ResourceNotice({
   if (loading) {
     return (
       <div className="mf-notice" role="status">
-        <span className="mf-loading-dot" /> 正在加载…
+        <span className="mf-loading-dot" /> {t('正在加载…', 'Loading…')}
       </div>
     );
   }
@@ -389,8 +432,11 @@ export function FilterBar({
           <path d="m13 13 4 4" />
         </svg>
         <input
-          aria-label="搜索商品"
-          placeholder="搜索商品、品牌或特点"
+          aria-label={t('搜索商品', 'Search products')}
+          placeholder={t(
+            '搜索商品、品牌或特点',
+            'Search products, brands or features',
+          )}
           value={filters.query}
           onChange={(event) =>
             onChange({ ...filters, query: event.target.value })
@@ -398,14 +444,14 @@ export function FilterBar({
         />
       </label>
       <label className="mf-select-field">
-        <span className="mf-sr-only">商品分类</span>
+        <span className="mf-sr-only">{t('商品分类', 'Product category')}</span>
         <select
           value={filters.category}
           onChange={(event) =>
             onChange({ ...filters, category: event.target.value })
           }
         >
-          <option value="all">全部分类</option>
+          <option value="all">{t('全部分类', 'All categories')}</option>
           {categories.map((category) => (
             <option key={category} value={category}>
               {categoryLabel(category)}
@@ -414,26 +460,30 @@ export function FilterBar({
         </select>
       </label>
       <label className="mf-select-field">
-        <span className="mf-sr-only">排序方式</span>
+        <span className="mf-sr-only">{t('排序方式', 'Sort order')}</span>
         <select
           value={filters.sort}
           onChange={(event) =>
             onChange({ ...filters, sort: event.target.value as SortOrder })
           }
         >
-          <option value="recommended">推荐排序</option>
-          <option value="price_asc">价格从低到高</option>
-          <option value="price_desc">价格从高到低</option>
-          <option value="rating">评分优先</option>
+          <option value="recommended">{t('推荐排序', 'Recommended')}</option>
+          <option value="price_asc">
+            {t('价格从低到高', 'Price: low to high')}
+          </option>
+          <option value="price_desc">
+            {t('价格从高到低', 'Price: high to low')}
+          </option>
+          <option value="rating">{t('评分优先', 'Top rated')}</option>
         </select>
       </label>
       <label className="mf-price-field">
-        <span>预算 ¥</span>
+        <span>{t('预算 ¥', 'Budget ¥')}</span>
         <input
           type="number"
           min="0"
-          aria-label="最高价格"
-          placeholder="不限"
+          aria-label={t('最高价格', 'Maximum price')}
+          placeholder={t('不限', 'Any')}
           value={filters.maxPrice ?? ''}
           onChange={(event) =>
             onChange({
@@ -451,7 +501,7 @@ export function FilterBar({
 }
 
 function ProductShape({ product }: { product: Product }) {
-  if (product.name.includes('耳机')) {
+  if (product.id === 'p001' || product.id === 'p009') {
     return (
       <>
         <path
@@ -493,7 +543,7 @@ function ProductShape({ product }: { product: Product }) {
       </>
     );
   }
-  if (product.name.includes('台灯')) {
+  if (product.id === 'p002') {
     return (
       <>
         <path
@@ -510,7 +560,7 @@ function ProductShape({ product }: { product: Product }) {
       </>
     );
   }
-  if (product.name.includes('显示器')) {
+  if (product.id === 'p007') {
     return (
       <>
         <rect
@@ -540,7 +590,7 @@ function ProductShape({ product }: { product: Product }) {
       </>
     );
   }
-  if (product.name.includes('键盘') || product.name.includes('充电')) {
+  if (product.id === 'p004' || product.id === 'p011') {
     return (
       <>
         <rect
@@ -606,7 +656,7 @@ function ProductShape({ product }: { product: Product }) {
       </>
     );
   }
-  if (product.name.includes('水杯') || product.name.includes('手冲')) {
+  if (product.id === 'p008' || product.id === 'p006') {
     return (
       <>
         <path d="M60 38h53l-5 53q-1 13-20 13T66 91Z" fill="currentColor" />
@@ -742,12 +792,18 @@ export function ProductCard({
     onOpen
       ? {
           id: `action:open-details:${product.id}`,
-          label: `${product.name} · 查看推荐理由`,
+          label: t(
+            `${product.name} · 查看推荐理由`,
+            `${product.name} · Why this pick?`,
+          ),
           kind: 'action',
           getData: () => ({
             productId: product.id,
             action: 'open_details',
-            description: `查看 ${product.name} 的详情与推荐理由`,
+            description: t(
+              `查看 ${product.name} 的详情与推荐理由`,
+              `View details and reasons for ${product.name}`,
+            ),
             product: getProductData(),
           }),
         }
@@ -759,7 +815,7 @@ export function ProductCard({
         <ProductArt product={product} />
         {index !== undefined && (
           <span className="mf-rank">
-            推荐 {String(index + 1).padStart(2, '0')}
+            {t('推荐', 'PICK')} {String(index + 1).padStart(2, '0')}
           </span>
         )}
       </div>
@@ -783,11 +839,14 @@ export function ProductCard({
               className="mf-open-product"
               onClick={onOpen}
             >
-              查看推荐理由 <span aria-hidden="true">↗</span>
+              {t('查看推荐理由', 'Why this pick?')}{' '}
+              <span aria-hidden="true">↗</span>
             </button>
           ) : (
             <span className="mf-stock">
-              {product.inStock ? '现货' : '暂时缺货'}
+              {product.inStock
+                ? t('现货', 'In stock')
+                : t('暂时缺货', 'Out of stock')}
             </span>
           )}
         </div>
@@ -799,10 +858,15 @@ export function ProductCard({
 export function EmptyProducts({ reset }: { reset: () => void }) {
   return (
     <div className="mf-empty">
-      <strong>没有符合条件的商品</strong>
-      <p>试试其他关键词，或放宽预算与分类条件。</p>
+      <strong>{t('没有符合条件的商品', 'No matching products')}</strong>
+      <p>
+        {t(
+          '试试其他关键词，或放宽预算与分类条件。',
+          'Try another search, a higher budget or a different category.',
+        )}
+      </p>
       <button className="mf-button mf-button-quiet" onClick={reset}>
-        清除筛选
+        {t('清除筛选', 'Clear filters')}
       </button>
     </div>
   );

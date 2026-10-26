@@ -1,3 +1,6 @@
+import { displayCopy } from '../shared/display-copy';
+import { LanguageSwitch } from './LanguageSwitch';
+import { t, initializeLocale, localeUrl } from '../shared/i18n';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { AgentMessage, Json } from '../shared/contracts';
 import { ApplicationsService, SnapshotExpiredError } from './runtime/discovery';
@@ -13,10 +16,16 @@ import { DeployPage } from './DeployPage';
 import './style.css';
 
 const suggestions = [
-  '最新推荐有什么？',
-  '只看 500 元以内的数码产品',
-  '展开第一个推荐，告诉我为什么推荐它',
-  '把我的兴趣改成数码，再看最新推荐',
+  t('最新推荐有什么？', "What's new for me?"),
+  t('只看 500 元以内的数码产品', 'Show tech products under ¥500'),
+  t(
+    '展开第一个推荐，告诉我为什么推荐它',
+    'Open the first recommendation and tell me why',
+  ),
+  t(
+    '把我的兴趣改成数码，再看最新推荐',
+    'Set my interests to tech, then show new recommendations',
+  ),
 ];
 interface ChatItem {
   id: number;
@@ -45,6 +54,9 @@ export function Mark({ small = false }: { small?: boolean }) {
   );
 }
 export default function App() {
+  useEffect(() => {
+    initializeLocale();
+  }, []);
   if (typeof window !== 'undefined' && location.pathname.startsWith('/deploy/'))
     return <DeployPage />;
   return <Workspace />;
@@ -53,12 +65,15 @@ function Workspace() {
   const [revision, setRevision] = useState(0);
   const [trace] = useState(() => new TraceLog());
   const [registry] = useState(
-    () => new ToolRegistry((event, detail) => trace.add('工具', event, detail)),
+    () =>
+      new ToolRegistry((event, detail) =>
+        trace.add(t('工具', 'Tools'), event, detail),
+      ),
   );
   const [selection] = useState(
     () =>
       new ElementSelectionRegistry((event, detail) =>
-        trace.add('引用', event, detail),
+        trace.add(t('引用', 'Reference'), event, detail),
       ),
   );
   const [expired, setExpired] = useState<SnapshotExpiredError | null>(null);
@@ -66,7 +81,8 @@ function Workspace() {
     () =>
       new ApplicationsService({
         endpoint: '/api/discovery/root',
-        trace: (event, detail) => trace.add('发现', event, detail),
+        trace: (event, detail) =>
+          trace.add(t('发现', 'Discovery'), event, detail),
         onExpired: (error) => {
           registry.expire(error.endpoint, error.consumerKey, error.expectedSid);
           selection.expire(
@@ -151,8 +167,8 @@ function Workspace() {
             binding ||
             root?.bindings.find((item) => item.id === routeId)?.id ||
             routeId,
-          title: cap.title,
-          description: cap.description,
+          title: displayCopy(cap.title),
+          description: displayCopy(cap.description),
           path: `/${cap.entryPath!.replace(/^\/+/, '')}`,
         };
       });
@@ -165,7 +181,12 @@ function Workspace() {
     const sequence = ++navigationSequence.current;
     const url = new URL(path, location.origin);
     if (url.origin !== location.origin)
-      throw new Error('只允许工作区内的应用路径');
+      throw new Error(
+        t(
+          '只允许工作区内的应用路径',
+          'Only workspace application paths are allowed',
+        ),
+      );
     signal?.throwIfAborted();
     if (url.pathname !== '/') setPreview(true);
     setPicking(false);
@@ -178,10 +199,18 @@ function Workspace() {
         signal,
       });
       if (sequence !== navigationSequence.current)
-        throw new DOMException('已被新的导航取代', 'AbortError');
+        throw new DOMException(
+          t('已被新的导航取代', 'Superseded by a newer navigation'),
+          'AbortError',
+        );
       signal?.throwIfAborted();
       if (url.pathname !== '/' && !result.chain.length)
-        throw new Error('部署平台未配置这个页面');
+        throw new Error(
+          t(
+            '部署平台未配置这个页面',
+            'This page is not configured in the deployment platform',
+          ),
+        );
       setNavigation({
         path: `${url.pathname}${url.search}`,
         chain: result.chain,
@@ -190,11 +219,13 @@ function Workspace() {
         history.pushState(
           null,
           '',
-          `/workbench${url.pathname === '/' ? '' : `?path=${encodeURIComponent(url.pathname + url.search)}`}`,
+          localeUrl(
+            `/workbench${url.pathname === '/' ? '' : `?path=${encodeURIComponent(url.pathname + url.search)}`}`,
+          ),
         );
       trace.add(
-        '导航',
-        `打开 ${result.chain.at(-1)?.binding.title || '工作台'}`,
+        t('导航', 'Navigation'),
+        `${t('打开', 'Open')} ${displayCopy(result.chain.at(-1)?.binding.title || t('工作台', 'Workspace'))}`,
         { path },
       );
       bump();
@@ -249,7 +280,12 @@ function Workspace() {
       selected = selection.readSelection();
     } catch {
       selection.clear();
-      setError('无法读取这个元素的信息，请重新选择后发送。');
+      setError(
+        t(
+          '无法读取这个元素的信息，请重新选择后发送。',
+          'Could not read this element. Select it again before sending.',
+        ),
+      );
       return;
     }
     setError('');
@@ -330,7 +366,10 @@ function Workspace() {
     } catch (error) {
       if (!isCurrentRun()) return;
       const content = controller.signal.aborted
-        ? '本轮操作已停止。已完成的页面操作会保留。'
+        ? t(
+            '本轮操作已停止。已完成的页面操作会保留。',
+            'Stopped. Completed page actions have been kept.',
+          )
         : error instanceof Error
           ? error.message
           : String(error);
@@ -374,7 +413,9 @@ function Workspace() {
         selection={selection}
         navigate={navigateRemote}
         extra={extra}
-        trace={(event, detail) => trace.add('加载', event, detail)}
+        trace={(event, detail) =>
+          trace.add(t('加载', 'Loading'), event, detail)
+        }
         renderNested={(_path, props) => renderLevel(index + 1, props)}
       />
     ) : null;
@@ -387,7 +428,10 @@ function Workspace() {
         pathname: new URL(navigation.path, location.origin).pathname,
         cache: 'reload',
       });
-      trace.add('发现', '当前路径快照仍有效');
+      trace.add(
+        t('发现', 'Discovery'),
+        t('当前路径快照仍有效', 'The snapshot for this path is still current'),
+      );
       bump();
     } catch (error) {
       setError(error instanceof Error ? error.message : String(error));
@@ -415,33 +459,41 @@ function Workspace() {
       : registry.mode === 'local'
         ? 'Local registry'
         : registry.mode === 'checking'
-          ? '检测 WebMCP…'
-          : 'WebMCP 不可用';
+          ? t('检测 WebMCP…', 'Checking WebMCP…')
+          : t('WebMCP 不可用', 'WebMCP unavailable');
   return (
     <div
       className={`workspace ${preview ? 'preview-open' : 'preview-closed'} ${picking ? 'is-picking' : ''}`}
       style={{ '--chat-width': `${chatWidth}%` } as React.CSSProperties}
     >
       <header className="topbar">
-        <a className="brand" href="/workbench">
+        <a className="brand" href={localeUrl('/workbench')}>
           <Mark small /> <strong>MF Workspace</strong>
           <span className="tag">LOCAL</span>
         </a>
         <nav>
-          <a className="selected" href="/workbench">
-            工作台
+          <a className="selected" href={localeUrl('/workbench')}>
+            {t('工作台', 'Workspace')}
           </a>
-          <a href="/deploy/root">总部署</a>
-          <a href="/deploy/recommendations">推荐部署 ↗</a>
+          <a href={localeUrl('/deploy/root')}>
+            {t('总部署', 'Root deployment')}
+          </a>
+          <a href={localeUrl('/deploy/recommendations')}>
+            {t('推荐部署 ↗', 'Recommendations ↗')}
+          </a>
         </nav>
+        <LanguageSwitch />
         <span className="connection">
-          <i /> 本地环境
+          <i /> {t('本地环境', 'Local environment')}
         </span>
       </header>
       <main className="split-workspace">
-        <section className="chat-panel" aria-label="与 Agent 对话">
+        <section
+          className="chat-panel"
+          aria-label={t('与 Agent 对话', 'Chat with the agent')}
+        >
           <div className="panel-heading">
-            <span>对话</span>
+            <span>{t('对话', 'Chat')}</span>
             <div className="panel-heading-actions">
               <button
                 className="preview-toggle"
@@ -450,11 +502,13 @@ function Workspace() {
                 aria-controls="application-preview"
               >
                 <span aria-hidden="true">◫</span>{' '}
-                {preview ? '收起预览' : '打开预览'}
+                {preview
+                  ? t('收起预览', 'Hide preview')
+                  : t('打开预览', 'Open preview')}
               </button>
               <button
                 className="icon-button"
-                title="新对话"
+                title={t('新对话', 'New chat')}
                 onClick={() => {
                   const run = currentRun.current;
                   currentRun.current = undefined;
@@ -471,7 +525,7 @@ function Workspace() {
                   setLoading(false);
                   setError('');
                   navigationSequence.current++;
-                  history.pushState(null, '', '/workbench');
+                  history.pushState(null, '', localeUrl('/workbench'));
                 }}
               >
                 ＋
@@ -482,11 +536,17 @@ function Workspace() {
             {!messages.length && (
               <div className="chat-welcome">
                 <Mark />
-                <h1>想看点什么？</h1>
+                <h1>{t('想看点什么？', 'What would you like to explore?')}</h1>
                 <p>
-                  从一个问题开始，让 Agent 为你打开需要的页面。
+                  {t(
+                    '从一个问题开始，让 Agent 为你打开需要的页面。',
+                    'Ask a question. Your agent will open the page you need.',
+                  )}
                   <br />
-                  选中页面里的内容，还可以接着聊。
+                  {t(
+                    '选中页面里的内容，还可以接着聊。',
+                    'Select anything on the page to keep the conversation going.',
+                  )}
                 </p>
                 <div className="suggestions">
                   {suggestions.map((text, i) => (
@@ -510,7 +570,7 @@ function Workspace() {
               >
                 <div className="message-author">
                   {message.role === 'user' ? (
-                    '你'
+                    t('你', 'You')
                   ) : (
                     <>
                       <Mark small /> Workspace Agent
@@ -529,8 +589,10 @@ function Workspace() {
             {!!steps.length && (
               <details className="agent-steps" open={busy}>
                 <summary>
-                  {busy ? '正在执行页面操作' : '查看本轮操作'} · {steps.length}{' '}
-                  步
+                  {busy
+                    ? t('正在执行页面操作', 'Running page actions')
+                    : t('查看本轮操作', 'View actions')}{' '}
+                  · {steps.length} {t('步', 'steps')}
                 </summary>
                 {steps.map((step) => (
                   <details key={step.id}>
@@ -559,9 +621,9 @@ function Workspace() {
             )}
             {!preview && registry.mode === 'unavailable' && (
               <div className="inline-error">
-                页面工具暂不可用。
+                {t('页面工具暂不可用。', 'Page tools are unavailable.')}
                 <button onClick={() => registry.useLocalFallback()}>
-                  使用本地注册表
+                  {t('使用本地注册表', 'Use local registry')}
                 </button>
               </div>
             )}
@@ -580,7 +642,12 @@ function Workspace() {
                   <details>
                     <summary>
                       <strong>{selection.getSelection()!.label}</strong>
-                      <span>将随下一条消息发送</span>
+                      <span>
+                        {t(
+                          '将随下一条消息发送',
+                          'Included with your next message',
+                        )}
+                      </span>
                     </summary>
                     <pre>
                       {JSON.stringify(selection.getSelection()!.data, null, 2)}
@@ -588,7 +655,7 @@ function Workspace() {
                   </details>
                   <button
                     type="button"
-                    aria-label="移除元素引用"
+                    aria-label={t('移除元素引用', 'Remove element reference')}
                     onClick={() => selection.clear()}
                   >
                     ×
@@ -597,11 +664,14 @@ function Workspace() {
               )}
               <textarea
                 ref={composer}
-                aria-label="输入对话"
+                aria-label={t('输入对话', 'Message')}
                 placeholder={
                   mode === 'replay'
-                    ? '试试「最新推荐有什么？」'
-                    : '描述你想查看或操作的内容…'
+                    ? t('试试「最新推荐有什么？」', 'Try “What’s new for me?”')
+                    : t(
+                        '描述你想查看或操作的内容…',
+                        'Describe what you want to explore or do…',
+                      )
                 }
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
@@ -620,41 +690,48 @@ function Workspace() {
                 <button
                   type="button"
                   className={`select-element-button ${picking ? 'active' : ''}`}
-                  aria-label="选择页面内容"
+                  aria-label={t('选择页面内容', 'Select page content')}
                   aria-pressed={picking}
                   title={
                     selection.list().length
-                      ? '选择页面主动提供的元素，作为对话引用'
-                      : '打开应用后可选择页面内容'
+                      ? t(
+                          '选择页面主动提供的元素，作为对话引用',
+                          'Select an element offered by this page to reference in chat',
+                        )
+                      : t(
+                          '打开应用后可选择页面内容',
+                          'Open an app to select page content',
+                        )
                   }
                   disabled={busy || !selection.list().length}
                   onClick={() =>
                     picking ? finishSelection() : beginSelection()
                   }
                 >
-                  <span aria-hidden="true">⌖</span> 选择内容
+                  <span aria-hidden="true">⌖</span>{' '}
+                  {t('选择内容', 'Select content')}
                 </button>
                 <select
-                  aria-label="Agent 模式"
+                  aria-label={t('Agent 模式', 'Agent mode')}
                   value={mode}
                   disabled={busy}
                   onChange={(event) =>
                     setMode(event.target.value as 'replay' | 'model')
                   }
                 >
-                  <option value="replay">演示回放</option>
+                  <option value="replay">{t('演示回放', 'Demo replay')}</option>
                   <option value="model" disabled={!modelStatus.configured}>
-                    真实模型
+                    {t('真实模型', 'Live model')}
                     {modelStatus.configured
                       ? ` · ${modelStatus.model}`
-                      : ' · 未配置'}
+                      : t(' · 未配置', ' · Not configured')}
                   </option>
                 </select>
                 {busy ? (
                   <button
                     type="button"
                     className="send-button"
-                    aria-label="停止操作"
+                    aria-label={t('停止操作', 'Stop')}
                     onClick={() => currentRun.current?.abort()}
                   >
                     ■
@@ -662,7 +739,7 @@ function Workspace() {
                 ) : (
                   <button
                     className="send-button"
-                    aria-label="发送"
+                    aria-label={t('发送', 'Send')}
                     disabled={!ready || !transportReady || !input.trim()}
                   >
                     ↑
@@ -672,15 +749,21 @@ function Workspace() {
             </form>
             <p className="composer-note">
               {mode === 'replay'
-                ? '回放预设决策，执行真实页面工具。'
-                : '模型选择工具，浏览器执行页面操作。'}
+                ? t(
+                    '回放预设决策，执行真实页面工具。',
+                    'Scripted decisions, real page tools.',
+                  )
+                : t(
+                    '模型选择工具，浏览器执行页面操作。',
+                    'The model chooses tools. Your browser runs the actions.',
+                  )}
             </p>
           </div>
         </section>
         <div
           className="split-handle"
           role="separator"
-          aria-label="调整对话宽度"
+          aria-label={t('调整对话宽度', 'Resize chat')}
           aria-orientation="vertical"
           aria-valuenow={chatWidth}
           tabIndex={0}
@@ -697,7 +780,7 @@ function Workspace() {
         <section
           id="application-preview"
           className="app-panel"
-          aria-label="应用页面"
+          aria-label={t('应用页面', 'Application preview')}
           aria-hidden={!preview}
           {...(!preview ? { inert: '' } : {})}
         >
@@ -709,7 +792,7 @@ function Workspace() {
                   void navigate('/').catch(() => {});
                 }}
               >
-                应用
+                {t('应用', 'Apps')}
               </button>
               {navigation.chain.map((app, i) => (
                 <React.Fragment key={i}>
@@ -717,26 +800,33 @@ function Workspace() {
                   <button
                     onClick={() => void navigate(app.basename).catch(() => {})}
                   >
-                    {app.binding.title}
+                    {displayCopy(app.binding.title)}
                   </button>
                 </React.Fragment>
               ))}
             </div>
             <div className="canvas-actions">
               <span className="tag">
-                {loading ? '发现中…' : active ? '已连接' : 'READY'}
+                {loading
+                  ? t('发现中…', 'Discovering…')
+                  : active
+                    ? t('已连接', 'Connected')
+                    : 'READY'}
               </span>
               <button
-                title="主动请求当前路径 endpoint，保留 sid"
+                title={t(
+                  '主动请求当前路径 endpoint，保留 sid',
+                  'Request the current path endpoint with the existing sid',
+                )}
                 onClick={() => void refresh()}
                 disabled={!ready || loading}
               >
-                ↻ 重新发现
+                {t('↻ 重新发现', '↻ Refresh discovery')}
               </button>
               <button
                 onClick={hidePreview}
-                aria-label="关闭预览"
-                title="关闭预览"
+                aria-label={t('关闭预览', 'Close preview')}
+                title={t('关闭预览', 'Close preview')}
               >
                 ×
               </button>
@@ -749,20 +839,29 @@ function Workspace() {
           )}
           {registry.mode === 'unavailable' && (
             <div className="inline-error">
-              原生 WebMCP 不可用：{registry.reason}
+              {t('原生 WebMCP 不可用：', 'Native WebMCP unavailable: ')}
+              {registry.reason}
               <button onClick={() => registry.useLocalFallback()}>
-                使用本地注册表
+                {t('使用本地注册表', 'Use local registry')}
               </button>
             </div>
           )}
           {expired && (
             <div className="expiry-banner" role="alert">
               <div>
-                <strong>这个应用有新的部署</strong>
+                <strong>
+                  {t('这个应用有新的部署', 'A new deployment is available')}
+                </strong>
                 <p>
                   {deferred
-                    ? '已保留当前内容，受影响的工具暂不可用。'
-                    : '当前快照已过期。刷新后加载新版本；也可以暂时保留页面。'}
+                    ? t(
+                        '已保留当前内容，受影响的工具暂不可用。',
+                        'Current content is kept. Affected tools are temporarily unavailable.',
+                      )
+                    : t(
+                        '当前快照已过期。刷新后加载新版本；也可以暂时保留页面。',
+                        'This snapshot has expired. Reload for the latest version, or keep this page for now.',
+                      )}
                 </p>
               </div>
               <button
@@ -770,10 +869,10 @@ function Workspace() {
                   setDeferred(true);
                 }}
               >
-                保留当前页面
+                {t('保留当前页面', 'Keep this page')}
               </button>
               <button className="primary" onClick={() => location.reload()}>
-                刷新加载
+                {t('刷新加载', 'Reload')}
               </button>
             </div>
           )}
@@ -794,11 +893,19 @@ function Workspace() {
                   <Mark />
                 </div>
                 <span className="eyebrow">YOUR CONNECTED WORKSPACE</span>
-                <h2>应用，随对话而来。</h2>
+                <h2>
+                  {t('应用，随对话而来。', 'Your conversation opens doors.')}
+                </h2>
                 <p>
-                  从一个问题开始，或者选择一个入口。
+                  {t(
+                    '从一个问题开始，或者选择一个入口。',
+                    'Start with a question, or choose an app.',
+                  )}
                   <br />
-                  每个页面都来自部署平台当前发布的配置。
+                  {t(
+                    '每个页面都来自部署平台当前发布的配置。',
+                    'Each page follows the configuration published by the deployment platform.',
+                  )}
                 </p>
                 <div className="entry-grid">
                   {entries().map((entry, i) => (
@@ -812,20 +919,24 @@ function Workspace() {
                       </span>
                       <strong>{entry.title}</strong>
                       <span>{entry.description}</span>
-                      <b>打开应用 ↗</b>
+                      <b>{t('打开应用 ↗', 'Open app ↗')}</b>
                     </button>
                   ))}
                 </div>
                 <div className="boundary-caption">
-                  <i /> 根应用 A <span>→</span> 动态推荐 C <span>→</span>{' '}
-                  嵌套详情 D
+                  <i /> {t('根应用 A', 'Root app A')}
+                  <span>→</span> {t('动态推荐 C', 'Dynamic recommendations C')}
+                  <span>→</span> {t('嵌套详情 D', 'Nested details D')}
                 </div>
               </div>
             ) : !transportReady ? (
               <div className="loading">
                 {registry.mode === 'checking'
-                  ? '正在检测页面工具支持…'
-                  : '请选择上方「使用本地注册表」以加载应用。'}
+                  ? t('正在检测页面工具支持…', 'Checking page tool support…')
+                  : t(
+                      '请选择上方「使用本地注册表」以加载应用。',
+                      'Choose “Use local registry” above to load this app.',
+                    )}
               </div>
             ) : (
               <>
@@ -838,7 +949,9 @@ function Workspace() {
                     registry={registry}
                     selection={selection}
                     navigate={navigateRemote}
-                    trace={(event, detail) => trace.add('加载', event, detail)}
+                    trace={(event, detail) =>
+                      trace.add(t('加载', 'Loading'), event, detail)
+                    }
                     renderNested={() => null}
                   />
                 )}
@@ -849,13 +962,16 @@ function Workspace() {
       </main>
       <footer className="statusbar">
         <button onClick={() => setInspector((value) => !value)}>
-          <span>{inspector ? '▾' : '▸'}</span> 运行过程{' '}
+          <span>{inspector ? '▾' : '▸'}</span> {t('运行过程', 'Activity')}{' '}
           <span className="event-count">{trace.events.length}</span>
         </button>
-        <span>{service.getContexts().length} 个发现上下文</span>
+        <span>
+          {service.getContexts().length}{' '}
+          {t('个发现上下文', 'discovery contexts')}
+        </span>
         <span>
           {registry.list().filter((t) => t.status === 'ready').length}{' '}
-          个可用工具
+          {t('个可用工具', 'available tools')}
         </span>
         <button
           className="transport"
@@ -878,17 +994,27 @@ function Workspace() {
                   className={inspectorTab === tab ? 'active' : ''}
                   onClick={() => setInspectorTab(tab)}
                 >
-                  {['过程记录', '页面工具', '发现快照'][i]}
+                  {
+                    [
+                      t('过程记录', 'Activity log'),
+                      t('页面工具', 'Page tools'),
+                      t('发现快照', 'Snapshots'),
+                    ][i]
+                  }
                 </button>
               ))}
             </div>
             <div>
               {active?.provider.name === 'catalog' && (
                 <button onClick={() => setDual((value) => !value)}>
-                  {dual ? '关闭双实例' : '双实例诊断'}
+                  {dual
+                    ? t('关闭双实例', 'Close second instance')
+                    : t('双实例诊断', 'Inspect two instances')}
                 </button>
               )}
-              <button onClick={() => setInspector(false)}>收起 ↓</button>
+              <button onClick={() => setInspector(false)}>
+                {t('收起 ↓', 'Collapse ↓')}
+              </button>
             </div>
           </div>
           <div className="inspector-content">
@@ -920,8 +1046,11 @@ function Workspace() {
             {inspectorTab === 'tools' && (
               <>
                 <p className="inspector-explanation">
-                  {transport} ·
-                  只有与已接受声明一致、且当前已注册的工具可以执行。
+                  {transport}{' '}
+                  {t(
+                    '· 只有与已接受声明一致、且当前已注册的工具可以执行。',
+                    ' · Only registered tools that match the accepted declarations can run.',
+                  )}
                   {registry.reason}
                 </p>
                 {registry.list().map((tool) => (
@@ -933,7 +1062,7 @@ function Workspace() {
                       <code>{tool.name}</code>
                       <span>{tool.context.sid}</span>
                     </summary>
-                    <p>{tool.description}</p>
+                    <p>{displayCopy(tool.description)}</p>
                     <pre>{JSON.stringify(tool.inputSchema, null, 2)}</pre>
                     {tool.error && <p>{tool.error}</p>}
                     <button
@@ -945,16 +1074,21 @@ function Workspace() {
                       onClick={() =>
                         void registry
                           .execute(tool.name, {})
-                          .catch((error) => trace.add('工具', String(error)))
+                          .catch((error) =>
+                            trace.add(t('工具', 'Tools'), String(error)),
+                          )
                       }
                     >
-                      在此实例执行空参数调用
+                      {t('在此实例执行空参数调用', 'Run with empty arguments')}
                     </button>
                   </details>
                 ))}
                 {!registry.list().length && (
                   <p className="inspector-explanation">
-                    还没有页面工具。打开一个应用后，页面会注册自己的工具。
+                    {t(
+                      '还没有页面工具。打开一个应用后，页面会注册自己的工具。',
+                      'No page tools yet. Open an app to register its tools.',
+                    )}
                   </p>
                 )}
               </>

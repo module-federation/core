@@ -1,3 +1,4 @@
+import { t } from '../shared/i18n';
 import React, { useEffect, useState } from 'react';
 import type { ElementSelectionRegistry } from './runtime/selection';
 
@@ -24,7 +25,12 @@ export function ElementPicker({ registry, surface, onFinish }: Props) {
       registry.select(referenceId);
       onFinish();
     } catch {
-      setError('这个元素已更新，请重新选择。');
+      setError(
+        t(
+          '这个元素已更新，请重新选择。',
+          'This element has changed. Please select it again.',
+        ),
+      );
       setHovered('');
     }
   };
@@ -119,20 +125,31 @@ export function ElementPicker({ registry, surface, onFinish }: Props) {
       <div
         className="element-picker-bar"
         role="region"
-        aria-label="选择页面元素"
+        aria-label={t('选择页面元素', 'Select a page element')}
       >
         <div role="status">
-          <strong>选择要讨论的内容</strong>
-          <span>{error || '点击商品卡片或按钮，只会引用，不会执行操作。'}</span>
+          <strong>
+            {t('选择要讨论的内容', 'Select something to discuss')}
+          </strong>
+          <span>
+            {error ||
+              t(
+                '点击商品卡片或按钮，只会引用，不会执行操作。',
+                'Click a product or button to reference it without running its action.',
+              )}
+          </span>
         </div>
         <select
-          aria-label="按名称选择页面元素"
+          aria-label={t('按名称选择页面元素', 'Select an element by name')}
           value=""
           onChange={(event) => {
             if (event.target.value) choose(event.target.value);
           }}
         >
-          <option value="">按名称选择 · {handles.length} 个元素</option>
+          <option value="">
+            {t('按名称选择 ·', 'Select by name ·')}
+            {handles.length} {t('个元素', 'elements')}
+          </option>
           {handles.map((handle) => (
             <option key={handle.referenceId} value={handle.referenceId}>
               {handle.label} · {handle.context.mountId}
@@ -140,7 +157,8 @@ export function ElementPicker({ registry, surface, onFinish }: Props) {
           ))}
         </select>
         <button onClick={onFinish}>
-          取消 <kbd>Esc</kbd>
+          {t('取消', 'Cancel')}
+          <kbd>Esc</kbd>
         </button>
       </div>
       {current && box && box.width > 0 && box.height > 0 && (
@@ -156,10 +174,10 @@ export function ElementPicker({ registry, surface, onFinish }: Props) {
         >
           <span className={box.top < 80 ? 'label-inside' : ''}>
             {current.kind === 'action'
-              ? '按钮'
+              ? t('按钮', 'Button')
               : current.kind === 'product'
-                ? '商品'
-                : '区域'}
+                ? t('商品', 'Product')
+                : t('区域', 'Section')}
             <b>{current.label}</b>
           </span>
         </div>

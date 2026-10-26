@@ -152,6 +152,7 @@ export interface ModelTool {
   };
 }
 export interface AgentRequest {
+  locale?: 'zh' | 'en';
   messages: AgentMessage[];
   /** Tools are advertised from the browser's live registry; the server never executes them. */
   tools: ModelTool[];

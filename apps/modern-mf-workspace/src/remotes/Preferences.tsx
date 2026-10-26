@@ -1,3 +1,4 @@
+import { t } from '../../shared/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import { createBridgeComponent } from '@module-federation/bridge-react/v18';
 import { TOOL_DECLARATIONS } from '../../shared/capabilities';
@@ -17,18 +18,34 @@ import {
 } from './common';
 
 const categories = [
-  ['audio', '声音与音乐', '耳机、音箱'],
-  ['workspace', '桌面与工作', '灯光、键盘、显示器'],
-  ['travel', '通勤与旅行', '背包、随行好物'],
-  ['lifestyle', '居家与生活', '咖啡、柔软织物'],
+  [
+    'audio',
+    t('声音与音乐', 'Audio & music'),
+    t('耳机、音箱', 'Headphones & speakers'),
+  ],
+  [
+    'workspace',
+    t('桌面与工作', 'Workspace'),
+    t('灯光、键盘、显示器', 'Lighting, keyboards & monitors'),
+  ],
+  [
+    'travel',
+    t('通勤与旅行', 'Travel & commuting'),
+    t('背包、随行好物', 'Backpacks & everyday carry'),
+  ],
+  [
+    'lifestyle',
+    t('居家与生活', 'Home & living'),
+    t('咖啡、柔软织物', 'Coffee & soft furnishings'),
+  ],
 ];
 const priorities = [
-  ['comfort', '舒适体验'],
-  ['quality', '耐用与品质'],
-  ['value', '性价比'],
-  ['design', '外观设计'],
-  ['portable', '轻巧便携'],
-  ['sustainability', '可持续材料'],
+  ['comfort', t('舒适体验', 'Comfort')],
+  ['quality', t('耐用与品质', 'Quality & durability')],
+  ['value', t('性价比', 'Value')],
+  ['design', t('外观设计', 'Design')],
+  ['portable', t('轻巧便携', 'Portability')],
+  ['sustainability', t('可持续材料', 'Sustainable materials')],
 ];
 function mergePreferences(
   previous: Preferences,
@@ -42,7 +59,12 @@ function mergePreferences(
       patch.budget < 0 ||
       patch.budget > 1_000_000
     )
-      throw new Error('预算请输入 0–1,000,000 之间的数字');
+      throw new Error(
+        t(
+          '预算请输入 0–1,000,000 之间的数字',
+          'Enter a budget between 0 and 1,000,000',
+        ),
+      );
     next.budget = patch.budget;
   }
   for (const key of ['categories', 'priorities'] as const) {
@@ -51,13 +73,23 @@ function mergePreferences(
         !Array.isArray(patch[key]) ||
         !patch[key].every((value) => typeof value === 'string')
       )
-        throw new Error('偏好选项必须是字符串数组');
+        throw new Error(
+          t(
+            '偏好选项必须是字符串数组',
+            'Preference options must be an array of strings',
+          ),
+        );
       next[key] = [...new Set(patch[key] as string[])];
     }
   }
   if (patch.notes !== undefined) {
     if (typeof patch.notes !== 'string' || patch.notes.length > 1000)
-      throw new Error('补充说明最多填写 1000 个字');
+      throw new Error(
+        t(
+          '补充说明最多填写 1000 个字',
+          'Notes must be 1,000 characters or fewer',
+        ),
+      );
     next.notes = patch.notes;
   }
   return next;
@@ -120,7 +152,12 @@ function PreferencesPage({ context, runtime }: RemotePageProps) {
           setSaved(preferencesOnly(result));
           setDraft(preferencesOnly(result));
           setCustomized(true);
-          setMessage('偏好已保存，下次推荐会使用这些设置。');
+          setMessage(
+            t(
+              '偏好已保存，下次推荐会使用这些设置。',
+              'Preferences saved. Your next recommendations will use these settings.',
+            ),
+          );
           runtime.trace('preferences.saved', {
             mountId: context.mountId,
             budget: result.budget,
@@ -129,7 +166,11 @@ function PreferencesPage({ context, runtime }: RemotePageProps) {
           return result;
         } catch (error) {
           if (!controller.signal.aborted)
-            setSaveError(error instanceof Error ? error.message : '保存失败');
+            setSaveError(
+              error instanceof Error
+                ? error.message
+                : t('保存失败', 'Unable to save preferences'),
+            );
           throw error;
         } finally {
           signal?.removeEventListener('abort', abort);
@@ -178,14 +219,24 @@ function PreferencesPage({ context, runtime }: RemotePageProps) {
     });
   }
   return (
-    <section className="mf-page mf-preferences" aria-label="我的偏好">
+    <section
+      className="mf-page mf-preferences"
+      aria-label={t('我的偏好', 'My preferences')}
+    >
       <PageHeading
         eyebrow="MADE FOR YOUR EVERYDAY"
-        title={pageCopy(context, 'greeting', '好选择，从了解你开始。')}
+        title={pageCopy(
+          context,
+          'greeting',
+          t('好选择，从了解你开始。', 'Better picks start with you.'),
+        )}
         description={pageCopy(
           context,
           'subtitle',
-          '设定预算，选出关心的品类。推荐会更贴近你的日常。',
+          t(
+            '设定预算，选出关心的品类。推荐会更贴近你的日常。',
+            'Set your budget and choose your interests for recommendations that fit your day.',
+          ),
         )}
       />
       <ResourceNotice
@@ -204,15 +255,20 @@ function PreferencesPage({ context, runtime }: RemotePageProps) {
           }}
         >
           <fieldset className="mf-form-section" disabled={saving}>
-            <legend className="mf-section-title">每件商品的预算</legend>
+            <legend className="mf-section-title">
+              {t('每件商品的预算', 'Budget per item')}
+            </legend>
             <p className="mf-section-description">
-              在舒适的预算里，发现更好的选择。
+              {t(
+                '在舒适的预算里，发现更好的选择。',
+                'Find something better at a price that works for you.',
+              )}
             </p>
             <div className="mf-budget-row">
               <label className="mf-budget-input">
                 <span>¥</span>
                 <input
-                  aria-label="每件商品预算"
+                  aria-label={t('每件商品预算', 'Budget per item')}
                   type="number"
                   min="0"
                   max="1000000"
@@ -238,9 +294,14 @@ function PreferencesPage({ context, runtime }: RemotePageProps) {
             </div>
           </fieldset>
           <fieldset className="mf-form-section" disabled={saving}>
-            <legend className="mf-section-title">你感兴趣的品类</legend>
+            <legend className="mf-section-title">
+              {t('你感兴趣的品类', 'Your interests')}
+            </legend>
             <p className="mf-section-description">
-              可以多选，也可以留空探索所有好物。
+              {t(
+                '可以多选，也可以留空探索所有好物。',
+                'Choose a few categories, or leave them blank to explore everything.',
+              )}
             </p>
             <div className="mf-category-options">
               {categories.map(([value, title, description], index) => (
@@ -269,7 +330,9 @@ function PreferencesPage({ context, runtime }: RemotePageProps) {
             </div>
           </fieldset>
           <fieldset className="mf-form-section" disabled={saving}>
-            <legend className="mf-section-title">什么对你更重要？</legend>
+            <legend className="mf-section-title">
+              {t('什么对你更重要？', 'What matters most to you?')}
+            </legend>
             <div className="mf-priority-options">
               {priorities.map(([value, label]) => (
                 <button
@@ -284,9 +347,12 @@ function PreferencesPage({ context, runtime }: RemotePageProps) {
               ))}
             </div>
             <label className="mf-notes-label">
-              还有什么想告诉我们？
+              {t('还有什么想告诉我们？', 'Anything else we should know?')}
               <textarea
-                placeholder="例如：经常出差，喜欢轻便、低调的设计。"
+                placeholder={t(
+                  '例如：经常出差，喜欢轻便、低调的设计。',
+                  'For example: I travel often and like lightweight, understated designs.',
+                )}
                 rows={3}
                 maxLength={1000}
                 value={draft.notes}
@@ -297,16 +363,24 @@ function PreferencesPage({ context, runtime }: RemotePageProps) {
           <div className="mf-save-row">
             <span className="mf-muted">
               {dirty
-                ? '有尚未保存的修改'
+                ? t('有尚未保存的修改', 'You have unsaved changes')
                 : customized
-                  ? '正在使用你保存的个人偏好'
-                  : '尚未设置个人偏好，推荐使用部署默认值'}
+                  ? t(
+                      '正在使用你保存的个人偏好',
+                      'Using your saved preferences',
+                    )
+                  : t(
+                      '尚未设置个人偏好，推荐使用部署默认值',
+                      'No saved preferences yet. Recommendations use deployment defaults.',
+                    )}
             </span>
             <button
               className="mf-button mf-button-primary"
               disabled={saving || (!dirty && customized)}
             >
-              {saving ? '正在保存…' : '保存偏好'}
+              {saving
+                ? t('正在保存…', 'Saving…')
+                : t('保存偏好', 'Save preferences')}
             </button>
           </div>
           {message && (

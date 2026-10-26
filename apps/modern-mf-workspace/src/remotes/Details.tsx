@@ -1,3 +1,4 @@
+import { t } from '../../shared/i18n';
 import React, { useEffect } from 'react';
 import { createBridgeComponent } from '@module-federation/bridge-react/v18';
 import { TOOL_DECLARATIONS } from '../../shared/capabilities';
@@ -44,21 +45,30 @@ function Details({
       {
         title:
           current && product.price <= current.budget
-            ? '在你的预算之内'
-            : '价格与价值，清楚可见',
+            ? t('在你的预算之内', 'Within your budget')
+            : t('价格与价值，清楚可见', 'A clear view of the price'),
         detail: current
-          ? `${money(product.price)} 的价格，${product.price <= current.budget ? `比你的预算还低 ${money(current.budget - product.price)}。` : `比当前预算高 ${money(product.price - current.budget)}，可以再比较一下。`}`
-          : `当前价格 ${money(product.price)}，根据需要做决定。`,
+          ? t(
+              `${money(product.price)} 的价格，${product.price <= current.budget ? `比你的预算还低 ${money(current.budget - product.price)}。` : `比当前预算高 ${money(product.price - current.budget)}，可以再比较一下。`}`,
+              `${money(product.price)} — ${product.price <= current.budget ? `${money(current.budget - product.price)} below your budget.` : `${money(product.price - current.budget)} above your budget. You may want to compare other options.`}`,
+            )
+          : t(
+              `当前价格 ${money(product.price)}，根据需要做决定。`,
+              `Currently ${money(product.price)}. Choose what works for you.`,
+            ),
       },
       {
         title: current?.categories.includes(product.category)
-          ? '正好是你感兴趣的品类'
-          : '为日常多一个选择',
+          ? t('正好是你感兴趣的品类', 'A category you are interested in')
+          : t('为日常多一个选择', 'Another option for every day'),
         detail: product.description,
       },
       {
-        title: `${product.rating.toFixed(1)} 分的使用体验`,
-        detail: `${product.features.slice(0, 2).join('、')}。${product.inStock ? '目前有现货。' : '目前暂时缺货，可先加入考虑清单。'}`,
+        title: t(
+          `${product.rating.toFixed(1)} 分的使用体验`,
+          `Rated ${product.rating.toFixed(1)} out of 5`,
+        ),
+        detail: `${product.features.slice(0, 2).join(t('、', ', '))}${t('。', '. ')}${product.inStock ? t('目前有现货。', 'Available now.') : t('目前暂时缺货，可先加入考虑清单。', 'Currently out of stock, but worth keeping in mind.')}`,
       },
     ];
   }
@@ -67,13 +77,24 @@ function Details({
       ...TOOL_DECLARATIONS.get_product_details,
       async execute(input, options) {
         if (typeof input.productId !== 'string' || !input.productId)
-          throw new Error('请提供要查看的商品 ID');
+          throw new Error(
+            t(
+              '请提供要查看的商品 ID',
+              'Provide the ID of the product you want to view',
+            ),
+          );
         const allProducts = await products.read();
         options?.signal?.throwIfAborted();
         const selected = allProducts.find(
           (item) => item.id === input.productId,
         );
-        if (!selected) throw new Error(`未找到商品 ${input.productId}`);
+        if (!selected)
+          throw new Error(
+            t(
+              `未找到商品 ${input.productId}`,
+              `Product ${input.productId} was not found`,
+            ),
+          );
         const stored = await preferences.read().catch(() => null);
         const current =
           stored?.customized === true
@@ -96,7 +117,10 @@ function Details({
     product
       ? {
           id: `details:product:${product.id}`,
-          label: `${product.name} · 商品详情`,
+          label: t(
+            `${product.name} · 商品详情`,
+            `${product.name} · Product details`,
+          ),
           kind: 'product',
           getData: () => ({ ...product, productId: product.id }),
         }
@@ -108,7 +132,10 @@ function Details({
     product
       ? {
           id: `details:reasons:${product.id}`,
-          label: `${product.name} · 推荐理由`,
+          label: t(
+            `${product.name} · 推荐理由`,
+            `${product.name} · Recommendation reasons`,
+          ),
           kind: 'section',
           getData: () => ({
             productId: product.id,
@@ -119,7 +146,10 @@ function Details({
       : null,
   );
   return (
-    <section className="mf-page mf-detail-page" aria-label="商品推荐理由">
+    <section
+      className="mf-page mf-detail-page"
+      aria-label={t('商品推荐理由', 'Why this product?')}
+    >
       <ResourceNotice
         error={products.error}
         loading={products.loading}
@@ -139,13 +169,17 @@ function Details({
                 </strong>
                 <span className="mf-rating">★ {product.rating.toFixed(1)}</span>
                 <span className="mf-stock">
-                  {product.inStock ? '现货' : '暂时缺货'}
+                  {product.inStock
+                    ? t('现货', 'In stock')
+                    : t('暂时缺货', 'Out of stock')}
                 </span>
               </div>
             </div>
           </div>
           <div ref={reasonsRef} className="mf-detail-reasons">
-            <h3 className="mf-section-title">为什么推荐给你</h3>
+            <h3 className="mf-section-title">
+              {t('为什么推荐给你', 'Why we picked it for you')}
+            </h3>
             {reasons(product, effectivePreferences).map((reason, index) => (
               <div className="mf-reason" key={reason.title}>
                 <span className="mf-reason-icon" aria-hidden="true">
@@ -159,7 +193,9 @@ function Details({
             ))}
           </div>
           <div className="mf-detail-features">
-            <h3 className="mf-section-title">值得注意的细节</h3>
+            <h3 className="mf-section-title">
+              {t('值得注意的细节', 'Details worth a look')}
+            </h3>
             <div className="mf-product-tags">
               {product.features.map((feature) => (
                 <span key={feature}>{feature}</span>
@@ -170,9 +206,19 @@ function Details({
       ) : products.value ? (
         <div className="mf-empty">
           <strong>
-            {selectedId ? '没有找到这件商品' : '选一件好物，看看推荐理由'}
+            {selectedId
+              ? t('没有找到这件商品', 'Product not found')
+              : t(
+                  '选一件好物，看看推荐理由',
+                  'Choose a product to see why it fits',
+                )}
           </strong>
-          <p>从推荐列表打开商品，即可在这里查看详情。</p>
+          <p>
+            {t(
+              '从推荐列表打开商品，即可在这里查看详情。',
+              'Open a product from your recommendations to see its details here.',
+            )}
+          </p>
         </div>
       ) : null}
     </section>

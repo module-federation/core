@@ -168,6 +168,17 @@ button.primary:hover {
   align-items: center;
   gap: 7px;
 }
+.language-switch {
+  margin-left: auto;
+  width: auto;
+  flex-shrink: 0;
+  padding: 6px 9px;
+  font-size: 12px;
+}
+.language-switch + .connection {
+  margin-left: 0;
+  white-space: nowrap;
+}
 .connection i,
 .mini-dot,
 .live-label i {

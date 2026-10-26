@@ -1,3 +1,4 @@
+import { t } from '../../shared/i18n';
 import React from 'react';
 import { createBridgeComponent } from '@module-federation/bridge-react/v18';
 import { TOOL_DECLARATIONS } from '../../shared/capabilities';
@@ -45,18 +46,25 @@ function Catalog({ context, runtime }: RemotePageProps) {
   ]);
   const visibleProducts = selectProducts(products.value ?? [], filters);
   return (
-    <section className="mf-page" aria-label="商品目录">
+    <section className="mf-page" aria-label={t('商品目录', 'Product catalog')}>
       <PageHeading
         eyebrow="THE EVERYDAY EDIT"
-        title={pageCopy(context, 'greeting', '为日常，挑一点好东西。')}
+        title={pageCopy(
+          context,
+          'greeting',
+          t('为日常，挑一点好东西。', 'Good things for every day.'),
+        )}
         description={pageCopy(
           context,
           'subtitle',
-          '从专注工作到周末出发，找到适合你的那一件。',
+          t(
+            '从专注工作到周末出发，找到适合你的那一件。',
+            'From focused work to weekend plans, find something that fits your day.',
+          ),
         )}
       >
         <span className="mf-count-label">
-          {products.value?.length ?? '—'} 件好物
+          {products.value?.length ?? '—'} {t('件好物', 'finds')}
         </span>
       </PageHeading>
       <FilterBar
@@ -72,12 +80,17 @@ function Catalog({ context, runtime }: RemotePageProps) {
       {products.value && (
         <>
           <div className="mf-results-line" aria-live="polite">
-            <span>找到 {visibleProducts.length} 件商品</span>
+            <span>
+              {t(
+                `找到 ${visibleProducts.length} 件商品`,
+                `${visibleProducts.length} products found`,
+              )}
+            </span>
             <button
               className="mf-text-button"
               onClick={() => setFilters(initialFilters)}
             >
-              重置筛选
+              {t('重置筛选', 'Reset filters')}
             </button>
           </div>
           {visibleProducts.length ? (

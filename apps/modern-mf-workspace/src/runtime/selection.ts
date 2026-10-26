@@ -1,3 +1,4 @@
+import { t } from '../../shared/i18n.ts';
 import type { Json } from '../../shared/contracts.ts';
 import type { RemoteContext, RemoteSelectable } from '../remotes/types.ts';
 
@@ -41,14 +42,24 @@ function jsonCopy(value: unknown, seen = new Set<object>()): Json {
   )
     return value;
   if (typeof value !== 'object' || seen.has(value))
-    throw new Error('所选元素只允许提供 JSON 数据');
+    throw new Error(
+      t(
+        '所选元素只允许提供 JSON 数据',
+        'Selected elements can only expose JSON data',
+      ),
+    );
   const prototype = Object.getPrototypeOf(value);
   if (
     !Array.isArray(value) &&
     prototype !== Object.prototype &&
     prototype !== null
   )
-    throw new Error('所选元素只允许提供 JSON 数据');
+    throw new Error(
+      t(
+        '所选元素只允许提供 JSON 数据',
+        'Selected elements can only expose JSON data',
+      ),
+    );
   seen.add(value);
   try {
     if (Array.isArray(value)) return value.map((item) => jsonCopy(item, seen));
@@ -134,7 +145,12 @@ export class ElementSelectionRegistry {
         !owner ||
         owner.getAttribute('data-selection-mount-id') !== context.mountId
       )
-        throw new Error('可选择元素必须属于当前已挂载页面');
+        throw new Error(
+          t(
+            '可选择元素必须属于当前已挂载页面',
+            'Selectable elements must belong to the currently mounted page',
+          ),
+        );
       if (
         !id.trim() ||
         !label.trim() ||
@@ -150,7 +166,12 @@ export class ElementSelectionRegistry {
                 registered.id === id)),
         )
       )
-        throw new Error(`可选择元素标识重复或声明不合法：${id}`);
+        throw new Error(
+          t(
+            `可选择元素标识重复或声明不合法：${id}`,
+            `Duplicate or invalid selectable element declaration: ${id}`,
+          ),
+        );
       ids.add(id);
       elements.add(element);
       return owner;
@@ -216,7 +237,12 @@ export class ElementSelectionRegistry {
     if (!registration || !this.isActive(registration)) return null;
     const raw = registration.getData();
     if (!raw || Array.isArray(raw) || typeof raw !== 'object')
-      throw new Error('所选元素必须提供 JSON 对象');
+      throw new Error(
+        t(
+          '所选元素必须提供 JSON 对象',
+          'Selected elements must expose a JSON object',
+        ),
+      );
     const data = jsonCopy(raw) as Record<string, Json>;
     // A producer callback can synchronously trigger disposal or expiration.
     if (!this.isActive(registration)) return null;

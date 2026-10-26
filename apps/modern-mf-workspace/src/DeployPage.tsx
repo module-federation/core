@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { getLocale, localeUrl, t } from '../shared/i18n';
+import { displayCopy } from '../shared/display-copy';
+import { LanguageSwitch } from './LanguageSwitch';
 import type {
   DiscoveryResult,
   PlatformConfig,
@@ -6,6 +9,24 @@ import type {
   RecommendationsConfig,
   RootConfig,
 } from '../shared/contracts';
+
+function deploymentError(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  if (getLocale() !== 'en') return message;
+  const translated = displayCopy(message);
+  if (translated !== message) return translated;
+  return message
+    .replace(/^(.+) 必须为对象$/, '$1 must be an object')
+    .replace(
+      /^(.+) 必须为长度不超过 (\d+) 的字符串$/,
+      '$1 must be a string of at most $2 characters',
+    )
+    .replace(/^(.+) 包含未知字段$/, '$1 contains unknown fields')
+    .replace(
+      /^(.+) 必须为最多 12 项的数组$/,
+      '$1 must be an array with at most 12 items',
+    );
+}
 
 const isRootConfig = (config: PlatformConfig): config is RootConfig =>
   'entries' in config;
@@ -44,7 +65,7 @@ export function DeployPage() {
     setSnapshot(await result.json());
   };
   useEffect(() => {
-    void load().catch((error) => setError(String(error)));
+    void load().catch((error) => setError(deploymentError(error)));
   }, [platform]);
   const update = (
     patch: Partial<RootConfig> | Partial<RecommendationsConfig>,
@@ -75,7 +96,12 @@ export function DeployPage() {
         setSelection(entry);
         setError('');
       } catch {
-        setError('当前 props 不是有效 JSON，请修正后切换。');
+        setError(
+          t(
+            '当前 props 不是有效 JSON，请修正后切换。',
+            'The current props are not valid JSON. Fix them before switching.',
+          ),
+        );
       }
     }
   };
@@ -103,15 +129,24 @@ export function DeployPage() {
         body: JSON.stringify({ config }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message || '发布失败');
+      if (!response.ok)
+        throw new Error(
+          data.error?.message || t('发布失败', 'Publishing failed'),
+        );
       await load();
       setNotice(
         isRoot
-          ? 'A 的快照已发布。工作台重新发现时会校验当前 sid。'
-          : 'C 已独立发布。动态关系下 A 的快照不变；工作台下一次请求 C 时会校验 sid。',
+          ? t(
+              'A 的快照已发布。工作台重新发现时会校验当前 sid。',
+              'Snapshot A is published. The workspace will validate its sid on the next discovery request.',
+            )
+          : t(
+              'C 已独立发布。动态关系下 A 的快照不变；工作台下一次请求 C 时会校验 sid。',
+              'C is published independently. A keeps its snapshot across this dynamic boundary. The workspace will validate C’s sid on its next request.',
+            ),
       );
     } catch (error) {
-      setError(error instanceof Error ? error.message : String(error));
+      setError(deploymentError(error));
     } finally {
       setPublishing(false);
     }
@@ -119,17 +154,25 @@ export function DeployPage() {
   const reset = async () => {
     if (
       !window.confirm(
-        '恢复两个平台的初始配置和本地偏好？当前工作台会在下次请求时检测快照变化。',
+        t(
+          '恢复两个平台的初始配置和本地偏好？当前工作台会在下次请求时检测快照变化。',
+          'Reset both platforms and local preferences to their initial settings? The workspace will detect the changed snapshots on its next request.',
+        ),
       )
     )
       return;
     const response = await fetch('/api/reset', { method: 'POST' });
     if (!response.ok) {
-      setError('重置失败');
+      setError(t('重置失败', 'Reset failed'));
       return;
     }
     await load();
-    setNotice('本地样例已恢复，请刷新工作台开始新会话。');
+    setNotice(
+      t(
+        '本地样例已恢复，请刷新工作台开始新会话。',
+        'Sample settings restored. Refresh the workspace to start a new session.',
+      ),
+    );
   };
   const dirty =
     draft &&
@@ -140,31 +183,35 @@ export function DeployPage() {
   return (
     <div className="deployment-page">
       <header className="topbar">
-        <a className="brand" href="/workbench">
+        <a className="brand" href={localeUrl('/workbench')}>
           <span className="deployment-logo">⌘</span>
           <strong>MF Workspace</strong>
           <span className="tag">LOCAL</span>
         </a>
         <nav>
-          <a href="/workbench">工作台</a>
-          <a className={isRoot ? 'selected' : ''} href="/deploy/root">
-            总部署
+          <a href={localeUrl('/workbench')}>{t('工作台', 'Workspace')}</a>
+          <a
+            className={isRoot ? 'selected' : ''}
+            href={localeUrl('/deploy/root')}
+          >
+            {t('总部署', 'Root deployment')}
           </a>
           <a
             className={!isRoot ? 'selected' : ''}
-            href="/deploy/recommendations"
+            href={localeUrl('/deploy/recommendations')}
           >
-            推荐部署 ↗
+            {t('推荐部署 ↗', 'Recommendations ↗')}
           </a>
         </nav>
         <a
           className="open-workspace"
-          href="/workbench"
+          href={localeUrl('/workbench')}
           target="_blank"
           rel="noreferrer"
         >
-          打开工作台 ↗
+          {t('打开工作台 ↗', 'Open workspace ↗')}
         </a>
+        <LanguageSwitch />
       </header>
       <main className="deploy-main">
         <div className="deploy-title">
@@ -172,24 +219,39 @@ export function DeployPage() {
             <div className="eyebrow">
               DEPLOYMENT / {isRoot ? 'ROOT CONSUMER' : 'INDEPENDENT CONSUMER'}
             </div>
-            <h1>{isRoot ? '总部署控制台' : '推荐中心部署'}</h1>
+            <h1>
+              {isRoot
+                ? t('总部署控制台', 'Root deployment')
+                : t('推荐中心部署', 'Recommendations deployment')}
+            </h1>
             <p>
               {isRoot
-                ? '组织应用入口，决定版本与动态边界。'
-                : '独立管理推荐应用和它的嵌套详情。'}
+                ? t(
+                    '组织应用入口，决定版本与动态边界。',
+                    'Configure app entries, versions, and dynamic boundaries.',
+                  )
+                : t(
+                    '独立管理推荐应用和它的嵌套详情。',
+                    'Manage recommendations and nested details independently.',
+                  )}
             </p>
           </div>
           <div className="publish-actions">
             <span className={`draft-status ${dirty ? 'dirty' : ''}`}>
               <i />
-              {dirty ? '有未发布修改' : '与已发布配置一致'}
+              {dirty
+                ? t('有未发布修改', 'Unpublished changes')
+                : t('与已发布配置一致', 'All changes published')}
             </span>
             <button
               className="primary"
               disabled={!draft || publishing}
               onClick={() => void publish()}
             >
-              {publishing ? '正在发布…' : '发布配置'} <span>↗</span>
+              {publishing
+                ? t('正在发布…', 'Publishing…')
+                : t('发布配置', 'Publish configuration')}{' '}
+              <span>↗</span>
             </button>
           </div>
         </div>
@@ -205,23 +267,29 @@ export function DeployPage() {
         )}
         <div className="deployment-summary">
           <div>
-            <span>消费方</span>
-            <strong>{isRoot ? 'A · 工作台' : 'C · 最新推荐'}</strong>
+            <span>{t('消费方', 'Consumer')}</span>
+            <strong>
+              {isRoot
+                ? t('A · 工作台', 'A · Workspace')
+                : t('C · 最新推荐', 'C · Recommendations')}
+            </strong>
           </div>
           <div>
             <span>Consumer key</span>
-            <code>{view?.published.consumerKey || '加载中…'}</code>
+            <code>
+              {view?.published.consumerKey || t('加载中…', 'Loading…')}
+            </code>
           </div>
           <div>
-            <span>当前快照</span>
+            <span>{t('当前快照', 'Current snapshot')}</span>
             <code>{view?.published.sid || '—'}</code>
           </div>
           <div>
-            <span>最近发布</span>
+            <span>{t('最近发布', 'Last published')}</span>
             <strong>
               {view
                 ? new Date(view.published.publishedAt).toLocaleTimeString(
-                    'zh-CN',
+                    getLocale() === 'en' ? 'en-US' : 'zh-CN',
                   )
                 : '—'}
             </strong>
@@ -229,10 +297,16 @@ export function DeployPage() {
         </div>
         <div className="deploy-grid">
           <aside className="application-tree">
-            <div className="section-label">应用关系</div>
+            <div className="section-label">
+              {t('应用关系', 'Application tree')}
+            </div>
             <div className="tree-root">
               <span className="tree-letter">{isRoot ? 'A' : 'C'}</span>
-              <strong>{isRoot ? '工作台' : '最新推荐'}</strong>
+              <strong>
+                {isRoot
+                  ? t('工作台', 'Workspace')
+                  : t('最新推荐', 'Recommendations')}
+              </strong>
               <span className="mini-dot" />
             </div>
             {isRoot ? (
@@ -247,16 +321,20 @@ export function DeployPage() {
                       <span className="tree-letter">{['B', 'P', 'C'][i]}</span>
                       <span>
                         {draft && isRootConfig(draft)
-                          ? draft.entries[entry].title
-                          : ['商品列表', '个人配置', '最新推荐'][i]}
+                          ? displayCopy(draft.entries[entry].title)
+                          : [
+                              t('商品列表', 'Product catalog'),
+                              t('个人配置', 'Preferences'),
+                              t('最新推荐', 'Recommendations'),
+                            ][i]}
                       </span>
                       <small>
                         {entry === 'recommendations' &&
                         draft &&
                         isRootConfig(draft) &&
                         draft.recommendationMode === 'dynamic'
-                          ? '动态'
-                          : '固定'}
+                          ? t('动态', 'Dynamic')
+                          : t('固定', 'Fixed')}
                       </small>
                     </button>
                   ),
@@ -266,16 +344,16 @@ export function DeployPage() {
                   {draft &&
                   isRootConfig(draft) &&
                   draft.recommendationMode === 'fixed'
-                    ? 'D · 已复制的详情'
-                    : '进入 C 后继续发现'}
+                    ? t('D · 已复制的详情', 'D · Copied details')
+                    : t('进入 C 后继续发现', 'Discover more when entering C')}
                 </div>
               </div>
             ) : (
               <div className="tree-children">
                 <div className="tree-child-static">
                   <span className="tree-letter">D</span>
-                  <span>推荐详情</span>
-                  <small>固定 v1</small>
+                  <span>{t('推荐详情', 'Product details')}</span>
+                  <small>{t('固定 v1', 'Fixed v1')}</small>
                 </div>
               </div>
             )}
@@ -283,35 +361,50 @@ export function DeployPage() {
               <span>◇</span>
               <p>
                 {isRoot
-                  ? '动态边界只保存子应用地址。子应用内部的路由与工具由它自己提供。'
-                  : '这里的发布只切换 C 的快照。A 通过动态地址，在进入时取得 C 的结果。'}
+                  ? t(
+                      '动态边界只保存子应用地址。子应用内部的路由与工具由它自己提供。',
+                      'Dynamic boundaries keep the child endpoint. Each child provides its own routes and tools.',
+                    )
+                  : t(
+                      '这里的发布只切换 C 的快照。A 通过动态地址，在进入时取得 C 的结果。',
+                      'Publishing here replaces C’s snapshot. A discovers C through its endpoint when users enter it.',
+                    )}
               </p>
             </div>
             <a
               className="text-link"
-              href={isRoot ? '/deploy/recommendations' : '/deploy/root'}
+              href={localeUrl(
+                isRoot ? '/deploy/recommendations' : '/deploy/root',
+              )}
             >
-              {isRoot ? '打开推荐独立部署' : '返回总部署'} ↗
+              {isRoot
+                ? t('打开推荐独立部署', 'Open recommendations deployment')
+                : t('返回总部署', 'Back to root deployment')}{' '}
+              ↗
             </a>
           </aside>
           <section className="config-editor">
             <div className="section-heading">
-              <h2>{isRoot ? '入口配置' : '应用与嵌套配置'}</h2>
-              <span className="tag">草稿</span>
+              <h2>
+                {isRoot
+                  ? t('入口配置', 'Entry configuration')
+                  : t('应用与嵌套配置', 'Application and nesting')}
+              </h2>
+              <span className="tag">{t('草稿', 'Draft')}</span>
             </div>
             {draft && isRootConfig(draft) ? (
               <>
                 <label className="field">
-                  入口名称
+                  {t('入口名称', 'Entry name')}
                   <input
-                    value={draft.entries[selection].title}
+                    value={displayCopy(draft.entries[selection].title)}
                     onChange={(event) =>
                       updateEntry({ title: event.target.value })
                     }
                   />
                 </label>
                 <label className="field">
-                  挂载路径
+                  {t('挂载路径', 'Mount path')}
                   <div className="input-prefix">
                     <span>/</span>
                     <input
@@ -323,10 +416,15 @@ export function DeployPage() {
                       }
                     />
                   </div>
-                  <small>应用相对根消费方的路径，发布时校验。</small>
+                  <small>
+                    {t(
+                      '应用相对根消费方的路径，发布时校验。',
+                      'Path relative to the root consumer, validated on publish.',
+                    )}
+                  </small>
                 </label>
                 <div className="field">
-                  <span>依赖关系</span>
+                  <span>{t('依赖关系', 'Dependency')}</span>
                   {selection === 'recommendations' ? (
                     <div className="option-pair">
                       <button
@@ -337,8 +435,13 @@ export function DeployPage() {
                           update({ recommendationMode: 'dynamic' })
                         }
                       >
-                        <b>动态部署地址</b>
-                        <span>C 独立发布，进入后发现</span>
+                        <b>{t('动态部署地址', 'Dynamic endpoint')}</b>
+                        <span>
+                          {t(
+                            'C 独立发布，进入后发现',
+                            'Publish C independently; discover on entry',
+                          )}
+                        </span>
                       </button>
                       <button
                         className={
@@ -346,13 +449,19 @@ export function DeployPage() {
                         }
                         onClick={() => update({ recommendationMode: 'fixed' })}
                       >
-                        <b>固定版本 v1</b>
-                        <span>复制已接受的 C 与 D</span>
+                        <b>{t('固定版本 v1', 'Fixed version v1')}</b>
+                        <span>
+                          {t(
+                            '复制已接受的 C 与 D',
+                            'Copy accepted snapshots for C and D',
+                          )}
+                        </span>
                       </button>
                     </div>
                   ) : (
                     <div className="readonly-field">
-                      固定版本 v1 <span>MF manifest</span>
+                      {t('固定版本 v1', 'Fixed version v1')}{' '}
+                      <span>MF manifest</span>
                     </div>
                   )}
                 </div>
@@ -371,7 +480,7 @@ export function DeployPage() {
                   </div>
                 )}
                 <label className="field">
-                  应用 props
+                  {t('应用 props', 'Application props')}
                   <textarea
                     className="code-input"
                     spellCheck={false}
@@ -379,14 +488,19 @@ export function DeployPage() {
                     value={propsText}
                     onChange={(event) => setPropsText(event.target.value)}
                   />
-                  <small>可序列化 JSON，随本次快照交给应用。</small>
+                  <small>
+                    {t(
+                      '可序列化 JSON，随本次快照交给应用。',
+                      'Serializable JSON passed to the app with this snapshot.',
+                    )}
+                  </small>
                 </label>
               </>
             ) : (
               draft && (
                 <>
                   <div className="field">
-                    <span>推荐应用版本</span>
+                    <span>{t('推荐应用版本', 'Recommendations version')}</span>
                     <div className="option-pair">
                       {(['v1', 'v2'] as const).map((version) => (
                         <button
@@ -400,20 +514,26 @@ export function DeployPage() {
                         >
                           <b>
                             {version === 'v1'
-                              ? 'v1 · 精选好物'
-                              : 'v2 · 灵感清单'}
+                              ? t('v1 · 精选好物', 'v1 · Curated picks')
+                              : t('v2 · 灵感清单', 'v2 · Fresh inspiration')}
                           </b>
                           <span>
                             {version === 'v1'
-                              ? '按评分推荐'
-                              : '新的推荐排序与视觉'}
+                              ? t(
+                                  '按评分推荐',
+                                  'Recommendations ranked by rating',
+                                )
+                              : t(
+                                  '新的推荐排序与视觉',
+                                  'Updated ranking and visual style',
+                                )}
                           </span>
                         </button>
                       ))}
                     </div>
                   </div>
                   <label className="field">
-                    默认预算
+                    {t('默认预算', 'Default budget')}
                     <input
                       type="number"
                       min="0"
@@ -433,13 +553,13 @@ export function DeployPage() {
                     />
                   </label>
                   <div className="field">
-                    <span>默认兴趣</span>
+                    <span>{t('默认兴趣', 'Default interests')}</span>
                     <div className="category-options">
                       {[
-                        ['audio', '数码影音'],
-                        ['workspace', '桌面办公'],
-                        ['travel', '出行'],
-                        ['lifestyle', '日常生活'],
+                        ['audio', t('数码影音', 'Audio & tech')],
+                        ['workspace', t('桌面办公', 'Workspace')],
+                        ['travel', t('出行', 'Travel')],
+                        ['lifestyle', t('日常生活', 'Lifestyle')],
                       ].map(([value, label]) => (
                         <label key={value}>
                           <input
@@ -471,8 +591,15 @@ export function DeployPage() {
                   </div>
                   <label className="toggle-row">
                     <div>
-                      <strong>启用嵌套详情</strong>
-                      <p>挂载 D，并允许打开详情和读取商品信息。</p>
+                      <strong>
+                        {t('启用嵌套详情', 'Enable nested details')}
+                      </strong>
+                      <p>
+                        {t(
+                          '挂载 D，并允许打开详情和读取商品信息。',
+                          'Mount D to open details and read product information.',
+                        )}
+                      </p>
                     </div>
                     <input
                       type="checkbox"
@@ -484,7 +611,12 @@ export function DeployPage() {
                     />
                   </label>
                   <div className="endpoint-preview">
-                    <span>独立 Discovery endpoint</span>
+                    <span>
+                      {t(
+                        '独立 Discovery endpoint',
+                        'Independent discovery endpoint',
+                      )}
+                    </span>
                     <code>/api/discovery/recommendations</code>
                   </div>
                 </>
@@ -492,7 +624,7 @@ export function DeployPage() {
             )}
             {draft && (
               <label className="field">
-                下发策略
+                {t('下发策略', 'Delivery strategy')}
                 <select
                   value={draft.delivery}
                   onChange={(event) =>
@@ -502,25 +634,39 @@ export function DeployPage() {
                   }
                 >
                   <option value="ondemand">
-                    按需下发 · 进入目标路径再准备路由
+                    {t(
+                      '按需下发 · 进入目标路径再准备路由',
+                      'On demand · Prepare routes on entry',
+                    )}
                   </option>
-                  <option value="full">全量下发 · 当前固定闭包全部准备</option>
+                  <option value="full">
+                    {t(
+                      '全量下发 · 当前固定闭包全部准备',
+                      'Full · Prepare all fixed dependencies',
+                    )}
+                  </option>
                 </select>
                 <small>
-                  入口目录始终可发现；全量下发也不会穿透独立动态边界。
+                  {t(
+                    '入口目录始终可发现；全量下发也不会穿透独立动态边界。',
+                    'Entries are always discoverable. Full delivery still respects independent dynamic boundaries.',
+                  )}
                 </small>
               </label>
             )}
           </section>
           <aside className="publish-preview">
             <div className="section-heading">
-              <h2>已发布视图</h2>
+              <h2>{t('已发布视图', 'Published view')}</h2>
               <span className="live-label">
                 <i /> LIVE
               </span>
             </div>
             <p className="muted">
-              此处来自真实 discovery 响应。编辑草稿后，发布才会生效。
+              {t(
+                '此处来自真实 discovery 响应。编辑草稿后，发布才会生效。',
+                'Live discovery data. Draft changes take effect after publishing.',
+              )}
             </p>
             <div className="preview-boundary">
               <span className="tree-letter">{isRoot ? 'A' : 'C'}</span>
@@ -531,15 +677,17 @@ export function DeployPage() {
                 view &&
                 isRootConfig(view.published.config) &&
                 view.published.config.recommendationMode === 'dynamic'
-                  ? '独立动态边界'
-                  : '固定快照关系'}
+                  ? t('独立动态边界', 'Independent dynamic boundary')
+                  : t('固定快照关系', 'Fixed snapshot dependency')}
               </b>
             </div>
-            <div className="section-label">入口与工具声明</div>
+            <div className="section-label">
+              {t('入口与工具声明', 'Entries and tool declarations')}
+            </div>
             {snapshot?.capabilities?.map((cap, index) => (
               <div className="capability-preview" key={index}>
-                <strong>{cap.title}</strong>
-                <p>{cap.description}</p>
+                <strong>{displayCopy(cap.title)}</strong>
+                <p>{displayCopy(cap.description)}</p>
                 {cap.tools?.length ? (
                   cap.tools.map((tool) => (
                     <details key={tool.name}>
@@ -547,15 +695,20 @@ export function DeployPage() {
                         <code>{tool.name}</code>
                         <span>
                           {tool.annotations?.consequentialHint
-                            ? '修改'
-                            : '读取'}
+                            ? t('修改', 'Write')
+                            : t('读取', 'Read')}
                         </span>
                       </summary>
                       <pre>{JSON.stringify(tool.inputSchema, null, 2)}</pre>
                     </details>
                   ))
                 ) : (
-                  <small>进入后由子应用声明工具</small>
+                  <small>
+                    {t(
+                      '进入后由子应用声明工具',
+                      'The child declares its tools on entry',
+                    )}
+                  </small>
                 )}
               </div>
             ))}
@@ -563,7 +716,8 @@ export function DeployPage() {
               className="payload-button"
               onClick={() => setShowPayload((value) => !value)}
             >
-              {showPayload ? '收起' : '查看'}响应 JSON {showPayload ? '▴' : '▾'}
+              {showPayload ? t('收起', 'Hide') : t('查看', 'View')}
+              {t('响应 JSON', ' response JSON')} {showPayload ? '▴' : '▾'}
             </button>
             {showPayload && (
               <pre className="payload-view">
@@ -571,24 +725,27 @@ export function DeployPage() {
               </pre>
             )}
             <p className="schema-note">
-              工具 Schema 来自产物，不在部署台改写执行能力。
+              {t(
+                '工具 Schema 来自产物，不在部署台改写执行能力。',
+                'Tool schemas come from build artifacts. Deployment settings do not redefine what tools can do.',
+              )}
             </p>
           </aside>
         </div>
         <section className="release-history">
           <div className="section-heading">
-            <h2>发布记录</h2>
+            <h2>{t('发布记录', 'Release history')}</h2>
             <button className="text-button" onClick={() => void reset()}>
-              恢复初始样例
+              {t('恢复初始样例', 'Reset sample settings')}
             </button>
           </div>
           <table>
             <thead>
               <tr>
-                <th>快照</th>
-                <th>配置</th>
-                <th>时间</th>
-                <th>状态</th>
+                <th>{t('快照', 'Snapshot')}</th>
+                <th>{t('配置', 'Configuration')}</th>
+                <th>{t('时间', 'Time')}</th>
+                <th>{t('状态', 'Status')}</th>
               </tr>
             </thead>
             <tbody>
@@ -599,17 +756,21 @@ export function DeployPage() {
                   </td>
                   <td>
                     {isRootConfig(publication.config)
-                      ? `C ${publication.config.recommendationMode === 'dynamic' ? '动态地址' : '固定 v1'}`
-                      : `推荐 ${publication.config.version}`}
+                      ? `C ${publication.config.recommendationMode === 'dynamic' ? t('动态地址', 'Dynamic endpoint') : t('固定 v1', 'Fixed v1')}`
+                      : `${t('推荐', 'Recommendations')} ${publication.config.version}`}
                   </td>
                   <td>
-                    {new Date(publication.publishedAt).toLocaleString('zh-CN')}
+                    {new Date(publication.publishedAt).toLocaleString(
+                      getLocale() === 'en' ? 'en-US' : 'zh-CN',
+                    )}
                   </td>
                   <td>
                     {publication.sid === view.published.sid ? (
-                      <span className="live-label">● 当前</span>
+                      <span className="live-label">
+                        {t('● 当前', '● Current')}
+                      </span>
                     ) : (
-                      '历史'
+                      t('历史', 'Previous')
                     )}
                   </td>
                 </tr>
@@ -618,8 +779,10 @@ export function DeployPage() {
           </table>
         </section>
         <p className="deploy-footnote">
-          本地模拟部署平台 · 发布会重算并原子切换快照 · 应用由真实 MF manifest /
-          Bridge 加载
+          {t(
+            '本地模拟部署平台 · 发布会重算并原子切换快照 · 应用由真实 MF manifest /\n          Bridge 加载',
+            'Local deployment simulator · Publishing recomputes and atomically replaces snapshots · Apps load through MF manifests and Bridge',
+          )}
         </p>
       </main>
     </div>

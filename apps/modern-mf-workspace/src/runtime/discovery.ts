@@ -1,3 +1,5 @@
+import { t } from '../../shared/i18n.ts';
+import { displayCopy } from '../../shared/display-copy.ts';
 import type {
   ApiError,
   Binding,
@@ -53,7 +55,11 @@ export class SnapshotExpiredError extends DiscoveryError {
   }) {
     super(
       'SNAPSHOT_EXPIRED',
-      details.message ?? '应用发现数据已经过期，请刷新页面。',
+      details.message ??
+        t(
+          '应用发现数据已经过期，请刷新页面。',
+          'Application discovery data has expired. Reload the page.',
+        ),
     );
     this.name = 'SnapshotExpiredError';
     this.endpoint = details.endpoint;
@@ -100,7 +106,12 @@ function pathnameOnly(pathname: string): string {
     pathname.startsWith('//') ||
     /[?#\\\0]/.test(pathname)
   ) {
-    invalid('pathname 必须为不含 query/hash 的页面绝对路径。');
+    invalid(
+      t(
+        'pathname 必须为不含 query/hash 的页面绝对路径。',
+        'pathname must be an absolute page path without a query or hash.',
+      ),
+    );
   }
   return (
     new URL(pathname, 'http://discovery.local').pathname
@@ -122,7 +133,13 @@ function matchBinding(
   const consumed: string[] = [];
   for (const [index, segment] of pattern.entries()) {
     if (segment === '*') {
-      if (index !== pattern.length - 1) invalid('通配符只能位于挂载路径末尾。');
+      if (index !== pattern.length - 1)
+        invalid(
+          t(
+            '通配符只能位于挂载路径末尾。',
+            'A wildcard is only allowed at the end of a mount path.',
+          ),
+        );
       break;
     }
     const actual = remaining[index];
@@ -146,22 +163,44 @@ function validateContext(value: DiscoveryContext): void {
     !Array.isArray(value.capabilities) ||
     !Array.isArray(value.loadedPaths)
   )
-    invalid('发现响应缺少有效的消费上下文。');
+    invalid(
+      t(
+        '发现响应缺少有效的消费上下文。',
+        'The discovery response has no valid consumer context.',
+      ),
+    );
   if (value.loadedPaths.some((path) => typeof path !== 'string'))
-    invalid('loadedPaths 必须为路径数组。');
+    invalid(
+      t(
+        'loadedPaths 必须为路径数组。',
+        'loadedPaths must be an array of paths.',
+      ),
+    );
   for (const binding of value.bindings) {
     if (!binding.id || typeof binding.path !== 'string' || !binding.props)
-      invalid('应用绑定无效。');
+      invalid(t('应用绑定无效。', 'Invalid application binding.'));
     if (binding.mode === 'fixed' && !binding.provider)
-      invalid('固定关系缺少确定的产物。');
+      invalid(
+        t(
+          '固定关系缺少确定的产物。',
+          'A fixed binding requires a specific artifact.',
+        ),
+      );
     if (binding.mode === 'dynamic' && !binding.childEndpoint)
-      invalid('动态关系缺少发现地址。');
+      invalid(
+        t(
+          '动态关系缺少发现地址。',
+          'A dynamic binding requires a discovery endpoint.',
+        ),
+      );
     if (binding.mode !== 'fixed' && binding.mode !== 'dynamic')
-      invalid('未知的应用绑定类型。');
+      invalid(t('未知的应用绑定类型。', 'Unknown application binding type.'));
   }
   for (const route of value.routes) {
     if (!value.bindings.some((binding) => binding.id === route.bindingId))
-      invalid('路由引用了未知绑定。');
+      invalid(
+        t('路由引用了未知绑定。', 'The route references an unknown binding.'),
+      );
   }
   // Capabilities may refer to route IDs omitted from this path's projected routes.
 }
@@ -174,7 +213,12 @@ function mergeById<T extends { id: string }>(
   for (const record of incoming) {
     const known = records.get(record.id);
     if (known && stableJSON(known) !== stableJSON(record))
-      invalid(`同一 sid 内记录 ${record.id} 发生变化。`);
+      invalid(
+        t(
+          `同一 sid 内记录 ${record.id} 发生变化。`,
+          `Record ${record.id} changed within the same sid.`,
+        ),
+      );
     records.set(record.id, record);
   }
   return [...records.values()];
@@ -281,7 +325,12 @@ export class ApplicationsService {
           stableJSON(previous.props) !== stableJSON(context.props) ||
           stableJSON(previous.capabilities) !== stableJSON(context.capabilities)
         ) {
-          invalid('同一 sid 内的产物或入口目录发生变化。');
+          invalid(
+            t(
+              '同一 sid 内的产物或入口目录发生变化。',
+              'Artifacts or the application directory changed within the same sid.',
+            ),
+          );
         }
         context.bindings = mergeById(previous.bindings, context.bindings);
         context.routes = mergeById(previous.routes, context.routes);
@@ -327,7 +376,12 @@ export class ApplicationsService {
       });
       const body = (await response.json()) as DiscoveryResult | ApiError;
       if (!body || typeof body !== 'object')
-        invalid('发现响应必须为 JSON 对象。');
+        invalid(
+          t(
+            '发现响应必须为 JSON 对象。',
+            'The discovery response must be a JSON object.',
+          ),
+        );
       if ('error' in body) {
         const error = body.error;
         if (error.code === 'SNAPSHOT_EXPIRED') {
@@ -337,11 +391,11 @@ export class ApplicationsService {
               consumerKey: target.consumerKey ?? error.consumerKey ?? '',
               expectedSid: target.sid ?? error.expectedSid ?? '',
               actualSid: error.actualSid,
-              message: error.message,
+              message: displayCopy(error.message),
             }),
           );
         }
-        throw new DiscoveryError(error.code, error.message);
+        throw new DiscoveryError(error.code, displayCopy(error.message));
       }
       if (!response.ok)
         throw new DiscoveryError(
@@ -349,15 +403,27 @@ export class ApplicationsService {
           `Application discovery failed: ${response.status}`,
         );
       if (body.protocolVersion !== '1.0' || !Array.isArray(body.contexts))
-        invalid('未知的应用发现协议。');
+        invalid(
+          t('未知的应用发现协议。', 'Unknown application discovery protocol.'),
+        );
       validateContext(body);
       if (
         body.endpoint !== target.endpoint ||
         (target.consumerKey && body.consumerKey !== target.consumerKey)
       )
-        invalid('发现响应不属于请求的 Consumer。');
+        invalid(
+          t(
+            '发现响应不属于请求的 Consumer。',
+            'The discovery response does not match the requested consumer.',
+          ),
+        );
       if (body.pathname !== pathname || body.basename !== basename)
-        invalid('发现响应不属于请求的路径。');
+        invalid(
+          t(
+            '发现响应不属于请求的路径。',
+            'The discovery response does not match the requested path.',
+          ),
+        );
       if (target.sid && body.sid !== target.sid) {
         throw this.expire(
           new SnapshotExpiredError({
@@ -369,10 +435,20 @@ export class ApplicationsService {
         );
       }
       if (!body.loadedPaths.includes(pathname))
-        invalid('发现响应没有完成目标路径准备。');
+        invalid(
+          t(
+            '发现响应没有完成目标路径准备。',
+            'The discovery response did not prepare the target path.',
+          ),
+        );
       for (const context of body.contexts) {
         if (context.endpoint !== body.endpoint || context.sid !== body.sid)
-          invalid('响应跨越了独立动态发现边界。');
+          invalid(
+            t(
+              '响应跨越了独立动态发现边界。',
+              'The response crossed an independent dynamic discovery boundary.',
+            ),
+          );
       }
       this.commit(body);
       this.options.trace?.('discovery:received', {
@@ -410,7 +486,12 @@ export class ApplicationsService {
       if (context) {
         this.checkContext(context);
         if (target.sid && target.sid !== context.sid)
-          invalid('绑定与已经接受的消费代次不一致。');
+          invalid(
+            t(
+              '绑定与已经接受的消费代次不一致。',
+              'The binding does not match the accepted consumer generation.',
+            ),
+          );
       }
       if (
         !context ||
@@ -447,7 +528,12 @@ export class ApplicationsService {
     ): Promise<void> => {
       const key = contextKey(context);
       if (ancestors.has(key) || ancestors.size >= 32)
-        invalid('应用挂载链包含递归关系。');
+        invalid(
+          t(
+            '应用挂载链包含递归关系。',
+            'The application mount chain contains a recursive relationship.',
+          ),
+        );
       ancestors.add(key);
       const matches = context.bindings
         .flatMap((binding) => {
@@ -458,7 +544,12 @@ export class ApplicationsService {
       const match = matches[0];
       if (!match) return;
       if (matches[1]?.basename === match.basename)
-        invalid('同一路径匹配了冲突的应用绑定。');
+        invalid(
+          t(
+            '同一路径匹配了冲突的应用绑定。',
+            'Conflicting application bindings match the same path.',
+          ),
+        );
       const { binding } = match;
       let child = context;
       if (binding.mode === 'dynamic') {
@@ -480,7 +571,12 @@ export class ApplicationsService {
             binding.childEndpoint !== context.endpoint) ||
           (binding.sid && binding.sid !== context.sid)
         )
-          invalid('固定复制关系不能查询另一代动态来源。');
+          invalid(
+            t(
+              '固定复制关系不能查询另一代动态来源。',
+              'A fixed copy cannot query a different dynamic source generation.',
+            ),
+          );
         child = await ensure(
           {
             endpoint: context.endpoint,
@@ -492,13 +588,24 @@ export class ApplicationsService {
       }
       const provider =
         binding.mode === 'dynamic' ? child.provider : binding.provider;
-      if (!provider) invalid('已解析应用缺少 MF 产物。');
+      if (!provider)
+        invalid(
+          t(
+            '已解析应用缺少 MF 产物。',
+            'The resolved application has no MF artifact.',
+          ),
+        );
       if (
         binding.mode === 'fixed' &&
         child !== context &&
         stableJSON(child.provider) !== stableJSON(provider)
       )
-        invalid('固定绑定的产物与消费上下文不一致。');
+        invalid(
+          t(
+            '固定绑定的产物与消费上下文不一致。',
+            'The fixed artifact does not match the consumer context.',
+          ),
+        );
       chain.push({
         binding,
         provider,

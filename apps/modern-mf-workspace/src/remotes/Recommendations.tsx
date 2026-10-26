@@ -1,3 +1,5 @@
+import { t } from '../../shared/i18n';
+import { localizePreferences } from '../../shared/product-i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import { createBridgeComponent } from '@module-federation/bridge-react/v18';
 import { TOOL_DECLARATIONS } from '../../shared/capabilities';
@@ -27,7 +29,7 @@ function readDefaultPreferences(value: unknown): Preferences | null {
     Array.isArray(candidate.categories) &&
     Array.isArray(candidate.priorities) &&
     typeof candidate.notes === 'string'
-    ? (candidate as Preferences)
+    ? localizePreferences(candidate as Preferences)
     : null;
 }
 function Recommendations({
@@ -46,10 +48,10 @@ function Recommendations({
       : (defaults ?? savedPreferences.value);
   const preferenceSource =
     savedPreferences.value?.customized === true
-      ? '已保存的个人偏好'
+      ? t('已保存的个人偏好', 'Your saved preferences')
       : defaults
-        ? '部署默认偏好'
-        : '初始偏好';
+        ? t('部署默认偏好', 'Deployment defaults')
+        : t('初始偏好', 'Initial preferences');
   const version =
     suppliedVersion === 'v2' ||
     context.version === 'v2' ||
@@ -102,7 +104,13 @@ function Recommendations({
     setFilters({ ...initialFilters, maxPrice: preferences?.budget ?? null });
   }
   async function openProduct(id?: string, signal?: AbortSignal) {
-    if (!detailsEnabled) throw new Error('当前推荐暂不提供商品详情');
+    if (!detailsEnabled)
+      throw new Error(
+        t(
+          '当前推荐暂不提供商品详情',
+          'Product details are not available for these recommendations',
+        ),
+      );
     const [allProducts, current] = await Promise.all([
       products.read(),
       currentPreferences(),
@@ -119,7 +127,12 @@ function Recommendations({
       ? matches.find((product) => product.id === id)
       : matches[0];
     if (!selected)
-      throw new Error('当前筛选结果中没有这件商品，请先调整筛选条件');
+      throw new Error(
+        t(
+          '当前筛选结果中没有这件商品，请先调整筛选条件',
+          'This product is not in the current results. Adjust your filters first.',
+        ),
+      );
     const destination = `${detailPath}?product=${encodeURIComponent(selected.id)}`;
     await runtime.navigate(
       destination,
@@ -196,27 +209,44 @@ function Recommendations({
     const signal = lifetime.current.signal;
     void openProduct(id, signal).catch((error: unknown) => {
       if (!signal.aborted)
-        setActionError(error instanceof Error ? error.message : '无法打开商品');
+        setActionError(
+          error instanceof Error
+            ? error.message
+            : t('无法打开商品', 'Unable to open this product'),
+        );
     });
   }
   return (
-    <section className="mf-page mf-recommendations" aria-label="为我推荐">
+    <section
+      className="mf-page mf-recommendations"
+      aria-label={t('为我推荐', 'For you')}
+    >
       <PageHeading
         eyebrow="A FEW THINGS, JUST FOR YOU"
         title={pageCopy(
           context,
           'greeting',
-          version === 'v2' ? '让下一件，更适合你。' : '你的日常好物清单。',
+          version === 'v2'
+            ? t('让下一件，更适合你。', 'Find your next everyday favorite.')
+            : t('你的日常好物清单。', 'Your everyday shortlist.'),
         )}
         description={pageCopy(
           context,
           'subtitle',
           version === 'v2'
-            ? '从个人偏好再多想一步，优先推荐有现货、细节更周到的好物。'
-            : '结合预算与品类偏好，挑出值得你多看一眼的好物。',
+            ? t(
+                '从个人偏好再多想一步，优先推荐有现货、细节更周到的好物。',
+                'A fresh take on your preferences, with in-stock finds and thoughtful details first.',
+              )
+            : t(
+                '结合预算与品类偏好，挑出值得你多看一眼的好物。',
+                'Thoughtful picks based on your budget and the categories you love.',
+              ),
         )}
       >
-        <span className="mf-version-badge">精选 {version.toUpperCase()}</span>
+        <span className="mf-version-badge">
+          {t('精选', 'CURATED')} {version.toUpperCase()}
+        </span>
       </PageHeading>
       <div className="mf-preference-summary">
         <span className="mf-spark" aria-hidden="true">
@@ -226,15 +256,18 @@ function Recommendations({
           <strong>{preferenceSource}</strong>
           <span>
             {preferences
-              ? `单件预算 ${money(preferences.budget)} · ${preferences.categories.length ? `${preferences.categories.length} 个偏好品类` : '探索所有品类'}`
-              : '正在读取你的偏好…'}
+              ? t(
+                  `单件预算 ${money(preferences.budget)} · ${preferences.categories.length ? `${preferences.categories.length} 个偏好品类` : '探索所有品类'}`,
+                  `${money(preferences.budget)} per item · ${preferences.categories.length ? `${preferences.categories.length} preferred categories` : 'Explore all categories'}`,
+                )
+              : t('正在读取你的偏好…', 'Loading your preferences…')}
           </span>
         </div>
         <button
           className="mf-text-button"
           onClick={() => void savedPreferences.read(true).catch(() => {})}
         >
-          更新偏好
+          {t('更新偏好', 'Refresh preferences')}
         </button>
       </div>
       <FilterBar
@@ -258,7 +291,8 @@ function Recommendations({
         <div className="mf-nested-detail" data-nested-application="details">
           <div className="mf-nested-toolbar">
             <span>
-              <span className="mf-nested-dot" /> 正在了解这件好物
+              <span className="mf-nested-dot" />{' '}
+              {t('正在了解这件好物', 'A closer look at this pick')}
             </span>
             <button
               className="mf-text-button"
@@ -269,12 +303,14 @@ function Recommendations({
                   .catch((error: unknown) => {
                     if (!signal.aborted)
                       setActionError(
-                        error instanceof Error ? error.message : '无法返回列表',
+                        error instanceof Error
+                          ? error.message
+                          : t('无法返回列表', 'Unable to return to the list'),
                       );
                   });
               }}
             >
-              收起详情 <span aria-hidden="true">×</span>
+              {t('收起详情', 'Close details')} <span aria-hidden="true">×</span>
             </button>
           </div>
           {runtime.renderNested(currentPath, {
@@ -286,9 +322,14 @@ function Recommendations({
       {products.value && (
         <>
           <div className="mf-results-line" aria-live="polite">
-            <span>为你挑选 {visibleProducts.length} 件好物</span>
+            <span>
+              {t(
+                `为你挑选 ${visibleProducts.length} 件好物`,
+                `${visibleProducts.length} picks for you`,
+              )}
+            </span>
             <button className="mf-text-button" onClick={resetFilters}>
-              重置筛选
+              {t('重置筛选', 'Reset filters')}
             </button>
           </div>
           {visibleProducts.length ? (
@@ -302,15 +343,21 @@ function Recommendations({
                   runtime={runtime}
                   reason={[
                     preferences?.categories.includes(product.category)
-                      ? '符合你的偏好品类'
-                      : '来自当前筛选的好物',
+                      ? t('符合你的偏好品类', 'Matches a category you like')
+                      : t(
+                          '来自当前筛选的好物',
+                          'A match for your current filters',
+                        ),
                     preferences && product.price <= preferences.budget
-                      ? '在你的预算之内'
+                      ? t('在你的预算之内', 'Within your budget')
                       : '',
-                    `${product.rating.toFixed(1)} 分的使用体验`,
+                    t(
+                      `${product.rating.toFixed(1)} 分的使用体验`,
+                      `Rated ${product.rating.toFixed(1)} out of 5`,
+                    ),
                   ]
                     .filter(Boolean)
-                    .join('；')}
+                    .join(t('；', '; '))}
                   onOpen={
                     detailsEnabled
                       ? () => navigateToProduct(product.id)

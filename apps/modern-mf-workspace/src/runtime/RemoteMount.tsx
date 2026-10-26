@@ -1,3 +1,5 @@
+import { displayCopy } from '../../shared/display-copy.ts';
+import { t } from '../../shared/i18n.ts';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   loadRemote,
@@ -61,7 +63,13 @@ export function RemoteMount(props: Props) {
     // the host's mountId state update.
     element.setAttribute('data-selection-mount-id', context.mountId);
     const assertActive = () => {
-      if (disposed) throw new Error('TOOL_INSTANCE_EXPIRED: 页面已卸载');
+      if (disposed)
+        throw new Error(
+          t(
+            'TOOL_INSTANCE_EXPIRED: 页面已卸载',
+            'TOOL_INSTANCE_EXPIRED: The page has unmounted',
+          ),
+        );
     };
     const routeId = app.context.routes.find(
       (route) => route.bindingId === app.binding.id,
@@ -77,7 +85,12 @@ export function RemoteMount(props: Props) {
       registerTools: (_context, definitions) => {
         if (disposed) return () => {};
         if (_context.mountId !== context.mountId)
-          throw new Error('工具不能注册到其他挂载实例');
+          throw new Error(
+            t(
+              '工具不能注册到其他挂载实例',
+              'Tools cannot register with another mount instance',
+            ),
+          );
         const dispose = registry.register(context, definitions, declared);
         disposers.add(dispose);
         return () => {
@@ -88,7 +101,12 @@ export function RemoteMount(props: Props) {
       registerSelectables: (_context, definitions) => {
         if (disposed) return () => {};
         if (_context.mountId !== context.mountId)
-          throw new Error('可选择元素不能注册到其他挂载实例');
+          throw new Error(
+            t(
+              '可选择元素不能注册到其他挂载实例',
+              'Selectable elements cannot register with another mount instance',
+            ),
+          );
         if (
           definitions.some(
             (definition) =>
@@ -97,7 +115,12 @@ export function RemoteMount(props: Props) {
                 element,
           )
         )
-          throw new Error('可选择元素必须位于当前页面容器内');
+          throw new Error(
+            t(
+              '可选择元素必须位于当前页面容器内',
+              'Selectable elements must belong to the current page container',
+            ),
+          );
         const dispose = latest.current.selection.register(context, definitions);
         disposers.add(dispose);
         return () => {
@@ -117,7 +140,12 @@ export function RemoteMount(props: Props) {
           (url.pathname !== context.basename &&
             !url.pathname.startsWith(`${context.basename}/`))
         )
-          throw new Error('远程页面不能跳出自己的挂载范围');
+          throw new Error(
+            t(
+              '远程页面不能跳出自己的挂载范围',
+              'A remote page cannot navigate outside its mount path',
+            ),
+          );
         await latest.current.navigate(path, navigationSignal);
         assertActive();
       },
@@ -179,7 +207,13 @@ export function RemoteMount(props: Props) {
         moduleName,
       );
       if (disposed) return;
-      if (!module?.default) throw new Error('远程应用没有导出 Bridge provider');
+      if (!module?.default)
+        throw new Error(
+          t(
+            '远程应用没有导出 Bridge provider',
+            'The remote application does not export a Bridge provider',
+          ),
+        );
       instance = module.default();
       await render();
       if (disposed) return;
@@ -222,15 +256,19 @@ export function RemoteMount(props: Props) {
     >
       {!ready && !error && (
         <div className="loading">
-          <span className="spinner" /> 正在加载 {app.binding.title}…
+          <span className="spinner" />{' '}
+          {t(
+            `正在加载 ${app.binding.title}…`,
+            `Loading ${displayCopy(app.binding.title)}…`,
+          )}
         </div>
       )}
       {error && (
         <div className="error-state">
-          <strong>页面加载失败</strong>
+          <strong>{t('页面加载失败', 'Unable to load this page')}</strong>
           <p>{error}</p>
           <button onClick={() => setRetry((value) => value + 1)}>
-            重新加载
+            {t('重新加载', 'Reload')}
           </button>
         </div>
       )}
