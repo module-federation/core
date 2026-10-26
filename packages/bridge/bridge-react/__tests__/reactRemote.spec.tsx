@@ -7,32 +7,114 @@ import { remoteRuntime } from './reactRemote-utils';
 import { createBridgeComponent } from '../src/provider/versions/v18';
 
 describe('unified React remote consumption', () => {
-  it('hydrates noSSR placeholders without loading during server rendering or reporting a mismatch', async () => {
-    const { instance, loadRemote } = remoteRuntime({
-      default: () => <strong>client weather</strong>,
-    });
-    const Remote = createReactRemote({
-      remote: 'shop/Card',
-      instance,
-      noSSR: true,
-      loading: <p>connecting</p>,
-    });
-    const container = document.createElement('div');
-    container.innerHTML = renderToString(<Remote />);
-    expect(container.textContent).toBe('connecting');
-    expect(loadRemote).not.toHaveBeenCalled();
-    document.body.appendChild(container);
-    const onRecoverableError = jest.fn();
-    let root: ReturnType<typeof hydrateRoot>;
-    try {
-      act(() => {
-        root = hydrateRoot(container, <Remote />, { onRecoverableError });
+  it.each([false, true])(
+    'hydrates noSSR without a redundant loading commit or recovery errors (ancestor Suspense: %s)',
+    async (nested) => {
+      const { instance, loadRemote } = remoteRuntime({
+        default: () => <strong>client weather</strong>,
       });
-      await screen.findByText('client weather');
-      expect(onRecoverableError).not.toHaveBeenCalled();
+      const Remote = createReactRemote({
+        remote: 'shop/Card',
+        instance,
+        noSSR: true,
+        loading: <p>connecting</p>,
+      });
+      const container = document.createElement('div');
+      const commits: string[] = [];
+      const content = (
+        <React.Profiler
+          id="noSSR"
+          onRender={() => {
+            commits.push(container.textContent || '');
+          }}
+        >
+          <Remote />
+        </React.Profiler>
+      );
+      const element = nested ? (
+        <React.Suspense fallback={null}>{content}</React.Suspense>
+      ) : (
+        content
+      );
+      container.innerHTML = renderToString(element);
+      expect(container.textContent).toBe('connecting');
+      expect(loadRemote).not.toHaveBeenCalled();
+      document.body.appendChild(container);
+      const onRecoverableError = jest.fn();
+      let root: ReturnType<typeof hydrateRoot>;
+      try {
+        act(() => {
+          root = hydrateRoot(container, element, { onRecoverableError });
+        });
+        await screen.findByText('client weather');
+        expect(onRecoverableError).not.toHaveBeenCalled();
+        // Root and Suspense hydration retain the placeholder. Preparation
+        // then commits content directly, without another loading render.
+        expect(commits).toEqual(['connecting', 'connecting', 'client weather']);
+      } finally {
+        act(() => root!.unmount());
+        container.remove();
+      }
+    },
+  );
+  it('loads noSSR once through StrictMode and preserves component state when props change', async () => {
+    function Weather({ label }: { label: string }) {
+      const [count, setCount] = React.useState(0);
+      return (
+        <button onClick={() => setCount((v) => v + 1)}>
+          {label}: {count}
+        </button>
+      );
+    }
+    const { instance, loadRemote } = remoteRuntime({ default: Weather });
+    const view = render(
+      <StrictMode>
+        <ReactRemote
+          noSSR
+          remote="shop/Card"
+          instance={instance}
+          props={{ label: 'first' }}
+        />
+      </StrictMode>,
+    );
+    await screen.findByText('first: 0');
+    act(() => screen.getByRole('button').click());
+    view.rerender(
+      <StrictMode>
+        <ReactRemote
+          noSSR
+          remote="shop/Card"
+          instance={instance}
+          props={{ label: 'updated' }}
+        />
+      </StrictMode>,
+    );
+    await screen.findByText('updated: 1');
+    expect(loadRemote).toHaveBeenCalledTimes(1);
+  });
+  it('retries failed noSSR preparation without retaining the previous rejection', async () => {
+    const errors = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const runtime = remoteRuntime({ default: () => <p>client recovered</p> });
+    runtime.loadRemote.mockRejectedValueOnce(new Error('client offline'));
+    try {
+      render(
+        <ReactRemote
+          noSSR
+          remote="shop/Card"
+          instance={runtime.instance}
+          fallback={({ error, retry }) => (
+            <button onClick={retry}>{error.message}</button>
+          )}
+        />,
+      );
+      const button = await screen.findByRole('button', {
+        name: /client offline/,
+      });
+      act(() => button.click());
+      await screen.findByText('client recovered');
+      expect(runtime.loadRemote).toHaveBeenCalledTimes(2);
     } finally {
-      act(() => root!.unmount());
-      container.remove();
+      errors.mockRestore();
     }
   });
   it('preserves runtime load recovery when the manifest protocol lookup fails', async () => {

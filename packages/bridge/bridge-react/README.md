@@ -154,8 +154,10 @@ const Card = createReactRemote<{ label: string }>({
 Pass `instance` when consuming through a particular Enhanced runtime. The default
 instance is resolved at render time. Ordinary components, including named exports
 selected with `exportName`, render in the host React tree and retain the existing
-component SSR, stylesheet and data-loader integration. `noSSR` hydrates the server
-placeholder before loading the client component. Configured load and data fallbacks
+component SSR, stylesheet and data-loader integration. `noSSR` keeps the server
+placeholder for hydration, then prepares the protocol, component and data from
+the first client effect. Ready content commits without an intermediate mount
+gate or a second loading effect. Configured load and data fallbacks
 remain present in server HTML. Manifest lookup failures also reach the runtime
 load-recovery hook before the consumer fallback.
 
