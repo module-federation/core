@@ -33,6 +33,31 @@ describe('React remote SSR protocol selection', () => {
     const Remote = createReactRemote({ remote: 'shop/Card', instance });
     expect(await html(<Remote />)).toContain('<strong>server content</strong>');
   });
+  it('renders the configured fallback for server-side loader failures', async () => {
+    const { instance, loadRemote } = remoteRuntime({ default: () => null });
+    loadRemote.mockRejectedValue(new Error('weather API unavailable'));
+    const Remote = createReactRemote({
+      remote: 'shop/Card',
+      instance,
+      fallback: ({ error }) => <p role="alert">{error.message}</p>,
+    });
+    expect(await html(<Remote />)).toContain('weather API unavailable');
+  });
+  it('renders the configured server fallback when protocol metadata cannot be loaded', async () => {
+    const { instance, loadRemote, snapshotHandler } = remoteRuntime({
+      default: () => null,
+    });
+    snapshotHandler.loadRemoteSnapshotInfo.mockRejectedValue(
+      new Error('manifest unavailable'),
+    );
+    const Remote = createReactRemote({
+      remote: 'shop/Card',
+      instance,
+      fallback: ({ error }) => <p>{error.message}</p>,
+    });
+    expect(await html(<Remote />)).toContain('manifest unavailable');
+    expect(loadRemote).not.toHaveBeenCalled();
+  });
   it('outputs a Bridge placeholder without executing its Node expose or provider', async () => {
     const factory = jest.fn();
     const { instance, loadRemote, snapshotHandler } = remoteRuntime(

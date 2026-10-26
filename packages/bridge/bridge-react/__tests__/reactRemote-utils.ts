@@ -36,6 +36,7 @@ export function remoteRuntime(
     loadRemoteSnapshotInfo: jest.fn(async () => ({ remoteSnapshot: snapshot })),
     getGlobalRemoteInfo: jest.fn(() => ({ remoteSnapshot: snapshot })),
   };
+  const errorLoadRemote = jest.fn();
   const instance = {
     name: 'host',
     options: {
@@ -52,8 +53,11 @@ export function remoteRuntime(
     registerPlugins: jest.fn(),
     loadRemote,
     moduleCache,
-    remoteHandler: { idToRemoteMap },
+    remoteHandler: {
+      idToRemoteMap,
+      hooks: { lifecycle: { errorLoadRemote: { emit: errorLoadRemote } } },
+    },
     snapshotHandler,
   } as unknown as ModuleFederation;
-  return { instance, loadRemote, metadata, snapshotHandler };
+  return { instance, loadRemote, metadata, snapshotHandler, errorLoadRemote };
 }

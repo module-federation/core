@@ -11,6 +11,7 @@ import {
   helpers,
   type ModuleFederation,
 } from '@module-federation/enhanced/runtime';
+import type { ModuleInfo } from '@module-federation/sdk';
 import type { DataFetchParams } from './lazy/types';
 import { createLazyComponent } from './lazy/createLazyComponent';
 import { autoFetchDataPlugin } from './lazy';
@@ -77,14 +78,34 @@ async function resolveProtocol(
   const { remote, expose } = matched;
   const hasManifest =
     !('entry' in remote) || /\.json(?:[?#]|$)/.test(remote.entry);
-  const snapshot = hasManifest
-    ? (
+  let snapshot: ModuleInfo | undefined;
+  if (hasManifest) {
+    try {
+      snapshot = (
         await instance.snapshotHandler.loadRemoteSnapshotInfo({
           moduleInfo: remote,
           id,
         })
-      ).remoteSnapshot
-    : undefined;
+      ).remoteSnapshot;
+    } catch (error) {
+      // Protocol lookup is part of loading a remote. Preserve the runtime's
+      // final load recovery hook without executing an unknown provider on Node.
+      const recovered =
+        await instance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
+          id,
+          error,
+          from: 'runtime',
+          lifecycle: 'onLoad',
+          expose,
+          origin: instance,
+        });
+      if (!recovered) throw error;
+      return {
+        render: hint || 'component',
+        recovered: namespace(recovered, id),
+      };
+    }
+  }
   const metadata =
     snapshot && 'modules' in snapshot
       ? snapshot.modules.find(
@@ -109,7 +130,10 @@ async function resolveProtocol(
       `Remote '${id}' render hint conflicts with its manifest protocol.`,
     );
   }
-  return metadata?.render || hint || 'component';
+  return {
+    render: metadata?.render || hint || 'component',
+    recovered: undefined,
+  };
 }
 
 function BridgeMount({
@@ -268,74 +292,117 @@ function createConsumer<P extends object>(
     const options = getOptions();
     const instance = options.instance || getInstance();
     const [attempt, setAttempt] = useState(0);
+    const [mounted, setMounted] = useState(!options.noSSR);
+    useEffect(() => {
+      if (options.noSSR) {
+        // Let the server placeholder finish hydrating before loading client UI.
+        if (React.startTransition)
+          React.startTransition(() => setMounted(true));
+        else setMounted(true);
+      }
+    }, [options.noSSR]);
     const retry = useCallback(() => setAttempt((value) => value + 1), []);
     const paramsKey = JSON.stringify(options.dataFetchParams);
     const Lazy = useMemo(
       () =>
-        React.lazy<React.ComponentType<P>>(async () => {
-          if (!instance)
-            throw new Error('An initialized MF runtime instance is required.');
-          if (!configured.has(instance)) {
-            instance.registerPlugins([autoFetchDataPlugin()]);
-            configured.add(instance);
-          }
-          let id: string;
-          let loaded: Promise<Namespace> | undefined;
-          if (typeof options.remote === 'string') {
-            id = options.remote;
-          } else {
-            if (typeof window === 'undefined') {
+        React.lazy<React.ComponentType<P>>(() =>
+          (async () => {
+            if (!instance)
               throw new Error(
-                'Use a remote alias/expose for automatic SSR protocol selection.',
+                'An initialized MF runtime instance is required.',
               );
+            if (!configured.has(instance)) {
+              instance.registerPlugins([autoFetchDataPlugin()]);
+              configured.add(instance);
             }
-            loaded = options.remote().then((value) => namespace(value));
-            const module = await loaded;
-            const identity = module[moduleId];
-            if (typeof identity !== 'string')
-              throw new Error(
-                'The remote loader returned no MF module identity. Use a remote alias/expose.',
-              );
-            id = identity;
-          }
-          const protocol = await resolveProtocol(instance, id, options.render);
-          const load = () =>
-            (loaded ||= instance
-              .loadRemote(id)
-              .then((value) => namespace(value, id)));
-          if (protocol === 'bridge') {
-            if (options.exportName && options.exportName !== 'default')
-              throw new Error(
-                'Bridge exposes use the default provider export.',
-              );
-            return {
-              default: (businessProps: P) => (
-                <BridgeMount
-                  load={load}
-                  instance={instance}
-                  id={id}
-                  loading={getOptions().loading}
-                  remoteProps={businessProps}
-                />
-              ),
-            };
-          }
-          const Component = createLazyComponent({
-            loader: load,
-            instance,
-            export: options.exportName || 'default',
-            loading: options.loading ?? null,
-            fallback: ({ error }: { error: Error }) => {
-              throw error;
-            },
-            noSSR: options.noSSR,
-            dataFetchParams: options.dataFetchParams,
-            injectScript: options.injectScript,
-            injectLink: options.injectLink,
-            delayLoading: options.delayLoading,
-          });
-          return { default: Component as React.ComponentType<P> };
-        }),
+            let id: string;
+            let loaded: Promise<Namespace> | undefined;
+            if (typeof options.remote === 'string') {
+              id = options.remote;
+            } else {
+              if (typeof window === 'undefined') {
+                throw new Error(
+                  'Use a remote alias/expose for automatic SSR protocol selection.',
+                );
+              }
+              loaded = options.remote().then((value) => namespace(value));
+              const module = await loaded;
+              const identity = module[moduleId];
+              if (typeof identity !== 'string')
+                throw new Error(
+                  'The remote loader returned no MF module identity. Use a remote alias/expose.',
+                );
+              id = identity;
+            }
+            const selection = await resolveProtocol(
+              instance,
+              id,
+              options.render,
+            );
+            const protocol = selection.render;
+            if (selection.recovered && protocol === 'component') {
+              // A runtime fallback has no successful remote registry entry,
+              // data loader or remote asset metadata to hydrate.
+              return {
+                default: selection.recovered[
+                  options.exportName || 'default'
+                ] as React.ComponentType<P>,
+              };
+            }
+            if (selection.recovered)
+              loaded = Promise.resolve(selection.recovered);
+            const load = () =>
+              (loaded ||= instance
+                .loadRemote(id)
+                .then((value) => namespace(value, id)));
+            if (protocol === 'bridge') {
+              if (options.exportName && options.exportName !== 'default')
+                throw new Error(
+                  'Bridge exposes use the default provider export.',
+                );
+              return {
+                default: (businessProps: P) => (
+                  <BridgeMount
+                    load={load}
+                    instance={instance}
+                    id={id}
+                    loading={getOptions().loading}
+                    remoteProps={businessProps}
+                  />
+                ),
+              };
+            }
+            const Component = createLazyComponent({
+              loader: load,
+              instance,
+              export: options.exportName || 'default',
+              loading: options.loading ?? null,
+              fallback: ({ error }: { error: Error }) => {
+                // React error boundaries do not catch during server rendering.
+                // Keep the lazy data/loader fallback in the server response.
+                const fallback = getOptions().fallback;
+                if (typeof window === 'undefined' && fallback) {
+                  return fallback({ error: asError(error), retry });
+                }
+                throw error;
+              },
+              noSSR: options.noSSR,
+              dataFetchParams: options.dataFetchParams,
+              injectScript: options.injectScript,
+              injectLink: options.injectLink,
+              delayLoading: options.delayLoading,
+            });
+            return { default: Component as React.ComponentType<P> };
+          })().catch((error) => {
+            const fallback = getOptions().fallback;
+            if (typeof window === 'undefined' && fallback) {
+              return {
+                default: () => fallback({ error: asError(error), retry }),
+              };
+            }
+            throw error;
+          }),
+        ),
       [
         instance,
         options.remote,
@@ -348,8 +415,6 @@ function createConsumer<P extends object>(
         attempt,
       ],
     );
-    if (options.noSSR && typeof window === 'undefined')
-      return <>{options.loading}</>;
     return (
       <RemoteBoundary
         key={attempt}
@@ -358,10 +423,12 @@ function createConsumer<P extends object>(
         retry={retry}
       >
         <Suspense fallback={options.loading ?? null}>
-          {React.createElement(
-            Lazy as unknown as React.ComponentType<P>,
-            props as React.Attributes & P,
-          )}
+          {options.noSSR && !mounted
+            ? options.loading
+            : React.createElement(
+                Lazy as unknown as React.ComponentType<P>,
+                props as React.Attributes & P,
+              )}
         </Suspense>
       </RemoteBoundary>
     );

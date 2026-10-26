@@ -1,10 +1,55 @@
 import React, { StrictMode, createContext, useContext } from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
+import { hydrateRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server.node';
 import { createReactRemote, ReactRemote } from '../src/reactRemote';
 import { remoteRuntime } from './reactRemote-utils';
 import { createBridgeComponent } from '../src/provider/versions/v18';
 
 describe('unified React remote consumption', () => {
+  it('hydrates noSSR placeholders without loading during server rendering or reporting a mismatch', async () => {
+    const { instance, loadRemote } = remoteRuntime({
+      default: () => <strong>client weather</strong>,
+    });
+    const Remote = createReactRemote({
+      remote: 'shop/Card',
+      instance,
+      noSSR: true,
+      loading: <p>connecting</p>,
+    });
+    const container = document.createElement('div');
+    container.innerHTML = renderToString(<Remote />);
+    expect(container.textContent).toBe('connecting');
+    expect(loadRemote).not.toHaveBeenCalled();
+    document.body.appendChild(container);
+    const onRecoverableError = jest.fn();
+    let root: ReturnType<typeof hydrateRoot>;
+    try {
+      act(() => {
+        root = hydrateRoot(container, <Remote />, { onRecoverableError });
+      });
+      await screen.findByText('client weather');
+      expect(onRecoverableError).not.toHaveBeenCalled();
+    } finally {
+      act(() => root!.unmount());
+      container.remove();
+    }
+  });
+  it('preserves runtime load recovery when the manifest protocol lookup fails', async () => {
+    const runtime = remoteRuntime({ default: () => null });
+    const error = new Error('manifest unavailable');
+    runtime.snapshotHandler.loadRemoteSnapshotInfo.mockRejectedValue(error);
+    runtime.errorLoadRemote.mockResolvedValue({
+      default: () => <p>runtime recovered weather</p>,
+    });
+    render(<ReactRemote remote="shop/Card" instance={runtime.instance} />);
+    await screen.findByText('runtime recovered weather');
+    expect(runtime.errorLoadRemote).toHaveBeenCalledTimes(1);
+    expect(runtime.errorLoadRemote).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'shop/Card', error, lifecycle: 'onLoad' }),
+    );
+    expect(runtime.loadRemote).not.toHaveBeenCalled();
+  });
   it('keeps host loading DOM outside the producer React root', async () => {
     const provider = createBridgeComponent({
       rootComponent: () => <strong>independent root</strong>,
@@ -209,7 +254,7 @@ describe('unified React remote consumption', () => {
     async (_name, protocol, service, hint, message) => {
       const errors = jest.spyOn(console, 'error').mockImplementation(() => {});
       try {
-        const { instance, loadRemote } = remoteRuntime(
+        const { instance, loadRemote, errorLoadRemote } = remoteRuntime(
           { default: () => null },
           protocol,
           service,
@@ -224,6 +269,7 @@ describe('unified React remote consumption', () => {
         );
         await screen.findByText(message);
         expect(loadRemote).not.toHaveBeenCalled();
+        expect(errorLoadRemote).not.toHaveBeenCalled();
       } finally {
         errors.mockRestore();
       }
