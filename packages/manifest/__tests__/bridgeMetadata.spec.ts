@@ -1,40 +1,35 @@
 /** @jest-environment node */
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import webpack from 'webpack';
-import type { Compilation } from 'webpack';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
-import { createBridgeMetadataReader } from '../src/bridgeMetadata';
+import type { Compilation, Module, Dependency } from 'webpack';
+import {
+  createBridgeMetadataReader,
+  annotateBridgeExposes,
+} from '../src/bridgeMetadata';
+import type { Stats } from '@module-federation/sdk';
 
-describe('Bridge expose source metadata', () => {
-  let directory: string;
-  let compiler: webpack.Compiler;
+describe('Bridge built module metadata', () => {
+  let modules: Map<string, Module>;
   let read: ReturnType<typeof createBridgeMetadataReader>;
   beforeEach(() => {
-    directory = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-bridge-metadata-'));
-    source(
-      'export const createBridgeComponent = (options) => options;',
-      'factory.ts',
-    );
-    compiler = webpack({
-      mode: 'none',
-      context: directory,
-      resolve: { extensions: ['.ts', '.tsx', '.js'] },
-    });
-    read = createBridgeMetadataReader(compiler, {
-      fileDependencies: new Set(),
+    modules = new Map();
+    read = createBridgeMetadataReader({
+      moduleGraph: {
+        getModule: (dependency: Dependency & { request: string }) =>
+          modules.get(dependency.request) || null,
+      },
     } as unknown as Compilation);
   });
-  afterEach(async () => {
-    await new Promise<void>((resolve, reject) =>
-      compiler.close((error) => (error ? reject(error) : resolve())),
-    );
-    fs.rmSync(directory, { recursive: true, force: true });
-  });
-  function source(code: string, filename = 'entry.tsx') {
-    fs.writeFileSync(path.join(directory, filename), code);
-    return `./${filename}`;
+  function source(code: string, filename = 'entry.tsx'): Module {
+    const module = {
+      type: 'javascript/auto',
+      identifier: () => filename,
+      originalSource: () => ({ source: () => code }),
+      get dependencies() {
+        return [...modules.keys()].map((request) => ({ request }));
+      },
+    } as unknown as Module;
+    modules.set(`./${filename}`, module);
+    modules.set(`./${filename.replace(/\.[^.]+$/, '')}`, module);
+    return module;
   }
   it.each([
     "import { createBridgeComponent } from '@module-federation/bridge-react'; export default createBridgeComponent({ rootComponent: () => null });",
@@ -68,54 +63,58 @@ describe('Bridge expose source metadata', () => {
       ),
     ).toBe(true);
   });
-  it.each<moduleFederationPlugin.ModuleFederationPluginOptions['remotes']>([
-    { checkout: 'checkout@https://example.test/remoteEntry.js' },
-    { checkout: { external: 'checkout@https://example.test/remoteEntry.js' } },
-    { checkout: ['checkout@https://example.test/remoteEntry.js'] },
-    ['checkout'],
-    [{ checkout: 'checkout@https://example.test/remoteEntry.js' }],
-  ])('stops forwarding analysis at configured remotes: %j', async (remotes) => {
-    const readRemote = createBridgeMetadataReader(
-      compiler,
-      {
-        fileDependencies: new Set(),
-      } as unknown as Compilation,
-      remotes,
-    );
-    let index = 0;
-    for (const request of ['checkout', 'checkout/pages/checkout/[...slug]']) {
-      for (const code of [
-        `import Page from '${request}'; export default Page;`,
-        `export {default} from '${request}';`,
-      ]) {
-        expect(await readRemote(source(code, `remote-${index++}.tsx`))).toBe(
-          false,
-        );
-      }
-    }
-    expect(await readRemote('checkout/Page')).toBe(false);
-    await expect(
-      readRemote(
-        source("export {default} from 'checkout-other/page';", 'prefix.ts'),
-      ),
-    ).rejects.toThrow(/Can't resolve/);
-    await expect(
-      readRemote(source("export {default} from './missing';", 'local.ts')),
-    ).rejects.toThrow(/Can't resolve/);
+  it.each(['remote', 'external', 'ignored'])(
+    'keeps %s modules opaque',
+    async (kind) => {
+      modules.set('checkout/Page', {
+        type: 'javascript/dynamic',
+        identifier: () => kind,
+        originalSource: () => null,
+        dependencies: [],
+      } as unknown as Module);
+      expect(await read(source("export {default} from 'checkout/Page';"))).toBe(
+        false,
+      );
+    },
+  );
+  it('terminates cyclic re-exports', async () => {
+    source("export {default} from './entry';", 'barrel.ts');
+    expect(await read(source("export {default} from './barrel';"))).toBe(false);
   });
-  it('recognizes scoped remote aliases', async () => {
-    const readRemote = createBridgeMetadataReader(
-      compiler,
-      {
-        fileDependencies: new Set(),
-      } as unknown as Compilation,
-      {
-        '@scope/checkout': 'checkout@https://example.test/remoteEntry.js',
-      },
+  it('reuses parser metadata without reading the module source', async () => {
+    const originalSource = jest.fn(() => {
+      throw new Error('must reuse parser metadata');
+    });
+    const module = {
+      buildInfo: { federationBridgeExports: { default: { bridge: true } } },
+      originalSource,
+    } as unknown as Module;
+    expect(await read(module)).toBe(true);
+    expect(originalSource).not.toHaveBeenCalled();
+  });
+  it('caches built source analysis within a compilation', async () => {
+    const module = source(
+      'const createBridgeComponent = x => x; export default createBridgeComponent({});',
     );
-    expect(
-      await readRemote(source("export {default} from '@scope/checkout/Page';")),
-    ).toBe(false);
+    const originalSource = jest.spyOn(module, 'originalSource');
+    expect(await read(module)).toBe(true);
+    expect(await read(module)).toBe(true);
+    expect(originalSource).toHaveBeenCalledTimes(1);
+  });
+  it('preserves explicit metadata for opaque exports', () => {
+    const stats = {
+      exposes: [{ name: 'App', path: './App', render: 'bridge' }],
+    } as Stats;
+    expect(annotateBridgeExposes(stats, new Map())).toBe(stats);
+    expect(stats.exposes[0].render).toBe('bridge');
+  });
+  it('diagnoses conflicting manifest metadata with the expose name', () => {
+    const stats = {
+      exposes: [{ name: 'App', path: './App', render: 'component' }],
+    } as Stats;
+    expect(() =>
+      annotateBridgeExposes(stats, new Map([['./App', true]])),
+    ).toThrow(/\.\/App: Bridge export conflicts/);
   });
   it.each([
     'export default function Card() { return <div />; }',

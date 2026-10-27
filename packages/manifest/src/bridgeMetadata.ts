@@ -1,6 +1,8 @@
-import { parse, type ParseResult } from '@babel/parser';
+import { parse } from '@babel/parser';
 import type * as t from '@babel/types';
-import type { Compiler, Compilation } from 'webpack';
+import type { Compilation, Module, Dependency } from 'webpack';
+import type NormalModuleFactory from 'webpack/lib/NormalModuleFactory';
+import type JavascriptParser from 'webpack/lib/javascript/JavascriptParser';
 import type { Stats, moduleFederationPlugin } from '@module-federation/sdk';
 
 type Reference = { source: string; imported: string };
@@ -11,7 +13,21 @@ type ModuleInfo = {
   exports: Map<string, Expression>;
 };
 
+// Webpack's parser uses ESTree literals/properties, while the Rspack fallback
+// uses Babel nodes. Normalize only the syntax inspected by this convention.
 function unwrap(node: t.Node): t.Node {
+  if ((node.type as string) === 'Literal') {
+    const value = (node as unknown as { value: unknown }).value;
+    if (typeof value === 'string' || typeof value === 'boolean') {
+      return {
+        ...node,
+        type: typeof value === 'string' ? 'StringLiteral' : 'BooleanLiteral',
+      } as t.Node;
+    }
+  }
+  if ((node.type as string) === 'Property') {
+    return { ...node, type: 'ObjectProperty' } as t.Node;
+  }
   if (
     node.type === 'TSAsExpression' ||
     node.type === 'TSSatisfiesExpression' ||
@@ -23,7 +39,7 @@ function unwrap(node: t.Node): t.Node {
   return node;
 }
 
-function collectModule(ast: ParseResult<t.File>): ModuleInfo {
+function collectModule(program: t.Program): ModuleInfo {
   const info: ModuleInfo = {
     imports: new Map(),
     locals: new Map(),
@@ -37,7 +53,7 @@ function collectModule(ast: ParseResult<t.File>): ModuleInfo {
       }
     }
   };
-  for (const statement of ast.program.body) {
+  for (const statement of program.body) {
     collect(statement);
     if (statement.type === 'ImportDeclaration') {
       if (statement.importKind === 'type') continue;
@@ -90,66 +106,16 @@ function collectModule(ast: ParseResult<t.File>): ModuleInfo {
   return info;
 }
 
-/** Analyze source bindings without importing or executing a producer. */
-export function createBridgeMetadataReader(
-  compiler: Compiler,
-  compilation: Compilation,
-  remotes: moduleFederationPlugin.ModuleFederationPluginOptions['remotes'] = {},
-) {
-  const remoteNames = Array.isArray(remotes)
-    ? remotes.flatMap((remote) =>
-        typeof remote === 'string' ? [remote] : Object.keys(remote),
-      )
-    : Object.keys(remotes);
-  // Remote modules are resolved by the federation plugin, not the filesystem.
-  // Match the same alias boundary as ContainerReferencePlugin.
-  const isRemote = (request: string) =>
-    remoteNames.some(
-      (name) => request === name || request.startsWith(`${name}/`),
-    );
-  const modules = new Map<string, Promise<ModuleInfo>>();
-  const resolver = compiler.resolverFactory.get('normal', {
-    dependencyType: 'esm',
-  });
-  const resolve = (context: string, request: string): Promise<string> =>
-    new Promise((accept, reject) => {
-      resolver.resolve({}, context, request, {}, (error, result) => {
-        if (error || !result) {
-          reject(error || new Error(`Cannot resolve ${request}`));
-        } else {
-          accept(result.split('?')[0]);
-        }
-      });
-    });
-  const read = (filename: string) => {
-    let promise = modules.get(filename);
-    if (!promise) {
-      compilation.fileDependencies.add(filename);
-      promise = new Promise<ModuleInfo>((accept, reject) => {
-        compiler.inputFileSystem!.readFile(filename, (error, content) => {
-          if (error || !content) {
-            reject(error || new Error(`Cannot read ${filename}`));
-            return;
-          }
-          try {
-            accept(
-              collectModule(
-                parse(content.toString(), {
-                  sourceType: 'unambiguous',
-                  plugins: ['typescript', 'jsx', 'decorators-legacy'],
-                }),
-              ),
-            );
-          } catch (parseError) {
-            reject(parseError);
-          }
-        });
-      });
-      modules.set(filename, promise);
-    }
-    return promise;
-  };
+type ExportValue = Reference | { bridge: true } | { error: string };
+type ModuleExports = Record<string, ExportValue>;
+type BridgeMetadata = Map<string, boolean | Error>;
+type BridgeBuildInfo = Module['buildInfo'] & {
+  federationBridgeExports?: ModuleExports;
+};
 
+/** Retain compact export descriptions, never the complete parser AST. */
+function describeExports(program: t.Program): ModuleExports {
+  const info = collectModule(program);
   const local = (
     node: t.Node,
     info: ModuleInfo,
@@ -185,39 +151,34 @@ export function createBridgeMetadataReader(
           value.property.type === 'Identifier' &&
           value.property.name === 'createBridgeComponent') ||
         (value.computed &&
-          value.property.type === 'StringLiteral' &&
-          value.property.value === 'createBridgeComponent')
+          unwrap(value.property).type === 'StringLiteral' &&
+          (unwrap(value.property) as t.StringLiteral).value ===
+            'createBridgeComponent')
       );
     }
     return false;
   };
 
-  const inspect = async (
-    filename: string,
-    exported = 'default',
-    visited = new Set<string>(),
-  ): Promise<boolean> => {
-    if (!/\.[cm]?[jt]sx?$/.test(filename)) return false;
-    const key = `${filename}:${exported}`;
-    if (visited.has(key)) return false;
-    visited.add(key);
-    const info = await read(filename);
-    let value = info.exports.get(exported);
-    if (!value) return false;
+  const classify = (expression: Expression): ExportValue | false => {
+    let value = expression;
     if ('type' in value) {
       value = local(value, info);
-      if (value.type === 'Identifier') {
+      if (value.type === 'Identifier')
         value = info.imports.get(value.name) || value;
-      }
     }
-    if (!('type' in value)) {
-      if (isRemote(value.source)) return false;
-      const path = await import('node:path');
-      return inspect(
-        await resolve(path.dirname(filename), value.source),
-        value.imported,
-        visited,
-      );
+    if (!('type' in value)) return value;
+    if (
+      value.type === 'MemberExpression' &&
+      value.object.type === 'Identifier'
+    ) {
+      const binding = info.imports.get(value.object.name);
+      const property = unwrap(value.property);
+      if (binding?.imported === '*') {
+        if (!value.computed && property.type === 'Identifier')
+          return { source: binding.source, imported: property.name };
+        if (value.computed && property.type === 'StringLiteral')
+          return { source: binding.source, imported: property.value };
+      }
     }
     if (value.type !== 'CallExpression') return false;
     if (!isFactory(value.callee, info)) {
@@ -239,7 +200,8 @@ export function createBridgeMetadataReader(
         'Bridge provider options must be a statically analyzable object.',
       );
     }
-    for (const property of object.properties) {
+    for (const rawProperty of object.properties) {
+      const property = unwrap(rawProperty);
       if (
         property.type === 'SpreadElement' ||
         ('computed' in property && property.computed)
@@ -249,11 +211,12 @@ export function createBridgeMetadataReader(
         );
       }
       if (property.type !== 'ObjectProperty') continue;
+      const key = unwrap(property.key);
       const name =
-        property.key.type === 'Identifier'
-          ? property.key.name
-          : property.key.type === 'StringLiteral'
-            ? property.key.value
+        key.type === 'Identifier'
+          ? key.name
+          : key.type === 'StringLiteral'
+            ? key.value
             : undefined;
       if (name !== 'isService') continue;
       const flag = local(property.value, info);
@@ -266,40 +229,161 @@ export function createBridgeMetadataReader(
         );
       }
     }
-    return true;
+    return { bridge: true };
   };
-  return async (request: string): Promise<boolean> => {
-    // Loader-generated exports do not necessarily retain the source protocol.
-    if (request.includes('!') || request.includes('?')) return false;
-    if (isRemote(request)) return false;
-    return inspect(await resolve(compiler.context, request));
-  };
+  const exports: ModuleExports = Object.create(null);
+  for (const [name, expression] of info.exports) {
+    try {
+      const value = classify(expression);
+      if (value) exports[name] = value;
+    } catch (error) {
+      exports[name] = {
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+  return exports;
 }
 
-export async function annotateBridgeExposes(
-  stats: Stats,
-  options: moduleFederationPlugin.ModuleFederationPluginOptions,
-  compiler: Compiler,
+/** Read built modules and follow the compilation's resolved dependency graph. */
+export function createBridgeMetadataReader(compilation: Compilation) {
+  const descriptions = new WeakMap<Module, ModuleExports>();
+  const read = (module: Module): ModuleExports => {
+    let exports = descriptions.get(module);
+    if (!exports) {
+      // Remote, external, ignored and non-JavaScript modules are opaque.
+      exports = (module.buildInfo as BridgeBuildInfo)?.federationBridgeExports;
+      if (!exports) {
+        const source =
+          module.type.startsWith('javascript') && module.originalSource();
+        exports = source
+          ? describeExports(
+              parse(source.source().toString(), {
+                sourceType: 'unambiguous',
+                plugins: ['typescript', 'jsx', 'decorators-legacy'],
+              }).program,
+            )
+          : {};
+      }
+      descriptions.set(module, exports);
+    }
+    return exports;
+  };
+  const inspect = async (
+    module: Module,
+    exported = 'default',
+    visited = new Map<Module, Set<string>>(),
+  ): Promise<boolean> => {
+    const seen = visited.get(module) || new Set<string>();
+    if (seen.has(exported)) return false;
+    seen.add(exported);
+    visited.set(module, seen);
+    const value = read(module)[exported];
+    if (!value) return false;
+    if ('error' in value) throw new Error(value.error);
+    if ('bridge' in value) return true;
+    const dependency = module.dependencies.find(
+      (dep) =>
+        (dep as Dependency & { request?: string }).request === value.source,
+    );
+    const target = dependency && compilation.moduleGraph.getModule(dependency);
+    return target ? inspect(target, value.imported, visited) : false;
+  };
+  return inspect;
+}
+
+/** Collect before module concatenation, then let StatsPlugin emit the metadata. */
+export function collectBridgeMetadata(
   compilation: Compilation,
-): Promise<Stats> {
-  const exposes = options.exposes;
-  if (!exposes || Array.isArray(exposes)) return stats;
-  const reader = createBridgeMetadataReader(
-    compiler,
-    compilation,
-    options.remotes,
-  );
-  for (const expose of stats.exposes) {
-    const config = exposes[expose.path || `./${expose.name}`];
-    if (!config) continue;
-    const imports =
+  normalModuleFactory: NormalModuleFactory,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
+): BridgeMetadata {
+  const metadata: BridgeMetadata = new Map();
+  if (
+    options.manifest === false ||
+    !options.exposes ||
+    Array.isArray(options.exposes)
+  )
+    return metadata;
+  const exposedRequests = new Map<string, string[]>();
+  for (const [name, config] of Object.entries(options.exposes)) {
+    const value =
       typeof config === 'object' && !Array.isArray(config)
         ? config.import
         : config;
-    const requests = Array.isArray(imports) ? imports : [imports];
+    const requests = Array.isArray(value) ? value : [value];
     if (requests.length !== 1) continue;
+    const names = exposedRequests.get(requests[0]) || [];
+    names.push(name);
+    exposedRequests.set(requests[0], names);
+  }
+  // Rspack parses in Rust and does not expose JavascriptParser hooks. For it,
+  // the reader parses only reachable built module sources, once per compilation.
+  for (const type of [
+    'javascript/auto',
+    'javascript/esm',
+    'javascript/dynamic',
+  ]) {
+    normalModuleFactory.hooks.parser
+      ?.for(type)
+      .tap('FederationBridgeMetadata', (parser) => {
+        const jsParser = parser as JavascriptParser;
+        jsParser.hooks.program.tap('FederationBridgeMetadata', (program) => {
+          (
+            jsParser.state.module.buildInfo as BridgeBuildInfo
+          ).federationBridgeExports = describeExports(
+            program as unknown as t.Program,
+          );
+        });
+      });
+  }
+  compilation.hooks.finishModules.tapPromise(
+    'FederationBridgeMetadata',
+    async (modules) => {
+      const read = createBridgeMetadataReader(compilation);
+      for (const module of modules) {
+        if (!module.identifier().startsWith('container entry')) continue;
+        if (
+          options.name &&
+          !module
+            .libIdent({ context: compilation.compiler.context })
+            ?.endsWith(`webpack/container/entry/${options.name}`)
+        )
+          continue;
+        for (const block of module.blocks) {
+          for (const dep of block.dependencies) {
+            if (dep.type !== 'container exposed') continue;
+            const names = exposedRequests.get(
+              (dep as Dependency & { request: string }).request,
+            );
+            const target = compilation.moduleGraph.getModule(dep);
+            if (!names || !target) continue;
+            let result: boolean | Error;
+            try {
+              result = await read(target);
+            } catch (error) {
+              result =
+                error instanceof Error ? error : new Error(String(error));
+            }
+            for (const name of names) metadata.set(name, result);
+          }
+        }
+      }
+    },
+  );
+  return metadata;
+}
+
+export function annotateBridgeExposes(
+  stats: Stats,
+  metadata: BridgeMetadata,
+): Stats {
+  for (const expose of stats.exposes) {
+    const name = expose.path || `./${expose.name}`;
     try {
-      if (!(await reader(requests[0]))) continue;
+      const bridge = metadata.get(name);
+      if (bridge instanceof Error) throw bridge;
+      if (!bridge) continue;
       if (
         (expose.render && expose.render !== 'bridge') ||
         expose.isService === true
@@ -312,7 +396,7 @@ export async function annotateBridgeExposes(
       expose.isService = false;
     } catch (error) {
       throw new Error(
-        `[ Module Federation ] ${expose.path || expose.name}: ${error instanceof Error ? error.message : String(error)}`,
+        `[ Module Federation ] ${name}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
