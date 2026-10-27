@@ -1,12 +1,8 @@
 /**
  * @jest-environment node
  *
- * Compatibility of the identifiers emitted by Rspack's layer-aware Module
- * Federation stack with the published (pre-layers) manifest reader.
- *
- * `@module-federation/manifest-legacy` is the older published reader
- * (2.8.2, before this change); `../src` is the current one. Both run the
- * real @module-federation/sdk and @module-federation/managers.
+ * Compare layer-aware identifiers with the published 2.8.2 reader and the
+ * workspace reader. Both use the SDK and managers packages.
  */
 import type { StatsModule } from 'webpack';
 import path from 'path';
