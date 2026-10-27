@@ -28,3 +28,18 @@ helpers.utils.matchRemoteWithNameAndExpose(
   instance.options.remotes,
   'remote/component',
 );
+
+import { createReactRemote } from '@module-federation/bridge-react/base';
+import type { ComponentProps } from 'react';
+const Card = createReactRemote<{ label: string }>({
+  remote: 'shop/Card',
+  instance,
+});
+const validProps: ComponentProps<typeof Card> = { label: 'valid' };
+// @ts-expect-error Remote props keep the declared business type.
+const invalidProps: ComponentProps<typeof Card> = { label: 123 };
+
+// Framework re-exports must remain consumable with skipLibCheck disabled.
+import { createBridgeComponent as createBridge18 } from '@module-federation/bridge-react/v18';
+import { createBridgeComponent as createBridge19 } from '@module-federation/bridge-react/v19';
+void [createBridge18, createBridge19];

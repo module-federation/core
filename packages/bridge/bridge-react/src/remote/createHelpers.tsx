@@ -13,6 +13,23 @@ export type LazyRemoteComponentInfo<
   _E extends keyof T,
 > = RemoteComponentParams<T>;
 
+export type RemoteAppComponentCreator = <
+  T = Record<string, unknown>,
+  E extends keyof T = keyof T,
+>(
+  info: LazyRemoteComponentInfo<T, E>,
+) => React.ForwardRefExoticComponent<
+  React.PropsWithoutRef<RemoteComponentProps> &
+    React.RefAttributes<HTMLDivElement>
+>;
+
+export type LazyRemoteComponentCreator = <
+  T = Record<string, unknown>,
+  E extends keyof T = keyof T,
+>(
+  info: LazyRemoteComponentInfo<T, E>,
+) => React.LazyExoticComponent<ReturnType<RemoteAppComponentCreator>>;
+
 /**
  * Creates a factory function for creating lazy remote components
  * @param RemoteApp The RemoteAppWrapper component to use (with or without router)

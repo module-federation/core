@@ -48,3 +48,10 @@ export type {
   CacheStatus,
   CacheStatsInfo,
 } from './lazy';
+
+export { createReactRemote, ReactRemote } from './reactRemote';
+export type {
+  CreateReactRemoteOptions,
+  ReactRemoteProps,
+  ReactRemoteErrorInfo,
+} from './reactRemote';
