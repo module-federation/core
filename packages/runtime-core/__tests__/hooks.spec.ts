@@ -89,6 +89,13 @@ describe('hooks', () => {
     const module =
       await GM.loadRemote<(...args: Array<number>) => number>('@demo/main/sub');
     assert(module, 'loadRemote should return a module');
+    // Consumers look up metadata using the effective module identity.
+    for (const id of ['@demo/main/sub', '@demo/main/add', 'main/add']) {
+      expect(GM.remoteHandler.idToRemoteMap[id]).toEqual({
+        name: '@demo/main',
+        expose: './add',
+      });
+    }
     expect(beforeLoadRemoteArgs).toMatchObject({
       id: '@demo/main/sub',
       options: GM.options,

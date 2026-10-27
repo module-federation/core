@@ -220,6 +220,14 @@ function getServerNeedRemoteInfo(
 export function createLazyComponent<T, E extends keyof T>(
   options: CreateLazyComponentOptions<T, E>,
 ) {
+  return createLazyComponentResource(options).Component;
+}
+
+// Shared by the public lazy consumer and the unified client-only consumer.
+// Kept out of the public entry points.
+export function createLazyComponentResource<T, E extends keyof T>(
+  options: CreateLazyComponentOptions<T, E>,
+) {
   const { instance, injectScript, injectLink } = options;
   if (!instance) {
     throw new Error('instance is required for createLazyComponent!');
@@ -350,7 +358,17 @@ export function createLazyComponent<T, E extends keyof T>(
     ];
 
     const Com = m[exportName] as React.FC<ComponentType>;
-    if (exportName in m && typeof Com === 'function') {
+    if (
+      exportName in m &&
+      (typeof Com === 'function' ||
+        (Com &&
+          typeof Com === 'object' &&
+          [
+            Symbol.for('react.memo'),
+            Symbol.for('react.forward_ref'),
+            Symbol.for('react.lazy'),
+          ].includes((Com as any).$$typeof)))
+    ) {
       return (props: Omit<ComponentType, 'key'> & { mfData?: unknown }) => (
         <>
           {globalThis.FEDERATION_SSR && dataFetchMapKey && (
@@ -385,7 +403,14 @@ export function createLazyComponent<T, E extends keyof T>(
     };
   });
 
-  return (props: ComponentType) => {
+  const loadClient = async (): Promise<NoSSRLoadedState> => {
+    const data = await getNoSSRData();
+    const m = await callLoader();
+    const Component = createLoadedComponent(m);
+    return { status: 'loaded', Component, data };
+  };
+
+  const Component = (props: ComponentType) => {
     const { key, ...args } = props;
 
     if (!options.noSSR) {
@@ -407,12 +432,7 @@ export function createLazyComponent<T, E extends keyof T>(
       useEffect(() => {
         let isMounted = true;
 
-        loadPromiseRef.current ??= (async () => {
-          const data = await getNoSSRData();
-          const m = await callLoader();
-          const Component = createLoadedComponent(m);
-          return { status: 'loaded', Component, data };
-        })();
+        loadPromiseRef.current ??= loadClient();
 
         loadPromiseRef.current.then(
           (loadedState) => {
@@ -465,4 +485,5 @@ export function createLazyComponent<T, E extends keyof T>(
       return <LoadedComponent {...args} mfData={state.data} />;
     }
   };
+  return { Component, loadClient };
 }

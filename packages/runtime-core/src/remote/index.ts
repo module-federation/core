@@ -241,6 +241,9 @@ export class RemoteHandler {
   async loadRemote<T>(
     id: string,
     options?: { loadFactory?: boolean; from: CallFrom },
+    // Internal continuation for consumers that inspect the completed
+    // afterResolve result before deciding whether to execute the module.
+    resolvedRemote?: ReturnType<RemoteHandler['getRemoteModuleAndOptions']>,
   ): Promise<T | null> {
     const { host } = this;
     const startMatchInfo = matchRemoteWithNameAndExpose(
@@ -270,9 +273,7 @@ export class RemoteHandler {
       // id: alias(app1) + expose(button) = app1/button
       // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
       const { module, moduleOptions, remoteMatchInfo } =
-        await this.getRemoteModuleAndOptions({
-          id,
-        });
+        await (resolvedRemote || this.getRemoteModuleAndOptions({ id }));
       const {
         pkgNameOrAlias,
         remote,
@@ -304,6 +305,7 @@ export class RemoteHandler {
       });
 
       this.setIdToRemoteMap(id, remoteMatchInfo);
+      if (idRes !== id) this.setIdToRemoteMap(idRes, remoteMatchInfo);
       afterLoadRemoteArgs = {
         id: completeRequestId,
         expose: completeExpose,

@@ -4,13 +4,16 @@ import {
   createRemoteAppComponentFactory,
   createDeprecatedRemoteComponentFactory,
   type LazyRemoteComponentInfo,
+  type RemoteAppComponentCreator,
+  type LazyRemoteComponentCreator,
 } from '../createHelpers';
 
 export type { LazyRemoteComponentInfo };
 
-const createLazyRemoteComponent = createLazyRemoteComponentFactory(RemoteApp);
+const createLazyRemoteComponent: LazyRemoteComponentCreator =
+  createLazyRemoteComponentFactory(RemoteApp);
 
-export const createRemoteAppComponent =
+export const createRemoteAppComponent: RemoteAppComponentCreator =
   createRemoteAppComponentFactory(RemoteApp);
 
 /**

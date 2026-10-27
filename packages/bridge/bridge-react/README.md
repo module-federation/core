@@ -131,3 +131,50 @@ root.render(
     <App />
 );
 ```
+
+## Unified React remote consumers
+
+`createReactRemote` and `ReactRemote` are available from the root and router-free
+`/base` entries. They read the selected expose's rendering protocol from the
+Snapshot returned by the completed runtime `afterResolve` chain before choosing
+the consumer. This includes platform-provided snapshots and request rewrites.
+The same resolved request continues through the normal load lifecycle without
+resolving or fetching its manifest again.
+
+```tsx
+import { createReactRemote, ReactRemote } from '@module-federation/bridge-react/base'
+
+const Card = createReactRemote<{ label: string }>({
+  remote: 'shop/Card',
+  loading: <span>Loading</span>,
+  fallback: ({ error, retry }) => <button onClick={retry}>{error.message}</button>,
+})
+
+<Card label="Example" />
+<ReactRemote remote="shop/Card" props={{ label: 'Example' }} />
+```
+
+Pass `instance` when consuming through a particular Enhanced runtime. The default
+instance is resolved at render time. Ordinary components, including named exports
+selected with `exportName`, render in the host React tree and retain the existing
+component SSR, stylesheet and data-loader integration. `noSSR` keeps the server
+placeholder for hydration, then prepares the protocol, component and data from
+the first client effect. Ready content commits without an intermediate mount
+gate or a second loading effect. Configured load and data fallbacks
+remain present in server HTML. Resolution failures also reach the runtime
+load-recovery and diagnostic hooks before the consumer fallback.
+
+An expose marked `render: 'bridge'` mounts its default provider in a separate
+client root. Each mounted consumer owns its provider lifecycle. On the server it
+outputs a placeholder without loading the producer's Node expose. Bridge SSR and
+Service App execution are not supported by this API version.
+
+For an unmarked legacy provider, set `render: 'bridge'`. A hint conflicting with
+published metadata fails. Unmarked ordinary components keep the component path.
+CSR loaders may be used as `remote` if they return an MF module namespace with a
+module identity. Use an alias/expose string for automatic SSR selection.
+
+Loading defaults to null. Without `fallback`, errors reach the parent boundary.
+Retry creates fresh failed-load and consumer state, without promising a network
+re-download or automatic replay of business loaders. General runtime registration
+and loading APIs remain available from `@module-federation/enhanced/runtime`.
