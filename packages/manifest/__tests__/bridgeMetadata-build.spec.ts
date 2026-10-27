@@ -31,6 +31,7 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
         './LoaderOrdinary': './loader-ordinary.js',
         './Query': './query-entry.js?bridge',
         './External': './external-entry.js',
+        './MixedDependency': './mixed-entry.js',
       };
       const remotes = {
         checkout: 'checkout@https://example.test/remoteEntry.js',
@@ -60,6 +61,8 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
         'ordinary-loader.cjs': `module.exports = function () {return 'export default () => null;';};`,
         'query-entry.js': "export {component as default} from '@barrel';",
         'external-entry.js': "export {default} from '@external-provider';",
+        'mixed-entry.js':
+          "const ordinary = require('@dual'); export {ordinary}; export {default} from '@dual';",
       };
       for (const [filename, code] of Object.entries(graphFixtures)) {
         fs.writeFileSync(path.join(directory, filename), code);
@@ -129,7 +132,10 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
           context: ${JSON.stringify(directory)},
           entry: './entry.js',
           output: {path: ${JSON.stringify(path.join(directory, 'dist'))}, publicPath: 'https://example.test/'},
-          resolve: {alias: {
+          resolve: {byDependency: {
+            esm: {alias: {'@dual': ${JSON.stringify(path.join(directory, 'app.js'))}}},
+            commonjs: {alias: {'@dual': ${JSON.stringify(path.join(directory, 'card.js'))}}},
+          }, alias: {
             '@framework/bundled-provider': ${JSON.stringify(path.join(directory, 'factory.js'))},
             '@framework/wrapper': ${JSON.stringify(path.join(directory, 'framework-wrapper.js'))},
             '@entry-alias$': ${JSON.stringify(path.join(directory, 'alias-chain.js'))},
@@ -188,6 +194,7 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
             'Replaced',
             'LoaderBridge',
             'Query',
+            'MixedDependency',
           ]) {
             expect(
               output.exposes.find((item: any) => item.name === name),

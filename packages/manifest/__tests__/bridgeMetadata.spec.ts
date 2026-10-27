@@ -24,7 +24,10 @@ describe('Bridge built module metadata', () => {
       identifier: () => filename,
       originalSource: () => ({ source: () => code }),
       get dependencies() {
-        return [...modules.keys()].map((request) => ({ request }));
+        return [...modules.keys()].map((request) => ({
+          request,
+          category: 'esm',
+        }));
       },
     } as unknown as Module;
     modules.set(`./${filename}`, module);
@@ -100,6 +103,27 @@ describe('Bridge built module metadata', () => {
     expect(await read(module)).toBe(true);
     expect(await read(module)).toBe(true);
     expect(originalSource).toHaveBeenCalledTimes(1);
+  });
+  it('follows the ESM edge when a CommonJS dependency has the same request', async () => {
+    const bridge = source(
+      'const createBridgeComponent = x => x; export default createBridgeComponent({});',
+      'bridge.js',
+    );
+    const card = source('export default () => null;', 'card.js');
+    const dependencies = [
+      { request: '@dual', category: 'commonjs', target: card },
+      { request: '@dual', category: 'esm', target: bridge },
+    ];
+    const compilation = {
+      moduleGraph: {
+        getModule: (dep: (typeof dependencies)[number]) => dep.target,
+      },
+    } as unknown as Compilation;
+    const module = {
+      ...source("export {default} from '@dual';"),
+      dependencies,
+    } as unknown as Module;
+    expect(await createBridgeMetadataReader(compilation)(module)).toBe(true);
   });
   it('preserves explicit metadata for opaque exports', () => {
     const stats = {

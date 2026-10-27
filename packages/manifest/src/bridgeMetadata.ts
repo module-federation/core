@@ -284,6 +284,7 @@ export function createBridgeMetadataReader(compilation: Compilation) {
     if ('bridge' in value) return true;
     const dependency = module.dependencies.find(
       (dep) =>
+        dep.category === 'esm' &&
         (dep as Dependency & { request?: string }).request === value.source,
     );
     const target = dependency && compilation.moduleGraph.getModule(dependency);
