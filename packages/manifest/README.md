@@ -46,6 +46,9 @@ regardless of the factory's package or a framework's bundled implementation.
 No framework import registration is required. A local factory with this name is
 also treated as a Bridge factory. Merely importing or calling the factory elsewhere
 in the file, or exporting only a named provider, does not mark the default export.
+Framework wrappers are recognized when the expose calls or imports them under the
+`createBridgeComponent` name. Arbitrary wrapper function bodies are not inspected,
+so a differently named wrapper is not inferred as Bridge.
 
 Provider options must be static objects without spreads or computed keys.
 Service App declarations and ambiguous wrappers are diagnosed at build time.

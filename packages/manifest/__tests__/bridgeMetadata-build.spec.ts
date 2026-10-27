@@ -17,6 +17,8 @@ describe.each(['webpack', 'rspack'] as const)(
         './Bundled': './bundled.js',
         './Named': './named.js',
         './ReExport': './re-export.js',
+        './Wrapped': './wrapped.js',
+        './RenamedWrapper': './renamed-wrapper.js',
       };
       fs.writeFileSync(
         path.join(directory, 'package.json'),
@@ -47,6 +49,18 @@ describe.each(['webpack', 'rspack'] as const)(
         path.join(directory, 're-export.js'),
         "export {default} from './app.js';",
       );
+      fs.writeFileSync(
+        path.join(directory, 'framework-wrapper.js'),
+        "import {createBridgeComponent as coreBridge} from './factory.js'; export function createBridgeComponent(options) {return coreBridge(options);}",
+      );
+      fs.writeFileSync(
+        path.join(directory, 'wrapped.js'),
+        "import {createBridgeComponent as bridge} from '@framework/wrapper'; export default bridge({rootComponent: () => null});",
+      );
+      fs.writeFileSync(
+        path.join(directory, 'renamed-wrapper.js'),
+        "import {createBridgeComponent} from '@framework/wrapper'; function createWeatherApp(options) {return createBridgeComponent(options);} export default createWeatherApp({rootComponent: () => null});",
+      );
       try {
         execFileSync(
           process.execPath,
@@ -63,7 +77,10 @@ describe.each(['webpack', 'rspack'] as const)(
           context: ${JSON.stringify(directory)},
           entry: './entry.js',
           output: {path: ${JSON.stringify(path.join(directory, 'dist'))}, publicPath: 'https://example.test/'},
-          resolve: {alias: {'@framework/bundled-provider': ${JSON.stringify(path.join(directory, 'factory.js'))}}},
+          resolve: {alias: {
+            '@framework/bundled-provider': ${JSON.stringify(path.join(directory, 'factory.js'))},
+            '@framework/wrapper': ${JSON.stringify(path.join(directory, 'framework-wrapper.js'))},
+          }},
           plugins: [
             new build.container.ModuleFederationPlugin({name: 'metadata_remote', filename: 'remoteEntry.js', exposes: ${JSON.stringify(exposes)}}),
             new StatsPlugin({name: 'metadata_remote', exposes: ${JSON.stringify(exposes)}}, {pluginVersion: 'test', bundler: ${JSON.stringify(bundler)}}),
@@ -88,12 +105,12 @@ describe.each(['webpack', 'rspack'] as const)(
           fs.readFileSync(path.join(directory, 'dist/mf-stats.json'), 'utf8'),
         );
         for (const output of [manifest, stats]) {
-          for (const name of ['App', 'Bundled', 'ReExport']) {
+          for (const name of ['App', 'Bundled', 'ReExport', 'Wrapped']) {
             expect(
               output.exposes.find((item: any) => item.name === name),
             ).toMatchObject({ render: 'bridge', isService: false });
           }
-          for (const name of ['Card', 'Named']) {
+          for (const name of ['Card', 'Named', 'RenamedWrapper']) {
             expect(
               output.exposes.find((item: any) => item.name === name),
             ).not.toHaveProperty('render');

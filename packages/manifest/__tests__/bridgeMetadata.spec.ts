@@ -43,6 +43,7 @@ describe('Bridge expose source metadata', () => {
     "import { createBridgeComponent } from '@framework/bundled-provider'; export default createBridgeComponent({ rootComponent: App });",
     "import createBridgeComponent from './bundled-factory'; export default createBridgeComponent({ rootComponent: App });",
     'function createBridgeComponent(options) { return options; } export default createBridgeComponent({ rootComponent: App });',
+    "import { createBridgeComponent as coreBridge } from '@framework/core'; function createBridgeComponent(options) { return coreBridge(options); } export default createBridgeComponent({ rootComponent: App });",
     'const createBridgeComponent = (options) => options; const make = createBridgeComponent; export default make({ rootComponent: App });',
     "import { createBridgeComponent as make } from '@framework/mf'; const bridge = make; export default bridge({ rootComponent: App });",
     "import * as framework from '@framework/mf'; export default framework['createBridgeComponent']({ rootComponent: App });",
@@ -74,6 +75,7 @@ describe('Bridge expose source metadata', () => {
     "import { createBridgeComponent } from './factory'; export default createBridgeComponent;",
     "import { otherFactory } from '@module-federation/bridge-react'; export default otherFactory({rootComponent: App});",
     "import { createBridgeComponent } from '@framework/mf'; export default () => createBridgeComponent({rootComponent: App});",
+    "import { createBridgeComponent } from '@framework/mf'; function createWeatherApp(options) { return createBridgeComponent(options); } export default createWeatherApp({rootComponent: App});",
     'const a = b; const b = a; export default a({});',
   ])(
     'keeps default exports not produced by the named factory unmarked: %s',
