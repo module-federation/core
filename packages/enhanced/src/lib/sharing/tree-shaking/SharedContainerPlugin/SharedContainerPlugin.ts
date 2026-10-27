@@ -21,6 +21,8 @@ export type SharedContainerPluginOptions = {
   shareName: string;
   version: string;
   request: string;
+  layer?: string;
+  artifactIdentity?: string;
   library?: moduleFederationPlugin.LibraryOptions;
   independentShareFileName?: string;
 };
@@ -31,6 +33,7 @@ class SharedContainerPlugin {
   _options: {
     name: string;
     request: string;
+    layer?: string;
     version: string;
     fileName: string;
     library: moduleFederationPlugin.LibraryOptions;
@@ -42,12 +45,15 @@ class SharedContainerPlugin {
     const { mfName, shareName, request, library, independentShareFileName } =
       options;
     const version = options.version || '0.0.0';
-    this._globalName = encodeName(`${mfName}_${shareName}_${version}`);
+    this._globalName = encodeName(
+      `${mfName}_${shareName}_${version}${options.artifactIdentity ? `_${options.artifactIdentity}` : ''}`,
+    );
     const fileName = independentShareFileName || `${version}/share-entry.js`;
     this._shareName = shareName;
     this._options = {
       name: shareName,
       request: request,
+      layer: options.layer,
       library: (library
         ? { ...library, name: this._globalName }
         : undefined) || {
@@ -64,7 +70,7 @@ class SharedContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
-    const { library, name, request, fileName } = this._options;
+    const { library, name, request, fileName, layer } = this._options;
 
     if (
       library.type &&
@@ -81,7 +87,7 @@ class SharedContainerPlugin {
         compilation: Compilation,
         callback: (error?: WebpackError | null | undefined) => void,
       ) => {
-        const dep = new SharedEntryDependency(name, request);
+        const dep = new SharedEntryDependency(name, request, layer);
         dep.loc = { name: name };
 
         compilation.addEntry(
@@ -89,6 +95,7 @@ class SharedContainerPlugin {
           dep,
           {
             name: name,
+            layer,
             filename: fileName,
             library: {
               type: library.type!,

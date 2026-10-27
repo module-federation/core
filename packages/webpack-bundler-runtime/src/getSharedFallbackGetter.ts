@@ -4,22 +4,38 @@ export const getSharedFallbackGetter = ({
   shareKey,
   factory,
   version,
+  scope = 'default',
+  layer,
   webpackRequire,
   libraryType = 'global',
 }: GetSharedFallbackGetterOptions) => {
-  const { runtime, instance, bundlerRuntime, sharedFallback } =
+  const { runtime, bundlerRuntime, sharedFallback } =
     webpackRequire.federation!;
   if (!sharedFallback) {
     return factory;
   }
-  // { react: [  [ react/19.0.0/index.js , 19.0.0, react_global_name, var ]  ] }
   const fallbackItems = sharedFallback[shareKey];
   if (!fallbackItems) {
     return factory;
   }
+  const scopes = Array.isArray(scope) ? scope : [scope];
+  const candidates = scopes.flatMap((shareScope) =>
+    fallbackItems.filter((item) => {
+      const identity = item[3];
+      if (!identity) return true;
+      const itemScopes = Array.isArray(identity.shareScope)
+        ? identity.shareScope
+        : [identity.shareScope];
+      return (
+        (identity.layer ?? undefined) === (layer ?? undefined) &&
+        itemScopes.includes(shareScope)
+      );
+    }),
+  );
+  if (!candidates.length) return factory;
   const fallbackItem = version
-    ? fallbackItems.find((item) => item[1] === version)
-    : fallbackItems[0];
+    ? candidates.find((item) => item[1] === version)
+    : candidates[0];
   if (!fallbackItem) {
     throw new Error(
       `No fallback item found for shareKey: ${shareKey} and version: ${version}`,

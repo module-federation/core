@@ -99,7 +99,9 @@ it.each([
     expect(
       toolsRequire('@module-federation/runtime/package.json').version,
     ).toBe('0.13.1');
-    expect(nativeRequire('@rspack/core/package.json').version).toBe('2.2.7');
+    expect(nativeRequire('@rspack/core/package.json').version).toBe(
+      '2.3.0-beta.1',
+    );
     expect(
       nativeRequire('@module-federation/runtime-tools/package.json').version,
     ).toBe(nativeRequire('../package.json').version);

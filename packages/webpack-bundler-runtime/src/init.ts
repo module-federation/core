@@ -51,6 +51,8 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
                     webpackRequire,
                     libraryType,
                     version: sharedArg.version,
+                    scope: sharedArg.scope,
+                    layer: sharedArg.shareConfig?.layer,
                   });
                 }
               });
