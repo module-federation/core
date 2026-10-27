@@ -509,10 +509,6 @@ const t = {
               filePath: { type: 'string' },
               disableAssetsAnalyze: { type: 'boolean' },
               fileName: { type: 'string' },
-              bridgeProviderModules: {
-                type: 'array',
-                items: { type: 'string' },
-              },
               additionalData: { instanceof: 'Function' },
             },
             additionalProperties: !1,
@@ -5143,8 +5139,6 @@ function D(
                                                             'disableAssetsAnalyze' !==
                                                               t &&
                                                             'fileName' !== t &&
-                                                            'bridgeProviderModules' !==
-                                                              t &&
                                                             'additionalData' !==
                                                               t
                                                           ) {
@@ -5226,109 +5220,33 @@ function D(
                                                                 }
                                                                 N = t === c;
                                                               } else N = !0;
-                                                              if (N) {
+                                                              if (N)
                                                                 if (
                                                                   void 0 !==
-                                                                  e.bridgeProviderModules
+                                                                  e.additionalData
                                                                 ) {
-                                                                  let t =
-                                                                    e.bridgeProviderModules;
-                                                                  const r = c;
-                                                                  if (c === r)
-                                                                    if (
-                                                                      Array.isArray(
-                                                                        t,
-                                                                      )
-                                                                    ) {
-                                                                      const e =
-                                                                        t.length;
-                                                                      for (
-                                                                        let r = 0;
-                                                                        r < e;
-                                                                        r++
-                                                                      ) {
-                                                                        const e =
-                                                                          c;
-                                                                        if (
-                                                                          'string' !=
-                                                                          typeof t[
-                                                                            r
-                                                                          ]
-                                                                        ) {
-                                                                          const e =
-                                                                            {
-                                                                              params:
-                                                                                {
-                                                                                  type: 'string',
-                                                                                },
-                                                                            };
-                                                                          (null ===
-                                                                          u
-                                                                            ? (u =
-                                                                                [
-                                                                                  e,
-                                                                                ])
-                                                                            : u.push(
-                                                                                e,
-                                                                              ),
-                                                                            c++);
-                                                                        }
-                                                                        if (
-                                                                          e !==
-                                                                          c
-                                                                        )
-                                                                          break;
-                                                                      }
-                                                                    } else {
-                                                                      const e =
-                                                                        {
-                                                                          params:
-                                                                            {
-                                                                              type: 'array',
-                                                                            },
-                                                                        };
-                                                                      (null ===
-                                                                      u
-                                                                        ? (u = [
-                                                                            e,
-                                                                          ])
-                                                                        : u.push(
-                                                                            e,
-                                                                          ),
-                                                                        c++);
-                                                                    }
-                                                                  N = r === c;
-                                                                } else N = !0;
-                                                                if (N)
+                                                                  const t = c;
                                                                   if (
-                                                                    void 0 !==
-                                                                    e.additionalData
+                                                                    !(
+                                                                      e.additionalData instanceof
+                                                                      Function
+                                                                    )
                                                                   ) {
-                                                                    const t = c;
-                                                                    if (
-                                                                      !(
-                                                                        e.additionalData instanceof
-                                                                        Function
-                                                                      )
-                                                                    ) {
-                                                                      const e =
-                                                                        {
-                                                                          params:
-                                                                            {},
-                                                                        };
-                                                                      (null ===
-                                                                      u
-                                                                        ? (u = [
-                                                                            e,
-                                                                          ])
-                                                                        : u.push(
-                                                                            e,
-                                                                          ),
-                                                                        c++);
-                                                                    }
-                                                                    N = t === c;
-                                                                  } else N = !0;
-                                                              }
+                                                                    const e = {
+                                                                      params:
+                                                                        {},
+                                                                    };
+                                                                    (null === u
+                                                                      ? (u = [
+                                                                          e,
+                                                                        ])
+                                                                      : u.push(
+                                                                          e,
+                                                                        ),
+                                                                      c++);
+                                                                  }
+                                                                  N = t === c;
+                                                                } else N = !0;
                                                             }
                                                           }
                                                         }
@@ -5466,11 +5384,11 @@ function D(
                                                                           ),
                                                                         c++);
                                                                     }
-                                                                    var M =
+                                                                    var U =
                                                                       e === c;
                                                                   }
                                                                   if (
-                                                                    M &&
+                                                                    U &&
                                                                     e > 1
                                                                   ) {
                                                                     let e =
@@ -5501,7 +5419,7 @@ function D(
                                                                           ),
                                                                         c++);
                                                                     }
-                                                                    M = r === c;
+                                                                    U = r === c;
                                                                   }
                                                                 }
                                                               else {

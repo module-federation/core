@@ -11,13 +11,6 @@ type ModuleInfo = {
   exports: Map<string, Expression>;
 };
 
-const providerModules = [
-  '@module-federation/bridge-react',
-  '@module-federation/bridge-react/base',
-  '@module-federation/bridge-react/v18',
-  '@module-federation/bridge-react/v19',
-];
-
 function unwrap(node: t.Node): t.Node {
   if (
     node.type === 'TSAsExpression' ||
@@ -101,9 +94,7 @@ function collectModule(ast: ParseResult<t.File>): ModuleInfo {
 export function createBridgeMetadataReader(
   compiler: Compiler,
   compilation: Compilation,
-  additionalModules: string[] = [],
 ) {
-  const sources = new Set([...providerModules, ...additionalModules]);
   const modules = new Map<string, Promise<ModuleInfo>>();
   const resolver = compiler.resolverFactory.get('normal', {
     dependencyType: 'esm',
@@ -159,26 +150,31 @@ export function createBridgeMetadataReader(
     seen.add(value.name);
     return local(declaration, info, seen);
   };
-  const isFactory = (node: t.Node, info: ModuleInfo): boolean => {
-    const value = local(node, info);
+  const isFactory = (
+    node: t.Node,
+    info: ModuleInfo,
+    seen = new Set<string>(),
+  ): boolean => {
+    const value = unwrap(node);
     if (value.type === 'Identifier') {
+      // Frameworks may bundle their own factory implementation. Recognize the
+      // public naming convention without resolving or executing that factory.
+      if (value.name === 'createBridgeComponent') return true;
       const imported = info.imports.get(value.name);
-      return Boolean(
-        imported &&
-        sources.has(imported.source) &&
-        imported.imported === 'createBridgeComponent',
-      );
+      if (imported?.imported === 'createBridgeComponent') return true;
+      if (seen.has(value.name)) return false;
+      seen.add(value.name);
+      const declaration = info.locals.get(value.name);
+      return Boolean(declaration && isFactory(declaration, info, seen));
     }
-    if (
-      value.type === 'MemberExpression' &&
-      value.object.type === 'Identifier' &&
-      !value.computed &&
-      value.property.type === 'Identifier' &&
-      value.property.name === 'createBridgeComponent'
-    ) {
-      const imported = info.imports.get(value.object.name);
-      return Boolean(
-        imported && imported.imported === '*' && sources.has(imported.source),
+    if (value.type === 'MemberExpression') {
+      return (
+        (!value.computed &&
+          value.property.type === 'Identifier' &&
+          value.property.name === 'createBridgeComponent') ||
+        (value.computed &&
+          value.property.type === 'StringLiteral' &&
+          value.property.value === 'createBridgeComponent')
       );
     }
     return false;
@@ -274,13 +270,7 @@ export async function annotateBridgeExposes(
 ): Promise<Stats> {
   const exposes = options.exposes;
   if (!exposes || Array.isArray(exposes)) return stats;
-  const reader = createBridgeMetadataReader(
-    compiler,
-    compilation,
-    typeof options.manifest === 'object'
-      ? options.manifest.bridgeProviderModules
-      : undefined,
-  );
+  const reader = createBridgeMetadataReader(compiler, compilation);
   for (const expose of stats.exposes) {
     const config = exposes[expose.path || `./${expose.name}`];
     if (!config) continue;

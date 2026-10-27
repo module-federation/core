@@ -12,16 +12,18 @@ describe('Bridge expose source metadata', () => {
   let read: ReturnType<typeof createBridgeMetadataReader>;
   beforeEach(() => {
     directory = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-bridge-metadata-'));
+    source(
+      'export const createBridgeComponent = (options) => options;',
+      'factory.ts',
+    );
     compiler = webpack({
       mode: 'none',
       context: directory,
       resolve: { extensions: ['.ts', '.tsx', '.js'] },
     });
-    read = createBridgeMetadataReader(
-      compiler,
-      { fileDependencies: new Set() } as unknown as Compilation,
-      ['@custom/runtime/mf'],
-    );
+    read = createBridgeMetadataReader(compiler, {
+      fileDependencies: new Set(),
+    } as unknown as Compilation);
   });
   afterEach(async () => {
     await new Promise<void>((resolve, reject) =>
@@ -38,6 +40,12 @@ describe('Bridge expose source metadata', () => {
     "import { createBridgeComponent as bridge } from '@module-federation/bridge-react/v18'; const provider = bridge({ rootComponent: App }); export default provider;",
     "import * as bridge from '@module-federation/bridge-react/base'; const provider = bridge.createBridgeComponent({ rootComponent: App, isService: false }); export { provider as default };",
     "import { createBridgeComponent as bridge } from '@custom/runtime/mf'; export default bridge({ rootComponent: App });",
+    "import { createBridgeComponent } from '@framework/bundled-provider'; export default createBridgeComponent({ rootComponent: App });",
+    "import createBridgeComponent from './bundled-factory'; export default createBridgeComponent({ rootComponent: App });",
+    'function createBridgeComponent(options) { return options; } export default createBridgeComponent({ rootComponent: App });',
+    'const createBridgeComponent = (options) => options; const make = createBridgeComponent; export default make({ rootComponent: App });',
+    "import { createBridgeComponent as make } from '@framework/mf'; const bridge = make; export default bridge({ rootComponent: App });",
+    "import * as framework from '@framework/mf'; export default framework['createBridgeComponent']({ rootComponent: App });",
   ])(
     'identifies provider bindings without executing source: %s',
     async (code) => {
@@ -58,19 +66,21 @@ describe('Bridge expose source metadata', () => {
       ),
     ).toBe(true);
   });
-  it('does not classify ordinary functions or similarly named local factories as Bridge', async () => {
-    expect(
-      await read(source('export default function Card() { return <div />; }')),
-    ).toBe(false);
-    expect(
-      await read(
-        source(
-          'function createBridgeComponent(x) {return x;} export default createBridgeComponent({});',
-          'other.ts',
-        ),
-      ),
-    ).toBe(false);
-  });
+  it.each([
+    'export default function Card() { return <div />; }',
+    'function otherFactory(x) { return x; } export default otherFactory({});',
+    "import { createBridgeComponent } from '@framework/mf'; const provider = createBridgeComponent({rootComponent: App}); export default function Card() {return null;}",
+    "import { createBridgeComponent } from '@framework/mf'; export const provider = createBridgeComponent({rootComponent: App});",
+    "import { createBridgeComponent } from './factory'; export default createBridgeComponent;",
+    "import { otherFactory } from '@module-federation/bridge-react'; export default otherFactory({rootComponent: App});",
+    "import { createBridgeComponent } from '@framework/mf'; export default () => createBridgeComponent({rootComponent: App});",
+    'const a = b; const b = a; export default a({});',
+  ])(
+    'keeps default exports not produced by the named factory unmarked: %s',
+    async (code) => {
+      expect(await read(source(code))).toBe(false);
+    },
+  );
   it.each([
     ['export default bridge(options);', /statically analyzable object/],
     ['export default bridge({...options});', /spreads/],

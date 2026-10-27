@@ -11,7 +11,13 @@ describe.each(['webpack', 'rspack'] as const)(
       const directory = fs.mkdtempSync(
         path.join(os.tmpdir(), `mf-${bundler}-metadata-`),
       );
-      const exposes = { './App': './app.js', './Card': './card.js' };
+      const exposes = {
+        './App': './app.js',
+        './Card': './card.js',
+        './Bundled': './bundled.js',
+        './Named': './named.js',
+        './ReExport': './re-export.js',
+      };
       fs.writeFileSync(
         path.join(directory, 'package.json'),
         JSON.stringify({ name: 'metadata_remote', version: '1.0.0' }),
@@ -23,11 +29,23 @@ describe.each(['webpack', 'rspack'] as const)(
       );
       fs.writeFileSync(
         path.join(directory, 'app.js'),
-        "import {createBridgeComponent as bridge} from '@module-federation/bridge-react'; export default bridge({rootComponent: () => null});",
+        "import {createBridgeComponent as bridge} from '@framework/bundled-provider'; export default bridge({rootComponent: () => null});",
       );
       fs.writeFileSync(
         path.join(directory, 'card.js'),
         'export default () => null;',
+      );
+      fs.writeFileSync(
+        path.join(directory, 'bundled.js'),
+        'const createBridgeComponent = (options) => () => ({render() {}, destroy() {}}); export default createBridgeComponent({rootComponent: () => null});',
+      );
+      fs.writeFileSync(
+        path.join(directory, 'named.js'),
+        "import {createBridgeComponent} from '@framework/bundled-provider'; export const provider = createBridgeComponent({rootComponent: () => null}); export default () => null;",
+      );
+      fs.writeFileSync(
+        path.join(directory, 're-export.js'),
+        "export {default} from './app.js';",
       );
       try {
         execFileSync(
@@ -45,7 +63,7 @@ describe.each(['webpack', 'rspack'] as const)(
           context: ${JSON.stringify(directory)},
           entry: './entry.js',
           output: {path: ${JSON.stringify(path.join(directory, 'dist'))}, publicPath: 'https://example.test/'},
-          resolve: {alias: {'@module-federation/bridge-react': ${JSON.stringify(path.join(directory, 'factory.js'))}}},
+          resolve: {alias: {'@framework/bundled-provider': ${JSON.stringify(path.join(directory, 'factory.js'))}}},
           plugins: [
             new build.container.ModuleFederationPlugin({name: 'metadata_remote', filename: 'remoteEntry.js', exposes: ${JSON.stringify(exposes)}}),
             new StatsPlugin({name: 'metadata_remote', exposes: ${JSON.stringify(exposes)}}, {pluginVersion: 'test', bundler: ${JSON.stringify(bundler)}}),
@@ -69,15 +87,18 @@ describe.each(['webpack', 'rspack'] as const)(
         const stats = JSON.parse(
           fs.readFileSync(path.join(directory, 'dist/mf-stats.json'), 'utf8'),
         );
-        expect(
-          manifest.exposes.find((item: any) => item.name === 'App'),
-        ).toMatchObject({ render: 'bridge', isService: false });
-        expect(
-          stats.exposes.find((item: any) => item.name === 'App'),
-        ).toMatchObject({ render: 'bridge', isService: false });
-        expect(
-          manifest.exposes.find((item: any) => item.name === 'Card'),
-        ).not.toHaveProperty('render');
+        for (const output of [manifest, stats]) {
+          for (const name of ['App', 'Bundled', 'ReExport']) {
+            expect(
+              output.exposes.find((item: any) => item.name === name),
+            ).toMatchObject({ render: 'bridge', isService: false });
+          }
+          for (const name of ['Card', 'Named']) {
+            expect(
+              output.exposes.find((item: any) => item.name === name),
+            ).not.toHaveProperty('render');
+          }
+        }
       } finally {
         fs.rmSync(directory, { recursive: true, force: true });
       }

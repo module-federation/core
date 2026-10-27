@@ -4,4 +4,4 @@
 '@module-federation/enhanced': minor
 ---
 
-Publish expose rendering metadata for statically identifiable React Bridge providers and preserve it through Manifest and Snapshot conversion. Framework integrations can register their provider import paths without enabling router aliases.
+Publish expose rendering metadata for statically identifiable React Bridge providers and preserve it through Manifest and Snapshot conversion. Identify default exports produced by a createBridgeComponent call by name, including aliases and bundled framework factories, without requiring provider import registration.

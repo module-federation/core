@@ -340,8 +340,6 @@ export interface AdditionalDataOptions {
   bundler: 'webpack' | 'rspack';
 }
 export interface PluginManifestOptions {
-  /** Additional framework modules exporting createBridgeComponent. */
-  bridgeProviderModules?: string[];
   filePath?: string;
   disableAssetsAnalyze?: boolean;
   fileName?: string;
