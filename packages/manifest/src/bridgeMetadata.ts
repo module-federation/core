@@ -94,7 +94,19 @@ function collectModule(ast: ParseResult<t.File>): ModuleInfo {
 export function createBridgeMetadataReader(
   compiler: Compiler,
   compilation: Compilation,
+  remotes: moduleFederationPlugin.ModuleFederationPluginOptions['remotes'] = {},
 ) {
+  const remoteNames = Array.isArray(remotes)
+    ? remotes.flatMap((remote) =>
+        typeof remote === 'string' ? [remote] : Object.keys(remote),
+      )
+    : Object.keys(remotes);
+  // Remote modules are resolved by the federation plugin, not the filesystem.
+  // Match the same alias boundary as ContainerReferencePlugin.
+  const isRemote = (request: string) =>
+    remoteNames.some(
+      (name) => request === name || request.startsWith(`${name}/`),
+    );
   const modules = new Map<string, Promise<ModuleInfo>>();
   const resolver = compiler.resolverFactory.get('normal', {
     dependencyType: 'esm',
@@ -199,6 +211,7 @@ export function createBridgeMetadataReader(
       }
     }
     if (!('type' in value)) {
+      if (isRemote(value.source)) return false;
       const path = await import('node:path');
       return inspect(
         await resolve(path.dirname(filename), value.source),
@@ -258,6 +271,7 @@ export function createBridgeMetadataReader(
   return async (request: string): Promise<boolean> => {
     // Loader-generated exports do not necessarily retain the source protocol.
     if (request.includes('!') || request.includes('?')) return false;
+    if (isRemote(request)) return false;
     return inspect(await resolve(compiler.context, request));
   };
 }
@@ -270,7 +284,11 @@ export async function annotateBridgeExposes(
 ): Promise<Stats> {
   const exposes = options.exposes;
   if (!exposes || Array.isArray(exposes)) return stats;
-  const reader = createBridgeMetadataReader(compiler, compilation);
+  const reader = createBridgeMetadataReader(
+    compiler,
+    compilation,
+    options.remotes,
+  );
   for (const expose of stats.exposes) {
     const config = exposes[expose.path || `./${expose.name}`];
     if (!config) continue;

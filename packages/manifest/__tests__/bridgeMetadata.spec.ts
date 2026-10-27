@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import webpack from 'webpack';
 import type { Compilation } from 'webpack';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { createBridgeMetadataReader } from '../src/bridgeMetadata';
 
 describe('Bridge expose source metadata', () => {
@@ -66,6 +67,55 @@ describe('Bridge expose source metadata', () => {
         source("import Provider from './barrel'; export default Provider;"),
       ),
     ).toBe(true);
+  });
+  it.each<moduleFederationPlugin.ModuleFederationPluginOptions['remotes']>([
+    { checkout: 'checkout@https://example.test/remoteEntry.js' },
+    { checkout: { external: 'checkout@https://example.test/remoteEntry.js' } },
+    { checkout: ['checkout@https://example.test/remoteEntry.js'] },
+    ['checkout'],
+    [{ checkout: 'checkout@https://example.test/remoteEntry.js' }],
+  ])('stops forwarding analysis at configured remotes: %j', async (remotes) => {
+    const readRemote = createBridgeMetadataReader(
+      compiler,
+      {
+        fileDependencies: new Set(),
+      } as unknown as Compilation,
+      remotes,
+    );
+    let index = 0;
+    for (const request of ['checkout', 'checkout/pages/checkout/[...slug]']) {
+      for (const code of [
+        `import Page from '${request}'; export default Page;`,
+        `export {default} from '${request}';`,
+      ]) {
+        expect(await readRemote(source(code, `remote-${index++}.tsx`))).toBe(
+          false,
+        );
+      }
+    }
+    expect(await readRemote('checkout/Page')).toBe(false);
+    await expect(
+      readRemote(
+        source("export {default} from 'checkout-other/page';", 'prefix.ts'),
+      ),
+    ).rejects.toThrow(/Can't resolve/);
+    await expect(
+      readRemote(source("export {default} from './missing';", 'local.ts')),
+    ).rejects.toThrow(/Can't resolve/);
+  });
+  it('recognizes scoped remote aliases', async () => {
+    const readRemote = createBridgeMetadataReader(
+      compiler,
+      {
+        fileDependencies: new Set(),
+      } as unknown as Compilation,
+      {
+        '@scope/checkout': 'checkout@https://example.test/remoteEntry.js',
+      },
+    );
+    expect(
+      await readRemote(source("export {default} from '@scope/checkout/Page';")),
+    ).toBe(false);
   });
   it.each([
     'export default function Card() { return <div />; }',

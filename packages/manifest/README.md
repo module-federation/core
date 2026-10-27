@@ -49,6 +49,8 @@ in the file, or exporting only a named provider, does not mark the default expor
 Framework wrappers are recognized when the expose calls or imports them under the
 `createBridgeComponent` name. Arbitrary wrapper function bodies are not inspected,
 so a differently named wrapper is not inferred as Bridge.
+Re-exports from configured federated remotes stop source analysis at the remote
+boundary and keep their existing metadata, since their source is not local.
 
 Provider options must be static objects without spreads or computed keys.
 Service App declarations and ambiguous wrappers are diagnosed at build time.

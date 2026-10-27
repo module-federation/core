@@ -19,12 +19,25 @@ describe.each(['webpack', 'rspack'] as const)(
         './ReExport': './re-export.js',
         './Wrapped': './wrapped.js',
         './RenamedWrapper': './renamed-wrapper.js',
+        './RemoteImport': './remote-import.js',
+        './RemoteReExport': './remote-re-export.js',
+      };
+      const remotes = {
+        checkout: 'checkout@https://example.test/remoteEntry.js',
       };
       fs.writeFileSync(
         path.join(directory, 'package.json'),
         JSON.stringify({ name: 'metadata_remote', version: '1.0.0' }),
       );
       fs.writeFileSync(path.join(directory, 'entry.js'), 'export {};');
+      fs.writeFileSync(
+        path.join(directory, 'remote-import.js'),
+        "import Page from 'checkout/pages/checkout/[...slug]'; export default Page;",
+      );
+      fs.writeFileSync(
+        path.join(directory, 'remote-re-export.js'),
+        "export {default} from 'checkout/Page';",
+      );
       fs.writeFileSync(
         path.join(directory, 'factory.js'),
         'export const createBridgeComponent = (options) => () => ({render() {}, destroy() {}});',
@@ -82,8 +95,8 @@ describe.each(['webpack', 'rspack'] as const)(
             '@framework/wrapper': ${JSON.stringify(path.join(directory, 'framework-wrapper.js'))},
           }},
           plugins: [
-            new build.container.ModuleFederationPlugin({name: 'metadata_remote', filename: 'remoteEntry.js', exposes: ${JSON.stringify(exposes)}}),
-            new StatsPlugin({name: 'metadata_remote', exposes: ${JSON.stringify(exposes)}}, {pluginVersion: 'test', bundler: ${JSON.stringify(bundler)}}),
+            new build.container.ModuleFederationPlugin({name: 'metadata_remote', filename: 'remoteEntry.js', exposes: ${JSON.stringify(exposes)}, remotes: ${JSON.stringify(remotes)}}),
+            new StatsPlugin({name: 'metadata_remote', exposes: ${JSON.stringify(exposes)}, remotes: ${JSON.stringify(remotes)}}, {pluginVersion: 'test', bundler: ${JSON.stringify(bundler)}}),
           ],
         });
         await new Promise((resolve, reject) => compiler.run((error, stats) => {
@@ -110,7 +123,13 @@ describe.each(['webpack', 'rspack'] as const)(
               output.exposes.find((item: any) => item.name === name),
             ).toMatchObject({ render: 'bridge', isService: false });
           }
-          for (const name of ['Card', 'Named', 'RenamedWrapper']) {
+          for (const name of [
+            'Card',
+            'Named',
+            'RenamedWrapper',
+            'RemoteImport',
+            'RemoteReExport',
+          ]) {
             expect(
               output.exposes.find((item: any) => item.name === name),
             ).not.toHaveProperty('render');
