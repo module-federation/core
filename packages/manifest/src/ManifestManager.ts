@@ -63,6 +63,8 @@ class ManifestManager {
         name: cur.name,
         assets: cur.assets,
         path: cur.path,
+        ...(cur.render !== undefined && { render: cur.render }),
+        ...(cur.isService !== undefined && { isService: cur.isService }),
       };
       sum.push(expose);
       return sum;

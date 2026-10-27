@@ -156,6 +156,8 @@ export function generateSnapshotFromManifest(
       moduleName: expose.name,
       modulePath: expose.path,
       assets: expose.assets,
+      ...(expose.render !== undefined && { render: expose.render }),
+      ...(expose.isService !== undefined && { isService: expose.isService }),
     })),
   };
 
