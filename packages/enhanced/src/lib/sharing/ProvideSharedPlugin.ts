@@ -4,6 +4,7 @@
 */
 
 'use strict';
+import { getWebpack, getWebpackModule } from '../webpack';
 import {
   getWebpackPath,
   normalizeWebpackPath,
@@ -24,8 +25,10 @@ type ProvidesConfig = provideSharedPlugin.ProvidesConfig;
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
-const { satisfy, parseRange } = require(
-  normalizeWebpackPath('webpack/lib/util/semver'),
+const { satisfy, parseRange } = getWebpackModule(
+  getWebpack().sharing?.semver,
+  'webpack/lib/util/semver',
+  'webpack/lib/sharing/semver',
 ) as typeof import('webpack/lib/util/semver');
 import {
   addSingletonFilterWarning,
@@ -34,8 +37,9 @@ import {
   extractPathAfterNodeModules,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
-const WebpackError = require(
-  normalizeWebpackPath('webpack/lib/WebpackError'),
+const WebpackError = getWebpackModule(
+  getWebpack().WebpackError,
+  'webpack/lib/WebpackError',
 ) as typeof import('webpack/lib/WebpackError');
 
 export type ResolvedProvideMap = Map<

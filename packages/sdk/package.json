@@ -61,18 +61,9 @@
       ]
     }
   },
-  "peerDependencies": {
-    "webpack": "^5.0.0"
-  },
-  "peerDependenciesMeta": {
-    "webpack": {
-      "optional": true
-    }
-  },
   "devDependencies": {
     "@jest/globals": "29.7.0",
-    "webpack": "^5.0.0",
-    "webpack-5-112": "npm:webpack@5.112.0"
+    "webpack": "^5.0.0"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts",

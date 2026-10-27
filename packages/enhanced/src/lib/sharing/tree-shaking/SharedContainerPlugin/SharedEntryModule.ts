@@ -1,17 +1,20 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type {
+  InputFileSystem,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  WebpackError,
+} from 'webpack';
+import { getWebpack, getWebpackModule } from '../../../webpack';
 import type { Compilation, Dependency } from 'webpack';
 import type {
   CodeGenerationResult,
-  InputFileSystem,
   LibIdentOptions,
   NeedBuildContext,
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
   RequestShortener,
   ResolverWithOptions,
   WebpackOptions,
 } from 'webpack/lib/Module';
-import type WebpackError from 'webpack/lib/WebpackError';
+
 import SharedDependency from './SharedDependency';
 import { getFederationGlobalScope } from '../../../container/runtime/utils';
 
@@ -21,9 +24,11 @@ const {
   Template,
   Module,
   RuntimeGlobals,
-} = require(normalizeWebpackPath('webpack')) as typeof import('webpack');
-const StaticExportsDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
+} = getWebpack();
+const StaticExportsDependency = getWebpackModule(
+  getWebpack().dependencies?.StaticExportsDependency,
+  'webpack/lib/dependencies/StaticExportsDependency',
+  'webpack/lib/dependencies/core/StaticExportsDependency',
 ) as typeof import('webpack/lib/dependencies/StaticExportsDependency');
 
 const SOURCE_TYPES = new Set(['javascript']);

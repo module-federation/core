@@ -4,15 +4,17 @@
 */
 
 'use strict';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackModule } from '../webpack';
 import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
 } from 'webpack/lib/ModuleFactory';
 import FallbackModule from './FallbackModule';
 
-const ModuleFactory = require(
-  normalizeWebpackPath('webpack/lib/ModuleFactory'),
+const ModuleFactory = getWebpackModule(
+  getWebpack().ModuleFactory,
+  'webpack/lib/ModuleFactory',
+  'webpack/lib/module/ModuleFactory',
 ) as typeof import('webpack/lib/ModuleFactory');
 
 export default class FallbackModuleFactory extends ModuleFactory {

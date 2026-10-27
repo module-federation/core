@@ -1,8 +1,5 @@
 declare const dependencies: typeof import('webpack').dependencies;
-import type {
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
-} from 'webpack/lib/dependencies/ModuleDependency';
+
 declare class ContainerExposedDependency extends dependencies.ModuleDependency {
   exposedName: string;
   request: string;
@@ -27,3 +24,7 @@ declare class ContainerExposedDependency extends dependencies.ModuleDependency {
   deserialize(context: ObjectDeserializerContext): void;
 }
 export default ContainerExposedDependency;
+import type {
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+} from 'webpack';

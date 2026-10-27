@@ -1,15 +1,18 @@
-import type { Compilation } from 'webpack';
 import type {
   InputFileSystem,
-  LibIdentOptions,
-  NeedBuildContext,
   ObjectDeserializerContext,
   ObjectSerializerContext,
+  WebpackError,
+} from 'webpack';
+import type { Compilation } from 'webpack';
+import type {
+  LibIdentOptions,
+  NeedBuildContext,
   RequestShortener,
   ResolverWithOptions,
   WebpackOptions,
 } from 'webpack/lib/Module';
-import type WebpackError from 'webpack/lib/WebpackError';
+
 declare const Module: typeof import('webpack').Module;
 export type ExposeOptions = {
   /**

@@ -2,7 +2,7 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackModule } from '../webpack';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
@@ -20,14 +20,6 @@ import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
 import type { OptimizationSplitChunksCacheGroup } from 'webpack/lib/optimize/SplitChunksPlugin';
 import type { Falsy } from 'webpack/declarations/WebpackOptions';
-
-const ModuleDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
-) as typeof import('webpack/lib/dependencies/ModuleDependency');
-
-const EntryDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
-) as typeof import('webpack/lib/dependencies/EntryDependency');
 
 const PLUGIN_NAME = 'ContainerPlugin';
 
@@ -150,6 +142,17 @@ class ContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
+    const ModuleDependency = getWebpackModule(
+      getWebpack(compiler).dependencies?.ModuleDependency,
+      'webpack/lib/dependencies/ModuleDependency',
+      'webpack/lib/dependencies/core/ModuleDependency',
+    ) as typeof import('webpack/lib/dependencies/ModuleDependency');
+    const EntryDependency = getWebpackModule(
+      getWebpack(compiler).dependencies?.EntryDependency,
+      'webpack/lib/dependencies/EntryDependency',
+      'webpack/lib/entry/EntryDependency',
+    ) as typeof import('webpack/lib/dependencies/EntryDependency');
+
     const useModuleFederationPlugin = compiler.options.plugins.find(
       (p: Falsy | WebpackPluginInstance | WebpackPluginFunction) => {
         if (typeof p !== 'object' || !p) {

@@ -4,7 +4,13 @@
 */
 
 'use strict';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type {
+  WebpackError,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  InputFileSystem,
+} from 'webpack';
+import { getWebpack, getWebpackModule } from '../webpack';
 import type {
   WebpackOptions,
   Compilation,
@@ -15,26 +21,20 @@ import type {
   NeedBuildContext,
   RequestShortener,
   ResolverWithOptions,
-  WebpackError,
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
   Hash,
-  InputFileSystem,
 } from 'webpack/lib/Module';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import { normalizeConsumeShareOptions } from './utils';
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
 import type { ConsumeOptions } from '@module-federation/sdk';
 
-const { stringifyHoley } = require(
-  normalizeWebpackPath('webpack/lib/util/semver'),
+const { stringifyHoley } = getWebpackModule(
+  getWebpack().sharing?.semver,
+  'webpack/lib/util/semver',
+  'webpack/lib/sharing/semver',
 ) as typeof import('webpack/lib/util/semver');
-const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { sources: webpackSources } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const { AsyncDependenciesBlock, Module, RuntimeGlobals } = getWebpack();
+const { sources: webpackSources } = getWebpack();
 import makeSerializable from '../makeSerializable';
 
 /**
