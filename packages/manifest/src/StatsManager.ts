@@ -225,7 +225,6 @@ class StatsManager {
         if (!assets[assetKey]) {
           assets[assetKey] = chunkAssets;
         } else {
-          // Merge split chunk assets, deduplicating with Set
           assets[assetKey] = {
             js: {
               sync: [
