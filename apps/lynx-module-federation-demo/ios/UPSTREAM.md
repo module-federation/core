@@ -16,5 +16,5 @@ and bundle identifier, uses a programmatic UIKit root view, and adds the
 resource fetchers required for HTTP Bundle, Lazy Bundle, and generic resource
 loading.
 
-The generated host bundle is intentionally not committed. Run
+The generated host bundle is not committed. Run
 `pnpm ios:prepare` before opening the workspace.

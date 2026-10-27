@@ -1,7 +1,7 @@
 # Lynx Module Federation demo
 
-This is an official Rspeedy + ReactLynx application, not a browser-only
-simulation. It includes:
+This demo uses Rspeedy and ReactLynx to build native and Web applications.
+It includes:
 
 - a standalone UIKit iOS application derived from Lynx's official
   `HelloLynxSwift` starter;
@@ -44,13 +44,13 @@ split assets from the fetched manifest URL instead of Lynx Web's internal
 default to `/host-native/`, which works for a root deployment and the bundled
 iOS resource provider; set `LYNX_HOST_ORIGIN` when they live elsewhere.
 
-## Rspeedy compatibility boundary
+## Rspeedy compiler resolution
 
 Rspeedy 0.17 resolves its own `@rspack/core`, while this demo pins the
 pkg.pr.new preview of the [Rspack layers stack](https://github.com/web-infra-dev/rspack/pull/14913)
 at `44017e21f108fa7abec1c3631a3a7efc7a8f334b`, also installed under the existing
-`@rspack-canary/core` alias. `rspack-canary-rspeedy.mjs` is the single
-compatibility boundary: it starts Rspeedy with Node resolution hooks that map
+`@rspack-canary/core` alias. `rspack-canary-rspeedy.mjs` starts Rspeedy with
+Node resolution hooks that map
 `@rspack/core` to the pinned preview and `@rsbuild/core` to the workspace's
 matching package.
 
@@ -68,8 +68,7 @@ released versions once the upstream fixes are available.
 ## Run the standalone Catalog product
 
 The Catalog directly renders `Card`, `Details`, and `ActivityFeed` from the
-same source files published by `federation.config.mjs`. It is a complete app,
-not an artifact placeholder:
+same source files published by `federation.config.mjs`:
 
 ```sh
 pnpm dev:catalog:native
@@ -89,7 +88,7 @@ its local shared-state implementation; the provider marks that implementation
 `import: false`, so Orbit supplies the negotiated singleton and does not
 download Catalog's standalone app or duplicate shared state.
 
-The federation configs explicitly enable `experiments.asyncStartup`. Shared
+The federation configs enable `experiments.asyncStartup`. Shared
 modules do not use `eager: true`: the host waits for share-scope initialization
 and loads its singleton provider from a host `lazy-bundle/*.bundle` before
 application startup. The remote's `import: false` consumer then reuses that
@@ -101,10 +100,9 @@ host's non-eager startup share before the first render. Both host builds use
 the built-in `jsReady` first-screen handoff; no private or manual readiness API
 is involved.
 
-`src/app/staticCard.ts` is the standard asynchronous bootstrap boundary. It
-contains a module-scope static `import * as card from 'catalog/Card'`; importing
-that local boundary asynchronously delays evaluation without replacing the
-federated import with a runtime loader.
+`src/app/staticCard.ts` contains a module-scope static import from
+`catalog/Card`. The host imports `staticCard.ts` asynchronously to delay
+evaluation until shared modules are ready. The federated import remains static.
 
 On iOS, root-relative host and standalone Catalog lazy-bundle paths resolve
 against an HTTP root bundle's origin. Embedded Release host assets resolve
@@ -112,7 +110,7 @@ against the signed app bundle.
 
 ## Run the standalone iOS app
 
-The app under `ios/` is a real iPhone/iPad application embedding `LynxView`.
+The app under `ios/` embeds `LynxView` on iPhone and iPad.
 It does not require Lynx Explorer. Its exact official starter source and commit
 are recorded in `ios/UPSTREAM.md`.
 
@@ -190,15 +188,15 @@ Explorer on the device and scan it. The phone must be able to reach
 `<your-lan-ip>:3000`; `127.0.0.1` refers to the phone itself and will not work.
 Set `CATALOG_NATIVE_MANIFEST_URL` when the remote manifest is hosted elsewhere.
 
-`e2e:native` is artifact and transport validation. It compiles the real Rspeedy
+`e2e:native` validates artifacts and HTTP loading. It compiles the Rspeedy
 host, Catalog app, and remote, verifies the regular standalone root bundle, two
 separately transported host lazy bundles (including the async-startup
 singleton), the background container, three independently loadable remote UI
 roots, and ActivityFeed's nested dynamic-import bundle; checks the manifest's
 public background expose/share metadata; then fetches every artifact over HTTP.
-The macOS CI job adds a real iOS Simulator runtime test of those artifacts.
+The macOS CI job runs those artifacts in iOS Simulator.
 
-## Run the real Lynx Web E2E
+## Run the Lynx Web E2E
 
 Install Chromium once, then run:
 
@@ -242,7 +240,7 @@ paths with `LYNX_HOST_WEB_BUNDLE`, `LYNX_REMOTE_MANIFEST`,
 | `pnpm test`             | Cross-platform native artifact and Lynx Web checks               |
 
 The web remote enables `mainThread: true`, so each exposure has background and
-main-thread variants. The demo deliberately scopes `orbit-shared-state` to
+main-thread variants. The demo scopes `orbit-shared-state` to
 the semantic `background` realm; E2E proves singleton identity across the host
 and all remotes in that realm. It does not claim cross-thread identity because
-JavaScript objects cannot cross Lynx's realm boundary.
+Lynx cannot share JavaScript objects between realms.

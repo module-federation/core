@@ -1,4 +1,4 @@
-# Lynx Federation Architecture Refactor Design
+# Lynx federation refactor design
 
 ## Status
 
@@ -8,9 +8,8 @@ is generated output.
 
 ## Objective
 
-Refactor the Lynx Module Federation implementation and demos until the
-architecture is direct, testable, and maintainable without changing the
-already-proven behavior:
+Separate manifest caching, compilation state, lazy loading, and resource
+fetching in the Lynx adapter and demo. Preserve the existing behavior:
 
 - no eager shares;
 - native Lynx, iOS, Web, and Node-compatible manifest loading;
@@ -18,16 +17,16 @@ already-proven behavior:
 - `asyncStartup` transport;
 - native split and single-chunk remote bundles;
 - `publicPath: 'auto'` on Web and resolved absolute native origins;
-- real Web and iOS E2E coverage;
+- Web and iOS E2E coverage;
 - optimized CI with retained diagnostics.
 
-The refactor must address every finding from the thermonuclear review and keep
+The refactor must address every finding from the code review and keep
 the PR's public API and emitted artifact contracts stable.
 
 ## Constraints
 
 - Prefer public Lynx/Rspeedy APIs. A private adapter is permitted only when no
-  exported configuration surface exists, and then it must be isolated,
+  exported configuration API exists, and then it must be isolated,
   version-bounded, and compatibility-tested.
 - Preserve synchronous Lynx lazy-bundle thenable semantics. Converting the
   official thenable to a native Promise is not behavior-preserving.
@@ -37,26 +36,24 @@ the PR's public API and emitted artifact contracts stable.
 - Use test-driven development: every behavior change starts with a test that
   fails for the intended reason.
 
-## Considered Approaches
+## Considered approaches
 
 ### 1. Minimal patches
 
 Fix the stale manifest URL, double-load guard, and destructive test output, but
 leave the existing plugin boundaries intact.
 
-Rejected because it preserves hidden cross-plugin state and the complicated
-lazy-load settlement model. It would make CI green without meeting the
-maintainability objective.
+Rejected because it leaves shared mutable plugin state and lazy-load
+settlement spread across callbacks.
 
-### 2. Boundary refactor (selected)
+### 2. Separate state by lifetime
 
-Keep the proven compiler/runtime behavior, but make ownership explicit at each
-boundary: public Rspeedy chain configuration, atomic manifest records,
-per-compilation bundle state, one lazy-load controller, transactional React
-state, isolated test output, and focused test harnesses.
+Use public Rspeedy chain configuration, store each manifest with its URL,
+and keep bundle state per compilation. Give lazy loading one controller,
+commit related React state together, and isolate test output.
 
-Selected because it deletes incidental coupling while preserving externally
-observable behavior and allows each change to be proved independently.
+This approach removes shared state between unrelated operations. Each change
+can be tested without changing compiler output or runtime behavior.
 
 ### 3. Single monolithic federation coordinator
 
@@ -211,9 +208,9 @@ shutdown. Scenario assertions remain in their platform-specific runners.
 The Metro emulator partition size will be defined once as an environment value
 and used for both AVD creation and the explicit emulator CLI flag.
 
-### Native iOS resource boundary
+### Native iOS resource handling
 
-The 396-line Objective-C fetcher will be decomposed around testable ownership:
+Split the 396-line Objective-C fetcher into these classes:
 
 - `OrbitResourceURLResolver`: absolute/relative URL resolution, local-file
   containment, and allowed local-network policy;
@@ -225,12 +222,12 @@ The 396-line Objective-C fetcher will be decomposed around testable ownership:
 The production fetcher will depend on those collaborators. A new
 `OrbitControlTests` target will exercise URL traversal/symlink rejection,
 relative URL resolution, cache replacement and byte limits, oversized download
-cancellation, and cleanup. The real UI tests remain the end-to-end proof that
+cancellation, and cleanup. The UI tests check that
 the assembled fetcher loads standalone and federated bundles.
 
 The existing single Release `xcodebuild` invocation will include the
 `OrbitControlTests` target as well as the three `OrbitControlUITests`, retaining
-one compile while making the native boundary tests mandatory in CI.
+one compile while making the resource tests mandatory in CI.
 
 `ios-project.mjs` will retain structural policy checks for project wiring and
 ATS configuration, but it will stop treating source-code regexes as behavioral
@@ -247,7 +244,7 @@ The Rspack-canary Rspeedy wrapper remains isolated behind package scripts. The
 README will document why it exists, the pinned upstream compatibility
 constraint, and the condition for deleting it.
 
-## Error Handling and Invariants
+## Error handling and invariants
 
 - Failed manifest parsing never publishes resolved-URL metadata.
 - Cache invalidation removes the manifest record and in-flight load together.
@@ -267,21 +264,21 @@ The completed branch must pass:
 - runtime-core and SDK targeted regression tests;
 - all `@module-federation/lynx` unit, type, build, and lint checks;
 - demo project policy and artifact tests;
-- local `e2e-lynx` parity including real Web E2E;
-- real GitHub macOS Lynx iOS E2E and both Metro platform jobs;
+- local `e2e-lynx` parity including Web E2E;
+- GitHub macOS Lynx iOS E2E and both Metro platform jobs;
 - repository formatting and `git diff --check`;
-- a fresh thermonuclear correctness and code-quality audit;
+- a fresh correctness and code-quality review;
 - every latest-head PR check.
 
-## Completion Criteria
+## Completion criteria
 
 The refactor is complete only when:
 
-1. Every thermonuclear finding is removed or superseded by stronger evidence.
+1. Each review finding has a fix or test evidence that rules it out.
 2. No production file crosses 1,000 lines and the 901-line test is decomposed.
 3. No private Lynx plugin state is accessed.
 4. Manifest URL metadata and compilation state are atomic and lifecycle-safe.
 5. Lazy loading preserves synchronous thenables, timeout/retry, consumes, and
    stale-load behavior with clearer state ownership.
 6. Demo and native fetch behavior have direct tests rather than regex proxies.
-7. Local and real-platform CI are green on the final commit.
+7. Local checks and platform CI pass on the final commit.

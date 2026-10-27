@@ -1,4 +1,4 @@
-# Real Lynx Web E2E
+# Lynx Web E2E
 
 `run.mjs` mounts the official Rspeedy `main.web.bundle` in the public
 `@lynx-js/web-core` `<lynx-view>` client at a mobile viewport. It serves the
@@ -14,5 +14,5 @@ Expected artifacts:
 
 Override them with `LYNX_HOST_WEB_BUNDLE`, `LYNX_REMOTE_MANIFEST`, and
 `LYNX_REMOTE_WEB_BUNDLE`. A failed run writes
-`test/real-web/artifacts/failure.png` (override with
-`LYNX_WEB_E2E_SCREENSHOT`).
+`test/real-web/artifacts/failure.png`. Set `LYNX_WEB_E2E_SCREENSHOT` to
+use another path.

@@ -156,7 +156,7 @@ manifest inference or `getPublicPath`. Browser and browser-like transports
 infer a root-relative manifest's origin from the fetched `Response.url`; Node
 hosts should provide an absolute manifest URL (or a custom fetch response with
 an absolute URL). The Lynx runtime plugin then resolves lazy bundles relative
-to that actual entry URL instead of the DOM `currentScript` signal used by
+to that entry URL instead of the DOM `currentScript` signal used by
 Webpack's browser auto-public-path runtime. Native remotes should follow
 Rspeedy and set an absolute `output.assetPrefix` (for example from a CDN or
 `LYNX_REMOTE_ORIGIN`) because Lynx's native lazy-bundle bootstrap also consumes
@@ -243,4 +243,4 @@ network-deployed remote entry. Supporting native main-thread shared negotiation
 requires a separate runtime design and native singleton coverage.
 
 See `apps/lynx-module-federation-demo` for an official Rspeedy native app,
-native artifact checks, and a real Lynx for Web browser E2E.
+native artifact checks, and a Lynx for Web browser E2E.
