@@ -121,7 +121,13 @@ export interface ManifestModuleInfos {
   [exposeModuleName: string]: StatsModuleInfo;
 }
 
-export interface StatsExpose {
+/** Rendering protocol of an exposed module, independent of its container format. */
+export interface ExposeRenderMetadata {
+  render?: 'component' | 'bridge';
+  isService?: boolean;
+}
+
+export interface StatsExpose extends ExposeRenderMetadata {
   id: string;
   name: string;
   path?: string;

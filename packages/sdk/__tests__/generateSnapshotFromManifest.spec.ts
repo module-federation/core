@@ -2,6 +2,25 @@ import { manifest, snapshot } from './resources/manifestSnapshotMap';
 import { generateSnapshotFromManifest } from '../src/generateSnapshotFromManifest';
 
 describe('generateSnapshotFromManifest', () => {
+  it('preserves per-expose rendering metadata without changing legacy modules', () => {
+    const input = {
+      ...manifest.devAppManifest,
+      exposes: manifest.devAppManifest.exposes.map((item, index) =>
+        index === 0
+          ? { ...item, render: 'bridge' as const, isService: false }
+          : item,
+      ),
+    };
+    const result = generateSnapshotFromManifest(input);
+    expect(result.modules[0]).toMatchObject({
+      render: 'bridge',
+      isService: false,
+    });
+    expect(result.modules.slice(1)).toEqual(
+      snapshot.devAppSnapshot.modules.slice(1),
+    );
+    expect(manifest.devAppManifest.exposes[0]).not.toHaveProperty('render');
+  });
   it('return basic app snapshot with only manifest params in dev', () => {
     const remoteSnapshot = generateSnapshotFromManifest(
       manifest.devAppManifest,

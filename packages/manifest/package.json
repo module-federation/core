@@ -27,9 +27,10 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
+    "@babel/parser": "7.29.9",
     "@module-federation/dts-plugin": "workspace:*",
-    "@module-federation/managers": "workspace:*"
+    "@module-federation/managers": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
   },
   "exports": {
     ".": {
@@ -51,6 +52,8 @@
     }
   },
   "devDependencies": {
+    "@babel/types": "7.29.8",
+    "@rspack/core": "2.1.10",
     "typescript": "7.0.2",
     "webpack": "^5.0.0"
   },
