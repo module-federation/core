@@ -32,6 +32,11 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
         './Query': './query-entry.js?bridge',
         './External': './external-entry.js',
         './MixedDependency': './mixed-entry.js',
+        './DefaultImportRelative': './default-import-relative.js',
+        './DefaultImportAlias': './default-import-alias.js',
+        './DefaultImportOrdinaryRelative':
+          './default-import-ordinary-relative.js',
+        './DefaultImportOrdinaryAlias': './default-import-ordinary-alias.js',
       };
       const remotes = {
         checkout: 'checkout@https://example.test/remoteEntry.js',
@@ -63,6 +68,14 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
         'external-entry.js': "export {default} from '@external-provider';",
         'mixed-entry.js':
           "const ordinary = require('@dual'); export {ordinary}; export {default} from '@dual';",
+        'default-import-relative.js':
+          "import MyExport from './app.js'; export default MyExport;",
+        'default-import-alias.js':
+          "import MyExport from '@default-provider'; export default MyExport;",
+        'default-import-ordinary-relative.js':
+          "import MyExport from './card.js'; export default MyExport;",
+        'default-import-ordinary-alias.js':
+          "import MyExport from '@default-card'; export default MyExport;",
       };
       for (const [filename, code] of Object.entries(graphFixtures)) {
         fs.writeFileSync(path.join(directory, filename), code);
@@ -143,6 +156,8 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
             '@provider': ${JSON.stringify(path.join(directory, 'provider.js'))},
             '@choice': ${JSON.stringify(path.join(directory, 'card.js'))},
             '@loader-provider': ${JSON.stringify(path.join(directory, 'app.js'))},
+            '@default-provider': ${JSON.stringify(path.join(directory, 'app.js'))},
+            '@default-card': ${JSON.stringify(path.join(directory, 'card.js'))},
           }},
           module: {rules: [
             {test: /rule-entry\\.js$/, resolve: {alias: {'@choice': ${JSON.stringify(path.join(directory, 'app.js'))}}}},
@@ -195,6 +210,8 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
             'LoaderBridge',
             'Query',
             'MixedDependency',
+            'DefaultImportRelative',
+            'DefaultImportAlias',
           ]) {
             expect(
               output.exposes.find((item: any) => item.name === name),
@@ -209,6 +226,8 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
             'ReplacedOrdinary',
             'LoaderOrdinary',
             'External',
+            'DefaultImportOrdinaryRelative',
+            'DefaultImportOrdinaryAlias',
           ]) {
             expect(
               output.exposes.find((item: any) => item.name === name),
