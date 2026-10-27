@@ -4,6 +4,8 @@ import { Writable } from 'node:stream';
 import { renderToPipeableStream } from 'react-dom/server.node';
 import { createReactRemote } from '../src/reactRemote';
 import { remoteRuntime } from './reactRemote-utils';
+import { snapshotRuntime } from './reactRemote-runtime-utils';
+import { helpers } from '@module-federation/enhanced/runtime';
 
 function html(element: React.ReactElement): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -85,4 +87,90 @@ describe('React remote SSR protocol selection', () => {
     expect(await html(<Remote />)).toContain('client only');
     expect(loadRemote).not.toHaveBeenCalled();
   });
+});
+
+describe('React remote SSR with platform snapshots', () => {
+  beforeEach(() => helpers.global.resetFederationGlobalInfo());
+
+  it.each([false, true])(
+    'selects Bridge before loading its Node expose (pure entry: %s)',
+    async (pureEntry) => {
+      const provider = jest.fn();
+      const runtime = snapshotRuntime({
+        module: { default: provider },
+        render: 'bridge',
+        pureEntry,
+      });
+      if (pureEntry) {
+        runtime.instance.registerPlugins([
+          {
+            name: 'platform-entry-snapshot',
+            afterResolve: (args) => ({
+              ...args,
+              remoteSnapshot: runtime.snapshot,
+            }),
+          },
+        ]);
+      }
+      const Remote = createReactRemote({
+        remote: 'alias/Card',
+        instance: runtime.instance,
+        loading: <span>platform placeholder</span>,
+      });
+      expect(await html(<Remote />)).toContain('platform placeholder');
+      expect(runtime.beforeRequest).toHaveBeenCalledTimes(1);
+      expect(runtime.afterResolve).toHaveBeenCalledTimes(1);
+      expect(runtime.loadEntry).not.toHaveBeenCalled();
+      expect(runtime.get).not.toHaveBeenCalled();
+      expect(runtime.factory).not.toHaveBeenCalled();
+      expect(provider).not.toHaveBeenCalled();
+    },
+  );
+
+  it('continues the same resolved request through component SSR', async () => {
+    const runtime = snapshotRuntime({
+      module: { default: () => <strong>platform server content</strong> },
+      render: 'component',
+      globalSnapshot: true,
+    });
+    const Remote = createReactRemote({
+      remote: 'alias/Card',
+      instance: runtime.instance,
+    });
+    expect(await html(<Remote />)).toContain(
+      '<strong>platform server content</strong>',
+    );
+    expect(runtime.beforeRequest).toHaveBeenCalledTimes(1);
+    expect(runtime.afterResolve).toHaveBeenCalledTimes(1);
+    expect(runtime.factory).toHaveBeenCalledTimes(1);
+    expect(runtime.onLoad).toHaveBeenCalledTimes(1);
+    expect(runtime.afterLoadRemote).toHaveBeenCalledTimes(1);
+  });
+});
+
+it('preserves component SSR metadata lookup after a deployment request rewrite', async () => {
+  const runtime = snapshotRuntime({
+    module: { default: () => <strong>rewritten server content</strong> },
+    render: 'component',
+    globalSnapshot: true,
+  });
+  runtime.beforeRequest.mockImplementation((args) => ({
+    ...args,
+    id: `${runtime.name}/Card`,
+  }));
+  const Remote = createReactRemote({
+    remote: 'deployment/Card',
+    instance: runtime.instance,
+    fallback: ({ error }) => <p>{error.message}</p>,
+  });
+  expect(await html(<Remote />)).toContain(
+    '<strong>rewritten server content</strong>',
+  );
+  expect(
+    runtime.instance.remoteHandler.idToRemoteMap[`${runtime.name}/Card`],
+  ).toEqual({
+    name: runtime.name,
+    expose: './Card',
+  });
+  expect(runtime.beforeRequest).toHaveBeenCalledTimes(1);
 });

@@ -37,6 +37,28 @@ export function remoteRuntime(
     getGlobalRemoteInfo: jest.fn(() => ({ remoteSnapshot: snapshot })),
   };
   const errorLoadRemote = jest.fn();
+  const getRemoteModuleAndOptions = jest.fn(async ({ id }: { id: string }) => ({
+    remoteMatchInfo: {
+      id,
+      expose: './Card',
+      remoteSnapshot: (await snapshotHandler.loadRemoteSnapshotInfo())
+        .remoteSnapshot,
+    },
+  }));
+  const loadResolvedRemote = jest.fn(async (id, _options, resolvedRemote) => {
+    try {
+      await resolvedRemote;
+      return await loadRemote(id);
+    } catch (error) {
+      const recovered = await errorLoadRemote({
+        id,
+        error,
+        lifecycle: 'onLoad',
+      });
+      if (!recovered) throw error;
+      return recovered;
+    }
+  });
   const instance = {
     name: 'host',
     options: {
@@ -55,9 +77,19 @@ export function remoteRuntime(
     moduleCache,
     remoteHandler: {
       idToRemoteMap,
+      getRemoteModuleAndOptions,
+      loadRemote: loadResolvedRemote,
       hooks: { lifecycle: { errorLoadRemote: { emit: errorLoadRemote } } },
     },
     snapshotHandler,
   } as unknown as ModuleFederation;
-  return { instance, loadRemote, metadata, snapshotHandler, errorLoadRemote };
+  return {
+    instance,
+    loadRemote,
+    metadata,
+    snapshotHandler,
+    errorLoadRemote,
+    getRemoteModuleAndOptions,
+    loadResolvedRemote,
+  };
 }

@@ -8,10 +8,8 @@ import React, {
 } from 'react';
 import {
   getInstance,
-  helpers,
   type ModuleFederation,
 } from '@module-federation/enhanced/runtime';
-import type { ModuleInfo } from '@module-federation/sdk';
 import type { DataFetchParams } from './lazy/types';
 import { createLazyComponentResource } from './lazy/createLazyComponent';
 import { autoFetchDataPlugin } from './lazy';
@@ -71,42 +69,26 @@ async function resolveProtocol(
   id: string,
   hint?: CreateReactRemoteOptions['render'],
 ) {
-  const matched = helpers.utils.matchRemoteWithNameAndExpose(
-    instance.options.remotes,
+  // Resolve through the runtime's full beforeRequest / afterResolve chain.
+  // Its final result includes the platform-selected snapshot and expose.
+  const resolvedRemote = instance.remoteHandler.getRemoteModuleAndOptions({
     id,
-  );
-  if (!matched) throw new Error(`Remote '${id}' is not registered.`);
-  const { remote, expose } = matched;
-  const hasManifest =
-    !('entry' in remote) || /\.json(?:[?#]|$)/.test(remote.entry);
-  let snapshot: ModuleInfo | undefined;
-  if (hasManifest) {
-    try {
-      snapshot = (
-        await instance.snapshotHandler.loadRemoteSnapshotInfo({
-          moduleInfo: remote,
-          id,
-        })
-      ).remoteSnapshot;
-    } catch (error) {
-      // Protocol lookup is part of loading a remote. Preserve the runtime's
-      // final load recovery hook without executing an unknown provider on Node.
-      const recovered =
-        await instance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
-          id,
-          error,
-          from: 'runtime',
-          lifecycle: 'onLoad',
-          expose,
-          origin: instance,
-        });
-      if (!recovered) throw error;
-      return {
-        render: hint || 'component',
-        recovered: namespace(recovered, id),
-      };
-    }
+  });
+  const load = () =>
+    instance.remoteHandler.loadRemote(id, undefined, resolvedRemote);
+  let match: Awaited<typeof resolvedRemote>['remoteMatchInfo'];
+  try {
+    match = (await resolvedRemote).remoteMatchInfo;
+  } catch {
+    // Continue through the normal runtime error and diagnostic hooks without
+    // resolving twice or executing an unknown provider on Node.
+    return {
+      render: hint || 'component',
+      recovered: namespace(await load(), id),
+      load,
+    };
   }
+  const { remoteSnapshot: snapshot, expose } = match;
   const metadata =
     snapshot && 'modules' in snapshot
       ? snapshot.modules.find(
@@ -134,6 +116,7 @@ async function resolveProtocol(
   return {
     render: metadata?.render || hint || 'component',
     recovered: undefined,
+    load,
   };
 }
 
@@ -405,9 +388,7 @@ function createConsumer<P extends object>(
           if (selection.recovered)
             loaded = Promise.resolve(selection.recovered);
           const load = () =>
-            (loaded ||= instance
-              .loadRemote(id)
-              .then((value) => namespace(value, id)));
+            (loaded ||= selection.load().then((value) => namespace(value, id)));
           if (protocol === 'bridge') {
             if (options.exportName && options.exportName !== 'default')
               throw new Error(

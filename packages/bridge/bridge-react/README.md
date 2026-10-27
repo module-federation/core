@@ -136,7 +136,10 @@ root.render(
 
 `createReactRemote` and `ReactRemote` are available from the root and router-free
 `/base` entries. They read the selected expose's rendering protocol from the
-Manifest/Snapshot before choosing the consumer.
+Snapshot returned by the completed runtime `afterResolve` chain before choosing
+the consumer. This includes platform-provided snapshots and request rewrites.
+The same resolved request continues through the normal load lifecycle without
+resolving or fetching its manifest again.
 
 ```tsx
 import { createReactRemote, ReactRemote } from '@module-federation/bridge-react/base'
@@ -158,8 +161,8 @@ component SSR, stylesheet and data-loader integration. `noSSR` keeps the server
 placeholder for hydration, then prepares the protocol, component and data from
 the first client effect. Ready content commits without an intermediate mount
 gate or a second loading effect. Configured load and data fallbacks
-remain present in server HTML. Manifest lookup failures also reach the runtime
-load-recovery hook before the consumer fallback.
+remain present in server HTML. Resolution failures also reach the runtime
+load-recovery and diagnostic hooks before the consumer fallback.
 
 An expose marked `render: 'bridge'` mounts its default provider in a separate
 client root. Each mounted consumer owns its provider lifecycle. On the server it
