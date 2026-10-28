@@ -7,6 +7,8 @@ export type ErrorFallbackProps = {
 
 /** A router-owned URL, including its basename, search and hash. */
 export interface BridgeNavigation {
+  /** Format a full logical host location as a browser or hash href. */
+  createHref?: (to: string) => string;
   getLocation: () => string;
   subscribe: (listener: () => void) => () => void;
   navigate: (

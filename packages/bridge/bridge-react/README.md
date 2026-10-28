@@ -193,7 +193,7 @@ navigation for applications that are mounted in different locations.
 
 Framework application Roots can call `useBridgeRouter()` from `/base` to read the
 provider's mount context. A navigation adapter supplies `getLocation()`,
-`subscribe(listener)`, and `navigate(to, { replace })`. Locations include the host
+`subscribe(listener)`, and `navigate(to, { replace })`. An optional `createHref(to)` formats native links for Hash Routers. Locations include the host
 Router basename, query, and hash. Numeric navigation delegates history movement
 to the host. Each adapter subscription belongs to a mounted application and must
 be released on unmount. Existing providers can ignore this optional integration
