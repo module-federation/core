@@ -11,6 +11,7 @@ import {
   type ModuleFederation,
 } from '@module-federation/enhanced/runtime';
 import type { DataFetchParams } from './lazy/types';
+import type { ProviderParams } from './types';
 import { createLazyComponentResource } from './lazy/createLazyComponent';
 import { autoFetchDataPlugin } from './lazy';
 import { transformError, DelayedLoading } from './lazy/AwaitDataFetch';
@@ -34,6 +35,11 @@ export interface CreateReactRemoteOptions {
   injectScript?: boolean;
   injectLink?: boolean;
   delayLoading?: number;
+  /** Application mount prefix. Does not rewrite the producer's route graph. */
+  basename?: string;
+  memoryRoute?: ProviderParams['memoryRoute'];
+  /** Optional host router integration, scoped to this mounted provider. */
+  navigation?: ProviderParams['navigation'];
 }
 
 export type ReactRemoteProps<P extends object = Record<string, unknown>> =
@@ -126,16 +132,22 @@ function BridgeMount({
   id,
   loading,
   remoteProps,
+  basename,
+  memoryRoute,
+  navigation,
 }: {
   load: () => Promise<Namespace>;
   instance: ModuleFederation;
   id: string;
   loading?: React.ReactNode;
   remoteProps: object;
+  basename?: string;
+  memoryRoute?: ProviderParams['memoryRoute'];
+  navigation?: ProviderParams['navigation'];
 }) {
   const dom = useRef<HTMLDivElement>(null);
-  const latest = useRef(remoteProps);
-  latest.current = remoteProps;
+  const latest = useRef({ remoteProps, basename, memoryRoute, navigation });
+  latest.current = { remoteProps, basename, memoryRoute, navigation };
   const ownerRef = useRef<{
     active: boolean;
     provider?: Provider;
@@ -155,7 +167,13 @@ function BridgeMount({
         owner.queue = owner.queue
           .then(async () => {
             if (!owner.active || !owner.provider) return;
-            const info = { ...latest.current, moduleName: id, dom: element };
+            const { remoteProps: props, ...controls } = latest.current;
+            const info = {
+              ...props,
+              ...controls,
+              moduleName: id,
+              dom: element,
+            };
             const context = {
               side: 'consumer' as const,
               framework: 'react' as const,
@@ -226,7 +244,7 @@ function BridgeMount({
   }, [load, instance, id]);
   useEffect(() => {
     if (ownerRef.current?.provider) ownerRef.current.update();
-  }, [remoteProps]);
+  }, [remoteProps, basename, memoryRoute, navigation]);
   if (error) throw error;
   return (
     <>
@@ -402,6 +420,9 @@ function createConsumer<P extends object>(
                   id={id}
                   loading={getOptions().loading}
                   remoteProps={businessProps}
+                  basename={getOptions().basename}
+                  memoryRoute={getOptions().memoryRoute}
+                  navigation={getOptions().navigation}
                 />
               ),
             };

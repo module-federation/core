@@ -178,3 +178,26 @@ Loading defaults to null. Without `fallback`, errors reach the parent boundary.
 Retry creates fresh failed-load and consumer state, without promising a network
 re-download or automatic replay of business loaders. General runtime registration
 and loading APIs remain available from `@module-federation/enhanced/runtime`.
+
+### Application routing controls
+
+The unified consumers accept `basename`, `memoryRoute`, and an optional
+`navigation` adapter separately from business `props`. These controls only apply
+to Bridge providers. Ordinary component props and their SSR path are unchanged.
+Updating controls or business props reuses the mounted provider and React Root.
+
+`basename` describes the consumer mount prefix. It does not select, rebase, or
+rewrite producer routes or business links. Producers must make their routing and
+navigation compatible with the supplied prefix. Prefer relative links and
+navigation for applications that are mounted in different locations.
+
+Framework application Roots can call `useBridgeRouter()` from `/base` to read the
+provider's mount context. A navigation adapter supplies `getLocation()`,
+`subscribe(listener)`, and `navigate(to, { replace })`. Locations include the host
+Router basename, query, and hash. Numeric navigation delegates history movement
+to the host. Each adapter subscription belongs to a mounted application and must
+be released on unmount. Existing providers can ignore this optional integration
+and retain their current Router behavior.
+
+No routing metadata is added to manifests or Snapshots. Bridge SSR, service
+execution, and remote version replacement are outside these controls.

@@ -33,9 +33,11 @@ export function createBaseBridgeComponent<T>({
 
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
-      const { moduleName, memoryRoute, basename = '/' } = appInfo;
+      const { moduleName, memoryRoute, navigation, basename = '/' } = appInfo;
       return (
-        <RouterContext.Provider value={{ moduleName, basename, memoryRoute }}>
+        <RouterContext.Provider
+          value={{ moduleName, basename, memoryRoute, navigation }}
+        >
           <bridgeInfo.rootComponent
             {...propsInfo}
             basename={basename}
@@ -64,11 +66,13 @@ export function createBaseBridgeComponent<T>({
       basename,
       moduleName,
       memoryRoute,
+      navigation,
       propsInfo,
     }: {
       basename?: string;
       moduleName?: string;
       memoryRoute?: any;
+      navigation?: ProviderParams['navigation'];
       propsInfo: T;
     }) => (
       <ErrorBoundary FallbackComponent={DefaultFallback}>
@@ -77,6 +81,7 @@ export function createBaseBridgeComponent<T>({
             moduleName,
             basename,
             memoryRoute,
+            navigation,
           }}
           propsInfo={propsInfo}
         />
@@ -91,6 +96,7 @@ export function createBaseBridgeComponent<T>({
           dom,
           basename,
           memoryRoute,
+          navigation,
           rootOptions,
           ...propsInfo
         } = info;
@@ -117,6 +123,7 @@ export function createBaseBridgeComponent<T>({
             basename={basename}
             moduleName={moduleName}
             memoryRoute={memoryRoute}
+            navigation={navigation}
             propsInfo={
               {
                 ...omitHostFallback(propsInfo as Record<string, unknown>),

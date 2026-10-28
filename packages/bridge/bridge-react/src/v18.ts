@@ -7,3 +7,6 @@ export type {
   DestroyParams,
   RenderParams,
 } from './types';
+
+export { useBridgeRouter } from './provider/context';
+export type { BridgeNavigation } from './types';

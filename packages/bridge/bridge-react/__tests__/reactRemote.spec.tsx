@@ -4,6 +4,7 @@ import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server.node';
 import { createReactRemote, ReactRemote } from '../src/reactRemote';
 import { remoteRuntime } from './reactRemote-utils';
+import { useBridgeRouter } from '../src/provider/context';
 import { createBridgeComponent } from '../src/provider/versions/v18';
 
 describe('unified React remote consumption', () => {
@@ -404,5 +405,129 @@ describe('unified React remote consumption', () => {
       complete({ default: factory });
     });
     expect(factory).not.toHaveBeenCalled();
+  });
+});
+
+describe('Bridge routing controls', () => {
+  it('updates basename and the navigation channel without recreating a provider or leaking controls into business props', async () => {
+    const received: any[] = [];
+    const providers: any[] = [];
+    const factory = jest.fn(() => {
+      const provider = {
+        render: jest.fn((info) => received.push(info)),
+        destroy: jest.fn(),
+      };
+      providers.push(provider);
+      return provider;
+    });
+    const { instance, loadRemote } = remoteRuntime(
+      { default: factory },
+      'bridge',
+    );
+    const first = {
+      getLocation: () => '/stores/100/app/product',
+      subscribe: () => () => {},
+      navigate: jest.fn(),
+    };
+    const second = { ...first, getLocation: () => '/stores/200/app/product' };
+    const view = render(
+      <ReactRemote
+        remote="shop/Card"
+        instance={instance}
+        basename="/stores/100/app"
+        navigation={first}
+        props={{ label: 'first' }}
+      />,
+    );
+    await waitFor(() => expect(received).toHaveLength(1));
+    view.rerender(
+      <ReactRemote
+        remote="shop/Card"
+        instance={instance}
+        basename="/stores/200/app"
+        navigation={second}
+        props={{ label: 'second' }}
+      />,
+    );
+    await waitFor(() =>
+      expect(received.at(-1)).toMatchObject({
+        basename: '/stores/200/app',
+        navigation: second,
+        label: 'second',
+      }),
+    );
+    expect(factory).toHaveBeenCalledTimes(1);
+    expect(loadRemote).toHaveBeenCalledTimes(1);
+    view.unmount();
+    await waitFor(() => expect(providers[0].destroy).toHaveBeenCalledTimes(1));
+  });
+
+  it('makes navigation available in the producer context and preserves its Root on updates', async () => {
+    let business: any;
+    let channel: any;
+    function App(props: any) {
+      business = props;
+      channel = useBridgeRouter()?.navigation;
+      const [count, setCount] = React.useState(0);
+      return (
+        <button onClick={() => setCount(count + 1)}>
+          {props.label}:{count}
+        </button>
+      );
+    }
+    const provider = createBridgeComponent({ rootComponent: App })();
+    const dom = document.createElement('div');
+    document.body.append(dom);
+    const navigation = {
+      getLocation: () => '/app',
+      subscribe: () => () => {},
+      navigate: jest.fn(),
+    };
+    await act(async () => {
+      await provider.render({
+        dom,
+        basename: '/app',
+        navigation,
+        label: 'first',
+      });
+    });
+    expect(channel).toBe(navigation);
+    expect(business.navigation).toBeUndefined();
+    await act(async () => {
+      dom.querySelector('button')!.click();
+    });
+    await act(async () => {
+      await provider.render({
+        dom,
+        basename: '/other',
+        navigation,
+        label: 'updated',
+      });
+    });
+    expect(dom.textContent).toBe('updated:1');
+    await act(async () => {
+      provider.destroy({ dom, moduleName: 'test' });
+    });
+    dom.remove();
+  });
+
+  it('does not pass Bridge controls to ordinary components', async () => {
+    let business: any;
+    const { instance } = remoteRuntime({
+      default: (props: any) => {
+        business = props;
+        return <p>ordinary</p>;
+      },
+    });
+    render(
+      <ReactRemote
+        remote="shop/Card"
+        instance={instance}
+        basename="/app"
+        props={{ label: 'business' }}
+      />,
+    );
+    await screen.findByText('ordinary');
+    expect(business).toEqual({ label: 'business' });
   });
 });

@@ -5,6 +5,16 @@ export type ErrorFallbackProps = {
   resetErrorBoundary: (...args: unknown[]) => void;
 };
 
+/** A router-owned URL, including its basename, search and hash. */
+export interface BridgeNavigation {
+  getLocation: () => string;
+  subscribe: (listener: () => void) => () => void;
+  navigate: (
+    to: string | number,
+    options?: { replace?: boolean },
+  ) => void | Promise<void>;
+}
+
 /**
  * Options for creating a React root
  */
@@ -33,6 +43,7 @@ export type RootType = HTMLElement | Root;
 export interface RenderParams {
   moduleName?: string;
   basename?: string;
+  navigation?: BridgeNavigation;
   memoryRoute?: {
     entryPath: string;
     initialState?: Record<string, unknown>;
@@ -64,6 +75,7 @@ export interface DestroyParams {
 export interface ProviderParams {
   moduleName?: string;
   basename?: string;
+  navigation?: BridgeNavigation;
   memoryRoute?: {
     entryPath: string;
     initialState?: Record<string, unknown>;

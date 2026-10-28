@@ -55,3 +55,6 @@ export type {
   ReactRemoteProps,
   ReactRemoteErrorInfo,
 } from './reactRemote';
+
+export { useBridgeRouter } from './provider/context';
+export type { BridgeNavigation } from './types';
