@@ -168,6 +168,14 @@ function BridgeMount({
           .then(async () => {
             if (!owner.active || !owner.provider) return;
             const { remoteProps: props, ...controls } = latest.current;
+            // Undefined top-level options must not erase legacy routing props.
+            for (const key of [
+              'basename',
+              'memoryRoute',
+              'navigation',
+            ] as const) {
+              if (controls[key] === undefined) delete controls[key];
+            }
             const info = {
               ...props,
               ...controls,

@@ -409,6 +409,64 @@ describe('unified React remote consumption', () => {
 });
 
 describe('Bridge routing controls', () => {
+  it.each(['factory', 'declarative'] as const)(
+    'preserves legacy routing props in the %s API when top-level controls are omitted',
+    async (api) => {
+      const provider = { render: jest.fn(), destroy: jest.fn() };
+      const factory = jest.fn(() => provider);
+      const { instance } = remoteRuntime({ default: factory }, 'bridge');
+      const options = { remote: 'shop/Card', instance };
+      type Props = { basename: string; memoryRoute: { entryPath: string } };
+      const Remote =
+        api === 'factory'
+          ? createReactRemote<Props>(options)
+          : (props: Props) => <ReactRemote {...options} props={props} />;
+      const memoryRoute = { entryPath: '/product/detail/42' };
+      const view = render(
+        <Remote basename="/shop" memoryRoute={memoryRoute} />,
+      );
+      await waitFor(() => expect(provider.render).toHaveBeenCalledTimes(1));
+      expect(provider.render.mock.calls[0][0]).toMatchObject({
+        basename: '/shop',
+        memoryRoute,
+      });
+      view.rerender(
+        <Remote basename="/stores/100" memoryRoute={memoryRoute} />,
+      );
+      await waitFor(() =>
+        expect(provider.render.mock.calls.at(-1)?.[0]).toMatchObject({
+          basename: '/stores/100',
+          memoryRoute,
+        }),
+      );
+      expect(factory).toHaveBeenCalledTimes(1);
+      view.unmount();
+      await waitFor(() => expect(provider.destroy).toHaveBeenCalledTimes(1));
+    },
+  );
+
+  it('gives explicit top-level controls precedence over legacy routing props', async () => {
+    const provider = { render: jest.fn(), destroy: jest.fn() };
+    const { instance } = remoteRuntime({ default: () => provider }, 'bridge');
+    const memoryRoute = { entryPath: '/product/detail/42' };
+    const view = render(
+      <ReactRemote
+        remote="shop/Card"
+        instance={instance}
+        basename="/inventory"
+        memoryRoute={memoryRoute}
+        props={{ basename: '/legacy', memoryRoute: { entryPath: '/legacy' } }}
+      />,
+    );
+    await waitFor(() => expect(provider.render).toHaveBeenCalledTimes(1));
+    expect(provider.render.mock.calls[0][0]).toMatchObject({
+      basename: '/inventory',
+      memoryRoute,
+    });
+    view.unmount();
+    await waitFor(() => expect(provider.destroy).toHaveBeenCalledTimes(1));
+  });
+
   it('updates basename and the navigation channel without recreating a provider or leaking controls into business props', async () => {
     const received: any[] = [];
     const providers: any[] = [];

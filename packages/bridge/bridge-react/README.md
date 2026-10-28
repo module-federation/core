@@ -185,6 +185,8 @@ The unified consumers accept `basename`, `memoryRoute`, and an optional
 `navigation` adapter separately from business `props`. These controls only apply
 to Bridge providers. Ordinary component props and their SSR path are unchanged.
 Updating controls or business props reuses the mounted provider and React Root.
+Legacy routing controls passed through props remain supported when the
+corresponding top-level option is omitted. Explicit top-level controls take precedence.
 
 `basename` describes the consumer mount prefix. It does not select, rebase, or
 rewrite producer routes or business links. Producers must make their routing and
