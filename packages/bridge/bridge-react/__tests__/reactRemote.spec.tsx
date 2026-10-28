@@ -531,3 +531,25 @@ describe('Bridge routing controls', () => {
     expect(business).toEqual({ label: 'business' });
   });
 });
+
+it('destroys a provider factory that resolves after its consumer unmounts', async () => {
+  let complete!: (value: unknown) => void;
+  const provider = { render: jest.fn(), destroy: jest.fn() };
+  const factory = jest.fn(
+    () =>
+      new Promise((resolve) => {
+        complete = resolve;
+      }),
+  );
+  const { instance } = remoteRuntime({ default: factory }, 'bridge');
+  const view = render(
+    <ReactRemote remote="shop/Card" instance={instance} basename="/app" />,
+  );
+  await waitFor(() => expect(factory).toHaveBeenCalledTimes(1));
+  view.unmount();
+  await act(async () => {
+    complete(provider);
+  });
+  await waitFor(() => expect(provider.destroy).toHaveBeenCalledTimes(1));
+  expect(provider.render).not.toHaveBeenCalled();
+});
