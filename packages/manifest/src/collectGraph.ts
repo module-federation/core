@@ -14,18 +14,24 @@ import type {
 } from '@module-federation/managers';
 import path from 'path';
 import { getExposeItem, getShareItem } from './ModuleHandler';
-import { getAssetsByChunk, getAssetsByChunkIDs } from './utils';
+import {
+  getAssetsByChunk,
+  getAssetsByChunkIDs,
+  getSharedIdentityKey,
+} from './utils';
 
 type ProvideData = {
   name: string;
   version: string;
   shareScope: string | string[];
+  shareConfig: { layer?: string };
 };
 type SharedData =
   | ProvideData
   | {
       shareKey: string;
       shareScope: string | string[];
+      shareConfig: { layer?: string };
     };
 type RemoteModule = Module & { request: string; internalRequest: string };
 
@@ -106,15 +112,19 @@ export function collectGraph(
     const consume = module.type === 'consume-shared-module';
     const name = 'shareKey' in data ? data.shareKey : data.name;
     const scope = data.shareScope;
-    const key = name;
-    const normalized = configuredShared.find(([key, value]) => {
+    const layer = data.shareConfig.layer ?? undefined;
+    const layered = layer !== undefined || Array.isArray(scope);
+    const key = layered ? getSharedIdentityKey(name, scope, layer) : name;
+    const configured = configuredShared.filter(([key, value]) => {
       const shareKey = value.shareKey || key;
       return (
         (shareKey === name ||
           (shareKey.endsWith('/') && name.startsWith(shareKey))) &&
         JSON.stringify(value.shareScope ?? 'default') === JSON.stringify(scope)
       );
-    })?.[1];
+    });
+    const normalized = (configured.find(([, value]) => value.layer === layer) ??
+      configured.find(([, value]) => value.layer === undefined))?.[1];
     const version =
       'version' in data
         ? JSON.parse(data.version)
@@ -125,9 +135,14 @@ export function collectGraph(
       const row = getShareItem({
         pkgName: name,
         pkgVersion: version,
-        normalizedShareOptions: shared[name],
+        normalizedShareOptions: layered ? normalized : shared[name],
         hostName,
       });
+      if (layered) {
+        row.id = `${hostName}:shared:${key}`;
+        if (layer !== undefined) row.layer = layer;
+        if (scope !== 'default') row.shareScope = scope;
+      }
       sharedMap[key] = row;
     }
     if (consume) {
