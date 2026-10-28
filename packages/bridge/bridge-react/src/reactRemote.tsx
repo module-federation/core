@@ -35,10 +35,10 @@ export interface CreateReactRemoteOptions {
   injectScript?: boolean;
   injectLink?: boolean;
   delayLoading?: number;
-  /** Application mount prefix. Does not rewrite the producer's route graph. */
+  /** Consumer-owned application mount. Source route selection belongs to the framework. */
   basename?: string;
   memoryRoute?: ProviderParams['memoryRoute'];
-  /** Optional host router integration, scoped to this mounted provider. */
+  /** Framework router integration for this mount. Framework consumers supply it automatically. */
   navigation?: ProviderParams['navigation'];
 }
 

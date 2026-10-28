@@ -409,6 +409,66 @@ describe('unified React remote consumption', () => {
 });
 
 describe('Bridge routing controls', () => {
+  it('keeps consumer mount paths and navigation channels independent across application mounts', async () => {
+    function App({ label, basename }: { label: string; basename?: string }) {
+      const routing = useBridgeRouter();
+      return (
+        <button
+          data-testid={label}
+          onClick={() =>
+            routing?.navigation?.navigate(`${routing.basename}/detail/43`)
+          }
+        >
+          {basename}:{routing?.navigation?.getLocation()}
+        </button>
+      );
+    }
+    const producer = createBridgeComponent({ rootComponent: App });
+    const factory = jest.fn(() => producer());
+    const { instance } = remoteRuntime({ default: factory }, 'bridge');
+    const first = {
+      getLocation: () => '/inventory/detail/42?tab=stock#summary',
+      subscribe: () => () => {},
+      navigate: jest.fn(),
+    };
+    const second = {
+      getLocation: () => '/warehouse/detail/99',
+      subscribe: () => () => {},
+      navigate: jest.fn(),
+    };
+    const view = render(
+      <>
+        <ReactRemote
+          remote="shop/Card"
+          instance={instance}
+          basename="/inventory"
+          navigation={first}
+          props={{ label: 'inventory' }}
+        />
+        <ReactRemote
+          remote="shop/Card"
+          instance={instance}
+          basename="/warehouse"
+          navigation={second}
+          props={{ label: 'warehouse' }}
+        />
+      </>,
+    );
+    const inventory = await screen.findByTestId('inventory');
+    const warehouse = await screen.findByTestId('warehouse');
+    expect(inventory.textContent).toBe(
+      '/inventory:/inventory/detail/42?tab=stock#summary',
+    );
+    expect(warehouse.textContent).toBe('/warehouse:/warehouse/detail/99');
+    await act(async () => {
+      inventory.click();
+    });
+    expect(first.navigate).toHaveBeenCalledWith('/inventory/detail/43');
+    expect(second.navigate).not.toHaveBeenCalled();
+    expect(factory).toHaveBeenCalledTimes(2);
+    view.unmount();
+  });
+
   it.each(['factory', 'declarative'] as const)(
     'preserves legacy routing props in the %s API when top-level controls are omitted',
     async (api) => {

@@ -188,18 +188,30 @@ Updating controls or business props reuses the mounted provider and React Root.
 Legacy routing controls passed through props remain supported when the
 corresponding top-level option is omitted. Explicit top-level controls take precedence.
 
-`basename` describes the consumer mount prefix. It does not select, rebase, or
-rewrite producer routes or business links. Producers must make their routing and
-navigation compatible with the supplied prefix. Prefer relative links and
-navigation for applications that are mounted in different locations.
+`basename` is owned by the consumer and describes where the exported application
+is mounted. An application's source route selector is not another basename and
+must not be appended to this mount. Selecting part of an application does not
+change the producer's standalone Router configuration. The framework application
+Root interprets its selected routes and maps navigation to the consumer mount.
+For example, an application selected from `/product` can expose its detail page
+at `/inventory/detail/42` when mounted at `/inventory`. Core forwards the mount
+and navigation channel without interpreting the selector.
+
+Producers remain responsible for portable business navigation. Prefer relative
+links and navigation, and adapt code that depends on a fixed basename or URL.
 
 Framework application Roots can call `useBridgeRouter()` from `/base` to read the
-provider's mount context. A navigation adapter supplies `getLocation()`,
+provider's mount context. Framework consumers normally create this channel
+automatically, so application users only configure their mount. A navigation adapter supplies `getLocation()`,
 `subscribe(listener)`, and `navigate(to, { replace })`. An optional `createHref(to)` formats native links for Hash Routers. Locations include the host
 Router basename, query, and hash. Numeric navigation delegates history movement
 to the host. Each adapter subscription belongs to a mounted application and must
 be released on unmount. Existing providers can ignore this optional integration
 and retain their current Router behavior.
+
+`memoryRoute` preserves the existing Bridge option for independent navigation
+with an initial `entryPath`. Existing Router wrappers use it to select a memory
+Router instead of browser history. It does not select a producer route scope.
 
 No routing metadata is added to manifests or Snapshots. Bridge SSR, service
 execution, and remote version replacement are outside these controls.
