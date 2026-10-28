@@ -87,6 +87,85 @@ describe('remote entry global collisions', () => {
     expect(getRemoteEntryExports('remote', key).entryExports).toBeUndefined();
   });
 
+  it('preserves a foreign global when force registering after a collision', async () => {
+    const foreign = { applicationState: true };
+    (globalThis as any)[key] = foreign;
+    const remote = {
+      name: 'force-register-collision',
+      entryGlobalName: key,
+      entry: 'http://localhost:1111/must-not-be-loaded.js',
+    };
+    const origin = new ModuleFederation({
+      name: 'force-register-host',
+      remotes: [remote],
+    });
+
+    await expect(origin.loadRemote(`${remote.name}/message`)).rejects.toThrow(
+      'Remote entry global name collision',
+    );
+    expect(origin.moduleCache.has(remote.name)).toBe(true);
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, key);
+
+    origin.registerRemotes(
+      [{ ...remote, entry: 'http://localhost:1111/replacement.js' }],
+      { force: true },
+    );
+
+    expect(Object.getOwnPropertyDescriptor(globalThis, key)).toEqual(
+      descriptor,
+    );
+    expect((globalThis as any)[key]).toBe(foreign);
+  });
+
+  it.each(['owned', 'replaced', 'accessor'] as const)(
+    'only removes its own loaded container when force registering (%s global)',
+    async (state) => {
+      const container = {
+        init() {},
+        get() {
+          return () => ({ message: 'ok' });
+        },
+      };
+      (globalThis as any)[key] = container;
+      const remote = {
+        name: 'force-register-loaded',
+        entryGlobalName: key,
+        entry: 'http://localhost:1111/must-not-be-loaded.js',
+      };
+      const origin = new ModuleFederation({
+        name: 'force-register-loaded-host',
+        remotes: [remote],
+      });
+      await expect(
+        origin.loadRemote(`${remote.name}/message`),
+      ).resolves.toEqual({
+        message: 'ok',
+      });
+      const foreign = { applicationState: true };
+      const get = rs.fn(() => foreign);
+      if (state === 'replaced') {
+        (globalThis as any)[key] = foreign;
+      } else if (state === 'accessor') {
+        Object.defineProperty(globalThis, key, { get, configurable: true });
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(globalThis, key);
+
+      origin.registerRemotes(
+        [{ ...remote, entry: 'http://localhost:1111/replacement.js' }],
+        { force: true },
+      );
+
+      if (state === 'owned') {
+        expect(Object.hasOwn(globalThis, key)).toBe(false);
+      } else {
+        expect(Object.getOwnPropertyDescriptor(globalThis, key)).toEqual(
+          descriptor,
+        );
+      }
+      expect(get).not.toHaveBeenCalled();
+    },
+  );
+
   it('reuses an existing legitimate container without loading its script', async () => {
     class Container {
       get() {}
