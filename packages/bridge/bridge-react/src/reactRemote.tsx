@@ -71,6 +71,11 @@ async function resolveProtocol(
   const resolvedRemote = instance.remoteHandler.getRemoteModuleAndOptions({
     id,
   });
+  // String inputs stay metadata-first because Bridge SSR currently renders a
+  // placeholder without loading the expose. Starting loadRemote in parallel can
+  // evaluate module-level browser code on Node, even without calling a provider.
+  // Revisit this ordering with framework-aware Bridge SSR and hydration support.
+  // Sharing resolvedRemote already avoids repeating resolution hooks and requests.
   const load = () =>
     instance.remoteHandler.loadRemote(id, undefined, resolvedRemote);
   let match: Awaited<typeof resolvedRemote>['remoteMatchInfo'];
@@ -260,6 +265,8 @@ function createConsumer<P extends object>(
           } else {
             // Calling a loader executes the module, not a Bridge provider or
             // React component. Cache the exact result for this render attempt.
+            // Unlike strings, loaders must run before source/type discovery, so
+            // framework SSR must also account for their module-level side effects.
             const value = await options.remote();
             const handler = instance.remoteHandler as {
               getLoadedRemoteInfo?: (value: unknown) =>
