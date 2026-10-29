@@ -150,9 +150,10 @@
     "dev": "vite",
     "build": "vite build && tsc -p tsconfig.json && node scripts/write-dts-entrypoints.mjs",
     "preview": "vite preview",
-    "test": "pnpm run test:jest && pnpm run test:rstest",
+    "test": "pnpm run test:jest && pnpm run test:rstest && pnpm run test:types",
     "test:jest": "pnpm exec jest --config jest.config.js --passWithNoTests",
-    "test:rstest": "pnpm exec rstest --passWithNoTests"
+    "test:rstest": "pnpm exec rstest --passWithNoTests",
+    "test:types": "node scripts/check-react-remote-types.mjs"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*"

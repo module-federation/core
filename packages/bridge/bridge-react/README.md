@@ -138,8 +138,10 @@ root.render(
 `/base` entries. They read the selected expose's rendering protocol from the
 Snapshot returned by the completed runtime `afterResolve` chain before choosing
 the consumer. This includes platform-provided snapshots and request rewrites.
-The same resolved request continues through the normal load lifecycle without
-resolving or fetching its manifest again.
+String inputs select the protocol before executing the expose. The same resolved
+request continues through the normal load lifecycle without resolving or fetching
+its manifest again. Callback inputs execute once per consumer attempt, then use
+the completed load's recorded source and Snapshot to select the consumer.
 
 ```tsx
 import { createReactRemote, ReactRemote } from '@module-federation/bridge-react/base'
@@ -166,13 +168,54 @@ load-recovery and diagnostic hooks before the consumer fallback.
 
 An expose marked `render: 'bridge'` mounts its default provider in a separate
 client root. Each mounted consumer owns its provider lifecycle. On the server it
-outputs a placeholder without loading the producer's Node expose. Bridge SSR and
-Service App execution are not supported by this API version.
+outputs a placeholder and never invokes the provider. With a string input, the
+producer's Node expose is not loaded. A callback may already execute that module
+before its protocol can be identified. Bridge SSR and Service App execution are
+not supported by this API version.
 
 For an unmarked legacy provider, set `render: 'bridge'`. A hint conflicting with
 published metadata fails. Unmarked ordinary components keep the component path.
-CSR loaders may be used as `remote` if they return an MF module namespace with a
-module identity. Use an alias/expose string for automatic SSR selection.
+The same `remote` option also accepts synchronous or asynchronous callbacks:
+
+```tsx
+import Shop from 'shop/Card';
+import { loadRemote } from '@module-federation/enhanced/runtime';
+
+const LoadedCard = createReactRemote({ remote: () => loadRemote('shop/Card') });
+const PreloadedCard = createReactRemote({ remote: () => Shop });
+// A callback can also return a preloaded namespace, or Promise.resolve(Shop).
+```
+
+Callbacks return an MF namespace or a preloaded default component/provider. The
+consumer uses the exact loaded value. Function components, `memo`, `forwardRef`,
+and frozen namespaces are supported without invoking components to identify them
+or modifying the raw `loadRemote` result. Ordinary components retain SSR content,
+data fetching, and assets. `noSSR` does not invoke the callback on the server.
+A static import or preload performed by application code still runs when that
+application code executes.
+
+Keep function inputs to `ReactRemote` stable across renders by defining them at
+module scope or using `useCallback`. Reuse the same function when only business
+props change. Replacing the function reference selects a new loading source and
+resets that consumer instance's loading and component state.
+
+Preloaded default exports require the updated runtime that records provenance
+when the remote factory executes, including bundler-managed imports. Load and
+consume the value through the same runtime instance. Older runtimes can still
+return a namespace carrying `mf_module_id`, with an extra metadata resolution.
+A local component without MF provenance, an unassociated accessor export, or one
+value reused by multiple exposes or deployments cannot be identified reliably.
+Use a string input or an unambiguous namespace in those cases. Multiple names for
+one export within the same expose are allowed. Default interop getters may be
+read to record provenance, while arbitrary named getters are not evaluated.
+A named component selected from a namespace still uses `exportName`. A callback
+returning an individual export treats that value as the default export.
+
+Business props are inferred from callback results, namespace default or named
+component exports, and generated remote ID declarations. Generated host types
+extend the shared `ModuleFederation.RemoteModuleMap` interface. Applications can
+also augment that interface for a typed remote ID without generated declarations.
+Unknown dynamic strings can still use `createReactRemote<Props>` explicitly.
 
 Loading defaults to null. Without `fallback`, errors reach the parent boundary.
 Retry creates fresh failed-load and consumer state, without promising a network

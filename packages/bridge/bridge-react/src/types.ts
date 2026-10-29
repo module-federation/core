@@ -170,3 +170,13 @@ export interface RemoteAppParams extends ProviderParams {
   exportName: string | number | symbol;
   fallback: React.ComponentType<ErrorFallbackProps>;
 }
+
+/** Phantom business-props metadata. It does not add a runtime provider field. */
+declare const bridgeProviderProps: unique symbol;
+export type BridgeProvider<
+  Props = Record<string, unknown>,
+  RenderResult extends void | Promise<void> = void | Promise<void>,
+> = (() => {
+  render: (info: RenderParams) => RenderResult;
+  destroy: (info: DestroyParams) => void;
+}) & { readonly [bridgeProviderProps]?: Props };

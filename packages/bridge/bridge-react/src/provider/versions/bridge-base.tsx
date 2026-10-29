@@ -6,6 +6,7 @@ import * as React from 'react';
 import type { BridgeOperationContext } from '@module-federation/bridge-shared';
 import type {
   ProviderParams,
+  BridgeProvider,
   ProviderFnParams,
   RootType,
   DestroyParams,
@@ -23,7 +24,7 @@ export function createBaseBridgeComponent<T>({
   createRoot,
   defaultRootOptions,
   ...bridgeInfo
-}: ProviderFnParams<T>) {
+}: ProviderFnParams<T>): BridgeProvider<T, Promise<void>> {
   return () => {
     const rootMap = new Map<any, RootType>();
     const instance = federationRuntime.instance;

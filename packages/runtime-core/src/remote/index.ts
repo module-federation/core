@@ -61,9 +61,23 @@ export interface LoadRemoteMatch {
   remoteSnapshot?: ModuleInfo;
 }
 
+/** The resolved source of an object returned by a completed remote factory. */
+export interface LoadedRemoteInfo {
+  remoteMatchInfo?: LoadRemoteMatch;
+  id: string;
+  /** A runtime recovery result has no normal expose protocol or data assets. */
+  recovered: boolean;
+  /** False when the value is an individual export rather than its namespace. */
+  isModule: boolean;
+}
+
 export class RemoteHandler {
   host: ModuleFederation;
   idToRemoteMap: Record<string, { name: string; expose: string }>;
+  private loadedRemoteInfo = new WeakMap<
+    object,
+    Map<string, LoadedRemoteInfo>
+  >();
 
   hooks = new PluginSystem({
     beforeRegisterRemote: new SyncWaterfallHook<{
@@ -211,6 +225,127 @@ export class RemoteHandler {
     this.idToRemoteMap = {};
   }
 
+  /** Look up this instance's completed load without resolving or loading again. */
+  getLoadedRemoteInfo(value: unknown): LoadedRemoteInfo | undefined {
+    if (!value || (typeof value !== 'object' && typeof value !== 'function'))
+      return;
+    const matches = this.loadedRemoteInfo.get(value);
+    if (!matches?.size) return;
+    if (matches.size !== 1) {
+      throw new Error(
+        'The preloaded remote value has multiple expose or version identities. Use a remote alias/expose instead.',
+      );
+    }
+    return matches.values().next().value;
+  }
+
+  private rememberLoadedRemote(
+    value: unknown,
+    match?: LoadRemoteMatch,
+    recoveredId?: string,
+  ): void {
+    if (!value || (typeof value !== 'object' && typeof value !== 'function'))
+      return;
+    const snapshot = match?.remoteSnapshot;
+    const metadata =
+      match && snapshot && 'modules' in snapshot
+        ? snapshot.modules.find(
+            (item) =>
+              item.modulePath === match.expose ||
+              item.moduleName === match.expose.replace(/^\.\//, ''),
+          )
+        : undefined;
+    // Alias requests for the same source coalesce. Reusing one value across
+    // exposes or deployments must not silently choose the last completed load.
+    const key = JSON.stringify(
+      match
+        ? [
+            match.remote.name,
+            match.expose,
+            match.remoteInfo.entry,
+            match.remoteInfo.version,
+            match.remoteInfo.buildVersion,
+            snapshot?.version,
+            snapshot?.buildVersion,
+            snapshot && 'remoteEntry' in snapshot
+              ? snapshot.remoteEntry
+              : undefined,
+            snapshot && 'ssrRemoteEntry' in snapshot
+              ? snapshot.ssrRemoteEntry
+              : undefined,
+            snapshot && 'publicPath' in snapshot
+              ? snapshot.publicPath
+              : undefined,
+            metadata?.render,
+            metadata?.isService,
+          ]
+        : ['recovered', recoveredId],
+    );
+    const remember = (item: unknown, isModule: boolean) => {
+      if (!item || (typeof item !== 'object' && typeof item !== 'function'))
+        return;
+      let matches = this.loadedRemoteInfo.get(item);
+      if (!matches) {
+        matches = new Map();
+        this.loadedRemoteInfo.set(item, matches);
+      }
+      const previous = matches.get(key);
+      if (!previous || isModule)
+        matches.set(key, {
+          remoteMatchInfo: match,
+          id: match?.id || recoveredId!,
+          recovered: !match,
+          isModule,
+        });
+    };
+    remember(value, true);
+    let descriptors: ReturnType<typeof Object.getOwnPropertyDescriptors>;
+    try {
+      descriptors = Object.getOwnPropertyDescriptors(value);
+    } catch {
+      // Provenance collection must not turn a successfully loaded Proxy into
+      // a runtime failure. Its namespace is still associated with this load.
+      return;
+    }
+    // Inspect data exports without evaluating arbitrary namespace getters.
+    // The default getter is the standard ESM interop boundary and is needed
+    // for preloaded default imports. A throwing getter must not break loading.
+    for (const [name, descriptor] of Object.entries(descriptors)) {
+      if ('value' in descriptor) remember(descriptor.value, false);
+      else if (name === 'default' && descriptor.get) {
+        try {
+          remember(descriptor.get.call(value), false);
+        } catch {
+          /* Leave the getter's error to its actual consumer. */
+        }
+      }
+    }
+  }
+
+  private observeModuleFactory(
+    factory: (...args: any[]) => unknown,
+    match?: LoadRemoteMatch,
+    recoveredId?: string,
+  ) {
+    const remember = (result: unknown) => {
+      this.rememberLoadedRemote(result, match, recoveredId);
+      return result;
+    };
+    return function (this: unknown, ...args: unknown[]) {
+      const value = factory.apply(this, args);
+      // The native Promise method checks internal slots across realms. Do not
+      // read value.then: a synchronous namespace can export that business name.
+      if (value && (typeof value === 'object' || typeof value === 'function')) {
+        try {
+          return Promise.prototype.then.call(value, remember);
+        } catch {
+          // Ordinary values (including custom thenables) stay synchronous.
+        }
+      }
+      return remember(value);
+    };
+  }
+
   formatAndRegisterRemote(globalOptions: Options, userOptions: UserOptions) {
     const userRemotes = userOptions.remotes || [];
 
@@ -314,11 +449,18 @@ export class RemoteHandler {
         origin: host,
       };
 
-      if (typeof moduleWrapper === 'function') {
-        return moduleWrapper as T;
+      const result =
+        typeof moduleWrapper === 'function'
+          ? (moduleWrapper as T)
+          : moduleOrFactory;
+      if (!loadFactory && typeof result === 'function') {
+        return this.observeModuleFactory(
+          result as (...args: any[]) => unknown,
+          remoteMatchInfo,
+        ) as T;
       }
-
-      return moduleOrFactory;
+      this.rememberLoadedRemote(result, remoteMatchInfo);
+      return result;
     } catch (error) {
       const { from = 'runtime' } = options || { from: 'runtime' };
 
@@ -367,6 +509,14 @@ export class RemoteHandler {
         recovered: true,
       };
 
+      if (options?.loadFactory === false && typeof failOver === 'function') {
+        return this.observeModuleFactory(
+          failOver as (...args: any[]) => unknown,
+          undefined,
+          id,
+        ) as T;
+      }
+      this.rememberLoadedRemote(failOver, undefined, id);
       return failOver as T;
     } finally {
       if (afterLoadRemoteArgs) {

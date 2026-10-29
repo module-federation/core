@@ -10,3 +10,5 @@ export type {
 
 export { useBridgeRouter } from './provider/context';
 export type { BridgeNavigation } from './types';
+
+export type { BridgeProvider } from './types';
