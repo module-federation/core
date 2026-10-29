@@ -238,6 +238,12 @@ when the Host pathname, query, or hash changes. An explicit basename overrides
 inference while retaining Host notifications. Existing Router aliases and
 producer Router wrappers remain available for that legacy integration.
 
+This automatic path applies to browser-based Bridge producers. A framework
+application backed by an independent memory Router still needs its framework's
+navigation integration. In particular, consuming a Modern application Root
+through Core directly with only `basename` does not connect that memory Router
+to the Host. Use the Modern consumer entry or provide the navigation adapter.
+
 Framework integrations should use `/base`, which has no React Router dependency.
 The framework reads its own Router context, calculates the mount basename, and
 passes `basename` and an optional `navigation` adapter to Bridge. This integration

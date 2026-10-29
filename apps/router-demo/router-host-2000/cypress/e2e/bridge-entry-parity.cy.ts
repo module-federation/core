@@ -1,4 +1,4 @@
-describe('Bridge consumer entry compatibility', () => {
+describe('React remote input routing parity', () => {
   it('identifies the provider through manifest rendering metadata', () => {
     cy.request('http://localhost:2006/mf-manifest.json').then(({ body }) => {
       const expose = body.exposes.find(
@@ -10,10 +10,10 @@ describe('Bridge consumer entry compatibility', () => {
   });
 
   for (const variant of [
-    'legacy-auto',
-    'legacy-explicit',
-    'unified-auto',
-    'unified-explicit',
+    'loader-auto',
+    'loader-explicit',
+    'string-auto',
+    'string-explicit',
   ]) {
     it(`${variant} preserves deep links, host updates, remote links and history`, () => {
       const basename = `/router-parity/${variant}`;

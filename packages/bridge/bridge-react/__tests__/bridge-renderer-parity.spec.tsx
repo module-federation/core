@@ -1,8 +1,10 @@
 import React, { StrictMode } from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
-import { createRemoteAppComponent as createLegacyBase } from '../src/base';
-import { createReactRemote as createUnifiedBase } from '../src/reactRemote';
+import {
+  createRemoteAppComponent as createLegacyBase,
+  createReactRemote as createUnifiedBase,
+} from '../src/base';
 import {
   createRemoteAppComponent,
   createReactRemote,

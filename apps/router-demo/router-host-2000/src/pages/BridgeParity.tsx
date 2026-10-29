@@ -1,26 +1,29 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
-import {
-  createReactRemote,
-  createRemoteAppComponent,
-} from '@module-federation/bridge-react';
+import { createReactRemote } from '@module-federation/bridge-react';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 
 const loading = <p data-testid="parity-loading">Loading remote</p>;
-const LegacyRemote = createRemoteAppComponent({
-  loader: () => loadRemote('remote6/export-app'),
+const LoaderRemote = createReactRemote({
+  remote: () => loadRemote('remote6/export-app'),
   loading,
-  fallback: ({ error }: { error: Error }) => <pre>{error.message}</pre>,
+  fallback: ({ error }) => <pre>{error.message}</pre>,
 });
 
-// The manifest identifies this expose as a Bridge provider. No rendering hint
-// or explicit navigation adapter is needed by either unified consumer.
-const UnifiedRemote = createReactRemote({
+const ExplicitLoaderRemote = createReactRemote({
+  remote: () => loadRemote('remote6/export-app'),
+  basename: '/router-parity/loader-explicit',
+  loading,
+});
+
+// Both input forms use the expose's manifest protocol to select Bridge.
+// Function inputs identify the source after the loader completes.
+const StringRemote = createReactRemote({
   remote: 'remote6/export-app',
   loading,
 });
-const ExplicitUnifiedRemote = createReactRemote({
+const ExplicitStringRemote = createReactRemote({
   remote: 'remote6/export-app',
-  basename: '/router-parity/unified-explicit',
+  basename: '/router-parity/string-explicit',
   loading,
 });
 
@@ -47,10 +50,10 @@ export default function BridgeParity() {
           Host query and hash
         </Link>
       </nav>
-      {variant === 'legacy-auto' && <LegacyRemote />}
-      {variant === 'legacy-explicit' && <LegacyRemote basename={basename} />}
-      {variant === 'unified-auto' && <UnifiedRemote />}
-      {variant === 'unified-explicit' && <ExplicitUnifiedRemote />}
+      {variant === 'loader-auto' && <LoaderRemote />}
+      {variant === 'loader-explicit' && <ExplicitLoaderRemote />}
+      {variant === 'string-auto' && <StringRemote />}
+      {variant === 'string-explicit' && <ExplicitStringRemote />}
     </section>
   );
 }
