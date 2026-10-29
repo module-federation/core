@@ -2,4 +2,4 @@
 "@module-federation/bridge-react": minor
 ---
 
-Support per-mount basename, memory route and host navigation controls in the unified React consumers. Application Roots can read their provider navigation context without receiving routing controls as business props.
+Share the Bridge renderer between unified and legacy React consumers, preserving provider and Root identity across props and routing updates. Retain default-entry automatic React Router mount detection and Host location notifications, including explicit mounts and query/hash changes. Provide router-independent basename, memoryRoute and navigation integration through the shared Bridge implementation, without consuming business props named navigation.

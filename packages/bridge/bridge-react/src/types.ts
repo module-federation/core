@@ -1,4 +1,6 @@
 import * as React from 'react';
+import type { ModuleFederation } from '@module-federation/enhanced/runtime';
+import { BRIDGE_ROUTING, type BridgeRouting } from './provider/routing';
 
 export type ErrorFallbackProps = {
   error: unknown;
@@ -45,7 +47,7 @@ export type RootType = HTMLElement | Root;
 export interface RenderParams {
   moduleName?: string;
   basename?: string;
-  navigation?: BridgeNavigation;
+  [BRIDGE_ROUTING]?: BridgeRouting;
   memoryRoute?: {
     entryPath: string;
     initialState?: Record<string, unknown>;
@@ -138,6 +140,11 @@ export interface RemoteComponentParams<
   E extends keyof T = keyof T,
 > {
   loader: () => Promise<T>;
+  /** Optional runtime and Router integration shared by all Bridge consumers. */
+  instance?: ModuleFederation | null;
+  basename?: string;
+  memoryRoute?: ProviderParams['memoryRoute'];
+  navigation?: BridgeNavigation;
   loading: React.ReactNode;
   fallback: React.ComponentType<{ error: Error }>;
   export?: E;

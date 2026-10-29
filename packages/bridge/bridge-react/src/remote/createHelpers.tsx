@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react';
 import { ErrorBoundary } from '../error-boundary';
 import { LoggerInstance } from '../utils';
+import type { RemoteAppWrapperProps } from './RemoteAppWrapper';
 import {
   ErrorFallbackProps,
   RemoteComponentParams,
@@ -35,7 +36,9 @@ export type LazyRemoteComponentCreator = <
  * @param RemoteApp The RemoteAppWrapper component to use (with or without router)
  */
 export function createLazyRemoteComponentFactory(
-  RemoteApp: React.ComponentType<any>,
+  RemoteApp: React.ComponentType<
+    RemoteAppWrapperProps & React.RefAttributes<HTMLDivElement>
+  >,
 ) {
   return function createLazyRemoteComponent<
     T = Record<string, unknown>,
@@ -67,16 +70,32 @@ export function createLazyRemoteComponentFactory(
             HTMLDivElement,
             RemoteComponentProps
           >((props, ref) => {
+            const {
+              basename,
+              memoryRoute,
+              className,
+              style,
+              fallback = info.fallback,
+              loading = info.loading,
+              ...remoteProps
+            } = props;
             return (
               <RemoteApp
-                // change `name` key to `moduleName` to avoid same property `name` passed by user's props which may cause unexpected issues.
                 moduleName={moduleName}
                 providerInfo={exportFn}
-                exportName={info.export || 'default'}
-                fallback={info.fallback}
-                loading={info.loading}
+                instance={info.instance}
+                routing={{
+                  basename:
+                    typeof basename === 'string' ? basename : info.basename,
+                  memoryRoute: (memoryRoute as any) ?? info.memoryRoute,
+                  navigation: info.navigation,
+                }}
+                remoteProps={remoteProps}
+                fallback={fallback as React.ComponentType<ErrorFallbackProps>}
+                loading={loading}
+                className={className as string | undefined}
+                style={style as React.CSSProperties | undefined}
                 ref={ref}
-                {...props}
               />
             );
           });
@@ -107,7 +126,9 @@ export function createLazyRemoteComponentFactory(
  * @param RemoteApp The RemoteAppWrapper component to use (with or without router)
  */
 export function createRemoteAppComponentFactory(
-  RemoteApp: React.ComponentType<any>,
+  RemoteApp: React.ComponentType<
+    RemoteAppWrapperProps & React.RefAttributes<HTMLDivElement>
+  >,
 ) {
   const createLazyRemoteComponent = createLazyRemoteComponentFactory(RemoteApp);
 

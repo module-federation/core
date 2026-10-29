@@ -49,7 +49,7 @@ export type {
   CacheStatsInfo,
 } from './lazy';
 
-export { createReactRemote, ReactRemote } from './reactRemote';
+export { createReactRemote, ReactRemote } from './remote/router-component';
 export type {
   CreateReactRemoteOptions,
   ReactRemoteProps,

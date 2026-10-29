@@ -5,6 +5,7 @@ import {
   createBrowserRouter,
   RouterProvider,
   useRouteError,
+  useLocation,
 } from 'react-router';
 import './App.css';
 import styled from '@emotion/styled';
@@ -92,6 +93,7 @@ function About() {
 }
 
 function Layout() {
+  const location = useLocation();
   return (
     <div
       style={{
@@ -101,6 +103,12 @@ function Layout() {
       }}
     >
       <h1>🎯 Remote6 - React Router v7 Demo</h1>
+      <output data-testid="remote6-location">
+        {location.pathname + location.search + location.hash}
+      </output>
+      <Link data-testid="parity-remote-about" to="/about?from=remote#third">
+        Remote about with query and hash
+      </Link>
       <nav style={{ marginBottom: '20px' }}>
         <ul
           style={{

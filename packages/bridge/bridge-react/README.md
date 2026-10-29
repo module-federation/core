@@ -181,33 +181,51 @@ and loading APIs remain available from `@module-federation/enhanced/runtime`.
 
 ### Application routing controls
 
-The unified consumers accept `basename`, `memoryRoute`, and an optional
-`navigation` adapter separately from business `props`. These controls only apply
-to Bridge providers. Ordinary component props and their SSR path are unchanged.
-Updating controls or business props reuses the mounted provider and React Root.
-Legacy routing controls passed through props remain supported when the
-corresponding top-level option is omitted. Explicit top-level controls take precedence.
+Unified and legacy consumers use the same Bridge renderer. The unified API
+selects the component or Bridge protocol, while the shared renderer owns provider
+creation, updates, cleanup, and asynchronous failures. Updating business props or
+routing controls reuses the mounted provider and React Root.
+The shared renderer removes its loading placeholder in a React commit before
+allowing the producer Root to render into the same mount container.
 
-`basename` is owned by the consumer and describes where the exported application
-is mounted. An application's source route selector is not another basename and
-must not be appended to this mount. Selecting part of an application does not
-change the producer's standalone Router configuration. The framework application
-Root interprets its selected routes and maps navigation to the consumer mount.
-For example, an application selected from `/product` can expose its detail page
-at `/inventory/detail/42` when mounted at `/inventory`. Core forwards the mount
-and navigation channel without interpreting the selector.
+The default entry retains the existing React Router integration for both
+`createRemoteAppComponent` and `createReactRemote` / `ReactRemote`. It reads the
+local route boundary to calculate `basename` and notifies browser-based Remotes
+when the Host pathname, query, or hash changes. An explicit basename overrides
+inference while retaining Host notifications. Existing Router aliases and
+producer Router wrappers remain available for that legacy integration.
 
-Producers remain responsible for portable business navigation. Prefer relative
-links and navigation, and adapt code that depends on a fixed basename or URL.
+Framework integrations should use `/base`, which has no React Router dependency.
+The framework reads its own Router context, calculates the mount basename, and
+passes `basename` and an optional `navigation` adapter to Bridge. This integration
+does not require replacing the framework Router through build aliases. Explicit
+adapters and `memoryRoute` mounts bypass the default entry's automatic Host
+notifications.
 
-Framework application Roots can call `useBridgeRouter()` from `/base` to read the
-provider's mount context. Framework consumers normally create this channel
-automatically, so application users only configure their mount. A navigation adapter supplies `getLocation()`,
-`subscribe(listener)`, and `navigate(to, { replace })`. An optional `createHref(to)` formats native links for Hash Routers. Locations include the host
-Router basename, query, and hash. Numeric navigation delegates history movement
-to the host. Each adapter subscription belongs to a mounted application and must
-be released on unmount. Existing providers can ignore this optional integration
-and retain their current Router behavior.
+The unified consumers accept these controls separately from business `props`.
+The legacy `createRemoteAppComponent` factory accepts the same controls in its
+options. Existing basename and memoryRoute instance props remain supported.
+Navigation controls use internal Bridge metadata, so an application prop named
+`navigation` keeps its business meaning and is not consumed as a Router adapter.
+Older providers retain flat basename and memoryRoute controls and can ignore the
+optional navigation integration.
+
+`basename` is owned by the consumer and describes where the application is
+mounted. A framework's source route selector chooses exported content, not a
+producer basename. For example, selecting the application under `/product` and
+mounting it at `/inventory` exposes its relative detail route at
+`/inventory/detail/42`. Producers remain responsible for portable relative links,
+navigation, and code that depends on a fixed basename or absolute URL. Core does
+not interpret framework route selectors.
+
+Framework application Roots can call `useBridgeRouter()` from `/base` to read
+their provider's mount context. A navigation adapter supplies `getLocation()`,
+`subscribe(listener)`, and `navigate(to, { replace })`. An optional `createHref(to)`
+formats native links for Hash Routers. Locations include the Host Router basename,
+query, and hash. Numeric navigation delegates history movement to the Host. Each
+adapter subscription belongs to a mounted application and must be released on
+unmount. Passing an adapter alone does not retrofit an older provider's Router.
+The framework's application Root must consume the integration.
 
 `memoryRoute` preserves the existing Bridge option for independent navigation
 with an initial `entryPath`. Existing Router wrappers use it to select a memory

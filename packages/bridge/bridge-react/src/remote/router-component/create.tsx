@@ -24,3 +24,13 @@ export const createRemoteComponent = createDeprecatedRemoteComponentFactory(
 );
 
 export { createLazyRemoteComponent };
+
+import {
+  createReactRemoteConsumers,
+  type createReactRemote as BaseCreateReactRemote,
+  type ReactRemote as BaseReactRemote,
+} from '../../reactRemote';
+const unifiedConsumers = createReactRemoteConsumers(RemoteApp);
+export const createReactRemote: typeof BaseCreateReactRemote =
+  unifiedConsumers.createReactRemote;
+export const ReactRemote: typeof BaseReactRemote = unifiedConsumers.ReactRemote;

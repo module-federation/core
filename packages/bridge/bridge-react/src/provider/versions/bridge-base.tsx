@@ -15,6 +15,7 @@ import type {
 } from '../../types';
 import { ErrorBoundary } from '../../error-boundary';
 import { RouterContext } from '../context';
+import { BRIDGE_ROUTING } from '../routing';
 import { LoggerInstance } from '../../utils';
 import { federationRuntime } from '../plugin';
 
@@ -96,7 +97,7 @@ export function createBaseBridgeComponent<T>({
           dom,
           basename,
           memoryRoute,
-          navigation,
+          [BRIDGE_ROUTING]: routing,
           rootOptions,
           ...propsInfo
         } = info;
@@ -123,7 +124,7 @@ export function createBaseBridgeComponent<T>({
             basename={basename}
             moduleName={moduleName}
             memoryRoute={memoryRoute}
-            navigation={navigation}
+            navigation={routing?.navigation}
             propsInfo={
               {
                 ...omitHostFallback(propsInfo as Record<string, unknown>),

@@ -4,6 +4,7 @@ import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server.node';
 import { createReactRemote, ReactRemote } from '../src/reactRemote';
 import { remoteRuntime } from './reactRemote-utils';
+import { BRIDGE_ROUTING } from '../src/provider/routing';
 import { useBridgeRouter } from '../src/provider/context';
 import { createBridgeComponent } from '../src/provider/versions/v18';
 
@@ -133,7 +134,7 @@ describe('unified React remote consumption', () => {
     );
     expect(runtime.loadRemote).not.toHaveBeenCalled();
   });
-  it('keeps host loading DOM outside the producer React root', async () => {
+  it('releases host loading DOM before mounting the producer React root', async () => {
     const provider = createBridgeComponent({
       rootComponent: () => <strong>independent root</strong>,
     });
@@ -570,7 +571,7 @@ describe('Bridge routing controls', () => {
     await waitFor(() =>
       expect(received.at(-1)).toMatchObject({
         basename: '/stores/200/app',
-        navigation: second,
+        [BRIDGE_ROUTING]: { navigation: second },
         label: 'second',
       }),
     );
@@ -605,7 +606,7 @@ describe('Bridge routing controls', () => {
       await provider.render({
         dom,
         basename: '/app',
-        navigation,
+        [BRIDGE_ROUTING]: { navigation },
         label: 'first',
       });
     });
@@ -618,7 +619,7 @@ describe('Bridge routing controls', () => {
       await provider.render({
         dom,
         basename: '/other',
-        navigation,
+        [BRIDGE_ROUTING]: { navigation },
         label: 'updated',
       });
     });

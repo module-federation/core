@@ -1,127 +1,105 @@
-import React, { useContext, useEffect, useState, forwardRef } from 'react';
+import React, { useContext, useEffect, useRef, forwardRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import {
   dispatchPopstateEnv,
   type BridgeOperationContext,
 } from '@module-federation/bridge-shared';
-import { LoggerInstance, pathJoin } from '../../utils';
+import { pathJoin } from '../../utils';
 import { federationRuntime } from '../../provider/plugin';
-import { RemoteAppWrapper } from '../RemoteAppWrapper';
+import {
+  RemoteAppWrapper,
+  type RemoteAppWrapperProps,
+} from '../RemoteAppWrapper';
 
-interface ExtraDataProps {
-  basename?: string;
-}
+const MissingRouteContext = React.createContext<any>(null);
 
-export function withRouterData<
-  P extends Parameters<typeof RemoteAppWrapper>[0],
->(
-  WrappedComponent: React.ComponentType<P & ExtraDataProps>,
-): React.FC<Omit<P, keyof ExtraDataProps>> {
-  const Component = forwardRef(function (props: any, ref) {
-    if (props?.basename) {
-      return (
-        <WrappedComponent {...props} basename={props.basename} ref={ref} />
-      );
-    }
-    let enableDispathPopstate = false;
-    let routerContextVal: any;
+/** Legacy React Router integration, shared by old and unified default entries. */
+export function withRouterData(
+  WrappedComponent: React.ComponentType<
+    RemoteAppWrapperProps & React.RefAttributes<HTMLDivElement>
+  >,
+) {
+  const AutomaticRouterMount = forwardRef<
+    HTMLDivElement,
+    RemoteAppWrapperProps
+  >(function AutomaticRouterMount(props, ref) {
+    const router: any = ReactRouterDOM;
+    let location: ReturnType<typeof ReactRouterDOM.useLocation> | undefined;
     try {
-      ReactRouterDOM.useLocation();
-      enableDispathPopstate = true;
+      location = ReactRouterDOM.useLocation();
     } catch {
-      enableDispathPopstate = false;
+      // The router-aware entry also supports applications without a Host Router.
     }
-    let basename = '/';
-
-    if (!props.basename && enableDispathPopstate) {
-      const ReactRouterDOMAny: any = ReactRouterDOM;
-      // Avoid building tools checking references
-      const useRouteMatch = ReactRouterDOMAny['use' + 'RouteMatch']; //v5
-      const useHistory = ReactRouterDOMAny['use' + 'History']; //v5
-      const useHref = ReactRouterDOMAny['use' + 'Href'];
-      const UNSAFE_RouteContext = ReactRouterDOMAny['UNSAFE_' + 'RouteContext'];
-
-      if (UNSAFE_RouteContext /* react-router@6 */) {
-        if (useHref) {
-          basename = useHref?.('/');
-        }
-        routerContextVal = useContext(UNSAFE_RouteContext);
-        if (
-          routerContextVal &&
-          routerContextVal.matches &&
-          routerContextVal.matches.length > 0
-        ) {
-          const matchIndex = routerContextVal.matches.length - 1;
-          const pathnameBase =
-            routerContextVal.matches[matchIndex].pathnameBase;
-          basename = pathJoin(basename, pathnameBase || '/');
-        }
-      } /* react-router@5 */ else {
-        const match = useRouteMatch?.(); // v5
-        if (useHistory /* react-router@5 */) {
-          // there is no dynamic switching of the router version in the project
-          // so hooks can be used in conditional judgment
-          const history = useHistory?.();
-          // To be compatible to history@4.10.1 and @5.3.0 we cannot write like this `history.createHref(pathname)`
-          basename = history?.createHref?.({ pathname: '/' });
-        }
-        if (match /* react-router@5 */) {
-          basename = pathJoin(basename, match?.path || '/');
-        }
+    const routeContext: any = useContext(
+      router.UNSAFE_RouteContext || MissingRouteContext,
+    );
+    let inferredBasename = '/';
+    if (location) {
+      if (router.UNSAFE_RouteContext) {
+        const rootHref = router.useHref('/');
+        const matches = routeContext?.matches;
+        inferredBasename = pathJoin(
+          rootHref,
+          matches?.[matches.length - 1]?.pathnameBase || '/',
+        );
+      } else {
+        const match = router.useRouteMatch?.();
+        const history = router.useHistory?.();
+        inferredBasename = pathJoin(
+          history?.createHref?.({ pathname: '/' }) || '/',
+          match?.url || '/',
+        );
       }
     }
-
-    LoggerInstance.debug(`createRemoteAppComponent withRouterData >>>`, {
-      ...props,
-      basename,
-      routerContextVal,
-      enableDispathPopstate,
-    });
-
-    if (enableDispathPopstate) {
-      const location = ReactRouterDOM.useLocation();
-      const [pathname, setPathname] = useState(location.pathname);
-
-      useEffect(() => {
-        if (pathname !== '' && pathname !== location.pathname) {
-          LoggerInstance.debug(
-            `createRemoteAppComponent dispatchPopstateEnv >>>`,
-            {
-              name: props.name,
-              pathname: location.pathname,
-            },
-          );
-          const route = {
-            action: 'host-to-remote' as const,
-            mechanism: 'popstate' as const,
-            from: pathname,
-            to: location.pathname,
-            basename,
-          };
-          const operationContext: BridgeOperationContext = {
-            side: 'consumer',
-            framework: 'react',
-            operation: 'route-sync',
-            moduleName: props.moduleName,
-            route,
-          };
-          dispatchPopstateEnv();
-          federationRuntime.instance?.bridgeHook.lifecycle.afterBridgeRouteSync.emit(
-            {
-              context: operationContext,
-            },
-          );
-        }
-        setPathname(location.pathname);
-      }, [location]);
-    }
-
-    return <WrappedComponent {...(props as P)} basename={basename} ref={ref} />;
+    const automatic = !(
+      props.routing?.navigation ||
+      props.routing?.memoryRoute ||
+      props.remoteProps.memoryRoute
+    );
+    const explicit = props.routing?.basename ?? props.remoteProps.basename;
+    const basename = typeof explicit === 'string' ? explicit : inferredBasename;
+    const current = location
+      ? `${location.pathname}${location.search}${location.hash}`
+      : undefined;
+    const previous = useRef(current);
+    const instance = props.instance || federationRuntime.instance;
+    useEffect(() => {
+      const from = previous.current;
+      previous.current = current;
+      if (
+        !automatic ||
+        from === undefined ||
+        current === undefined ||
+        from === current
+      )
+        return;
+      const context: BridgeOperationContext = {
+        side: 'consumer',
+        framework: 'react',
+        operation: 'route-sync',
+        moduleName: props.moduleName,
+        route: {
+          action: 'host-to-remote',
+          mechanism: 'popstate',
+          from,
+          to: current,
+          basename,
+        },
+      };
+      dispatchPopstateEnv();
+      instance?.bridgeHook?.lifecycle.afterBridgeRouteSync.emit({ context });
+    }, [current, basename, instance, props.moduleName, automatic]);
+    return (
+      <WrappedComponent
+        {...props}
+        routing={automatic ? { ...props.routing, basename } : props.routing}
+        ref={ref}
+      />
+    );
   });
 
-  return forwardRef(function (props, ref) {
-    return <Component {...props} ref={ref} />;
-  }) as any;
+  // Keep the same renderer in the tree when explicit controls are added or removed.
+  return AutomaticRouterMount;
 }
 
 export default withRouterData(RemoteAppWrapper);

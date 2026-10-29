@@ -12,6 +12,10 @@ import {
 } from '@module-federation/enhanced/runtime';
 import type { DataFetchParams } from './lazy/types';
 import type { ProviderParams } from './types';
+import {
+  RemoteAppWrapper,
+  type RemoteAppWrapperProps,
+} from './remote/RemoteAppWrapper';
 import { createLazyComponentResource } from './lazy/createLazyComponent';
 import { autoFetchDataPlugin } from './lazy';
 import { transformError, DelayedLoading } from './lazy/AwaitDataFetch';
@@ -46,10 +50,6 @@ export type ReactRemoteProps<P extends object = Record<string, unknown>> =
   CreateReactRemoteOptions & { props?: P };
 
 type Namespace = Record<string, any> & { [key: symbol]: unknown };
-type Provider = {
-  render: (info: Record<string, unknown> & { dom: HTMLElement }) => unknown;
-  destroy: (info: { dom: HTMLElement; moduleName: string }) => unknown;
-};
 const configured = new WeakSet<ModuleFederation>();
 const moduleId = Symbol.for('mf_module_id');
 
@@ -124,142 +124,6 @@ async function resolveProtocol(
     recovered: undefined,
     load,
   };
-}
-
-function BridgeMount({
-  load,
-  instance,
-  id,
-  loading,
-  remoteProps,
-  basename,
-  memoryRoute,
-  navigation,
-}: {
-  load: () => Promise<Namespace>;
-  instance: ModuleFederation;
-  id: string;
-  loading?: React.ReactNode;
-  remoteProps: object;
-  basename?: string;
-  memoryRoute?: ProviderParams['memoryRoute'];
-  navigation?: ProviderParams['navigation'];
-}) {
-  const dom = useRef<HTMLDivElement>(null);
-  const latest = useRef({ remoteProps, basename, memoryRoute, navigation });
-  latest.current = { remoteProps, basename, memoryRoute, navigation };
-  const ownerRef = useRef<{
-    active: boolean;
-    provider?: Provider;
-    queue: Promise<unknown>;
-    update: () => void;
-  }>();
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState<Error>();
-  useEffect(() => {
-    const element = dom.current!;
-    let destroyed = false;
-    const owner = {
-      active: true,
-      provider: undefined as Provider | undefined,
-      queue: Promise.resolve() as Promise<unknown>,
-      update: () => {
-        owner.queue = owner.queue
-          .then(async () => {
-            if (!owner.active || !owner.provider) return;
-            const { remoteProps: props, ...controls } = latest.current;
-            // Undefined top-level options must not erase legacy routing props.
-            for (const key of [
-              'basename',
-              'memoryRoute',
-              'navigation',
-            ] as const) {
-              if (controls[key] === undefined) delete controls[key];
-            }
-            const info = {
-              ...props,
-              ...controls,
-              moduleName: id,
-              dom: element,
-            };
-            const context = {
-              side: 'consumer' as const,
-              framework: 'react' as const,
-              operation: 'render' as const,
-            };
-            const extra =
-              instance.bridgeHook?.lifecycle.beforeBridgeRender.emit(
-                info,
-                context,
-              );
-            await owner.provider.render({
-              ...info,
-              ...(extra as any)?.extraProps,
-            });
-            instance.bridgeHook?.lifecycle.afterBridgeRender.emit(info, {
-              context,
-            });
-            if (owner.active) setReady(true);
-          })
-          .catch((failure) => {
-            if (owner.active) setError(asError(failure));
-          });
-      },
-    };
-    ownerRef.current = owner;
-    const destroy = async () => {
-      if (destroyed || !owner.provider) return;
-      destroyed = true;
-      const info = { moduleName: id, dom: element };
-      const context = {
-        side: 'consumer' as const,
-        framework: 'react' as const,
-        operation: 'destroy' as const,
-        reason: 'unmount' as const,
-      };
-      instance.bridgeHook?.lifecycle.beforeBridgeDestroy.emit(info, context);
-      await owner.provider.destroy(info);
-      instance.bridgeHook?.lifecycle.afterBridgeDestroy.emit(info, { context });
-    };
-    owner.queue = load()
-      .then(async (module) => {
-        if (!owner.active) return;
-        if (typeof module.default !== 'function')
-          throw new Error(
-            `Bridge '${id}' must have a default provider export.`,
-          );
-        const provider = await module.default();
-        if (
-          !provider ||
-          typeof provider.render !== 'function' ||
-          typeof provider.destroy !== 'function'
-        ) {
-          throw new Error(
-            `Bridge '${id}' must provide render and destroy methods.`,
-          );
-        }
-        owner.provider = provider;
-        if (!owner.active) await destroy();
-      })
-      .catch((failure) => {
-        if (owner.active) setError(asError(failure));
-      });
-    owner.update();
-    return () => {
-      owner.active = false;
-      void owner.queue.then(destroy).catch((failure) => console.error(failure));
-    };
-  }, [load, instance, id]);
-  useEffect(() => {
-    if (ownerRef.current?.provider) ownerRef.current.update();
-  }, [remoteProps, basename, memoryRoute, navigation]);
-  if (error) throw error;
-  return (
-    <>
-      <div ref={dom} data-mf-bridge={id} />
-      {!ready && loading}
-    </>
-  );
 }
 
 class RemoteBoundary extends React.Component<
@@ -364,6 +228,7 @@ function ClientOnlyRemote<P extends object>({
 
 function createConsumer<P extends object>(
   getOptions: () => CreateReactRemoteOptions,
+  RemoteApp: React.ComponentType<RemoteAppWrapperProps>,
 ) {
   return function RemoteConsumer(props: P) {
     const options = getOptions();
@@ -420,17 +285,27 @@ function createConsumer<P extends object>(
               throw new Error(
                 'Bridge exposes use the default provider export.',
               );
+            const loadProvider = async () => {
+              const module = await load();
+              if (typeof module.default !== 'function')
+                throw new Error(
+                  `Bridge '${id}' must have a default provider export.`,
+                );
+              return module.default;
+            };
             return {
               Component: (businessProps: P) => (
-                <BridgeMount
-                  load={load}
+                <RemoteApp
+                  loadProvider={loadProvider}
                   instance={instance}
-                  id={id}
+                  moduleName={id}
                   loading={getOptions().loading}
-                  remoteProps={businessProps}
-                  basename={getOptions().basename}
-                  memoryRoute={getOptions().memoryRoute}
-                  navigation={getOptions().navigation}
+                  remoteProps={businessProps as Record<string, unknown>}
+                  routing={{
+                    basename: getOptions().basename,
+                    memoryRoute: getOptions().memoryRoute,
+                    navigation: getOptions().navigation,
+                  }}
                 />
               ),
             };
@@ -514,18 +389,29 @@ function createConsumer<P extends object>(
   };
 }
 
-export function createReactRemote<P extends object = Record<string, unknown>>(
-  options: CreateReactRemoteOptions,
-): React.ComponentType<P> {
-  return createConsumer<P>(() => options);
+/** Inject the existing router-aware or router-free Bridge renderer at the entry point. */
+export function createReactRemoteConsumers(
+  RemoteApp: React.ComponentType<RemoteAppWrapperProps>,
+) {
+  function createReactRemote<P extends object = Record<string, unknown>>(
+    options: CreateReactRemoteOptions,
+  ): React.ComponentType<P> {
+    return createConsumer<P>(() => options, RemoteApp);
+  }
+  function ReactRemote<P extends object = Record<string, unknown>>({
+    props,
+    ...options
+  }: ReactRemoteProps<P>) {
+    const current = useRef(options);
+    current.current = options;
+    const Component = useMemo(
+      () => createConsumer<P>(() => current.current, RemoteApp),
+      [],
+    );
+    return <Component {...(props as P)} />;
+  }
+  return { createReactRemote, ReactRemote };
 }
 
-export function ReactRemote<P extends object = Record<string, unknown>>({
-  props,
-  ...options
-}: ReactRemoteProps<P>) {
-  const current = useRef(options);
-  current.current = options;
-  const Component = useMemo(() => createConsumer<P>(() => current.current), []);
-  return <Component {...(props as P)} />;
-}
+export const { createReactRemote, ReactRemote } =
+  createReactRemoteConsumers(RemoteAppWrapper);
