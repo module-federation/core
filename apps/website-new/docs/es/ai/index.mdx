@@ -1,0 +1,138 @@
+---
+pageType: doc-wide
+sidebar: false
+---
+
+# Inicio rápido con IA
+
+:::tip ¿Prefieres leer la documentación por tu cuenta?
+Si quieres recorrer en orden los conceptos, la configuración y la integración de Module Federation, ve a la [guía de primeros pasos](/guide/start/index.html).
+:::
+
+## Una mejor forma de empezar
+
+Si ya usas una herramienta de programación con IA, el mejor punto de partida no es leer primero toda la documentación por tu cuenta.
+
+El enfoque más rápido es: **dale primero a tu agente la documentación más reciente de Module Federation y luego deja que responda preguntas, depure problemas, actualice la configuración y escriba código.**
+
+Muchos modelos todavía tienen un conocimiento incompleto o desactualizado de Module Federation 2.0. Así que el objetivo de esta página no es que estudies primero, sino ayudar a que tu agente obtenga primero el material de referencia correcto.
+
+## Configuración recomendada
+
+Si usas Claude Code, Cursor, Windsurf u otro editor compatible con Skills, instala:
+
+```bash
+npx skills add module-federation/agent-skills --skill mf -y
+```
+
+Después, pídele al agente que lea la documentación antes de responder:
+
+```text
+/mf docs What's the difference between singleton and requiredVersion in shared?
+```
+
+La idea es sencilla:
+
+- no necesitas rebuscar primero en la documentación
+- tu agente lee la documentación más reciente antes de responder
+- es mucho más probable que el resultado sea preciso
+
+## Si quieres que tu agente haga más
+
+La skill `mf` hace algo más que responder preguntas. También puede ayudar a tu agente a:
+
+- añadir Module Federation a un proyecto existente
+- revisar problemas de configuración
+- analizar problemas de tipos
+- comprobar conflictos de dependencias compartidas
+- inspeccionar la información de módulos remotos
+- usar la extensión MF de Divebell para diagnosticar fallos de runtime, cadenas de carga y cuellos de botella de rendimiento
+- leer informes de observabilidad de la aplicación en entornos locales, de SSR o de producción
+
+👉 [Ver la documentación de Agent Skills](/ai/skill.html)
+
+## Observar y depurar la carga de MF
+
+Los problemas de resolución de remotes, selección de shared, ciclo de vida de Bridge y
+rendimiento de módulos a menudo solo existen en el runtime de la página en vivo. Para un diagnóstico puntual,
+la skill `mf` puede usar la extensión MF de [Divebell](/guide/debug/divebell.html)
+para obtener evidencia acotada y estructurada sin añadir el Observability Plugin
+a la aplicación. La interacción con la página solo se usa para activar la ruta de carga.
+
+Pídeselo directamente al agente:
+
+```text
+/mf observability
+Open https://example.com with Divebell, reproduce the failing checkout flow,
+and tell me which Remote or Shared phase failed.
+```
+
+Cuando hace falta, la skill instala Divebell de forma global en la máquina del agente, lee
+la Skill de CLI que devuelve `divebell skill`, instala
+`@divebell/extension-mf` y lee la Skill de comandos que devuelve
+`divebell mf --skill`. Ninguno de los dos paquetes se añade a tu aplicación.
+
+Para recopilación continua, archivos de Node/SSR, subidas desde producción o informes que
+deban conservarse, integra el
+[Observability Plugin](/plugin/plugins/observability-plugin.html). Tras un
+fallo de carga, pásale al agente el `traceId` generado, el comando `read:` o el
+informe subido:
+
+```text
+/mf observability
+I saw this Module Federation console error:
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+Please read the report and fix the issue.
+```
+
+En Node o SSR, pídele al agente que lea `.mf/observability/latest.json`. En
+producción, sube los informes con el callback `onReport` del plugin y pásale a tu agente
+el informe almacenado. Un trace ID de una sesión de navegador ya cerrada no
+sustituye al informe almacenado.
+
+## También puedes usarlo sin instalar nada
+
+Si primero quieres una versión ligera, envía esto directamente a tu agente:
+
+```text
+Before answering, please read https://module-federation.io/llms.txt to learn about the latest Module Federation 2.0 documentation, then answer my question.
+```
+
+Es la forma más sencilla de evitar que el modelo adivine cuando todavía no has instalado la skill.
+
+## Documentación que puedes pasarle a tu agente
+
+### llms.txt
+
+[module-federation.io](https://module-federation.io) es compatible con el estándar [llms.txt](https://llmstxt.org), que es un buen punto de entrada para los sistemas de IA:
+
+```text
+https://module-federation.io/llms.txt
+```
+
+### Documentación en Markdown
+
+Todas las páginas del sitio de documentación también están disponibles en Markdown. Sustituye `.html` al final de la URL de la documentación por `.md`:
+
+```text
+# HTML version
+https://module-federation.io/guide/basic/runtime.html
+
+# Markdown version
+https://module-federation.io/guide/basic/runtime.md
+```
+
+## Próximos pasos
+
+Si quieres empezar a usar este flujo de trabajo ahora mismo:
+
+1. Instala `mf`
+2. Haz la pregunta que más te importe
+3. Usa [Divebell](/guide/debug/divebell.html) para diagnósticos puntuales del runtime de MF, de la cadena de carga o del rendimiento
+4. Activa el [Observability Plugin](/plugin/plugins/observability-plugin.html)
+   cuando la evidencia de carga deba conservarse o subirse
+5. Abre la [documentación de Skills](/ai/skill.html) para ver qué subcomandos admite

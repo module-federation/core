@@ -1,0 +1,77 @@
+import {Steps} from '@theme'
+
+# Trabajar con Express.js
+
+Si usas Express, es posible que la recarga en caliente de módulos en el servidor no funcione después de [estos pasos](/integrations/framework/nextjs/basic-example.html#step-3-implementing-ssr)
+
+Express tiene su propia pila de rutas, así que recargar la caché de require no basta para recargar las rutas dentro de Express.
+
+<Steps>
+### Añadir un callback global en Express
+Para la recarga en caliente de módulos con Express y Next.js, es necesario configurar un callback global que limpie la caché de rutas de Express.
+Así se reconocen las actualizaciones de rutas sin reiniciar el servidor.
+
+```javascript title="server/express.js"
+import express from 'express';
+import next from 'next';
+
+const dev = process.env.NODE_ENV !== 'production';
+const hostname = 'localhost';
+const port = 3000;
+const app = next({ dev, hostname, port });
+const handle = app.getRequestHandler();
+
+global.clearRoutes = () => {
+  server._router.stack = server._router.stack.filter((k) => !(k && k.route && k.route.path));
+};
+
+app.prepare().then(() => {
+  const server = express();
+
+  server.all('*', (req, res) => {
+    const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+    const { pathname, query } = parsedUrl;
+
+    handle(req, res, parsedUrl);
+  });
+
+  server.listen(port, () => {
+    console.log(`> Ready on http://${hostname}:${port}`);
+  });
+});
+```
+
+### Disparar el callback durante la revalidación
+
+Añade una llamada al callback global en `_document.js` para limpiar la caché de rutas de Express durante la revalidación, de modo que las rutas actualizadas se sirvan sin reiniciar el servidor.
+```jsx title="pages/_document.js"
+class MyDocument extends Document {
+  static async getInitialProps(ctx) {
+    if (ctx?.pathname && !ctx?.pathname?.endsWith('_error')) {
+      await revalidate().then((shouldUpdate) => {
+        if (shouldUpdate) {
+          global.clearRoutes();
+        }
+      });
+    }
+
+    const initialProps = await Document.getInitialProps(ctx);
+    return initialProps;
+  }
+
+  render() {
+    return (
+      <Html>
+        <Head />
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
+```
+
+</Steps>
+

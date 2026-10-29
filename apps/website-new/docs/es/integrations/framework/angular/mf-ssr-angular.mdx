@@ -1,0 +1,115 @@
+---
+title: "Renderizado en el servidor"
+---
+
+import {Steps} from '@theme'
+
+# Module Federation en Angular con renderizado en el servidor
+
+Históricamente, Module Federation se limitaba al renderizado en el cliente (CSR), lo que beneficiaba principalmente a las Single Page Applications (SPA). Sin embargo, la evolución del desarrollo web ha ido favoreciendo cada vez más el renderizado en el servidor (SSR) por sus múltiples ventajas.
+
+## La apuesta de Nx por SSR con Module Federation (desde la versión 15.4)
+
+Con la llegada de la versión 15.4, Nx introdujo Module Federation con soporte para SSR, lo que supuso un hito importante. Esta combinación de Module Federation y SSR en los workspaces de Nx aprovecha los puntos fuertes de ambas tecnologías.
+
+Para comprender a fondo Nx y su integración con Module Federation, te recomendamos encarecidamente consultar la documentación oficial de Nx. Ofrece información detallada y orientación práctica para sacar el máximo partido a estas tecnologías. Puedes acceder a este valioso recurso aquí:
+
+- [Documentación oficial de Nx sobre Module Federation](https://nx.dev/recipes/module-federation).
+
+Esta guía se centra en acompañarte en la configuración de Module Federation con renderizado en el servidor específicamente para aplicaciones Angular.
+
+## Cómo funciona
+
+En una aplicación SSR tradicional, el servidor se encarga de renderizar la aplicación en función de la ruta que solicita el navegador. Al combinar Module Federation con SSR, este concepto se amplía. Si una ruta apunta a un módulo remoto, el servidor host delega el procesamiento de la ruta en el servidor remote, que renderiza el HTML y lo devuelve al navegador.
+
+Esta integración no solo aprovecha todo el potencial del SSR, sino que también mantiene la flexibilidad de dividir el build en segmentos más pequeños. Facilita el despliegue independiente de funcionalidades dentro de la aplicación, lo que permite actualizar el servidor remote sin tener que volver a desplegar por completo el servidor host.
+
+## Guía paso a paso
+
+Empezaremos creando una aplicación host llamada 'dashboard' y una aplicación remote llamada 'login'.
+
+<Steps>
+
+### Crear el workspace de Nx
+
+Empieza ejecutando el siguiente comando para crear un nuevo workspace de Nx:
+
+```bash
+npx create-nx-workspace@latest myorganization
+```
+
+Durante este proceso, se te preguntará por el tipo de workspace y el preset.
+
+Responde a las preguntas de la siguiente forma:
+
+```bash
+- Workspace type: "integrated"
+- Workspace content: "apps"
+- Enable distributed caching (CI speed enhancement): "No"
+```
+
+**Usar Nx Cloud (opcional)**
+
+Al configurar tu workspace, también se te preguntará si quieres añadir Nx Cloud. Esta guía no cubre Nx Cloud, pero su integración con Module Federation resulta ventajosa para compartir caché entre equipos y en CI, lo que mejora los tiempos de build. Obtén más información sobre Nx Cloud en el [sitio web de Nx Cloud](https://nx.app).
+
+### Instalar el plugin de Angular para Nx
+
+Después de crear el workspace, entra en él:
+
+```bash
+cd myorganization
+```
+
+#### Instala el plugin oficial de Angular para Nx:
+
+```bash
+npm install @nx/angular
+```
+
+
+### Generar las aplicaciones
+
+Usa un único comando para generar la estructura de tu arquitectura de Module Federation con SSR:
+
+```bash
+npx nx g host dashboard --remotes=login --ssr
+```
+
+Este comando genera dos aplicaciones Angular Universal (SSR) y configura Webpack con Module Federation tanto para el navegador como para el servidor.
+
+
+### Servir las aplicaciones
+
+1. Para servir las aplicaciones 'dashboard' (host) y 'login' (remote), ejecuta:
+
+```bash
+npx nx serve-ssr dashboard
+```
+
+Esto genera los bundles de navegador y de servidor de la aplicación 'login' y la ejecuta con Node.js. Ten en cuenta que la aplicación 'login' se ejecuta sin observadores de archivos, por lo que los cambios en su código no se reflejarán automáticamente.
+</Steps>
+
+## Caché y actualizaciones en tiempo real
+
+- Nx guarda en caché el build de los bundles de navegador y de servidor de la aplicación 'login'. En ejecuciones posteriores, usa esta caché en lugar de volver a construir la aplicación.
+- En la aplicación 'dashboard', el build de servidor incluye observadores de archivos, lo que permite actualizar el código en tiempo real.
+
+## Verificar la configuración
+
+1. Si la compilación termina correctamente, verás un mensaje de éxito con la dirección en la que escucha el servidor, normalmente `http://localhost:4200`.
+2. Abre esta dirección en el navegador e inspecciona la pestaña Network de DevTools.
+
+### Module Federation en acción
+
+- Inicialmente, Angular Universal se encargará del renderizado y la navegación posterior pasará a renderizado en el cliente (CSR).
+- Al navegar a http://localhost:4200/login verás el HTML renderizado en el servidor de la página de login, lo que demuestra la capacidad de Module Federation para resolver y renderizar módulos desde servidores remotos.
+
+### Actualizaciones en vivo de la aplicación de login
+
+Si estás trabajando activamente en la aplicación 'login' y necesitas ver el resultado de tus cambios en tiempo real, puedes habilitar que el servidor se vuelva a construir al modificar el código. Para ello, usa el flag `devRemotes`:
+
+```bash
+npx nx serve-ssr dashboard --devRemotes=login
+```
+
+Con este comando, el servidor volverá a construir la aplicación 'login' cada vez que hagas cambios, lo que permite un proceso de desarrollo iterativo y eficiente.

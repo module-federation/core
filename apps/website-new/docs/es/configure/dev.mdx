@@ -1,0 +1,40 @@
+# dev
+
+- Tipo: `boolean | PluginDevOptions`
+- Obligatorio: No
+- Valor por defecto: `true`
+- Escenario de uso: controla el comportamiento de `Module Federation` en desarrollo
+
+Los tipos de `PluginDevOptions` son los siguientes:
+
+```ts
+interface PluginDevOptions {
+  disableLiveReload?: boolean;
+  disableHotTypesReload?: boolean;
+  disableDynamicRemoteTypeHints?: boolean;
+}
+```
+
+## disableHotTypesReload
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Indica si se desactiva la recarga en caliente de tipos
+
+## disableLiveReload
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Indica si se desactiva `liveReload`. Si lo estableces en `true`, ninguna actualización del producer activará el `liveReload` de la **página** del consumer
+
+## disableDynamicRemoteTypeHints
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Indica si se desactiva la recarga en caliente de tipos

@@ -1,0 +1,156 @@
+import { PackageManagerTabs } from '@theme';
+
+# TanStack
+
+Las aplicaciones de TanStack Start y TanStack Router hacen el build con Vite, así que usan [`@module-federation/vite`](/integrations/build-tool/vite.html) directamente. Un host de TanStack Start puede consumir remotes en el servidor y en el navegador: los componentes remotos se renderizan en la respuesta de SSR y luego se hidratan.
+
+Una aplicación de TanStack Router solo de cliente es una aplicación de Vite normal; sigue la guía de [Vite](/integrations/build-tool/vite.html). El resto de esta página trata la configuración de TanStack Start.
+
+## Compatibilidad
+
+- Hosts de TanStack Start con renderizado en el servidor a través de Nitro
+- Remotes construidos con Vite, como una biblioteca de React que expone componentes
+- Singletons compartidos para `react`, `react-dom` y tus propios paquetes
+
+## Instalación
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/vite --save-dev',
+    yarn: 'yarn add @module-federation/vite --dev',
+    pnpm: 'pnpm add @module-federation/vite --save-dev',
+    bun: 'bun add @module-federation/vite --dev',
+  }}
+/>
+
+## Configurar el remote
+
+El remote es una aplicación de Vite con React normal que expone componentes:
+
+```ts title="remote/vite.config.ts"
+import { federation } from '@module-federation/vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    federation({
+      name: 'remote',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Widget': './src/components/Widget',
+      },
+      shared: {
+        react: { singleton: true, requiredVersion: '^19.0.0' },
+        'react-dom': { singleton: true, requiredVersion: '^19.0.0' },
+      },
+    }),
+    react(),
+  ],
+  server: {
+    port: 4174,
+    cors: true,
+    origin: 'http://localhost:4174',
+  },
+  preview: {
+    port: 4174,
+    cors: true,
+  },
+});
+```
+
+## Configurar el host de TanStack Start
+
+Añade `federation()` antes de `tanstackStart()`:
+
+```ts title="host/vite.config.ts"
+import { federation } from '@module-federation/vite';
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import react from '@vitejs/plugin-react';
+import { nitro } from 'nitro/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  nitro: {
+    // Keep these as Node externals so the host and remotes share one
+    // React instance during SSR.
+    traceDeps: [
+      'react',
+      'react-dom',
+      '@module-federation/runtime',
+      '@module-federation/runtime-core',
+      '@module-federation/sdk',
+    ],
+  },
+  plugins: [
+    federation({
+      name: 'host',
+      hostInitInjectLocation: 'entry',
+      remotes: {
+        remote: {
+          type: 'module',
+          name: 'remote',
+          entry: 'http://localhost:4174/remoteEntry.js',
+        },
+      },
+      shared: {
+        react: { singleton: true, requiredVersion: '^19.0.0' },
+        'react-dom': { singleton: true, requiredVersion: '^19.0.0' },
+      },
+    }),
+    tanstackStart(),
+    react(),
+    nitro(),
+  ],
+  ssr: {
+    optimizeDeps: {
+      include: ['react', 'react-dom'],
+    },
+  },
+});
+```
+
+Hay dos ajustes importantes para SSR:
+
+- `hostInitInjectLocation: 'entry'` inyecta la inicialización del host en el script de entrada. TanStack Start no tiene `index.html`, y esto garantiza que el runtime de federación esté listo antes de que se ejecute `hydrateRoot`.
+- `nitro.traceDeps` mantiene React y el runtime de federación como externals de Node en el bundle del servidor de Nitro. Sin esto, Nitro incluye React dentro del bundle y el remote acaba con una instancia de React distinta, lo que rompe los hooks y el contexto.
+
+## Cargar componentes remotos
+
+Importa los remotes con `React.lazy` y precárgalos en el `loader` de la ruta para que el runtime de federación los resuelva en el servidor antes de renderizar. Sin la precarga, el componente lazy todavía no se ha resuelto durante el SSR y no renderiza nada.
+
+```tsx title="host/src/routes/index.tsx"
+import { createFileRoute } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
+
+const RemoteWidget = lazy(() => import('remote/Widget'));
+
+export const Route = createFileRoute('/')({
+  loader: () => import('remote/Widget').then(() => null),
+  component: IndexPage,
+});
+
+function IndexPage() {
+  return (
+    <Suspense fallback={<div>Loading remote widget...</div>}>
+      <RemoteWidget />
+    </Suspense>
+  );
+}
+```
+
+Envuelve los remotes en un error boundary si la página debe seguir renderizándose cuando un remote no esté disponible.
+
+Declara los módulos remotos para que TypeScript pueda resolverlos, o activa [`dts`](/configure/dts.html) para descargar automáticamente los tipos de los remotes:
+
+```ts title="host/src/types/remote.d.ts"
+declare module 'remote/Widget' {
+  import type { ComponentType } from 'react';
+  const Widget: ComponentType;
+  export default Widget;
+}
+```
+
+## Ejemplos
+
+- [Host y remote de TanStack](https://github.com/gioboa/module-federation-vite-examples/tree/main/tanstack): host de TanStack Start con SSR, un remote con React 19 y un paquete de contexto compartido

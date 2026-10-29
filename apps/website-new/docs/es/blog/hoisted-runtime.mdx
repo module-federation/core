@@ -1,0 +1,77 @@
+import {Tabs, Tab} from '@theme'
+
+# Inicio asíncrono en Module Federation
+
+> 5 de septiembre de 2024
+
+Nos alegra anunciar una nueva funcionalidad experimental: `experiments.asyncStartup = true`.
+
+Esta versión introduce el **inicio asíncrono**, que permite la inicialización asíncrona automática de los entrypoints de Module Federation.
+
+## 🚀 Características principales
+
+### Inicialización asíncrona automática
+
+Con el inicio asíncrono habilitado, **ya no se necesitan imports dinámicos (`import()`) en la parte superior de tu app**. Ahora todos los entrypoints se inicializan de forma asíncrona por defecto. Esto significa:
+- Se acabaron los errores eager
+- No hacen falta "async boundaries" en el código de usuario
+- La inicialización asíncrona se gestiona automáticamente
+
+:::note
+Esto solo afecta a la inicialización de los entry points. Puedes seguir usando imports dinámicos con normalidad en toda tu aplicación, incluso para importar módulos remotos. Esta funcionalidad no cambia ni limita el funcionamiento de los imports dinámicos en tu código.
+:::
+
+:::tip
+**Nota:** Los entrypoints asíncronos siempre exportarán una promesa. Esto es especialmente relevante si haces `require` manualmente de un entrypoint empaquetado o si expones algo como una biblioteca UMD en el ámbito global.
+:::
+
+#### Comparación antes y después
+
+Observa cómo el nuevo comportamiento asíncrono simplifica los entrypoints. Haz clic en las pestañas "Antes" y "Después" para ver la diferencia.
+
+<Tabs>
+  <Tab label="Antes">
+    ```jsx
+    // entrypoint
+    import('./bootstrap.js')
+
+    // bootstrap.js
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import App from './App';
+
+    const root = ReactDOM.createRoot(document.getElementById('root')!);
+    root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    );
+    ```
+  </Tab>
+  <Tab label="Después">
+    ```jsx
+    // entrypoint
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import App from './App';
+
+    const root = ReactDOM.createRoot(document.getElementById('root')!);
+    root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    );
+    ```
+  </Tab>
+</Tabs>
+
+### Notas importantes
+
+Al usar el inicio asíncrono:
+- Todos los entrypoints se inicializan de forma asíncrona por defecto
+- Los exports de los entrypoints serán promesas que se resuelven con los exports reales
+- No se necesitan async boundaries manuales ni imports dinámicos
+- Los errores de consumo eager se evitan automáticamente gracias a la inicialización asíncrona
+
+Esta funcionalidad simplifica la configuración de Module Federation al eliminar la necesidad de gestionar manualmente la asincronía, a la vez que garantiza la inicialización correcta de los módulos federados.
+
