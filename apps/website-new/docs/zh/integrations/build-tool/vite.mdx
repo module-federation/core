@@ -1,16 +1,17 @@
 # Vite
 
+`@module-federation/vite` 为 Vite 5、6、7 和 8 提供 Module Federation 支持：
+
 - 能够构建出满足 `Module Federation` 加载规范的模块
 - 能够使用别名消费 `Module Federation` 规范的模块
 - 能够设置模块的共享依赖配置，当加载模块的宿主环境已经存在对应依赖时将不会重复加载
 - 当模块具备远程类型时会自动下载并消费远程模块的类型
+- 开发时能够在宿主应用中热更新远程模块
+- 能够为服务端渲染（SSR）宿主应用在服务端渲染远程模块
 
-:::warning 不支持的选项
-除了 [dev](/configure/dev.html) 选项外，其他选项全部支持（包含 dts）。
+:::tip 框架
+使用 Nuxt、TanStack Start 或 Vinext？请参阅 [Nuxt](/integrations/framework/nuxt.html)、[TanStack](/integrations/framework/tanstack.html) 和 [Vinext](/integrations/framework/vinext.html) 指南，了解包括 SSR 在内的框架专属配置。
 :::
-- roadmap 🗓️
-  - 消费远程模块时将具备热更新能力
-  - nuxt ssr
 
 ## 快速开始
 
@@ -39,25 +40,134 @@ import CreateConfig from '@docs/_snippets/vite/create-config';
 
 ### 注册插件
 
-在 `vite` 中，你可以通过 `vite.config.js` 配置文件中的 `plugins` 配置项来添加插件：
+在 `Vite` 中，你可以通过 `vite.config.ts` 配置文件中的 `plugins` 配置项来添加插件：
 
 import RegisterPlugin from '@docs/_snippets/vite/register-plugin';
 
 <RegisterPlugin />
 
+省略 `type` 的对象形式 remotes 会沿用旧的默认值 `"var"`，并输出一条警告。Vite 远程应用请使用 `type: 'module'`；仅当远程应用是全局格式时才使用 `type: 'var'`，例如 Webpack 或 Rspack 容器，或 Vite 远程应用的 `varFilename` 产物。
+
 ## 配置构建插件
 
-- Type: `ModuleFederationPlugin(options: ModuleFederationOptions)`
+- 类型：`federation(options: ModuleFederationOptions)`
 
-- Module federation 插件的配置结构如下所示：
+- Module Federation 插件的配置结构如下所示：
 
 ```ts
-type ModuleFederationOptions {
-    name: string;
-    filename?: string,
-    remotes?: Array<RemoteInfo>;
-    shared?: ShareInfos;
+type ModuleFederationOptions = {
+  name: string;
+  filename?: string;
+  exposes?: Record<string, string | { import: string }>;
+  remotes?: Record<string, string | RemoteObjectConfig>;
+  shared?: ShareInfos;
+  // ...plus the Vite-specific options below
 };
 ```
 
-你可以在 [Config 总览](/configure/index.html) 页面找到所有配置项的详细说明。
+你可以在 [Config 总览](/configure/index.html) 页面找到通用配置项的详细说明。以下选项是 Vite 插件特有的：
+
+| 选项 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `hostInitInjectLocation` | `'html' \| 'entry'` | `'html'` | 宿主应用初始化脚本的注入位置。对于没有 `index.html` 的应用（例如服务端渲染（SSR）宿主应用），请使用 `'entry'`。 |
+| `varFilename` | `string` | | 额外生成一个 `var` 格式的远程入口，供使用 `type: 'var'` 加载远程应用的旧版宿主应用使用。 |
+| `ssrFilename` | `string` | `<filename base>.ssr.js` | SSR 远程入口的文件名。 |
+| `bundleAllCSS` | `boolean` | `false` | 将产物中的所有 CSS 资源添加到每个导出的模块。 |
+| `moduleParseTimeout` | `number` | `10` | 构建期间等待模块解析的最长时间，单位为秒。 |
+| `moduleParseIdleTimeout` | `number` | | 与 `moduleParseTimeout` 类似，但每解析完一个模块就会重新计时。大型代码库推荐使用此选项。 |
+| `target` | `'web' \| 'node'` | `'web'`，启用 `build.ssr` 时为 `'node'` | 目标环境，用于对 federation 运行时进行 tree-shaking。 |
+| `disableRemote` | `boolean` | `false` | 从运行时中移除消费远程模块的支持。配置了 `remotes` 时请勿启用。 |
+| `disableShared` | `boolean` | `false` | 从运行时中移除共享依赖的支持。配置了 `shared` 时请勿启用。 |
+| `disableSnapshot` | `boolean` | Node/SSR 构建为 `true`，其他情况为 `false` | 移除快照支持，包括基于 manifest 的远程应用、预加载、动态类型提示、HMR 以及 devtools 集成。 |
+| `ssrEntryLoader` | `SsrEntryLoaderConfig` | | 控制服务端渲染（SSR）宿主应用如何加载远程入口。参阅 [服务端渲染](#服务端渲染)。 |
+| `ssrExternals` | `string[]` | | 需要在 SSR 远程入口中保持 external 的额外 Node 专用包。共享依赖和运行时相关的包默认已是 external。 |
+
+`manifest` 选项也接受一个对象，包含 `fileName`、`filePath`、`disableAssetsAnalyze` 以及 `additionalData` 钩子，用于修改生成的 `mf-manifest.json` 和 `mf-stats.json`。
+
+## 跨远程应用热更新
+
+在宿主应用上启用 `dev.remoteHmr`，即可在两个应用都以开发模式运行时热更新远程模块：
+
+```ts title="vite.config.ts"
+federation({
+  name: 'host',
+  remotes: {
+    // ...
+  },
+  dev: {
+    remoteHmr: true,
+  },
+});
+```
+
+设置为 `true` 时，React（`@vitejs/plugin-react` 或 `@vitejs/plugin-react-swc`）和 Vue（`@vitejs/plugin-vue` 或 `@vitejs/plugin-vue-jsx`）远程应用会使用框架原生的 HMR，其他框架则回退为整页刷新。设置为 `'full-reload'` 则始终刷新整个页面。`remoteHmr` 默认关闭。其他 `dev` 选项请参阅 [dev](/configure/dev.html)。
+
+## 服务端渲染
+
+远程应用会在浏览器入口旁生成一个服务端入口，默认命名为 `<filename base>.ssr.js`，设置了 `ssrFilename` 时则使用该名称，并在 `mf-manifest.json` 中以 `metaData.ssrRemoteEntry` 声明。通过 manifest 消费远程应用的服务端渲染（SSR）宿主应用会自动选择浏览器入口或服务端入口。
+
+`ssrEntryLoader` 控制宿主应用在构建和预览期间如何执行远程入口：
+
+```ts title="vite.config.ts"
+federation({
+  name: 'host',
+  remotes: {
+    // ...
+  },
+  ssrEntryLoader: {
+    strategy: 'temp-file', // or 'vm'
+    maxAgeMs: 60_000,
+    fetchTimeoutMs: 5_000,
+    fetchMaxBytes: 5 * 1024 * 1024,
+  },
+});
+```
+
+- `'temp-file'`（默认）会拉取远程模块图，将其中的导入重写为宿主应用的共享包，写入临时文件，再通过 `import()` 加载。
+- `'vm'` 使用 `vm.SourceTextModule` 在内存中执行模块图。它要求 Node.js 以 `--experimental-vm-modules` 运行，缺少该标志时会回退到 `'temp-file'` 并输出警告。
+- `maxAgeMs` 会在指定时间后重新检查每个远程应用的 manifest，以便识别在同一 URL 重新部署的远程应用。省略时会一直缓存到进程退出。
+- `fetchTimeoutMs` 和 `fetchMaxBytes` 限制每个请求，默认分别为 10 秒和 10 MiB。设置为 `0` 可取消限制。
+
+Vite 8 开发模式使用 Vite 的 `ModuleRunner`，因此这些选项主要影响构建和预览。
+
+SSR 入口会将 `@module-federation/runtime`、`@module-federation/runtime-core` 和 `@module-federation/sdk` 保持为 external，由 Node 从宿主应用中解析。如果宿主应用无法解析这些包（例如单纯的 `@module-federation/enhanced` 宿主应用），请在远程应用上设置 Vite 的 `ssr.noExternal`，以生成自包含的入口。
+
+## 实验性功能
+
+### 外部运行时
+
+由宿主应用共享一个 `@module-federation/runtime-core` 实例，这样远程应用就无需打包各自的副本。在宿主应用上设置 `experiments.provideExternalRuntime: true`，并在每个远程应用上设置 `experiments.externalRuntime: true`。页面上应当只有一个容器提供运行时，并且它必须在任何使用该运行时的远程应用之前加载。
+
+### 宿主应用提供所有共享依赖
+
+当由单个宿主应用提供所有共享依赖、远程应用只负责消费时，`experiments.hostProvidesAllShared: true` 会通过浏览器原生 import map 而非 federation 运行时来解析共享依赖。请在宿主应用和每个远程应用上都进行设置：
+
+```ts title="remote/vite.config.ts"
+federation({
+  name: 'remote',
+  exposes: { './Button': './src/Button.tsx' },
+  shared: { react: {}, 'react-dom': {}, 'react/jsx-runtime': {} },
+  experiments: { hostProvidesAllShared: true },
+});
+```
+
+```ts title="host/vite.config.ts"
+federation({
+  name: 'host',
+  remotes: { remote: 'https://cdn.example.com/remote/mf-manifest.json' },
+  shared: { react: {}, 'react-dom': {}, 'react/jsx-runtime': {} },
+  experiments: { hostProvidesAllShared: true },
+});
+```
+
+共享模块会变成普通的静态 ES 导入，因此在模块执行期间读取共享值的代码无需 `eager` 也能正常工作。该模式不会加载 federation 运行时，因此不支持版本协商、`import: false`、运行时插件、服务端渲染（SSR）、`loadRemote`，也无法与 Webpack 和 Rspack 容器互操作。
+
+### React 服务端渲染岛
+
+`experiments.ssrMode: 'ISLAND'` 允许不共享 React 的远程应用在服务端渲染，并在宿主应用的 React 树之外使用自己的 React 进行水合。参阅 [隔离的 React 岛](/integrations/framework/vinext.html#隔离的-react-岛)。
+
+## 分块
+
+插件会管理代码分块，确保 federation 运行时和共享依赖包装模块按正确顺序加载。将 `codeSplitting` 设置为 `false` 会被忽略并输出警告。
+
+在 Vite 8 上，你配置的 `build.rolldownOptions.output.codeSplitting.groups` 会保留在 federation 分组之后，而 `manualChunks` 会被忽略并输出警告；请将相应的分组迁移到 `codeSplitting.groups`。在 Vite 5 到 7 上，函数形式的 `manualChunks` 仍会对插件未接管的模块生效，而对象形式则会被忽略。

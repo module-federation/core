@@ -1,22 +1,23 @@
 # Vite
 
-- Can build módulos esse meet o `Module Federation` carregamento specifications.
-- Can consuma módulos esse adhere para o `Module Federation` specifications usando aliases.
-- Can configure dependências compartilhadas for módulos, so esse quando o host environment do carregado módulo já has o corresponding dependência, it vai não ser carregado again.
-- Quando um módulo has remote tipos, it automatically downloads e consome o remote tipos.
+`@module-federation/vite` leva o Module Federation para o Vite 5, 6, 7 e 8:
 
-:::warning Unsupported Options
-Except para o [dev](/configure/dev.html) opção, all opções são compatível.
+- Gera módulos que seguem as especificações de carregamento do `Module Federation`.
+- Consome, por meio de aliases, módulos que seguem as especificações do `Module Federation`.
+- Permite configurar dependências compartilhadas entre módulos, de modo que, quando o ambiente host do módulo carregado já tem a dependência correspondente, ela não é carregada de novo.
+- Quando um módulo tem tipos remotos, baixa e consome esses tipos automaticamente.
+- Faz hot update de módulos remotos dentro do host durante o desenvolvimento.
+- Renderiza módulos remotos no servidor para hosts com SSR.
+
+:::tip Frameworks
+Usa Nuxt, TanStack Start ou Vinext? Veja os guias de [Nuxt](/integrations/framework/nuxt.html), [TanStack](/integrations/framework/tanstack.html) e [Vinext](/integrations/framework/vinext.html) para a configuração específica de cada framework, incluindo SSR.
 :::
-- roadmap 🗓️
-  - Consuming módulos remotos vai have hot update capabilities.
-  - nuxt ssr
 
 ## Início rápido
 
 ### Instalação
 
-Você pode instale o plugin com o seguintes comandos:
+Instale o plugin com um dos comandos abaixo:
 
 import { PackageManagerTabs } from '@theme';
 
@@ -29,35 +30,144 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
-### Crie module-federation.configuração.ts
+### Crie o module-federation.config.ts
 
-Crie o `module-federation.config.ts` arquivo com o seguintes content:
+Crie o arquivo `module-federation.config.ts` com o seguinte conteúdo:
 
 import CreateConfig from '@docs/_snippets/vite/create-config';
 
 <CreateConfig />
 
-### Register o Plugin
+### Registre o plugin
 
-In `Vite`, você pode adicione o plugin por meio do `plugins` configuração item no `vite.config.js` arquivo:
+No `Vite`, adicione o plugin pela opção `plugins` do arquivo `vite.config.ts`:
 
 import RegisterPlugin from '@docs/_snippets/vite/register-plugin';
 
 <RegisterPlugin />
 
-## Configure o Plugin de build
+Remotes definidos como objeto sem `type` mantêm o padrão legado `"var"` e geram um aviso no log. Use `type: 'module'` para remotes do Vite e `type: 'var'` apenas para remotes em formato global, como containers do Webpack ou do Rspack, ou a saída `varFilename` de um remote do Vite.
 
-- Tipo: `ModuleFederationPlugin(options: ModuleFederationOptions)`
+## Configure o plugin de build
 
-- O configuração structure para o Module Federation plugin é as follows:
+- Tipo: `federation(options: ModuleFederationOptions)`
+
+- A estrutura de configuração do plugin do Module Federation é a seguinte:
 
 ```ts
 type ModuleFederationOptions = {
   name: string;
   filename?: string;
-  remotes?: Array<RemoteInfo>;
+  exposes?: Record<string, string | { import: string }>;
+  remotes?: Record<string, string | RemoteObjectConfig>;
   shared?: ShareInfos;
+  // ...plus the Vite-specific options below
 };
 ```
 
-Você pode find detailed explanations de all configuração items no [Configuration Overview](/configure/index.html) page.
+As opções de configuração comuns estão explicadas em detalhes na página [Visão geral da configuração](/configure/index.html). As opções a seguir são específicas do plugin do Vite:
+
+| Opção | Tipo | Padrão | Descrição |
+| --- | --- | --- | --- |
+| `hostInitInjectLocation` | `'html' \| 'entry'` | `'html'` | Onde o script de inicialização do host é injetado. Use `'entry'` em apps sem `index.html`, como hosts com SSR. |
+| `varFilename` | `string` | | Gera um remote entry `var` adicional para hosts legados que carregam remotes com `type: 'var'`. |
+| `ssrFilename` | `string` | `<filename base>.ssr.js` | Nome do arquivo do remote entry de SSR. |
+| `bundleAllCSS` | `boolean` | `false` | Adiciona todos os assets CSS do bundle a cada módulo exposto. |
+| `moduleParseTimeout` | `number` | `10` | Tempo máximo, em segundos, de espera pelo parsing de módulos durante o build. |
+| `moduleParseIdleTimeout` | `number` | | Igual a `moduleParseTimeout`, mas o contador reinicia a cada módulo processado. Prefira esta opção em codebases grandes. |
+| `target` | `'web' \| 'node'` | `'web'`, ou `'node'` quando `build.ssr` está ativo | Ambiente de destino, usado para fazer tree-shaking do runtime de federation. |
+| `disableRemote` | `boolean` | `false` | Remove do runtime o suporte ao consumo de remotes. Não ative quando houver `remotes` configurados. |
+| `disableShared` | `boolean` | `false` | Remove do runtime o suporte a dependências compartilhadas. Não ative quando houver `shared` configurado. |
+| `disableSnapshot` | `boolean` | `true` em builds Node/SSR, senão `false` | Remove o suporte a snapshots, incluindo remotes baseados em manifest, preload, dicas de tipos dinâmicas, HMR e a integração com o devtools. |
+| `ssrEntryLoader` | `SsrEntryLoaderConfig` | | Controla como hosts com SSR carregam os remote entries. Veja [Renderização no servidor](#server-side-rendering). |
+| `ssrExternals` | `string[]` | | Pacotes adicionais, exclusivos do Node, que devem ficar externos no remote entry de SSR. Pacotes compartilhados e de runtime já são externos por padrão. |
+
+A opção `manifest` também aceita um objeto com `fileName`, `filePath`, `disableAssetsAnalyze` e um hook `additionalData` para alterar os arquivos `mf-manifest.json` e `mf-stats.json` gerados.
+
+## Hot update entre remotes
+
+Ative `dev.remoteHmr` no host para fazer hot update de módulos remotos enquanto os dois apps rodam em desenvolvimento:
+
+```ts title="vite.config.ts"
+federation({
+  name: 'host',
+  remotes: {
+    // ...
+  },
+  dev: {
+    remoteHmr: true,
+  },
+});
+```
+
+Com `true`, remotes em React (`@vitejs/plugin-react` ou `@vitejs/plugin-react-swc`) e Vue (`@vitejs/plugin-vue` ou `@vitejs/plugin-vue-jsx`) usam o HMR nativo do framework, e os demais frameworks recorrem a um recarregamento completo da página. Use `'full-reload'` para sempre recarregar a página. O `remoteHmr` vem desativado por padrão. As outras opções de `dev` estão descritas em [dev](/configure/dev.html).
+
+## Renderização no servidor {#server-side-rendering}
+
+Um remote gera um entry de servidor ao lado do entry do navegador, chamado `<filename base>.ssr.js` por padrão ou com o nome definido em `ssrFilename`, e o anuncia como `metaData.ssrRemoteEntry` no `mf-manifest.json`. Hosts com SSR que consomem remotes pelo manifest escolhem automaticamente o entry do navegador ou o do servidor.
+
+`ssrEntryLoader` controla como o host avalia os remote entries durante o build e o preview:
+
+```ts title="vite.config.ts"
+federation({
+  name: 'host',
+  remotes: {
+    // ...
+  },
+  ssrEntryLoader: {
+    strategy: 'temp-file', // or 'vm'
+    maxAgeMs: 60_000,
+    fetchTimeoutMs: 5_000,
+    fetchMaxBytes: 5 * 1024 * 1024,
+  },
+});
+```
+
+- `'temp-file'` (padrão) busca o grafo do remote, reescreve os imports para apontar para os pacotes compartilhados do host, grava arquivos temporários e os carrega com `import()`.
+- `'vm'` avalia o grafo em memória com `vm.SourceTextModule`. Exige que o Node.js rode com `--experimental-vm-modules` e, se essa flag estiver ausente, recorre a `'temp-file'` com um aviso.
+- `maxAgeMs` verifica de novo o manifest de cada remote depois do tempo indicado, para que um remote republicado na mesma URL seja detectado. Se omitido, o cache dura até o processo terminar.
+- `fetchTimeoutMs` e `fetchMaxBytes` limitam cada requisição, com padrão de 10 segundos e 10 MiB. `0` desativa o limite.
+
+No desenvolvimento com Vite 8 é usado o `ModuleRunner` do Vite, então essas opções afetam principalmente o build e o preview.
+
+O entry de SSR mantém `@module-federation/runtime`, `@module-federation/runtime-core` e `@module-federation/sdk` como externos, para que o Node os resolva a partir do host. Se o host não conseguir resolver esses pacotes, como no caso de um host que usa apenas `@module-federation/enhanced`, configure `ssr.noExternal` do Vite no remote para gerar um entry autocontido.
+
+## Experimentos
+
+### Runtime externo
+
+Compartilhe uma única instância de `@module-federation/runtime-core` a partir do host, para que os remotes não incluam a própria cópia no bundle. Defina `experiments.provideExternalRuntime: true` no host e `experiments.externalRuntime: true` em cada remote. Apenas um container na página deve fornecer o runtime, e ele precisa carregar antes de qualquer remote que o utilize.
+
+### Host fornece todos os shared
+
+Quando um único host fornece todas as dependências compartilhadas e os remotes apenas as consomem, `experiments.hostProvidesAllShared: true` resolve as dependências compartilhadas por meio de um import map nativo do navegador, em vez do runtime de federation. Defina a opção no host e em todos os remotes:
+
+```ts title="remote/vite.config.ts"
+federation({
+  name: 'remote',
+  exposes: { './Button': './src/Button.tsx' },
+  shared: { react: {}, 'react-dom': {}, 'react/jsx-runtime': {} },
+  experiments: { hostProvidesAllShared: true },
+});
+```
+
+```ts title="host/vite.config.ts"
+federation({
+  name: 'host',
+  remotes: { remote: 'https://cdn.example.com/remote/mf-manifest.json' },
+  shared: { react: {}, 'react-dom': {}, 'react/jsx-runtime': {} },
+  experiments: { hostProvidesAllShared: true },
+});
+```
+
+Os módulos compartilhados viram imports ES estáticos comuns, então código que lê um valor compartilhado durante a avaliação dos módulos funciona sem `eager`. Esse modo não carrega o runtime de federation e, por isso, não oferece negociação de versões, `import: false`, plugins de runtime, SSR, `loadRemote` nem interoperabilidade com containers do Webpack e do Rspack.
+
+### Ilhas React com SSR
+
+`experiments.ssrMode: 'ISLAND'` permite que um remote que não compartilha o React seja renderizado no servidor e hidratado com o próprio React, fora da árvore React do host. Veja [Ilhas React isoladas](/integrations/framework/vinext.html#ilhas-react-isoladas).
+
+## Divisão em chunks
+
+O plugin gerencia a divisão em chunks para que o runtime de federation e os wrappers de dependências compartilhadas carreguem na ordem correta. Definir `codeSplitting` como `false` é ignorado com um aviso.
+
+No Vite 8, seus `build.rolldownOptions.output.codeSplitting.groups` são mantidos abaixo dos grupos de federation, e `manualChunks` é ignorado com um aviso; mova esse agrupamento para `codeSplitting.groups`. Do Vite 5 ao 7, uma função `manualChunks` continua rodando para os módulos que o plugin não assume, enquanto a forma de objeto é ignorada.

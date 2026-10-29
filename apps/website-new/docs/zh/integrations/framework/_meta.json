@@ -19,5 +19,20 @@
     "label": "Angular",
     "collapsible": true,
     "collapsed": true
+  },
+  {
+    "type": "file",
+    "name": "nuxt",
+    "label": "Nuxt"
+  },
+  {
+    "type": "file",
+    "name": "tanstack",
+    "label": "TanStack"
+  },
+  {
+    "type": "file",
+    "name": "vinext",
+    "label": "Vinext"
   }
 ]
