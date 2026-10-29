@@ -1,0 +1,30 @@
+# Integraciones
+
+Module Federation funciona sobre MF Runtime. La mayoría de los proyectos deberían usar un plugin de build. Te permite hacer `import` de módulos remotos como si fueran paquetes npm y ofrece capacidades de ingeniería como sugerencias de tipos. Si tu proyecto necesita exponer módulos para que otras aplicaciones los consuman, debes usar un plugin de build. Si no quieres cambiar tu configuración de build y solo necesitas cargar módulos remotos en runtime, puedes usar Runtime directamente.
+
+Si no tienes claro qué paquete instalar, empieza por el tipo de tu proyecto:
+
+| Tu proyecto | Paquete a instalar | Siguiente lectura |
+| --- | --- | --- |
+| App de Rsbuild | `@module-federation/rsbuild-plugin` | [Rsbuild](/integrations/build-tool/rsbuild.html) |
+| Módulo de Rslib | `@module-federation/rsbuild-plugin` | [Rslib](/integrations/build-tool/rslib.html) |
+| App de Vite | `@module-federation/vite` | [Vite](/integrations/build-tool/vite.html) |
+| App de Rspack | `@module-federation/enhanced` | [Rspack](/integrations/bundler/rspack.html) |
+| App de Webpack | `@module-federation/enhanced` | [Webpack](/integrations/bundler/webpack.html) |
+| React Native / Metro | `@module-federation/metro` y el plugin de Metro correspondiente | [Metro](/integrations/bundler/metro.html) |
+| Sitio de Rspress | `@module-federation/rspress-plugin` | [Rspress](/integrations/documentation/rspress.html) |
+| App de Modern.js | `@module-federation/modern-js-v3` (recomendado para Modern.js v3) o `@module-federation/modern-js` (Modern.js v2) | [Modern.js](/integrations/framework/modernjs/index.html) |
+| App de Next.js | `@module-federation/nextjs-mf` y `webpack` | [Next.js](/integrations/framework/nextjs/index.html) |
+| App de Angular | Elige el paquete de integración que corresponda a tu configuración de build de Angular | [Angular](/integrations/framework/angular/index.html) |
+| App de Nuxt | `@module-federation/nuxt` | [Nuxt](/integrations/framework/nuxt.html) |
+| App de TanStack Start / Router | `@module-federation/vite` | [TanStack](/integrations/framework/tanstack.html) |
+| App de Vinext | `@module-federation/vite` | [Vinext](/integrations/framework/vinext.html) |
+| Monorepos | Usa el paquete de tu framework de aplicación y de tus herramientas de monorepo | [Monorepos](/integrations/framework/monorepos/index.html) |
+
+También puedes usar solo Runtime para cargar módulos remotos. Cada tipo de proyecto importa Runtime desde una entrada distinta. Continúa con [Instalación de Runtime](/guide/runtime/index.html#installation) para saber cómo elegir la entrada de Runtime correcta.
+
+## Próximos pasos
+
+- Primero elige la integración que corresponda a tu proyecto y, después, completa la instalación de paquetes y la configuración del plugin.
+- Si usas React, Vue u otro escenario específico de un framework, continúa con [Práctica](/integrations/practice/index.html).
+- Las capacidades comunes de Module Federation se siguen presentando en la [Guía](/guide/start/index.html). Usa la página de integración correspondiente para la instalación de paquetes y la configuración del plugin.

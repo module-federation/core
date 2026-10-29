@@ -1,0 +1,138 @@
+# Presets
+
+## Shared
+
+Por defecto, ciertos módulos internos de Next.js se comparten automáticamente para optimizar tu aplicación.
+Ten en cuenta que compartir manualmente estos módulos internos puede provocar errores, ya que se gestionan por ti.
+
+- `next/dynamic`
+- `next/head`
+- `next/link`
+- `next/router`
+- `next/script`
+- `react`
+- `react/`
+- `react-dom`
+- `react-dom/`
+- `styled-jsx`
+- `styled-jsx/style`
+
+<details>
+<summary> Haz clic para desplegar `DEFAULT_SHARE_SCOPE`:</summary>
+
+```ts
+export const DEFAULT_SHARE_SCOPE: SharedObject = {
+  'next/dynamic': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/head': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/link': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/router': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+  },
+  'next/image': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  'next/script': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
+  react: {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react/jsx-dev-runtime': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react/jsx-runtime': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'styled-jsx': {
+    singleton: true,
+    import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
+  },
+  'styled-jsx/style': {
+    singleton: true,
+    import: false,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
+  },
+  'styled-jsx/css': {
+    singleton: true,
+    import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
+  },
+};
+```
+</details>
+
+## Exponer páginas
+
+Puedes exponer automáticamente todas las páginas mediante el plugin
+
+```javascript
+new NextFederationPlugin({
+  name: 'remoteApp',
+  filename: '',
+  remotes: {},
+  exposes: {},
+  shared: {},
+  extraOptions: {
+    exposePages: true
+  },
+});
+```
+
+Así, las páginas quedarán disponibles para importarlas de esta forma:
+
+- `import Page from 'remoteApp/pages/index'`
+- `import Page from 'remoteApp/pages/shop/product'`
+
+## Opciones de build
+### Public Path
+
+Public Path se establece en "auto"
+
+`config.output.publicPath: "auto"`
+
+### Target
+
+El target de salida de Webpack cambia de `node` a `async-node`
+
+`config.target = "async-node"`

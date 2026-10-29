@@ -1,0 +1,71 @@
+import CommonMfManifestStatsFields from '@docs/es/_components/configure/mf-manifest-stats-common.mdx'
+
+# Referencia de campos del manifest
+
+`mf-manifest.json` se genera cuando [manifest](/configure/manifest.html) está habilitado. Es un manifest orientado al runtime destilado a partir de `mf-stats.json`, que mantiene una estructura estable y cómoda para los consumers.
+
+## Nivel superior
+
+| Campo | Tipo | Obligatorio | mf-stats.json | Descripción |
+| --- | --- | --- | --- | --- |
+| `id` | `string` | Sí | Sí | Identificador único del build |
+| `name` | `string` | Sí | Sí | Nombre de la federación |
+| `metaData` | `StatsMetaData` | Sí | Sí | Información del build y de la remote entry |
+| `shared` | `ManifestShared[]` | Sí | Sí (más completo) | Lista de shared (campos reducidos) |
+| `remotes` | `ManifestRemote[]` | Sí | Sí (más completo) | Lista de remotes (campos reducidos) |
+| `exposes` | `ManifestExpose[]` | Sí | Sí (más completo) | Lista de exposes (campos reducidos) |
+
+:::tip Impacto de disableAssetsAnalyze
+Cuando se establece `disableAssetsAnalyze: true` en [manifest](/configure/manifest.html), `mf-manifest.json` omitirá `shared` y `exposes`, y `remotes` omitirá `assets`.
+:::
+
+## Diferencias de campos frente a mf-stats.json
+
+<CommonMfManifestStatsFields />
+
+### shared (ManifestShared frente a StatsShared)
+
+`mf-manifest.json` conserva solo los campos de shared esenciales que se necesitan en tiempo de ejecución.
+
+| Campo | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `id` | Sí | Sí |
+| `name` | Sí | Sí |
+| `version` | Sí | Sí |
+| `singleton` | Sí | Sí |
+| `requiredVersion` | Sí | Sí |
+| `hash` | Sí | Sí |
+| `assets` | Sí | Sí |
+| `deps` | No | Sí |
+| `usedIn` | No | Sí |
+| `usedExports` | No | Sí |
+| `fallback` | Opcional | Sí |
+| `fallbackName` | Opcional | Sí |
+| `fallbackType` | Opcional | Sí |
+
+### remotes (ManifestRemote frente a StatsRemote)
+
+`mf-manifest.json` conserva el conjunto mínimo necesario para localizar y cargar un remote.
+
+| Campo | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `moduleName` | Sí | Sí |
+| `federationContainerName` | Sí | Sí |
+| `alias` | Sí | Sí |
+| `consumingFederationContainerName` | No | Sí |
+| `usedIn` | No | Sí |
+| `entry` / `version` (uno de los dos) | Sí | Sí |
+
+### exposes (ManifestExpose frente a StatsExpose)
+
+`mf-manifest.json` solo expone los campos que usa el consumer en tiempo de ejecución.
+
+| Campo | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `id` | Sí | Sí |
+| `name` | Sí | Sí |
+| `path` | Sí | Sí |
+| `assets` | Sí | Sí |
+| `file` | No | Sí |
+| `requires` | No | Sí |
+

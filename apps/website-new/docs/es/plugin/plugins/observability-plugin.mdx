@@ -1,0 +1,507 @@
+---
+title: Plugin de observabilidad
+description: Observa la carga de Module Federation, recopila informes de runtime y de build, y proporciona a personas o agentes de IA suficientes datos para depurar fallos.
+---
+
+# Plugin de observabilidad
+
+El plugin de observabilidad hace que la carga de Module Federation sea observable.
+Registra los eventos de carga en runtime, resume el resultado final, imprime un
+`traceId` estable cuando la carga falla y puede correlacionar los fallos de runtime
+con la información del build.
+
+El plugin está diseñado para Module Federation `2.5.0` y posteriores. Si un
+proyecto usa una versión anterior de MF, los códigos de error de runtime siguen
+ayudando con la resolución de problemas básica, pero el informe enriquecido y el
+flujo de observabilidad de la carga requieren actualizar a `2.5.0+` y activar
+este plugin.
+
+Úsalo cuando quieras responder preguntas como estas:
+
+- ¿Se cargó correctamente este remote?
+- ¿Qué fase falló: manifest, remoteEntry, init, expose, factory o shared?
+- ¿Se recuperó la carga mediante un fallback de runtime o una ruta de recuperación?
+- ¿Qué provider y qué versión de la dependencia shared se seleccionaron?
+- ¿Terminó realmente `preloadRemote` de cargar sus recursos?
+- ¿Qué informe debería dar a una persona o a un agente de programación con IA?
+
+La observabilidad de shared está limitada a la instancia de MF. Te indica qué
+instancia de MF cargó una dependencia shared, qué provider/versión registrado se
+seleccionó y el scope, la versión y la configuración eager relacionados. No
+garantiza un vínculo causal entre esa dependencia shared y un remote/expose
+concreto. Cuando un flujo implica varias dependencias shared, revisa todos los
+eventos `phase: "shared"`. `summary.shared` es solo el último resumen de shared
+observado.
+
+Si el plugin de build proporciona `customShareInfo` pero ningún provider shared
+registrado coincide con él, no siempre se trata de un error fatal. El informe
+describe la ruta gestionada como `summary.outcome: "recovered"`,
+`summary.phases.shared.status: "complete"` y
+`shared.reason: "custom-share-info-unmatched"`. Significa que el runtime continuó
+por una ruta recuperable. Revisa la configuración de shared solo si esperabas que
+se seleccionara un provider/versión concreto.
+
+La observabilidad de la precarga responde a si `preloadRemote` terminó realmente
+de cargar sus recursos. Cuando `preloadRemote` finaliza, los informes incluyen
+resultados de recursos con `phase: "preload"` que contienen la URL del recurso,
+el tipo de recurso, el estado y el `id` de la precarga. El estado puede ser
+`success`, `error`, `timeout` o `cached`. Cuando la llamada no especifica
+`exposes`, el `id` es `remoteName/*`. Cuando se proporcionan `exposes`, cada
+expose se registra por separado como `remoteName/expose`.
+
+Si quieres probar primero el flujo de informes, o revisar y exportar informes
+directamente desde la página, instala la última versión de la
+[extensión de Chrome de Module Federation](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom).
+La pestaña `Loading Trace` lee los informes del propio plugin de observabilidad
+de la página. Si la página no tiene el plugin instalado, la extensión también
+puede iniciar una recopilación temporal para la pestaña actual. Consulta
+[Loading Trace en Chrome Devtool](/guide/debug/chrome-devtool.html#loading-trace)
+para ver el flujo completo.
+
+## Instalación
+
+```bash
+npm install @module-federation/observability-plugin
+```
+
+## Runtime en el navegador
+
+Usa la entrada por defecto en el código de runtime del navegador.
+
+```ts title="mf-runtime.ts"
+import { createInstance } from '@module-federation/runtime';
+import { ObservabilityPlugin } from '@module-federation/observability-plugin';
+
+export const mf = createInstance({
+  name: 'runtime_host',
+  remotes: [
+    {
+      name: 'remote1',
+      entry: 'https://example.com/mf-manifest.json',
+    },
+  ],
+  plugins: [
+    ObservabilityPlugin({
+      level: 'verbose',
+      browser: {
+        enabled: true,
+        scope: 'runtime_host',
+      },
+    }),
+  ],
+});
+```
+
+Cuando falla una carga de Module Federation, el plugin imprime una pista
+compacta con `console.error`:
+
+```text
+[Module Federation] Observability report generated
+traceId: mf-...
+phase: manifest
+errorCode: RUNTIME-003
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+```
+
+Ejecuta el comando de `read:` en la consola del navegador para obtener el informe completo.
+
+También puedes leer los informes directamente:
+
+```ts
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getLatestReport();
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getReports({ limit: 5 });
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.findReports({
+  remote: 'remote1',
+});
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.exportReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getRuntimeState();
+```
+
+Si quieres observar las cadenas de carga en desarrollo, o si la página se queda
+en estado de carga antes de que se imprima ningún error, activa el lector del
+navegador. El modo de navegador de desarrollo imprime por defecto los logs de inicio:
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  browser: {
+    enabled: true,
+    scope: 'runtime_host',
+  },
+});
+```
+
+El plugin imprime `console.info` solo cuando empieza `loadRemote` o `loadShare`.
+La línea incluye el `traceId` y el comando de lectura. Los agentes pueden usar
+ese `traceId` para revisar el informe actual, incluidos `status: "pending"`,
+`summary.phases`, `updatedAt` y `duration`. Configura `trace.printStart: false`
+para desactivarlo en el modo de navegador de desarrollo. En el modo de navegador
+de producción, los logs de inicio están desactivados por defecto y requieren
+`trace.printStart: true`.
+
+## Runtime en producción
+
+En producción, evita exponer por defecto un lector público en el navegador.
+Mantén mínima la salida por consola y sube los informes a través de tu propio sistema.
+
+```ts title="mf-runtime.ts"
+import { ObservabilityPlugin } from '@module-federation/observability-plugin';
+
+export const observabilityPlugin = ObservabilityPlugin({
+  level: 'summary',
+  browser: {
+    mode: 'production',
+  },
+  onReport(report) {
+    if (report.status === 'error' || report.summary.outcome === 'recovered') {
+      navigator.sendBeacon(
+        '/api/mf-observability',
+        JSON.stringify({
+          traceId: report.traceId,
+          status: report.status,
+          diagnosis: report.diagnosis,
+          summary: report.summary,
+          remote: report.remote,
+          shared: report.shared,
+          moduleInfo: report.moduleInfo,
+        }),
+      );
+    }
+  },
+});
+```
+
+En el modo de navegador de producción, la pista de la consola solo contiene el
+`traceId` y el `errorCode` conocido. El informe completo debe obtenerse de
+`onReport`, de `exportReport()` o de tu propio backend de telemetría.
+
+## Analizar los informes de `onReport`
+
+`onReport` se llama cada vez que se actualiza un informe. Las apps en producción
+normalmente no necesitan guardar todos los informes correctos, pero este callback
+es el lugar adecuado para subir a tu propio sistema los fallos, las rutas
+recuperadas o determinadas cadenas de carga correctas.
+
+Estrategias habituales:
+
+- Solo resolución de problemas: sube `report.status === "error"` y
+  `report.summary.outcome === "recovered"`.
+- Auditoría de dependencias shared: sube también
+  `report.summary.outcome === "shared-resolved"` para ver qué provider y qué
+  versión se seleccionaron.
+- Auditoría de resultados de precarga: sube también
+  `report.summary.outcome === "preloaded"` o los eventos `phase: "preload"`
+  fallidos para contar los recursos de precarga correctos, fallidos, con tiempo
+  de espera agotado y en caché.
+- Observabilidad completa de la carga: toma muestras de los informes correctos
+  `runtime-loaded`, `component-loaded` y `shared-resolved`.
+
+Cuando tengas un informe, léelo en este orden:
+
+1. `diagnosis`: pista sobre el responsable, datos clave y siguientes acciones sugeridas.
+2. `summary`: resultado final. `runtime-loaded` significa que el remote se cargó,
+   `component-loaded` significa que el código de negocio informó de que estaba
+   listo, `shared-resolved` significa que se seleccionó un provider/versión de
+   shared, `preloaded` significa que los recursos de precarga terminaron,
+   `failed` significa que la carga falló y `recovered` significa que el runtime
+   continuó por una ruta recuperable.
+3. `remote` / `shared`: el objetivo de carga actual. En los informes de shared,
+   revisa `provider`, `requiredVersion`, `selectedVersion` y `availableVersions`.
+4. `moduleInfo`: información del módulo proporcionada por el despliegue, útil
+   para problemas de coincidencia del snapshot.
+5. `events`: la línea temporal ordenada, útil para encontrar la fase que se quedó bloqueada.
+
+Ejemplo:
+
+```ts
+ObservabilityPlugin({
+  level: 'summary',
+  browser: {
+    mode: 'production',
+  },
+  onReport(report) {
+    const outcome = report.summary.outcome;
+    const shouldUpload =
+      report.status === 'error' ||
+      outcome === 'recovered' ||
+      outcome === 'shared-resolved' ||
+      outcome === 'preloaded';
+
+    if (!shouldUpload) {
+      return;
+    }
+
+    navigator.sendBeacon(
+      '/api/mf-observability',
+      JSON.stringify({
+        traceId: report.traceId,
+        status: report.status,
+        outcome,
+        diagnosis: report.diagnosis,
+        summary: report.summary,
+        remote: report.remote,
+        shared: report.shared,
+        moduleInfo: report.moduleInfo,
+        events: report.events,
+      }),
+    );
+  },
+});
+```
+
+Puedes dar el informe subido a un agente de programación con IA:
+
+```text
+/mf observability
+
+Here is an MF observability report uploaded from production.
+Please tell me whether the load succeeded, where it failed, who likely owns the issue, and how to fix it.
+
+<paste report JSON>
+```
+
+import DivebellObservability from '@docs/es/_components/divebell-observability.mdx';
+
+## Observar {props.observabilityTargetName || 'Module Federation'} con {props.observabilityToolName || 'Divebell'}
+
+{props.observabilityToolContent || <DivebellObservability />}
+
+## Opciones de runtime
+
+`ObservabilityPlugin(options)` admite estas opciones de runtime:
+
+| Opción | Tipo | Valor por defecto | Descripción |
+| --- | --- | --- | --- |
+| `enabled` | `boolean` | `true` | Activa o desactiva el plugin. Un plugin desactivado no registra eventos ni genera informes. |
+| `level` | `'summary' \| 'verbose'` | `'summary'` | Nivel de detalle del informe. `verbose` conserva la línea temporal completa de eventos. |
+| `maxEvents` | `number` | límite integrado | Número máximo de eventos conservados por instancia del plugin. |
+| `console` | `boolean` | `true` | Imprime una pista breve con `console.error` cuando falla una carga. |
+| `printRawStack` | `boolean` | `false` | Imprime en la consola el stack original del error. Mantenlo desactivado por defecto en producción. |
+| `stackTrace.enabled` | `boolean` | `true` | Guarda un stack recortado en el informe. |
+| `stackTrace.maxLines` | `number` | límite integrado | Número máximo de líneas del stack que se guardan en el informe. |
+| `stackTrace.maxLength` | `number` | límite integrado | Número máximo de caracteres del stack que se guardan en el informe. |
+| `collector` | `boolean \| { enabled?: boolean; port?: number }` | `false` | Envía por POST los eventos de runtime del navegador a un colector local. `true` usa `127.0.0.1:17891`; la configuración personalizada solo necesita un `port`. Está pensado para la depuración local con IA, y el plugin de runtime no inicia el servidor. |
+| `browser.enabled` | `boolean` | `false` | Expone el lector del navegador en `window.__FEDERATION__.__OBSERVABILITY__`. |
+| `browser.scope` | `string` | nombre del host | Namespace del lector del navegador, por ejemplo `runtime_host`. |
+| `browser.mode` | `'development' \| 'production'` | `'development'` | Modo de salida en el navegador. El modo de producción mantiene mínimas las pistas de la consola. |
+| `trace.printStart` | `boolean` | `true` en el modo de navegador de desarrollo, `false` en el modo de navegador de producción | Imprime `console.info` cuando empieza `loadRemote` o `loadShare` para que los agentes de desarrollo puedan obtener el `traceId`. El modo de producción requiere un `true` explícito. |
+| `react.enabled` | `boolean` | `true` | Interruptor general de las opciones de depuración específicas de React. Configúralo como `false` para desactivar todo el envoltorio de React. |
+| `react.injectLoadedCallback` | `boolean` | `false` | Envuelve explícitamente los componentes React remotos que coinciden e inyecta `onMFRemoteLoaded`. Esto cambia la referencia del componente; úsalo como opción de depuración temporal y elimínalo cuando se haya corregido el problema. |
+| `react.remoteIds` | `string[]` | `[]` | Limita la inyección del callback a peticiones remotas concretas, como `remote/Button` o `./Button`. Vacío significa que no hay filtro de remotes. |
+| `react.defaultExportMode` | `'preserve' \| 'component'` | automático | Controla si los remotes `{ default: Component }` devuelven directamente el componente envuelto. Normalmente conviene mantener el valor por defecto. |
+| `onEvent` | `(event, report, context) => void` | `undefined` | Se llama cada vez que se registra un evento de observabilidad. |
+| `onReport` | `(report, context) => void` | `undefined` | Se llama cada vez que se actualiza un informe. Las apps en producción suelen subir los informes aquí. |
+| `onRawError` | `(error, context) => void` | `undefined` | Se llama con el objeto de error original para integrarlo con tu propio sistema de errores. |
+
+## Runtime en Node o SSR
+
+Usa la entrada de Node cuando quieras archivos de informe locales.
+
+```ts title="mf-node-runtime.ts"
+import { createInstance } from '@module-federation/runtime';
+import { ObservabilityPlugin } from '@module-federation/observability-plugin/node';
+
+createInstance({
+  name: 'node_host',
+  remotes: [],
+  plugins: [
+    ObservabilityPlugin({
+      level: 'verbose',
+      fileOutput: true,
+      directory: '.mf/observability',
+    }),
+  ],
+});
+```
+
+La entrada de Node escribe:
+
+- `.mf/observability/latest.json`: el último informe completo
+- `.mf/observability/events.jsonl`: flujo de eventos de varias trazas
+
+Lee primero `latest.json`. Usa `events.jsonl` solo cuando necesites el orden o
+varias trazas.
+
+## Observabilidad del build
+
+Añade el plugin de build junto a tu plugin de build de Module Federation cuando
+quieras evidencias independientes del lado del build.
+
+```js title="webpack.config.js"
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
+const {
+  ObservabilityBuildPlugin,
+} = require('@module-federation/observability-plugin/build');
+
+const moduleFederationOptions = {
+  name: 'runtime_host',
+  remotes: {
+    remote1: 'remote1@https://example.com/mf-manifest.json',
+  },
+  exposes: {
+    './Button': './src/Button',
+  },
+  shared: {
+    react: { singleton: true, requiredVersion: '^18.0.0' },
+  },
+};
+
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin(moduleFederationOptions),
+    new ObservabilityBuildPlugin({
+      moduleFederation: moduleFederationOptions,
+    }),
+  ],
+};
+```
+
+La observabilidad del build puede escribir:
+
+- `.mf/observability/build-info.json`
+- `.mf/observability/build-report.json`
+
+Los informes de runtime no incluyen estos archivos. Cuando la depuración necesite
+evidencias del build, lee el archivo del build por separado y compáralo con el
+informe de runtime.
+
+## Marcar el éxito de negocio
+
+Module Federation puede saber que un módulo remoto se ha cargado. No siempre
+puede saber si tu componente de negocio ha terminado su propia carga de datos,
+el renderizado de gráficos o la inicialización de un SDK.
+
+Cuando `react.injectLoadedCallback` está activado explícitamente, el plugin
+inyecta una prop `onMFRemoteLoaded` en los componentes React remotos que
+coinciden. El producer puede llamarla cuando se cumpla su propia condición de
+"listo":
+
+```tsx
+import { useEffect } from 'react';
+import type { OnMFRemoteLoaded } from '@module-federation/observability-plugin';
+
+export default function RemotePanel({
+  onMFRemoteLoaded,
+}: {
+  onMFRemoteLoaded?: OnMFRemoteLoaded;
+}) {
+  useEffect(() => {
+    onMFRemoteLoaded?.({
+      metadata: {
+        dataReady: true,
+      },
+    });
+  }, [onMFRemoteLoaded]);
+
+  return <section>Remote panel</section>;
+}
+```
+
+El código del lado del consumer puede seguir llamando directamente al método de
+la instancia cuando lo necesite:
+
+```ts
+import { getInstance } from '@module-federation/runtime';
+import '@module-federation/observability-plugin';
+
+getInstance()?.markComponentLoaded({
+  requestId: 'remote1/Button',
+  componentName: 'Button',
+  metadata: {
+    route: '/dashboard',
+  },
+});
+```
+
+El informe incluirá `component:business-loaded` y
+`summary.outcome: "component-loaded"`.
+
+## Inyectar el callback de carga de React
+
+Para desarrollo, depuración con IA o depuración temporal en producción, puedes
+inyectar explícitamente un callback de carga en los componentes React remotos
+que coinciden:
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  react: {
+    injectLoadedCallback: true,
+    remoteIds: ['remote/Button'],
+  },
+});
+```
+
+Cuando está activado, el plugin intenta detectar los componentes de función de
+React remotos después de que `loadRemote` tenga éxito y los envuelve con un
+componente que no añade nodos al DOM. El envoltorio solo inyecta la prop
+`onMFRemoteLoaded`. No observa el montaje de React, el ciclo de vida del
+renderizado ni los tiempos de espera. Cuando el producer llama a
+`props.onMFRemoteLoaded?.()`, el informe registra `component:business-loaded`.
+
+Si `summary.componentLoaded` es `false` después de activar
+`react.injectLoadedCallback`, comprueba primero si el código fuente del producer
+llama realmente a `props.onMFRemoteLoaded?.(...)`. Si no lo hace, el informe solo
+puede demostrar que el recurso remoto se cargó; no puede demostrar si el
+componente alcanzó el punto de "listo" de negocio del producer. Si no tienes
+acceso al código fuente del producer, pide a su responsable que confirme si se
+añadió el callback.
+
+Esta opción cambia la referencia del componente porque `loadRemote` devuelve un
+componente envoltorio. Usa `remoteIds` para mantener acotado el alcance de las
+coincidencias y elimina esta opción cuando se haya corregido el problema en producción.
+
+## Uso con la skill `mf`
+
+Instala la skill:
+
+```bash
+npx skills add module-federation/agent-skills --skill mf -y
+```
+
+Cuando la consola imprima una pista de observabilidad, pídele a tu agente:
+
+```text
+/mf observability
+I saw this Module Federation console error:
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+Please read the report and fix the issue.
+```
+
+Si estás en Node o SSR, dale al agente la ruta del archivo:
+
+```text
+/mf observability
+Read .mf/observability/latest.json and explain the likely owner and fix.
+```
+
+Si tu app en producción sube informes, dale al agente el informe subido o el
+`traceId`:
+
+```text
+/mf observability
+Here is the uploaded report for traceId mf-...
+Tell me whether this is a host, remote, shared, network, or build issue.
+```
+
+## Qué lee primero la IA
+
+La skill lee los campos en este orden:
+
+1. `diagnosis`
+2. `summary`
+3. `moduleInfo`
+4. `events`
+
+Si se necesitan evidencias del lado del build, lee `.mf/observability/build-info.json` o
+`.mf/observability/build-report.json` como un archivo independiente.
+
+Los informes omiten los campos `undefined`. Si falta un campo, considéralo no
+observado o no relevante para esta traza.

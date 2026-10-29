@@ -1,0 +1,51 @@
+# shareScope
+
+`shareScope` especifica en qué pools de dependencias compartidas (Share Scope) participa un producer. Puedes pensar en un Share Scope como un pool de dependencias compartidas con nombre: las dependencias solo se reutilizan dentro del mismo Scope.
+
+- Tipo: `string | string[]`
+- Obligatorio: No
+- Valor por defecto: `'default'`
+
+## Qué hace
+
+- Controla qué Share Scopes inicializa un producer en runtime.
+- Funciona junto con `shared[*].shareScope`: una dependencia compartida solo participa en el Scope al que está asignada.
+- Funciona junto con `remotes[remote].shareScope`: el consumer debe alinear con el producer los Scopes que quiere reutilizar; de lo contrario, los Scopes que falten se tratan como vacíos y no se pueden reutilizar.
+
+## Ejemplos
+
+### Un único Scope (predeterminado)
+
+```ts
+new ModuleFederationPlugin({
+  name: 'app_remote',
+  shareScope: 'default',
+});
+```
+
+### Varios Scopes (pools compartidos aislados)
+
+```ts
+new ModuleFederationPlugin({
+  name: 'app_remote',
+  shareScope: ['default', 'scope1'],
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: false,
+      shareScope: 'default',
+    },
+    '@company/design-system': {
+      singleton: true,
+      requiredVersion: false,
+      shareScope: 'scope1',
+    },
+  },
+});
+```
+
+## Notas
+
+- `shareScope` declara qué Share Scopes inicializa este módulo. No coloca automáticamente las dependencias en esos Scopes; eso lo controla el `shareScope` de cada entrada de `shared`.
+- Para reutilizar realmente dependencias entre aplicaciones, el producer y el consumer normalmente tienen que acordar los mismos Scopes. Consulta [remotes.shareScope](/configure/remotes.html#sharescope).
+

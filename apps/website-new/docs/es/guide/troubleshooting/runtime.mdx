@@ -1,0 +1,526 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+import EnableAsyncEntry from '@docs/es/_components/EnableAsyncEntry';
+import Runtime from '@docs/es/_components/runtime/index';
+import { Tab, Tabs } from '@theme';
+
+# Runtime
+
+Esta página recopila los códigos de error relacionados con el runtime y orientación habitual para resolver problemas.
+
+## Códigos de error
+
+- [RUNTIME-001](#runtime-001)
+- [RUNTIME-002](#runtime-002)
+- [RUNTIME-003](#runtime-003)
+- [RUNTIME-004](#runtime-004)
+- [RUNTIME-005](#runtime-005)
+- [RUNTIME-006](#runtime-006)
+- [RUNTIME-007](#runtime-007)
+- [RUNTIME-008](#runtime-008)
+- [RUNTIME-009](#runtime-009)
+- [RUNTIME-010](#runtime-010)
+- [RUNTIME-012](#runtime-012)
+- [RUNTIME-013](#runtime-013)
+- [RUNTIME-014](#runtime-014)
+- [RUNTIME-015](#runtime-015)
+
+## RUNTIME-001
+
+<ErrorCodeTitle code='RUNTIME-001'/>
+
+### Causas
+
+Cuando el archivo de entrada del producer se carga con normalidad, el producer se registra en el objeto global (globalThis/window) y se puede acceder a él mediante window[remoteEntryKey].
+
+Sin embargo, durante este proceso de carga, no se puede acceder a los producers registrados. Hay cuatro posibles causas de este error:
+
+1. La remoteEntryUrl no es correcta.
+2. El archivo remoteEntry no monta el contenedor correctamente.
+3. Un problema de red impide acceder al recurso.
+4. El remote tiene otro formato y no se ha especificado ni en el plugin ni en los detalles de los remotes en `init`.
+
+### Soluciones
+
+Para cada causa hay una solución correspondiente:
+
+1. Comprueba si la remoteEntryUrl es correcta.
+  - Si usas manifest, revisa los campos publicPath y remoteEntry.name del manifest
+2. Si el proyecto usa rspack para el build, comprueba si [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) está definido en la configuración final del build. Si es así, elimina esa configuración.
+3. Comprueba si el recurso es accesible desde fuera.
+4. Si cargas un remote ESM desde un host que no es ESM
+  - establece `type: 'module'` en la configuración del remote
+
+### Obtener información de error más detallada {#getting-more-detailed-error-information}
+
+Si has confirmado que `window[remoteEntryKey]` no existe (es decir, el script no consiguió registrar el contenedor), pero en la consola no aparece ningún mensaje de error claro, puede deberse a que el script del producer es un recurso cross-origin. Por defecto, los navegadores ocultan los detalles de error de los scripts cross-origin (`filename`, `lineno` y `message` quedan vacíos).
+
+Puedes añadir un atributo `crossorigin` al script mediante el hook [`createScript`](/plugin/dev/index.html#createscript), siempre que el servidor del producer tenga configurado `Access-Control-Allow-Origin`.
+
+Primero, crea el archivo del plugin de runtime:
+
+```ts title="script-crossorigin-plugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+
+export default function MFScriptPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'script-crossorigin-plugin',
+    createScript({ url }) {
+      const script = document.createElement('script');
+      script.src = url;
+      script.crossOrigin = 'anonymous';
+      return script;
+    },
+    // If preloadRemote is used in your project, also implement createLink to keep
+    // crossorigin consistent. Without this, the preload (no-cors) and actual load
+    // (cors) will have different cache keys, causing the preload to be wasted.
+    createLink({ url, attrs }) {
+      const link = document.createElement('link');
+      link.setAttribute('href', url);
+      link.setAttribute('crossorigin', 'anonymous');
+      if (attrs) {
+        Object.entries(attrs).forEach(([key, value]) => {
+          if (key !== 'crossorigin') {
+            link.setAttribute(key, String(value));
+          }
+        });
+      }
+      return link;
+    },
+  };
+}
+```
+
+Después, registra el plugin:
+
+<Tabs>
+  <Tab label="Plugin de build">
+
+Regístralo mediante el campo `runtimePlugins` de tu configuración de build:
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: { /* ... */ },
+      runtimePlugins: [
+        path.resolve(__dirname, './script-crossorigin-plugin.ts'),
+      ],
+    }),
+  ],
+};
+```
+
+  </Tab>
+  <Tab label="API de runtime">
+
+Regístralo mediante el campo `plugins` de la API `init`:
+
+```ts title="index.ts"
+import { init } from '@module-federation/runtime';
+import MFScriptPlugin from './script-crossorigin-plugin';
+
+init({
+  name: 'host',
+  remotes: [/* ... */],
+  plugins: [MFScriptPlugin()],
+});
+```
+
+  </Tab>
+</Tabs>
+
+Una vez añadido, las excepciones de runtime lanzadas por scripts cross-origin incluirán `filename`, `lineno` y `message` completos, lo que facilita localizar el error concreto.
+
+
+:::warning
+
+* Después de añadir este plugin, también debes establecer `output.crossOriginLoading` en `'anonymous'` en la configuración de build de **todos los producers**; de lo contrario, la precarga dejará de funcionar.
+
+```js
+// webpack.config.js / rspack.config.js (producer side)
+module.exports = {
+  output: {
+    crossOriginLoading: 'anonymous',
+  },
+};
+```
+
+* Si el servidor no tiene configuradas las cabeceras CORS, añadir el atributo `crossorigin` hará, por el contrario, que el script no se cargue (error de red). Confirma que el servidor está bien configurado antes de usar este enfoque.
+
+:::
+
+## RUNTIME-002
+
+<ErrorCodeTitle code='RUNTIME-002'/>
+
+### Causas
+
+No se puede obtener la función `init` del contenedor del producer.
+
+Un contenedor de producer normal exporta `{ get, init }`. En esta carga, `init` es `undefined`, por lo que se lanza un error.
+
+### Soluciones
+
+Revisa en el siguiente orden:
+
+1. Antes de cargar el producer, ejecuta window[remoteEntryKey] en la `terminal` para comprobar si ese objeto ya está ocupado. Si es así, cambia el [name](/configure/name.html#name) del producer
+2. Si el proyecto usa rspack para el build, comprueba si [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) está definido en la configuración final del build. Si es así, elimina esa configuración.
+
+## RUNTIME-003
+
+<ErrorCodeTitle code='RUNTIME-003'/>
+
+### Causas
+
+No se pudo cargar el manifest.
+
+### Soluciones
+
+1. Comprueba si se puede acceder con normalidad a la manifestUrl
+2. Comprueba si la manifestUrl tiene problemas de cross-origin
+
+## RUNTIME-004
+
+<ErrorCodeTitle code='RUNTIME-004'/>
+
+### Causas
+
+No se encontró ningún módulo remoto coincidente. Este error puede deberse a las siguientes causas:
+
+1. La información del producer no está registrada en el consumer
+2. requestId usa un alias o un nombre incorrecto
+3. Hay un hook `beforeRequest` registrado que no devuelve los datos correctos
+
+### Soluciones
+
+1. Comprueba si la información del producer de esta petición está registrada en el consumer
+2. Compara si la información del producer registrada (name/alias) coincide con requestId
+3. Comprueba si hay un hook `beforeRequest` registrado y corrige el plugin de runtime correspondiente
+
+## RUNTIME-005
+
+<ErrorCodeTitle code='RUNTIME-005'/>
+
+### Causas
+
+Una vez configurado shared, la biblioteca de dependencia correspondiente se considera un módulo asíncrono. Si la entrada asíncrona no está habilitada y no se ha establecido `eager: true`, se produce este error.
+
+### Soluciones
+
+Elige una de las dos opciones:
+
+1. Habilitar la entrada asíncrona
+
+<EnableAsyncEntry />
+
+2. Establecer `eager: true` en shared
+
+## RUNTIME-006
+
+<ErrorCodeTitle code='RUNTIME-006'/>
+
+### Causas
+
+La dependencia shared actual no está cargada, por lo que no se puede usar `loadShareSync`.
+
+### Soluciones
+
+Elige una de las dos opciones:
+
+1. Usa `loadShare` en lugar de `loadShareSync`
+2. Proporciona la función [lib](/guide/runtime/runtime-api.html#loadshare) a la dependencia shared actual
+
+## RUNTIME-007
+
+<ErrorCodeTitle code='RUNTIME-007'/>
+
+### Causas
+
+La entrada del remote está definida como un número de versión en lugar de una URL de recurso, y la plataforma de despliegue no entrega los datos correctos.
+
+### Soluciones
+
+Comprueba si globalSnapshot contiene un objeto con la clave `${moduleName}:${moduleInfo.version}`. Si no es así, comprueba si hay algún problema en el pipeline de entrega de datos de la plataforma de despliegue.
+
+## RUNTIME-008
+
+<ErrorCodeTitle code='RUNTIME-008'/>
+
+### Causas
+
+No se pudo cargar el script de entrada del remote. El mensaje de error incluye un motivo de fallo concreto, que pertenece a una de estas dos categorías:
+
+**1. ScriptNetworkError: fallo a nivel de red**
+
+No se pudo descargar el archivo del script. Causas habituales:
+
+- URL del recurso incorrecta (el servidor devuelve 404)
+- Inestabilidad de la red o timeout de la petición
+- Configuración incorrecta de cross-origin (CORS)
+- Nodo de CDN no disponible
+
+**2. ScriptExecutionError: error de runtime durante la ejecución del script**
+
+El archivo del script se descargó correctamente, pero su IIFE lanzó una excepción de runtime durante la ejecución. El mensaje de error contendrá `ScriptExecutionError` junto con la excepción original (por ejemplo, `TypeError: ...`). Causas habituales:
+
+- Sintaxis incompatible en el código del producer (por ejemplo, APIs del navegador no soportadas)
+- La entrada del producer depende de una variable global que no se inicializó correctamente
+- Salida del build corrupta o incompleta
+
+### Soluciones
+
+**Para ScriptNetworkError:**
+
+1. Abre directamente en el navegador la URL del recurso que aparece en el mensaje de error para confirmar que es accesible
+2. Verifica la configuración de `publicPath` y de la dirección de `remoteEntry` del producer
+3. Revisa si hay problemas de CORS; si es necesario, configura CORS en el servidor o usa el hook [`createScript`](/plugin/dev/index.html#createscript) para añadir un atributo `crossOrigin`
+4. En redes inestables, añade un mecanismo de reintento; consulta [Reintentos en runtime](/plugin/plugins/retry-plugin.html)
+
+**Para ScriptExecutionError:**
+
+1. Examina la excepción original del mensaje de error (`TypeError` / `SyntaxError`, etc.) para localizar el error concreto en el archivo de entrada del producer
+2. Verifica que el target de build del producer es compatible con el rango de navegadores que soporta el consumer
+3. Descarga el archivo de entrada del remote desde el panel Network de las DevTools del navegador y ejecútalo manualmente para reproducir el error
+
+:::tip
+Un `ScriptExecutionError` significa que el script se descargó correctamente: reintentar no solucionará este tipo de error. Céntrate primero en investigar problemas de compatibilidad o errores de runtime en el código del producer.
+:::
+
+### Obtener información de error más detallada
+
+Antes de la **v2.3.0**, los mensajes de error de RUNTIME-008 podían no incluir los detalles concretos de la excepción. Si el mensaje de error no es lo bastante descriptivo, consulta 「[RUNTIME-001 Obtener información de error más detallada](#getting-more-detailed-error-information)」 para ver cómo añadir el atributo `crossorigin` y obtener la traza de error completa.
+
+## RUNTIME-009
+
+<ErrorCodeTitle code='RUNTIME-009'/>
+
+### Causa
+
+No se usa el plugin de build, sino que se llama directamente a la API de runtime.
+
+### Solución
+
+<Runtime />
+
+## RUNTIME-010
+
+<ErrorCodeTitle code='RUNTIME-010'/>
+
+### Causa
+
+Se llamó a `initOptions` con un `name` distinto del usado durante la inicialización. El `name` es el identificador único de la instancia y no se puede cambiar después de la inicialización.
+
+### Solución
+
+- Si necesitas una instancia con un `name` distinto, usa la API `createInstance` para crear una nueva instancia en lugar de modificar la existente.
+- Si no necesitas cambiar el `name`, omite el campo `name` en la llamada a `initOptions` o mantenlo igual que el valor usado durante la inicialización.
+
+## RUNTIME-012
+
+<ErrorCodeTitle code='RUNTIME-012'/>
+
+### Causa
+
+Al cargar un módulo shared, el `getter` local no es una función (es `undefined` u otro tipo que no es una función).
+
+Cuando `loadShare` devuelve `false` (es decir, el remote no proporcionó el módulo shared), el runtime recurre al `getter` local para resolver el módulo. Si en ese momento el `getter` no es una función, ni el remote ni el fallback local pueden suministrar el módulo, y se lanza este error.
+
+**Causa más habitual**: en alguna de las aplicaciones se ha establecido `import: false` para el módulo shared, lo que indica al bundler que no incluya ese módulo localmente. En ese caso, la aplicación host **debe** proporcionar el módulo mediante una función `lib`; si ningún host lo proporciona, el fallback no tiene nada a lo que llamar.
+
+### Solución
+
+1. **Revisa la configuración de `shared.import`**
+
+   Si estableces `import: false` para este módulo shared en cualquier aplicación, debes asegurarte de que el host proporcione la función `lib` correspondiente, por ejemplo:
+
+   ```ts title="host/webpack.config.ts"
+   new ModuleFederationPlugin({
+     name: 'host',
+     shared: {
+       react: {
+         singleton: true,
+         lib: () => require('react'), // host must provide lib
+       },
+     },
+   });
+   ```
+
+2. **Elimina `import: false`**
+
+   Si la optimización no es necesaria, elimina `import: false` y deja que el bundler gestione la dependencia automáticamente.
+
+3. **Verifica el nombre y el rango de versiones del módulo shared**
+
+   Asegúrate de que el nombre y el rango de versiones del módulo shared coinciden entre el host y todos los remotes, de modo que se encuentre una coincidencia y nunca se llegue al fallback con un `getter` vacío.
+
+## RUNTIME-013
+
+<ErrorCodeTitle code='RUNTIME-013'/>
+
+### Causa
+
+Se puede acceder al manifest y parsearlo como JSON, pero no es un manifest de Module Federation válido.
+
+El caso más habitual es que falten campos obligatorios como `metaData`, `exposes` o `shared`. Normalmente esto significa que la URL devolvió un JSON incorrecto, que un gateway devolvió datos incompletos o que el producer no emitió un manifest de MF válido.
+
+### Solución
+
+1. Abre directamente la manifestUrl del mensaje de error y confirma que devuelve un manifest de MF, y no otra respuesta JSON de negocio o un objeto vacío
+2. Comprueba que la generación del manifest está habilitada en el producer y que el artefacto del build contiene `metaData`, `exposes` y `shared`
+3. Comprueba si un gateway, una plataforma de despliegue o un proxy reescribió la respuesta del manifest
+4. Si el plugin de observabilidad está habilitado, empieza por `diagnosis.facts.url` y `diagnosis.actions`
+
+## RUNTIME-014
+
+<ErrorCodeTitle code='RUNTIME-014'/>
+
+### Causa
+
+La entrada del producer se cargó e inicializó, pero el producer no exportó el expose solicitado.
+
+Las causas habituales incluyen:
+
+1. El nombre del expose solicitado por el consumer es incorrecto
+2. La configuración de build del producer no declara este expose
+3. El prefijo `./`, las mayúsculas y minúsculas o el alias no coinciden
+4. El consumer usa un artefacto de build antiguo y el último expose del producer no se ha desplegado
+
+### Solución
+
+1. Compara la petición `loadRemote('remote/expose')` del consumer con la configuración `exposes` del producer
+2. Comprueba si el expose necesita el prefijo `./` y verifica que las mayúsculas y minúsculas coincidan exactamente
+3. Si cargas mediante manifest, comprueba si la lista `exposes` del manifest contiene el módulo
+4. Si el plugin de observabilidad está habilitado, examina `diagnosis.facts.expose` y la acción `check-expose` relacionada
+
+## RUNTIME-015
+
+<ErrorCodeTitle code='RUNTIME-015'/>
+
+### Causa
+
+La entrada del producer se cargó, pero falló la inicialización del contenedor.
+
+Esto suele ocurrir mientras el producer ejecuta `init`, por ejemplo porque falló la inicialización de las dependencias shared, los datos de shareScope no coincidían con lo esperado o la entrada del producer lanzó un error interno.
+
+### Solución
+
+1. Lee el error original en el mensaje; apunta al fallo real lanzado durante `init`
+2. Revisa la configuración de shared entre el host y el producer, especialmente shareScope, singleton, strictVersion, requiredVersion y eager
+3. Confirma que el tipo de remoteEntry y el nombre global del producer coinciden con la configuración del consumer
+4. Si el plugin de observabilidad está habilitado, examina `summary.phases.remoteEntry`, `diagnosis.facts` y la acción `check-shared-provider`
+
+## Problemas habituales (sin código de error)
+
+### Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+
+#### Mensaje de error
+
+:::danger Mensaje de error del navegador
+Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+
+You might have mismatching versions of React and the renderer (such as React DOM)
+
+You might be breaking the Rules of Hooks
+
+You might have more than one copy of React in the same app
+:::
+
+:::danger Mensaje de error del navegador
+Uncaught TypeError: Cannot read properties on null (reading `useState`)
+:::
+
+#### Solución
+
+Este error es un problema de múltiples instancias de React, que suele ocurrir cuando react no reutiliza la misma instancia.
+Puedes evitar este problema configurando `shared` y estableciendo el modo singleton con `singleton: true`.
+
+```ts title="modern.config.js"
+{
+    ...
+    new ModuleFederationPlugin({
+            ...,
+         // Default basic configuration
+         // shared: [
+         //   'react',
+         //   'react-dom',
+         //   'my-custom-module'
+         // ]
+
+         // Configuration with more specificity
+            shared: {
+                react: { singleton: true, },
+                'react-dom': { singleton: true, },
+                'my-custom-module': { singleton: true, },
+                ...
+            },
+        })
+      ])
+  }
+```
+
+### HMR falla
+
+* Usa [React Developer Tools](https://chromewebstore.google.com/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
+
+* Si shared lo proporciona un host en producción, usa [Module Federation DevTools](/guide/debug/chrome-devtool.html) y haz clic en el botón `Enable HMR`.
+
+![](@public/guide/chrome-devtools/mf-devtool-hmr.jpg)
+
+### Los imports de subrutas no se comparten (se carga una dependencia duplicada) {#subpath-imports-are-not-shared-duplicate-dependency-loaded}
+
+#### Síntoma
+
+- El navegador descarga dos copias del mismo paquete (por ejemplo, `react-dom`)
+- React lanza errores "Invalid hook call" o de discrepancia de hidratación
+- `loadShare` devuelve `false` para imports de subrutas como `react-dom/client`
+
+#### Causa raíz
+
+La configuración de `shared` solo incluye el nombre exacto del paquete, por ejemplo `'react-dom'`. Module Federation intercepta los imports en tiempo de build. Un nombre exacto solo intercepta `import 'react-dom'`; los imports de subrutas como `import { createRoot } from 'react-dom/client'` eluden la configuración de shared y se incluyen localmente en el bundle.
+
+#### Solución
+
+Usa una **barra final** para habilitar la coincidencia por prefijo en cualquier paquete que exponga subrutas:
+
+```ts title="rspack.config.ts"
+shared: {
+  react: { singleton: true },
+  'react-dom': { singleton: true },      // exact match — only 'react-dom'
+  'react-dom/': { singleton: true },     // prefix match — 'react-dom/client', 'react-dom/server', ...
+  'react/': { singleton: true },         // prefix match — 'react/jsx-runtime', 'react/jsx-dev-runtime', ...
+}
+```
+
+Lo mismo se aplica a los paquetes con scope (`'@scope/package/'`) y a las bibliotecas de utilidades (`'lodash/'`).
+
+### A preload for 'http://resource-url' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.
+
+#### Causa
+
+Cuando la URL del producer es un manifest, al cargar el módulo de ese producer se precargan automáticamente los recursos correspondientes. Si aparece la advertencia anterior, se debe a que la precarga por defecto no configura credentials, mientras que el `load remote script` real sí incluye las credentials correspondientes, lo que hace que la precarga falle.
+
+#### Solución
+
+Añade un plugin de runtime mediante [runtimePlugins](/configure/runtimeplugins.html) y configura el atributo `crossorigin` en el hook [createLink](/plugin/dev/index.html#createlink). Su valor debe coincidir con el del `load script` real.
+
+Por ejemplo, para cambiar a `anonymous` el atributo crossorigin del link precargado:
+
+```ts title="runtimePlugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+
+export default function MFLinkPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'link-plugin',
+    createLink({ url }) {
+      const link = document.createElement('link');
+      link.setAttribute('href', url);
+      link.setAttribute('rel', 'preload');
+      link.setAttribute('as', 'script');
+      link.setAttribute('crossorigin', 'anonymous');
+      return link
+    }
+  };
+}
+```

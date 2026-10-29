@@ -1,0 +1,49 @@
+# Precarga de datos
+
+La función `prefetch` se usa para precargar recursos y **datos** de los módulos remotos, lo que mejora el rendimiento de la aplicación y la experiencia de usuario. Al cargar de antemano el contenido necesario antes de que el usuario acceda a una funcionalidad, los tiempos de espera pueden reducirse considerablemente.
+
+import React from 'react';
+import PrefetchTip from '@docs/es/_components/data-fetch/prefetch-tip';
+
+{props.prefetchTip || React.createElement(PrefetchTip)}
+
+## Cuándo usarla
+
+`prefetch` es la opción ideal cuando quieres precargar el JavaScript, el CSS o los datos asociados a un componente sin renderizarlo de inmediato. Por ejemplo, puedes activar `prefetch` cuando el usuario pasa el cursor sobre un enlace o un botón, de modo que, cuando realmente haga clic, el componente se renderice más rápido.
+
+## API
+
+```typescript
+interface ModuleFederation {
+  prefetch(options: {
+    id: string;
+    dataFetchParams?: Record<string, any>;
+    preloadComponentResource?: boolean;
+  }): void;
+}
+```
+
+### Parámetros
+
+```ts
+type PrefetchOptions = {
+  // Unique identifier for the remote module, in the format '<remoteName>/<exposedModule>', e.g. 'shop/Button'.
+  id: string;
+
+  // If the remote component has a data fetch function, this object will be passed to it.
+  dataFetchParams?: Record<string, any>;
+
+  // Whether to preload the component's resources, including JavaScript chunks and associated CSS files. Defaults to false.
+  preloadComponentResource?: boolean;
+};
+```
+
+## Ejemplos de uso
+
+Supongamos que tenemos una aplicación remota `shop` que expone un componente `Button`, y que este componente tiene asociada una función de obtención de datos.
+
+import PrefetchDemo from '@docs/es/_components/data-fetch/prefetch-demo';
+
+{props.prefetchDemo || React.createElement(PrefetchDemo)}
+
+Usando `prefetch` con flexibilidad, puedes controlar con precisión el momento en que se cargan los recursos según los escenarios concretos de tu aplicación y el comportamiento de los usuarios, optimizando así el rendimiento de la aplicación.

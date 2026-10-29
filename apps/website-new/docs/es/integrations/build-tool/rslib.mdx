@@ -1,0 +1,75 @@
+# Rslib
+
+Rslib puede usar `@module-federation/rsbuild-plugin` para hacer el build de producers de Module Federation. Es una buena opción cuando una biblioteca de componentes, un módulo de negocio o un producer de SSR debe publicarse como un artefacto independiente para que otras aplicaciones lo consuman.
+
+## Inicio rápido
+
+### Instalación
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rsbuild-plugin --save-dev',
+    yarn: 'yarn add @module-federation/rsbuild-plugin --save-dev',
+    pnpm: 'pnpm add @module-federation/rsbuild-plugin --save-dev',
+    bun: 'bun add @module-federation/rsbuild-plugin --save-dev',
+  }}
+/>
+
+### Registrar el plugin
+
+```ts title='rslib.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rslib/core';
+
+export default defineConfig({
+  lib: [
+    {
+      format: 'mf',
+      output: {
+        distPath: {
+          root: './dist/mf',
+        },
+        assetPrefix: 'https://example.com/mf/',
+      },
+      plugins: [
+        pluginModuleFederation({
+          name: 'rslib_provider',
+          exposes: {
+            '.': './src/index.tsx',
+          },
+          shared: {
+            react: {
+              singleton: true,
+            },
+            'react-dom': {
+              singleton: true,
+            },
+          },
+        }),
+      ],
+    },
+  ],
+});
+```
+
+## SSR
+
+Si necesitas generar artefactos tanto para el navegador como para Node.js, usa `target: 'dual'` en las opciones del plugin.
+
+```ts title='rslib.config.ts'
+pluginModuleFederation(
+  {
+    name: 'rslib_provider',
+    exposes: {
+      '.': './src/index.tsx',
+    },
+  },
+  {
+    target: 'dual',
+  },
+);
+```
+
+Para ver todas las opciones del plugin, consulta la [configuración del plugin de Rsbuild](/integrations/build-tool/rsbuild.html#rsbuildoptions).

@@ -1,0 +1,19 @@
+[
+  {
+    "type": "file",
+    "name": "runtime-size-optimization",
+    "label": "Optimizar el tamaño del runtime"
+  },
+  "shared-tree-shaking",
+  "multiple-shared-scope",
+  {
+    "type": "file",
+    "name": "manifest-fields",
+    "label": "Referencia de campos del manifest"
+  },
+  {
+    "type": "file",
+    "name": "stats-fields",
+    "label": "Referencia de campos de stats"
+  }
+]

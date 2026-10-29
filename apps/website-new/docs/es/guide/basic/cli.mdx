@@ -1,0 +1,42 @@
+# Herramienta de línea de comandos
+
+{props.name || 'Module Federation'} ofrece una herramienta de línea de comandos ligera, <code>{props.cmd || 'mf'}</code>, incluida en <code>{props.cmdTool || '@module-federation/enhanced'}</code>.
+
+:::note
+Si ya completaste la integración siguiendo una [guía de integración](/integrations/index.html), lo habitual es que <code>{props.cmdTool || '@module-federation/enhanced'}</code> ya esté en tu árbol de dependencias y que este comando esté disponible de inmediato. Si no es así, instálalo manualmente en tu proyecto antes de ejecutar los comandos siguientes.
+:::
+
+## Ver todos los comandos
+
+import React from 'react';
+import ViewAllCmdsMdx from '@docs/es/_components/cli/view-all-cmds';
+
+{/* rspress flattenMdxContent issue */}
+{props.show || React.createElement(ViewAllCmdsMdx)}
+
+## Opciones comunes
+
+La CLI de {props.name || 'Module Federation'} ofrece algunas opciones comunes que puedes usar con todos los comandos:
+
+| Opción                  | Descripción                                                                                                                                                                                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-c, --config <config>` | Especifica la ruta del archivo de configuración, que puede ser relativa o absoluta. El valor por defecto es {props.configName ? props.configName : 'module-federation.config.ts' }                                                                            |
+| `-m, --mode <mode>`     | Especifica el entorno de ejecución; puedes elegir "dev" o "prod". El valor por defecto es "dev". Según el valor elegido, se inyectará automáticamente "development" o "production" en la variable de entorno `process.env.NODE_ENV`. |
+| `-h, --help`            | Muestra la ayuda del comando                                                                                                                                                                                                                                     |
+
+## {props.cmd || 'mf'} dts
+
+<code>{props.cmd || 'mf'} dts</code>
+se usa para descargar o generar archivos de declaración de tipos de TypeScript.
+
+import CommandInfo from '@docs/_snippets/cli/cmd-info';
+
+{props.commandInfo || <CommandInfo />}
+
+:::info Nota
+
+El comando <code>{props.cmd || 'mf'} dts</code> genera o descarga automáticamente los archivos de declaración de tipos según la configuración de <code>{props.configName || 'module-federation.config.ts'}</code>. Esto significa que debes proporcionar un archivo de configuración válido; de lo contrario, el comando no se ejecutará correctamente.
+
+Si solo usas la API de runtime, debes crear un archivo <code>{props.configName || 'module-federation.config.ts'}</code> temporal, configurar [dts.consumeTypes.remoteTypeUrls](/configure/dts.html#remotetypeurls) y, después, ejecutar el comando `mf dts`.
+
+:::

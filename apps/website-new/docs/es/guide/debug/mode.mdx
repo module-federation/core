@@ -1,0 +1,25 @@
+# Habilitar el modo de depuración
+
+Para facilitar la resolución de problemas, {props.name || 'Module Federation'} ofrece un modo de depuración. Puedes añadir la variable de entorno `FEDERATION_DEBUG=true` al ejecutar un build, o ejecutar `localStorage.setItem('FEDERATION_DEBUG','true')` en el navegador para habilitar el modo de depuración de Module Federation.
+
+Añadir variables de entorno en el build:
+
+```bash
+# Debug development mode
+FEDERATION_DEBUG=true pnpm dev
+
+# Debug production mode
+FEDERATION_DEBUG=true pnpm build
+```
+
+Añadir variables de entorno en runtime:
+
+```
+localStorage.setItem('FEDERATION_DEBUG','true')
+```
+
+## Información de logs
+
+Tras habilitar el modo de depuración, podrás ver la siguiente información en la consola:
+
+En modo de depuración, verás en la terminal algunos logs que empiezan por [ <code>{props.name || 'Module Federation'}</code> ].
