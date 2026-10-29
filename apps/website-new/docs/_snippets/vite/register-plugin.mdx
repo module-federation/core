@@ -1,8 +1,9 @@
-```ts title='vite.config.js'
+```ts title='vite.config.ts'
 import { federation } from '@module-federation/vite';
+import { defineConfig } from 'vite';
 import mfConfig from './module-federation.config';
 
-module.exports = {
+export default defineConfig({
   server: {
     origin: 'http://localhost:2000',
     port: 2000,
@@ -14,5 +15,5 @@ module.exports = {
   build: {
     target: 'chrome89',
   },
-};
+});
 ```
