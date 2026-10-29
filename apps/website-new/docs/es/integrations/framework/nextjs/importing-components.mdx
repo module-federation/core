@@ -1,0 +1,89 @@
+# Importar componentes
+
+Los módulos remotos se pueden importar de varias formas.
+
+### Importación diferida / asíncrona
+
+#### Exportaciones por defecto
+
+Usa `React.lazy` y `React.Suspense`
+
+:::danger Errores de hidratación
+Usar `next/dynamic` para importar módulos remotos provocará **errores de hidratación**
+:::
+
+```javascript
+import React, { lazy } from 'react';
+const SampleComponent = lazy(() => import('next2/sampleComponent'));
+
+const FormComponent = ()=>{
+  return (
+    <Suspense fallback="loading">
+      <SampleComponent/>
+    </Suspense>
+  )
+}
+
+export default FormComponent
+```
+
+#### Exportaciones con nombre
+Las exportaciones con nombre requieren devolver un `default` simulado a `React.lazy`, que solo espera exportaciones por defecto.
+
+```javascript
+import React, { lazy } from 'react';
+
+const SampleComponent = lazy(() => import('next2/sampleComponent').then((mod) => {
+  return { default: mod.NamedComponent };
+}));
+
+const FormComponent = () => {
+  return (
+    <Suspense fallback="loading">
+      <SampleComponent />
+    </Suspense>
+  );
+};
+
+export default FormComponent;
+```
+
+### Importación eager / síncrona
+
+Las importaciones eager también funcionan, pero se recomienda usar importaciones dinámicas siempre que sea posible para evitar grandes transferencias o peticiones de red iniciales
+
+```javascript
+let SomeHook = require('next2/someHook');
+SomeHook = SomeHook.default || SomeHook;
+
+import SomeComponent, {NamedExportComponent} from 'next2/sampleComponent';
+```
+### Solo en el cliente
+
+En algunos casos, puede que solo quieras cargar un módulo remoto en el cliente.
+
+Por ejemplo, si tu remote no ofrece un target de build commonjs y otro para navegador.
+
+Node requiere un remoteEntry en formato commonjs; no puedes proporcionar a un servidor un remote destinado al navegador.
+
+```jsx
+import {lazy, Suspense, useEffect, useState} from 'react';
+
+const RemoteModule = typeof window === 'undefined' ? ()=>{} : lazy(() => import('app3/sampleComponent'));
+
+const ClientOnly = ({Component}) => {
+  const [mounted, setMount] = useState(false);
+  useEffect(() => {
+    setMount(true);
+  }, []);
+  if (!mounted) return null;
+  return (
+    <Suspense fallback="loading">
+      <Component />
+    </Suspense>
+  );
+};
+
+const App = ()=>{
+  return <ClientOnly Component={RemoteModule} />
+}

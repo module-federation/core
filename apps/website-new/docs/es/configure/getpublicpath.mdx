@@ -1,0 +1,37 @@
+# getPublicPath
+
+- Tipo: `string`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+- Condición de efecto: solo tiene efecto cuando se define `exposes`
+
+
+Se usa para establecer un `publicPath` dinámico. El valor debe ser una función convertida en string o una expresión de retorno convertida en string. Cuando otros consumers cargan este provider, el string de `getPublicPath` se ejecuta mediante `new Function` para obtener el valor de retorno, que se usará como prefijo de `publicPath` para los recursos estáticos del módulo. Por ejemplo, si tu proyecto desplegado recibe un `cdn_prefix` dinámico, puedes configurarlo así:
+
+- Forma de función: ``function(){ return window.cdn_prefix }``
+- Forma de retorno: ``return "https:" + window.navigator.cdn_host + "/resource/app/"``
+
+En el siguiente ejemplo se define `getPublicPath`. Cuando otros consumers cargan este provider, el string de `getPublicPath` se ejecuta con `new Function` para obtener el valor, que se usará como prefijo de `publicPath` para los recursos estáticos del módulo.
+
+:::tip NOTA
+`getPublicPath` debe ser una función convertida en string o una expresión de retorno convertida en string.
+:::
+
+:::tip NOTA
+Si usas el plugin de Module Federation para webpack y quieres establecer un publicPath dinámico, debes asignar `__webpack_public_path__ = window.cdn_prefix` dentro del cuerpo de la función `getPublicPath`.
+:::
+
+```ts title="rspack.config.ts"
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'provider',
+      exposes: {
+        './Button': './src/components/Button.tsx',
+      },
+      // ...
+      getPublicPath: `function() {return "https:" + window.navigator.cdn_host + "/resource/app/"}`,
+    }),
+  ],
+};
+```

@@ -1,0 +1,489 @@
+---
+title: "Ejemplo básico"
+---
+
+# Next.js y Module Federation
+
+import {Steps, Tabs, Tab, Badge, SourceCode} from '@theme';
+
+:::danger Proyecto obsoleto
+El soporte para Next.js está llegando a su fin. [Más información](https://github.com/module-federation/core/issues/3153)
+:::
+
+<span className="badge-info">
+ <Badge text="Next 12" type="info" />
+ <Badge text="Next 13" type="info" />
+ <Badge text="Next 14" type="info" />
+ <Badge text="Next 15" type="info" />
+ <Badge text="SSR (Pages Router)" type="info" />
+</span>
+<Badge text="App Router" type="danger" />
+<Badge text="No recomendado" type="warning" />
+#
+
+:::tip Demo de referencia
+Consulta aquí la lista de proyectos de ejemplo: [Next.js SSR](https://github.com/module-federation/module-federation-examples/tree/master/nextjs-ssr)
+:::
+
+## Configurar el entorno
+
+Antes de empezar, necesitas instalar [Node.js](https://nodejs.org/) y asegurarte de que tu versión de Node.js sea >= 16. **Recomendamos usar la versión LTS de Node.js 24.**
+
+Puedes comprobar la versión de Node.js que estás usando con el siguiente comando:
+
+```bash
+node -v
+```
+
+Si no tienes Node.js instalado en tu entorno actual, o la versión instalada es demasiado antigua, puedes usar [nvm](https://github.com/nvm-sh/nvm) o [fnm](https://github.com/Schniz/fnm) para instalar la versión necesaria.
+
+Este es un ejemplo de cómo instalar la versión LTS de Node.js 24 mediante nvm:
+
+```bash
+# Install the long-term support version of Node.js 24
+nvm install 24 --lts
+
+# Make the newly installed Node.js 24 as the default version
+nvm alias default 24
+
+# Switch to the newly installed Node.js 24
+nvm use 24
+```
+
+
+## Paso 1: configurar las aplicaciones Next
+
+### Crear un proyecto Next
+
+Puedes usar `create-next-app` para crear un proyecto Next. Solo tienes que ejecutar el siguiente comando:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npx create-next-app@latest',
+    yarn: 'yarn create next-app',
+    pnpm: 'pnpm create next-app',
+    bun: 'bunx create-next-app',
+  }}
+/>
+
+
+#
+
+
+<Steps>
+### Crear la app 1
+```bash
+npx create-next-app@latest
+
+"What is your project named?":
+> mfe1
+
+"Would you like to use App Router?":
+> No
+```
+
+### Crear la app 2
+
+```bash
+npx create-next-app@latest
+
+"What is your project named?":
+> mfe2
+
+"Would you like to use App Router?":
+> No
+```
+
+### Instalar
+
+```bash
+cd mfe1
+pnpm add @module-federation/nextjs-mf webpack -D
+pnpm i
+```
+```bash
+cd mfe2
+pnpm add @module-federation/nextjs-mf webpack -D
+pnpm i
+ ````
+
+</Steps>
+
+
+### Proyectos existentes
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm i @module-federation/nextjs-mf webpack -D',
+    yarn: 'yarn add @module-federation/nextjs-mf webpack -D',
+    pnpm: 'pnpm add @module-federation/nextjs-mf webpack -D',
+    bun: 'bun add @module-federation/nextjs-mf webpack -D',
+  }}
+/>
+
+
+```javascript title="next.config.mjs"
+import { NextFederationPlugin } from '@module-federation/nextjs-mf';
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  webpack(config,options ){
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'mfe1',
+        filename: 'static/chunks/remoteEntry.js',
+        remotes: {
+          mfe2: `http://localhost:3001/static/${options.isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+        },
+        shared: {},
+        extraOptions: {
+          exposePages: true,
+          enableImageLoaderFix: true,
+          enableUrlLoaderFix: true,
+        },
+      })
+    )
+    return config
+  }
+};
+
+export default nextConfig;
+```
+
+## Paso 2: sobrescribir Webpack
+
+
+<Steps>
+### Establecer la variable de entorno de Webpack local
+
+"Webpack local" significa que debes tener webpack instalado como dependencia, y Next no usará su copia empaquetada de webpack, que no puede utilizarse porque no exporta todos los elementos internos de Webpack
+
+```bash title="shell"
+cross-env NEXT_PRIVATE_LOCAL_WEBPACK=true next dev
+# or
+cross-env NEXT_PRIVATE_LOCAL_WEBPACK=true next build
+```
+
+También se puede usar `.env`, pero puede no ser fiable a la hora de establecer `NEXT_PRIVATE_LOCAL_WEBPACK` a tiempo.
+
+```ini title=".env"
+NEXT_PRIVATE_LOCAL_WEBPACK=true
+```
+
+### Asegúrate de instalar Webpack manualmente
+
+Webpack debe estar instalado; de lo contrario, el build lanzará errores `MODULE_NOT_FOUND`
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm i webpack -D',
+    yarn: 'yarn add webpack -D',
+    pnpm: 'pnpm add webpack -D',
+    bun: 'bun add webpack -D',
+  }}
+/>
+
+</Steps>
+
+## Paso 3: implementar SSR {#step-3-implementing-ssr}
+
+<Steps>
+
+### Añadir un ciclo de vida de servidor
+
+Para garantizar que Next.js cree un runtime de servidor, `_document` debe implementar `getInitialProps` o `getServerSideProps`
+
+
+
+<div className="rspress-directive warning">
+Sin un método de ciclo de vida de servidor, Next intentará aplicar `SSG` a las páginas que considere estáticas.
+
+Sin un runtime de servidor, no hay ningún servidor que renderice las actualizaciones de los remotes
+</div>
+
+```jsx title="_document.js"
+import Document, { Html, Head, Main, NextScript } from 'next/document';
+
+class MyDocument extends Document {
+  static async getInitialProps(ctx) {
+    const initialProps = await Document.getInitialProps(ctx);
+    return initialProps;
+  }
+
+  render() {
+    return (
+      <Html>
+        <Head />
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
+```
+
+
+
+### Añadir revalidación para la recarga en caliente en Node
+
+Para gestionar las actualizaciones de los módulos remotos se usa la función `revalidate`. Esto se debe a que Webpack usa una caché de chunks y no volverá a obtener un chunk ya cargado, y un servidor en caliente no reconoce las actualizaciones automáticamente.
+
+Hay dos formas principales de implementar la revalidación:
+- Bloqueo del renderizado (Render Blocking)
+- Stale While Revalidate
+
+<Tabs>
+  <Tab label="Bloqueo del renderizado">
+    Esta implementación se recomienda para la mayoría de los casos de uso, ya que ayuda a evitar errores de hidratación al garantizar que el servidor y el cliente estén siempre sincronizados. Al bloquear y comprobar si hay actualizaciones antes de renderizar, puedes garantizar que tu aplicación esté siempre actualizada sin afectar negativamente a la experiencia de usuario.
+
+    **Cómo funciona:**
+
+    - **Antes de renderizar la página**, el servidor comprueba si hay actualizaciones disponibles.
+    - **Si hay actualizaciones disponibles**, aplica Hot Module Replacement (HMR) antes de responder a la solicitud del cliente.
+    - **Este método garantiza** que todos los usuarios reciban la última versión de la aplicación sin encontrar incoherencias entre el contenido renderizado en el servidor y el renderizado en el cliente.
+
+    **Ejemplo de implementación:**
+
+    ```jsx title="_document"
+
+    import { revalidate } from '@module-federation/nextjs-mf/utils';
+    import Document, { Html, Head, Main, NextScript } from 'next/document';
+
+    class MyDocument extends Document {
+      static async getInitialProps(ctx) {
+        if (ctx?.pathname && !ctx?.pathname?.endsWith('_error')) {
+          await revalidate().then((shouldUpdate) => {
+            if (shouldUpdate) {
+              console.log('Hot Module Replacement (HMR) activated', shouldUpdate);
+            }
+          });
+        }
+
+        const initialProps = await Document.getInitialProps(ctx);
+        return initialProps;
+      }
+
+      render() {
+        return (
+          <Html>
+            <Head />
+            <body>
+              <Main />
+              <NextScript />
+            </body>
+          </Html>
+        );
+      }
+    }
+    ```
+  </Tab>
+  <Tab label="Stale While Revalidate">
+    Aunque no se recomienda por el riesgo de errores de hidratación, este método consiste en escuchar el evento 'finish' del objeto de respuesta y después comprobar si hay actualizaciones. Puede ser útil en escenarios concretos en los que las actualizaciones pueden aplicarse con menos frecuencia o en los que la coherencia inmediata entre servidor y cliente no es tan crítica.
+
+    **Cómo funciona:**
+
+    - **Después de responder al cliente**, el servidor escucha el evento 'finish' del objeto de respuesta.
+    - **Una vez enviada la respuesta**, comprueba si hay actualizaciones.
+    - **Si encuentra actualizaciones**, las registra o actúa en consecuencia, aunque las actualizaciones solo se aplicarán a las solicitudes posteriores.
+
+    **Ejemplo de implementación:**
+
+   ```jsx title="_document"
+    static async getInitialProps(ctx) {
+      const initialProps = await Document.getInitialProps(ctx);
+      ctx?.res?.on('finish', () => {
+        revalidate().then((shouldUpdate) => {
+          console.log('Response sent, checking for updates:', shouldUpdate);
+        });
+      });
+      return initialProps;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Chunk flushing
+
+El chunk flushing intenta "volcar" los chunks usados durante el SSR para que las etiquetas `<script>` puedan enviarse al navegador.
+
+```jsx title="_document"
+import Document, { Html, Head, Main, NextScript } from 'next/document';
+import {
+  revalidate,
+  FlushedChunks,
+  flushChunks,
+} from '@module-federation/nextjs-mf/utils';
+
+class MyDocument extends Document {
+  static async getInitialProps(ctx) {
+    if (ctx.pathname) {
+      if (!ctx.pathname.endsWith('_error')) {
+        await revalidate().then((shouldUpdate) => {
+          if (shouldUpdate) {
+            console.log('should HMR', shouldUpdate);
+          }
+        });
+      }
+    }
+
+    const initialProps = await Document.getInitialProps(ctx);
+
+    const chunks = await flushChunks();
+
+    return {
+      ...initialProps,
+      chunks,
+    };
+  }
+
+  render() {
+    return (
+      <Html>
+        <Head>
+          <FlushedChunks chunks={this.props.chunks} />
+        </Head>
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
+```
+</Steps>
+
+## Paso 4: crear y exponer
+
+Ahora, crea un componente para exponerlo desde `MFE2`
+
+<Steps>
+### Crear el componente Button
+
+En `MFE2`, crea un nuevo archivo llamado `Button.js` en el directorio src con el siguiente contenido:
+
+```javascript
+import React from 'react';
+
+const Button = () => (
+  <button>MFE2 Button</button>
+);
+
+export default Button;
+
+```
+
+### Configurar Next en MFE2
+Actualiza la configuración de build para exponer un módulo
+
+```javascript title="next.config.mjs"
+const nextConfig = {
+  reactStrictMode: true,
+  webpack(config, options) {
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'mfe2',
+        filename: 'static/chunks/remoteEntry.js',
+        exposes: {
+          "./Button": './component/Button.js',
+        },
+        shared: {},
+        extraOptions: {
+          exposePages: true,
+          enableImageLoaderFix: true,
+          enableUrlLoaderFix: true,
+        },
+      })
+    )
+    return config
+  }
+};
+```
+</Steps>
+
+## Paso 5: consumir el módulo remoto
+
+Consume en `MFE1` el módulo expuesto desde `MFE2`
+
+
+
+<Steps>
+### Importar el módulo
+
+Importa `MFE2` en una de las páginas de `MFE1`
+
+
+```jsx title="index.js"
+import React from 'react';
+import Button from 'mfe2/Button'; // federated import
+
+const Index = () => {
+  return (
+    <div>
+      <h1>MFE1</h1>
+      <Button />
+    </div>
+  );
+}
+```
+
+### Añadir un método de ciclo de vida de servidor a la página
+
+Next también intentará aplicar `SSG` a las páginas que no tengan algún ciclo de vida de datos.
+
+Asegúrate de añadir uno a los archivos de página.
+
+```javascript
+export const getServerSideProps = async () => {
+  return {
+    props: {}
+  }
+}
+// or
+Index.getInitialProps = async ()=> {
+  return {}
+}
+
+export default Index;
+```
+
+### Configurar Next en MFE1
+
+Actualiza el campo `remotes` en consecuencia
+
+```javascript title="next.config.mjs"
+import { NextFederationPlugin } from '@module-federation/nextjs-mf';
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  webpack(config,options ){
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'mfe1',
+        filename: 'static/chunks/remoteEntry.js',
+        remotes: {
+          mfe2: `http://localhost:3001/static/${options.isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+        },
+        shared: {},
+        extraOptions: {
+          exposePages: true,
+          enableImageLoaderFix: true,
+          enableUrlLoaderFix: true,
+        },
+      })
+    )
+    return config
+  }
+};
+
+export default nextConfig;
+```
+</Steps>
+
+

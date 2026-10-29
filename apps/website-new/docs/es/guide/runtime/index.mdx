@@ -1,0 +1,342 @@
+# Acceso al runtime
+
+:::info Lecturas previas
+
+- Las [funcionalidades y capacidades](/guide/start/index.html) de Module Federation
+- El [glosario](/guide/start/glossary.html) de Module Federation
+- Cómo [consumir y exportar módulos](/guide/start/quick-start.html)
+
+:::
+
+Actualmente, `Module Federation` ofrece dos formas de registrar y cargar módulos:
+
+- Una es declararlos en el plugin de build (normalmente en el archivo `module-federation.config.ts`).
+
+- La otra es registrar y cargar los módulos directamente mediante la API de `runtime`.
+
+Los dos modos no entran en conflicto y se pueden usar a la vez. Puedes elegir con flexibilidad el método y el momento de registro de los módulos según tu escenario concreto.
+
+## Diferencias entre los dos enfoques
+
+|Registrar módulos en runtime|Registrar módulos en el plugin|
+|------------------------------------------------------------------------------------------------------------------|---------------------- |
+|Se puede usar sin el plugin de build; el runtime puro sirve directamente para registrar y cargar módulos en proyectos como `webpack4`|El plugin de build requiere webpack5 o superior|
+|Admite el registro dinámico de módulos|No admite el registro dinámico de módulos|
+|No admite cargar módulos con la sintaxis `import`|Admite cargar módulos con la sintaxis síncrona `import`|
+|Admite cargar módulos con `loadRemote`|Admite cargar módulos con `loadRemote`|
+|Configurar `shared` exige proporcionar la versión concreta y la información de la instancia|Configurar `shared` solo requiere definir reglas, sin proporcionar la versión concreta ni la información de la instancia|
+|Las dependencias `shared` solo se pueden ofrecer hacia fuera; no se pueden usar dependencias `shared` externas|Las dependencias `shared` se comparten en ambos sentidos según reglas concretas|
+|El proceso de carga se puede modificar mediante el mecanismo de `plugin` del `runtime`|Actualmente no admite proporcionar un `plugin` para modificar el proceso de carga|
+|No admite sugerencias de tipos remotos|Admite sugerencias de tipos remotos|
+
+import Runtime from '@docs/es/_components/runtime/index';
+
+<Runtime />
+
+## Instalación {#installation}
+
+Cada tipo de proyecto debe instalar e importar el Runtime desde una entrada distinta. La mayoría de proyectos deberían instalar `@module-federation/enhanced` e importar las APIs del Runtime desde `@module-federation/enhanced/runtime`. Si tu proyecto Modern.js ya usa un plugin de Module Federation, importa las APIs del Runtime desde la entrada `/runtime` del plugin para que el plugin del framework y las llamadas manuales al Runtime usen la misma instancia del Runtime.
+
+import { PackageManagerTabs, Tab, Tabs } from '@theme';
+
+### @module-federation/enhanced
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/enhanced --save',
+    yarn: 'yarn add @module-federation/enhanced --save',
+    pnpm: 'pnpm add @module-federation/enhanced --save',
+    bun: 'bun add @module-federation/enhanced --save',
+  }}
+/>
+
+```ts
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+```
+
+### Modern.js
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/modern-js-v3 --save',
+    yarn: 'yarn add @module-federation/modern-js-v3 --save',
+    pnpm: 'pnpm add @module-federation/modern-js-v3 --save',
+    bun: 'bun add @module-federation/modern-js-v3 --save',
+  }}
+/>
+
+```ts
+import { createInstance, loadRemote } from '@module-federation/modern-js-v3/runtime';
+```
+
+En proyectos Modern.js v2, instala `@module-federation/modern-js` e importa las APIs del Runtime desde `@module-federation/modern-js/runtime`.
+
+## Registro de módulos
+
+<Tabs>
+  <Tab label="Plugin de build (con plugin de build)">
+  ```tsx
+  // If use build plugin, you can use `registerRemotes` directly.
+  import { registerRemotes } from '@module-federation/enhanced/runtime';
+
+  registerRemotes([
+    {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+    }
+  ]);
+  ```
+  </Tab>
+  <Tab label="Runtime puro (sin plugin de build)">
+  ```ts
+  // If not use build plugin, you can create new instance and register remote.
+  import { createInstance } from '@module-federation/enhanced/runtime';
+
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      }
+    ]
+  });
+
+  mf.registerRemotes([
+    {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+    }
+  ]);
+  ```
+  </Tab>
+</Tabs>
+
+## Carga de módulos
+
+<Tabs>
+  <Tab label="Plugin de build (con plugin de build)">
+  ```tsx
+  // If use build plugin, you can use `loadRemote` directly.
+  import { loadRemote } from '@module-federation/enhanced/runtime';
+  import React from 'react';
+
+  export default () => {
+    const MyButton = React.lazy(() =>
+      loadRemote('remote1').then(({ MyButton }) => {
+        return {
+          default: MyButton
+        };
+      }),
+    );
+
+    return (
+      <React.Suspense fallback="Loading Button">
+        <MyButton />
+      </React.Suspense>
+    );
+  }
+  ```
+  </Tab>
+  <Tab label="Runtime puro (sin plugin de build)">
+  ```ts
+  // If not use build plugin, you can create new instance and load remote.
+  import { createInstance } from '@module-federation/enhanced/runtime';
+  import React from 'react';
+
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'remote1',
+        alias: 'remote-1',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      }
+    ]
+  });
+
+  export default () => {
+    const MyButton = React.lazy(() =>
+      mf.loadRemote('remote1').then(({ MyButton }) => {
+        return {
+          default: MyButton
+        };
+      }),
+    );
+
+    return (
+      <React.Suspense fallback="Loading Button">
+        <MyButton />
+      </React.Suspense>
+    );
+  }
+  ```
+  </Tab>
+</Tabs>
+
+### Cargar módulos anónimos
+
+<Tabs>
+    <Tab label="Plugin de build (con plugin de build)">
+    ```tsx
+    // If use build plugin, you can use `loadRemote` directly.
+    import React from 'react';
+    import { loadRemote } from '@module-federation/enhanced/runtime';
+
+    const RemoteButton = React.lazy(() => loadRemote('provider/button'));
+    // 也可通过模块别名加载：
+    // const RemoteButton = React.lazy(() => loadRemote('remotes-1/button'));
+
+    export default () => {
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+    <Tab label="Runtime puro (sin plugin de build)">
+    ```tsx
+    // If not use build plugin, you can create new instance and load remote.
+    import { createInstance } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+
+    // 创建实例
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote1',
+          alias: 'remote-1',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        }
+      ]
+    });
+
+    // Use instance api load remote.
+    const RemoteButton = React.lazy(() => mf.loadRemote('provider/button'));
+    // Also support use alias to load
+    // const RemoteButton = React.lazy(() => mf.loadRemote('remotes-1/button'));
+
+    export default () => {
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+ </Tabs>
+
+### Cargar módulos con nombre
+
+ <Tabs>
+    <Tab label="Plugin de build (con plugin de build)">
+    ```tsx
+    // If use build plugin, you can use `loadRemote` directly.
+    import React from 'react';
+    import { loadRemote } from '@module-federation/enhanced/runtime';
+
+    export default () => {
+      const RemoteButton = React.lazy(() =>
+        loadRemote('remote1/button').then(({ RemoteButton }) => {
+          return {
+            default: RemoteButton
+          };
+        }),
+      );
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+    <Tab label="Runtime puro (sin plugin de build)">
+    ```tsx
+    // If not use build plugin, you can create new instance and load remote.
+    import { createInstance } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+
+    // 创建实例
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote1',
+          alias: 'remote-1',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        }
+      ]
+    });
+
+    export default () => {
+      const RemoteButton = React.lazy(() =>
+        // Use instance api load remote.
+        mf.loadRemote('remote1/button').then(({ RemoteButton }) => {
+          return {
+            default: RemoteButton
+          };
+        }),
+      );
+      return (
+        <React.Suspense fallback="Loading Button">
+          <RemoteButton />
+        </React.Suspense>
+      );
+    }
+    ```
+    </Tab>
+ </Tabs>
+
+### Cargar funciones de utilidad
+
+<Tabs>
+    <Tab label="Plugin de build (con plugin de build)">
+    ```tsx
+    // If use build plugin, you can use `loadRemote` directly.
+    import React from 'react';
+    import { loadRemote } from '@module-federation/enhanced/runtime';
+
+    // 加载 remote1 expose 的 util
+    loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
+        md.add(1,2);
+    });
+    ```
+    </Tab>
+    <Tab label="Runtime puro (sin plugin de build)">
+    ```tsx
+    // If not use build plugin, you can create new instance and load remote.
+    import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+    import React from 'react';
+
+    // create instance
+    const mf = createInstance({
+      name: 'mf_host',
+      remotes: [
+        {
+          name: 'remote1',
+          alias: 'remote-1',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        }
+      ]
+    });
+
+    mf.loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
+        md.add(1,2);
+    });
+    ```
+    </Tab>
+ </Tabs>
+
+## Siguientes lecturas
+
+- [API de runtime](/guide/runtime/runtime-api.html): `createInstance`, `loadRemote`, `registerRemotes` y otras APIs de runtime.
+- [Plugins de runtime](/guide/runtime/runtime-plugins.html): amplía el flujo de carga del runtime.
+- [Hooks de runtime](/guide/runtime/runtime-hooks.html): hooks del ciclo de vida disponibles para los plugins de runtime.

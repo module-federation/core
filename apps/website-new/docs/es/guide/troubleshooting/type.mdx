@@ -1,0 +1,89 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+# Tipos
+
+Los errores de tipos se dividen en dos categorías: errores con código de error fijo y errores relacionados con el escenario.
+
+## Errores con código de error fijo
+
+Este tipo de error se puede capturar claramente en el código, y a cada error se le asigna un código de error fijo. El código de error está formado por el tipo de error y un ID, por ejemplo `TYPE-001`.
+
+### Lista de códigos de error
+
+- [TYPE-001](#type-001)
+
+## TYPE-001
+
+<ErrorCodeTitle code='TYPE-001'/>
+
+### Causas
+
+Al compilar los tipos TS de los archivos expuestos (`exposes`), se usa el `tsconfig.json` del proyecto actual. La falta de algunas opciones del compilador puede hacer que falle el build de tipos.
+
+### Soluciones
+
+1. Elimina `incremental` y `tsBuildInfoFile` de tsconfig.json del comando `cmd`.
+2. Ejecuta en la terminal el `cmd` del mensaje de error y corrige el archivo o el `tsconfig` según la salida.
+
+Si quieres ignorar los errores de comprobación de tipos de TS, establece [`compilerOptions.noCheck`](https://www.typescriptlang.org/tsconfig/#noCheck) en `true` en `tsconfig.json` (requiere TS 5.5+).
+
+Si el `cmd` se ejecuta sin errores pero sigues obteniendo un fallo de compilación de TS, revisa el campo `exposes` de `ModuleFederationPlugin`:
+
+```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
+new ModuleFederationPlugin({
+    ...
+    // Make sure both key and value start with "./"
+    exposes: { './Foo': './src/<path-to-file>/Foo.tsx' },
+    ...
+  })
+```
+
+## Errores relacionados con el escenario
+
+Este tipo de error se genera en función del escenario concreto del usuario y no tiene un código de error fijo. El mensaje de error y la forma de resolverlo varían según el escenario.
+
+### Los tipos generados contienen alias
+
+**Descripción del fenómeno**
+
+Los tipos generados por el producer contienen alias y no se pueden procesar correctamente en el consumer.
+
+**Cómo resolverlo**
+
+1. Instala [typescript-transform-paths](https://www.npmjs.com/package/typescript-transform-paths) y [ts-patch](https://www.npmjs.com/package/ts-patch)
+2. Aplica `typescript-transform-paths` en `tsconfig.json`
+
+```diff
+{
+"compilerOptions": {
++ "plugins": [
++ { "transform": "typescript-transform-paths" },
++ {
++ "transform": "typescript-transform-paths",
++ "afterDeclarations": true
++ }
++ ],
+},
+}
+```
+
+3. Establece [dts.generateTypes.compilerInstance](/configure/dts.html#compilerinstance) en `tspc` (CLI de `ts-patch`)
+4. Vuelve a generar los tipos
+
+### Los tipos generados no se actualizan al trabajar detrás de un proxy local
+
+**Descripción del fenómeno**
+
+Los tipos del producer se generan correctamente y el log del consumer muestra que se procesaron con éxito, pero el directorio `@mf-types` no se actualiza.
+El problema puede deberse a una configuración del proxy que no permite descargar el recurso.
+
+**Cómo resolverlo**
+
+1. Comprueba si el directorio `@mf-types` se genera en el directorio `dist` del producer.
+2. Revisa el log de tu proxy en busca de errores relacionados con `TLS` o `SSL`.
+3. Ajusta la configuración de tu proxy para añadir la certificación `TLS` de tu entorno local.
+4. En algunos escenarios esto no funciona. Como alternativa, puedes definir la variable de entorno `NODE_TLS_REJECT_UNAUTHORIZED=0` para ignorar los errores de `TLS` o `SSL`. Así, `@mf-types.zip` se podrá procesar correctamente.
+
+:::danger Nota importante
+Establece NODE_TLS_REJECT_UNAUTHORIZED=0 solo en tu entorno de desarrollo local. No está pensado para producción. Si optas por esta vía, asegúrate de hacer commit de los tipos generados en tu repositorio.
+:::

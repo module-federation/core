@@ -1,0 +1,46 @@
+# Glosario de términos
+
+## Module Federation
+
+Module Federation (MF) es un patrón de arquitectura para dividir aplicaciones JavaScript, similar a los microservicios en el lado del servidor. Te permite compartir código y recursos entre varias aplicaciones JavaScript (o micro-frontends). Si una aplicación que usa módulos federados no tiene las dependencias que requiere el código federado, las dependencias que faltan se descargan desde el origen del build o desde un par capaz de compartirlas.
+
+Esto permite crear aplicaciones de estilo micro-frontend en las que varios sistemas comparten código y se actualizan de forma dinámica, sin necesidad de volver a compilar toda la aplicación.
+
+También abrió la puerta a un conjunto más amplio de casos de uso en el lado del servidor: como la federación funciona de forma universal, tiene varios casos de uso dinámicos en el backend.
+
+## Producer (Remote)
+
+Una aplicación que expone módulos para que otras aplicaciones JavaScript los consuman, mediante el plugin de build de Module Federation con la configuración `exposes`, se denomina Provider (Producer) en Module Federation. Un Producer también puede actuar como Consumer.
+
+## Consumer (Host)
+
+Una aplicación que consume módulos de otros Producers mediante el plugin de build de Module Federation con la configuración `remotes` se denomina Consumer. Un Consumer también puede actuar como Producer.
+
+## Micro-frontend
+
+Micro-frontend (MFE) es un estilo de arquitectura similar a los microservicios, en el que un único producto cohesionado se compone de varias aplicaciones frontend que se entregan de forma independiente. Divide una aplicación frontend en aplicaciones más pequeñas y sencillas que se pueden desarrollar, probar y desplegar de forma independiente, sin dejar de presentarse ante el usuario como un único producto.
+
+Resuelve principalmente dos problemas:
+
+- El tamaño creciente y la dificultad de mantenimiento de las aplicaciones a medida que evolucionan con cada iteración.
+- La baja eficiencia de la colaboración entre equipos o departamentos en el desarrollo de proyectos.
+
+## Bundler
+
+Hace referencia a herramientas de empaquetado de módulos como [Webpack](https://webpack.js.org/), [Rspack](https://rspack.dev/), Vite y Metro.
+
+El objetivo principal de un bundler es empaquetar JavaScript, CSS y otros archivos. Los archivos empaquetados se pueden usar en navegadores, Node.js y otros entornos. Cuando un bundler procesa una aplicación web, construye un grafo de dependencias que incluye todos los módulos que necesita la aplicación y, después, empaqueta todos esos módulos en uno o más bundles.
+
+Para elegir la herramienta y el plugin adecuados para tu proyecto, consulta [Integraciones](/integrations/index.html).
+
+## Manifest
+
+El manifest es un manifiesto de runtime que genera un producer durante el build. Describe la entrada remota, los módulos expuestos, los assets, las dependencias compartidas y la información de tipos. Un consumer puede leer `mf-manifest.json` y usar esa información para cargar módulos remotos.
+
+Para más detalles, consulta [Manifest y Snapshot](/guide/basic/manifest-snapshot.html), [la configuración de manifest](/configure/manifest.html) y [los campos de mf-manifest.json](/guide/advanced/manifest-fields.html).
+
+## Snapshot
+
+Un Snapshot es un resultado condensado y resuelto de antemano de la información del Manifest. El runtime puede generar un Snapshot a partir del Manifest. Si tienes un servicio de despliegue, también puede generar y entregar el Snapshot por adelantado para que el consumer obtenga directamente la entrada remota y los assets que se pueden precargar.
+
+El Snapshot se usa en la carga de remotes, la precarga de assets, DevTools, el proxy y el diagnóstico en runtime.

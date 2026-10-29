@@ -1,0 +1,162 @@
+---
+pageType: doc-wide
+sidebar: false
+---
+
+# Skills
+
+Module Federation ahora ofrece una única **skill `mf`** unificada.
+
+No necesitas elegir entre una larga lista de skills independientes, ni leer primero la documentación para luego trasladársela a tu agente. Lo más sencillo es instalar esta única skill y dejar que el agente decida si debe leer la documentación, inspeccionar la configuración o resolver un problema.
+
+Cuando un problema solo existe en el runtime de la página en vivo, la skill usa la
+Divebell MF Extension para obtener evidencia estructurada sobre Remote, Shared, Bridge y el
+rendimiento de los módulos. El navegador es solo el punto de entrada y el disparador de la carga.
+Divebell se instala en la máquina del agente, no en la aplicación.
+
+Si todavía no lo has leído, empieza por [Inicio rápido con IA](/ai/index.html).
+
+## Instalación
+
+```bash
+npx skills add module-federation/agent-skills --skill mf -y
+```
+
+Después, el punto de entrada principal es:
+
+```text
+/mf <sub-command or question>
+```
+
+Si no puedes usar la CLI, también puedes copiar el directorio manualmente desde GitHub:
+
+```text
+https://github.com/module-federation/agent-skills/tree/main/skills/mf
+```
+
+## Cómo usarla
+
+`mf` tiene un único punto de entrada, pero incluye varias capacidades. Puedes indicar un subcomando explícito o simplemente preguntar en lenguaje natural.
+
+Con subcomandos explícitos:
+
+```text
+/mf docs How do I use Module Federation in Modern.js?
+/mf integrate
+/mf type-check
+/mf runtime-error RUNTIME-008
+/mf observability
+```
+
+Con lenguaje natural:
+
+```text
+/mf What's the difference between singleton and requiredVersion in shared?
+/mf Help me figure out why this project is not pulling remote types
+/mf Add Module Federation to the current project
+/mf I saw a Module Federation console error with traceId mf-...
+```
+
+## Qué admite `mf`
+
+| Subcomando | Para qué sirve |
+|---|---|
+| `docs` | Lee primero la documentación más reciente y luego responde preguntas sobre configuración, API y conceptos |
+| `context` | Inspecciona la configuración de MF del proyecto actual |
+| `module-info` | Inspecciona las URL de los módulos remotos, los módulos expuestos y los metadatos relacionados |
+| `integrate` | Añade Module Federation a un proyecto existente |
+| `type-check` | Diagnostica problemas relacionados con los tipos |
+| `shared-deps` | Diagnostica conflictos de dependencias compartidas y empaquetado duplicado |
+| `perf` | Diagnostica un desarrollo local lento y un HMR lento |
+| `config-check` | Diagnostica errores de configuración, archivos que faltan e incompatibilidades de plugins |
+| `bridge-check` | Diagnostica problemas de integración de Bridge |
+| `runtime-error` | Diagnostica códigos de error de runtime explícitos, especialmente `RUNTIME-001` y `RUNTIME-008` |
+| `observability` | Diagnostica fallos del runtime de MF, cadenas de carga y cuellos de botella de rendimiento mediante Divebell, o lee informes de observabilidad |
+
+## Los flujos de trabajo más habituales
+
+### 1. Leer la documentación antes de responder
+
+Este es el caso de uso más habitual y el mejor punto de partida:
+
+```text
+/mf docs What's the difference between singleton and requiredVersion in shared?
+```
+
+Así el agente lee primero la documentación más reciente en lugar de adivinar a partir de una memoria desactualizada.
+
+### 2. Dejar que el agente haga la integración por ti
+
+Si quieres añadir Module Federation a un proyecto existente:
+
+```text
+/mf integrate
+```
+
+El agente inspeccionará tu proyecto actual y decidirá qué hacer a continuación.
+
+### 3. Dejar que el agente diagnostique directamente
+
+Si ya tienes un problema concreto:
+
+```text
+/mf type-check
+/mf shared-deps
+/mf config-check
+/mf runtime-error RUNTIME-008
+/mf observability
+```
+
+En ese punto, el objetivo no es que investigues tú primero manualmente, sino que el agente empiece a diagnosticar de inmediato.
+
+### 4. Dejar que el agente depure una página de MF en vivo
+
+Para una investigación puntual, proporciona a la skill la URL de destino y el recorrido del usuario:
+
+```text
+/mf observability
+Open https://example.com with Divebell, reproduce the failing checkout flow,
+and inspect the Remote and Shared loading chain.
+```
+
+La skill detecta la CLI de Divebell y las MF Extension Skills instaladas, abre
+la página con `divebell open <url> --mf` y selecciona el comando `divebell mf`
+relevante más acotado. La interacción con la página solo se usa para disparar la
+carga diferida correspondiente; las conclusiones deben basarse en evidencia estructurada de Remote, Shared, Bridge o
+del rendimiento de los módulos.
+
+Consulta [Diagnosticar problemas de runtime](/guide/debug/divebell.html) para ver los
+comandos de instalación, el mapa de comandos, el flujo de trabajo del proxy de Remote y los límites
+de la evidencia.
+
+### 5. Dejar que el agente lea la observabilidad retenida
+
+Instala el [Observability Plugin](/plugin/plugins/observability-plugin.html)
+en tu aplicación cuando los informes deban recopilarse de forma continua, subirse desde
+producción o generarse desde Node/SSR. Cuando un error en la consola del navegador muestre un
+`traceId` y un comando `read:`, pasa a la skill la fuente del informe
+a la que tengas acceso:
+
+```text
+/mf observability
+I saw this Module Federation console error:
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+Please read the report and fix the issue.
+```
+
+Para Node, SSR o subidas desde producción:
+
+```text
+/mf observability
+Read .mf/observability/latest.json and explain the likely owner and fix.
+```
+
+## Lo único que de verdad tienes que recordar
+
+No necesitas leer primero la documentación y luego decirle al agente qué hacer.
+
+Instala `mf` y deja que el agente lea, inspeccione, decida y actúe.
