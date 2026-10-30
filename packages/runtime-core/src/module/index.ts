@@ -20,6 +20,7 @@ import {
   InitScope,
   ShareScopeMap,
   ResourceLoadContext,
+  InitTokens,
 } from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
@@ -143,6 +144,7 @@ class Module {
     rawInitScope?: InitScope,
     expose?: string,
     resourceContext?: ResourceLoadContext,
+    initFrom?: InitTokens[string],
   ) {
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry(expose, resourceContext);
@@ -210,6 +212,13 @@ class Module {
           remoteInfo: this.remoteInfo,
           origin: this.host,
         });
+      // Set after the hook so plugins that copy the options don't drop it
+      if (Object.isExtensible(initContainerOptions.remoteEntryInitOptions))
+        Object.defineProperty(
+          initContainerOptions.remoteEntryInitOptions,
+          'initFrom',
+          { value: initFrom, configurable: true },
+        );
 
       if (typeof remoteEntryExports?.init === 'undefined') {
         error(

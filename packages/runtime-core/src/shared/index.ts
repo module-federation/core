@@ -466,6 +466,7 @@ export class SharedHandler {
       from?: CallFrom;
       strategy?: ShareStrategy;
       context?: SharedLoadContext;
+      initFrom?: InitTokens[string];
     },
   ): Array<Promise<void>> {
     const { host } = this;
@@ -561,6 +562,7 @@ export class SharedHandler {
             initScope,
             undefined,
             resourceContext,
+            extraOptions?.initFrom,
           );
         }
       }

@@ -1,4 +1,5 @@
 import { InitContainerEntryOptions, WebpackRequire } from './types';
+import { withInitCaller } from './initializeSharing';
 
 export function initContainerEntry(
   options: InitContainerEntryOptions,
@@ -81,9 +82,15 @@ export function initContainerEntry(
     webpackRequire.federation.attachShareScopeMap(webpackRequire);
   }
 
+  // Runs this container's sharing init as called by the remote init that triggered it
+  const initSharing = (...args: Parameters<WebpackRequire['I']>) =>
+    withInitCaller(remoteEntryInitOptions?.initFrom, () =>
+      webpackRequire.I(...args),
+    );
+
   if (!Array.isArray(shareScopeKey)) {
     // @ts-ignore
-    return webpackRequire.I(shareScopeKey || 'default', initScope);
+    return initSharing(shareScopeKey || 'default', initScope);
   }
 
   var proxyInitializeSharing = Boolean(
@@ -92,13 +99,13 @@ export function initContainerEntry(
 
   if (proxyInitializeSharing) {
     // @ts-ignore
-    return webpackRequire.I(shareScopeKey, initScope);
+    return initSharing(shareScopeKey, initScope);
   }
   // @ts-ignore
   return Promise.all(
     shareScopeKey.map((key) => {
       // @ts-ignore
-      return webpackRequire.I(key, initScope);
+      return initSharing(key, initScope);
     }),
   ).then(() => true);
 }
