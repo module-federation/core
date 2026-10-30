@@ -13,6 +13,8 @@ const { RuntimeModule, RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
+const HASH_IN_FILENAME = /\[(?:full|chunk|content)?hash(?::[^\]]+)?\]/g;
+
 class FederationRuntimeModule extends RuntimeModule {
   runtimeRequirements: ReadonlySet<string>;
   containerName: string;
@@ -56,18 +58,59 @@ class FederationRuntimeModule extends RuntimeModule {
         } else {
           matcher = hasJsMatcher('chunkId');
         }
-        const outputName = this.compilation.getPath(
-          jsModulePlugin.getChunkFilenameTemplate(
+        const { runtimeTemplate } = this.compilation;
+        const chunkRootOutputDir = (
+          runtimeTemplate as {
+            chunkRootOutputDir?: (
+              chunk: import('webpack').Chunk,
+              withoutPublicPath: boolean,
+            ) => string;
+          }
+        ).chunkRootOutputDir;
+        if (typeof chunkRootOutputDir === 'function') {
+          // webpack >= 5.111 computes the depth without resolving unsettled hashes
+          rootOutputDir = chunkRootOutputDir.call(
+            runtimeTemplate,
+            this.chunk,
+            false,
+          );
+        } else {
+          const template = jsModulePlugin.getChunkFilenameTemplate(
             this.chunk,
             this.compilation.outputOptions,
-          ),
-          { chunk: this.chunk, contentHashType: 'javascript' },
-        );
-        rootOutputDir = getUndoPath(
-          outputName,
-          this.compilation.outputOptions.path || '',
-          false,
-        );
+          );
+          // hashes are not settled yet and only change the basename, not the depth
+          const filenameTemplate =
+            typeof template === 'string'
+              ? template.replace(HASH_IN_FILENAME, 'x')
+              : template;
+          let outputName: string;
+          try {
+            outputName = this.compilation.getPath(filenameTemplate, {
+              chunk: this.chunk,
+              contentHashType: 'javascript',
+            });
+          } catch (err) {
+            const originalContentHash = this.chunk.contentHash;
+            this.chunk.contentHash = {
+              ...originalContentHash,
+              javascript: 'x',
+            };
+            try {
+              outputName = this.compilation.getPath(filenameTemplate, {
+                chunk: this.chunk,
+                contentHashType: 'javascript',
+              });
+            } finally {
+              this.chunk.contentHash = originalContentHash;
+            }
+          }
+          rootOutputDir = getUndoPath(
+            outputName,
+            this.compilation.outputOptions.path || '',
+            false,
+          );
+        }
       }
     }
 
