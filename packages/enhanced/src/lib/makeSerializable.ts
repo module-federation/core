@@ -1,7 +1,8 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackModule } from './webpack';
 
-const webpackMakeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+const webpackMakeSerializable = getWebpackModule(
+  getWebpack().util?.makeSerializable,
+  'webpack/lib/util/makeSerializable',
 ) as typeof import('webpack/lib/util/makeSerializable');
 
 /**

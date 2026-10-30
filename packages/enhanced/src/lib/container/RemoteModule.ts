@@ -2,6 +2,11 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
+import type {
+  WebpackError,
+  InputFileSystem,
+  ObjectDeserializerContext,
+} from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation, WebpackOptionsNormalized } from 'webpack';
 import type {
@@ -9,15 +14,14 @@ import type {
   CodeGenerationResult,
   LibIdentOptions,
   NeedBuildContext,
-  WebpackError,
 } from 'webpack/lib/Module';
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { WEBPACK_MODULE_TYPE_REMOTE } from '../Constants';
 import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
-import type { InputFileSystem } from 'webpack/lib/FileSystemInfo';
+
 import type { RequestShortener } from 'webpack/lib/RuntimeModule';
-import type { ObjectDeserializerContext } from 'webpack/lib/serialization/ObjectMiddleware';
+
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 
 const { sources: webpackSources } = require(

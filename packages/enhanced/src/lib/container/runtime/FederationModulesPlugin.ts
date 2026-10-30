@@ -1,9 +1,5 @@
 import type { Compiler, Compilation as CompilationType } from 'webpack';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
-const Compilation = require(
-  normalizeWebpackPath('webpack/lib/Compilation'),
-) as typeof import('webpack/lib/Compilation');
 import { SyncHook } from 'tapable';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
