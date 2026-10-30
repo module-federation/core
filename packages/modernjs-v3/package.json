@@ -50,10 +50,6 @@
       "types": "./dist/types/react/plugin.d.ts",
       "default": "./dist/esm/react/plugin.mjs"
     },
-    "./ssr-dev-plugin": {
-      "types": "./dist/types/ssr-runtime/devPlugin.d.ts",
-      "default": "./dist/esm/ssr-runtime/devPlugin.mjs"
-    },
     "./ssr-inject-data-fetch-function-plugin": {
       "types": "./dist/types/ssr-runtime/injectDataFetchFunctionPlugin.d.ts",
       "default": "./dist/esm/ssr-runtime/injectDataFetchFunctionPlugin.mjs"
