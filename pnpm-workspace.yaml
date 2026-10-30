@@ -6,6 +6,7 @@ packages:
   - 'apps/runtime-demo/*'
   - 'apps/next-app-router/*'
   - 'apps/modern-component-data-fetch/*'
+  - 'apps/unified-react-demo/*'
   - 'apps/modernjs-ssr/*'
   - 'apps/shared-tree-shaking/*/*'
   - 'apps/router-demo/*'
