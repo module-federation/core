@@ -1,9 +1,23 @@
 import * as React from 'react';
+import type { ModuleFederation } from '@module-federation/enhanced/runtime';
+import { BRIDGE_ROUTING, type BridgeRouting } from './provider/routing';
 
 export type ErrorFallbackProps = {
   error: unknown;
   resetErrorBoundary: (...args: unknown[]) => void;
 };
+
+/** A router-owned URL, including its basename, search and hash. */
+export interface BridgeNavigation {
+  /** Format a full logical host location as a browser or hash href. */
+  createHref?: (to: string) => string;
+  getLocation: () => string;
+  subscribe: (listener: () => void) => () => void;
+  navigate: (
+    to: string | number,
+    options?: { replace?: boolean },
+  ) => void | Promise<void>;
+}
 
 /**
  * Options for creating a React root
@@ -33,6 +47,7 @@ export type RootType = HTMLElement | Root;
 export interface RenderParams {
   moduleName?: string;
   basename?: string;
+  [BRIDGE_ROUTING]?: BridgeRouting;
   memoryRoute?: {
     entryPath: string;
     initialState?: Record<string, unknown>;
@@ -64,6 +79,7 @@ export interface DestroyParams {
 export interface ProviderParams {
   moduleName?: string;
   basename?: string;
+  navigation?: BridgeNavigation;
   memoryRoute?: {
     entryPath: string;
     initialState?: Record<string, unknown>;
@@ -124,6 +140,11 @@ export interface RemoteComponentParams<
   E extends keyof T = keyof T,
 > {
   loader: () => Promise<T>;
+  /** Optional runtime and Router integration shared by all Bridge consumers. */
+  instance?: ModuleFederation | null;
+  basename?: string;
+  memoryRoute?: ProviderParams['memoryRoute'];
+  navigation?: BridgeNavigation;
   loading: React.ReactNode;
   fallback: React.ComponentType<{ error: Error }>;
   export?: E;
@@ -149,3 +170,13 @@ export interface RemoteAppParams extends ProviderParams {
   exportName: string | number | symbol;
   fallback: React.ComponentType<ErrorFallbackProps>;
 }
+
+/** Phantom business-props metadata. It does not add a runtime provider field. */
+declare const bridgeProviderProps: unique symbol;
+export type BridgeProvider<
+  Props = Record<string, unknown>,
+  RenderResult extends void | Promise<void> = void | Promise<void>,
+> = (() => {
+  render: (info: RenderParams) => RenderResult;
+  destroy: (info: DestroyParams) => void;
+}) & { readonly [bridgeProviderProps]?: Props };

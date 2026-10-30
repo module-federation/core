@@ -138,8 +138,10 @@ root.render(
 `/base` entries. They read the selected expose's rendering protocol from the
 Snapshot returned by the completed runtime `afterResolve` chain before choosing
 the consumer. This includes platform-provided snapshots and request rewrites.
-The same resolved request continues through the normal load lifecycle without
-resolving or fetching its manifest again.
+String inputs select the protocol before executing the expose. The same resolved
+request continues through the normal load lifecycle without resolving or fetching
+its manifest again. Callback inputs execute once per consumer attempt, then use
+the completed load's recorded source and Snapshot to select the consumer.
 
 ```tsx
 import { createReactRemote, ReactRemote } from '@module-federation/bridge-react/base'
@@ -166,15 +168,167 @@ load-recovery and diagnostic hooks before the consumer fallback.
 
 An expose marked `render: 'bridge'` mounts its default provider in a separate
 client root. Each mounted consumer owns its provider lifecycle. On the server it
-outputs a placeholder without loading the producer's Node expose. Bridge SSR and
-Service App execution are not supported by this API version.
+outputs a placeholder and never invokes the provider. With a string input, the
+producer's Node expose is not loaded. A callback may already execute that module
+before its protocol can be identified. Bridge SSR and Service App execution are
+not supported by this API version.
 
 For an unmarked legacy provider, set `render: 'bridge'`. A hint conflicting with
 published metadata fails. Unmarked ordinary components keep the component path.
-CSR loaders may be used as `remote` if they return an MF module namespace with a
-module identity. Use an alias/expose string for automatic SSR selection.
+The same `remote` option also accepts synchronous or asynchronous callbacks:
+
+```tsx
+import Shop from 'shop/Card';
+import { loadRemote } from '@module-federation/enhanced/runtime';
+
+const LoadedCard = createReactRemote({ remote: () => loadRemote('shop/Card') });
+const PreloadedCard = createReactRemote({ remote: () => Shop });
+// A callback can also return a preloaded namespace, or Promise.resolve(Shop).
+```
+
+Callbacks return an MF namespace or a preloaded default component/provider. The
+consumer uses the exact loaded value. Function components, `memo`, `forwardRef`,
+and frozen namespaces are supported without invoking components to identify them
+or modifying the raw `loadRemote` result. Ordinary components retain SSR content,
+data fetching, and assets. `noSSR` does not invoke the callback on the server.
+A static import or preload performed by application code still runs when that
+application code executes.
+
+Keep function inputs to `ReactRemote` stable across renders by defining them at
+module scope or using `useCallback`. Reuse the same function when only business
+props change. Replacing the function reference selects a new loading source and
+resets that consumer instance's loading and component state.
+
+Preloaded default exports require the updated runtime that records provenance
+when the remote factory executes, including bundler-managed imports. Load and
+consume the value through the same runtime instance. Older runtimes can still
+return a namespace carrying `mf_module_id`, with an extra metadata resolution.
+A local component without MF provenance, an unassociated accessor export, or one
+value reused by multiple exposes or deployments cannot be identified reliably.
+Use a string input or an unambiguous namespace in those cases. Multiple names for
+one export within the same expose are allowed. Default interop getters may be
+read to record provenance, while arbitrary named getters are not evaluated.
+A named component selected from a namespace still uses `exportName`. A callback
+returning an individual export treats that value as the default export.
+
+Business props are inferred from callback results, namespace default or named
+component exports, and generated remote ID declarations. Generated host types
+extend the shared `ModuleFederation.RemoteModuleMap` interface. Applications can
+also augment that interface for a typed remote ID without generated declarations.
+Unknown dynamic strings can still use `createReactRemote<Props>` explicitly.
 
 Loading defaults to null. Without `fallback`, errors reach the parent boundary.
 Retry creates fresh failed-load and consumer state, without promising a network
 re-download or automatic replay of business loaders. General runtime registration
 and loading APIs remain available from `@module-federation/enhanced/runtime`.
+
+### Application routing controls
+
+Unified and legacy consumers use the same Bridge renderer. The unified API
+selects the component or Bridge protocol, while the shared renderer owns provider
+creation, updates, cleanup, and asynchronous failures. Updating business props or
+navigating within a mount reuses the mounted provider and React Root.
+The shared renderer removes its loading placeholder in a React commit before
+allowing the producer Root to render into the same mount container.
+
+The default entry retains the existing React Router integration for both
+`createRemoteAppComponent` and `createReactRemote` / `ReactRemote`. It reads the
+local route boundary to calculate `basename` and notifies browser-based Remotes
+when the Host pathname, query, or hash changes. An explicit basename overrides
+inference while retaining Host notifications. Existing Router aliases and
+producer Router wrappers remain available for that legacy integration.
+
+This automatic path provides Host-to-Remote notifications for browser-based
+Bridge producers. It does not observe every producer Router or make independent
+memory navigation follow the Host. Framework application Roots must connect
+their Router to the Bridge integration to provide both directions.
+
+Framework integrations should use `/base`, which has no React Router dependency.
+The framework reads its own Router context, calculates the mount basename, and
+passes `basename` and an optional `navigation` adapter to Bridge. This integration
+does not require replacing the framework Router through build aliases. Explicit
+adapters and `memoryRoute` mounts bypass the default entry's automatic Host
+notifications.
+
+The unified consumers accept these controls separately from business `props`.
+The legacy `createRemoteAppComponent` factory accepts the same controls in its
+options. Existing basename and memoryRoute instance props remain supported.
+Navigation controls use internal Bridge metadata, so an application prop named
+`navigation` keeps its business meaning and is not consumed as a Router adapter.
+Older providers retain flat basename and memoryRoute controls and can ignore the
+optional navigation integration.
+
+`basename` is owned by the consumer and describes where the application is
+mounted. A framework's source route selector chooses exported content, not a
+producer basename. For example, selecting the application under `/product` and
+mounting it at `/inventory` exposes its relative detail route at
+`/inventory/detail/42`. Producers remain responsible for portable relative links,
+navigation, and code that depends on a fixed basename or absolute URL. Core does
+not interpret framework route selectors. Browser-connected framework applications
+keep that basename fixed for one mount. If its actual mount basename changes,
+the framework consumer must create a new mount identity, for example with a React
+key, and dispose the previous Root, Router, subscriptions, and pending requests.
+Page state is preserved for ordinary props updates and internal navigation, but
+not across different mount locations.
+
+Framework application Roots can call `useBridgeRouter()` from `/base` to read
+their provider's mount context. A navigation adapter supplies `getLocation()`,
+`subscribe(listener)`, and `navigate(to, { replace })`. An optional `createHref(to)`
+formats native links for Hash Routers. Locations include the Host Router basename,
+query, and hash. Numeric navigation is available through the Host adapter. Each
+adapter subscription belongs to a mounted application and must be released on
+unmount. Passing an adapter alone does not retrofit an older provider's Router.
+The framework's application Root must consume the integration.
+
+Frameworks connecting a browser-backed Router can use
+`createBridgeRouterConnector` from `/base` (also exported by the default, `/v18`,
+and `/v19` entries). It delegates to the Router-independent implementation in
+`@module-federation/bridge-shared`. Create one connector in the mounted
+application's committed lifecycle, attach its Router adapter, and dispose it
+when that application unmounts:
+
+```ts
+const connection = createBridgeRouterConnector({
+  navigation: bridge.navigation,
+  onError: reportRouterError,
+});
+connection.attach(routerAdapter);
+// Rebind a changed navigation adapter during the same mount.
+connection.setNavigation(bridge.navigation);
+// During unmount, also dispose the framework's Router.
+connection.dispose();
+```
+
+The adapter supplies `getSnapshot`, `subscribe`, `getHistoryLocation`,
+`syncFromHistory`, and `notifyPeers`. Snapshots include the committed URL and
+entry key, the pending navigation's URL and key, the history action, and whether
+initialization has completed. Use the Router's entry keys consistently for
+history and snapshots. Entry keys are required so a same-URL new navigation can
+be distinguished from a notification about an existing entry. Pending navigation
+does not include background revalidation. `getHistoryLocation()` returns one
+`{ url, key }` entry. Both history and snapshots use the full logical URL,
+including the consumer basename, query, and hash. The connector does not project
+between old and new mount prefixes.
+
+`syncFromHistory` starts reading the current history entry without writing it
+again. `notifyPeers` reports a write already completed by the Remote, for example
+using the existing browser `popstate` compatibility notification. The adapter
+must exclude the writing Router from that notification, including when it has
+started a subsequent navigation. Other Router instances still receive it. The
+framework adapter owns Browser/Hash interpretation and Router-specific APIs. The connector
+owns initial redirect reconciliation, duplicate pending-entry detection, and
+subscription cleanup. Work is queued rather than performed synchronously while
+attaching a Router. Disposing the connector invalidates queued work.
+
+The connector uses the existing per-mount `navigation` reference. It does not
+register a global runtime plugin or use `afterBridgeRouteSync` for communication.
+That hook retains its existing observation behavior and does not acknowledge that
+a Router's loaders have completed. Older providers keep their existing routing
+behavior, and independent `memoryRoute` cards do not attach a browser connector.
+
+`memoryRoute` preserves the existing Bridge option for independent navigation
+with an initial `entryPath`. Existing Router wrappers use it to select a memory
+Router instead of browser history. It does not select a producer route scope.
+
+No routing metadata is added to manifests or Snapshots. Bridge SSR, service
+execution, and remote version replacement are outside these controls.

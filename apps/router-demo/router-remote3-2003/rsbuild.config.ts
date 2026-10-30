@@ -4,6 +4,9 @@ import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import path from 'path';
 
 export default defineConfig({
+  output: {
+    assetPrefix: 'http://localhost:2003',
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

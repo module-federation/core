@@ -4,6 +4,8 @@ import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server.node';
 import { createReactRemote, ReactRemote } from '../src/reactRemote';
 import { remoteRuntime } from './reactRemote-utils';
+import { BRIDGE_ROUTING } from '../src/provider/routing';
+import { useBridgeRouter } from '../src/provider/context';
 import { createBridgeComponent } from '../src/provider/versions/v18';
 
 describe('unified React remote consumption', () => {
@@ -132,7 +134,7 @@ describe('unified React remote consumption', () => {
     );
     expect(runtime.loadRemote).not.toHaveBeenCalled();
   });
-  it('keeps host loading DOM outside the producer React root', async () => {
+  it('releases host loading DOM before mounting the producer React root', async () => {
     const provider = createBridgeComponent({
       rootComponent: () => <strong>independent root</strong>,
     });
@@ -405,4 +407,268 @@ describe('unified React remote consumption', () => {
     });
     expect(factory).not.toHaveBeenCalled();
   });
+});
+
+describe('Bridge routing controls', () => {
+  it('keeps consumer mount paths and navigation channels independent across application mounts', async () => {
+    function App({ label, basename }: { label: string; basename?: string }) {
+      const routing = useBridgeRouter();
+      return (
+        <button
+          data-testid={label}
+          onClick={() =>
+            routing?.navigation?.navigate(`${routing.basename}/detail/43`)
+          }
+        >
+          {basename}:{routing?.navigation?.getLocation()}
+        </button>
+      );
+    }
+    const producer = createBridgeComponent({ rootComponent: App });
+    const factory = jest.fn(() => producer());
+    const { instance } = remoteRuntime({ default: factory }, 'bridge');
+    const first = {
+      getLocation: () => '/inventory/detail/42?tab=stock#summary',
+      subscribe: () => () => {},
+      navigate: jest.fn(),
+    };
+    const second = {
+      getLocation: () => '/warehouse/detail/99',
+      subscribe: () => () => {},
+      navigate: jest.fn(),
+    };
+    const view = render(
+      <>
+        <ReactRemote
+          remote="shop/Card"
+          instance={instance}
+          basename="/inventory"
+          navigation={first}
+          props={{ label: 'inventory' }}
+        />
+        <ReactRemote
+          remote="shop/Card"
+          instance={instance}
+          basename="/warehouse"
+          navigation={second}
+          props={{ label: 'warehouse' }}
+        />
+      </>,
+    );
+    const inventory = await screen.findByTestId('inventory');
+    const warehouse = await screen.findByTestId('warehouse');
+    expect(inventory.textContent).toBe(
+      '/inventory:/inventory/detail/42?tab=stock#summary',
+    );
+    expect(warehouse.textContent).toBe('/warehouse:/warehouse/detail/99');
+    await act(async () => {
+      inventory.click();
+    });
+    expect(first.navigate).toHaveBeenCalledWith('/inventory/detail/43');
+    expect(second.navigate).not.toHaveBeenCalled();
+    expect(factory).toHaveBeenCalledTimes(2);
+    view.unmount();
+  });
+
+  it.each(['factory', 'declarative'] as const)(
+    'preserves legacy routing props in the %s API when top-level controls are omitted',
+    async (api) => {
+      const provider = { render: jest.fn(), destroy: jest.fn() };
+      const factory = jest.fn(() => provider);
+      const { instance } = remoteRuntime({ default: factory }, 'bridge');
+      const options = { remote: 'shop/Card', instance };
+      type Props = { basename: string; memoryRoute: { entryPath: string } };
+      const Remote =
+        api === 'factory'
+          ? createReactRemote<Props>(options)
+          : (props: Props) => <ReactRemote {...options} props={props} />;
+      const memoryRoute = { entryPath: '/product/detail/42' };
+      const view = render(
+        <Remote basename="/shop" memoryRoute={memoryRoute} />,
+      );
+      await waitFor(() => expect(provider.render).toHaveBeenCalledTimes(1));
+      expect(provider.render.mock.calls[0][0]).toMatchObject({
+        basename: '/shop',
+        memoryRoute,
+      });
+      view.rerender(
+        <Remote basename="/stores/100" memoryRoute={memoryRoute} />,
+      );
+      await waitFor(() =>
+        expect(provider.render.mock.calls.at(-1)?.[0]).toMatchObject({
+          basename: '/stores/100',
+          memoryRoute,
+        }),
+      );
+      expect(factory).toHaveBeenCalledTimes(1);
+      view.unmount();
+      await waitFor(() => expect(provider.destroy).toHaveBeenCalledTimes(1));
+    },
+  );
+
+  it('gives explicit top-level controls precedence over legacy routing props', async () => {
+    const provider = { render: jest.fn(), destroy: jest.fn() };
+    const { instance } = remoteRuntime({ default: () => provider }, 'bridge');
+    const memoryRoute = { entryPath: '/product/detail/42' };
+    const view = render(
+      <ReactRemote
+        remote="shop/Card"
+        instance={instance}
+        basename="/inventory"
+        memoryRoute={memoryRoute}
+        props={{ basename: '/legacy', memoryRoute: { entryPath: '/legacy' } }}
+      />,
+    );
+    await waitFor(() => expect(provider.render).toHaveBeenCalledTimes(1));
+    expect(provider.render.mock.calls[0][0]).toMatchObject({
+      basename: '/inventory',
+      memoryRoute,
+    });
+    view.unmount();
+    await waitFor(() => expect(provider.destroy).toHaveBeenCalledTimes(1));
+  });
+
+  it('updates basename and the navigation channel without recreating a provider or leaking controls into business props', async () => {
+    const received: any[] = [];
+    const providers: any[] = [];
+    const factory = jest.fn(() => {
+      const provider = {
+        render: jest.fn((info) => received.push(info)),
+        destroy: jest.fn(),
+      };
+      providers.push(provider);
+      return provider;
+    });
+    const { instance, loadRemote } = remoteRuntime(
+      { default: factory },
+      'bridge',
+    );
+    const first = {
+      getLocation: () => '/stores/100/app/product',
+      subscribe: () => () => {},
+      navigate: jest.fn(),
+    };
+    const second = { ...first, getLocation: () => '/stores/200/app/product' };
+    const view = render(
+      <ReactRemote
+        remote="shop/Card"
+        instance={instance}
+        basename="/stores/100/app"
+        navigation={first}
+        props={{ label: 'first' }}
+      />,
+    );
+    await waitFor(() => expect(received).toHaveLength(1));
+    view.rerender(
+      <ReactRemote
+        remote="shop/Card"
+        instance={instance}
+        basename="/stores/200/app"
+        navigation={second}
+        props={{ label: 'second' }}
+      />,
+    );
+    await waitFor(() =>
+      expect(received.at(-1)).toMatchObject({
+        basename: '/stores/200/app',
+        [BRIDGE_ROUTING]: { navigation: second },
+        label: 'second',
+      }),
+    );
+    expect(factory).toHaveBeenCalledTimes(1);
+    expect(loadRemote).toHaveBeenCalledTimes(1);
+    view.unmount();
+    await waitFor(() => expect(providers[0].destroy).toHaveBeenCalledTimes(1));
+  });
+
+  it('makes navigation available in the producer context and preserves its Root on updates', async () => {
+    let business: any;
+    let channel: any;
+    function App(props: any) {
+      business = props;
+      channel = useBridgeRouter()?.navigation;
+      const [count, setCount] = React.useState(0);
+      return (
+        <button onClick={() => setCount(count + 1)}>
+          {props.label}:{count}
+        </button>
+      );
+    }
+    const provider = createBridgeComponent({ rootComponent: App })();
+    const dom = document.createElement('div');
+    document.body.append(dom);
+    const navigation = {
+      getLocation: () => '/app',
+      subscribe: () => () => {},
+      navigate: jest.fn(),
+    };
+    await act(async () => {
+      await provider.render({
+        dom,
+        basename: '/app',
+        [BRIDGE_ROUTING]: { navigation },
+        label: 'first',
+      });
+    });
+    expect(channel).toBe(navigation);
+    expect(business.navigation).toBeUndefined();
+    await act(async () => {
+      dom.querySelector('button')!.click();
+    });
+    await act(async () => {
+      await provider.render({
+        dom,
+        basename: '/other',
+        [BRIDGE_ROUTING]: { navigation },
+        label: 'updated',
+      });
+    });
+    expect(dom.textContent).toBe('updated:1');
+    await act(async () => {
+      provider.destroy({ dom, moduleName: 'test' });
+    });
+    dom.remove();
+  });
+
+  it('does not pass Bridge controls to ordinary components', async () => {
+    let business: any;
+    const { instance } = remoteRuntime({
+      default: (props: any) => {
+        business = props;
+        return <p>ordinary</p>;
+      },
+    });
+    render(
+      <ReactRemote
+        remote="shop/Card"
+        instance={instance}
+        basename="/app"
+        props={{ label: 'business' }}
+      />,
+    );
+    await screen.findByText('ordinary');
+    expect(business).toEqual({ label: 'business' });
+  });
+});
+
+it('destroys a provider factory that resolves after its consumer unmounts', async () => {
+  let complete!: (value: unknown) => void;
+  const provider = { render: jest.fn(), destroy: jest.fn() };
+  const factory = jest.fn(
+    () =>
+      new Promise((resolve) => {
+        complete = resolve;
+      }),
+  );
+  const { instance } = remoteRuntime({ default: factory }, 'bridge');
+  const view = render(
+    <ReactRemote remote="shop/Card" instance={instance} basename="/app" />,
+  );
+  await waitFor(() => expect(factory).toHaveBeenCalledTimes(1));
+  view.unmount();
+  await act(async () => {
+    complete(provider);
+  });
+  await waitFor(() => expect(provider.destroy).toHaveBeenCalledTimes(1));
+  expect(provider.render).not.toHaveBeenCalled();
 });

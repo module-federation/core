@@ -54,4 +54,25 @@ export type {
   CreateReactRemoteOptions,
   ReactRemoteProps,
   ReactRemoteErrorInfo,
-} from './reactRemote';
+} from './reactRemoteTypes';
+
+export { useBridgeRouter } from './provider/context';
+export type { BridgeNavigation } from './types';
+
+export type { BridgeProvider } from './types';
+export type {
+  CreateReactRemote,
+  ReactRemoteComponent,
+  RemoteSource,
+  RemoteExportName,
+  InferRemoteProps,
+} from './reactRemoteTypes';
+
+export { createBridgeRouterConnector } from './bridgeRouter';
+export type {
+  BridgeRouterAdapter,
+  BridgeRouterConnector,
+  BridgeRouterConnectorOptions,
+  BridgeRouterLocation,
+  BridgeRouterSnapshot,
+} from './bridgeRouter';

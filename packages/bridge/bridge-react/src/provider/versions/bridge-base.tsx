@@ -6,6 +6,7 @@ import * as React from 'react';
 import type { BridgeOperationContext } from '@module-federation/bridge-shared';
 import type {
   ProviderParams,
+  BridgeProvider,
   ProviderFnParams,
   RootType,
   DestroyParams,
@@ -15,6 +16,7 @@ import type {
 } from '../../types';
 import { ErrorBoundary } from '../../error-boundary';
 import { RouterContext } from '../context';
+import { BRIDGE_ROUTING } from '../routing';
 import { LoggerInstance } from '../../utils';
 import { federationRuntime } from '../plugin';
 
@@ -22,7 +24,7 @@ export function createBaseBridgeComponent<T>({
   createRoot,
   defaultRootOptions,
   ...bridgeInfo
-}: ProviderFnParams<T>) {
+}: ProviderFnParams<T>): BridgeProvider<T, Promise<void>> {
   return () => {
     const rootMap = new Map<any, RootType>();
     const instance = federationRuntime.instance;
@@ -33,9 +35,11 @@ export function createBaseBridgeComponent<T>({
 
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
-      const { moduleName, memoryRoute, basename = '/' } = appInfo;
+      const { moduleName, memoryRoute, navigation, basename = '/' } = appInfo;
       return (
-        <RouterContext.Provider value={{ moduleName, basename, memoryRoute }}>
+        <RouterContext.Provider
+          value={{ moduleName, basename, memoryRoute, navigation }}
+        >
           <bridgeInfo.rootComponent
             {...propsInfo}
             basename={basename}
@@ -64,11 +68,13 @@ export function createBaseBridgeComponent<T>({
       basename,
       moduleName,
       memoryRoute,
+      navigation,
       propsInfo,
     }: {
       basename?: string;
       moduleName?: string;
       memoryRoute?: any;
+      navigation?: ProviderParams['navigation'];
       propsInfo: T;
     }) => (
       <ErrorBoundary FallbackComponent={DefaultFallback}>
@@ -77,6 +83,7 @@ export function createBaseBridgeComponent<T>({
             moduleName,
             basename,
             memoryRoute,
+            navigation,
           }}
           propsInfo={propsInfo}
         />
@@ -91,6 +98,7 @@ export function createBaseBridgeComponent<T>({
           dom,
           basename,
           memoryRoute,
+          [BRIDGE_ROUTING]: routing,
           rootOptions,
           ...propsInfo
         } = info;
@@ -117,6 +125,7 @@ export function createBaseBridgeComponent<T>({
             basename={basename}
             moduleName={moduleName}
             memoryRoute={memoryRoute}
+            navigation={routing?.navigation}
             propsInfo={
               {
                 ...omitHostFallback(propsInfo as Record<string, unknown>),

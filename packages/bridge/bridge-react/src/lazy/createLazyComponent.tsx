@@ -62,6 +62,7 @@ type SSRAssetDescriptors = {
 function getTargetModuleInfo(
   id: string,
   instance?: ModuleFederation,
+  resolvedRemoteInfo?: ReturnType<typeof getLoadedRemoteInfos>,
 ):
   | {
       module: BasicProviderModuleInfo['modules'][0];
@@ -72,7 +73,8 @@ function getTargetModuleInfo(
   if (!instance) {
     return;
   }
-  const loadedRemoteInfo = getLoadedRemoteInfos(id, instance);
+  const loadedRemoteInfo =
+    resolvedRemoteInfo || getLoadedRemoteInfos(id, instance);
   if (!loadedRemoteInfo) {
     return;
   }
@@ -108,7 +110,10 @@ function getTargetModuleInfo(
   };
 }
 
-function collectSSRAssetDescriptors(options: IProps): SSRAssetDescriptors {
+function collectSSRAssetDescriptors(
+  options: IProps,
+  resolvedRemoteInfo?: ReturnType<typeof getLoadedRemoteInfos>,
+): SSRAssetDescriptors {
   const {
     id,
     injectLink = true,
@@ -121,7 +126,11 @@ function collectSSRAssetDescriptors(options: IProps): SSRAssetDescriptors {
     return { scriptSrcs, stylesheetHrefs };
   }
 
-  const moduleAndPublicPath = getTargetModuleInfo(id, instance);
+  const moduleAndPublicPath = getTargetModuleInfo(
+    id,
+    instance,
+    resolvedRemoteInfo,
+  );
   if (!moduleAndPublicPath) {
     return { scriptSrcs, stylesheetHrefs };
   }
@@ -226,7 +235,11 @@ export function createLazyComponent<T, E extends keyof T>(
 // Shared by the public lazy consumer and the unified client-only consumer.
 // Kept out of the public entry points.
 export function createLazyComponentResource<T, E extends keyof T>(
-  options: CreateLazyComponentOptions<T, E>,
+  options: CreateLazyComponentOptions<T, E> & {
+    resolvedRemoteInfo?: ReturnType<typeof getLoadedRemoteInfos>;
+    /** Only for resources owned by one consumer mount, never a shared factory. */
+    cacheDataForMount?: boolean;
+  },
 ) {
   const { instance, injectScript, injectLink } = options;
   if (!instance) {
@@ -278,7 +291,8 @@ export function createLazyComponentResource<T, E extends keyof T>(
       if (!moduleId) {
         throw new Error('moduleId is empty');
       }
-      loadedRemoteInfo = getLoadedRemoteInfos(moduleId, instance);
+      loadedRemoteInfo =
+        options.resolvedRemoteInfo || getLoadedRemoteInfos(moduleId, instance);
       if (!loadedRemoteInfo) {
         throw new Error(`can not find loaded remote('${moduleId}') info!`);
       }
@@ -331,7 +345,8 @@ export function createLazyComponentResource<T, E extends keyof T>(
 
   const createLoadedComponent = (m: LoadedModule) => {
     const moduleId = m && m[Symbol.for('mf_module_id')];
-    const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, instance);
+    const loadedRemoteInfo =
+      options.resolvedRemoteInfo || getLoadedRemoteInfos(moduleId, instance);
     loadedRemoteInfo?.snapshot;
     const dataFetchMapKey = loadedRemoteInfo
       ? getDataFetchMapKey(
@@ -346,12 +361,15 @@ export function createLazyComponentResource<T, E extends keyof T>(
       : undefined;
     logger.debug('LazyComponent dataFetchMapKey: ', dataFetchMapKey);
 
-    const { scriptSrcs, stylesheetHrefs } = collectSSRAssetDescriptors({
-      id: moduleId,
-      instance,
-      injectLink,
-      injectScript,
-    });
+    const { scriptSrcs, stylesheetHrefs } = collectSSRAssetDescriptors(
+      {
+        id: moduleId,
+        instance,
+        injectLink,
+        injectScript,
+      },
+      options.resolvedRemoteInfo,
+    );
     const assets = [
       ...renderScriptAssets(scriptSrcs),
       <HydratedStylesheetAssets key="stylesheets" hrefs={stylesheetHrefs} />,
@@ -410,13 +428,19 @@ export function createLazyComponentResource<T, E extends keyof T>(
     return { status: 'loaded', Component, data };
   };
 
+  let mountDataPromise: ReturnType<typeof getData> | undefined;
+  const initialData = () =>
+    options.cacheDataForMount
+      ? (mountDataPromise ||= getData(options.noSSR))
+      : getData(options.noSSR);
+
   const Component = (props: ComponentType) => {
     const { key, ...args } = props;
 
     if (!options.noSSR) {
       return (
         <AwaitDataFetch
-          resolve={getData(options.noSSR)}
+          resolve={initialData()}
           loading={options.loading}
           delayLoading={options.delayLoading}
           errorElement={options.fallback}

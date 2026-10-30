@@ -21,3 +21,15 @@ export * from './dom';
 export * from './node';
 export * from './normalizeOptions';
 export { createModuleFederationConfig } from './createModuleFederationConfig';
+
+/** Canonical registry extended by generated declarations without extra imports. */
+declare global {
+  // Global augmentation avoids a direct SDK dependency in generated host types.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace ModuleFederation {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- declaration merging registry
+    interface RemoteModuleMap {}
+  }
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- allow SDK module augmentation too
+export interface RemoteModuleMap extends ModuleFederation.RemoteModuleMap {}

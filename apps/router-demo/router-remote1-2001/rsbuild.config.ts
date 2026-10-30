@@ -4,6 +4,9 @@ import { pluginReact } from '@rsbuild/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  output: {
+    assetPrefix: 'http://localhost:2001',
+  },
   resolve: {
     // Prevent pnpm workspace from causing dev dependencies on npm to take effect
     alias: {

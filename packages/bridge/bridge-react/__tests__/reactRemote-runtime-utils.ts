@@ -8,12 +8,14 @@ export function snapshotRuntime({
   isService = false,
   pureEntry = false,
   globalSnapshot = false,
+  dataFetch,
 }: {
   module: Record<string, unknown>;
   render?: 'component' | 'bridge';
   isService?: boolean;
   pureEntry?: boolean;
   globalSnapshot?: boolean;
+  dataFetch?: () => unknown;
 }) {
   const name = `react_remote_${++sequence}`;
   const snapshot = {
@@ -34,12 +36,22 @@ export function snapshotRuntime({
     shared: [],
     remotesInfo: {},
   } satisfies ModuleInfo;
+  if (dataFetch) {
+    snapshot.modules.push({
+      moduleName: 'Card.data',
+      modulePath: './Card.data',
+      isService: false,
+      assets: { js: { sync: [], async: [] }, css: { sync: [], async: [] } },
+    });
+  }
   const events: string[] = [];
   const factory = jest.fn(() => {
     events.push('factory');
     return module;
   });
-  const get = jest.fn(() => factory);
+  const get = jest.fn((expose: string) =>
+    expose === './Card.data' ? () => ({ fetchData: dataFetch }) : factory,
+  );
   const loadEntry = jest.fn(() => ({ init() {}, get }));
   const beforeRequest = jest.fn((args) => args);
   const loadSnapshot = jest.fn((args) => ({
