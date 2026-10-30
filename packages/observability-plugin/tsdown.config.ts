@@ -4,6 +4,7 @@ const entry = {
   'chrome-devtool': 'src/chrome-devtool.ts',
   node: 'src/node.ts',
   build: 'src/build.ts',
+  vite: 'src/vite.ts',
 };
 
 const baseConfig = {
@@ -15,7 +16,9 @@ const baseConfig = {
     '@module-federation/runtime',
     '@module-federation/sdk',
     'node:fs',
+    'node:module',
     'node:path',
+    'vite',
   ],
 };
 
