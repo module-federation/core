@@ -1,4 +1,8 @@
-import { createLink, createScript, safeToString } from '@module-federation/sdk';
+import {
+  createLink,
+  createScript,
+  safeToString,
+} from '@module-federation/sdk/core';
 import {
   PreloadAssets,
   PreloadAssetResult,
@@ -13,7 +17,7 @@ import {
 } from '../type';
 import { matchRemote } from './manifest';
 import { assert } from './logger';
-import { ModuleFederation } from '../core';
+import type { ModuleFederation } from '../index';
 import { getRemoteEntry, isEsmRemoteType } from './load';
 import { getPreloadedAsset, setPreloadedAsset } from '../global';
 

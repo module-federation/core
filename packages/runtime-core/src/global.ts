@@ -1,4 +1,4 @@
-import { ModuleFederation } from './core';
+import type { ModuleFederation } from './index';
 import {
   RemoteEntryExports,
   GlobalShareScopeMap,
@@ -10,7 +10,7 @@ import {
   GlobalModuleInfo,
   ModuleInfo,
   isDebugMode,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import { warn, error } from './utils/logger';
 import { ModuleFederationRuntimePlugin } from './type/plugin';
 
@@ -312,3 +312,7 @@ export const setPreloadedAsset = (url: string): void => {
     }
   }
 };
+
+export function getGlobalShareScope(): GlobalShareScopeMap {
+  return Global.__FEDERATION__.__SHARE__;
+}
