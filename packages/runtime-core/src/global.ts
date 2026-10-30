@@ -264,12 +264,63 @@ export const getRemoteEntryExports = (
   entryExports: RemoteEntryExports | undefined;
 } => {
   const remoteEntryKey = globalName || `__FEDERATION_${name}:custom__`;
-  const entryExports = (CurrentGlobal as any)[remoteEntryKey];
-  return {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    CurrentGlobal,
     remoteEntryKey,
-    entryExports,
-  };
+  );
+
+  // A declared but unassigned `var` is an available registration slot. Accessors,
+  // readonly undefined values and inherited properties must not be overwritten.
+  if (
+    (!descriptor && !(remoteEntryKey in CurrentGlobal)) ||
+    (descriptor &&
+      'value' in descriptor &&
+      descriptor.value === undefined &&
+      descriptor.writable)
+  ) {
+    return { remoteEntryKey, entryExports: undefined };
+  }
+
+  const entryExports = descriptor?.value;
+  if (
+    entryExports &&
+    (typeof entryExports === 'object' || typeof entryExports === 'function') &&
+    hasContainerMethod(entryExports, 'get') &&
+    hasContainerMethod(entryExports, 'init')
+  ) {
+    return { remoteEntryKey, entryExports };
+  }
+
+  error(
+    `Remote entry global name collision: "${remoteEntryKey}" for remote "${name}" is already defined and is not a Module Federation container. Choose a different remote container name and matching entryGlobalName.`,
+  );
 };
+
+function hasContainerMethod(
+  container: object,
+  method: 'get' | 'init',
+): boolean {
+  for (
+    let target: object | null = container;
+    target;
+    target = Object.getPrototypeOf(target)
+  ) {
+    const descriptor = Object.getOwnPropertyDescriptor(target, method);
+    if (descriptor) {
+      // Webpack and Rspack expose container methods through export getters.
+      try {
+        const value =
+          'value' in descriptor
+            ? descriptor.value
+            : descriptor.get?.call(container);
+        return typeof value === 'function';
+      } catch {
+        return false;
+      }
+    }
+  }
+  return false;
+}
 
 // This function is used to register global plugins.
 // It iterates over the provided plugins and checks if they are already registered.
