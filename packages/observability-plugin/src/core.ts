@@ -3,7 +3,6 @@ import type {
   RuntimePluginHooks,
 } from '@module-federation/runtime';
 
-import { createDivebellObservabilityAdapter } from './divebell';
 import { createReportManager } from './report/manager';
 import type {
   LegacyObservabilityBridgeHookArgs,
@@ -54,6 +53,7 @@ import type {
   ObservableModuleFederation,
   OnMFRemoteLoaded,
 } from './type';
+import type { DivebellReportReader } from './divebell-actions';
 import {
   COMPONENT_BUSINESS_LOADED_EVENT,
   DEFAULT_MAX_EVENTS,
@@ -115,6 +115,68 @@ import {
   sanitizeText,
   sanitizeUrl,
 } from './utils';
+
+interface DivebellObservabilityAdapter {
+  register(): void;
+  syncReport(
+    report: ObservabilityReport,
+    context?: ObservabilityEventContext,
+  ): void;
+}
+
+function createLazyDivebellObservabilityAdapter(
+  input: ObservabilityPluginOptions['divebell'],
+  reportReader: DivebellReportReader,
+): DivebellObservabilityAdapter | undefined {
+  if (!input || (input !== true && input.enabled === false)) {
+    return undefined;
+  }
+
+  let adapter: DivebellObservabilityAdapter | undefined;
+  let loadPromise: Promise<void> | undefined;
+  let shouldRegister = false;
+  const pendingReports: Array<{
+    report: ObservabilityReport;
+    context?: ObservabilityEventContext;
+  }> = [];
+
+  const load = () => {
+    if (!loadPromise) {
+      loadPromise = import('./divebell')
+        .then(({ createDivebellObservabilityAdapter }) => {
+          adapter = createDivebellObservabilityAdapter(input, reportReader);
+          if (shouldRegister) {
+            adapter?.register();
+          }
+          pendingReports.splice(0).forEach(({ report, context }) => {
+            adapter?.syncReport(report, context);
+          });
+        })
+        .catch(() => {
+          pendingReports.length = 0;
+        });
+    }
+
+    return loadPromise;
+  };
+
+  return {
+    register() {
+      shouldRegister = true;
+      adapter?.register();
+      void load();
+    },
+    syncReport(report, context) {
+      if (adapter) {
+        adapter.syncReport(report, context);
+        return;
+      }
+
+      pendingReports.push({ report, context });
+      void load();
+    },
+  };
+}
 
 export type {
   MFRemoteLoadedOptions,
@@ -498,14 +560,17 @@ export function createObservability(
     }
   };
 
-  const divebellAdapter = createDivebellObservabilityAdapter(options.divebell, {
-    getReports: getReportsSnapshot,
-    findReports: findReportsSnapshot,
-    getLatestReport: getLatestReportSnapshot,
-    getReport: getReportSnapshot,
-    exportReport: exportReportSnapshot,
-    getRuntimeState: getRuntimeStateSnapshot,
-  });
+  const divebellAdapter = createLazyDivebellObservabilityAdapter(
+    options.divebell,
+    {
+      getReports: getReportsSnapshot,
+      findReports: findReportsSnapshot,
+      getLatestReport: getLatestReportSnapshot,
+      getReport: getReportSnapshot,
+      exportReport: exportReportSnapshot,
+      getRuntimeState: getRuntimeStateSnapshot,
+    },
+  );
 
   const createBrowserReader = (): ObservabilityBrowserReader => ({
     getEvents: getEventsSnapshot,
