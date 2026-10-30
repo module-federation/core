@@ -6,8 +6,7 @@ on:
 
 jobs:
   e2e-rstest:
-    # Playwright 1.57 has no Chromium build for ubuntu-latest (26.04) yet.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Checkout Repository
