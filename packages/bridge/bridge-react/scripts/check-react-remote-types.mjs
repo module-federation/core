@@ -19,6 +19,15 @@ const compiler = join(
   dirname(require.resolve('typescript/package.json')),
   'bin/tsc',
 );
+// The package compiler no longer supports legacy Node resolution. Keep a
+// regression using the workspace compiler for frameworks that still use it.
+const workspaceRequire = createRequire(
+  join(packageRoot, '../../../package.json'),
+);
+const classicCompiler = join(
+  dirname(workspaceRequire.resolve('typescript/package.json')),
+  'bin/tsc',
+);
 const fixture = mkdtempSync(join(tmpdir(), 'mf-react-remote-types-'));
 const packageDir = (name) => {
   for (
@@ -51,7 +60,22 @@ import { createReactRemote as createBaseRemote, ReactRemote as BaseRemote } from
 import { createBridgeComponent as create18 } from '@module-federation/bridge-react/v18';
 import { createBridgeComponent as create19 } from '@module-federation/bridge-react/v19';
 import { createBridgeComponent as create17 } from '@module-federation/bridge-react';
+import { createBridgeRouterConnector as connectDefault } from '@module-federation/bridge-react';
+import { createBridgeRouterConnector, type BridgeRouterAdapter, type BridgeRouterLocation } from '@module-federation/bridge-react/base';
+import { createBridgeRouterConnector as connect18 } from '@module-federation/bridge-react/v18';
+import { createBridgeRouterConnector as connect19 } from '@module-federation/bridge-react/v19';
 import Shop, * as namespace from './remote.js';
+declare const routerAdapter: BridgeRouterAdapter;
+for (const connect of [connectDefault, createBridgeRouterConnector, connect18, connect19]) {
+  const connection = connect({onError: () => {}});
+  connection.attach(routerAdapter);
+  connection.setNavigation(undefined);
+  connection.dispose();
+}
+const entry: BridgeRouterLocation = {url: '/inventory', key: 'one'};
+// @ts-expect-error history entry identity is required even for same-URL navigation
+const noEntryIdentity: BridgeRouterLocation = {url: '/inventory'};
+
 
 declare global { namespace ModuleFederation { interface RemoteModuleMap {
   'shop/App': typeof namespace;
@@ -201,12 +225,12 @@ const Explicit = createReactRemote<{required:string}>({remote:dynamic});
 // @ts-expect-error explicit declaration generics remain checked
 <ReactRemote<{required:string}> remote={dynamic} props={{required:1}}/>;
 `;
-  for (const mode of ['module', 'commonjs']) {
+  for (const mode of ['module', 'commonjs', 'classic-node']) {
     const directory = join(fixture, mode);
     mkdirSync(directory);
     writeFileSync(
       join(directory, 'package.json'),
-      JSON.stringify({ type: mode }),
+      JSON.stringify({ type: mode === 'module' ? 'module' : 'commonjs' }),
     );
     writeFileSync(
       join(directory, 'remote.tsx'),
@@ -224,8 +248,9 @@ export function Named(props:{label:string}) { return <p>{props.label}</p> }`,
           noEmit: true,
           jsx: 'react-jsx',
           target: 'ES2020',
-          module: 'NodeNext',
-          moduleResolution: 'NodeNext',
+          module: mode === 'classic-node' ? 'CommonJS' : 'NodeNext',
+          moduleResolution: mode === 'classic-node' ? 'Node' : 'NodeNext',
+          ...(mode === 'classic-node' ? { ignoreDeprecations: '6.0' } : {}),
           esModuleInterop: true,
           types: ['node', 'react'],
         },
@@ -234,7 +259,11 @@ export function Named(props:{label:string}) { return <p>{props.label}</p> }`,
     );
     const result = spawnSync(
       process.execPath,
-      [compiler, '-p', join(directory, 'tsconfig.json')],
+      [
+        mode === 'classic-node' ? classicCompiler : compiler,
+        '-p',
+        join(directory, 'tsconfig.json'),
+      ],
       { encoding: 'utf8' },
     );
     if (result.status !== 0)

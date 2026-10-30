@@ -12,3 +12,13 @@ export { useBridgeRouter } from './provider/context';
 export type { BridgeNavigation } from './types';
 
 export type { BridgeProvider } from './types';
+
+export { createBridgeRouterConnector } from './bridgeRouter';
+export type {
+  BridgeRouterAdapter,
+  BridgeRouterConnector,
+  BridgeRouterConnectorOptions,
+  BridgeRouterHistory,
+  BridgeRouterLocation,
+  BridgeRouterSnapshot,
+} from './bridgeRouter';

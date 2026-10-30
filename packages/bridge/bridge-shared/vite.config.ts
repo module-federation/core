@@ -9,7 +9,9 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'bridge-shared',
-      fileName: (format) => `index.${format}.js`,
+      formats: ['es', 'umd', 'cjs'],
+      fileName: (format) =>
+        format === 'cjs' ? 'router.cjs' : `index.${format}.js`,
     },
   },
 });

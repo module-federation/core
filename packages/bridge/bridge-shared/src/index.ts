@@ -7,5 +7,15 @@ export type {
   BridgeOperationResult,
   BridgeOperationSide,
   BridgeRouteSummary,
-} from './type';
-export { dispatchPopstateEnv } from './env';
+} from './type.js';
+export { dispatchPopstateEnv } from './env.js';
+
+export { createBridgeRouterConnector } from './router.js';
+export type {
+  BridgeRouterAdapter,
+  BridgeRouterConnector,
+  BridgeRouterConnectorOptions,
+  BridgeRouterHistory,
+  BridgeRouterLocation,
+  BridgeRouterSnapshot,
+} from './router.js';

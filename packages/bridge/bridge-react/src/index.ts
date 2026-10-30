@@ -67,3 +67,13 @@ export type {
   RemoteExportName,
   InferRemoteProps,
 } from './reactRemoteTypes';
+
+export { createBridgeRouterConnector } from './bridgeRouter';
+export type {
+  BridgeRouterAdapter,
+  BridgeRouterConnector,
+  BridgeRouterConnectorOptions,
+  BridgeRouterHistory,
+  BridgeRouterLocation,
+  BridgeRouterSnapshot,
+} from './bridgeRouter';

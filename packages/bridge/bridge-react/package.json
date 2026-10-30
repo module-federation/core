@@ -156,6 +156,7 @@
     "test:types": "node scripts/check-react-remote-types.mjs"
   },
   "dependencies": {
+    "@module-federation/bridge-shared": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
@@ -174,7 +175,6 @@
     }
   },
   "devDependencies": {
-    "@module-federation/bridge-shared": "workspace:*",
     "@rsbuild/plugin-react": "2.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/jest-dom": "6.6.3",

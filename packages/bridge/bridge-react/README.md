@@ -238,11 +238,10 @@ when the Host pathname, query, or hash changes. An explicit basename overrides
 inference while retaining Host notifications. Existing Router aliases and
 producer Router wrappers remain available for that legacy integration.
 
-This automatic path applies to browser-based Bridge producers. A framework
-application backed by an independent memory Router still needs its framework's
-navigation integration. In particular, consuming a Modern application Root
-through Core directly with only `basename` does not connect that memory Router
-to the Host. Use the Modern consumer entry or provide the navigation adapter.
+This automatic path provides Host-to-Remote notifications for browser-based
+Bridge producers. It does not observe every producer Router or make independent
+memory navigation follow the Host. Framework application Roots must connect
+their Router to the Bridge integration to provide both directions.
 
 Framework integrations should use `/base`, which has no React Router dependency.
 The framework reads its own Router context, calculates the mount basename, and
@@ -271,10 +270,55 @@ Framework application Roots can call `useBridgeRouter()` from `/base` to read
 their provider's mount context. A navigation adapter supplies `getLocation()`,
 `subscribe(listener)`, and `navigate(to, { replace })`. An optional `createHref(to)`
 formats native links for Hash Routers. Locations include the Host Router basename,
-query, and hash. Numeric navigation delegates history movement to the Host. Each
+query, and hash. Numeric navigation is available through the Host adapter. Each
 adapter subscription belongs to a mounted application and must be released on
 unmount. Passing an adapter alone does not retrofit an older provider's Router.
 The framework's application Root must consume the integration.
+
+Frameworks connecting a browser-backed Router can use
+`createBridgeRouterConnector` from `/base` (also exported by the default, `/v18`,
+and `/v19` entries). It delegates to the Router-independent implementation in
+`@module-federation/bridge-shared`. Create one connector in the mounted
+application's committed lifecycle, attach its Router adapter, and dispose it
+when that application unmounts:
+
+```ts
+const connection = createBridgeRouterConnector({
+  navigation: bridge.navigation,
+  onError: reportRouterError,
+});
+connection.attach(routerAdapter);
+// Reconcile updated controls or a dynamic mount without recreating the Router.
+connection.setNavigation(bridge.navigation);
+// During unmount, also dispose the framework's Router.
+connection.dispose();
+```
+
+The adapter supplies `getSnapshot`, `subscribe`, `getHistoryLocation`,
+`syncFromHistory`, and `notifyPeers`. Snapshots include the committed URL and
+entry key, the pending navigation's URL and key, the history action, and whether
+initialization has completed. Use the Router's entry keys consistently for
+history and snapshots. Entry keys are required so a same-URL new navigation can
+be distinguished from a notification about an existing entry. Pending navigation
+does not include background revalidation. History exposes both the Remote's
+projected location and the Host's logical URL, so dynamic mount prefixes do not
+require a new Router.
+
+`syncFromHistory` starts reading the current history entry without writing it
+again. `notifyPeers` reports a write already completed by the Remote, for example
+using the existing browser `popstate` compatibility notification. The adapter
+must exclude the writing Router from that notification, including when it has
+started a subsequent navigation. Other Router instances still receive it. The
+framework adapter owns Browser/Hash interpretation and Router-specific APIs. The connector
+owns initial redirect reconciliation, duplicate pending-entry detection, and
+subscription cleanup. Work is queued rather than performed synchronously while
+attaching a Router. Disposing the connector invalidates queued work.
+
+The connector uses the existing per-mount `navigation` reference. It does not
+register a global runtime plugin or use `afterBridgeRouteSync` for communication.
+That hook retains its existing observation behavior and does not acknowledge that
+a Router's loaders have completed. Older providers keep their existing routing
+behavior, and independent `memoryRoute` cards do not attach a browser connector.
 
 `memoryRoute` preserves the existing Bridge option for independent navigation
 with an initial `entryPath`. Existing Router wrappers use it to select a memory
