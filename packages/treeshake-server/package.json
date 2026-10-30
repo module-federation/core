@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.3",
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.64.1",
     "@rstest/core": "^0.6.5",
     "@types/node": "^20.11.30",
     "@vercel/nft": "^1.1.1",
