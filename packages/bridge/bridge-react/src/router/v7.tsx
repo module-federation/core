@@ -71,5 +71,10 @@ function WraperRouterProvider(props: Record<string, unknown>) {
 
 // Export all from react-router for v7 compatibility
 export * from 'react-router';
+
+export function readReactRouter() {
+  return ReactRouterDom;
+}
+
 export { WraperRouter as BrowserRouter };
 export { WraperRouterProvider as RouterProvider };
