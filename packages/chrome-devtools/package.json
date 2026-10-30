@@ -8,17 +8,17 @@
     "directory": "packages/chrome-devtools"
   },
   "scripts": {
-    "build:storybook": "storybook build",
-    "storybook": "storybook dev -p 6006",
+    "build:storybook": "pnpm run build:react19 && storybook build",
+    "storybook": "pnpm run build:react19 && storybook dev -p 6006",
     "reset": "npx rimraf ./**/node_modules",
-    "dev": "modern-app dev",
-    "build:devtool": "modern-app build && node postpack.js",
+    "dev": "pnpm run build:react19 && modern-app dev",
+    "build:devtool": "pnpm run build:react19 && modern-app build && node postpack.js",
     "build:devtool:popup": "pnpm run build:devtool",
     "build": "npm run build:lib",
-    "build:debug": "DEBUG=true modern-app build && node postpack.js",
-    "build:lib": "rm -rf dist && modern-module build -c modern.lib.config.ts && tsc -p tsconfig.lib.json",
+    "build:debug": "pnpm run build:react19 && DEBUG=true modern-app build && node postpack.js",
+    "build:lib": "pnpm run build:react19 && rm -rf dist && modern-module build -c modern.lib.config.ts && tsc -p tsconfig.lib.json",
     "release": "npm publish --tag canary",
-    "test": "rstest",
+    "test": "pnpm run build:react19 && rstest",
     "test:e2e": "node ../../scripts/ensure-playwright.js && E2ETEST=true pnpm build:devtool && playwright test",
     "test:e2e:ui": "node ../../scripts/ensure-playwright.js && E2ETEST=true pnpm build:devtool && playwright test --ui",
     "start": "modern-app start",
@@ -26,7 +26,8 @@
     "postinstall": "bash install-deps.bash",
     "build:chrome-plugins": "pnpm -C . build",
     "e2e:devtools": "pnpm -C . test:e2e",
-    "e2e:devtools:ui": "pnpm -C . test:e2e:ui"
+    "e2e:devtools:ui": "pnpm -C . test:e2e:ui",
+    "build:react19": "node build-react19.cjs"
   },
   "files": [
     "dist/",
@@ -104,6 +105,8 @@
     "prettier": "~3.3.3",
     "typescript": "7.0.2",
     "rimraf": "~6.0.1",
-    "vitest": "4.1.11"
+    "vitest": "4.1.11",
+    "react19": "npm:react@19.2.4",
+    "react-dom19": "npm:react-dom@19.2.4"
   }
 }
