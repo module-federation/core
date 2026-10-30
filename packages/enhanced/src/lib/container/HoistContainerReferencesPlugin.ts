@@ -85,114 +85,74 @@ class HoistContainerReferences implements WebpackPluginInstance {
     remoteDependencies: Set<Dependency>,
   ): void {
     const { chunkGraph, moduleGraph } = compilation;
+    const { forEachRuntime } = compilation.compiler.webpack.util.runtime;
     const allModulesToHoist = new Set<Module>();
 
-    // Process container entry dependencies (needed for nextjs-mf exposed modules)
-    for (const dep of containerEntryDependencies) {
-      const containerEntryModule = moduleGraph.getModule(dep);
-      if (!containerEntryModule) continue;
+    const runtimeChunkByKey = new Map<string, Chunk>();
+    for (const chunk of runtimeChunks) {
+      forEachRuntime(chunk.runtime, (runtimeKey) => {
+        if (runtimeKey) runtimeChunkByKey.set(runtimeKey, chunk);
+      });
+    }
+
+    const runtimeChunksOf = (module: Module): Set<Chunk> => {
+      const chunks = new Set<Chunk>();
+      for (const runtimeSpec of chunkGraph.getModuleRuntimes(module)) {
+        forEachRuntime(runtimeSpec, (runtimeKey) => {
+          const runtimeChunk = runtimeKey && runtimeChunkByKey.get(runtimeKey);
+          if (runtimeChunk) chunks.add(runtimeChunk);
+        });
+      }
+      return chunks;
+    };
+
+    for (const dep of [
+      ...containerEntryDependencies,
+      ...federationRuntimeDependencies,
+      ...remoteDependencies,
+    ]) {
+      const module = moduleGraph.getModule(dep);
+      if (!module) continue;
       const referencedModules = getAllReferencedModules(
         compilation,
-        containerEntryModule,
+        module,
         'initial',
       );
       referencedModules.forEach((m: Module) => allModulesToHoist.add(m));
-      const moduleRuntimes = chunkGraph.getModuleRuntimes(containerEntryModule);
-      const runtimes = new Set<string>();
-      for (const runtimeSpec of moduleRuntimes) {
-        compilation.compiler.webpack.util.runtime.forEachRuntime(
-          runtimeSpec,
-          (runtimeKey) => {
-            if (runtimeKey) {
-              runtimes.add(runtimeKey);
-            }
-          },
-        );
-      }
-      for (const runtime of runtimes) {
-        const runtimeChunk = compilation.namedChunks.get(runtime);
-        if (!runtimeChunk) continue;
-        for (const module of referencedModules) {
-          if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
-            chunkGraph.connectChunkAndModule(runtimeChunk, module);
+      for (const runtimeChunk of runtimeChunksOf(module)) {
+        for (const referenced of referencedModules) {
+          if (!chunkGraph.isModuleInChunk(referenced, runtimeChunk)) {
+            chunkGraph.connectChunkAndModule(runtimeChunk, referenced);
           }
         }
       }
     }
 
-    // Federation Runtime Dependencies: use 'initial' (not 'all')
-    for (const dep of federationRuntimeDependencies) {
-      const runtimeModule = moduleGraph.getModule(dep);
-      if (!runtimeModule) continue;
-      const referencedModules = getAllReferencedModules(
-        compilation,
-        runtimeModule,
-        'initial',
-      );
-      referencedModules.forEach((m: Module) => allModulesToHoist.add(m));
-      const moduleRuntimes = chunkGraph.getModuleRuntimes(runtimeModule);
-      const runtimes = new Set<string>();
-      for (const runtimeSpec of moduleRuntimes) {
-        compilation.compiler.webpack.util.runtime.forEachRuntime(
-          runtimeSpec,
-          (runtimeKey) => {
-            if (runtimeKey) {
-              runtimes.add(runtimeKey);
-            }
-          },
-        );
-      }
-      for (const runtime of runtimes) {
-        const runtimeChunk = compilation.namedChunks.get(runtime);
-        if (!runtimeChunk) continue;
-        for (const module of referencedModules) {
-          if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
-            chunkGraph.connectChunkAndModule(runtimeChunk, module);
-          }
-        }
-      }
-    }
-
-    // Process remote dependencies
-    for (const remoteDep of remoteDependencies) {
-      const remoteModule = moduleGraph.getModule(remoteDep);
-      if (!remoteModule) continue;
-      const referencedRemoteModules = getAllReferencedModules(
-        compilation,
-        remoteModule,
-        'initial',
-      );
-      referencedRemoteModules.forEach((m: Module) => allModulesToHoist.add(m));
-      const remoteModuleRuntimes = chunkGraph.getModuleRuntimes(remoteModule);
-      const remoteRuntimes = new Set<string>();
-      for (const runtimeSpec of remoteModuleRuntimes) {
-        compilation.compiler.webpack.util.runtime.forEachRuntime(
-          runtimeSpec,
-          (runtimeKey) => {
-            if (runtimeKey) remoteRuntimes.add(runtimeKey);
-          },
-        );
-      }
-      for (const runtime of remoteRuntimes) {
-        const runtimeChunk = compilation.namedChunks.get(runtime);
-        if (!runtimeChunk) continue;
-        for (const module of referencedRemoteModules) {
-          if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
-            chunkGraph.connectChunkAndModule(runtimeChunk, module);
-          }
-        }
-      }
-    }
-
-    this.cleanUpChunks(compilation, allModulesToHoist);
+    this.cleanUpChunks(compilation, allModulesToHoist, runtimeChunkByKey);
   }
 
   // Method to clean up chunks by disconnecting unused modules
-  private cleanUpChunks(compilation: Compilation, modules: Set<Module>): void {
+  private cleanUpChunks(
+    compilation: Compilation,
+    modules: Set<Module>,
+    runtimeChunkByKey: Map<string, Chunk>,
+  ): void {
     const { chunkGraph } = compilation;
+    const { forEachRuntime } = compilation.compiler.webpack.util.runtime;
     for (const module of modules) {
       for (const chunk of chunkGraph.getModuleChunks(module)) {
-        if (!chunk.hasRuntime()) {
+        if (chunk.hasRuntime()) continue;
+        let hoistedToAllRuntimes = true;
+        forEachRuntime(chunk.runtime, (runtimeKey) => {
+          const runtimeChunk = runtimeKey && runtimeChunkByKey.get(runtimeKey);
+          if (
+            !runtimeChunk ||
+            !chunkGraph.isModuleInChunk(module, runtimeChunk)
+          ) {
+            hoistedToAllRuntimes = false;
+          }
+        });
+        if (hoistedToAllRuntimes) {
           chunkGraph.disconnectChunkAndModule(chunk, module);
         }
       }
