@@ -227,7 +227,7 @@ and loading APIs remain available from `@module-federation/enhanced/runtime`.
 Unified and legacy consumers use the same Bridge renderer. The unified API
 selects the component or Bridge protocol, while the shared renderer owns provider
 creation, updates, cleanup, and asynchronous failures. Updating business props or
-routing controls reuses the mounted provider and React Root.
+navigating within a mount reuses the mounted provider and React Root.
 The shared renderer removes its loading placeholder in a React commit before
 allowing the producer Root to render into the same mount container.
 
@@ -264,7 +264,12 @@ producer basename. For example, selecting the application under `/product` and
 mounting it at `/inventory` exposes its relative detail route at
 `/inventory/detail/42`. Producers remain responsible for portable relative links,
 navigation, and code that depends on a fixed basename or absolute URL. Core does
-not interpret framework route selectors.
+not interpret framework route selectors. Browser-connected framework applications
+keep that basename fixed for one mount. If its actual mount basename changes,
+the framework consumer must create a new mount identity, for example with a React
+key, and dispose the previous Root, Router, subscriptions, and pending requests.
+Page state is preserved for ordinary props updates and internal navigation, but
+not across different mount locations.
 
 Framework application Roots can call `useBridgeRouter()` from `/base` to read
 their provider's mount context. A navigation adapter supplies `getLocation()`,
@@ -288,7 +293,7 @@ const connection = createBridgeRouterConnector({
   onError: reportRouterError,
 });
 connection.attach(routerAdapter);
-// Reconcile updated controls or a dynamic mount without recreating the Router.
+// Rebind a changed navigation adapter during the same mount.
 connection.setNavigation(bridge.navigation);
 // During unmount, also dispose the framework's Router.
 connection.dispose();
@@ -300,9 +305,10 @@ entry key, the pending navigation's URL and key, the history action, and whether
 initialization has completed. Use the Router's entry keys consistently for
 history and snapshots. Entry keys are required so a same-URL new navigation can
 be distinguished from a notification about an existing entry. Pending navigation
-does not include background revalidation. History exposes both the Remote's
-projected location and the Host's logical URL, so dynamic mount prefixes do not
-require a new Router.
+does not include background revalidation. `getHistoryLocation()` returns one
+`{ url, key }` entry. Both history and snapshots use the full logical URL,
+including the consumer basename, query, and hash. The connector does not project
+between old and new mount prefixes.
 
 `syncFromHistory` starts reading the current history entry without writing it
 again. `notifyPeers` reports a write already completed by the Remote, for example

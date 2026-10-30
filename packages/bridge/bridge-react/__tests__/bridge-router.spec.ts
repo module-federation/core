@@ -1,7 +1,7 @@
 import {
   createBridgeRouterConnector,
   type BridgeRouterAdapter,
-  type BridgeRouterHistory,
+  type BridgeRouterLocation,
   type BridgeRouterSnapshot,
 } from '../../bridge-shared/src/router';
 
@@ -17,11 +17,8 @@ function fixture(initial?: Partial<BridgeRouterSnapshot>) {
     initialized: true,
     ...initial,
   };
-  let history: BridgeRouterHistory = {
-    location: { ...snapshot.location },
-    hostUrl: snapshot.location.url,
-  };
-  let hostLocation = history.hostUrl;
+  let history: BridgeRouterLocation = { ...snapshot.location };
+  let hostLocation = history.url;
   const routerListeners = new Set<() => void>();
   const hostListeners = new Set<() => void>();
   const navigation = {
@@ -42,7 +39,7 @@ function fixture(initial?: Partial<BridgeRouterSnapshot>) {
     }),
     getHistoryLocation: jest.fn(() => history),
     syncFromHistory: jest.fn(() => {
-      snapshot = { ...snapshot, pendingLocation: { ...history.location } };
+      snapshot = { ...snapshot, pendingLocation: { ...history } };
       publishRouter();
     }),
     notifyPeers: jest.fn(publishRouter),
@@ -58,7 +55,7 @@ function fixture(initial?: Partial<BridgeRouterSnapshot>) {
       snapshot = next;
       publishRouter();
     },
-    setHistory(next: BridgeRouterHistory) {
+    setHistory(next: BridgeRouterLocation) {
       history = next;
     },
     hostMove(url: string) {
@@ -126,7 +123,7 @@ describe('shared Bridge Router connector', () => {
     await tick();
     for (const action of ['PUSH', 'REPLACE'] as const) {
       const location = { url: '/inventory/2?tab=a#detail', key: action };
-      value.setHistory({ location, hostUrl: location.url });
+      value.setHistory(location);
       value.setSnapshot({ location, action, initialized: true });
       await tick();
     }
@@ -146,7 +143,7 @@ describe('shared Bridge Router connector', () => {
       connector.attach(value.adapter);
       await tick();
       const location = { url: '/inventory/2', key: 'two' };
-      value.setHistory({ location, hostUrl: location.url });
+      value.setHistory(location);
       value.setSnapshot({
         location,
         action: 'PUSH',
@@ -175,7 +172,7 @@ describe('shared Bridge Router connector', () => {
     connector.attach(value.adapter);
     await tick();
     const back = { url: '/inventory/previous', key: 'previous' };
-    value.setHistory({ location: back, hostUrl: back.url });
+    value.setHistory(back);
     value.setSnapshot({ ...value.snapshot(), pendingLocation: back });
     value.hostMove(back.url);
     await tick();
@@ -200,7 +197,7 @@ describe('shared Bridge Router connector', () => {
         ...value.snapshot(),
         pendingLocation: { url: '/inventory/slow', key: 'slow' },
       });
-      value.setHistory({ location: { url, key: 'host-new' }, hostUrl: url });
+      value.setHistory({ url, key: 'host-new' });
       value.hostMove(url);
       await tick();
       expect(value.adapter.syncFromHistory).toHaveBeenCalledTimes(1);
@@ -222,8 +219,8 @@ describe('shared Bridge Router connector', () => {
       pendingLocation: { url: '/inventory/1', key: 'remote-new' },
     });
     value.setHistory({
-      location: { url: '/inventory/1', key: 'host-new' },
-      hostUrl: '/inventory/1',
+      url: '/inventory/1',
+      key: 'host-new',
     });
     value.hostMove('/inventory/1');
     await tick();
@@ -249,7 +246,7 @@ describe('shared Bridge Router connector', () => {
     connector.dispose();
   });
 
-  it('reconciles a changed mount with the same navigation and Router adapter', async () => {
+  it('keeps the current subscription and does no work for the same navigation reference', async () => {
     const value = fixture();
     const connector = createBridgeRouterConnector({
       navigation: value.navigation,
@@ -257,17 +254,43 @@ describe('shared Bridge Router connector', () => {
     });
     connector.attach(value.adapter);
     await tick();
-    value.setHistory({
-      location: { url: '/inventory/2', key: 'new-mount' },
-      hostUrl: '/stores/200/inventory/2',
-    });
-    value.hostMove('/stores/200/inventory/2');
+    const reads = jest.mocked(value.adapter.getSnapshot).mock.calls.length;
     connector.setNavigation(value.navigation);
     await tick();
-    expect(value.adapter.syncFromHistory).toHaveBeenCalledTimes(1);
+    expect(value.adapter.getSnapshot).toHaveBeenCalledTimes(reads);
     expect(value.navigation.subscribe).toHaveBeenCalledTimes(1);
     expect(value.adapter.subscribe).toHaveBeenCalledTimes(1);
     connector.dispose();
+  });
+
+  it('replaces a mount with a new connection and drops the old queued work', async () => {
+    const previous = fixture({
+      location: { url: '/stores/100/inventory', key: 'old-mount' },
+      action: 'PUSH',
+    });
+    const next = fixture({
+      location: { url: '/stores/200/inventory', key: 'new-mount' },
+    });
+    const oldConnection = createBridgeRouterConnector({
+      navigation: previous.navigation,
+      onError: jest.fn(),
+    });
+    oldConnection.attach(previous.adapter);
+    oldConnection.dispose();
+    const connection = createBridgeRouterConnector({
+      navigation: next.navigation,
+      onError: jest.fn(),
+    });
+    connection.attach(next.adapter);
+    await tick();
+    expect(previous.routerListeners.size).toBe(0);
+    expect(previous.hostListeners.size).toBe(0);
+    expect(previous.adapter.getSnapshot).not.toHaveBeenCalled();
+    expect(previous.adapter.notifyPeers).not.toHaveBeenCalled();
+    expect(next.routerListeners.size).toBe(1);
+    expect(next.hostListeners.size).toBe(1);
+    expect(next.adapter.syncFromHistory).not.toHaveBeenCalled();
+    connection.dispose();
   });
 
   it('drops a queued Remote notification when the Host has already changed history', async () => {
@@ -279,11 +302,11 @@ describe('shared Bridge Router connector', () => {
     connector.attach(value.adapter);
     await tick();
     const location = { url: '/inventory/2', key: 'two' };
-    value.setHistory({ location, hostUrl: location.url });
+    value.setHistory(location);
     value.setSnapshot({ location, action: 'PUSH', initialized: true });
     value.setHistory({
-      location: { url: '/outside', key: 'outside' },
-      hostUrl: '/outside',
+      url: '/outside',
+      key: 'outside',
     });
     value.hostMove('/outside');
     await tick();

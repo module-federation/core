@@ -15,7 +15,6 @@ export type {
   BridgeRouterAdapter,
   BridgeRouterConnector,
   BridgeRouterConnectorOptions,
-  BridgeRouterHistory,
   BridgeRouterLocation,
   BridgeRouterSnapshot,
 } from './router.js';

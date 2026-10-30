@@ -12,18 +12,12 @@ export interface BridgeRouterSnapshot {
   initialized: boolean;
 }
 
-export interface BridgeRouterHistory {
-  /** Browser history expressed in the Remote Router's coordinates. */
-  location: BridgeRouterLocation;
-  /** The same entry expressed in the Host Router's coordinates. */
-  hostUrl: string;
-}
-
 /** Framework adapters own Router APIs and Browser/Hash URL interpretation. */
 export interface BridgeRouterAdapter {
   getSnapshot: () => BridgeRouterSnapshot;
   subscribe: (listener: () => void) => () => void;
-  getHistoryLocation: () => BridgeRouterHistory;
+  /** Current Browser/Hash logical URL, including the mount basename. */
+  getHistoryLocation: () => BridgeRouterLocation;
   /** Begin consuming the current history entry without writing another entry. */
   syncFromHistory: () => void;
   /**
@@ -79,11 +73,11 @@ export function createBridgeRouterConnector({
       const snapshot = adapter.getSnapshot();
       const history = adapter.getHistoryLocation();
       const hostLocation = navigation?.getLocation();
-      const committed = sameLocation(snapshot.location, history.location);
-      const pending = sameLocation(snapshot.pendingLocation, history.location);
+      const committed = sameLocation(snapshot.location, history);
+      const pending = sameLocation(snapshot.pendingLocation, history);
 
       if (
-        (hostLocation === undefined || hostLocation === history.hostUrl) &&
+        (hostLocation === undefined || hostLocation === history.url) &&
         !pending &&
         !committed
       ) {
@@ -113,13 +107,10 @@ export function createBridgeRouterConnector({
     queueMicrotask(flush);
   };
   const setNavigation: BridgeRouterConnector['setNavigation'] = (next) => {
-    if (!active) return;
-    if (navigation !== next) {
-      stopHost?.();
-      navigation = next;
-      stopHost = next?.subscribe(schedule);
-    }
-    // A dynamic mount can change its URL projection without replacing the adapter.
+    if (!active || navigation === next) return;
+    stopHost?.();
+    navigation = next;
+    stopHost = next?.subscribe(schedule);
     schedule();
   };
   setNavigation(initialNavigation);

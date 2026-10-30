@@ -73,7 +73,6 @@ export type {
   BridgeRouterAdapter,
   BridgeRouterConnector,
   BridgeRouterConnectorOptions,
-  BridgeRouterHistory,
   BridgeRouterLocation,
   BridgeRouterSnapshot,
 } from './bridgeRouter';
