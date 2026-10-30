@@ -33,6 +33,7 @@
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
+    "@module-federation/retry-plugin": "workspace:*",
     "@rspack/core": "2.1.10",
     "typescript": "7.0.2"
   },

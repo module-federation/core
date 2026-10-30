@@ -97,6 +97,9 @@ const RetryPlugin = (
 };
 
 export { RetryPlugin };
+// `runtimePlugins` entries import the module's default export and call it
+// with the entry's params.
+export default RetryPlugin;
 export type {
   CommonRetryOptions,
   FetchRetryOptions,
