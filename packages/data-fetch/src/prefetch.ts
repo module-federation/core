@@ -1,12 +1,8 @@
 import type { getInstance } from '@module-federation/runtime';
-import {
-  getDataFetchInfo,
-  getDataFetchMap,
-  getDataFetchMapKey,
-} from '../utils';
-import logger from '../logger';
+import { getDataFetchInfo, getDataFetchMap, getDataFetchMapKey } from './utils';
+import logger from './logger';
 import helpers from '@module-federation/runtime/helpers';
-import { DataFetchParams } from '../types';
+import { DataFetchParams } from './types';
 
 export type PrefetchOptions = {
   id: string;
