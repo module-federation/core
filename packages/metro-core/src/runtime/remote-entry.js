@@ -68,8 +68,12 @@ async function init(shared = {}, initScope = []) {
     hmrInitialized = true;
   }
 
-  // load the rest of shared deps
-  await Promise.all(Object.keys(shared).map(loadSharedToRegistry));
+  // load the rest of shared deps declared by this remote
+  await Promise.all(
+    Object.keys(shared)
+      .filter((key) => key in usedShared)
+      .map(loadSharedToRegistry),
+  );
 
   return instance;
 }
