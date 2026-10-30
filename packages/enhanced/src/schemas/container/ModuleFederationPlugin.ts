@@ -1075,6 +1075,11 @@ export default {
               description: 'Disable assets analyze for manifest generation',
               type: 'boolean',
             },
+            useLegacyStats: {
+              description:
+                'Use the legacy JavaScript stats reader for Webpack. Defaults to false. Native Rspack stats are unaffected.',
+              type: 'boolean',
+            },
             fileName: {
               description: 'Name of the manifest file',
               type: 'string',
