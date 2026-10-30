@@ -10,55 +10,52 @@ import {
   getInstance,
   type ModuleFederation,
 } from '@module-federation/enhanced/runtime';
-import type { DataFetchParams } from './lazy/types';
+import type {
+  CreateReactRemoteOptions,
+  ReactRemoteProps,
+  CreateReactRemote,
+  ReactRemoteComponent,
+} from './reactRemoteTypes';
+export type {
+  CreateReactRemoteOptions,
+  ReactRemoteProps,
+  ReactRemoteErrorInfo,
+} from './reactRemoteTypes';
+import {
+  RemoteAppWrapper,
+  type RemoteAppWrapperProps,
+} from './remote/RemoteAppWrapper';
 import { createLazyComponentResource } from './lazy/createLazyComponent';
 import { autoFetchDataPlugin } from './lazy';
+import { initializeRemoteDataFetch } from './lazy/data-fetch/runtime-plugin';
 import { transformError, DelayedLoading } from './lazy/AwaitDataFetch';
 
-export interface ReactRemoteErrorInfo {
-  error: Error;
-  retry: () => void;
-}
-
-export interface CreateReactRemoteOptions {
-  /** A registered alias/expose, or a CSR loader returning an MF module namespace. */
-  remote: string | (() => Promise<unknown>);
-  instance?: ModuleFederation | null;
-  exportName?: string;
-  /** Compatibility hint for unmarked legacy modules. */
-  render?: 'component' | 'bridge';
-  loading?: React.ReactNode;
-  fallback?: (info: ReactRemoteErrorInfo) => React.ReactNode;
-  noSSR?: boolean;
-  dataFetchParams?: DataFetchParams;
-  injectScript?: boolean;
-  injectLink?: boolean;
-  delayLoading?: number;
-}
-
-export type ReactRemoteProps<P extends object = Record<string, unknown>> =
-  CreateReactRemoteOptions & { props?: P };
-
 type Namespace = Record<string, any> & { [key: symbol]: unknown };
-type Provider = {
-  render: (info: Record<string, unknown> & { dom: HTMLElement }) => unknown;
-  destroy: (info: { dom: HTMLElement; moduleName: string }) => unknown;
-};
 const configured = new WeakSet<ModuleFederation>();
 const moduleId = Symbol.for('mf_module_id');
 
 const asError = (error: unknown) =>
   error instanceof Error ? error : new Error(String(error));
-function namespace(value: unknown, id?: string): Namespace {
+function namespace(
+  value: unknown,
+  id?: string,
+  individualExport = false,
+): Namespace {
   if (!value || (typeof value !== 'object' && typeof value !== 'function'))
     throw new Error('A React remote must return an MF module namespace.');
-  if (!id || (value as Namespace)[moduleId]) return value as Namespace;
+  if (
+    individualExport ||
+    (typeof value === 'function' && !('default' in value)) ||
+    ('$$typeof' in value && !('default' in value))
+  ) {
+    return Object.defineProperty({ default: value }, moduleId, { value: id });
+  }
+  if (!id || (value as Namespace)[moduleId] === id) return value as Namespace;
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  delete (descriptors as Record<symbol, unknown>)[moduleId];
   // Keep raw loadRemote exports unchanged, including frozen namespaces.
   return Object.defineProperty(
-    Object.create(
-      Object.getPrototypeOf(value),
-      Object.getOwnPropertyDescriptors(value),
-    ),
+    Object.create(Object.getPrototypeOf(value), descriptors),
     moduleId,
     { value: id },
   );
@@ -74,6 +71,11 @@ async function resolveProtocol(
   const resolvedRemote = instance.remoteHandler.getRemoteModuleAndOptions({
     id,
   });
+  // String inputs stay metadata-first because Bridge SSR currently renders a
+  // placeholder without loading the expose. Starting loadRemote in parallel can
+  // evaluate module-level browser code on Node, even without calling a provider.
+  // Revisit this ordering with framework-aware Bridge SSR and hydration support.
+  // Sharing resolvedRemote already avoids repeating resolution hooks and requests.
   const load = () =>
     instance.remoteHandler.loadRemote(id, undefined, resolvedRemote);
   let match: Awaited<typeof resolvedRemote>['remoteMatchInfo'];
@@ -85,9 +87,27 @@ async function resolveProtocol(
     return {
       render: hint || 'component',
       recovered: namespace(await load(), id),
+      match: undefined,
       load,
     };
   }
+  return {
+    render: selectProtocol(match, id, hint),
+    recovered: undefined,
+    match,
+    load,
+  };
+}
+
+type RemoteMatch = Awaited<
+  ReturnType<ModuleFederation['remoteHandler']['getRemoteModuleAndOptions']>
+>['remoteMatchInfo'];
+
+function selectProtocol(
+  match: RemoteMatch,
+  id: string,
+  hint?: CreateReactRemoteOptions['render'],
+) {
   const { remoteSnapshot: snapshot, expose } = match;
   const metadata =
     snapshot && 'modules' in snapshot
@@ -113,127 +133,7 @@ async function resolveProtocol(
       `Remote '${id}' render hint conflicts with its manifest protocol.`,
     );
   }
-  return {
-    render: metadata?.render || hint || 'component',
-    recovered: undefined,
-    load,
-  };
-}
-
-function BridgeMount({
-  load,
-  instance,
-  id,
-  loading,
-  remoteProps,
-}: {
-  load: () => Promise<Namespace>;
-  instance: ModuleFederation;
-  id: string;
-  loading?: React.ReactNode;
-  remoteProps: object;
-}) {
-  const dom = useRef<HTMLDivElement>(null);
-  const latest = useRef(remoteProps);
-  latest.current = remoteProps;
-  const ownerRef = useRef<{
-    active: boolean;
-    provider?: Provider;
-    queue: Promise<unknown>;
-    update: () => void;
-  }>();
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState<Error>();
-  useEffect(() => {
-    const element = dom.current!;
-    let destroyed = false;
-    const owner = {
-      active: true,
-      provider: undefined as Provider | undefined,
-      queue: Promise.resolve() as Promise<unknown>,
-      update: () => {
-        owner.queue = owner.queue
-          .then(async () => {
-            if (!owner.active || !owner.provider) return;
-            const info = { ...latest.current, moduleName: id, dom: element };
-            const context = {
-              side: 'consumer' as const,
-              framework: 'react' as const,
-              operation: 'render' as const,
-            };
-            const extra =
-              instance.bridgeHook?.lifecycle.beforeBridgeRender.emit(
-                info,
-                context,
-              );
-            await owner.provider.render({
-              ...info,
-              ...(extra as any)?.extraProps,
-            });
-            instance.bridgeHook?.lifecycle.afterBridgeRender.emit(info, {
-              context,
-            });
-            if (owner.active) setReady(true);
-          })
-          .catch((failure) => {
-            if (owner.active) setError(asError(failure));
-          });
-      },
-    };
-    ownerRef.current = owner;
-    const destroy = async () => {
-      if (destroyed || !owner.provider) return;
-      destroyed = true;
-      const info = { moduleName: id, dom: element };
-      const context = {
-        side: 'consumer' as const,
-        framework: 'react' as const,
-        operation: 'destroy' as const,
-        reason: 'unmount' as const,
-      };
-      instance.bridgeHook?.lifecycle.beforeBridgeDestroy.emit(info, context);
-      await owner.provider.destroy(info);
-      instance.bridgeHook?.lifecycle.afterBridgeDestroy.emit(info, { context });
-    };
-    owner.queue = load()
-      .then(async (module) => {
-        if (!owner.active) return;
-        if (typeof module.default !== 'function')
-          throw new Error(
-            `Bridge '${id}' must have a default provider export.`,
-          );
-        const provider = await module.default();
-        if (
-          !provider ||
-          typeof provider.render !== 'function' ||
-          typeof provider.destroy !== 'function'
-        ) {
-          throw new Error(
-            `Bridge '${id}' must provide render and destroy methods.`,
-          );
-        }
-        owner.provider = provider;
-        if (!owner.active) await destroy();
-      })
-      .catch((failure) => {
-        if (owner.active) setError(asError(failure));
-      });
-    owner.update();
-    return () => {
-      owner.active = false;
-      void owner.queue.then(destroy).catch((failure) => console.error(failure));
-    };
-  }, [load, instance, id]);
-  useEffect(() => {
-    if (ownerRef.current?.provider) ownerRef.current.update();
-  }, [remoteProps]);
-  if (error) throw error;
-  return (
-    <>
-      <div ref={dom} data-mf-bridge={id} />
-      {!ready && loading}
-    </>
-  );
+  return metadata?.render || hint || 'component';
 }
 
 class RemoteBoundary extends React.Component<
@@ -338,6 +238,7 @@ function ClientOnlyRemote<P extends object>({
 
 function createConsumer<P extends object>(
   getOptions: () => CreateReactRemoteOptions,
+  RemoteApp: React.ComponentType<RemoteAppWrapperProps>,
 ) {
   return function RemoteConsumer(props: P) {
     const options = getOptions();
@@ -357,24 +258,80 @@ function createConsumer<P extends object>(
           }
           let id: string;
           let loaded: Promise<Namespace> | undefined;
+          let selection: Awaited<ReturnType<typeof resolveProtocol>>;
           if (typeof options.remote === 'string') {
             id = options.remote;
+            selection = await resolveProtocol(instance, id, options.render);
           } else {
-            if (typeof window === 'undefined') {
-              throw new Error(
-                'Use a remote alias/expose for automatic SSR protocol selection.',
-              );
+            // Calling a loader executes the module, not a Bridge provider or
+            // React component. Cache the exact result for this render attempt.
+            // Unlike strings, loaders must run before source/type discovery, so
+            // framework SSR must also account for their module-level side effects.
+            const value = await options.remote();
+            const handler = instance.remoteHandler as {
+              getLoadedRemoteInfo?: (value: unknown) =>
+                | {
+                    remoteMatchInfo?: RemoteMatch;
+                    id: string;
+                    recovered: boolean;
+                    isModule: boolean;
+                  }
+                | undefined;
+            };
+            let source = handler.getLoadedRemoteInfo?.(value);
+            let selectedNamespace: Namespace | undefined;
+            if (
+              !source &&
+              handler.getLoadedRemoteInfo &&
+              value &&
+              typeof value === 'object'
+            ) {
+              // Bundler interop may create another namespace after the factory
+              // returns. Identify only the export actually requested here.
+              const exportName = options.exportName || 'default';
+              const selected = (value as Namespace)[exportName];
+              source = handler.getLoadedRemoteInfo(selected);
+              if (source) selectedNamespace = { [exportName]: selected };
             }
-            loaded = options.remote().then((value) => namespace(value));
-            const module = await loaded;
-            const identity = module[moduleId];
-            if (typeof identity !== 'string')
-              throw new Error(
-                'The remote loader returned no MF module identity. Use a remote alias/expose.',
+            if (source) {
+              id = source.id;
+              const module = namespace(
+                selectedNamespace || value,
+                id,
+                !selectedNamespace && !source.isModule,
               );
-            id = identity;
+              loaded = Promise.resolve(module);
+              selection = source.recovered
+                ? {
+                    render: options.render || 'component',
+                    recovered: module,
+                    match: undefined,
+                    load: () => loaded!,
+                  }
+                : {
+                    render: selectProtocol(
+                      source.remoteMatchInfo!,
+                      id,
+                      options.render,
+                    ),
+                    recovered: undefined,
+                    match: source.remoteMatchInfo!,
+                    load: () => loaded!,
+                  };
+            } else {
+              // Older runtimes only identify module namespaces. Never guess
+              // the source of a default export or another runtime's object.
+              const module = namespace(value);
+              const identity = !handler.getLoadedRemoteInfo && module[moduleId];
+              if (typeof identity !== 'string')
+                throw new Error(
+                  'The remote loader returned no MF module identity for this runtime instance. Use a remote alias/expose, or load the value with the same updated runtime instance.',
+                );
+              id = identity;
+              loaded = Promise.resolve(module);
+              selection = await resolveProtocol(instance, id, options.render);
+            }
           }
-          const selection = await resolveProtocol(instance, id, options.render);
           const protocol = selection.render;
           if (selection.recovered && protocol === 'component') {
             // A runtime fallback has no successful remote registry entry,
@@ -394,19 +351,47 @@ function createConsumer<P extends object>(
               throw new Error(
                 'Bridge exposes use the default provider export.',
               );
+            const loadProvider = async () => {
+              const module = await load();
+              if (typeof module.default !== 'function')
+                throw new Error(
+                  `Bridge '${id}' must have a default provider export.`,
+                );
+              return module.default;
+            };
             return {
               Component: (businessProps: P) => (
-                <BridgeMount
-                  load={load}
+                <RemoteApp
+                  loadProvider={loadProvider}
                   instance={instance}
-                  id={id}
+                  moduleName={id}
                   loading={getOptions().loading}
-                  remoteProps={businessProps}
+                  remoteProps={businessProps as Record<string, unknown>}
+                  routing={{
+                    basename: getOptions().basename,
+                    memoryRoute: getOptions().memoryRoute,
+                    navigation: getOptions().navigation,
+                  }}
                 />
               ),
             };
           }
+          const resolvedRemoteInfo = selection.match?.remoteInfo && {
+            ...selection.match.remoteInfo,
+            snapshot: selection.match.remoteSnapshot,
+            expose: selection.match.expose,
+          };
+          if (selection.match?.remoteInfo) {
+            initializeRemoteDataFetch({
+              id,
+              moduleInfo: selection.match.remoteInfo,
+              remoteSnapshot: selection.match.remoteSnapshot,
+              host: instance,
+            });
+          }
           const lazy = createLazyComponentResource({
+            resolvedRemoteInfo,
+            cacheDataForMount: true,
             loader: load,
             instance,
             export: options.exportName || 'default',
@@ -485,18 +470,32 @@ function createConsumer<P extends object>(
   };
 }
 
-export function createReactRemote<P extends object = Record<string, unknown>>(
-  options: CreateReactRemoteOptions,
-): React.ComponentType<P> {
-  return createConsumer<P>(() => options);
+/** Inject the existing router-aware or router-free Bridge renderer at the entry point. */
+export function createReactRemoteConsumers(
+  RemoteApp: React.ComponentType<RemoteAppWrapperProps>,
+): { createReactRemote: CreateReactRemote; ReactRemote: ReactRemoteComponent } {
+  function createReactRemote<P extends object = Record<string, unknown>>(
+    options: CreateReactRemoteOptions,
+  ): React.ComponentType<P> {
+    return createConsumer<P>(() => options, RemoteApp);
+  }
+  function ReactRemote<P extends object = Record<string, unknown>>({
+    props,
+    ...options
+  }: ReactRemoteProps<P>) {
+    const current = useRef(options);
+    current.current = options;
+    const Component = useMemo(
+      () => createConsumer<P>(() => current.current, RemoteApp),
+      [],
+    );
+    return <Component {...(props as P)} />;
+  }
+  return {
+    createReactRemote: createReactRemote as CreateReactRemote,
+    ReactRemote: ReactRemote as ReactRemoteComponent,
+  };
 }
 
-export function ReactRemote<P extends object = Record<string, unknown>>({
-  props,
-  ...options
-}: ReactRemoteProps<P>) {
-  const current = useRef(options);
-  current.current = options;
-  const Component = useMemo(() => createConsumer<P>(() => current.current), []);
-  return <Component {...(props as P)} />;
-}
+export const { createReactRemote, ReactRemote } =
+  createReactRemoteConsumers(RemoteAppWrapper);

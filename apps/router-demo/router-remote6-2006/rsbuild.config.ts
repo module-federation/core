@@ -5,6 +5,7 @@ import path from 'path';
 
 export default defineConfig({
   output: {
+    assetPrefix: 'http://localhost:2006',
     injectStyles: true,
   },
   resolve: {
