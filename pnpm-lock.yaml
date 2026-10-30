@@ -1839,6 +1839,21 @@ importers:
         specifier: 4.18.1
         version: 4.18.1
 
+  apps/node-esm-host:
+    dependencies:
+      '@module-federation/node':
+        specifier: workspace:*
+        version: link:../../packages/node
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+
+  apps/node-esm-remote:
+    dependencies:
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../packages/enhanced
+
   apps/node-host:
     dependencies:
       '@module-federation/enhanced':
