@@ -2,7 +2,6 @@ import {
   ModuleFederation,
   type UserOptions,
   CurrentGlobal,
-  getGlobalFederationConstructor,
   setGlobalFederationInstance,
   assert,
   setGlobalFederationConstructor,
@@ -26,10 +25,7 @@ export {
 export { ModuleFederation };
 
 export function createInstance(options: UserOptions) {
-  // Retrieve debug constructor
-  const ModuleFederationConstructor =
-    getGlobalFederationConstructor() || ModuleFederation;
-  const instance = new ModuleFederationConstructor({
+  const instance = new ModuleFederation({
     id: `${options.name}@${options.version || Date.now()}`,
     ...options,
   });
