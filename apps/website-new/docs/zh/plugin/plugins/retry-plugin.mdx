@@ -123,6 +123,11 @@ const mf = createInstance({
 - 可选
 - 重试间隔时间（毫秒），默认为 1000
 
+**retryStatuses**
+- 类型：`number[]`
+- 可选
+- fetch 请求（如 manifest）返回非 OK 响应时，仅对列出的 HTTP 状态码进行重试，其他非 OK 状态码立即失败；网络错误始终会重试。默认对所有非 OK 响应重试
+
 ### 高级配置
 
 **domains**
