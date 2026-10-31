@@ -1,5 +1,12 @@
 import path from 'node:path';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
+
+// tsup's ESM output shims bare `require` to a stub whose `.resolve` is
+// undefined, so `getPackageRootDir`/`resolvePackageJson` silently failed
+// (caught by their callers) whenever this package ran as ESM. A require
+// bound via createRequire() works in both the cjs and esm builds.
+const require = createRequire(import.meta.url);
 
 function getTypedName(name: string) {
   return `@types/${name.replace(/^@/, '').replace('/', '__')}`;
