@@ -3,6 +3,9 @@ import { act, fireEvent } from '@testing-library/react';
 import { createRoot, hydrateRoot, type Root } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 import { createBridgeComponent } from '../src/v18';
+import { createBridgeComponent as createServerBridgeComponent } from '../src/server';
+import { ReadableStream as NodeReadableStream } from 'node:stream/web';
+import { TextEncoder } from 'node:util';
 import { federationRuntime } from '../src/provider/plugin';
 import type {
   BridgeSSRRequest,
@@ -55,11 +58,17 @@ it('hydrates exactly the streamed producer tree and keeps its root through updat
     roots.set(dom, root);
     return root;
   });
+  global.ReadableStream = NodeReadableStream as typeof ReadableStream;
   let html = '';
   const renderStream = jest.fn(async (app, info): Promise<BridgeSSRResult> => {
     html = renderToString(app, { identifierPrefix: info.identifierPrefix });
     return {
-      stream: {} as ReadableStream<Uint8Array>,
+      stream: new NodeReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(html));
+          controller.close();
+        },
+      }) as ReadableStream<Uint8Array>,
       snapshot: Promise.resolve({}),
       abort() {},
     };
@@ -68,7 +77,6 @@ it('hydrates exactly the streamed producer tree and keeps its root through updat
     rootComponent: App,
     render,
     hydrate,
-    renderStream,
   })();
   const request: BridgeSSRRequest = {
     instanceId: 'inventory-1',
@@ -78,7 +86,15 @@ it('hydrates exactly the streamed producer tree and keeps its root through updat
     props: { label: 'Stock', url: '/business-url' },
     signal: new AbortController().signal,
   };
-  await provider.renderStream!(request);
+  const serverProvider = createServerBridgeComponent({
+    rootComponent: App,
+    renderStream,
+  })();
+  const result = await serverProvider.renderStream!(request);
+  if (!('messages' in result)) throw Error('Expected normalized Node messages');
+  const reader = result.messages.getReader();
+  while (!(await reader.read()).done) {}
+  reader.releaseLock();
   const dom = document.createElement('div');
   dom.innerHTML = html;
   document.body.appendChild(dom);
@@ -98,9 +114,7 @@ it('hydrates exactly the streamed producer tree and keeps its root through updat
   };
   await act(async () => provider.hydrate(hydrationInfo as any));
   expect(dom.firstChild).toBe(serverButton);
-  expect(hydrate.mock.calls[0][0].type).toBe(
-    renderStream.mock.calls[0][0].type,
-  );
+  expect(provider.renderStream).toBeUndefined();
   expect(hydrate.mock.calls[0][2]).toEqual({
     ...hydrationInfo,
     rootComponent: App,

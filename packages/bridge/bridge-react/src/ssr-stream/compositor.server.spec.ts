@@ -47,7 +47,6 @@ function producer() {
         protocol: 'mf-bridge-producer/1',
         hydration: 'complete',
         messages,
-        snapshot: Promise.resolve({ value: 'ready' }),
         abort() {
           aborts++;
         },

@@ -174,10 +174,11 @@
     "dev": "vite",
     "build": "vite build && tsc -p tsconfig.json && node scripts/write-dts-entrypoints.mjs",
     "preview": "vite preview",
-    "test": "pnpm run test:jest && pnpm run test:rstest && pnpm run test:types",
+    "test": "pnpm run test:jest && pnpm run test:rstest && pnpm run test:types && pnpm run test:boundaries",
     "test:jest": "pnpm exec jest --config jest.config.js --passWithNoTests",
     "test:rstest": "pnpm exec rstest --passWithNoTests && pnpm exec rstest --config rstest.ssr.config.ts",
-    "test:types": "node scripts/check-react-remote-types.mjs"
+    "test:types": "node scripts/check-react-remote-types.mjs",
+    "test:boundaries": "node scripts/check-runtime-boundaries.mjs"
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",

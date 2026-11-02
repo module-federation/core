@@ -24,7 +24,6 @@ export interface BridgeBrowserSnapshot {
 
 export interface BridgeBrowserSession {
   ready?: Promise<BridgeBrowserSnapshot>;
-  identifierPrefix?: string;
   done: Promise<BridgeBrowserSnapshot>;
 }
 

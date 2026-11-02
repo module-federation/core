@@ -236,7 +236,6 @@ export interface BridgeSSRRequest extends BridgeSSRRenderParams {
 }
 
 export interface BridgeSSRResult {
-  revision?: string;
   stylesheets?: string[];
   hydration?: {
     snapshot: Promise<unknown>;
@@ -258,10 +257,8 @@ export type BridgeSSRMessage =
 /** Complete producer-owned messages. Consumers preserve their order. */
 export interface BridgeSSRMessageResult {
   protocol: 'mf-bridge-producer/1';
-  revision?: string;
   stylesheets?: string[];
   hydration: 'progressive' | 'complete';
   messages: ReadableStream<BridgeSSRMessage>;
-  snapshot: Promise<unknown>;
   abort(reason?: unknown): void;
 }

@@ -23,7 +23,7 @@ it('preserves application scripts through progressive hydration and executes the
   const container = document.createElement('div');
   container.id = 'script-app';
   document.body.appendChild(container);
-  bridgeStreamBootstrap({ instanceIds: ['script-app'], timeoutMs: 1000 });
+  bridgeStreamBootstrap({ timeoutMs: 1000 });
   const runtime = window.__MF_BRIDGE_SSR__ as BridgeStreamBrowserRuntime;
   runtime.accept('script-app', {
     type: 'meta',

@@ -11,6 +11,7 @@ function createDocument(
   html = '<div id="a">loading A</div><div id="b">loading B</div>',
   timeoutMs = 1000,
   options: BridgeBootstrapOptions = {},
+  expectedIds = ['a', 'b'],
 ) {
   const dom = new JSDOM(html, {
     url: 'https://host.example/dashboard?csr=1',
@@ -20,8 +21,11 @@ function createDocument(
   (dom.window as any).TextEncoder = TextEncoder;
   (dom.window as any).ReadableStream = ReadableStream;
   dom.window.eval(
-    `(${bridgeStreamBootstrap.toString()})(${JSON.stringify({ instanceIds: ['a', 'b'], nonce: 'test-nonce', timeoutMs, ...options })})`,
+    `(${bridgeStreamBootstrap.toString()})(${JSON.stringify({ nonce: 'test-nonce', timeoutMs, ...options })})`,
   );
+  const runtime = (dom.window as any)
+    .__MF_BRIDGE_SSR__ as BridgeStreamBrowserRuntime;
+  expectedIds.forEach((id) => runtime.expect(id));
   return {
     dom,
     runtime: (dom.window as any)
@@ -42,7 +46,8 @@ describe('Bridge early bootstrap', () => {
     const { dom, runtime } = createDocument(
       '<div id="late">loading</div>',
       1000,
-      { instanceIds: [] },
+      {},
+      [],
     );
     runtime.expect('late');
     const container = dom.window.document.getElementById('late')!;

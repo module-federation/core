@@ -5,27 +5,24 @@
 import * as React from 'react';
 import type { BridgeOperationContext } from '@module-federation/bridge-shared';
 import type {
-  ProviderParams,
   ProviderFnParams,
   RootType,
   DestroyParams,
   RenderParams,
   CreateRootOptions,
-  ErrorFallbackProps,
   HydrateParams,
-  BridgeSSRRequest,
   BridgeProvider,
 } from '../../types';
-import { ErrorBoundary } from '../../error-boundary';
-import { RouterContext } from '../context';
 import { BRIDGE_ROUTING } from '../routing';
 import { LoggerInstance } from '../../utils';
 import { federationRuntime } from '../plugin';
+import { createBridgeElement } from '../create-element';
 
 export function createBaseBridgeComponent<T>({
   createRoot,
   hydrateRoot,
   defaultRootOptions,
+  renderStream: _renderStream,
   ...bridgeInfo
 }: ProviderFnParams<T>): BridgeProvider<T, Promise<void>> {
   return () => {
@@ -36,93 +33,10 @@ export function createBaseBridgeComponent<T>({
       instance,
     );
 
-    const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
-      const { appInfo, propsInfo, ...restProps } = info;
-      const { moduleName, memoryRoute, navigation, basename = '/' } = appInfo;
-      return (
-        <RouterContext.Provider
-          value={{ moduleName, basename, memoryRoute, navigation }}
-        >
-          <bridgeInfo.rootComponent
-            {...propsInfo}
-            basename={basename}
-            {...restProps}
-          />
-        </RouterContext.Provider>
-      );
-    };
-
-    const DefaultFallback = ({ error }: ErrorFallbackProps) => (
-      <div role="alert">
-        <p>Something went wrong:</p>
-        <pre style={{ color: 'red' }}>
-          {error instanceof Error ? error.message : String(error)}
-        </pre>
-      </div>
+    const createElement = createBridgeElement(
+      bridgeInfo.rootComponent,
+      instance,
     );
-
-    const omitHostFallback = <P extends Record<string, unknown>>(props: P) => {
-      const nextProps = { ...props };
-      delete nextProps.fallback;
-      return nextProps;
-    };
-
-    const BridgeWrapper = ({
-      basename,
-      moduleName,
-      memoryRoute,
-      navigation,
-      propsInfo,
-    }: {
-      basename?: string;
-      moduleName?: string;
-      memoryRoute?: any;
-      navigation?: ProviderParams['navigation'];
-      propsInfo: T;
-    }) => (
-      <ErrorBoundary FallbackComponent={DefaultFallback}>
-        <RawComponent
-          appInfo={{
-            moduleName,
-            basename,
-            memoryRoute,
-            navigation,
-          }}
-          propsInfo={propsInfo}
-        />
-      </ErrorBoundary>
-    );
-
-    // Keep the producer tree identical across stream rendering, hydration and
-    // later updates. Framework renderers receive this tree, never a Host element.
-    const createElement = (
-      info: ProviderParams,
-      propsInfo: Record<string, unknown>,
-      eventInfo: RenderParams | BridgeSSRRequest,
-      operationContext: BridgeOperationContext,
-    ) => {
-      const { basename, moduleName, memoryRoute, navigation } = info;
-      const beforeBridgeRenderRes =
-        instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
-          eventInfo,
-          operationContext,
-        ) || {};
-      return (
-        <BridgeWrapper
-          basename={basename}
-          moduleName={moduleName}
-          memoryRoute={memoryRoute}
-          navigation={navigation}
-          propsInfo={
-            {
-              ...omitHostFallback(propsInfo),
-              basename,
-              ...(beforeBridgeRenderRes as any)?.extraProps,
-            } as T
-          }
-        />
-      );
-    };
 
     const render = async (info: RenderParams, hydrate = false) => {
       LoggerInstance.debug(`createBridgeComponent render Info`, info);
@@ -212,28 +126,6 @@ export function createBaseBridgeComponent<T>({
     return {
       render,
       hydrate: (info: HydrateParams) => render(info, true),
-      // Absent for CSR-only providers: consumers use this capability to choose
-      // SSR/fallback. The framework owns stream cancellation and data snapshots.
-      ...(bridgeInfo.renderStream && {
-        async renderStream(info: BridgeSSRRequest) {
-          if (info.signal.aborted) throw info.signal.reason;
-          const operationContext: BridgeOperationContext = {
-            side: 'producer',
-            framework: 'react',
-            operation: 'render',
-            reason: 'direct',
-          };
-          const app = createElement(info, info.props, info, operationContext);
-          const result = await bridgeInfo.renderStream!(app, {
-            ...info,
-            rootComponent: bridgeInfo.rootComponent,
-          });
-          instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
-            context: operationContext,
-          });
-          return result;
-        },
-      }),
 
       destroy(info: DestroyParams) {
         const { dom } = info;

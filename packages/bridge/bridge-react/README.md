@@ -485,3 +485,5 @@ The older experimental patch backports the buffer-length correction in
 report tracked in [React #31134](https://github.com/facebook/react/issues/31134).
 This package does not apply that dependency patch or strip bytes from transport.
 Framework integrations must validate their selected renderer separately.
+
+The Node `/server` producer implements stream rendering without importing the browser Root lifecycle. Browser `/v18` and `/v19` producers implement mount, hydration, updates and unmount without including Node stream processing. Their shared tree construction keeps the server and browser markup consistent. Producer messages carry data snapshots in their `data` or `ready` messages, without a duplicate top-level snapshot promise.

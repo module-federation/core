@@ -142,7 +142,6 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
         const raw = await provider.renderStream(request);
         const result = await normalizeBridgeSSR(raw, request);
         session = result;
-        void result.snapshot.catch(() => {});
         if (signal.aborted) result.abort(signal.reason);
         return result;
       });
@@ -169,10 +168,8 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
       const job = jobs.get(id);
       if (job) job.stylesheets = [...new Set(hrefs)];
     },
-    register(id, factory, params, registrationOptions) {
-      const reservation = context.reserve(id);
-      if (!registrationOptions?.deferRender)
-        reservation.activate(factory, params);
+    register(id, factory, params) {
+      context.reserve(id).activate(factory, params);
     },
   };
 

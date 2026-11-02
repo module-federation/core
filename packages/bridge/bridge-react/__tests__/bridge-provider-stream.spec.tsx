@@ -76,7 +76,6 @@ it('renders the supplied root as a real stream without a DOM and retains the fra
       stream: Readable.toWeb(output) as ReadableStream<Uint8Array>,
       snapshot,
       abort: react.abort,
-      revision: 'inventory-v1',
       stylesheets: ['/inventory.css'],
     };
     return frameworkResult;
@@ -88,7 +87,6 @@ it('renders the supplied root as a real stream without a DOM and retains the fra
   const info = request({ title: 'Stock' });
   const result = (await provider.renderStream!(info)) as BridgeSSRMessageResult;
   expect(result.protocol).toBe('mf-bridge-producer/1');
-  expect(result.revision).toBe(frameworkResult.revision);
   expect(renderStream.mock.calls[0][1]).toEqual({
     ...info,
     rootComponent: Root,
@@ -111,15 +109,17 @@ it('renders the supplied root as a real stream without a DOM and retains the fra
 
   release();
   let rest = '';
+  let restored: unknown;
   for (
     let frame = await reader.read();
     !frame.done;
     frame = await reader.read()
   ) {
     if (frame.value.type === 'html') rest += frame.value.html;
+    if (frame.value.type === 'data') restored = frame.value.snapshot;
   }
   expect(rest).toContain('late inventory');
-  expect(await result.snapshot).toEqual({ loaderData: 'complete' });
+  expect(restored).toEqual({ loaderData: 'complete' });
 });
 
 it('does not advertise stream support for an existing CSR provider', () => {

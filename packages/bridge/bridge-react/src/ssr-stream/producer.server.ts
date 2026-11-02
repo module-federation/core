@@ -179,11 +179,9 @@ export async function normalizeBridgeSSR(
   }
   return {
     protocol: BRIDGE_PRODUCER_PROTOCOL,
-    revision: raw.revision,
     stylesheets: raw.stylesheets,
     hydration: hydration ? 'progressive' : 'complete',
     messages: output.stream,
-    snapshot: raw.snapshot,
     abort,
   };
 }

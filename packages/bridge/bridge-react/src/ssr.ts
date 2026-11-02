@@ -22,7 +22,6 @@ export interface BridgeSSRContextValue {
     instanceId: string,
     factory: () => BridgeProviderInstance | Promise<BridgeProviderInstance>,
     params: BridgeSSRRenderParams,
-    options?: { deferRender?: boolean },
   ): void;
 }
 
@@ -37,7 +36,6 @@ export interface BridgeSSRBrowserSnapshot {
 
 export interface BridgeSSRBrowserSession {
   ready?: Promise<BridgeSSRBrowserSnapshot>;
-  identifierPrefix?: string;
   done: Promise<BridgeSSRBrowserSnapshot>;
 }
 

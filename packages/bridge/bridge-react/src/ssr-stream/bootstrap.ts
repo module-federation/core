@@ -1,7 +1,6 @@
 import type { BridgeStreamBrowserRuntime, BridgeStreamFrame } from './protocol';
 
 export interface BridgeBootstrapOptions {
-  instanceIds?: string[];
   timeoutMs?: number;
   nonce?: string;
   maxQueuedBytes?: number;
@@ -14,12 +13,7 @@ export function bridgeStreamBootstrap(
   const global = window as unknown as {
     __MF_BRIDGE_SSR__?: BridgeStreamBrowserRuntime;
   };
-  if (global.__MF_BRIDGE_SSR__) {
-    (options.instanceIds || []).forEach((id) =>
-      global.__MF_BRIDGE_SSR__!.expect(id),
-    );
-    return;
-  }
+  if (global.__MF_BRIDGE_SSR__) return;
   const entries: Record<string, any> = Object.create(null);
   const stylesheets = new Map<
     string,
@@ -482,7 +476,6 @@ export function bridgeStreamBootstrap(
     fallback,
   };
   global.__MF_BRIDGE_SSR__ = runtime;
-  (options.instanceIds || []).forEach(expect);
   const observer = new MutationObserver(() => {
     Object.keys(entries).forEach((id) => {
       if (entries[id].pending.length) drain(id);
