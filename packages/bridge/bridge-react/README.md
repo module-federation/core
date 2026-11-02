@@ -516,6 +516,11 @@ props updates and navigation reuse the hydrated provider, Root, Router, and page
 state. Unmounting releases the session, cancels pending work, and destroys that
 provider. A changed basename requires a new mount, as described above.
 
+A server-marked Bridge container selects the existing Bridge renderer immediately
+while its browser provider loads. The Host can hydrate the mount container without
+suspending on module classification. Pending business props updates then pass
+through the same provider after its initial hydration, preserving the server DOM.
+
 Stream failures, timeout, or a claimed hydration failure request a document
 reload with `csr=1`. The Host adapter must honor that parameter by rendering its
 CSR document. Recovery must not rerun the broken SSR response indefinitely.

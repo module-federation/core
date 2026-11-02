@@ -175,6 +175,7 @@ class RemoteBoundary extends React.Component<
 type PreparedRemote<P extends object> = {
   Component: React.ComponentType<P>;
   loadClient?: () => Promise<React.ComponentType<P>>;
+  loadProvider?: RemoteAppWrapperProps['loadProvider'];
 };
 type RemoteResource<P extends object> = {
   prepare: () => Promise<PreparedRemote<P>>;
@@ -253,6 +254,13 @@ function createConsumer<P extends object>(
     // React's version is fixed for this consumer. Older React keeps the CSR path.
     const reactId = React.useId?.();
     const instanceId = reactId ? `mf-bridge-${reactId}` : undefined;
+    const [serverBridge] = useState(() => {
+      if (typeof document === 'undefined' || !instanceId) return;
+      const container = document.getElementById(instanceId);
+      const moduleName = container?.getAttribute('data-mf-bridge');
+      if (moduleName && container?.hasAttribute('data-mf-bridge-ssr'))
+        return { moduleName, remote: options.remote };
+    });
     const reservation = useMemo(
       () =>
         typeof window === 'undefined' && !options.noSSR && instanceId
@@ -261,8 +269,30 @@ function createConsumer<P extends object>(
       [ssr, instanceId, options.noSSR, attempt],
     );
     const resource = useMemo(() => {
+      const bridgeComponent =
+        (
+          id: string,
+          loadProvider: NonNullable<RemoteAppWrapperProps['loadProvider']>,
+          serverProvider?: BridgeProviderInstance,
+        ) =>
+        (businessProps: P) => (
+          <RemoteApp
+            loadProvider={loadProvider}
+            instance={instance}
+            moduleName={id}
+            ssrInstanceId={instanceId}
+            ssrProvider={serverProvider}
+            loading={getOptions().loading}
+            remoteProps={businessProps as Record<string, unknown>}
+            routing={{
+              basename: getOptions().basename,
+              memoryRoute: getOptions().memoryRoute,
+              navigation: getOptions().navigation,
+            }}
+          />
+        );
       let prepared: Promise<PreparedRemote<P>> | undefined;
-      const prepare = () =>
+      const prepare = (): Promise<PreparedRemote<P>> =>
         (prepared ||= (() => {
           const work = (async (): Promise<PreparedRemote<P>> => {
             if (!instance)
@@ -406,22 +436,8 @@ function createConsumer<P extends object>(
                 }
               }
               return {
-                Component: (businessProps: P) => (
-                  <RemoteApp
-                    loadProvider={loadProvider}
-                    instance={instance}
-                    moduleName={id}
-                    ssrInstanceId={instanceId}
-                    ssrProvider={serverProvider}
-                    loading={getOptions().loading}
-                    remoteProps={businessProps as Record<string, unknown>}
-                    routing={{
-                      basename: getOptions().basename,
-                      memoryRoute: getOptions().memoryRoute,
-                      navigation: getOptions().navigation,
-                    }}
-                  />
-                ),
+                Component: bridgeComponent(id, loadProvider, serverProvider),
+                loadProvider,
               };
             }
             const resolvedRemoteInfo = selection.match?.remoteInfo && {
@@ -484,6 +500,20 @@ function createConsumer<P extends object>(
         })());
       return {
         prepare,
+        // The server has already selected Bridge for this container. Hydrate
+        // its Host wrapper immediately, so parent updates cannot abandon an
+        // unresolved classification Suspense boundary and discard remote DOM.
+        Hydrate:
+          serverBridge?.remote === options.remote && attempt === 0
+            ? bridgeComponent(serverBridge.moduleName, async () => {
+                const selected = await prepare();
+                if (!selected.loadProvider)
+                  throw new Error(
+                    'The hydrated remote must retain its Bridge rendering protocol.',
+                  );
+                return selected.loadProvider();
+              })
+            : undefined,
         Lazy: React.lazy(async () => ({
           default: (await prepare()).Component,
         })),
@@ -500,6 +530,7 @@ function createConsumer<P extends object>(
       attempt,
       reservation,
       instanceId,
+      serverBridge,
     ]);
     return (
       <RemoteBoundary
@@ -516,8 +547,14 @@ function createConsumer<P extends object>(
               delayLoading={options.delayLoading}
               remoteProps={props}
             />
+          ) : resource.Hydrate ? (
+            React.createElement(resource.Hydrate, props)
           ) : (
-            React.createElement(resource.Lazy, props as React.Attributes & P)
+            React.createElement(
+              resource.Lazy,
+              props as React.Attributes &
+                React.ComponentProps<typeof resource.Lazy>,
+            )
           )}
         </Suspense>
       </RemoteBoundary>
