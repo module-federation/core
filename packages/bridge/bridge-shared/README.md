@@ -11,6 +11,9 @@ The shared package does not import a framework Router or require a runtime plugi
 The connector consumes the existing Bridge navigation adapter when available.
 It reconciles redirects completed before subscription, avoids restarting loaders
 already processing the same history entry, and drops queued work on disposal.
+While a loader redirect is pending, the connector retains the original history
+entry being consumed even when the pending destination changes. A new history
+entry, including a new key at the same URL, still cancels that navigation.
 Frameworks remain responsible for Browser/Hash URL interpretation and disposing
 their Router. The React Bridge package re-exports the connector from its default,
 `/base`, `/v18`, and `/v19` entries.
