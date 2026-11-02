@@ -1,6 +1,7 @@
 import React, {
   Suspense,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -25,10 +26,15 @@ import {
   RemoteAppWrapper,
   type RemoteAppWrapperProps,
 } from './remote/RemoteAppWrapper';
-import { createLazyComponentResource } from './lazy/createLazyComponent';
+import {
+  createLazyComponentResource,
+  collectSSRAssetDescriptors,
+} from './lazy/createLazyComponent';
 import { autoFetchDataPlugin } from './lazy';
 import { initializeRemoteDataFetch } from './lazy/data-fetch/runtime-plugin';
 import { transformError, DelayedLoading } from './lazy/AwaitDataFetch';
+import { BridgeSSRContext } from './ssr';
+import type { BridgeProviderInstance } from './types';
 
 type Namespace = Record<string, any> & { [key: symbol]: unknown };
 const configured = new WeakSet<ModuleFederation>();
@@ -71,11 +77,8 @@ async function resolveProtocol(
   const resolvedRemote = instance.remoteHandler.getRemoteModuleAndOptions({
     id,
   });
-  // String inputs stay metadata-first because Bridge SSR currently renders a
-  // placeholder without loading the expose. Starting loadRemote in parallel can
-  // evaluate module-level browser code on Node, even without calling a provider.
-  // Revisit this ordering with framework-aware Bridge SSR and hydration support.
-  // Sharing resolvedRemote already avoids repeating resolution hooks and requests.
+  // Keep protocol selection before loading. Without a framework SSR context,
+  // Bridge exposes retain their existing server placeholder behavior.
   const load = () =>
     instance.remoteHandler.loadRemote(id, undefined, resolvedRemote);
   let match: Awaited<typeof resolvedRemote>['remoteMatchInfo'];
@@ -246,189 +249,239 @@ function createConsumer<P extends object>(
     const [attempt, setAttempt] = useState(0);
     const retry = useCallback(() => setAttempt((value) => value + 1), []);
     const paramsKey = JSON.stringify(options.dataFetchParams);
+    const ssr = useContext(BridgeSSRContext);
+    // React's version is fixed for this consumer. Older React keeps the CSR path.
+    const reactId = React.useId?.();
+    const instanceId = reactId ? `mf-bridge-${reactId}` : undefined;
+    const reservation = useMemo(
+      () =>
+        typeof window === 'undefined' && !options.noSSR && instanceId
+          ? ssr?.reserve(instanceId)
+          : undefined,
+      [ssr, instanceId, options.noSSR, attempt],
+    );
     const resource = useMemo(() => {
       let prepared: Promise<PreparedRemote<P>> | undefined;
       const prepare = () =>
-        (prepared ||= (async (): Promise<PreparedRemote<P>> => {
-          if (!instance)
-            throw new Error('An initialized MF runtime instance is required.');
-          if (!configured.has(instance)) {
-            instance.registerPlugins([autoFetchDataPlugin()]);
-            configured.add(instance);
-          }
-          let id: string;
-          let loaded: Promise<Namespace> | undefined;
-          let selection: Awaited<ReturnType<typeof resolveProtocol>>;
-          if (typeof options.remote === 'string') {
-            id = options.remote;
-            selection = await resolveProtocol(instance, id, options.render);
-          } else {
-            // Calling a loader executes the module, not a Bridge provider or
-            // React component. Cache the exact result for this render attempt.
-            // Unlike strings, loaders must run before source/type discovery, so
-            // framework SSR must also account for their module-level side effects.
-            const value = await options.remote();
-            const handler = instance.remoteHandler as {
-              getLoadedRemoteInfo?: (value: unknown) =>
-                | {
-                    remoteMatchInfo?: RemoteMatch;
-                    id: string;
-                    recovered: boolean;
-                    isModule: boolean;
-                  }
-                | undefined;
-            };
-            let source = handler.getLoadedRemoteInfo?.(value);
-            let selectedNamespace: Namespace | undefined;
-            if (
-              !source &&
-              handler.getLoadedRemoteInfo &&
-              value &&
-              typeof value === 'object'
-            ) {
-              // Bundler interop may create another namespace after the factory
-              // returns. Identify only the export actually requested here.
-              const exportName = options.exportName || 'default';
-              const selected = (value as Namespace)[exportName];
-              source = handler.getLoadedRemoteInfo(selected);
-              if (source) selectedNamespace = { [exportName]: selected };
-            }
-            if (source) {
-              id = source.id;
-              const module = namespace(
-                selectedNamespace || value,
-                id,
-                !selectedNamespace && !source.isModule,
-              );
-              loaded = Promise.resolve(module);
-              selection = source.recovered
-                ? {
-                    render: options.render || 'component',
-                    recovered: module,
-                    match: undefined,
-                    load: () => loaded!,
-                  }
-                : {
-                    render: selectProtocol(
-                      source.remoteMatchInfo!,
-                      id,
-                      options.render,
-                    ),
-                    recovered: undefined,
-                    match: source.remoteMatchInfo!,
-                    load: () => loaded!,
-                  };
-            } else {
-              // Older runtimes only identify module namespaces. Never guess
-              // the source of a default export or another runtime's object.
-              const module = namespace(value);
-              const identity = !handler.getLoadedRemoteInfo && module[moduleId];
-              if (typeof identity !== 'string')
-                throw new Error(
-                  'The remote loader returned no MF module identity for this runtime instance. Use a remote alias/expose, or load the value with the same updated runtime instance.',
-                );
-              id = identity;
-              loaded = Promise.resolve(module);
-              selection = await resolveProtocol(instance, id, options.render);
-            }
-          }
-          const protocol = selection.render;
-          if (selection.recovered && protocol === 'component') {
-            // A runtime fallback has no successful remote registry entry,
-            // data loader or remote asset metadata to hydrate.
-            return {
-              Component: selection.recovered[
-                options.exportName || 'default'
-              ] as React.ComponentType<P>,
-            };
-          }
-          if (selection.recovered)
-            loaded = Promise.resolve(selection.recovered);
-          const load = () =>
-            (loaded ||= selection.load().then((value) => namespace(value, id)));
-          if (protocol === 'bridge') {
-            if (options.exportName && options.exportName !== 'default')
+        (prepared ||= (() => {
+          const work = (async (): Promise<PreparedRemote<P>> => {
+            if (!instance)
               throw new Error(
-                'Bridge exposes use the default provider export.',
+                'An initialized MF runtime instance is required.',
               );
-            const loadProvider = async () => {
-              const module = await load();
-              if (typeof module.default !== 'function')
-                throw new Error(
-                  `Bridge '${id}' must have a default provider export.`,
+            if (!configured.has(instance)) {
+              instance.registerPlugins([autoFetchDataPlugin()]);
+              configured.add(instance);
+            }
+            let id: string;
+            let loaded: Promise<Namespace> | undefined;
+            let selection: Awaited<ReturnType<typeof resolveProtocol>>;
+            if (typeof options.remote === 'string') {
+              id = options.remote;
+              selection = await resolveProtocol(instance, id, options.render);
+            } else {
+              // Calling a loader executes the module, not a Bridge provider or
+              // React component. Cache the exact result for this render attempt.
+              // Unlike strings, loaders must run before source/type discovery, so
+              // framework SSR must also account for their module-level side effects.
+              const value = await options.remote();
+              const handler = instance.remoteHandler as {
+                getLoadedRemoteInfo?: (value: unknown) =>
+                  | {
+                      remoteMatchInfo?: RemoteMatch;
+                      id: string;
+                      recovered: boolean;
+                      isModule: boolean;
+                    }
+                  | undefined;
+              };
+              let source = handler.getLoadedRemoteInfo?.(value);
+              let selectedNamespace: Namespace | undefined;
+              if (
+                !source &&
+                handler.getLoadedRemoteInfo &&
+                value &&
+                typeof value === 'object'
+              ) {
+                // Bundler interop may create another namespace after the factory
+                // returns. Identify only the export actually requested here.
+                const exportName = options.exportName || 'default';
+                const selected = (value as Namespace)[exportName];
+                source = handler.getLoadedRemoteInfo(selected);
+                if (source) selectedNamespace = { [exportName]: selected };
+              }
+              if (source) {
+                id = source.id;
+                const module = namespace(
+                  selectedNamespace || value,
+                  id,
+                  !selectedNamespace && !source.isModule,
                 );
-              return module.default;
+                loaded = Promise.resolve(module);
+                selection = source.recovered
+                  ? {
+                      render: options.render || 'component',
+                      recovered: module,
+                      match: undefined,
+                      load: () => loaded!,
+                    }
+                  : {
+                      render: selectProtocol(
+                        source.remoteMatchInfo!,
+                        id,
+                        options.render,
+                      ),
+                      recovered: undefined,
+                      match: source.remoteMatchInfo!,
+                      load: () => loaded!,
+                    };
+              } else {
+                // Older runtimes only identify module namespaces. Never guess
+                // the source of a default export or another runtime's object.
+                const module = namespace(value);
+                const identity =
+                  !handler.getLoadedRemoteInfo && module[moduleId];
+                if (typeof identity !== 'string')
+                  throw new Error(
+                    'The remote loader returned no MF module identity for this runtime instance. Use a remote alias/expose, or load the value with the same updated runtime instance.',
+                  );
+                id = identity;
+                loaded = Promise.resolve(module);
+                selection = await resolveProtocol(instance, id, options.render);
+              }
+            }
+            const protocol = selection.render;
+            if (protocol !== 'bridge') reservation?.skip();
+            if (selection.recovered && protocol === 'component') {
+              // A runtime fallback has no successful remote registry entry,
+              // data loader or remote asset metadata to hydrate.
+              return {
+                Component: selection.recovered[
+                  options.exportName || 'default'
+                ] as React.ComponentType<P>,
+              };
+            }
+            if (selection.recovered)
+              loaded = Promise.resolve(selection.recovered);
+            const load = () =>
+              (loaded ||= selection
+                .load()
+                .then((value) => namespace(value, id)));
+            if (protocol === 'bridge') {
+              if (options.exportName && options.exportName !== 'default')
+                throw new Error(
+                  'Bridge exposes use the default provider export.',
+                );
+              const loadProvider = async () => {
+                const module = await load();
+                if (typeof module.default !== 'function')
+                  throw new Error(
+                    `Bridge '${id}' must have a default provider export.`,
+                  );
+                return module.default;
+              };
+              let serverProvider: BridgeProviderInstance | undefined;
+              if (reservation) {
+                const factory = await loadProvider();
+                const provider = await factory();
+                if (typeof provider?.renderStream === 'function') {
+                  serverProvider = provider;
+                  ssr?.registerStyles(
+                    instanceId!,
+                    collectSSRAssetDescriptors(
+                      {
+                        id,
+                        instance,
+                        injectLink: options.injectLink,
+                      },
+                      selection.match?.remoteInfo && {
+                        ...selection.match.remoteInfo,
+                        snapshot: selection.match.remoteSnapshot,
+                        expose: selection.match.expose,
+                      },
+                    ).stylesheetHrefs,
+                  );
+                } else {
+                  reservation.skip();
+                }
+              }
+              return {
+                Component: (businessProps: P) => (
+                  <RemoteApp
+                    loadProvider={loadProvider}
+                    instance={instance}
+                    moduleName={id}
+                    ssrInstanceId={instanceId}
+                    ssrProvider={serverProvider}
+                    loading={getOptions().loading}
+                    remoteProps={businessProps as Record<string, unknown>}
+                    routing={{
+                      basename: getOptions().basename,
+                      memoryRoute: getOptions().memoryRoute,
+                      navigation: getOptions().navigation,
+                    }}
+                  />
+                ),
+              };
+            }
+            const resolvedRemoteInfo = selection.match?.remoteInfo && {
+              ...selection.match.remoteInfo,
+              snapshot: selection.match.remoteSnapshot,
+              expose: selection.match.expose,
             };
-            return {
-              Component: (businessProps: P) => (
-                <RemoteApp
-                  loadProvider={loadProvider}
-                  instance={instance}
-                  moduleName={id}
-                  loading={getOptions().loading}
-                  remoteProps={businessProps as Record<string, unknown>}
-                  routing={{
-                    basename: getOptions().basename,
-                    memoryRoute: getOptions().memoryRoute,
-                    navigation: getOptions().navigation,
-                  }}
-                />
-              ),
-            };
-          }
-          const resolvedRemoteInfo = selection.match?.remoteInfo && {
-            ...selection.match.remoteInfo,
-            snapshot: selection.match.remoteSnapshot,
-            expose: selection.match.expose,
-          };
-          if (selection.match?.remoteInfo) {
-            initializeRemoteDataFetch({
-              id,
-              moduleInfo: selection.match.remoteInfo,
-              remoteSnapshot: selection.match.remoteSnapshot,
-              host: instance,
+            if (selection.match?.remoteInfo) {
+              initializeRemoteDataFetch({
+                id,
+                moduleInfo: selection.match.remoteInfo,
+                remoteSnapshot: selection.match.remoteSnapshot,
+                host: instance,
+              });
+            }
+            const lazy = createLazyComponentResource({
+              resolvedRemoteInfo,
+              cacheDataForMount: true,
+              loader: load,
+              instance,
+              export: options.exportName || 'default',
+              loading: options.loading ?? null,
+              fallback: ({ error }: { error: Error }) => {
+                // React error boundaries do not catch during server rendering.
+                // Keep the lazy data/loader fallback in the server response.
+                const fallback = getOptions().fallback;
+                if (typeof window === 'undefined' && fallback) {
+                  return fallback({ error: asError(error), retry });
+                }
+                throw error;
+              },
+              noSSR: options.noSSR,
+              dataFetchParams: options.dataFetchParams,
+              injectScript: options.injectScript,
+              injectLink: options.injectLink,
+              delayLoading: options.delayLoading,
             });
-          }
-          const lazy = createLazyComponentResource({
-            resolvedRemoteInfo,
-            cacheDataForMount: true,
-            loader: load,
-            instance,
-            export: options.exportName || 'default',
-            loading: options.loading ?? null,
-            fallback: ({ error }: { error: Error }) => {
-              // React error boundaries do not catch during server rendering.
-              // Keep the lazy data/loader fallback in the server response.
+            return {
+              Component: lazy.Component as React.ComponentType<P>,
+              loadClient: async () => {
+                const loaded = await lazy.loadClient();
+                return (businessProps: P) => (
+                  <loaded.Component {...businessProps} mfData={loaded.data} />
+                );
+              },
+            };
+          })();
+          return (reservation ? reservation.wait(work) : work).catch(
+            (error) => {
+              reservation?.fail(error);
               const fallback = getOptions().fallback;
               if (typeof window === 'undefined' && fallback) {
-                return fallback({ error: asError(error), retry });
+                return {
+                  Component: () => fallback({ error: asError(error), retry }),
+                };
               }
               throw error;
             },
-            noSSR: options.noSSR,
-            dataFetchParams: options.dataFetchParams,
-            injectScript: options.injectScript,
-            injectLink: options.injectLink,
-            delayLoading: options.delayLoading,
-          });
-          return {
-            Component: lazy.Component as React.ComponentType<P>,
-            loadClient: async () => {
-              const loaded = await lazy.loadClient();
-              return (businessProps: P) => (
-                <loaded.Component {...businessProps} mfData={loaded.data} />
-              );
-            },
-          };
-        })().catch((error) => {
-          const fallback = getOptions().fallback;
-          if (typeof window === 'undefined' && fallback) {
-            return {
-              Component: () => fallback({ error: asError(error), retry }),
-            };
-          }
-          throw error;
-        }));
+          );
+        })());
       return {
         prepare,
         Lazy: React.lazy(async () => ({
@@ -445,6 +498,8 @@ function createConsumer<P extends object>(
       options.injectLink,
       paramsKey,
       attempt,
+      reservation,
+      instanceId,
     ]);
     return (
       <RemoteBoundary

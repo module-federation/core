@@ -1,16 +1,29 @@
 /** Shared Bridge lifecycle used by legacy and unified consumers. */
-import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import type { ModuleFederation } from '@module-federation/enhanced/runtime';
 import type { BridgeOperationContext } from '@module-federation/bridge-shared';
 import { getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
 import { BRIDGE_ROUTING, type BridgeRouting } from '../provider/routing';
-import type { ErrorFallbackProps, RenderParams } from '../types';
+import type {
+  BridgeProviderInstance,
+  ErrorFallbackProps,
+  RenderParams,
+} from '../types';
+import { BridgeSSRContext } from '../ssr';
+import {
+  claimRemoteHydration,
+  hydrateRemoteRoot,
+  readRemoteSSRHTML,
+} from './hydration';
 
-type Provider = {
-  render: (info: RenderParams) => unknown;
-  destroy: (info: { dom: HTMLElement; moduleName: string }) => unknown;
-};
+type Provider = BridgeProviderInstance;
 type ProviderFactory = () => Provider | Promise<Provider>;
 
 export interface RemoteAppWrapperProps {
@@ -24,6 +37,10 @@ export interface RemoteAppWrapperProps {
   fallback?: React.ComponentType<ErrorFallbackProps>;
   className?: string;
   style?: React.CSSProperties;
+  /** Stable Host React id shared by server composition and browser hydration. */
+  ssrInstanceId?: string;
+  /** Request-local producer instance, only present during server rendering. */
+  ssrProvider?: BridgeProviderInstance;
 }
 
 const asError = (error: unknown) =>
@@ -36,6 +53,17 @@ export const RemoteAppWrapper = forwardRef<
   const { moduleName, providerInfo, loadProvider, className, style, loading } =
     props;
   const instance = props.instance || federationRuntime.instance;
+  const ssr = useContext(BridgeSSRContext);
+  const instanceId = props.ssrInstanceId;
+  const [serverHTML] = useState(() => readRemoteSSRHTML(instanceId));
+  if (typeof window === 'undefined' && ssr && instanceId && props.ssrProvider) {
+    ssr.reserve(instanceId).activate(() => props.ssrProvider!, {
+      moduleName,
+      basename: props.routing?.basename,
+      memoryRoute: props.routing?.memoryRoute,
+      props: props.remoteProps,
+    });
+  }
   const dom = useRef<HTMLDivElement | null>(null);
   const latest = useRef(props);
   latest.current = props;
@@ -51,6 +79,10 @@ export const RemoteAppWrapper = forwardRef<
 
   useEffect(() => {
     const element = dom.current!;
+    const controller = new AbortController();
+    let hydration: ReturnType<typeof claimRemoteHydration>;
+    let renderedProps: RemoteAppWrapperProps | undefined;
+    const initialProps = latest.current;
     let destroyed = false;
     const getRenderInfo = () => {
       const { remoteProps, routing, fallback } = latest.current;
@@ -58,6 +90,7 @@ export const RemoteAppWrapper = forwardRef<
         ...remoteProps,
         moduleName,
         dom: element,
+        signal: controller.signal,
       };
       if (fallback) info.fallback = fallback;
       // Keep the legacy flat mount fields for existing provider artifacts.
@@ -67,6 +100,7 @@ export const RemoteAppWrapper = forwardRef<
       if (routing?.navigation !== undefined) info[BRIDGE_ROUTING] = routing;
       return info;
     };
+    const initialParams = getRenderInfo();
     const owner = {
       active: true,
       canRender: false,
@@ -76,6 +110,13 @@ export const RemoteAppWrapper = forwardRef<
         owner.queue = owner.queue
           .then(async () => {
             if (!owner.active || !owner.canRender || !owner.provider) return;
+            const current = latest.current;
+            if (
+              renderedProps?.remoteProps === current.remoteProps &&
+              renderedProps?.routing === current.routing &&
+              renderedProps?.fallback === current.fallback
+            )
+              return;
             const info = getRenderInfo();
             const context: BridgeOperationContext = {
               side: 'consumer',
@@ -91,6 +132,7 @@ export const RemoteAppWrapper = forwardRef<
               ...info,
               ...(extra as any)?.extraProps,
             });
+            renderedProps = current;
             instance?.bridgeHook?.lifecycle.afterBridgeRender.emit(info, {
               context,
             });
@@ -120,6 +162,8 @@ export const RemoteAppWrapper = forwardRef<
     // Defer provider creation so StrictMode replay cannot create an orphan Root.
     owner.queue = Promise.resolve()
       .then(async () => {
+        if (!owner.active) return;
+        hydration = claimRemoteHydration(instanceId, element);
         const factory = loadProvider ? await loadProvider() : providerInfo;
         if (!owner.active) return;
         const provider = await factory?.();
@@ -132,17 +176,38 @@ export const RemoteAppWrapper = forwardRef<
             `Bridge '${moduleName}' must provide render and destroy methods.`,
           );
         owner.provider = provider;
-        if (!owner.active) await destroy();
-        else setPrepared(owner);
+        if (!owner.active) {
+          await destroy();
+          return;
+        }
+        if (hydration) {
+          const claimed = hydration;
+          await hydrateRemoteRoot(
+            provider,
+            claimed.session,
+            initialParams,
+            () => owner.active,
+            (failure) => claimed.runtime.fallback?.(failure),
+          );
+          renderedProps = initialProps;
+        }
+        if (owner.active) setPrepared(owner);
       })
       .catch((failure) => {
-        if (owner.active) setError(asError(failure));
+        if (owner.active) {
+          hydration?.runtime.fallback?.(failure);
+          setError(asError(failure));
+        }
       });
     return () => {
       owner.active = false;
+      // Producer abort listeners may synchronously cancel hydration readers.
+      // Mark transport cancellation first so that cleanup cannot trigger recovery.
+      if (instanceId) hydration?.runtime.release(instanceId, element);
+      controller.abort();
       void owner.queue.then(destroy).catch((failure) => console.error(failure));
     };
-  }, [moduleName, providerInfo, loadProvider, instance]);
+  }, [moduleName, providerInfo, loadProvider, instance, instanceId]);
 
   // This effect runs after React commits children=null on the mount container.
   // Only then may the producer Root own its children.
@@ -165,10 +230,15 @@ export const RemoteAppWrapper = forwardRef<
         else if (ref) ref.current = element;
       }}
       data-mf-bridge={moduleName}
+      id={instanceId}
+      data-mf-bridge-root={instanceId}
+      data-mf-bridge-ssr={props.ssrProvider || serverHTML ? '' : undefined}
       className={`${getRootDomDefaultClassName(moduleName)} ${className || ''}`}
       style={style}
-    >
-      {prepared?.active ? null : loading}
-    </div>
+      suppressHydrationWarning={Boolean(serverHTML)}
+      {...(serverHTML
+        ? { dangerouslySetInnerHTML: serverHTML }
+        : { children: prepared?.active ? null : loading })}
+    />
   );
 });
