@@ -1,5 +1,8 @@
-import { MF_DATA_FETCH_STATUS, MF_DATA_FETCH_TYPE } from '../src/lazy/constant';
-import { cache, clearStore } from '../src/lazy/data-fetch/cache';
+import { cache, clearStore } from '@module-federation/data-fetch';
+import {
+  MF_DATA_FETCH_STATUS,
+  MF_DATA_FETCH_TYPE,
+} from '../../../data-fetch/src/constant';
 import type { DataFetch, MF_DATA_FETCH_MAP } from '../src/lazy/types';
 import { fetchData, resetDataFetchResult } from '../src/lazy/utils';
 

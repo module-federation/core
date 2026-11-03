@@ -1,0 +1,91 @@
+{
+  "name": "@module-federation/data-fetch",
+  "version": "2.8.2",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "zhouxiao <codingzx@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/data-fetch"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./data-fetch-utils": {
+      "types": "./dist/data-fetch-utils.d.ts",
+      "import": "./dist/data-fetch-utils.es.js",
+      "require": "./dist/data-fetch-utils.cjs.js"
+    },
+    "./server-middleware": {
+      "types": "./dist/server-middleware.d.ts",
+      "import": "./dist/server-middleware.es.js",
+      "require": "./dist/server-middleware.cjs.js"
+    },
+    "./size-limited-cache": {
+      "types": "./dist/size-limited-cache.d.ts",
+      "import": "./dist/size-limited-cache.es.js",
+      "require": "./dist/size-limited-cache.cjs.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.es.js",
+      "require": "./dist/utils.cjs.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "data-fetch-utils": [
+        "./dist/data-fetch-utils.d.ts"
+      ],
+      "server-middleware": [
+        "./dist/server-middleware.d.ts"
+      ],
+      "size-limited-cache": [
+        "./dist/size-limited-cache.d.ts"
+      ],
+      "utils": [
+        "./dist/utils.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc -p tsconfig.json && node scripts/write-dts-entrypoints.mjs",
+    "preview": "vite preview",
+    "test": "rstest"
+  },
+  "dependencies": {
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
+  },
+  "peerDependencies": {
+    "hono": ">=3"
+  },
+  "peerDependenciesMeta": {
+    "hono": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "hono": "4.12.26",
+    "typescript": "7.0.2",
+    "vite": "^5.4.21"
+  }
+}

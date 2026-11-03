@@ -4,12 +4,12 @@ import {
   FS_HREF,
   MF_DATA_FETCH_STATUS,
   MF_DATA_FETCH_TYPE,
-} from '../constant';
-import logger from '../logger';
+} from './constant';
+import logger from './logger';
 import {
   dataFetchFunctionOptions,
   MF_DATA_FETCH_MAP_VALUE_PROMISE_SET,
-} from '../types';
+} from './types';
 import {
   callAllDowngrade,
   callDowngrade,
@@ -17,7 +17,7 @@ import {
   getDataFetchMap,
   getDowngradeTag,
   initDataFetchMap,
-} from '../utils';
+} from './utils';
 
 const dataFetchFunction = async function (options: dataFetchFunctionOptions) {
   const [id, data, downgrade] = options;

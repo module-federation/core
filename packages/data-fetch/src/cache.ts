@@ -1,12 +1,12 @@
-import { SizeLimitedCache } from '../../shared/size-limited-cache';
-import { getDataFetchCache } from '../utils';
+import { SizeLimitedCache } from './size-limited-cache';
+import { getDataFetchCache } from './utils';
 
 import type {
   CacheConfig,
   CacheItem,
   DataFetch,
   DataFetchParams,
-} from '../types';
+} from './types';
 
 export const CacheSize = {
   KB: 1024,

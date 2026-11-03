@@ -1,15 +1,14 @@
-import autoFetchDataPlugin from './data-fetch/runtime-plugin';
-
 export { ERROR_TYPE } from './constant';
-export type { DataFetchParams, NoSSRRemoteInfo } from './types';
+export type {
+  DataFetchParams,
+  NoSSRRemoteInfo,
+} from '@module-federation/data-fetch';
 export type {
   CreateLazyComponentOptions,
   IProps as CollectSSRAssetsOptions,
 } from './createLazyComponent';
 
 export { createLazyComponent, collectSSRAssets } from './createLazyComponent';
-
-// export { wrapNoSSR } from './wrapNoSSR';
 
 export {
   injectDataFetch,
@@ -22,14 +21,13 @@ export {
   revalidateTag,
   clearStore,
   prefetch,
-} from './data-fetch';
-
-export { setSSREnv } from './utils';
-
-export { autoFetchDataPlugin };
+  setSSREnv,
+  autoFetchDataPlugin,
+  flushDataFetch,
+} from '@module-federation/data-fetch';
 
 export type {
   CacheStatus,
   CacheStatsInfo,
   PrefetchOptions,
-} from './data-fetch';
+} from '@module-federation/data-fetch';
