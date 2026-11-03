@@ -52,7 +52,8 @@ for (const format of ['esm', 'cjs']) {
         `${entry}/${format} imported Node rendering dependencies`,
       );
       assert(
-        !/normalizeBridgeSSR|mf-bridge-producer\/1/.test(text),
+        !text.includes('normalizeBridgeSSR') &&
+          !text.includes('module-federation/bridge-ssr/producer/v1'),
         `${entry}/${format} retained producer stream processing`,
       );
       assert(

@@ -9,7 +9,8 @@ import { containsShellMarker, htmlFrames } from './frames.server';
 import { isolateReactStreamScripts } from './script-isolation.server';
 import { channel } from './message-channel.server';
 
-export const BRIDGE_PRODUCER_PROTOCOL = 'mf-bridge-producer/1';
+export const BRIDGE_PRODUCER_PROTOCOL =
+  'module-federation/bridge-ssr/producer/v1';
 
 /** Framework byte streams are normalized once, inside the producer's Node entry. */
 export async function normalizeBridgeSSR(

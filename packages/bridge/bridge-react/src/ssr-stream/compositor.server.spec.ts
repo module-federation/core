@@ -44,7 +44,7 @@ function producer() {
     async renderStream(info) {
       request = info;
       return {
-        protocol: 'mf-bridge-producer/1',
+        protocol: 'module-federation/bridge-ssr/producer/v1',
         hydration: 'complete',
         messages,
         abort() {

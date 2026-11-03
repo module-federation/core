@@ -426,7 +426,7 @@ and the browser artifact for browser loading. An existing generic factory with
 same stream implementation. Do not serialize the React element or replace it
 with a separately constructed tree in a renderer callback.
 
-Only the producer-to-consumer message contract has a protocol version. The Host's inline browser receiver and response frames are generated together and do not carry a separate protocol identifier.
+The producer-to-consumer message contract uses `module-federation/bridge-ssr/producer/v1`. The Host's inline browser receiver and response frames are generated together and do not carry a separate protocol identifier.
 
 `BridgeSSRResult` contains a byte `ReadableStream`, a final `snapshot` promise,
 and `abort(reason)`. Optional `stylesheets` describe CSS required by the

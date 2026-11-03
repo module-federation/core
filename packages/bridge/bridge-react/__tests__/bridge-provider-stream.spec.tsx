@@ -86,7 +86,7 @@ it('renders the supplied root as a real stream without a DOM and retains the fra
   })();
   const info = request({ title: 'Stock' });
   const result = (await provider.renderStream!(info)) as BridgeSSRMessageResult;
-  expect(result.protocol).toBe('mf-bridge-producer/1');
+  expect(result.protocol).toBe('module-federation/bridge-ssr/producer/v1');
   expect(renderStream.mock.calls[0][1]).toEqual({
     ...info,
     rootComponent: Root,

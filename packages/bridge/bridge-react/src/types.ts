@@ -256,7 +256,7 @@ export type BridgeSSRMessage =
 
 /** Complete producer-owned messages. Consumers preserve their order. */
 export interface BridgeSSRMessageResult {
-  protocol: 'mf-bridge-producer/1';
+  protocol: 'module-federation/bridge-ssr/producer/v1';
   stylesheets?: string[];
   hydration: 'progressive' | 'complete';
   messages: ReadableStream<BridgeSSRMessage>;
