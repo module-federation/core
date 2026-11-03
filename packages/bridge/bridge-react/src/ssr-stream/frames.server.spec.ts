@@ -1,7 +1,16 @@
 import { describe, expect, it } from '@rstest/core';
 import { PassThrough, Readable } from 'node:stream';
-import { byteStream, htmlFrames, readFrames } from './frames.server';
+import {
+  byteStream,
+  htmlFrames,
+  readFrames,
+  type HTMLFrame,
+} from './frames.server';
 import { hostPieces } from './host-stream';
+import {
+  createReactStreamScriptIsolator,
+  isolateReactStreamScripts,
+} from './script-isolation.server';
 
 const MODERN_SHELL_MARKER = '&lt;!--&lt;?- SHELL_STREAM_END ?&gt;--&gt;';
 
@@ -67,9 +76,107 @@ describe('Bridge HTML framing', () => {
     expect((await iterator.next()).value).toBe(script);
     expect((await iterator.next()).done).toBe(true);
   });
+
+  it('reuses script offsets and decoded marker identity across fragmented Unicode HTML', async () => {
+    const html =
+      'before<!-- marker -->' +
+      '<section>中🌿<script nonce="x">$RC("remote-B:0","remote-S:0")</script>' +
+      '<script src="app.js">$RC("remote-B:1","remote-S:1")</script>' +
+      '<script type="application/json">{"helper":"$RC"}</script>' +
+      '<template id="b&#45;shell"></template></section>' +
+      '<script>$RC("remote-B:2","remote-S:2")</script>tail';
+    const bytes = Buffer.from(html);
+    for (const size of [1, 7, bytes.length]) {
+      const chunks: Buffer[] = [];
+      for (let i = 0; i < bytes.length; i += size)
+        chunks.push(bytes.subarray(i, i + size));
+      const frames: HTMLFrame[] = [];
+      for await (const frame of Readable.from(chunks).pipe(
+        htmlFrames({ includeMetadata: true, shellMarker: 'b-shell' }),
+      ))
+        frames.push(frame);
+      expect(frames.map((frame) => frame.html).join('')).toBe(html);
+      expect(
+        frames
+          .filter((frame) => frame.hasShellMarker)
+          .map((frame) => frame.html),
+      ).toEqual([expect.stringContaining('<section>')]);
+      const isolate = createReactStreamScriptIsolator('a', 'remote-');
+      expect(
+        frames.map((frame) => isolate(frame.html, frame.scripts)).join(''),
+      ).toBe(isolateReactStreamScripts(html, 'a', 'remote-'));
+      expect(
+        frames
+          .flatMap((frame) => frame.scripts)
+          .map((script) => script.executable),
+      ).toEqual([true, false, false, true]);
+    }
+  });
+
+  it('counts only the pending frame and finds a shell marker crossing chunk boundaries', async () => {
+    const fragment = '<p>中🌿</p>';
+    const bytes = Buffer.byteLength(fragment);
+    expect(await collectHTML(fragment.repeat(50), bytes)).toHaveLength(50);
+    await expect(collectHTML(fragment, bytes - 1)).rejects.toThrow(
+      'exceeds limit',
+    );
+    const shell = '中🌿'.repeat(20) + 'abababab-end';
+    const chunks = Array.from(Buffer.from(shell + fragment), (byte) =>
+      Buffer.from([byte]),
+    );
+    const parts = [];
+    for await (const part of Readable.from(chunks).pipe(
+      hostPieces('abababab-end', Buffer.byteLength(shell)),
+    ))
+      parts.push(part);
+    expect(parts).toEqual([shell, fragment]);
+    await expect(async () => {
+      for await (const _part of Readable.from(chunks).pipe(
+        hostPieces('abababab-end', Buffer.byteLength(shell) - 1),
+      )) {
+        /* consume */
+      }
+    }).rejects.toThrow('Host shell exceeds limit');
+  });
 });
 
 describe('Bridge transport framing', () => {
+  it('bounds each Unicode line across single-byte chunks and rejects invalid UTF-8', async () => {
+    const value = { html: '中🌿'.repeat(50) };
+    const line = JSON.stringify(value);
+    const bytes = Buffer.from(line + '\n\n' + line + '\n');
+    const stream = () =>
+      new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (const byte of bytes) controller.enqueue(Buffer.from([byte]));
+          controller.close();
+        },
+      });
+    const received = [];
+    for await (const frame of readFrames(stream(), Buffer.byteLength(line)))
+      received.push(frame);
+    expect(received).toEqual([value, value]);
+    await expect(async () => {
+      for await (const _frame of readFrames(
+        stream(),
+        Buffer.byteLength(line) - 1,
+      )) {
+        /* consume */
+      }
+    }).rejects.toThrow('exceeds limit');
+    const invalid = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(Buffer.from([0xe4, 0x0a]));
+        controller.close();
+      },
+    });
+    await expect(async () => {
+      for await (const _frame of readFrames(invalid)) {
+        /* consume */
+      }
+    }).rejects.toThrow();
+  });
+
   it('decodes split JSON lines and rejects incomplete or oversized complete lines', async () => {
     const encoder = new TextEncoder();
     function stream(value: string) {

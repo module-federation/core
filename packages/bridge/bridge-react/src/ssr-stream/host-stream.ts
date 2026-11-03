@@ -11,6 +11,8 @@ export function hostPieces(
   const decoder = new StringDecoder('utf8');
   let shell = false;
   let buffer = '';
+  let bufferBytes = 0;
+  let searchFrom = 0;
   const fragments = htmlFrames({ maxFrameBytes });
   const output = new Transform({
     readableObjectMode: true,
@@ -19,9 +21,11 @@ export function hostPieces(
         const text = decoder.write(chunk);
         if (!shell) {
           buffer += text;
-          const index = buffer.indexOf(marker);
+          bufferBytes += Buffer.byteLength(text);
+          const index = buffer.indexOf(marker, searchFrom);
           if (index < 0) {
-            if (Buffer.byteLength(buffer) > maxFrameBytes)
+            searchFrom = Math.max(0, buffer.length - marker.length + 1);
+            if (bufferBytes > maxFrameBytes)
               throw Error('Host shell exceeds limit');
             callback();
             return;
@@ -33,6 +37,7 @@ export function hostPieces(
           output.push(initial);
           const rest = buffer.slice(end);
           buffer = '';
+          bufferBytes = 0;
           shell = true;
           fragments.write(rest, callback);
         } else fragments.write(text, callback);

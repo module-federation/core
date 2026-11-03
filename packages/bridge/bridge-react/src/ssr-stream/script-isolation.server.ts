@@ -1,5 +1,21 @@
 import { parse } from 'acorn';
 import { Parser } from 'htmlparser2';
+import type { HTMLScript } from './frames.server';
+
+type Edit = { start: number; end: number; value: string };
+
+function replaceParts(source: string, edits: Edit[]): string {
+  if (!edits.length) return source;
+  edits.sort((a, b) => a.start - b.start);
+  const parts: string[] = [];
+  let offset = 0;
+  for (const edit of edits) {
+    parts.push(source.slice(offset, edit.start), edit.value);
+    offset = edit.end;
+  }
+  parts.push(source.slice(offset));
+  return parts.join('');
+}
 
 type SyntaxNode = {
   type: string;
@@ -119,20 +135,21 @@ function isolateScript(
   } catch {
     return source;
   }
-  const statements = program.body.filter(
-    (node: SyntaxNode) => node.type !== 'EmptyStatement',
-  );
-  const isClock = statements.length === 1 && shellClock(statements[0]);
-  if (
-    !isClock &&
-    (!statements.some((node: SyntaxNode) => completionCall(node, prefix)) ||
-      !statements.every(
-        (node: SyntaxNode) =>
-          helperDefinition(node) || completionCall(node, prefix),
-      ))
-  )
+  let count = 0;
+  let first: SyntaxNode | undefined;
+  let hasCompletion = false;
+  let instructions = true;
+  for (const node of program.body) {
+    if (node.type === 'EmptyStatement') continue;
+    first ??= node;
+    count++;
+    const completion = completionCall(node, prefix);
+    hasCompletion ||= completion;
+    if (!completion && !helperDefinition(node)) instructions = false;
+  }
+  if (!(count === 1 && shellClock(first!)) && !(hasCompletion && instructions))
     return source;
-  const edits: { start: number; end: number; value: string }[] = [];
+  const edits: Edit[] = [];
   const visit = (node: SyntaxNode, parent?: SyntaxNode, key?: string) => {
     if (
       node.type === 'Property' &&
@@ -168,13 +185,15 @@ function isolateScript(
           value: `${namespace}${node.name.slice(1)}`,
         });
     }
-    for (const [childKey, value] of Object.entries(node)) {
-      if (Array.isArray(value))
-        value.forEach((child) => {
+    for (const childKey in node) {
+      if (!Object.hasOwn(node, childKey)) continue;
+      const value = node[childKey];
+      if (Array.isArray(value)) {
+        for (const child of value) {
           if (child && typeof child.type === 'string')
             visit(child, node, childKey);
-        });
-      else if (
+        }
+      } else if (
         value &&
         typeof value === 'object' &&
         typeof value.type === 'string'
@@ -183,10 +202,7 @@ function isolateScript(
     }
   };
   visit(program);
-  for (const edit of edits.sort((a, b) => b.start - a.start)) {
-    source = source.slice(0, edit.start) + edit.value + source.slice(edit.end);
-  }
-  return source;
+  return replaceParts(source, edits);
 }
 
 /**
@@ -202,46 +218,58 @@ export function isolateReactStreamScripts(
   namespace: string,
   identifierPrefix?: string,
 ): string {
+  return createReactStreamScriptIsolator(namespace, identifierPrefix)(html);
+}
+
+/** Stream-local configuration; parsed script ranges can come from HTML framing. */
+export function createReactStreamScriptIsolator(
+  namespace: string,
+  identifierPrefix?: string,
+): (html: string, scripts?: HTMLScript[]) => string {
   const jsPrefix = `$MF_${Buffer.from(namespace).toString('hex')}_`;
-  const edits: { start: number; end: number; value: string }[] = [];
-  let script: { start: number; executable: boolean } | undefined;
-  const parser = new Parser(
-    {
-      onopentag(name, attributes) {
-        if (name !== 'script') return;
-        script = {
-          start: parser.endIndex + 1,
-          executable:
-            !attributes.src &&
-            (!attributes.type ||
-              attributes.type === 'text/javascript' ||
-              attributes.type === 'application/javascript'),
-        };
+  return (html, scripts) => {
+    const edits: Edit[] = [];
+    const isolate = ({ start, end, executable }: HTMLScript) => {
+      if (!executable) return;
+      const original = html.slice(start, end);
+      const value = isolateScript(original, jsPrefix, identifierPrefix);
+      if (value !== original) {
+        // The receiver removes only these transport artifacts after replay.
+        edits.push({
+          start: start - 1,
+          end: start - 1,
+          value: ' data-mf-react-transport=""',
+        });
+        edits.push({ start, end, value });
+      }
+    };
+    if (scripts) {
+      for (const script of scripts) isolate(script);
+      return replaceParts(html, edits);
+    }
+    let script: { start: number; executable: boolean } | undefined;
+    const parser = new Parser(
+      {
+        onopentag(name, attributes) {
+          if (name !== 'script') return;
+          script = {
+            start: parser.endIndex + 1,
+            executable:
+              !attributes.src &&
+              (!attributes.type ||
+                attributes.type === 'text/javascript' ||
+                attributes.type === 'application/javascript'),
+          };
+        },
+        onclosetag(name) {
+          if (name !== 'script' || !script) return;
+          isolate({ ...script, end: parser.startIndex });
+          script = undefined;
+        },
       },
-      onclosetag(name) {
-        if (name !== 'script' || !script) return;
-        if (script.executable) {
-          const end = parser.startIndex;
-          const original = html.slice(script.start, end);
-          const value = isolateScript(original, jsPrefix, identifierPrefix);
-          if (value !== original) {
-            // These instructions are transport artifacts, not application React
-            // elements. The receiver removes only these scripts after replay.
-            edits.push({
-              start: script.start - 1,
-              end: script.start - 1,
-              value: ' data-mf-react-transport=""',
-            });
-            edits.push({ start: script.start, end, value });
-          }
-        }
-        script = undefined;
-      },
-    },
-    { decodeEntities: false },
-  );
-  parser.end(html);
-  for (const edit of edits.reverse())
-    html = html.slice(0, edit.start) + edit.value + html.slice(edit.end);
-  return html;
+      { decodeEntities: false },
+    );
+    parser.end(html);
+    return replaceParts(html, edits);
+  };
 }
