@@ -489,3 +489,28 @@ This package does not apply that dependency patch or strip bytes from transport.
 Framework integrations must validate their selected renderer separately.
 
 The Node `/server` producer implements stream rendering without importing the browser Root lifecycle. Browser `/v18` and `/v19` producers implement mount, hydration, updates and unmount without including Node stream processing. Their shared tree construction keeps the server and browser markup consistent. Producer messages carry data snapshots in their `data` or `ready` messages, without a duplicate top-level snapshot promise.
+
+## Maintainer bundle-size reports
+
+The existing Bundle Size workflow compares the PR head with its Git merge-base,
+using the head's measurement fixtures and toolchain for both builds. Existing
+browser provider entries have before/after deltas. SSR-only exports absent from
+the base are reported as new capabilities with absolute sizes, never as a zero
+baseline. Non-peer runtime dependencies are bundled, while declared peers and
+Node builtins remain external. Bundle fixtures emit ESM. The receiver's response HTML is measured separately
+from JavaScript bundles. Size measurements do not establish runtime performance.
+
+After building both revisions, the Bridge section can also be reproduced locally
+from the current checkout:
+
+```sh
+node scripts/bundle-size-report.mjs --bridge-only --output head.json
+node scripts/bundle-size-report.mjs --bridge-only --packages-dir /path/to/base/packages --output base.json
+node scripts/bundle-size-report.mjs --bridge-only --compare base.json --current head.json --output stats.txt
+```
+
+CI displays the comparison in the job summary and existing PR report, and uploads
+both JSON measurements with the Markdown report. The JSON records source SHAs,
+lockfile hashes, tool versions, build settings, resolved modules and external
+imports. Git retains the inputs needed to rebuild each revision, while report
+artifacts are retained according to the repository's Actions retention policy.

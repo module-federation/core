@@ -21,6 +21,7 @@ import { join, resolve, relative, extname } from 'path';
 import { createRequire } from 'module';
 import { tmpdir } from 'os';
 import { gzipSync } from 'zlib';
+import { measureBridge, compareBridge } from './bridge-bundle-size.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const require = createRequire(import.meta.url);
@@ -696,6 +697,7 @@ async function measure(packagesDir) {
   return {
     packages: results,
     scenarios: await measureScenarios(packagesDir, packages),
+    bridge: await measureBridge(packagesDir),
   };
 }
 
@@ -1017,6 +1019,7 @@ function compare(baseData, currentData) {
   lines.push(...buildTable('Bundle targets', bundleMetrics, changedRootRows));
   lines.push(...buildEntrypointTable());
   lines.push(...buildScenarioTable());
+  lines.push(compareBridge(baseData.bridge, currentData.bridge));
 
   lines.push(
     `**Total dist (raw):** ${formatBytes(totalDistCurrent)} (${formatDelta(totalDistCurrent, totalDistBase)})`,
@@ -1050,7 +1053,7 @@ function compare(baseData, currentData) {
   }
   lines.push('');
   lines.push(
-    '_Bundle sizes are generated with rslib (Rspack). Package-root metrics preserve the historical report. Tracked subpath exports such as `./bundler` are measured separately so ENV_TARGET-driven tree-shaking is visible. Bare imports are externalized to keep package-level sizes consistent, and assets are emitted as resources._',
+    '_Package-root and tracked subpath sizes are generated with rslib (Rspack). Those metrics externalize bare imports and emit assets as resources. Bridge fixtures use esbuild and bundle non-peer runtime dependencies under the separate settings documented above._',
   );
   lines.push('');
 
@@ -1118,7 +1121,9 @@ async function main() {
 
     const baseData = JSON.parse(readFileSync(basePath, 'utf8'));
     const currentData = JSON.parse(readFileSync(currentPath, 'utf8'));
-    const markdown = compare(baseData, currentData);
+    const markdown = args['bridge-only']
+      ? compareBridge(baseData.bridge, currentData.bridge)
+      : compare(baseData, currentData);
 
     writeFileSync(outputPath, markdown, 'utf8');
     console.log(`Comparison written to ${outputPath}`);
@@ -1129,10 +1134,26 @@ async function main() {
     const outputPath = resolve(args.output || 'bundle-sizes.json');
 
     console.log(`Scanning packages in ${packagesDir}...`);
-    const results = await measure(packagesDir);
+    const results = args['bridge-only']
+      ? {
+          packages: {},
+          scenarios: {},
+          bridge: await measureBridge(packagesDir),
+        }
+      : await measure(packagesDir);
     const packageCount = Object.keys(results.packages).length;
 
     writeFileSync(outputPath, JSON.stringify(results, null, 2), 'utf8');
+    if (args['bridge-only']) {
+      console.log(`Bridge revision: ${results.bridge.revision}`);
+      for (const [name, fixture] of Object.entries(results.bridge.fixtures)) {
+        console.log(
+          `${name}: ${fixture.status}, raw=${formatMaybe(fixture.rawBytes)}, minified=${formatMaybe(fixture.minifiedBytes)}, gzip=${formatMaybe(fixture.gzipBytes)}`,
+        );
+      }
+      console.log(`Bridge report written to ${outputPath}`);
+      return;
+    }
     console.log(`Measured ${packageCount} packages → ${outputPath}`);
 
     // Print summary
