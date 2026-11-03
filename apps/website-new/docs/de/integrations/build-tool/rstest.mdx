@@ -1,0 +1,192 @@
+# Rstest {#rstest}
+
+`@module-federation/rstest` ermöglicht Module Federation in Test-Builds mit [Rstest](https://rstest.rs/). Verwende es, wenn deine Tests echte föderierte Remotes laden sollen, statt die Federation-Grenze durch Mocks zu ersetzen.
+
+## Unterstützte Funktionen {#supports}
+
+- Node- und JSDOM-Testumgebungen von Rstest
+- Browsermodus von Rstest
+- URL-Remotes wie `remote@http://localhost:3001/remoteEntry.js`
+- Pfadbasierte Remotes mit `commonjs ...` für Integrationstests unter Node
+- Automatischer Federation-Kompatibilitätsmodus von Rstest für Test-Builds mit Node als Ziel
+
+## Voraussetzungen {#requirements}
+
+:::tip
+
+Verwende `@rstest/core@0.11.4` oder neuer. Die Federation-Unterstützung von Rstest ist seit `0.11.4` verfügbar.
+
+:::
+
+Rstest-Versionen vor `0.11.4` enthalten den Kompatibilitätsmodus `federation` noch nicht, den dieses Plugin für Node-Test-Builds aktiviert.
+
+## Schnellstart {#quick-start}
+
+### Installation {#installation}
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rstest @rstest/core --save-dev',
+    yarn: 'yarn add @module-federation/rstest @rstest/core --dev',
+    pnpm: 'pnpm add @module-federation/rstest @rstest/core --save-dev',
+    bun: 'bun add @module-federation/rstest @rstest/core --dev',
+  }}
+/>
+
+### Plugin registrieren {#register-plugin}
+
+```ts title='rstest.config.ts'
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+export default defineConfig({
+  plugins: [
+    federation({
+      name: 'host',
+      remotes: {
+        'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true },
+      },
+    }),
+  ],
+});
+```
+
+:::warning
+
+Setze bei Verwendung dieses Plugins nicht `federation: true` in `rstest.config.ts`. Für Node- und JSDOM-Testumgebungen aktiviert `@module-federation/rstest` den Federation-Kompatibilitätsmodus von Rstest automatisch.
+
+:::
+
+Führe deine Tests wie gewohnt mit Rstest aus:
+
+```bash
+npx rstest run
+```
+
+### Eine Rsbuild-Federation-Konfiguration wiederverwenden {#reuse-an-rsbuild-federation-configuration}
+
+Wenn das Testprojekt bereits `@module-federation/rsbuild-plugin` registriert, rufe `federation()` ohne Optionen auf:
+
+```ts title='rstest.config.ts'
+import {
+  createModuleFederationConfig,
+  pluginModuleFederation,
+} from '@module-federation/rsbuild-plugin';
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+const options = createModuleFederationConfig({
+  name: 'host',
+  remotes: {
+    'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+  },
+});
+
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation(options, {
+      environment: 'rstest',
+      target: 'node',
+    }),
+    federation(),
+  ],
+});
+```
+
+Die Reihenfolge der Plugins ist entscheidend: Registriere zuerst `pluginModuleFederation`, damit `federation()` dieselben typisierten Optionen normalisieren kann. So wird nur ein `ModuleFederationPlugin` erzeugt und die Remote-Konfiguration nicht dupliziert.
+
+## Einen föderierten Remote testen {#test-a-federated-remote}
+
+Erstelle oder starte den Remote in `globalSetup` von Rstest. Importiere die bereitgestellten Module anschließend genauso wie im Anwendungscode:
+
+```ts title='remote.test.ts'
+import { expect, it } from '@rstest/core';
+import Button from 'component-app/Button';
+
+it('loads a remote through a static import', () => {
+  expect(Button).toBeDefined();
+});
+
+it('loads a remote through a dynamic import', async () => {
+  const remote = await import('component-app/Button');
+  expect(remote.default).toBeDefined();
+});
+```
+
+Das offizielle [Federation-Beispiel von Rstest](https://github.com/web-infra-dev/rstest/tree/v0.11.4/examples/federation) kombiniert einen Komponenten-Remote über HTTP mit einem lokal erstellten `commonjs ...`-Remote und führt sowohl Node- als auch JSDOM-Projekte aus.
+
+## Funktionsweise {#how-it-works}
+
+Bei Node- und Browser-Zielen ist der Standardwert für `dts`, `manifest` und `dev` jeweils `false`. Explizit angegebene Werte bleiben erhalten.
+
+### Standardwerte für Node-Tests {#node-test-defaults}
+
+Für Rstest-Builds mit Node als Ziel wendet das Plugin zur Node-Runtime passende Module-Federation-Standardwerte an:
+
+- `target: async-node`
+- `experiments.asyncStartup = true`
+- CommonJS-Containerausgabe; die Bibliothekstypen `module` und `modern-module` werden normalisiert
+- `@module-federation/node/runtimePlugin`
+- Federation-Optimierung für Node
+- standardmäßig Script-Transport für Remotes
+
+Normale URL-Remotes verwenden `remoteType: 'script'`. Inline-Transportpräfixe wie `commonjs ...` überschreiben diesen Standardwert.
+
+### Browsermodus {#browser-mode}
+
+Der Browsermodus von Rstest wird automatisch anhand der aufgelösten Konfiguration `browser.enabled` erkannt:
+
+Installiere zuerst `@rstest/browser` und einen Playwright-Browser. Siehe dazu die [Einrichtung des Rstest-Browsermodus](https://rstest.rs/guide/browser-testing/getting-started).
+
+```ts title='rstest.config.ts'
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+export default defineConfig({
+  browser: {
+    enabled: true,
+    provider: 'playwright',
+  },
+  plugins: [
+    federation({
+      name: 'browser_host',
+      remotes: {
+        app2: 'app2@http://localhost:3001/remoteEntry.js',
+      },
+    }),
+  ],
+});
+```
+
+Im Browsermodus entfallen die nur für Node geltenden Standardwerte. `experiments.asyncStartup` wird aktiviert und die oben genannten gemeinsamen Standardwerte werden angewendet. Gib `target` nur explizit an, wenn du den erkannten Modus überschreiben möchtest.
+
+## Konfiguration {#configuration}
+
+`federation(options, rstestOptions)` akzeptiert die übliche [Module-Federation-Konfiguration](/configure/index.html) als erstes Argument.
+
+```ts
+federation(moduleFederationOptions, {
+  target: 'node', // or 'browser'
+});
+```
+
+### moduleFederationOptions {#modulefederationoptions}
+
+[Module-Federation-Konfiguration](/configure/index.html)
+
+### rstestOptions {#rstestoptions}
+
+- Typ: `{ target?: 'node' | 'browser' }`
+- Standardwert: wird aus der aufgelösten Rstest-Konfiguration `browser.enabled` ermittelt. Im Browsermodus gilt `'browser'`, für andere Builds `'node'`.
+
+## Builds für Producer {#producer-builds}
+
+Verwende `@module-federation/rsbuild-plugin` oder ein anderes Module-Federation-Build-Plugin, um die Remote-Anwendung zu erstellen. Verwende `@module-federation/rstest` nur im Rstest-Testprojekt, das diese Remotes lädt.
+
+Für Rsbuild-Producer geht es im [Leitfaden zum Rsbuild-Plugin](/integrations/build-tool/rsbuild.html) weiter.

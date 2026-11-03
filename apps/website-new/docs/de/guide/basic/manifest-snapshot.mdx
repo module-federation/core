@@ -1,0 +1,116 @@
+# Manifest und Snapshot {#manifest-and-snapshot}
+
+`mf-manifest.json` ist ein Runtime-Manifest, das ein Producer nach dem Build erzeugt. Es beschreibt, welche Module der Producer bereitstellt, wo der Remote Entry liegt, welche Assets die Module benötigen, welche Shared-Abhängigkeiten verfügbar sind und wo sich die Typdateien befinden.
+
+Ein Snapshot ist eine verdichtete, bereits aufgelöste Darstellung der Manifest-Informationen. Die Runtime kann ein Manifest bei Bedarf anfordern und daraus einen Snapshot erzeugen. Ein Deployment-Dienst kann ihn auch vorab erzeugen und an den Consumer ausliefern. So erhält der Consumer den Remote Entry und vorladbare Assets direkt.
+
+Diese Seite erläutert die Konzepte und ihre Einsatzgebiete. Die Einstellungen findest du unter [Manifest-Konfiguration](/configure/manifest.html), die vollständige Feldreferenz unter [Felder von mf-manifest.json](/guide/advanced/manifest-fields.html).
+
+## Warum ein Manifest? {#why-manifest}
+
+Mit `remoteEntry.js` allein kann der Consumer Remote-Module laden. Die dazugehörigen Assets, Typen und Shared-Abhängigkeiten lassen sich damit aber nicht ohne Weiteres vorab ermitteln.
+
+Mit `mf-manifest.json` erhält der Consumer schon vor dem Laden eines Remote-Moduls weitere Informationen:
+
+- URL und Ladetyp des Remote Entry
+- Bereitgestellte Module und Asset-Listen
+- JavaScript und CSS, die vorgeladen werden können
+- Namen, Versionen und Assets von Shared-Abhängigkeiten
+- URLs der Typdateien
+
+Ein Manifest ist damit mehr als eine zusätzliche Entry-URL: Es ist eine Beschreibung, die der Producer der Runtime des Consumers bereitstellt.
+
+## Manifest und Stats {#manifest-and-stats}
+
+Wenn die [Manifest-Konfiguration](/configure/manifest.html) aktiviert ist, erzeugt das Build-Plugin sowohl `mf-manifest.json` als auch `mf-stats.json`.
+
+| Datei | Zweck |
+| --- | --- |
+| `mf-manifest.json` | Wird von der Consumer-Runtime gelesen. Die Felder sind stabiler und kompakter. |
+| `mf-stats.json` | Dient der Build-Analyse, Diagnose und Werkzeugunterstützung. Die Felder sind umfassender. |
+
+Wenn du nur Remote-Module verwenden möchtest, reicht normalerweise `mf-manifest.json`. Für Analysewerkzeuge, Diagnosen oder Plattformintegrationen ist `mf-stats.json` relevant.
+
+## Was ist ein Snapshot? {#what-snapshot-is}
+
+Ein Snapshot enthält die Modulinformationen, die die Runtime tatsächlich verwendet.
+
+Das Manifest ist ein Build-Artefakt eines einzelnen Producers und dient als Ausgangsbeschreibung. Der Snapshot ordnet diese Informationen in einer für die Runtime leichter nutzbaren Struktur an, darunter:
+
+- Der endgültige `remoteEntry` des Producers
+- Assets der bereitgestellten Module
+- Vorladbare Assets
+- Informationen über Shared-Abhängigkeiten
+- Weitere Remote-Module, von denen der Producer abhängt
+
+Ohne Deployment-Dienst fordert der Consumer zuerst `mf-manifest.json` an. Die Runtime erzeugt daraus den Snapshot.
+
+```txt
+Host configures remotes
+  -> request mf-manifest.json
+  -> parse Manifest
+  -> generate Snapshot
+  -> load remoteEntry, expose, shared, and preload assets
+```
+
+Mit einem Deployment-Dienst kann dieser das Manifest vorab verarbeiten, den Snapshot erzeugen und an den Consumer ausliefern.
+
+```txt
+Producer builds Manifest
+  -> deployment service parses Manifest ahead of time
+  -> generate Snapshot
+  -> Host gets remoteEntry and preload assets directly
+```
+
+Dadurch entfällt gegebenenfalls eine zusätzliche Manifest-Anfrage zur Laufzeit, und die Asset-Auflösung erfolgt auf dem Server.
+
+## Wo wird das verwendet? {#where-we-use-it}
+
+### Remotes laden {#remote-loading}
+
+Wenn `remotes` auf `mf-manifest.json` verweist, liest die Runtime das Manifest, erzeugt den Snapshot und löst daraus die endgültige `remoteEntry`-URL auf. Die Konfiguration beschreibt [remotes](/configure/remotes.html).
+
+### Assets vorladen {#asset-preloading}
+
+Das Manifest enthält Asset-Informationen zu bereitgestellten Modulen und Shared-Abhängigkeiten. Nach dem Erzeugen des Snapshots kann die Runtime damit das JavaScript und CSS vorladen, das Remote-Module benötigen.
+
+### Chrome DevTools {#chrome-devtools}
+
+Die [Chrome DevTools](/guide/debug/chrome-devtool.html) verwenden Manifest und Snapshot, um die föderierten Module auf der aktuellen Seite, ihre Abhängigkeiten, die Wiederverwendung von Shared-Abhängigkeiten und den für Proxying benötigten Remote Entry zu ermitteln.
+
+### Lokales Proxying {#local-proxying}
+
+Beim Debuggen einer Produktivseite können Proxy-Werkzeuge anhand des Snapshots den Ziel-Producer ermitteln und durch ein lokal laufendes Manifest oder einen lokalen Remote Entry ersetzen.
+
+### Runtime-Diagnose {#runtime-diagnostics}
+
+Wenn das Laden eines Remotes fehlschlägt, helfen Manifest und Snapshot dabei, die Fehlerstelle einzugrenzen:
+
+- Ist die Manifest-URL erreichbar?
+- Sind die Manifest-Felder vollständig?
+- Ist der Ziel-Producer im Snapshot vorhanden?
+- Kann der Snapshot `remoteEntry` auflösen?
+- Wird `remoteEntry` erfolgreich geladen?
+- Ist das angeforderte Expose vorhanden?
+
+So kannst du fehlgeschlagene Manifest-Anfragen, fehlende Snapshot-Einträge und spätere Ladefehler beim Remote Entry unterscheiden.
+
+## Was kannst du damit bauen? {#what-you-can-build-with-it}
+
+Manifest und Snapshot eignen sich als Eingaben für Runtime-Plugins, Debugging-Werkzeuge und Deployment-Plattformen.
+
+Du kannst damit zum Beispiel Folgendes umsetzen:
+
+- **Vorladen optimieren**: JavaScript und CSS von Remote-Modulen früher abrufen und Wartezeiten nach Nutzerinteraktionen verkürzen.
+- **Modulgraphen visualisieren**: Anzeigen, welche Producer, Consumer und Shared-Abhängigkeiten auf der aktuellen Seite geladen sind.
+- **Mit lokalem Proxy debuggen**: Einen Producer auf einer Produktivseite durch einen lokal laufenden Producer ersetzen.
+- **Ladefehler diagnostizieren**: Erkennen, ob ein Fehler beim Manifest, Snapshot, remoteEntry oder Expose auftritt.
+- **Shared-Abhängigkeiten analysieren**: Prüfen, ob sie wiederverwendet oder mehrfach geladen werden und ob die erwartete Version gewählt wurde.
+
+Anwendungscode sollte den globalen Snapshot nicht direkt verändern. Nutze diese Informationen über ein Runtime-Plugin, die DevTools oder einen Deployment-Dienst.
+
+## Auswirkungen von disableSnapshot {#impact-of-disablesnapshot}
+
+Wenn [`optimization.disableSnapshot`](/configure/experiments.html#disablesnapshot) aktiviert ist, werden Snapshot- und zugehörige Preload-Funktionen aus der Runtime entfernt, um deren Größe zu reduzieren.
+
+Das betrifft Funktionen, die Manifest oder Snapshot voraussetzen, etwa Remote-Typhinweise, Vorladen, DevTools-Visualisierung und Proxying.

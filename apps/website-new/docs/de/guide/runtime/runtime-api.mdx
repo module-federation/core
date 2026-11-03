@@ -1,0 +1,988 @@
+# Runtime-API {#runtime-api}
+
+import { Steps, Tab, Tabs, Badge, Aside } from '@theme';
+import Collapse from '@components/Collapse';
+
+Die Runtime-APIs von MF basieren auf der `ModuleFederation`-Instanz. Die Standardinstanz wird normalerweise automatisch vom Build-Plugin erstellt. Du musst bei Aufrufen der Runtime-APIs daher keine Instanz explizit übergeben: Die Aufrufe gelten automatisch für die Standardinstanz der Runtime.
+
+## createInstance
+
+Erstellt eine neue `ModuleFederation`-Instanz. Anders als andere Runtime-APIs arbeitet `createInstance` nicht mit der Standardinstanz, sondern gibt eine neue, von ihr isolierte Instanz zurück.
+
+**Wann du sie verwendest**
+
+Die Standardinstanz deckt die meisten Anwendungsfälle ab. `createInstance` brauchst du nur in folgenden Fällen:
+
+- Du verwendest kein Build-Plugin (reiner Runtime-Betrieb).
+- Du benötigst mehrere `ModuleFederation`-Instanzen mit unterschiedlichen Konfigurationen in derselben Anwendung.
+- Du möchtest die Partitionierungsfunktion von Module Federation nutzen, um eine Gruppe von APIs für andere Projekte zu kapseln.
+
+**Verhalten**
+
+- Jeder Aufruf erstellt eine neue Instanz und fügt sie der globalen Instanzliste hinzu.
+- Die Funktion sucht nicht nach bestehenden Instanzen anhand von `name` / `version` und führt die neuen Optionen auch nicht mit einer bestehenden Instanz zusammen.
+- Die neue Instanz ersetzt die Standardinstanz nicht. Um sie an anderer Stelle abzurufen, verwende [getInstance](#getinstance).
+
+**Beispiel**
+
+```ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'http://localhost:8080/mf-manifest.json'
+    }
+  ]
+});
+
+mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
+```
+
+## init <Badge type='warning'>Mit Bedacht verwenden</Badge> {#init}
+
+Initialisiert eine `ModuleFederation`-Runtime-Instanz oder verwendet eine bestehende wieder.
+
+`init` erstellt nicht immer eine neue Instanz: Die Runtime sucht zuerst anhand von `name` und `version` nach einer bestehenden Instanz. Findet sie eine passende, verwendet sie diese wieder und führt die neuen Optionen über `instance.initOptions(options)` mit ihr zusammen. Nur wenn keine passende Instanz existiert, wird eine neue erstellt.
+
+`init` eignet sich daher besonders, wenn derselbe Host mehrfach initialisiert wird und du dieselbe Runtime-Instanz wiederverwenden und erweitern möchtest.
+
+:::warning
+
+- Wenn du eine vollständig unabhängige neue Instanz benötigst, verwende [createInstance](#createinstance).
+- Wenn du nur auf die vom Build-Plugin erstellte Instanz zugreifen möchtest, verwende [getInstance](#getinstance).
+
+:::
+
+- Typ: `init(options: InitOptions): ModuleFederation`
+
+<Collapse title="Typ InitOptions">
+```ts
+type InitOptions {
+  // Name of the current host
+  name: string;
+  // List of dependent remote modules
+  // tip: The remotes configured at runtime are not completely consistent in type and data with those passed in by the build plugin.
+  remotes: Array<RemoteInfo>;
+  // List of dependencies that the current host needs to share
+  // When using the build plugin, users can configure the dependencies to be shared in the build plugin, and the build plugin will inject the dependencies to be shared into the shared configuration at runtime.
+  // When shared is passed in at runtime, the version instance reference must be passed in manually, because it cannot be directly obtained at runtime.
+  shared?: {
+    [pkgName: string]: ShareArgs | ShareArgs[];
+  };
+};
+
+type ShareArgs =
+  | (SharedBaseArgs & { get: SharedGetter })
+  | (SharedBaseArgs & { lib: () => Module });
+
+type SharedBaseArgs = {
+  version: string;
+  shareConfig?: SharedConfig;
+  scope?: string | Array<string>;
+  deps?: Array<string>;
+  strategy?: 'version-first' | 'loaded-first';
+};
+
+type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
+
+type RemoteInfo = {
+  alias?: string;
+};
+
+interface RemotesWithEntry {
+  name: string;
+  entry: string;
+}
+
+type ShareInfos = {
+  // Package name and basic information of the dependency, sharing strategy
+  [pkgName: string]: Share;
+};
+
+type Share = {
+  // Version of the shared dependency
+  version: string;
+  // Which modules consume the current shared dependency
+  useIn?: Array<string>;
+  // Which module the shared dependency comes from
+  from?: string;
+  // Factory function to get the instance of the shared dependency. When the cached shared instance cannot be loaded, it will load its own shared dependency.
+  lib: () => Module;
+  // Sharing strategy, which strategy will be used to determine the reuse of shared dependencies
+  shareConfig?: SharedConfig;
+  // Dependencies between shares
+  deps?: Array<string>;
+  // Under which scope the current shared dependency is placed, the default is default
+  scope?: string | Array<string>;
+};
+```
+
+</Collapse>
+
+<Collapse title="Beispiel">
+
+
+```ts
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+
+init({
+  name: "mf_host",
+  remotes: [
+    {
+      name: "remote",
+      // After configuring an alias, it can be loaded directly through the alias
+      alias: "app1",
+      // Decide which module to load by specifying the address of the module's manifest.json file
+      entry: "http://localhost:2001/mf-manifest.json"
+    }
+  ],
+});
+```
+
+</Collapse>
+
+:::tip Empfohlene Migration
+
+Wenn dein Code derzeit `init` verwendet, kannst du je nach Anwendungsfall zum empfohlenen Ansatz wechseln.
+
+:::
+
+### Migration mit Build-Plugin {#migration-option---using-the-build-plugin}
+
+Entferne den `init`-Aufruf und rufe die Instanz mit [getInstance](#getinstance) ab. Registriere die zuvor an `init` übergebenen Optionen mit [registerRemotes](#registerremotes), [registerShared](#registershared) und [registerPlugins](#registerplugins).
+
+```diff
+- import { init } from '@module-federation/enhanced/runtime';
++ import { registerShared, registerRemotes, registerPlugins, getInstance } from '@module-federation/enhanced/runtime';
+  import React from 'react';
+  import mfRuntimePlugin from 'mf-runtime-plugin';
+
+- const instance = init({
+-   name: 'mf_host',
+-   remotes: [
+-     {
+-       name: 'remote',
+-       entry: 'http://localhost:2001/mf-manifest.json',
+-     },
+-   ],
+-   shared: {
+-     react: {
+-       version: '18.0.0',
+-       scope: 'default',
+-       lib: () => React,
+-       shareConfig: {
+-         singleton: true,
+-         requiredVersion: '^18.0.0',
+-       },
+-     },
+-   },
+-   plugins: [mfRuntimePlugin()],
+- });
++ const instance = getInstance();
++ registerRemotes([
++   {
++     name: 'remote',
++     entry: 'http://localhost:2001/mf-manifest.json',
++   },
++ ]);
++ registerShared({
++   react: {
++     version: '18.0.0',
++     scope: 'default',
++     lib: () => React,
++     shareConfig: {
++       singleton: true,
++       requiredVersion: '^18.0.0',
++     },
++   },
++ });
++ registerPlugins([mfRuntimePlugin()]);
+```
+
+### Migration bei reinem Runtime-Betrieb {#migration-option---pure-runtime}
+
+Wechsle direkt zu [createInstance](#createinstance); die Struktur der Optionen bleibt gleich. Beachte aber die unterschiedliche Bedeutung: `createInstance` erstellt immer eine neue Instanz. `init` kann dagegen eine bestehende Instanz mit demselben `name` / derselben `version` wiederverwenden und die neuen Optionen mit ihr zusammenführen.
+
+```diff
+- import { init } from '@module-federation/enhanced/runtime';
++ import { createInstance } from '@module-federation/enhanced/runtime';
+
+- const instance = init({
++ const instance = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'remote',
+        entry: 'http://localhost:2001/mf-manifest.json',
+      },
+    ],
+    shared: {
+      react: {
+        version: '18.0.0',
+        scope: 'default',
+        lib: () => React,
+        shareConfig: {
+          singleton: true,
+          requiredVersion: '^18.0.0',
+        },
+      },
+    },
+    plugins: [mfRuntimePlugin()],
+  });
+```
+
+## getInstance
+
+- Typ: `getInstance(): ModuleFederation | null`
+- Typ: `getInstance(finder: (instance: ModuleFederation) => boolean): ModuleFederation | null`
+- Ruft die Standardinstanz von `ModuleFederation` oder die erste registrierte Instanz ab, die einem Such-Callback entspricht.
+
+Nachdem das Build-Plugin oder [init](#init) die Standardinstanz erstellt hat, kannst du sie mit `getInstance()` abrufen.
+
+
+```ts
+import { getInstance } from '@module-federation/enhanced/runtime';
+
+const mfInstance = getInstance();
+if (!mfInstance) {
+  throw new Error('Module Federation instance is not initialized');
+}
+
+mfInstance.loadRemote('remote/util');
+```
+
+Wenn du kein Build-Plugin verwendest, löst ein Aufruf von `getInstance` eine Ausnahme aus. Verwende in diesem Fall [createInstance](#createinstance), um eine neue Instanz zu erstellen.
+
+Mit [createInstance](#createinstance) erstellte Instanzen ersetzen die Standardinstanz nicht, werden aber in der globalen Instanzliste registriert. Selbst wenn du die zurückgegebene Referenz nicht gespeichert hast, kannst du sie später mit einem Such-Callback an `getInstance` wiederfinden.
+
+Der Such-Callback funktioniert wie `Array.prototype.find`: Die Runtime durchläuft die aktuell registrierten Instanzen und gibt den ersten Treffer zurück. Findet sie keine passende Instanz, gibt `getInstance` `null` zurück.
+
+```ts
+const targetInstance = getInstance(
+  (instance) => instance.name === 'remote-host',
+);
+
+if (targetInstance) {
+  targetInstance.loadRemote('remote/util');
+}
+```
+
+## registerRemotes
+
+<Collapse>
+
+```typescript
+function registerRemotes(remotes: Remote[], options?: { force?: boolean }) {}
+
+type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
+
+interface RemoteInfoCommon {
+  alias?: string;
+  shareScope?: string;
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+}
+
+interface RemoteWithEntry {
+  name: string;
+  entry: string;
+}
+
+interface RemoteWithVersion {
+  name: string;
+  version: string;
+}
+```
+
+</Collapse>
+
+:::warning
+
+Mit `force: true` überschreiben neu registrierte Module bereits registrierte und geladene Module. Der Cache der geladenen Module wird dabei automatisch gelöscht. Zusätzlich erscheint eine Warnung in der Konsole, die auf das Risiko dieses Vorgangs hinweist.
+
+:::
+
+<Tabs>
+  <Tab label="Mit Build-Plugin">
+  ```tsx
+  import { registerRemotes } from '@module-federation/enhanced/runtime';
+
+  // register new remote sub2
+  registerRemotes([
+    {
+      name: 'sub2',
+      entry: 'http://localhost:2002/mf-manifest.json',
+    }
+  ]);
+
+  // override remote sub1
+  registerRemotes([
+    {
+      name: 'sub1',
+      entry: 'http://localhost:2003/mf-manifest.json',
+    }
+  ], { force: true });
+  ```
+  </Tab>
+  <Tab label="Nur Runtime (ohne Build-Plugin)">
+  ```ts
+  import { createInstance } from '@module-federation/enhanced/runtime';
+
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'sub1',
+        entry: 'http://localhost:2001/mf-manifest.json',
+      }
+    ]
+  });
+
+  // register new remote sub2
+  mf.registerRemotes([
+    {
+      name: 'sub2',
+      entry: 'http://localhost:2002/mf-manifest.json',
+    }
+  ]);
+
+  // override remote sub1
+  mf.registerRemotes([
+    {
+      name: 'sub1',
+      entry: 'http://localhost:2003/mf-manifest.json',
+    }
+  ], { force: true });
+  ```
+  </Tab>
+</Tabs>
+
+## registerPlugins
+
+```typescript
+function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
+```
+
+<Tabs>
+  <Tab label="Mit Build-Plugin">
+  ```tsx
+  import { registerPlugins } from '@module-federation/enhanced/runtime';
+  import runtimePlugin from './custom-runtime-plugin';
+
+  // add new runtime plugin
+  registerPlugins([runtimePlugin()]);
+
+  registerPlugins([
+    {
+      name: 'custom-plugin-runtime',
+      beforeInit(args) {
+        const { userOptions, origin } = args;
+        if (origin.options.name && origin.options.name !== userOptions.name) {
+          userOptions.name = origin.options.name;
+        }
+        console.log('[build time inject] beforeInit: ', args);
+        return args;
+      },
+      beforeLoadShare(args) {
+        console.log('[build time inject] beforeLoadShare: ', args);
+        return args;
+      },
+      createLink({ url }) {
+        const link = document.createElement('link');
+        link.setAttribute('href', url);
+        link.setAttribute('rel', 'preload');
+        link.setAttribute('as', 'script');
+        link.setAttribute('crossorigin', 'anonymous');
+        return link;
+      },
+    }
+  ]);
+  ```
+  </Tab>
+  <Tab label="Nur Runtime (ohne Build-Plugin)">
+  ```ts
+  import { createInstance } from '@module-federation/enhanced/runtime';
+  import runtimePlugin from './custom-runtime-plugin';
+
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'sub1',
+        entry: 'http://localhost:2001/mf-manifest.json',
+      }
+    ]
+  });
+
+  // add new runtime plugin
+  mf.registerPlugins([runtimePlugin()]);
+
+  mf.registerPlugins([
+    {
+      name: 'custom-plugin-runtime',
+      beforeInit(args) {
+        const { userOptions, origin } = args;
+        if (origin.options.name && origin.options.name !== userOptions.name) {
+          userOptions.name = origin.options.name;
+        }
+        console.log('[build time inject] beforeInit: ', args);
+        return args;
+      },
+      beforeLoadShare(args) {
+        console.log('[build time inject] beforeLoadShare: ', args);
+        return args;
+      },
+      createLink({ url }) {
+        const link = document.createElement('link');
+        link.setAttribute('href', url);
+        link.setAttribute('rel', 'preload');
+        link.setAttribute('as', 'script');
+        link.setAttribute('crossorigin', 'anonymous');
+        return link;
+      },
+    }
+  ]);
+  ```
+  </Tab>
+</Tabs>
+
+## registerGlobalPlugins
+
+```typescript
+function registerGlobalPlugins(plugins: ModuleFederationRuntimePlugin[]): void {}
+```
+
+Registriert Plugins im globalen Federation-Zustand statt auf einer einzelnen aktuellen Instanz. Das eignet sich beispielsweise für:
+
+- gemeinsame Instrumentierung
+- umgebungsweit geltende Regeln
+- Standard-Plugins für den gesamten Host
+
+Globale Plugins werden anhand von `plugin.name` dedupliziert.
+
+```ts
+import { registerGlobalPlugins, createInstance } from '@module-federation/enhanced/runtime';
+
+import runtimePlugin from './runtime-plugin';
+
+registerGlobalPlugins([runtimePlugin()]);
+
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    },
+  ],
+});
+```
+
+Registriere globale Plugins vor dem Erstellen oder Verwenden von Runtime-Instanzen, damit das Verhalten vorhersehbar bleibt.
+
+## registerShared
+
+Registriert Shared-Abhängigkeiten für den Host. Die Runtime bevorzugt eine global bereits vorhandene Shared-Abhängigkeit, die die Anforderungen erfüllt. Andernfalls greift sie auf die hier registrierte Abhängigkeit zurück.
+
+```typescript
+function registerShared(shared: Shared): void;
+
+type Shared = {
+  // Mapping of shared dependency package names; the same package can be registered with multiple versions (array form)
+  [pkgName: string]: ShareArgs | ShareArgs[];
+};
+
+/**
+ * ShareArgs must provide either lib or get
+ *
+ * lib: synchronous factory function that returns the module immediately when called; should not return a Promise.
+ * Suitable when the module is already available at the time `registerShared` is called, e.g. `import React from 'react'`
+ *
+ * get: used for async / lazy loading scenarios
+ * */
+type ShareArgs =
+  | (SharedBaseArgs & { lib: () => Module })
+  | (SharedBaseArgs & { get: SharedGetter })
+  | SharedBaseArgs;
+
+type SharedBaseArgs = {
+  // Version number being registered; recommended for version differentiation
+  version?: string;
+  // Sharing strategy, controlling singleton, requiredVersion, etc.
+  shareConfig?: SharedConfig;
+  // Scope it belongs to, defaults to 'default'; can be placed under multiple scopes simultaneously
+  scope?: string | Array<string>;
+  // Names of other shared dependencies that this one depends on
+  deps?: Array<string>;
+  // Version selection strategy: prefer by version number / prefer already loaded instance
+  strategy?: 'version-first' | 'loaded-first';
+  loaded?: boolean;
+};
+
+interface SharedConfig {
+  singleton?: boolean;
+  requiredVersion: false | string;
+  eager?: boolean;
+  strictVersion?: boolean;
+  layer?: string | null;
+}
+
+type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
+```
+
+<Tabs>
+  <Tab label="Mit Build-Plugin">
+  ```tsx
+  import { registerShared } from '@module-federation/enhanced/runtime';
+  import React from 'react';
+  import ReactDom from 'react-dom';
+
+  registerShared({
+    react: {
+      version: '18.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^18.0.0',
+      },
+    },
+    'react-dom': {
+      version: '18.0.0',
+      scope: 'default',
+      lib: () => ReactDom,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^18.0.0',
+      },
+    },
+    antd: {
+      version: '1.0.0',
+      scope: 'default',
+      get: () => import('antd').then((m) => () => m),
+    },
+  });
+  ```
+  </Tab>
+  <Tab label="Nur Runtime (ohne Build-Plugin)">
+  ```ts
+  import { createInstance } from '@module-federation/enhanced/runtime';
+  import React from 'react';
+  import ReactDom from 'react-dom';
+
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'sub1',
+        entry: 'http://localhost:2001/mf-manifest.json',
+      }
+    ]
+  });
+
+  mf.registerShared({
+    react: {
+      version: '18.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^18.0.0',
+      },
+    },
+    'react-dom': {
+      version: '18.0.0',
+      scope: 'default',
+      lib: () => ReactDom,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^18.0.0',
+      },
+    },
+    antd: {
+      version: '1.0.0',
+      scope: 'default',
+      get: () => import('antd').then((m) => () => m),
+    },
+  });
+  ```
+  </Tab>
+</Tabs>
+
+## loadShare
+
+
+```ts
+type loadShare = (
+  pkgName: string,
+  extraOptions?: {
+    customShareInfo?: Partial<Shared>;
+    resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+  }
+) => Promise<() => ShareModule>;
+```
+
+Lädt eine `share`-Abhängigkeit. Gibt es in der globalen Umgebung eine `share`-Abhängigkeit, die die Anforderungen des aktuellen `host` erfüllt, wird zuerst diese passende `share`-Abhängigkeit wiederverwendet. Andernfalls wird die eigene Abhängigkeit geladen und für die spätere Wiederverwendung im globalen Cache abgelegt.
+
+Diese `API` wird **in der Regel nicht direkt aufgerufen, sondern vom Build-Plugin bei der Transformation seiner eigenen Abhängigkeiten verwendet**.
+
+<Tabs>
+  <Tab label="Mit Build-Plugin">
+  ```tsx
+  import { registerShared, loadShare } from '@module-federation/enhanced/runtime';
+  import React from 'react';
+  import ReactDom from 'react-dom';
+
+  registerShared({
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+    'react-dom': {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => ReactDom,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+  });
+
+  loadShare('react').then((reactFactory) => {
+    console.log(reactFactory());
+  });
+  ```
+  </Tab>
+  <Tab label="Nur Runtime (ohne Build-Plugin)">
+  ```ts
+  import { createInstance } from '@module-federation/enhanced/runtime';
+  import React from 'react';
+  import ReactDom from 'react-dom';
+
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'remote',
+        entry: 'http://localhost:2001/mf-manifest.json',
+        alias: 'app1',
+      }
+    ]
+  });
+
+  mf.registerShared({
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+    'react-dom': {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => ReactDom,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+  });
+
+  mf.loadShare('react').then((reactFactory) => {
+    console.log(reactFactory());
+  });
+  ```
+  </Tab>
+</Tabs>
+
+Wenn mehrere Versionen von Shared konfiguriert sind, wird standardmäßig die bereits geladene Version mit der höchsten Versionsnummer zurückgegeben. Dieses Verhalten kannst du mit `extraOptions.resolver` ändern:
+
+```ts
+loadShare('react', {
+  resolver: (sharedOptions) => {
+    return (
+      sharedOptions.find((i) => i.version === '17.0.0') ?? sharedOptions[0]
+    );
+  },
+}).then((reactFactory) => {
+  console.log(reactFactory()); // { version: '17.0.0' }
+});
+```
+
+## loadRemote
+
+Diese API lädt ein Remote-Modul zur Laufzeit.
+
+```ts
+type loadRemote = (remoteNameOrAlias: string) => Promise<RemoteModule>;
+```
+
+<Tabs>
+  <Tab label="Mit Build-Plugin">
+  ```tsx
+  import { loadRemote } from '@module-federation/enhanced/runtime';
+
+  // remoteName + expose
+  loadRemote('remote/util').then((m) => m.add(1, 2, 3));
+
+  // alias + expose
+  loadRemote('app1/util').then((m) => m.add(1, 2, 3));
+  ```
+  </Tab>
+  <Tab label="Nur Runtime (ohne Build-Plugin)">
+  ```ts
+  import { createInstance } from '@module-federation/enhanced/runtime';
+
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [
+      {
+        name: 'remote',
+        entry: 'http://localhost:2001/mf-manifest.json',
+        alias: 'app1',
+      }
+    ]
+  });
+
+  // remoteName + expose
+  mf.loadRemote('remote/util').then((m) => m.add(1, 2, 3));
+
+  // alias + expose
+  mf.loadRemote('app1/util').then((m) => m.add(1, 2, 3));
+  ```
+  </Tab>
+</Tabs>
+
+## preloadRemote
+
+<Collapse>
+
+```typescript
+async function preloadRemote(preloadOptions: Array<PreloadRemoteArgs>){}
+
+type depsPreloadArg = Omit<PreloadRemoteArgs, 'depsRemote'>;
+type PreloadRemoteArgs = {
+  // Name or alias of the remote to be preloaded
+  nameOrAlias: string;
+  // The exposes to be preloaded
+  // By default, all exposes are preloaded
+  // When exposes are provided, only the required exposes will be loaded
+  exposes?: Array<string>; // Default request
+  // The default is sync, which only loads the synchronous code referenced in expose
+  // When set to all, both synchronous and asynchronous references will be loaded
+  resourceCategory?: 'all' | 'sync';
+  // When no value is configured, all dependencies are loaded by default
+  // After configuring dependencies, only the configuration options will be loaded
+  depsRemote?: boolean | Array<depsPreloadArg>;
+  // When not configured, resources are not filtered
+  // After configuration, unnecessary resources will be filtered
+  filter?: (assetUrl: string) => boolean;
+  // Whether to record preloaded JS and CSS URLs and skip duplicate loading
+  // Defaults to true
+  recordPreloadedAssets?: boolean;
+};
+```
+
+</Collapse>
+
+Mit `preloadRemote` kannst du Modulressourcen frühzeitig vorladen, um aufeinanderfolgende Netzwerk-Requests zu vermeiden. `preloadRemote` kann Folgendes vorladen:
+
+* den `remoteEntry` des `remote`
+* das `expose` des `remote`
+* synchrone oder asynchrone Ressourcen des `remote`
+* Ressourcen der `remote`-Abhängigkeiten des `remote`
+
+`preloadRemote` wartet auf den Abschluss aller Ressourcen des aktuellen Preload-Aufrufs. Werden alle Ressourcen erfolgreich geladen oder im Cache gefunden, wird das Promise erfüllt. Schlägt eine Ressource fehl oder überschreitet ihr Zeitlimit, wird das Promise abgelehnt. Das Fehlerobjekt enthält dann die Ressourcenergebnisse dieses Preload-Aufrufs.
+
+Wenn dich nur das Endergebnis interessiert, kannst du direkt `await` oder `.then/.catch` verwenden:
+
+```ts
+import { preloadRemote } from '@module-federation/enhanced/runtime';
+
+try {
+  await preloadRemote([
+    {
+      nameOrAlias: 'sub1',
+      exposes: ['add'],
+      resourceCategory: 'all',
+    },
+  ]);
+
+  console.log('sub1/add preload success');
+} catch (error) {
+  console.error('sub1/add preload failed', error);
+}
+```
+
+Wenn du nachvollziehen möchtest, welche Ressourcen erfolgreich waren, fehlgeschlagen sind, ihr Zeitlimit überschritten haben oder aus dem Cache kamen, lies `results` aus dem Fehlerobjekt:
+
+```ts
+type PreloadRemoteError = Error & {
+  results?: Array<{
+    id: string;
+    results: Array<{
+      url: string;
+      status: 'success' | 'error' | 'timeout' | 'cached';
+      resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+      error?: unknown;
+    }>;
+  }>;
+};
+
+preloadRemote([
+  {
+    nameOrAlias: 'sub1',
+    exposes: ['add'],
+    resourceCategory: 'all',
+  },
+]).catch((error: PreloadRemoteError) => {
+  const failedResources =
+    error.results
+      ?.flatMap((remoteResult) =>
+        remoteResult.results.map((resource) => ({
+          id: remoteResult.id,
+          ...resource,
+        })),
+      )
+      .filter(
+        (resource) =>
+          resource.status === 'error' || resource.status === 'timeout',
+      ) ?? [];
+
+  failedResources.forEach((resource) => {
+    console.error(
+      `[preloadRemote] ${resource.id} ${resource.resourceType} failed`,
+      resource.url,
+      resource.error,
+    );
+  });
+});
+```
+
+Wenn `exposes` nicht angegeben ist, lautet die Ressourcen-ID dieses Preloads `remoteName/*`. Wenn `exposes` angegeben ist, erzeugt die Runtime Ressourcen pro Expose mit der Ressourcen-ID `remoteName/expose`.
+
+Standardmäßig erfasst die Runtime jede JS- und CSS-URL vor dem Beginn des Preloads. Spätere Preload-Versuche für dieselbe bereits geladene oder gerade ladende URL werden übersprungen und als `cached` gemeldet. Diese URL-Erfassung ändert den bestehenden Lifecycle des erzeugten Link- oder Script-Elements nicht. Es werden bis zu 2.000 URLs gespeichert; bei Überschreiten des Limits wird die älteste entfernt. Mit `recordPreloadedAssets: false` deaktivierst du sowohl die URL-Suche als auch die Erfassung für einen Preload-Vorgang.
+
+<Tabs>
+  <Tab label="Mit Build-Plugin">
+  ```tsx
+  import { registerRemotes, preloadRemote } from '@module-federation/enhanced/runtime';
+
+  registerRemotes([
+    {
+      name: 'sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    },
+    {
+      name: 'sub2',
+      entry: 'http://localhost:2002/mf-manifest.json',
+    },
+    {
+      name: 'sub3',
+      entry: 'http://localhost:2003/mf-manifest.json',
+    },
+  ]);
+
+  // preload sub1 module
+  // filter the resource information that carries ignore in the resource name
+  // only preload sub-dependent sub1-button module
+  preloadRemote([
+    {
+      nameOrAlias: 'sub1',
+      filter(assetUrl) {
+        return assetUrl.indexOf('ignore') === -1;
+      },
+      depsRemote: [{ nameOrAlias: 'sub1-button' }],
+    },
+  ]);
+
+  // preload sub2 module
+  // preload all exposes under sub2
+  // preload synchronous and asynchronous resources of sub2
+  preloadRemote([
+    {
+      nameOrAlias: 'sub2',
+      resourceCategory: 'all',
+    },
+  ]);
+
+  // preload add expose of sub3 module
+  preloadRemote([
+    {
+      nameOrAlias: 'sub3',
+      resourceCategory: 'all',
+      exposes: ['add'],
+    },
+  ]);
+  ```
+  </Tab>
+  <Tab label="Nur Runtime (ohne Build-Plugin)">
+  ```ts
+  import { createInstance } from '@module-federation/enhanced/runtime';
+
+  const mf = createInstance({
+    name: 'mf_host',
+    remotes: [],
+  });
+
+  mf.registerRemotes([
+    {
+      name: 'sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    },
+    {
+      name: 'sub2',
+      entry: 'http://localhost:2002/mf-manifest.json',
+    },
+    {
+      name: 'sub3',
+      entry: 'http://localhost:2003/mf-manifest.json',
+    },
+  ]);
+
+  // preload sub1 module
+  // filter the resource information that carries ignore in the resource name
+  // only preload sub-dependent sub1-button module
+  mf.preloadRemote([
+    {
+      nameOrAlias: 'sub1',
+      filter(assetUrl) {
+        return assetUrl.indexOf('ignore') === -1;
+      },
+      depsRemote: [{ nameOrAlias: 'sub1-button' }],
+    },
+  ]);
+
+  // preload sub2 module
+  // preload all exposes under sub2
+  // preload synchronous and asynchronous resources of sub2
+  mf.preloadRemote([
+    {
+      nameOrAlias: 'sub2',
+      resourceCategory: 'all',
+    },
+  ]);
+
+  // preload add expose of sub3 module
+  mf.preloadRemote([
+    {
+      nameOrAlias: 'sub3',
+      resourceCategory: 'all',
+      exposes: ['add'],
+    },
+  ]);
+  ```
+  </Tab>
+</Tabs>

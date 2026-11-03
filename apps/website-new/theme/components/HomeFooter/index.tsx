@@ -18,7 +18,7 @@ function useFooterData() {
       ],
     },
     {
-      title: 'Configuration',
+      title: t('Configuration'),
       items: [
         {
           title: t('Configuration'),
@@ -69,6 +69,7 @@ function useFooterData() {
 
 export function HomeFooter() {
   const footerData = useFooterData();
+  const isGerman = useLang() === 'de';
   return (
     <footer className="flex flex-col border-t dark:border-dark-50 items-center">
       <div className="pt-8 pb-4 w-full justify-around max-w-6xl hidden sm:flex">
@@ -89,8 +90,10 @@ export function HomeFooter() {
       </div>
       <div className="flex justify-center items-center">
         <h2 className="font-normal text-sm text-gray-600 dark:text-light-600 py-4">
-          © {new Date().getFullYear()} Module Federation core team. All Rights
-          Reserved.
+          © {new Date().getFullYear()}{' '}
+          {isGerman
+            ? 'Module Federation Core-Team. Alle Rechte vorbehalten.'
+            : 'Module Federation core team. All Rights Reserved.'}
         </h2>
       </div>
     </footer>

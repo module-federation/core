@@ -1,0 +1,149 @@
+---
+pageType: doc-wide
+sidebar: false
+---
+
+# Skills {#skills}
+
+Module Federation bietet einen einheitlichen **Skill `mf`**.
+
+Du musst weder aus einer langen Liste einzelner Skills wählen noch zuerst die Doku lesen und sie anschließend für deinen Agenten aufbereiten. Installiere diesen einen Skill und lass den Agenten entscheiden, ob er Doku lesen, Konfiguration prüfen oder ein Problem untersuchen soll.
+
+Wenn ein Problem nur in der laufenden Seite auftritt, nutzt der Skill die Divebell MF Extension, um strukturierte Daten zu Remotes, Shared-Abhängigkeiten, Bridge und Modul-Performance zu erfassen. Der Browser dient als Einstieg und löst den Ladevorgang aus. Divebell wird auf dem Rechner des Agenten installiert, nicht in der Anwendung.
+
+Falls du ihn noch nicht gelesen hast, beginne mit dem [KI-Schnellstart](/ai/index.html).
+
+## Installation {#installation}
+
+```bash
+npx skills add module-federation/agent-skills --skill mf -y
+```
+
+Danach verwendest du diesen Einstieg:
+
+```text
+/mf <sub-command or question>
+```
+
+Wenn du die CLI nicht verwenden kannst, kannst du das Verzeichnis auch manuell von GitHub kopieren:
+
+```text
+https://github.com/module-federation/agent-skills/tree/main/skills/mf
+```
+
+## Verwendung {#how-to-use-it}
+
+`mf` hat einen einzigen Einstiegspunkt mit mehreren Funktionen. Du kannst einen Unterbefehl angeben oder deine Frage in natürlicher Sprache stellen.
+
+Mit Unterbefehlen:
+
+```text
+/mf docs How do I use Module Federation in Modern.js?
+/mf integrate
+/mf type-check
+/mf runtime-error RUNTIME-008
+/mf observability
+```
+
+In natürlicher Sprache:
+
+```text
+/mf What's the difference between singleton and requiredVersion in shared?
+/mf Help me figure out why this project is not pulling remote types
+/mf Add Module Federation to the current project
+/mf I saw a Module Federation console error with traceId mf-...
+```
+
+## Funktionen von `mf` {#what-mf-supports}
+
+| Unterbefehl | Verwendungszweck |
+|---|---|
+| `docs` | Aktuelle Doku lesen und anschließend Fragen zu Konfiguration, APIs und Konzepten beantworten |
+| `context` | MF-Konfiguration des aktuellen Projekts prüfen |
+| `module-info` | URLs von Remote-Modulen, bereitgestellte Module und zugehörige Metadaten untersuchen |
+| `integrate` | Module Federation in ein bestehendes Projekt integrieren |
+| `type-check` | Typbezogene Probleme untersuchen |
+| `shared-deps` | Konflikte bei Shared-Abhängigkeiten und doppeltes Bündeln untersuchen |
+| `perf` | Langsame lokale Entwicklung und langsames HMR untersuchen |
+| `config-check` | Konfigurationsfehler, fehlende Dateien und nicht zueinander passende Plugins untersuchen |
+| `bridge-check` | Probleme bei der Bridge-Integration untersuchen |
+| `runtime-error` | Konkrete Runtime-Fehlercodes untersuchen, insbesondere `RUNTIME-001` und `RUNTIME-008` |
+| `observability` | MF-Runtime-Fehler, Ladeketten und Performance-Engpässe mit Divebell untersuchen oder Observability-Berichte lesen |
+
+## Häufige Arbeitsabläufe {#the-most-common-workflows}
+
+### 1. Vor der Antwort die Doku lesen {#1-read-the-docs-before-answering}
+
+Das ist der häufigste Anwendungsfall und ein guter Einstieg:
+
+```text
+/mf docs What's the difference between singleton and requiredVersion in shared?
+```
+
+Damit liest der Agent zuerst die aktuelle Doku, statt sich auf veraltetes Wissen zu verlassen.
+
+### 2. Die Integration vom Agenten durchführen lassen {#2-let-the-agent-integrate-it-for-you}
+
+Wenn du Module Federation in ein bestehendes Projekt integrieren möchtest:
+
+```text
+/mf integrate
+```
+
+Der Agent untersucht dein aktuelles Projekt und entscheidet über die nächsten Schritte.
+
+### 3. Probleme direkt untersuchen lassen {#3-let-the-agent-troubleshoot-directly}
+
+Wenn du bereits ein konkretes Problem hast:
+
+```text
+/mf type-check
+/mf shared-deps
+/mf config-check
+/mf runtime-error RUNTIME-008
+/mf observability
+```
+
+Der Agent kann damit direkt mit der Diagnose beginnen, ohne dass du zuerst selbst recherchieren musst.
+
+### 4. Eine laufende MF-Seite debuggen lassen {#4-let-the-agent-debug-a-live-mf-page}
+
+Gib dem Skill für eine einmalige Untersuchung die Ziel-URL und die Schritte in der Anwendung:
+
+```text
+/mf observability
+Open https://example.com with Divebell, reproduce the failing checkout flow,
+and inspect the Remote and Shared loading chain.
+```
+
+Der Skill ermittelt die installierten Skills für die Divebell CLI und die MF Extension, öffnet die Seite mit `divebell open <url> --mf` und wählt den kleinsten passenden `divebell mf`-Befehl. Seiteninteraktionen lösen nur den betreffenden asynchronen Ladevorgang aus. Schlussfolgerungen sollen auf strukturierten Daten zu Remotes, Shared-Abhängigkeiten, Bridge oder Modul-Performance beruhen.
+
+Unter [Runtime-Probleme untersuchen](/guide/debug/divebell.html) findest du die Installationsbefehle, eine Befehlsübersicht, den Remote-Proxy-Workflow und die Grenzen der erfassten Daten.
+
+### 5. Gespeicherte Observability-Berichte lesen lassen {#5-let-the-agent-read-retained-observability}
+
+Installiere das [Observability-Plugin](/plugin/plugins/observability-plugin.html) in deiner App, wenn du Berichte kontinuierlich erfassen, aus der Produktion hochladen oder mit Node/SSR schreiben möchtest. Gibt ein Fehler in der Browserkonsole eine `traceId` und einen Befehl unter `read:` aus, übergib dem Skill die zugängliche Berichtsquelle:
+
+```text
+/mf observability
+I saw this Module Federation console error:
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+Please read the report and fix the issue.
+```
+
+Für Node, SSR oder Uploads aus der Produktion:
+
+```text
+/mf observability
+Read .mf/observability/latest.json and explain the likely owner and fix.
+```
+
+## Das Wichtigste für den Einstieg {#the-one-thing-you-really-need-to-remember}
+
+Du musst die Doku nicht zuerst selbst lesen und dem Agenten anschließend erklären, was er tun soll.
+
+Installiere `mf` und lass den Agenten lesen, prüfen, entscheiden und handeln.

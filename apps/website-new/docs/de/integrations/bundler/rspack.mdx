@@ -1,0 +1,46 @@
+# Rspack {#rspack}
+
+- Erstellt Module gemäß den Ladespezifikationen von <code>{props.brandName || props.name || 'Module Federation'}</code>.
+- Lädt Module gemäß den Spezifikationen von <code>{props.brandName || props.name || 'Module Federation'}</code> über Aliase.
+- Konfiguriert Shared-Abhängigkeiten: Ist die passende Abhängigkeit bereits im Host verfügbar, wird sie nicht erneut geladen.
+- Lädt Remote-Typen automatisch herunter und verwendet sie, sofern das Modul welche bereitstellt.
+- Unterstützt Hot Updates für geladene Remote-Module.
+
+{props.tip}
+
+## Schnellstart {#quick-start}
+
+### Installation {#installation}
+
+Installiere das Plugin mit einem dieser Befehle:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: `npm add ${props.rspackPackage || props.pkgName || '@module-federation/enhanced'}`,
+    yarn: `yarn add ${props.rspackPackage || props.pkgName || '@module-federation/enhanced'}`,
+    pnpm: `pnpm add ${props.rspackPackage || props.pkgName || '@module-federation/enhanced'}`,
+    bun: `bun add ${props.rspackPackage || props.pkgName || '@module-federation/enhanced'}`,
+  }}
+/>
+
+### {props.configName || 'module-federation.config.ts'} erstellen {#create}
+
+Erstelle die Datei {props.configName || 'module-federation.config.ts'} mit folgendem Inhalt:
+
+import CreateConfig from '@docs/_snippets/rspack/create-config';
+
+{props.createConfig || <CreateConfig />}
+
+### Plugin registrieren {#register-plugin}
+
+In `Rspack` fügst du Plugins über die Option `plugins` hinzu:
+
+import RegisterPlugin from '@docs/_snippets/rspack/register-plugin';
+
+{props.registerPlugin || <RegisterPlugin />}
+
+## Konfiguration {#configuration}
+
+Alle Optionen sind in der [Konfigurationsübersicht](/configure/index.html) ausführlich beschrieben.

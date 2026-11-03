@@ -1,0 +1,155 @@
+---
+title: "Einen Monolithen erweitern"
+---
+
+# Angular-Anwendungen mit Module Federation erweitern: Schritt-für-Schritt-Anleitung {#extending-angular-apps-with-module-federation-a-step-step-guide}
+
+Willkommen zum zweiten Teil unserer Reihe über die Erweiterung von Angular-Anwendungen mit Module Federation (MF). Diese Anleitung zeigt, wie du MF in eine bestehende gewöhnliche Angular-Anwendung integrierst.
+
+## Unsere Werkzeuge verstehen: @angular-architects/module-federation {#understanding-our-tools-angular-architectsmodule-federation}
+
+Angular CLI unterstützt standardmäßig keine eigenen Webpack-Konfigurationen. Deshalb ersetzen wir den Angular-CLI-Builder durch einen angepassten Builder. Damit lässt sich die Webpack-Konfigurationsdatei erweitern, was für Funktionen wie Module Federation erforderlich ist.
+
+Diese Anleitung verwendet den angepassten Builder aus der Bibliothek `@angular-architects/module-federation`. Mit entsprechenden Kenntnissen kannst du ihn durch einen anderen Builder ersetzen. Wie eigene Webpack-Konfigurationen mit Angular-CLI-Buildern funktionieren, beschreibt DigitalOcean im Artikel [How To Use Custom webpack Configurations with Angular CLI Builders](https://www.digitalocean.com/community/tutorials/angular-custom-webpack-config). Er enthält Erklärungen und praktische Schritte, um deinen Angular-Build über die Standardkonfiguration hinaus anzupassen.
+
+### Funktionen der Bibliothek {#library-functions}
+
+- **Build-Konfiguration aktualisieren**: Ermöglicht die Erweiterung der Webpack-Konfigurationsdatei.
+- **Anwendungen ausliefern**: Ermöglicht den eigenständigen Betrieb von Anwendungen, sowohl direkt im Browser als auch als Microfrontend.
+
+## Hauptanwendung einrichten {#setting-up-main-app}
+
+### Mit Schematics initialisieren {#initialization-with-schematics}
+
+Führe im Stammverzeichnis deines Projekts folgenden Befehl aus:
+
+```bash
+ng add @angular-architects/module-federation --project app-micro --type dynamic-host --port 4200
+```
+
+Dieser Befehl konfiguriert dein Hauptprojekt für Module Federation, aktualisiert die Angular-CLI-Konfiguration, erstellt ein Manifest zum Laden von Remote-Entries und organisiert den Bootstrap-Prozess neu.
+
+### Konflikte mit Schematics behandeln {#handling-schematic-conflicts}
+
+Einige Angular-Schematics wie `@angular/pwa` und `@angular/material` erwarten das Bootstrapping in `main.ts`. Wenn du sie verwenden möchtest, schalte den Bootstrap-Prozess vorübergehend um:
+
+```bash
+ng g @angular-architects/module-federation:boot-async false --project [YOUR_MAIN_PROJECT]
+ng add [YOUR_LIBRARIES_OF_CHOICE] --project yourProject
+ng g @angular-architects/module-federation:boot-async true --project [YOUR_MAIN_PROJECT]
+```
+
+### Manifest-Datei aktualisieren {#updating-the-manifest-file}
+
+Nach den Änderungen durch das Schematic musst du das Manifest (`mf.manifest.json`) und die Routing-Konfiguration (`app-routing.module.ts`) anpassen, damit deine Angular-Anwendung korrekt funktioniert.
+
+Die Standardkonfiguration in `mf.manifest.json` verweist auf eine Datei an Port `4200`. Dieser Port wird jedoch üblicherweise von der Hauptanwendung verwendet.
+
+Passe deshalb den Port der zweiten Anwendung an, um Konflikte zu vermeiden. Verwende zum Beispiel 4201. Die Datei `mf.manifest.json` sollte dann so aussehen:
+
+```json
+{
+  "login": "http://localhost:4201/remoteEntry.js"
+}
+```
+
+Damit laufen Haupt- und Nebenanwendung auf getrennten Ports. Sie können unabhängig betrieben und zugleich integriert werden.
+
+- *Vereinfachtes Beispiel:* In dieser Anleitung ist die Manifest-Konfiguration zur Vereinfachung statisch in einer JSON-Datei definiert.
+
+- *Dynamische Konfiguration in Produktion:* Für reale Anwendungen wird empfohlen, die Manifest-Konfiguration dynamisch auszuliefern. Dafür kannst du:
+
+   - Die statische JSON-Datei durch eine Produktionsversion ersetzen.
+   - Einen Server-Endpunkt einrichten, der die Manifest-Konfiguration zurückgibt.
+
+:::details HINWEIS
+     Wenn du das Manifest dynamisch auslieferst, aktualisiere in main.ts die URL, mit der initFederation die Manifest-Daten abruft. Ohne Internetverbindung wird die Anwendung bei dieser Konfiguration nicht geladen. Mit einer statischen Konfiguration kannst du Verbindungsfehler dagegen behandeln, besonders wenn die Anwendung bereits gecacht wurde.
+:::
+
+4. **Manifest in das Routing integrieren**:
+
+   *Manifest-Datei anpassen:*
+
+   - Passe bei Bedarf wie zuvor beschrieben den Port in mf.manifest.json an.
+
+   *Anwendungsrouting (`app-routing.module.ts)` aktualisieren:*
+
+   - Entferne den bisherigen Importcode, zum Beispiel `import('@@login')`.
+   - Ersetze ihn durch einen Aufruf von `loadRemoteModule` aus dem `@angular-architects/module-federation module`.
+   - Konfiguriere `loadRemoteModule` mit folgendem Objekt:
+
+```json
+{
+  "type": "manifest",
+  "remoteName": "login",
+  "exposedModule": "./Module",
+}
+```
+
+   - `type`: Typ der Remote-Konfiguration, hier `'manifest'`.
+   - `remoteName`: Name des Moduls, wie im Manifest angegeben.
+   - `exposedModule`: Pfad zum Modul in der Nebenanwendung.
+
+   Das Ergebnis sollte dem folgenden Beispiel entsprechen:
+
+```typescript
+const routes: Routes = [
+  ...
+  {
+    path: '',
+    canMatch: [isNotLogged],
+    loadChildren: () =>
+      loadRemoteModule({ type: 'manifest', remoteName: 'login', exposedModule: './Module' }).then(
+        (m) => m.LoginModule,
+      ),
+  },
+  ...
+];
+```
+
+Die Hauptanwendung ist jetzt so konfiguriert, dass sie andere Anwendungen remote laden kann. Als Nächstes richten wir die Nebenanwendungen dafür ein.
+
+## Remote-Anwendungen einrichten {#setting-up-remote-apps}
+
+Beim Konfigurieren der Nebenanwendungen werden ähnlich wie bei der Hauptanwendung mehrere Projektbestandteile aktualisiert. Dabei entsteht jedoch keine Manifest-Datei. Stattdessen wird `webpack.config.js` angepasst und erhält mehr Angaben als die Konfiguration der Hauptanwendung.
+
+```bash
+ng add @angular-architects/module-federation --project login --type remote --port 4201
+```
+
+:::tip
+ Statt `--type dynamic-host` verwenden wir hier `--type remote`.
+:::
+
+### 'exposes' verstehen {#understanding-exposes}
+
+- *Aufgabe von 'exposes':* Die Eigenschaft exposes in `webpack.config.js` enthält eine Objektkonfiguration, deren Schlüssel-Wert-Paare Routen ähneln. Sie legt fest, welche Module dem Loader bereitgestellt werden.
+- *Verbindung zu 'exposedModule':* Diese Eigenschaft bezieht sich auf exposedModule aus der vorherigen Routenkonfiguration und bezeichnet den konkreten Modulpfad, der geladen werden soll.
+
+### Webpack-Konfiguration anpassen {#adjustments-in-webpack-configuration}
+
+*Abweichende Konfiguration erkennen:* Das Routing versucht derzeit, ein Modul namens './Module' zu laden. Dieses ist in der vorhandenen Webpack-Konfiguration jedoch nicht angegeben.
+
+Passe zur Behebung `webpack.config.js` an:
+
+- Entferne den vorhandenen Schlüssel './Component'.
+- Ergänze den Schlüssel './Module' und verweise auf den korrekten Pfad zum Anwendungsmodul, zum Beispiel:
+
+```javascript
+exposes: {
+  './Module': './projects/login/src/app/feature/login/login.module.ts',
+},
+```
+
+Damit stellen die Nebenanwendungen die benötigten Module korrekt bereit und erfüllen die Anforderungen der Hauptanwendung an das Remote-Laden.
+
+## Anwendungen testen und starten {#testing-and-running-the-applications}
+
+- **Hauptanwendung starten**: `ng serve`
+- **Nebenanwendung starten**: `ng serve login`
+- Aktualisiere nach dem Start beider Anwendungen die Hauptanwendung im Browser. Die Nebenanwendung sollte nun korrekt darin geladen werden.
+- Unter `localhost:4201` kannst du die Login-Anwendung außerdem eigenständig im Browser aufrufen.
+
+## Build-Konfiguration optimieren {#optimizing-build-configuration}
+
+Derzeit verwenden wir `shareAll` aus `@angular-architects/module-federation/webpack`. Ein gezielterer Ansatz teilt mit der Funktion `share` nur tatsächlich benötigte Abhängigkeiten. Das verbessert die Performance und Ressourcennutzung der Anwendung.

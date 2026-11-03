@@ -47,6 +47,12 @@ export default defineConfig({
       description: 'Arquitectura de micro-frontends para tu aplicación web',
       label: 'Español',
     },
+    {
+      lang: 'de',
+      title: 'Module federation',
+      description: 'Micro-Frontend-Architektur für deine Webanwendung',
+      label: 'Deutsch',
+    },
   ],
   logo: {
     light: '/module-federation.svg',

@@ -1,0 +1,64 @@
+# React Bridge im Überblick {#react-bridge-overview}
+
+`@module-federation/bridge-react` ist eine speziell für React-Anwendungen entwickelte Microfrontend-Lösung. Mit Framework-übergreifendem Rendering und abgestimmtem Routing kannst du React-Anwendungen oder Module als eigenständige Anwendungen exportieren und laden.
+
+## Zentrale Funktionen {#core-features}
+
+### Grundlagen {#basic-capabilities}
+
+- **🚀 Module auf Anwendungsebene exportieren**: Kapsle mit `createBridgeComponent` vollständige React-Anwendungen als Module, die sich über einen Remote laden lassen
+- **📦 Module auf Anwendungsebene laden**: Binde mit `createRemoteAppComponent` React-Anwendungen aus Remotes in Host-Anwendungen ein
+- **🎯 Lazy Loading auf Komponentenebene**: Lade mit `createLazyComponent` gezielt einzelne Komponenten bei Bedarf
+
+### Funktionen {#features}
+
+- **🔄 Framework-übergreifendes Rendering**: Unterstützt das Rendering über Framework-Grenzen hinweg (React, Vue, Angular usw.)
+- **🛣️ Abgestimmtes Routing**: Übernimmt automatisch die Übergabe von basename und Routing-Kontext für React Router
+- **🔗 Versionskompatibilität**: Unterstützt React 16–19 und berücksichtigt Unterschiede beim Rendering und im Lebenszyklus der Versionen automatisch
+- **⚡ Data Prefetch**: Integrierter Mechanismus zum Vorabladen von Ressourcen und Daten für Anwendungen, Komponenten und Abhängigkeiten
+
+### Warum ist das hilfreich? {#why-this-matters}
+
+- **Schrittweise Upgrades**: Verschiedene Teams können React in ihrem eigenen Tempo aktualisieren
+- **Integration ohne Unterbrechungen**: Neue und bestehende Anwendungen können zusammenarbeiten, ohne dass ihre Upgrades gleichzeitig stattfinden müssen
+- **Technische Schulden im Griff behalten**: Vermeide Integrationsprobleme durch unterschiedliche Versionen
+- **Unabhängige Teams**: Jedes Team kann selbst die passende React-Version wählen
+
+## Die wichtigsten APIs im Überblick {#key-api-overview}
+
+### Producer-API {#producer-api}
+
+`createBridgeComponent`: Kapselt eine React-Anwendung als Bridge-Komponente (Anwendungskomponente), sodass Consumer sie über einen Remote laden können. Wähle den Importpfad passend zur React-Version des Producer-Projekts:
+
+| React-Version | Importpfad |
+| ------------- | ----------- |
+| React 19      | `@module-federation/bridge-react/v19` |
+| React 18      | `@module-federation/bridge-react/v18` |
+| React 16 / 17 | `@module-federation/bridge-react/react` |
+
+:::warning Wichtig
+
+`@module-federation/bridge-react/v18` und `/v19` importieren `createRoot` aus `react-dom/client`.
+
+Wenn du nur `"react-dom"` als Shared-Abhängigkeit konfigurierst, wird `react-dom/client` nicht gemeinsam genutzt. Das kann zu Fehlern durch unterschiedliche React-Versionen führen. Verwende deshalb die Präfixschreibweise mit abschließendem Schrägstrich:
+
+```ts
+shared: {
+  'react-dom/': {
+    singleton: true,
+  },
+}
+```
+
+:::
+
+### Consumer-API {#consumer-api}
+
+| API                        | Beschreibung                                                                                         | Importpfad                              |
+| -------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `createRemoteAppComponent` | Lädt und rendert eine Bridge-Komponente aus einem Remote im Host und übernimmt dabei Rendering-Kontext und Router-Integration | `@module-federation/bridge-react/react` |
+| `lazyLoadComponentPlugin`  | Plugin für Prefetch und Lazy Loading                                                                    | `@module-federation/bridge-react/react` |
+
+### 💡 Beispiele {#-examples}
+
+[Vollständige Beispiele](https://github.com/module-federation/core/tree/main/apps/router-demo) – Vollständiges Microfrontend-Projekt mit mehreren React-Anwendungen

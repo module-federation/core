@@ -1,0 +1,210 @@
+# Daten abrufen {#data-fetching}
+
+Remote-Module sollen ihren Datenabruf meist selbst übernehmen: Der Consumer kümmert sich nur um das Laden und Rendern. Er muss weder die Datenabhängigkeiten des Remotes kennen noch dieselbe Abruflogik in jedem Consumer erneut implementieren.
+
+Bei CSR kann ein Remote die Anfrage einfach in `useEffect` innerhalb der Komponente auslösen. Bei SSR läuft `useEffect` jedoch nicht auf dem Server. Damit lassen sich dort vor dem Rendern keine Daten abrufen.
+
+Verbreitete SSR-Frameworks wie Next.js, Remix und Modern.js bieten normalerweise das Vorladen von Daten auf Routenebene: Sobald eine Route passt, läuft zunächst eine Ladefunktion. Ihre Daten werden anschließend in die zugehörige Routenkomponente übergeben. Dieser Mechanismus hängt aber vom Router des jeweiligen Frameworks ab. Module, die {props.name || 'Module Federation'} bereitstellt, gehören nicht zum Routenbaum des Hosts. Deshalb lässt er sich hier nicht direkt wiederverwenden.
+
+Dafür bietet {props.name || 'Module Federation'} Datenabruf auf **Komponentenebene**, mit dem du auch bei SSR Daten abrufen und Komponenten rendern kannst.
+
+:::note Komponentenebene
+
+Module, die über {props.name || 'Module Federation'} bereitgestellt werden, fallen in zwei grobe Kategorien:
+
+- **Komponenten**: Eigenständige UI-Komponenten, Hilfsfunktionen und Ähnliches ohne eigenen Router.
+- **Anwendungen**: Teilanwendungen mit vollständigem Router, die üblicherweise über [Bridge](/guide/bridge/overview.html) bereitgestellt und eingebunden werden.
+
+Diese Seite behandelt die erste Kategorie, also den Datenabruf auf Komponentenebene. Eine ausführliche Umsetzung findest du in der [Demo](https://github.com/module-federation/core/tree/main/apps/modern-component-data-fetch).
+:::
+
+## Verwendung {#how-to-use}
+
+Der Datenabruf unterstützt SSR und CSR. Die folgenden Abschnitte beschreiben Producer und Consumer getrennt:
+
+### Producer {#producer}
+
+import React from 'react';
+import ProviderTip from '@docs/de/_components/data-fetch/provider-tip';
+
+{props.providerTip || React.createElement(ProviderTip)}
+
+#### Dateikonvention für den Datenabruf {#data-fetching-file-convention}
+
+Der Datenabruf folgt einer **Dateikonvention**:
+
+- Zu jedem bereitgestellten Modul kann eine gleichnamige `.data`-Datei gehören.
+- Eine aus einer `.data`-Datei exportierte Funktion heißt **Data Loader**. Das Build-Plugin erkennt diese Konvention.
+- Beim Laden einer bereitgestellten Komponente ruft die Runtime zuerst den **Data Loader** auf, übergibt dessen Daten an die Komponente und rendert sie anschließend.
+
+Beispiel einer Dateistruktur:
+
+```bash
+.
+└── src
+    ├── List.tsx
+    └── List.data.ts
+```
+
+Die Konventionsdatei muss eine Funktion namens `fetchData` exportieren. Diese läuft vor dem Rendern der Remote-Komponente:
+
+```ts title="List.data.ts"
+import type { DataFetchParams } from '@module-federation/bridge-react/data-fetch';
+export type Data = {
+  data: string;
+};
+
+export const fetchData = async (params: DataFetchParams): Promise<Data> => {
+  console.log('params: ', params);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        data: `data: ${new Date()}`,
+      });
+    }, 1000);
+  });
+};
+```
+
+Die Runtime übergibt das zurückgegebene Datenobjekt an die Props der Komponente. Der Standardschlüssel lautet `mfData`:
+
+```tsx title="List.tsx"
+import React from 'react';
+import type { Data } from './index.data';
+
+const List = (props: { mfData?: Data }): JSX.Element => {
+  return (
+    <div>
+      {props.mfData?.data &&
+        props.mfData?.data.map((item, index) => <p key={index}>{item}</p>)}
+    </div>
+  );
+};
+
+export default List;
+```
+
+#### Standardparameter der Loader-Funktion {#default-loader-function-parameters}
+
+Die Loader-Funktion erhält standardmäßig Parameter vom Typ [DataFetchParams](/guide/bridge/react/load-component.html#datafetchparams). Dazu gehört folgendes Feld:
+
+- `isDowngrade`: Gibt an, ob die Ausführung im Fallback-Modus erfolgt. Schlägt beispielsweise das serverseitige Rendern fehl, sendet der Browser eine neue Anfrage an den Server, um die Loader-Funktion aufzurufen. In diesem Fall ist der Wert `true`.
+
+#### Data Loader in verschiedenen Umgebungen verwenden {#using-data-loader-in-different-environments}
+
+Die Loader-Funktion kann auf dem Server oder im Browser laufen. Auf dem Server heißt sie Server Loader, im Browser Client Loader.
+
+In CSR-Anwendungen läuft die Loader-Funktion im Browser. Standardmäßig handelt es sich also um Client Loader.
+
+In SSR-Anwendungen läuft sie ausschließlich auf dem Server. Standardmäßig handelt es sich also um Server Loader. Bei SSR ruft {props.name || 'Module Federation'} die entsprechende Funktion direkt auf dem Server auf. Beim Routenwechsel im Browser sendet {props.name || 'Module Federation'} eine HTTP-Anfrage an den SSR-Dienst, der die Loader-Funktion ebenfalls auf dem Server ausführt.
+
+:::info Vorteile eines ausschließlich serverseitigen SSR-Loaders
+
+- **Einfachere Verwendung**: Der Datenabruf in SSR-Anwendungen bleibt isomorph. Du musst die Ausführung nicht abhängig von der Umgebung unterscheiden.
+- **Kleinere Browser-Bundles**: Logik und ihre Abhängigkeiten werden vom Browser auf den Server verlagert.
+- **Bessere Wartbarkeit**: Serverseitige Datenlogik wirkt sich weniger direkt auf die Frontend-Oberfläche aus. Außerdem gelangen Server-Abhängigkeiten nicht versehentlich ins Browser-Bundle oder umgekehrt.
+
+:::
+
+#### Client Loader in SSR-Anwendungen verwenden {#using-client-loader-in-ssr-applications}
+
+In SSR-Anwendungen läuft die Loader-Funktion standardmäßig nur auf dem Server. In manchen Fällen sollen Browser-Anfragen aber direkt zur Datenquelle gehen, ohne den SSR-Dienst einzubeziehen. Zum Beispiel:
+
+1. Um durch direkte Anfragen an die Datenquelle den Netzwerkaufwand im Browser zu reduzieren.
+2. Wenn die Anwendung einen Daten-Cache im Browser hat und keine Daten vom SSR-Dienst anfordern soll.
+
+{props.name || 'Module Federation'} unterstützt dafür eine zusätzliche `.data.client`-Datei in SSR-Anwendungen, die dieselbe benannte Funktion exportiert. Scheitert der serverseitige Data Loader und wird auf einen Fallback zurückgegriffen oder wechselt der Nutzer im Browser die Route, führt die Anwendung diese Funktion wie bei CSR im Browser aus. Eine weitere Datenanfrage an den SSR-Dienst entfällt.
+
+```ts title="List.data.client.ts"
+import cache from 'my-cache';
+
+export async function loader({ params }) {
+  if (cache.has(params.id)) {
+    return cache.get(params.id);
+  }
+  const res = await fetch('URL_ADDRESS?id={params.id}');
+  return {
+    message: res.message,
+  };
+}
+```
+
+:::warning Warnung
+
+Für einen Client Loader muss ein zugehöriger Server Loader vorhanden sein. Dieser muss in einer `.data`-Datei definiert werden.
+
+:::
+
+#### Ein Producer verwendet seine eigenen Anwendungsdaten {#producer-consuming-its-own-application-data}
+
+Ein Producer kann auch als eigenständige Seite aufgerufen werden. Dann muss der Datenabruf in beiden Fällen funktionieren:
+
+- Beim Laden durch einen Consumer werden die Daten über den Data Loader übergeben.
+- Beim direkten Aufruf ruft der Producer die Daten über den Mechanismus seines eigenen Frameworks ab.
+
+Ein Producer mit Modern.js muss beispielsweise sowohl durch einen Consumer geladen als auch direkt als Producer-Seite aufgerufen werden können. Das lässt sich so umsetzen:
+
+- Erstelle eine Datei `page.data.ts` im Seitenverzeichnis des Producers und exportiere eine Funktion namens `loader`:
+
+:::info
+Modern.js erwartet für den [Datenabruf](https://modernjs.dev/guides/basic-features/data/data-fetch.html) eine aus `page.data.ts` exportierte Funktion `loader`.
+:::
+
+```ts title="page.data.ts"
+// Reuse fetchData from List.data.ts as the loader implementation
+import { fetchData } from '../components/List.data';
+import type { Data } from '../components/List.data';
+
+export const loader = fetchData;
+
+export type { Data };
+```
+
+- Verwende die Daten auf der `page` des Producers:
+
+```tsx title="page.tsx"
+import { useLoaderData } from '@modern-js/runtime/router';
+import List from '../components/List';
+import './index.css';
+
+import type { Data } from './page.data';
+
+const Index = () => {
+  const data = useLoaderData() as Data;
+  console.log('page data', data);
+
+  return (
+    <div className="container-box">
+      <List mfData={data} />
+    </div>
+  );
+};
+
+export default Index;
+```
+
+### Consumer {#consumer}
+
+import Consumer from '@docs/de/_components/data-fetch/consumer';
+
+{props.consumer || React.createElement(Consumer)}
+
+#### Eigene Parameter übergeben {#passing-custom-parameters}
+
+Neben der Datenstruktur, die die Runtime standardmäßig übergibt, kann der Consumer eigene Parameter über das Feld `dataFetchParams` von `createLazyComponent` an die Loader-Funktion weiterreichen. Beispiele sind Host-Kontext wie Nutzerkennung, Sprache oder Mandant.
+
+Diese Parameter werden mit den Standardparametern zusammengeführt und an den Loader übergeben.
+
+## FAQ {#faq}
+
+### Datenabruf auf Anwendungsebene? {#application-level-data-fetching}
+
+Für Module auf Anwendungsebene möchten wir RSC (React Server Components) verwenden, um die Funktionalität zu vervollständigen. Diese Möglichkeit wird derzeit untersucht.
+
+### Werden verschachtelte Producer unterstützt? {#is-nested-producer-supported}
+
+Nein, das wird nicht unterstützt.
+
+### Gibt es für Producer weitere Plugins neben Rslib und Modern.js? {#are-there-other-plugins-for-producers-besides-the-rslib-plugin-and-the-modernjs-plugin}
+
+Derzeit können nur die Plugins für Rslib und Modern.js einen Data Loader erstellen.

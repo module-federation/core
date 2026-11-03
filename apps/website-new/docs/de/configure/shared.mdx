@@ -1,0 +1,258 @@
+# shared
+
+Mit `shared` teilst du gemeinsame Abhängigkeiten zwischen Consumern und Producern. Das reduziert die zur Laufzeit heruntergeladene Datenmenge und verbessert die Performance. `shared` legt Regeln fest, nach denen Versionen von Abhängigkeiten wiederverwendet werden. Mehr zu geeigneten Einsatzfällen für `shared` und zur Verwendung von `shared` findest du in den [FAQ](#faq).
+
+- Typ: `PluginSharedOptions`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Der Typ `PluginSharedOptions` ist wie folgt definiert:
+
+```tsx
+type PluginSharedOptions = string[] | SharedObject;
+
+interface SharedObject {
+  [sharedName: string]: SharedConfig;
+}
+
+interface SharedConfig {
+  singleton?: boolean;
+  requiredVersion?: string;
+  eager?: boolean;
+  shareScope?: string;
+  import?: string | false;
+  shareKey?: string;
+  request?: string;
+  allowNodeModulesSuffixMatch?: boolean;
+  treeShaking?: TreeShakingConfig;
+}
+
+interface TreeShakingConfig {
+  mode: 'server-calc' | 'runtime-infer';
+  usedExports?: string[];
+}
+
+```
+
+## Beispiel {#example}
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/host',
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+  //...
+});
+```
+
+## singleton
+
+- Typ: `boolean`
+- Erforderlich: Nein
+- Standardwert: `false`
+
+Legt fest, ob innerhalb eines Share Scopes nur eine Version des Shared-Moduls zulässig ist (Singleton-Modus).
+
+- Bei true ist der Singleton-Modus aktiviert, bei false ist er deaktiviert.
+- Im Singleton-Modus werden die gemeinsamen Abhängigkeiten der Producer-Komponenten und des Consumers nur einmal geladen. Bei unterschiedlichen Versionen wird die höhere Version geladen. Die Seite mit der niedrigeren Version erhält eine Warnung.
+- Ohne Singleton-Modus lädt jede Seite ihre eigenen Abhängigkeiten, wenn Producer und Consumer unterschiedliche Versionen verwenden.
+
+## requiredVersion
+
+- Typ: `string`
+- Erforderlich: Nein
+- Standardwert: `require('project/package.json')[devDeps | dep]['depName']`
+
+Die erforderliche Version, die auch als Versionsbereich angegeben werden kann. Standardmäßig wird die Version der Abhängigkeit in der aktuellen Anwendung verwendet.
+
+- Bei Shared-Abhängigkeiten wird geprüft, ob die Version mindestens `requiredVersion` entspricht. Ist das der Fall, wird sie verwendet. Ist sie niedriger, erscheint eine Warnung in der Konsole und die kleinste verfügbare Version der Shared-Abhängigkeit wird verwendet.
+- Wenn eine Seite `requiredVersion` und die andere `singleton` setzt, wird die Abhängigkeit mit `requiredVersion` geladen. Die Seite mit `singleton` verwendet die Abhängigkeit mit `requiredVersion` direkt, unabhängig davon, welche Version `requiredVersion` angibt.
+
+## eager
+
+:::warning
+Mit `eager` auf true werden Shared-Abhängigkeiten in die Entry-Datei gepackt. Dadurch kann die Entry-Datei deutlich größer werden. Verwende diese Einstellung mit Bedacht.
+:::
+
+- Typ: `boolean`
+- Erforderlich: Nein
+- Standardwert: `false`
+
+Legt fest, ob das Shared-Modul sofort geladen wird.
+
+Normalerweise aktivierst du einen Lazy Entry und lädst Shared-Module anschließend bei Bedarf asynchron. Möchtest du `shared` ohne Lazy Entry verwenden, kannst du `eager` auf true setzen.
+
+## shareScope
+
+- Typ: `string`
+- Erforderlich: Nein
+- Standardwert: `'default'`
+
+Der Name des Share Scopes. Der Standardwert ist `'default'`.
+
+## import
+
+- Typ: `string | false`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Steuert den Importpfad von Shared-Abhängigkeiten. Der Standardwert ist `undefined`.
+
+Bei `false` wird diese Shared-Abhängigkeit nicht in die Ausgabe gepackt. Stattdessen wird ausschließlich das vom Consumer bereitgestellte `shared` verwendet. Stelle deshalb vor dem Setzen sicher, dass der Consumer die entsprechende Shared-Abhängigkeit bereitstellt.
+
+## shareKey
+
+- Typ: `string`
+- Erforderlich: Nein
+- Standardwert: Der Eigenschaftsname (`key`) des `shared`-Eintrags
+
+Der Schlüssel, unter dem zur Laufzeit im Share Scope gesucht wird. Producer und Consumer müssen für ein Shared-Modul **denselben** `shareKey` verwenden, damit die gemeinsame Nutzung ausgehandelt werden kann. Andernfalls bündelt jede Seite ihre eigene Kopie.
+
+Standardmäßig wird der Eigenschaftsname verwendet, sodass du die Option meist nicht setzen musst. Ein typischer Anwendungsfall für eine Anpassung ist die Zuordnung eines Alias zu einem anderen tatsächlichen Paket:
+
+```ts
+shared: {
+  'my-alias': {
+    import: 'react',      // actual package to resolve
+    shareKey: 'react',    // negotiate in Share Scope as "react"
+  },
+}
+```
+
+:::warning
+Ohne `shareKey` wird der Eigenschaftsname selbst als Schlüssel verwendet (`"my-alias"` im Beispiel oben). Registriert die andere Seite die Abhängigkeit unter `"react"`, stimmen die Schlüssel niemals überein.
+:::
+
+## request
+
+- Typ: `string`
+- Erforderlich: Nein
+- Standardwert: Der Eigenschaftsname (`key`) des `shared`-Eintrags
+
+Der Modul-Anfragepfad, den der Bundler beim Build abfängt. Enthält der Code einen `import`, der diesem Wert entspricht, ersetzt der Bundler ihn durch einen Consumer des Share Scopes, statt die Abhängigkeit in die Ausgabe zu bündeln.
+
+Standardmäßig wird der Eigenschaftsname verwendet, was für die meisten Fälle ausreicht. Der Unterschied zwischen `request` und `shareKey`:
+
+| Feld | Phase | Beantwortete Frage |
+|---|---|---|
+| `request` | Build · Modulgraph | Welcher `import` wird abgefangen? |
+| `shareKey` | Runtime · Aushandlung | Welcher Eintrag im Share Scope wird verwendet? |
+
+### Präfixabgleich mit abschließendem Schrägstrich {#prefix-matching-with-trailing-slash}
+
+Endet `request` mit `/`, behandelt der Bundler den Wert als **Präfix** und fängt jeden Import eines Unterpfads in diesem Namensraum ab. Der endgültige `shareKey` entsteht, indem das Unterpfad-Suffix an den konfigurierten `shareKey` angehängt wird. Fehlt `shareKey`, wird das Präfix selbst verwendet.
+
+```ts
+shared: {
+  'react-dom/': {
+    request: 'react-dom/',   // intercepts import 'react-dom/client', 'react-dom/server', etc.
+    shareKey: 'react-dom/',  // final shareKey = "react-dom/" + subpath suffix
+  },
+}
+```
+
+Dasselbe Muster funktioniert für Hilfsbibliotheken wie `lodash`:
+
+```ts
+shared: {
+  'lodash/': {
+    request: 'lodash/',    // intercepts import 'lodash/debounce', 'lodash/get', etc.
+    shareKey: 'lodash/',   // final shareKey = "lodash/" + subpath suffix
+  },
+}
+```
+
+Das ist für Pakete erforderlich, die Module über Unterpfade bereitstellen, etwa `react-dom/client`, `lodash/debounce` oder `@scope/package/subpath`. Ohne abschließenden Schrägstrich wird nur der exakte Paketname abgefangen. Unterpfad-Imports werden lokal gebündelt und nehmen nicht an der Aushandlung im Share Scope teil.
+
+:::warning Häufiger Fehler
+`'react-dom'` ohne abschließenden Schrägstrich fängt nur `import 'react-dom'` ab.
+
+Code mit `import { createRoot } from 'react-dom/client'` lädt eine zweite Kopie von React DOM. Das verletzt die Singleton-Anforderungen von React und verursacht Hydration-Fehler. Weitere Informationen findest du in den [FAQ zur Fehlerbehebung](/guide/troubleshooting/runtime.html#subpath-imports-are-not-shared-duplicate-dependency-loaded).
+:::
+
+## allowNodeModulesSuffixMatch
+
+- Typ: `boolean`
+- Erforderlich: Nein
+- Standardwert: `false`
+
+Aktiviert eine Fallback-Suche, die Shared-Module anhand des Pfadanteils nach `node_modules/` abgleicht. Aktiviere diese Option, wenn Consumer und Producer dasselbe Paket über unterschiedliche absolute Pfade auflösen, es aber trotzdem als dasselbe Shared-Modul behandeln sollen. Das kann beispielsweise durch pnpm-Hoisting, Symlinks oder eigene Bundler-Loader nötig sein.
+
+> Früher hieß diese Option `nodeModulesReconstructedLookup`.
+
+## treeShaking
+
+- Typ: `TreeShakingConfig`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Konfiguriert das Tree Shaking für Shared-Abhängigkeiten. Damit lässt sich die Größe des Shared-Bundles reduzieren.
+
+> Für diese Funktion wird Rspack als Bundler empfohlen. Die Dokumentation und Beispiele richten sich vorrangig an die Verwendung mit Rspack.
+
+### usedExports
+
+- Typ: `string[]`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Fügt die verwendeten Exports einer Shared-Abhängigkeit manuell **hinzu**.
+
+### mode
+
+- Typ: `'server-calc' | 'runtime-infer'`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Konfiguriert die Ladestrategie für Shared-Abhängigkeiten, die durch Tree Shaking optimiert wurden.
+
+- `runtime-infer`: Leitet die Auswahl aus `usedExports` des Consumers ab. Decken die `usedExports` des Providers die `usedExports` des Consumers ab, wird `shared` des Providers verwendet. Andernfalls wird das eigene `shared` des Consumers verwendet. Erfüllt keines die Anforderungen, wird auf das vollständige Bundle zurückgegriffen.
+- `server-calc`: Entscheidet anhand des vom Server gelieferten Snapshots, ob die Shared-Abhängigkeit geladen wird.
+
+### filename
+
+- Typ: `string`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Legt den Ausgabedateinamen für das durch Tree Shaking optimierte Shared-Modul fest.
+
+## FAQ
+
+### Wann sind Shared-Abhängigkeiten sinnvoll? {#when-to-use-shared-dependencies}
+
+Beim projektübergreifenden Einbinden von Modulen treten häufig Probleme wie **doppelt geladene Abhängigkeiten** oder **Singleton-Anforderungen** auf. Mit `shared` lassen sie sich lösen.
+
+- Der Consumer verwendet Drittpakete aus den Modulen des Producers an vielen Stellen, beispielsweise `lodash.get`.
+- Die Drittpakete in den Modulen des Producers haben Singleton-Anforderungen, beispielsweise `react`.
+- Die Drittpakete aus den Modulen des Producers werden auch im Consumer verwendet, sind umfangreich und unterstützen kein Tree Shaking, beispielsweise `lodash` ohne bedarfsgesteuerte Imports.
+- Die Drittpakete aus den Modulen des Producers werden auch im Consumer verwendet, sind umfangreich und unterstützen Tree Shaking, aber alle bereitgestellten Module werden genutzt, beispielsweise `antd`.
+
+In diesen Fällen kannst du die entsprechenden Abhängigkeiten zur Konfiguration `shared` hinzufügen.
+
+### Wie verwendest du Shared-Abhängigkeiten? {#how-to-use-shared-dependencies}
+
+{props.brandName || props.name || 'Module Federation'} unterstützt je nach Anwendungsfall zwei Konfigurationsformen für Shared-Abhängigkeiten: Array und Objekt. Das Array eignet sich für die meisten Fälle, das Objekt für komplexere Anpassungen.
+
+**Arrayformat (allgemeiner Anwendungsfall)**
+
+Ergänze die entsprechenden Abhängigkeiten unter `shared` in der Build-Konfiguration von {props.brandName || props.name || 'Module Federation'}, zum Beispiel:
+
+import ArrayShared from '@docs/_snippets/configure/array-shared';
+import React from 'react';
+
+{props.arrayShared || React.createElement(ArrayShared)}
+
+**Objektformat (individuelle Konfiguration)**
+
+Ergänze die Shared-Abhängigkeiten unter `shared` in der Konfiguration von {props.brandName || props.name || 'Module Federation'}. Dabei ist `key` der Name der Abhängigkeit und `value` die jeweilige Konfiguration.
+
+import ObjectShared from '@docs/_snippets/configure/object-shared'
+
+{props.objectShared || React.createElement(ObjectShared)}

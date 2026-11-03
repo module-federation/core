@@ -1,0 +1,101 @@
+# library
+
+`library` konfiguriert das Ausgabeformat der Bibliothek für den Module-Federation-Container und bestimmt damit, wie externe Consumer auf den Container zugreifen.
+
+- Typ: `LibraryOptions`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+```ts
+interface LibraryOptions {
+  type: LibraryType;
+  name?: string | string[] | { amd?: string; commonjs?: string; root?: string | string[] };
+  export?: string | string[];
+  umdNamedDefine?: boolean;
+  amdContainer?: string;
+  auxiliaryComment?: string | {
+    amd?: string;
+    commonjs?: string;
+    commonjs2?: string;
+    root?: string;
+  };
+}
+
+type LibraryType =
+  | 'var' | 'module' | 'assign' | 'assign-properties'
+  | 'this' | 'window' | 'self' | 'global'
+  | 'commonjs' | 'commonjs2' | 'commonjs-module' | 'commonjs-static'
+  | 'amd' | 'amd-require' | 'umd' | 'umd2'
+  | 'jsonp' | 'system' | string;
+```
+
+## type
+
+- Typ: `LibraryType`
+- Erforderlich: Ja
+- Standardwert: -
+
+Legt den Bibliothekstyp der Container-Ausgabe fest. Gängige Werte:
+
+| Wert | Beschreibung |
+|---|---|
+| `'var'` | Zuweisung an eine globale Variable (Standard) |
+| `'module'` | ESM-Ausgabe (erfordert `experiments.outputModule: true`) |
+| `'commonjs2'` | CommonJS über `module.exports` |
+| `'umd'` | Kompatibel mit AMD, CommonJS und globalen Variablen |
+| `'global'` | Anhängen an das `global`-Objekt |
+| `'window'` | Anhängen an das `window`-Objekt |
+| `'self'` | Anhängen an das `self`-Objekt |
+| `'system'` | SystemJS-Modulformat |
+
+## name
+
+- Typ: `string | string[] | LibraryCustomUmdObject`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Der Name der Bibliothek. Beim Typ `umd` kannst du getrennte Namen für amd, commonjs und die globale Variable angeben.
+
+## export
+
+- Typ: `string | string[]`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Legt fest, welcher Export als Bibliothek bereitgestellt wird.
+
+## umdNamedDefine
+
+- Typ: `boolean`
+- Erforderlich: Nein
+- Standardwert: `false`
+
+Legt bei `type` mit dem Wert `'umd'` fest, ob das AMD-Modul einen Namen erhält, der an `define()` übergeben wird.
+
+## amdContainer
+
+- Typ: `string`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Fügt den Funktionen `define`/`require` im AMD-Modul ein Container-Präfix hinzu.
+
+## auxiliaryComment
+
+- Typ: `string | object`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Fügt für jedes Modulformat einen Kommentar im UMD-Wrapper hinzu.
+
+## Beispiel {#example}
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/provider',
+  library: { type: 'var', name: 'provider' },
+  exposes: {
+    './Button': './src/Button',
+  },
+});
+```

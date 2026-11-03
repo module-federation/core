@@ -1,0 +1,50 @@
+# shareScope
+
+`shareScope` legt fest, an welchen Pools für Shared-Abhängigkeiten (Share Scopes) ein Producer teilnimmt. Ein Share Scope ist ein benannter Pool gemeinsam genutzter Abhängigkeiten: Sie werden nur innerhalb desselben Scopes wiederverwendet.
+
+- Typ: `string | string[]`
+- Erforderlich: Nein
+- Standardwert: `'default'`
+
+## Funktionsweise {#what-it-does}
+
+- Steuert, welche Share Scopes ein Producer zur Laufzeit initialisiert.
+- Wirkt zusammen mit `shared[*].shareScope`: Eine Shared-Abhängigkeit nimmt nur an dem Scope teil, dem sie zugewiesen ist.
+- Wirkt zusammen mit `remotes[remote].shareScope`: Der Consumer muss die Scopes, die er wiederverwenden möchte, mit dem Producer abgleichen. Andernfalls werden fehlende Scopes als leer behandelt und können nicht wiederverwendet werden.
+
+## Beispiele {#examples}
+
+### Ein einzelner Scope (Standard) {#single-scope-default}
+
+```ts
+new ModuleFederationPlugin({
+  name: 'app_remote',
+  shareScope: 'default',
+});
+```
+
+### Mehrere Scopes (isolierte Shared-Pools) {#multiple-scopes-isolated-shared-pools}
+
+```ts
+new ModuleFederationPlugin({
+  name: 'app_remote',
+  shareScope: ['default', 'scope1'],
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: false,
+      shareScope: 'default',
+    },
+    '@company/design-system': {
+      singleton: true,
+      requiredVersion: false,
+      shareScope: 'scope1',
+    },
+  },
+});
+```
+
+## Hinweise {#notes}
+
+- `shareScope` gibt an, welche Share Scopes dieses Modul initialisiert. Abhängigkeiten werden dadurch nicht automatisch diesen Scopes zugeordnet. Das steuert `shareScope` des jeweiligen `shared`-Eintrags.
+- Damit Abhängigkeiten tatsächlich über Anwendungsgrenzen hinweg wiederverwendet werden, müssen Producer und Consumer üblicherweise dieselben Scopes verwenden. Siehe [remotes.shareScope](/configure/remotes.html#sharescope).

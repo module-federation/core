@@ -1,0 +1,70 @@
+## Ein sekundäres Shared-Artefakt mit Tree Shaking erzeugen {#producing-a-secondary-tree-shaken-shared-artifact}
+
+:::warning Hinweis
+Wenn du eine Shared-Abhängigkeit für eine einzelne Anwendung durch Tree Shaking optimieren möchtest, reicht [usedExports](/configure/shared.html#usedexports) in der Regel aus.
+
+Dieser Abschnitt beschreibt die Erzeugung eines eigenständigen sekundären Artefakts, das zur Laufzeit bei Bedarf geladen und vom Deployment aus verteilt oder wiederverwendet werden kann.
+:::
+
+Dieser Prozess baut nur Shared-Abhängigkeiten; Remotes haben dabei keine Wirkung. Der ursprüngliche Projekteinstiegspunkt wird beim Build automatisch ignoriert, und ausschließlich Shared-Module werden gebündelt.
+
+### Projekte ohne Modern.js {#non-modernjs-projects}
+
+Verwende `TreeShakingSharedPlugin` in deiner Build-Konfiguration, setze `secondary: true` und verwende deine bestehende `mfConfig` weiter.
+
+import { Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="@module-federation/enhanced">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/enhanced';
+  // import { TreeShakingSharedPlugin } from '@module-federation/enhanced/rspack';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="@module-federation/rsbuild-plugin">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/rsbuild-plugin';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="In Rspack integriert">
+  ```ts
+  import { sharing } from '@rspack/core';
+  const { TreeShakingSharedPlugin } = sharing;
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+</Tab>
+</Tabs>
+
+### Modern.js-Projekte {#modernjs-projects}
+
+Bei `@module-federation/modern-js-v3` aktivierst du `secondarySharedTreeShaking: true` in den Plugin-Optionen, um das sekundäre Artefakt zu erzeugen.
+
+```ts title="modern.config.ts"
+import mfPlugin from '@module-federation/modern-js-v3';
+// ...
+plugins: [
+  mfPlugin({
+    secondarySharedTreeShaking: true,
+  }),
+];
+```

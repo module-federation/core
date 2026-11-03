@@ -1,0 +1,25 @@
+# implementation
+
+- Typ: `string`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Mit `implementation` änderst du die tatsächlich verwendete Runtime-Version des Bundlers. Gib dafür den Pfad zu `@module-federation/runtime-tools` an.
+
+Bei Module Federation übernimmt die Runtime das Laden und Teilen von Remote-Modulen. Standardmäßig verwendet der Bundler eine Runtime-Version, die zu seiner eigenen Version passt. In manchen Fällen brauchst du jedoch eine andere Version oder eine eigene Implementierung.
+
+Mit `implementation` gibst du den Pfad zur gewünschten Runtime-Implementierung an. Das ist beispielsweise hilfreich, wenn du Funktionen einer neueren oder älteren Runtime-Version benötigst, die in der Standardversion des Bundlers fehlen.
+
+So verwendest du eine bestimmte Version von `@module-federation/runtime-tools`, indem du `implementation` in deiner Konfigurationsdatei setzt:
+
+```javascript
+module.exports = {
+  // ...other configurations
+  plugins: [
+    new ModuleFederationPlugin({
+      // ...other Module Federation options
+      implementation: require.resolve('@module-federation/runtime-tools'),
+    }),
+  ],
+};
+```

@@ -1,0 +1,70 @@
+import CommonMfManifestStatsFields from '@docs/de/_components/configure/mf-manifest-stats-common.mdx'
+
+# Manifest-Feldreferenz {#manifest-field-reference}
+
+`mf-manifest.json` wird bei aktivierter Option [manifest](/configure/manifest.html) erzeugt. Es enthält die für die Runtime benötigten Informationen aus `mf-stats.json` in einer stabilen, für Consumer geeigneten Struktur.
+
+## Oberste Ebene {#top-level}
+
+| Feld | Typ | Erforderlich | mf-stats.json | Beschreibung |
+| --- | --- | --- | --- | --- |
+| `id` | `string` | Ja | Ja | Eindeutige Build-Kennung |
+| `name` | `string` | Ja | Ja | Federation-Name |
+| `metaData` | `StatsMetaData` | Ja | Ja | Build- und Remote-Entry-Informationen |
+| `shared` | `ManifestShared[]` | Ja | Ja (ausführlicher) | Shared-Liste (reduzierte Felder) |
+| `remotes` | `ManifestRemote[]` | Ja | Ja (ausführlicher) | Remote-Liste (reduzierte Felder) |
+| `exposes` | `ManifestExpose[]` | Ja | Ja (ausführlicher) | Exposes-Liste (reduzierte Felder) |
+
+:::tip Auswirkungen von disableAssetsAnalyze
+Wenn `disableAssetsAnalyze: true` unter [manifest](/configure/manifest.html) gesetzt ist, enthält `mf-manifest.json` weder `shared` noch `exposes`. In `remotes` entfällt außerdem `assets`.
+:::
+
+## Feldunterschiede zu mf-stats.json {#field-differences-vs-mf-statsjson}
+
+<CommonMfManifestStatsFields />
+
+### shared (ManifestShared und StatsShared) {#shared-manifestshared-vs-statsshared}
+
+`mf-manifest.json` enthält nur die wesentlichen Shared-Felder, die zur Laufzeit benötigt werden.
+
+| Feld | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `id` | Ja | Ja |
+| `name` | Ja | Ja |
+| `version` | Ja | Ja |
+| `singleton` | Ja | Ja |
+| `requiredVersion` | Ja | Ja |
+| `hash` | Ja | Ja |
+| `assets` | Ja | Ja |
+| `deps` | Nein | Ja |
+| `usedIn` | Nein | Ja |
+| `usedExports` | Nein | Ja |
+| `fallback` | Optional | Ja |
+| `fallbackName` | Optional | Ja |
+| `fallbackType` | Optional | Ja |
+
+### remotes (ManifestRemote und StatsRemote) {#remotes-manifestremote-vs-statsremote}
+
+`mf-manifest.json` enthält die Mindestangaben zum Ermitteln und Laden eines Remotes.
+
+| Feld | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `moduleName` | Ja | Ja |
+| `federationContainerName` | Ja | Ja |
+| `alias` | Ja | Ja |
+| `consumingFederationContainerName` | Nein | Ja |
+| `usedIn` | Nein | Ja |
+| `entry` / `version` (eines davon) | Ja | Ja |
+
+### exposes (ManifestExpose und StatsExpose) {#exposes-manifestexpose-vs-statsexpose}
+
+`mf-manifest.json` enthält nur die Felder, die Consumer zur Laufzeit benötigen.
+
+| Feld | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `id` | Ja | Ja |
+| `name` | Ja | Ja |
+| `path` | Ja | Ja |
+| `assets` | Ja | Ja |
+| `file` | Nein | Ja |
+| `requires` | Nein | Ja |

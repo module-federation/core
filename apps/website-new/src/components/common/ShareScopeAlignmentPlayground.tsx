@@ -1,9 +1,23 @@
+import { useLang } from '@rspress/core/runtime';
 import React, { useMemo, useState } from 'react';
 import { NoSSR } from '../NoSSR';
 import type { ShareScopeAlignmentItem } from './computeInitContainerShareScopeAlignment';
 import { computeInitContainerShareScopeAlignment } from './computeInitContainerShareScopeAlignment';
 
 type InputKind = 'unset' | 'string' | 'array';
+
+const GERMAN_MESSAGES: Record<string, string> = {
+  'Host shareScope is an empty array.':
+    'Der shareScope des Hosts ist ein leeres Array.',
+  "Host shareScope is an array with a single item. Prefer a string (e.g. 'default') unless you intentionally need array semantics.":
+    "Der shareScope des Hosts ist ein Array mit einem einzigen Eintrag. Verwende vorzugsweise einen String (z. B. 'default'), sofern du nicht ausdrücklich die Array-Semantik benötigst.",
+  'Remote shareScope is an empty array.':
+    'Der shareScope des Remotes ist ein leeres Array.',
+  "Remote shareScope is an array with a single item. Prefer a string (e.g. 'default') unless you intentionally need array semantics.":
+    "Der shareScope des Remotes ist ein Array mit einem einzigen Eintrag. Verwende vorzugsweise einen String (z. B. 'default'), sofern du nicht ausdrücklich die Array-Semantik benötigst.",
+  'Aligned via the shareScope object passed to remoteEntry.init(...)':
+    'Abgleich über das shareScope-Objekt, das an remoteEntry.init(...) übergeben wird',
+};
 
 function parseStringArray(raw: string): string[] {
   if (!raw.trim()) return [];
@@ -26,6 +40,9 @@ function toShareScopeKey(
 }
 
 export default function ShareScopeAlignmentPlayground() {
+  const isGerman = useLang() === 'de';
+  const localize = (message: string) =>
+    isGerman ? GERMAN_MESSAGES[message] || message : message;
   const [hostKind, setHostKind] = useState<InputKind>('array');
   const [hostRaw, setHostRaw] = useState('default,scope1');
 
@@ -97,19 +114,30 @@ export default function ShareScopeAlignmentPlayground() {
         <div style={rowStyle}>
           <div style={{ flex: '1 1 320px' }}>
             <div style={labelStyle}>
-              HostShareScope (remotes[remote].shareScope)
+              {isGerman ? 'Share Scope des Hosts' : 'HostShareScope'}{' '}
+              (remotes[remote].shareScope)
             </div>
             <div style={rowStyle}>
               <select
+                aria-label={
+                  isGerman
+                    ? 'Typ des Host-Share-Scopes'
+                    : 'Host share scope type'
+                }
                 value={hostKind}
                 onChange={(e) => setHostKind(e.target.value as InputKind)}
                 style={selectStyle}
               >
-                <option value="unset">unset</option>
+                <option value="unset">
+                  {isGerman ? 'nicht gesetzt' : 'unset'}
+                </option>
                 <option value="string">string</option>
                 <option value="array">array</option>
               </select>
               <input
+                aria-label={
+                  isGerman ? 'Host-Share-Scopes' : 'Host share scopes'
+                }
                 value={hostRaw}
                 onChange={(e) => setHostRaw(e.target.value)}
                 placeholder="default,scope1"
@@ -120,18 +148,31 @@ export default function ShareScopeAlignmentPlayground() {
           </div>
 
           <div style={{ flex: '1 1 320px' }}>
-            <div style={labelStyle}>RemoteShareScope (shareScope)</div>
+            <div style={labelStyle}>
+              {isGerman ? 'Share Scope des Remotes' : 'RemoteShareScope'}{' '}
+              (shareScope)
+            </div>
             <div style={rowStyle}>
               <select
+                aria-label={
+                  isGerman
+                    ? 'Typ des Remote-Share-Scopes'
+                    : 'Remote share scope type'
+                }
                 value={remoteKind}
                 onChange={(e) => setRemoteKind(e.target.value as InputKind)}
                 style={selectStyle}
               >
-                <option value="unset">unset</option>
+                <option value="unset">
+                  {isGerman ? 'nicht gesetzt' : 'unset'}
+                </option>
                 <option value="string">string</option>
                 <option value="array">array</option>
               </select>
               <input
+                aria-label={
+                  isGerman ? 'Remote-Share-Scopes' : 'Remote share scopes'
+                }
                 value={remoteRaw}
                 onChange={(e) => setRemoteRaw(e.target.value)}
                 placeholder="default"
@@ -144,18 +185,22 @@ export default function ShareScopeAlignmentPlayground() {
 
         {result.warnings.length > 0 ? (
           <div style={{ marginTop: 12 }}>
-            <div style={blockTitleStyle}>Warnings</div>
+            <div style={blockTitleStyle}>
+              {isGerman ? 'Warnungen' : 'Warnings'}
+            </div>
             <ul style={{ margin: 0, paddingLeft: 18 }}>
               {result.warnings.map((w: string) => (
                 <li key={w} style={{ color: 'var(--rp-c-text-2, #374151)' }}>
-                  {w}
+                  {localize(w)}
                 </li>
               ))}
             </ul>
           </div>
         ) : null}
 
-        <div style={blockTitleStyle}>Alignment (pseudo code)</div>
+        <div style={blockTitleStyle}>
+          {isGerman ? 'Abgleich (Pseudocode)' : 'Alignment (pseudo code)'}
+        </div>
         <pre
           style={{
             margin: 0,
@@ -169,14 +214,19 @@ export default function ShareScopeAlignmentPlayground() {
           {result.alignment.length > 0
             ? result.alignment
                 .map((a: ShareScopeAlignmentItem) => {
-                  if ('note' in a) return `${a.expression}\n${a.note}`;
+                  if ('note' in a)
+                    return `${a.expression}\n${localize(a.note)}`;
                   return a.expression;
                 })
                 .join('\n')
-            : '(no alignment)'}
+            : isGerman
+              ? '(kein Abgleich)'
+              : '(no alignment)'}
         </pre>
 
-        <div style={blockTitleStyle}>Initialized Scopes</div>
+        <div style={blockTitleStyle}>
+          {isGerman ? 'Initialisierte Scopes' : 'Initialized Scopes'}
+        </div>
         <pre
           style={{
             margin: 0,

@@ -1,0 +1,209 @@
+---
+title: "Internationalisierung (i18n)"
+---
+
+# Internationalisierung (i18n) mit Module Federation in React-Microfrontends implementieren {#implementing-internationalization-i18n-with-module-federation-in-react-micro-frontends}
+
+:::tip Beispielprojekt
+Das zugehörige Beispielprojekt findest du hier: [React i18n](https://github.com/module-federation/module-federation-examples/tree/master/i18next-nextjs-react)
+:::
+
+## Überblick {#overview}
+
+In einer Microfrontend-Architektur sollen die einzelnen Anwendungen möglichst unabhängig bleiben. Trotzdem ist die Kommunikation zwischen Anwendungen manchmal erforderlich. Eine häufige Anforderung ist, die Sprachauswahl über alle Microfrontends hinweg abzugleichen: Ändert jemand die Sprache in einer Anwendung, sollen alle eingebundenen Microfrontends diese Einstellung übernehmen. Diese Anleitung zeigt, wie du mit `react-i18next` die Internationalisierung in einer Microfrontend-Architektur mit Module Federation umsetzt.
+
+## Szenario {#scenario}
+
+Wir betrachten zwei Anwendungen: App A als Container-Anwendung und App B als Remote-Anwendung. App B kann eigenständig ausgeführt werden, lässt sich aber auch zur Laufzeit in App A einbetten. Ziel ist es, die Spracheinstellungen zwischen App A und App B abzugleichen, sodass beide Anwendungen ihre lokalisierten Inhalte verwalten und anzeigen können.
+
+## Architektur und Implementierung {#architecture-and-implementation}
+
+### Bundler-Konfiguration erweitern {#extending-bundler-configuration}
+
+Für die Microfrontend-Integration erweitern wir die vorhandene Konfiguration für Webpack/Rspack/Rsbuild und Create React App (CRA) mit dem Module-Federation-Plugin. So kann App B verschiedene Elemente wie Komponenten, Themes oder Hooks für App A oder andere eingebundene Anwendungen bereitstellen, ohne dass ein Eject erforderlich ist.
+
+### Internationalisierung einrichten {#setting-up-internationalization}
+
+Die Implementierung mit `react-i18next` bildet die Grundlage der Übersetzungsfunktion. Zuerst wird eine `i18next`-Instanz konfiguriert und direkt in die Hauptdatei der Anwendung (`App.js`) importiert. Diese Instanz verwaltet Zustand, Ressourcen (Übersetzungen) und Plugins über einen Context Store.
+
+#### Überschreiben von Übersetzungen vermeiden {#addressing-translation-override-challenges}
+
+Wenn jede Anwendung ihre `i18next`-Instanz direkt initialisiert, können Ressourcenkonflikte entstehen und Übersetzungen überschrieben werden. Um das zu vermeiden, erstellen wir getrennte `i18next`-Instanzen für App A und App B. So verwaltet jede Anwendung ihre Übersetzungen unabhängig.
+
+### Schritte zur Implementierung {#implementation-steps}
+
+#### i18next-Instanzen konfigurieren {#configuring-i18next-instances}
+
+Konfiguriere für App A und App B jeweils eine eigene `i18next`-Instanz:
+
+```javascript
+// App A
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import enJSON from './translations/en';
+import uaJSON from './translations/ua';
+
+// Translation resources
+const resources = {
+  en: { translation: enJSON },
+  ua: { translation: uaJSON },
+};
+
+// Initialize i18next instance for App A
+const appAInstance = i18n.createInstance();
+appAInstance.use(initReactI18next).init({
+  resources,
+  lng: 'en', // default language
+  fallbackLng: 'en',
+  interpolation: { escapeValue: false },
+  react: { useSuspense: true },
+});
+
+export default appAInstance;
+
+// Repeat similar setup for App B with a separate instance
+```
+
+#### i18next-Provider einbinden {#integrating-i18next-providers}
+
+Umschließe die Anwendungskomponenten mit `I18nextProvider` und übergib jeweils die passende `i18next`-Instanz, damit der richtige Übersetzungskontext verwendet wird.
+
+```javascript
+// App A Wrapper
+import { I18nextProvider } from 'react-i18next';
+import appAInstance from '../i18n';
+
+const AppAI18nWrapper = ({ children }) => (
+  <I18nextProvider i18n={appAInstance}>{children}</I18nextProvider>
+);
+
+export default AppAI18nWrapper;
+
+// Repeat similar setup for App B
+```
+
+#### Logik für den Sprachwechsel {#language-switching-logic}
+
+Schreibe für App B einen eigenen Hook zum Wechseln der Sprache, zum Beispiel:
+
+```javascript
+import appBInstance from '../i18n';
+
+const useSwitchLanguage = () => {
+  return (languageId) => appBInstance.changeLanguage(languageId);
+};
+
+export default useSwitchLanguage;
+```
+
+Stelle diesen Hook über Module Federation bereit, damit App A oder andere eingebundene Anwendungen ihn nutzen können.
+
+```javascript
+// Module Federation exposes configuration
+exposes: {
+  './hooks/useSwitchAppBLanguage': './src/hooks/useSwitchLanguage',
+},
+```
+
+Implementiere in App A einen Hook, der den Sprachwechsel in allen eingebundenen Microfrontends koordiniert:
+
+```javascript
+import useSwitchAppBLanguage from 'remoteAppB/hooks/useSwitchAppBLanguage';
+import appAInstance from '../i18n';
+
+const useSwitchLanguage = () => {
+  const switchAppBLanguageHook = useSwitchAppBLanguage();
+  //Application A
+  const switchAppALanguage = (languageCode) => appAInstance.changeLanguage(languageCode);
+  //Application B
+  const switchAppBLanguage = (languageCode) => switchAppBLanguageHook(languageCode);
+  //Both Applications
+  const switchAllLanguages = (languageCode) => {
+    switchAppALanguage(languageCode);
+    switchAppBLanguage(languageCode);
+  };
+
+  return { switchAppALanguage, switchAppBLanguage, switchAllLanguages };
+};
+
+export default useSwitchLanguage;
+```
+
+### Oberfläche für den Sprachwechsel {#language-switching-interface}
+
+Implementiere eine UI-Komponente, etwa einen Button, die den Sprachwechsel in allen Anwendungen auslöst:
+
+```javascript
+import { useSwitchLanguage } from 'src/hooks/useSwitchLanguage';
+
+const LanguageSwitcher = () => {
+  const { switchAllLanguages } = useSwitchLanguage();
+  const handleLanguageSwitch = (lng) => () => switchAllLanguages(lng);
+
+  return <button onClick={handleLanguageSwitch("ua")}>Change language to Ukrainian</button>;
+};
+
+export default LanguageSwitcher;
+```
+
+#### Eingebettete Anwendungen berücksichtigen {#handling-integrated-environments}
+
+Um Komponenten für die Sprachauswahl abhängig vom Kontext anzuzeigen, kannst du einen eigenen Hook wie `useIsRemote` verwenden. So lässt sich die Sprachauswahl in App B ausblenden, wenn sie in App A eingebettet ist.
+
+Der Hook `useIsRemote` erkennt, ob die aktuelle Anwendung (z. B. App B) eigenständig ausgeführt wird oder in eine andere Anwendung (z. B. App A) eingebettet ist. Anhand dieser Unterscheidung kannst du Komponenten passend zum Anwendungskontext rendern.
+
+Das folgende vereinfachte Beispiel für den Hook `useIsRemote` prüft eine bestimmte Bedingung, um die Umgebung der Anwendung zu erkennen. In einer tatsächlichen Anwendung könnte diese Bedingung auf URL-Parametern, vorhandenen DOM-Elementen oder einem anderen Merkmal beruhen, das zwischen eingebettetem und eigenständigem Betrieb unterscheidet:
+
+```javascript
+import { useEffect, useState } from 'react';
+
+/**
+ * Determines if the current application is running as a remote (embedded)
+ * or as a standalone application.
+ *
+ * You should adapt the logic based on the specific criteria that apply to your application's
+ * architecture, such as checking for specific URL parameters or the presence
+ * of a particular DOM element that would only exist when embedded.
+ */
+const useIsRemote = () => {
+  const [isRemote, setIsRemote] = useState(false);
+
+  useEffect(() => {
+    // Check for a URL parameter that indicates embedding
+    const searchParams = new URLSearchParams(window.location.search);
+    setIsRemote(searchParams.has('embedded'));
+
+    // Alternatively, check for a global variable or a specific DOM element
+    // setIsRemote(window.parent !== window || document.getElementById('embed-flag') !== null);
+  }, []);
+
+  return isRemote;
+};
+
+export default useIsRemote;
+```
+
+#### Den Hook useIsRemote verwenden {#using-the-useisremote-hook}
+
+Nach der Implementierung kannst du den Hook useIsRemote in deinen Komponenten verwenden, um Elemente abhängig davon zu rendern, ob die Anwendung eigenständig oder eingebettet ausgeführt wird. Hier ein Beispiel, das die Sprachauswahl in App B abhängig vom Kontext anzeigt:
+
+```javascript
+import React from 'react';
+import useIsRemote from './hooks/useIsRemote';
+import LanguageSwitcher from './components/LanguageSwitcher';
+
+const App = () => {
+  const isRemote = useIsRemote();
+
+  return (
+    <div>
+      {/* Only display the LanguageSwitcher if not running as a remote */}
+      {!isRemote && <LanguageSwitcher />}
+    </div>
+  );
+};
+
+export default App;
+```
+
+In diesem Beispiel wird `LanguageSwitcher` nur gerendert, wenn App B nicht in App A eingebettet ist. Grundlage ist der Zustand `isRemote`, den der Hook `useIsRemote` ermittelt. Dadurch erscheinen Komponenten wie die Sprachauswahl nur im passenden Kontext. Das verbessert die Bedienung und wahrt die Unabhängigkeit der Microfrontend-Anwendungen.

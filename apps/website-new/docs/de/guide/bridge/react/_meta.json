@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "getting-started",
+    "label": "Erste Schritte"
+  },
+  {
+    "type": "file",
+    "name": "export-app",
+    "label": "Anwendung exportieren"
+  },
+  {
+    "type": "file",
+    "name": "load-app",
+    "label": "Anwendung laden"
+  },
+  {
+    "type": "file",
+    "name": "load-component",
+    "label": "Komponenten per Lazy Loading laden und vorab abrufen"
+  }
+]

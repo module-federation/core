@@ -1,0 +1,107 @@
+# Plugin-System {#plugin-system}
+
+{props.brandName || props.name || 'Module Federation'} bietet ein schlankes Runtime-Plugin-System, das einen Großteil der Funktionen umsetzt und dir eigene Erweiterungen ermöglicht.
+
+Mit selbst entwickelten Plugins kannst du das Standardverhalten von <code>{props.brandName || props.name || 'Module Federation'}</code> ändern und zusätzliche Funktionen ergänzen, zum Beispiel:
+
+- Kontextinformationen abrufen
+- Lifecycle-Hooks registrieren
+- Konfigurationen von {props.brandName || props.name || 'Module Federation'} ändern
+- …
+
+## Plugins entwickeln {#developing-plugins}
+
+Plugins werden als Funktion nach dem Muster `() => ModuleFederationRuntimePlugin` bereitgestellt.
+
+### Beispiel für ein Plugin {#plugin-example}
+
+```typescript title="custom-runtime-plugin.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const runtimePlugin: () => ModuleFederationRuntimePlugin = function () {
+  return {
+    name: 'my-runtime-plugin',
+    beforeInit(args) {
+      console.log('beforeInit: ', args);
+      return args;
+    },
+    beforeRequest(args) {
+      console.log('beforeRequest: ', args);
+      return args;
+    },
+    afterResolve(args) {
+      console.log('afterResolve', args);
+      return args;
+    },
+    onLoad(args) {
+      console.log('onLoad: ', args);
+      return args;
+    },
+    async loadShare(args) {
+      console.log('loadShare:', args);
+    },
+    async beforeLoadShare(args) {
+      console.log('beforeloadShare:', args);
+      return args;
+    },
+  };
+};
+export default runtimePlugin;
+```
+
+Du kannst Plugins auf eine der beiden folgenden Arten registrieren:
+
+- Registrierung zur Build-Zeit
+
+```typescript title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      // ...
+      runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
+    }),
+  ],
+};
+```
+
+- Registrierung zur Laufzeit
+
+```typescript
+import { registerPlugins } from '@module-federation/enhanced/runtime'
+import runtimePlugin from 'custom-runtime-plugin.ts';
+
+registerPlugins([runtimePlugin()]);
+```
+
+### Aufbau eines Plugins {#plugin-structure}
+
+Funktionsbasierte Plugins können **ein Optionsobjekt entgegennehmen** und **eine Plugin-Instanz zurückgeben**. Ihren internen Zustand verwalten sie über Closures.
+
+Die einzelnen Bestandteile haben folgende Aufgaben:
+
+- Die Eigenschaft `name` legt den Namen des Plugins fest.
+- `fn` steht für die verschiedenen Hooks.
+
+### Namenskonventionen {#naming-conventions}
+
+Für Plugins gelten folgende Namenskonventionen:
+
+- Die Plugin-Funktion heißt `xxx-plugin` und wird als benannter Export bereitgestellt.
+- Die Eigenschaft `name` des Plugins folgt dem Format `xxx-plugin`.
+
+Ein Beispiel:
+
+```typescript
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+const pluginFooBar = (): ModuleFederationRuntimePlugin => ({
+  name: 'xxx-plugin',
+  //...
+});
+
+export default pluginFooBar;
+```
+
+## Einführung in Hooks {#hooks-introduction}
+
+Siehe [Runtime-Hooks](/guide/runtime/runtime-hooks.html).

@@ -1,0 +1,323 @@
+# Daten zwischenspeichern {#data-caching}
+
+Mit `cache` speicherst du Ergebnisse von Datenabrufen oder Berechnungen zwischen. Die Funktion bietet gezielte Kontrolle über die Daten und eignet sich für Client-Side Rendering (CSR) und Server-Side Rendering (SSR).
+
+## Grundlagen {#basic-usage}
+
+```ts
+import { cache } from '@module-federation/bridge-react/data-fetch';
+
+export type Data = {
+  data: string;
+};
+
+export const fetchData = cache(async (): Promise<Data> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        data: `[ provider ] fetched data: ${new Date()}`,
+      });
+    }, 1000);
+  });
+});
+```
+
+### Parameter {#parameters}
+
+- `fetchData`: Die Funktion `fetchData` eines DataLoaders.
+- `options` (optional): Cache-Konfiguration.
+  - `tag`: Kennzeichnung des Caches, über die er ungültig gemacht werden kann.
+  - `maxAge`: Gültigkeitsdauer des Caches in Millisekunden.
+  - `revalidate`: Zeitfenster für die erneute Validierung in Millisekunden, ähnlich wie `stale-while-revalidate` bei HTTP Cache-Control.
+  - `getKey`: Vereinfachte Funktion, die aus den Funktionsargumenten einen Cache-Schlüssel erzeugt.
+  - `onCache`: Callback für Cache-Vorgänge zur eigenen Verarbeitung zwischengespeicherter Daten.
+
+Der Parameter `options` hat folgenden Typ:
+
+```ts
+interface CacheOptions {
+  tag?: string | string[];
+  maxAge?: number;
+  revalidate?: number;
+  getKey?: <Args extends any[]>(...args: Args) => string;
+  onCache?: (info: CacheStatsInfo) => boolean;
+}
+```
+
+### Rückgabewert {#return-value}
+
+`cache` gibt eine neue `fetchData`-Funktion mit Cache-Unterstützung zurück. Mehrfaches Aufrufen dieser Funktion führt nicht zu einer wiederholten Ausführung.
+
+## Gültigkeitsbereich {#scope-of-use}
+
+Die Funktion wird ausschließlich innerhalb eines DataLoaders unterstützt.
+
+## Verwendung im Detail {#detailed-usage}
+
+### `maxAge` {#maxage}
+
+Nach jeder Berechnung speichert das Framework den Zeitpunkt, zu dem die Daten in den Cache geschrieben wurden. Beim nächsten Aufruf prüft es anhand von `maxAge`, ob der Eintrag abgelaufen ist. Falls ja, wird `fn` erneut ausgeführt. Andernfalls werden die zwischengespeicherten Daten zurückgegeben.
+
+```ts
+import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+
+const getDashboardStats = cache(
+  async () => {
+    return await fetchComplexStatistics();
+  },
+  {
+    maxAge: CacheTime.MINUTE * 2,  // Calling this function within 2 minutes will return cached data.
+  }
+);
+```
+
+#### `revalidate` {#revalidate}
+
+`revalidate` legt ein Zeitfenster für die erneute Validierung nach Ablauf des Caches fest. In Kombination mit `maxAge` entspricht das dem Modell `stale-while-revalidate` von HTTP Cache-Control.
+
+Im folgenden Beispiel gibt `getDashboardStats` innerhalb der ersten zwei Minuten zwischengespeicherte Daten zurück. Ist der Cache abgelaufen, aber noch keine drei Minuten alt, erhalten eingehende Anfragen zunächst die alten Daten. Im Hintergrund wird eine neue Anfrage ausgelöst, um den Cache zu aktualisieren.
+
+```ts
+import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+
+const getDashboardStats = cache(
+  async () => {
+    return await fetchComplexStatistics();
+  },
+  {
+    maxAge: CacheTime.MINUTE * 2,
+    revalidate: CacheTime.MINUTE * 1,
+  }
+);
+```
+
+#### `tag` {#tag}
+
+Mit `tag` kennzeichnest du einen Cache durch einen String oder ein Array von Strings. Darüber lässt sich der Cache ungültig machen. Mehrere Cache-Funktionen können denselben Tag verwenden.
+
+```ts
+import { cache, revalidateTag } from '@module-federation/bridge-react/data-fetch';
+
+const getDashboardStats = cache(
+  async () => {
+    return await fetchDashboardStats();
+  },
+  {
+    tag: 'dashboard',
+  }
+);
+
+const getComplexStatistics = cache(
+  async () => {
+    return await fetchComplexStatistics();
+  },
+  {
+    tag: 'dashboard',
+  }
+);
+
+revalidateTag('dashboard-stats'); // This will invalidate the caches for both getDashboardStats and getComplexStatistics.
+```
+
+#### `getKey` {#getkey}
+
+Mit `getKey` passt du die Erzeugung von Cache-Schlüsseln an. Beispielsweise sollen nur einige Funktionsparameter zur Unterscheidung der Cache-Einträge dienen. Die Funktion erhält dieselben Argumente wie die ursprüngliche Funktion und gibt einen String als Cache-Schlüssel zurück:
+
+```ts
+import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+import { fetchUserData } from './api';
+
+const getUser = cache(
+  async (userId, options) => {
+    // Here, options might contain many configurations, but we only want to cache based on userId.
+    return await fetchUserData(userId, options);
+  },
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    // Only use the first parameter (userId) as the cache key.
+    getKey: (userId, options) => userId,
+  }
+);
+
+// The following two calls will share the cache because getKey only uses userId.
+await getUser(123, { language: 'zh' });
+await getUser(123, { language: 'en' }); // Hits the cache, no new request.
+
+// Different userIds will use different caches.
+await getUser(456, { language: 'zh' }); // Does not hit the cache, new request.
+```
+
+Du kannst `getKey` auch mit `generateKey` kombinieren:
+
+:::info
+
+`generateKey` erzeugt auch dann einen konsistenten, eindeutigen Schlüssel, wenn sich die Reihenfolge der Objekteigenschaften ändert. Das sorgt für stabile Cache-Einträge.
+
+:::
+
+```ts
+import { cache, CacheTime, generateKey } from '@module-federation/bridge-react/data-fetch';
+import { fetchUserData } from './api';
+
+const getUser = cache(
+  async (userId, options) => {
+    return await fetchUserData(userId, options);
+  },
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    getKey: (userId, options) => generateKey(userId),
+  }
+);
+```
+
+#### `customKey` {#customkey}
+
+Sowohl `customKey` als auch `getKey` erlauben eigene Cache-Schlüssel. Der Unterschied liegt im **Gültigkeitsbereich**:
+
+- **`getKey`** ersetzt nur den Teil des Schlüssels, der aus den Argumenten entsteht. **Die Funktion selbst bleibt Teil der Schlüsselberechnung.** Zwei verschiedene Funktionen teilen den Cache daher auch dann nicht, wenn ihr `getKey` denselben Wert liefert.
+- **`customKey`** liefert den **gesamten endgültigen Cache-Schlüssel** und ersetzt den Standardschlüssel aus Funktion und Argumenten. Dadurch können **verschiedene Funktionen denselben Cache teilen**.
+
+:::tip Wann welche Option verwenden?
+Wenn du den Schlüssel nur aus bestimmten Argumenten ableiten möchtest, verwende `getKey`. Nutze `customKey` nur für funktionsübergreifend geteilte Caches oder ähnlich fortgeschrittene Fälle.
+:::
+
+`customKey` erhält ein Objekt mit folgenden Eigenschaften und muss einen String oder ein Symbol zurückgeben. Dieser Wert wird direkt als endgültiger Cache-Schlüssel verwendet:
+
+- `params`: Die an die zwischengespeicherte Funktion übergebenen Argumente.
+- `fn`: Die ursprüngliche zwischengespeicherte Funktion.
+- `generatedKey`: Der vom Framework automatisch anhand der Eingabeparameter erzeugte Schlüssel.
+
+Das folgende Beispiel zeigt, wie Funktionen mit `customKey` einen Cache teilen:
+
+```ts
+import { cache } from '@module-federation/bridge-react/data-fetch';
+import { fetchUserData } from './api';
+
+// Different functions, but they can share a cache via customKey.
+const getUserA = cache(
+  fetchUserData,
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    customKey: ({ params }) => {
+      // Return a stable string as the cache key.
+      return `user-${params[0]}`;
+    },
+  }
+);
+
+// Even if the function changes, it will hit the cache as long as customKey returns the same value.
+const getUserB = cache(
+  (...args) => fetchUserData(...args), // New function.
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    customKey: ({ params }) => {
+      // Return the same key as getUserA.
+      return `user-${params[0]}`;
+    },
+  }
+);
+
+// Even though getUserA and getUserB are different functions, because their customKey returns the same value,
+// they will share the cache when called with the same parameters.
+const dataA = await getUserA(1);
+const dataB = await getUserB(1); // This will hit the cache and not make a new request.
+
+// You can also use a Symbol as the cache key (usually for sharing a cache within the same application).
+const USER_CACHE_KEY = Symbol('user-cache');
+const getUserC = cache(
+  fetchUserData,
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    customKey: () => USER_CACHE_KEY,
+  }
+);
+
+// You can also use the generatedKey parameter to modify the default key.
+const getUserD = cache(
+  fetchUserData,
+  {
+    customKey: ({ generatedKey }) => `prefix-${generatedKey}`,
+  }
+);
+```
+
+#### `onCache` {#oncache}
+
+Mit `onCache` kannst du Cache-Statistiken wie Trefferquoten erfassen. Der Callback erhält Informationen zu jedem Cache-Vorgang, darunter Status, Schlüssel, Parameter und Ergebnis. Gib `false` zurück, um einen Cache-Treffer zu verhindern.
+
+```ts
+import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+
+// Track cache statistics.
+const stats = {
+  total: 0,
+  hits: 0,
+  misses: 0,
+  stales: 0,
+  hitRate: () => stats.hits / stats.total
+};
+
+const getUser = cache(
+  fetchUserData,
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    onCache({ status, key, params, result }) {
+      // status can be 'hit', 'miss', or 'stale'.
+      stats.total++;
+
+      if (status === 'hit') {
+        stats.hits++;
+      } else if (status === 'miss') {
+        stats.misses++;
+      } else if (status === 'stale') {
+        stats.stales++;
+      }
+
+      console.log(`Cache ${status === 'hit' ? 'hit' : status === 'miss' ? 'miss' : 'stale'}, key: ${String(key)}`);
+      console.log(`Current hit rate: ${stats.hitRate() * 100}%`);
+    }
+  }
+);
+
+// Example usage:
+await getUser(1); // Cache miss.
+await getUser(1); // Cache hit.
+await getUser(2); // Cache miss.
+```
+
+Der Callback `onCache` erhält ein Objekt mit folgenden Eigenschaften:
+
+- `status`: Status des Cache-Vorgangs:
+  - `hit`: Cache-Treffer. Der zwischengespeicherte Inhalt wird zurückgegeben.
+  - `miss`: Kein Cache-Treffer. Die Funktion wird ausgeführt und das Ergebnis zwischengespeichert.
+  - `stale`: Cache-Treffer mit veralteten Daten. Der Inhalt wird zurückgegeben und im Hintergrund erneut validiert.
+- `key`: Cache-Schlüssel, entweder aus `customKey` oder der Standardberechnung.
+- `params`: Die an die zwischengespeicherte Funktion übergebenen Argumente.
+- `result`: Die Ergebnisdaten aus dem Cache oder der neuen Berechnung.
+
+Der Callback `onCache` wird nur aufgerufen, wenn der Parameter `options` angegeben ist. Bei Verwendung einer Cache-Funktion ohne Optionen wird der Callback `onCache` nicht aufgerufen.
+
+Der Callback `onCache` eignet sich besonders für:
+
+- Das Überwachen der Cache-Performance.
+- Das Berechnen von Trefferquoten.
+- Das Protokollieren von Cache-Vorgängen.
+- Eigene Metriken.
+
+### Speicherung {#storage}
+
+Sowohl auf dem Client als auch auf dem Server liegt der Cache derzeit im Arbeitsspeicher. Die gemeinsame Speichergrenze aller Cache-Funktionen beträgt standardmäßig 1 GB. Sobald diese erreicht ist, entfernt der LRU-Algorithmus (Least Recently Used) die am längsten nicht verwendeten Einträge.
+
+:::info
+Da die von `cache` gespeicherten Inhalte voraussichtlich nicht sehr groß sind, werden sie derzeit standardmäßig im Arbeitsspeicher gehalten.
+:::
+
+Mit `configureCache` kannst du die Speichergrenze festlegen:
+
+```ts
+import { configureCache, CacheSize } from '@module-federation/bridge-react/data-fetch';
+
+configureCache({
+  maxSize: CacheSize.MB * 10, // 10MB
+});
+```

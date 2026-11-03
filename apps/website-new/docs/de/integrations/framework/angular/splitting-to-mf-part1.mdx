@@ -1,0 +1,298 @@
+---
+title: "Einen Monolithen aufteilen"
+---
+import {Steps} from '@theme'
+
+# Eine Angular-Anwendung in Microfrontends aufteilen: Schritt-für-Schritt-Anleitung {#splitting-an-angular-app-into-micro-frontend-applications-a-step-by-step-guide}
+## Einführung in Microfrontends {#introduction-to-micro-frontends}
+
+Microfrontends bieten einen skalierbaren Ansatz für große Anwendungen: Sie teilen sie in kleinere, unabhängige Teile auf. Spezialisierte Teams können diese Teile getrennt entwickeln, testen und bereitstellen. Das steigert die Effizienz und verringert die Komplexität.
+
+### Was ist ein Microfrontend? {#what-is-a-micro-frontend}
+
+Microfrontends übertragen Microservice-Prinzipien auf die Frontend-Entwicklung und zerlegen große Anwendungen in überschaubare Teile. Diese Teile, auch Micro-Apps genannt, können unabhängig entwickelt und häufig über Routing integriert werden. Mehr zu Microfrontends, insbesondere im Zusammenhang mit Module Federation, findest du in unserem [Artikel zu Module Federation](https://test.com).
+
+#### Unterschiedliche Perspektiven {#perspectives}
+
+Nutzer sehen eine einheitliche Anwendung. Entwickler erhalten zugleich flexible Möglichkeiten für Deployment und Auslieferung, einschließlich Module Federation zur Integration der Micro-Apps.
+
+## Technologien für Microfrontends {#micro-frontend-technology-landscape}
+
+Microfrontends erlauben unterschiedliche Frameworks oder Bibliotheken für einzelne Anwendungsteile. Das bietet Flexibilität, bringt aber auch Herausforderungen mit sich, etwa beim Wechsel von Teammitgliedern zwischen Projekten. Werkzeuge wie Single SPA oder frameworkspezifische Lösungen wie Nx für Angular helfen dabei, diese Technologien zu einer zusammenhängenden Anwendung zu verbinden. Ziel ist, jede Micro-App unabhängig zu bauen, zu testen und bereitzustellen und dabei ein einheitliches Nutzungserlebnis zu erhalten.
+
+## Den Wechsel zu Microfrontends angehen {#tackling-the-transition-to-micro-frontends}
+
+### Herausforderungen großer Anwendungen {#the-challenge-of-large-applications}
+
+Große Anwendungen können lange Test- und Build-Zeiten sowie langsame lokale Starts verursachen. Die Aufteilung in kleinere Microfrontends kann diese Probleme deutlich verringern.
+
+Für die Umsetzung von Microfrontends gibt es zahlreiche Ansätze, Anleitungen und Ressourcen. Manche beschreiben den Aufbau von Grund auf. Das eignet sich besonders für neue Projekte, die voraussichtlich stark wachsen werden.
+
+## Eine bestehende Anwendung refaktorieren {#refactoring-an-existing-application}
+
+Diese Anleitung konzentriert sich auf das Refaktorieren einer bestehenden Anwendung, die beispielsweise mit Angular CLI erstellt wurde. Sie wird in gemeinsam genutzte Bibliotheken und einzelne Anwendungen aufgeteilt. Diese Komponenten werden anschließend in die Gesamtanwendung integriert. Das einheitliche Nutzungserlebnis bleibt erhalten, während die Entwicklung effizienter wird.
+
+## Die Ausgangsanwendung für die Microfrontend-Umsetzung prüfen {#reviewing-the-base-application-for-micro-frontend-implementation}
+
+### Versuchsaufbau mit einer Beispielanwendung {#experiment-setup-with-a-sample-application}
+
+Wir verwenden eine Beispielanwendung, um Microfrontends zu untersuchen. Sie ist weder groß noch komplex, enthält aber mehrere Services. Daran lässt sich zeigen, wie diese in jede Micro-App einer Microfrontend-Architektur eingebunden werden können.
+
+#### Anwendungsstruktur {#application-structure}
+
+Die Struktur entspricht weitgehend einem neuen Angular-CLI-Projekt. Zu den zentralen Elementen gehören:
+
+- **Feature-Module**: Bestimmte Funktionen oder Seiten der Anwendung, etwa 'add-user', 'dashboard', 'login' und 'user-list'.
+- **Models**: Datenstrukturen, die die Form der Daten innerhalb der Anwendung festlegen.
+- **Gemeinsam genutzte Services**: Allgemeine Funktionen, die verschiedene Anwendungsteile verwenden, etwa Authentifizierung (`auth`) und Benutzerverwaltung (`users`).
+
+Die Verzeichnisstruktur sieht so aus:
+
+```bash
+- src
+  + features
+    - add-user
+    - dashboard
+    - login
+    - user-list
+  - models
+  + shared
+    - auth
+    - users
+```
+### Refactoring-Strategie {#refactoring-strategy}
+
+Services und Models sollen in Bibliotheken ausgelagert werden, die alle Micro-Apps nutzen können. Die Feature-Module werden hingegen in eigenständige Anwendungen umgewandelt. Das sorgt für Modularität und ermöglicht die unabhängige Entwicklung und Bereitstellung jeder Funktion.
+
+#### Überlegungen zum Routing {#routing-considerations}
+
+Das aktuelle Routing verwendet Lazy Loading, um Performance und Benutzererfahrung zu verbessern. Der folgende Ausschnitt zeigt die Routing-Strategie:
+
+```typescript title="app-routing.module.ts"
+
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { isLogged } from './shared/auth/is-logged.guard';
+import { isNotLogged } from './shared/auth/is-not-logged.guard';
+
+const routes: Routes = [
+  {
+    path: '',
+    canMatch: [isLogged],
+    loadChildren: () =>
+      import('./features/dashboard/dashboard.module').then((m) => m.DashboardModule),
+  },
+  {
+    path: '',
+    canMatch: [isNotLogged],
+    loadChildren: () => import('./features/login/login.module').then((m) => m.LoginModule),
+  },
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}
+```
+
+Dieses Routing-Modul verwendet die Guards `isLogged` und `isNotLogged`, um den Routenzugriff anhand des Anmeldestatus zu steuern. Dynamische Imports laden die Feature-Module verzögert.
+
+### Die Migration zu Microfrontends mit einfachen Schritten beginnen {#starting-with-simple-steps-in-micro-frontend-migration}
+
+#### Vorgehen bei einer komplexen Anwendung {#approach-to-migrating-a-complex-application}
+
+Die Migration einer komplexen Anwendung zu einer Microfrontend-Architektur kann anspruchsvoll sein. Klare Schritte und gegebenenfalls zusätzliche Werkzeuge für die Verwaltung von Abhängigkeiten erleichtern den Prozess.
+
+##### Zuerst: Dateien ohne Abhängigkeiten {#initial-focus-dependency-free-files}
+
+1. **Unabhängige Dateien identifizieren**: Suche zunächst Dateien, die selbst keine Abhängigkeiten besitzen, aber von Services und Feature-Modulen verwendet werden. In unserer Beispielanwendung trifft das auf den Ordner `models` zu. Er enthält anwendungsweit verwendete Models, ist aber von keinen anderen Dateien abhängig.
+
+2. **Neue Bibliothek für diese Dateien erstellen**: Generiere mit Angular CLI eine Bibliothek für diese unabhängigen Dateien:
+
+```bash
+ng generate library models
+```
+
+Dieser Befehl führt Folgendes aus:
+    - Er erstellt einen Ordner `projects`, der die Bibliothek `models` enthält.
+    - Er installiert `ng-packagr` als Abhängigkeit.
+    - Er aktualisiert `angular.json` und `tsconfig.json`, um die neue Bibliothek einzubinden.
+#### Bibliothek anpassen {#customizing-the-library}
+
+- **Pfadzuordnung**: Passe die Pfadzuordnung in `tsconfig.json` an, um mögliche Konflikte mit npm-Modulen zu vermeiden. Als Präfix bietet sich `@@` an, da npm-Modulnamen keine doppelten At-Zeichen enthalten dürfen.
+- **Paketname**: Wenn du die Bibliothek in einer Registry veröffentlichen möchtest, muss der Name in `package.json` deren Anforderungen erfüllen. Andernfalls kannst du einen passenden Namen frei wählen.
+
+#### Models refaktorieren {#refactoring-the-models}
+
+1. **Models verschieben**: Verschiebe den Inhalt des Ordners `models` in die neue Bibliothek. Die generierten Standardkomponenten, -module und -services kannst du entfernen. Lege die Datei mit dem Benutzermodel im Ordner `lib` der Bibliothek ab.
+2. **Öffentliche API aktualisieren**: Passe `public-api.ts` so an, dass die gewünschten Inhalte aus `lib` exportiert werden.
+
+#### Dateien verschieben {#managing-file-movement}
+
+- **Git zum Verschieben verwenden**: Verwende `git mv` statt der Dateifunktionen des Betriebssystems. So kann Git Änderungen besser nachvollziehen.
+
+#### Ordnerstruktur der Bibliothek {#library-folder-structure}
+
+Organisiere die Ordnerstruktur der Bibliothek `models` übersichtlich und leicht zugänglich.
+
+#### Imports aktualisieren {#updating-imports}
+**Importpfade ändern**: Ersetze vorhandene Importpfade durch den neuen Bibliothekspfad, zum Beispiel:
+
+```javascript
+// from
+import { User } from 'src/app/models/user';
+// to
+import { User } from '@@models';
+```
+
+Stelle sicher, dass der Pfad dem Eintrag in `tsconfig.json` entspricht.
+
+#### Bibliothek bauen {#building-the-library}
+
+**Fehler beheben**: Anfangs können Fehler auftreten, weil die Bibliothek noch nicht gebaut wurde. Führe dazu Folgendes aus:
+
+```bash
+ng build models
+```
+
+Dieser Befehl kompiliert die Bibliothek `models`, damit TypeScript `@@models` korrekt referenzieren kann.
+
+#### Über die grundlegende Migration hinaus {#advancing-beyond-basic-migration}
+
+Nachdem unabhängiger Code erfolgreich in Bibliotheken ausgelagert wurde, folgt Code mit Abhängigkeiten, der ebenfalls isoliert werden kann. In unserem Beispiel migrieren wir als Nächstes den Service `auth` samt Guards in eine eigene Bibliothek. Die Schritte entsprechen denen der Bibliothek `models`.
+#### Auth-Bibliothek erstellen {#creating-the-auth-library}
+<Steps>
+### Bibliothek generieren {#generate-the-library}
+Erstelle mit Angular CLI die Bibliothek `auth`:
+
+```bash
+ng generate library auth
+```
+
+### Bibliotheksinhalt refaktorieren: {#refactor-the-library-content}
+Entferne den Standardinhalt aus `lib` und verschiebe den gesamten Inhalt des Ordners `auth` dorthin. Aktualisiere `public-api.ts` entsprechend.
+
+`public-api.ts` sollte etwa so aussehen:
+
+```javascript
+/*
+ * Public API Surface of auth
+ */
+export * from './lib/auth.service';
+export * from './lib/is-logged.guard';
+export * from './lib/is-not-logged.guard';
+```
+
+### Bibliothek bauen {#build-the-library}
+Kompiliere die Bibliothek `auth` mit Angular CLI:
+
+```bash
+ng build auth
+```
+
+### Imports aktualisieren {#update-imports}
+Passe die Imports der Anwendung an, damit sie die neue Bibliothek `auth` verwenden.
+
+</Steps>
+Damit sind Teile deiner Anwendung erfolgreich in Bibliotheken migriert. Die Anwendung funktioniert weiter und kann schneller werden, da Angular nicht immer alles neu bauen muss. Du hast jetzt mehrere Bibliotheken, die isoliert getestet und gebaut werden können. Das eignet sich für größere Anwendungen mit gemeinsam genutzten Komponenten, Services, Pipes und weiteren Elementen.
+
+#### Erweiterte Organisation von Bibliotheken {#advanced-library-organization}
+
+Bei komplexeren Anwendungen kannst du mit den Secondary Entrypoints von ng-packagr gemeinsame Elemente wie Komponenten oder Services gruppieren. Dafür sind zusätzliche Konfigurationsanpassungen erforderlich.
+
+### Die erste Anwendung migrieren {#migrating-the-first-application}
+
+Nachdem wir Bibliotheken paketiert haben, lagern wir nun ein Feature-Modul in eine eigene Anwendung aus.
+
+#### Ein Modul zur Migration auswählen {#choosing-a-module-for-migration}
+
+In unserem Beispiel migrieren wir das Feature-Modul `Login`. Stelle sicher, dass alle gemeinsam genutzten Bestandteile dieses Moduls bereits in den zugehörigen Bibliotheken liegen. Andere Services wie `users` kannst du später migrieren.
+
+#### Login-Anwendung erstellen {#creating-the-login-application}
+
+<Steps>
+
+### Anwendung generieren {#generate-the-application}
+Erstelle mit Angular CLI die Anwendung `login`:
+
+```bash
+ng generate application login --style=scss --routing
+```
+
+Das Flag `--routing` wird für die Navigation innerhalb der Anwendung benötigt.
+
+### Anwendung starten {#serve-the-application}
+Teste die neue Anwendung mit:
+
+```bash
+ng serve login
+```
+
+Falls die Hauptanwendung bereits läuft, musst du gegebenenfalls einen anderen Port verwenden.
+
+</Steps>
+
+### Feature-Modul refaktorieren {#refactoring-the-feature-module}
+
+1. **Feature-Modul verschieben**: Ersetze hier keine Dateien wie bei den Bibliotheken. Erstelle stattdessen in `src` der neuen Anwendung einen Ordner `feature` und verschiebe den Ordner `login` dorthin.
+
+2. **Routing aktualisieren**: Passe `app-routing.module.ts` der Anwendung `login` so an, dass das Modul `Login` an der Root-Route geladen wird.
+
+3. **AppComponent anpassen**: Stelle sicher, dass `app.component.html` der Anwendung `login` ein Tag `<router-outlet></router-outlet>` enthält, damit das Routing funktioniert.
+
+### Styles übernehmen {#addressing-styling}
+
+Die neue Anwendung erscheint zunächst möglicherweise ohne Styles. Kopiere zur Behebung die Datei `styles.scss` aus der Hauptanwendung in die neue Anwendung. Spätere Beiträge behandeln das Teilen von Styles zwischen Anwendungen.
+
+### Ergebnis {#outcome}
+
+Wenn alles korrekt eingerichtet ist, läuft die Anwendung `login` jetzt unabhängig, mit Styles und funktionierender Logik. Damit ist ein wichtiger Schritt zur vollständigen Microfrontend-Architektur geschafft.
+
+## Login-App in die Hauptanwendung integrieren {#integrating-the-login-app-into-the-main-application}
+
+Nachdem `Login` als eigenständige Anwendung eingerichtet ist, wird sie in die Hauptanwendung integriert. Dazu bauen wir `Login` als Bibliothek und importieren sie über die bestehende Lazy-Loading-Funktion im Hauptmodul.
+
+### `angular.json` aktualisieren {#updating-angularjson}
+
+1. **Projektkonfiguration anpassen**: Dupliziere in `angular.json` die Konfiguration einer Bibliothek und platziere sie zur besseren Übersicht unterhalb der Konfiguration von `login`. Benenne den Schlüssel in `login-lib` um und passe Verweise wie `root` und `sourceRoot` auf die Anwendung `login` an.
++
+Passe die aktualisierte Konfiguration an die konkreten Pfade und Einstellungen der Anwendung `login` an.
++
+2. **`ng-package.json` erstellen**: Diese Datei beschreibt für `ng-packagr`, wie die Anwendung paketiert werden soll. Kopiere eine vorhandene `ng-package.json` aus einer anderen Bibliothek in das Stammverzeichnis von `Login`. Setze `dest` auf `"../../dist/login-lib"`, um das Build-Ausgabeverzeichnis festzulegen.
+
+### Öffentliche API festlegen {#establishing-the-public-api}
+
+1. **`public-api.ts` erstellen**: Anders als bei typischen Bibliotheken liegt diese Datei hier unter `src`. Sie soll ausschließlich das Feature-Modul `Login` exportieren:
+```javascript
+// public-api.ts
+export { LoginModule } from './app/feature/login/login.module';
+```
+
+### Bibliothek bauen {#building-the-library-1}
+
+1. **`package.json` vorbereiten**: Kopiere die `package.json` einer anderen Bibliothek in das Stammverzeichnis von `Login` und aktualisiere den Projektnamen.
+2. **Build-Befehl**: Führe den Angular-CLI-Build aus:
+```bash
+ng build login-lib
+```
+
+Dadurch wird das Modul `Login` als Bibliothek kompiliert.
+
+### Bibliothek importieren {#importing-the-library}
+
+1. **`tsconfig.json` aktualisieren**: Ergänze in `tsconfig.json` eine Pfadzuordnung für `login-lib`, die auf `"dist/login-lib"` zeigt. Nur so kann TypeScript die Bibliothek korrekt finden.
+
+2. **Anwendungsrouting anpassen**: Aktualisiere in `app-routing.module.ts` den Lazy-Loading-Pfad auf die neue Bibliothek:
+```javascript
+loadChildren: () => import('@@login').then((m) => m.LoginModule),
+```
+
+### Integrierte Anwendung starten {#running-the-integrated-application}
+
+Mit diesen Änderungen kannst du die Anwendung wie gewohnt starten. Das Modul `Login` ist nun ein separates Projekt und sollte weiterhin korrekt innerhalb der Hauptanwendung funktionieren.
+
+### Weitere Möglichkeiten und Überlegungen {#further-opportunities-and-considerations}
+
+- **Builds automatisieren**: Werkzeuge wie Lerna können Builds und die Verwaltung von Abhängigkeiten automatisieren. Das ist besonders bei mehreren Bibliotheken und Anwendungen hilfreich.
+- **Versionsverwaltung**: Bisher verwendet die Einrichtung keine Versionierung für Bibliotheken. Das kann inkompatible Änderungen erschweren. Für die langfristige Wartung kann eine Versionierungsstrategie sinnvoll sein.

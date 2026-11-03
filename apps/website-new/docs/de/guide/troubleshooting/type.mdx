@@ -1,0 +1,89 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+# Typen {#types}
+
+Typfehler werden in Fehler mit festem Fehlercode und szenarioabhängige Fehler unterteilt.
+
+## Fehler mit festem Fehlercode {#fixed-error-code-errors}
+
+Diese Fehler lassen sich im Code eindeutig erfassen und erhalten jeweils einen festen Fehlercode. Er besteht aus Fehlertyp und Kennung, zum Beispiel `TYPE-001`.
+
+### Liste der Fehlercodes {#error-code-list}
+
+- [TYPE-001](#type-001)
+
+## TYPE-001 {#type-001}
+
+<ErrorCodeTitle code='TYPE-001'/>
+
+### Ursachen {#reasons}
+
+Beim Kompilieren der TypeScript-Typen bereitgestellter Dateien (`exposes`) wird die `tsconfig.json` des aktuellen Projekts verwendet. Fehlende Compiler-Optionen können dazu führen, dass der Typ-Build fehlschlägt.
+
+### Lösungen {#solutions}
+
+1. Entferne die tsconfig.json-Optionen `incremental` und `tsBuildInfoFile` aus dem `cmd`-Befehl.
+2. Führe `cmd` aus der Fehlermeldung im Terminal aus und korrigiere die Datei oder `tsconfig` anhand der Ausgabe.
+
+Wenn du Fehler der TypeScript-Typprüfung ignorieren möchtest, setze [`compilerOptions.noCheck`](https://www.typescriptlang.org/tsconfig/#noCheck) in `tsconfig.json` auf `true`. Dafür benötigst du TS 5.5 oder neuer.
+
+Wenn `cmd` ohne Fehler läuft, die TypeScript-Kompilierung aber weiterhin fehlschlägt, prüfe das Feld `exposes` in `ModuleFederationPlugin`:
+
+```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
+new ModuleFederationPlugin({
+    ...
+    // Make sure both key and value start with "./"
+    exposes: { './Foo': './src/<path-to-file>/Foo.tsx' },
+    ...
+  })
+```
+
+## Szenarioabhängige Fehler {#scenario-related-errors}
+
+Diese Fehler hängen vom konkreten Anwendungsfall ab und haben keinen festen Fehlercode. Fehlermeldung und Vorgehen unterscheiden sich je nach Situation.
+
+### Erzeugte Typen enthalten Aliase {#generated-type-contains-aliases}
+
+**Fehlerbild**
+
+Die vom Producer erzeugten Typen enthalten Aliase und können im Consumer nicht korrekt verarbeitet werden.
+
+**Lösung**
+
+1. Installiere [typescript-transform-paths](https://www.npmjs.com/package/typescript-transform-paths) und [ts-patch](https://www.npmjs.com/package/ts-patch).
+2. Aktiviere `typescript-transform-paths` in `tsconfig.json`:
+
+```diff
+{
+"compilerOptions": {
++ "plugins": [
++ { "transform": "typescript-transform-paths" },
++ {
++ "transform": "typescript-transform-paths",
++ "afterDeclarations": true
++ }
++ ],
+},
+}
+```
+
+3. Setze [dts.generateTypes.compilerInstance](/configure/dts.html#compilerinstance) auf `tspc`, die CLI von `ts-patch`.
+4. Erzeuge die Typen erneut.
+
+### Erzeugte Typen werden hinter einem lokalen Proxy nicht aktualisiert {#generated-types-not-updating-when-working-behind-a-local-proxy}
+
+**Fehlerbild**
+
+Der Producer erzeugt die Typen erfolgreich, und laut Consumer-Log werden sie verarbeitet. Das Verzeichnis `@mf-types` aktualisiert sich jedoch nicht.
+Eine Proxy-Konfiguration kann den Download der Ressource verhindern.
+
+**Lösung**
+
+1. Prüfe, ob das Verzeichnis `@mf-types` im Verzeichnis `dist` des Producers erzeugt wird.
+2. Prüfe das Proxy-Log auf Fehler zu `TLS` oder `SSL`.
+3. Passe die Proxy-Konfiguration an, um `TLS`-Zertifikate für die lokale Umgebung einzubinden.
+4. Falls das in deinem Szenario nicht funktioniert, kannst du alternativ die Umgebungsvariable `NODE_TLS_REJECT_UNAUTHORIZED=0` setzen. Dadurch werden `TLS`- oder `SSL`-Fehler ignoriert und `@mf-types.zip` kann verarbeitet werden.
+
+:::danger Wichtiger Hinweis
+Setze NODE_TLS_REJECT_UNAUTHORIZED=0 ausschließlich in deiner lokalen Entwicklungsumgebung, niemals im Produktivbetrieb. Wenn du diesen Weg wählst, nimm die erzeugten Typen in dein Repository auf.
+:::
