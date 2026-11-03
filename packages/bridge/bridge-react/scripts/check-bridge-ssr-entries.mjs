@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { spawnSync } from 'node:child_process';
 import { PassThrough } from 'node:stream';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -11,7 +12,32 @@ const { renderToPipeableStream } = require('react-dom/server');
 const directory = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const marker = '<template id="host-shell"></template>';
 
-for (const mode of ['require', 'import']) {
+// Test each native loader in its own process, without another format warming
+// imports or hiding a declaration/runtime format mismatch.
+const modes = process.argv[2] === '--native-probe' ? [process.argv[3]] : [];
+if (!modes.length) {
+  for (const mode of ['require', 'import']) {
+    const result = spawnSync(
+      process.execPath,
+      [fileURLToPath(import.meta.url), '--native-probe', mode],
+      {
+        encoding: 'utf8',
+        timeout: 15000,
+      },
+    );
+    if (result.stderr) process.stderr.write(result.stderr);
+    assert.equal(
+      result.status,
+      0,
+      result.error?.message || result.stdout || result.stderr,
+    );
+    assert(
+      !result.stderr.includes('MODULE_TYPELESS_PACKAGE_JSON'),
+      `${mode} reparsed its native entry`,
+    );
+  }
+}
+for (const mode of modes) {
   const load = (name) => (mode === 'require' ? require(name) : import(name));
   const { createReactRemote } = await load(
     '@module-federation/bridge-react/base',
@@ -22,6 +48,17 @@ for (const mode of ['require', 'import']) {
   const { createBridgeSSRController } = await load(
     '@module-federation/bridge-react/ssr-node',
   );
+  const { createBridgeComponent } = await load(
+    '@module-federation/bridge-react/server',
+  );
+  const legacyBase = await load(
+    `@module-federation/bridge-react/dist/base.node.${mode === 'import' ? 'es' : 'cjs'}.js`,
+  );
+  const legacyServer = await load(
+    `@module-federation/bridge-react/dist/server.${mode === 'import' ? 'es' : 'cjs'}.js`,
+  );
+  assert.strictEqual(legacyBase.createReactRemote, createReactRemote);
+  assert.strictEqual(legacyServer.createBridgeComponent, createBridgeComponent);
   const request = createBridgeSSRController({
     request: new Request('https://host.test/inventory/detail/42'),
     shellEndMarker: marker,
@@ -29,18 +66,18 @@ for (const mode of ['require', 'import']) {
     timeoutMs: 1000,
   });
   let renders = 0;
-  const factory = () => ({
-    render() {},
-    destroy() {},
-    async renderStream(info) {
+  const factory = createBridgeComponent({
+    rootComponent: () => null,
+    async renderStream(_app, info) {
       renders++;
       assert.equal(info.basename, '/inventory');
+      const html = `<button>built SSR content 世界 &amp; 🌿</button><script nonce="test">function $RC(a,b){document.getElementById(a)};$RC("${info.identifierPrefix}B:0","${info.identifierPrefix}S:0")</script>`;
       return {
         stream: new ReadableStream({
           start(controller) {
-            controller.enqueue(
-              new TextEncoder().encode('<button>built SSR content</button>'),
-            );
+            // Exercise the bundled public Parser and decoder at byte boundaries.
+            for (const byte of Buffer.from(html))
+              controller.enqueue(Uint8Array.of(byte));
             controller.close();
           },
         }),
@@ -101,18 +138,19 @@ for (const mode of ['require', 'import']) {
   const html = await result;
   assert.deepEqual(errors, []);
   assert.equal(renders, 1, `${mode} entry did not share the SSR context`);
-  assert.match(html, /built SSR content/);
+  assert.match(html, /built SSR content 世界 &amp; 🌿/);
+  assert.match(html, /data-mf-react-transport/);
+  assert.match(html, /function \$MF_[0-9a-f]+_RC/);
+  assert(
+    !html.includes('function $RC('),
+    'Producer completion helper was not isolated',
+  );
   assert.match(html, /"type":"done"/);
 }
 
 // Follow only actual output imports. Node-only SSR libraries must remain outside
 // the browser consumer graph even though they are in the same published package.
-for (const entry of [
-  'base.es.js',
-  'base.cjs.js',
-  'index.es.js',
-  'index.cjs.js',
-]) {
+for (const entry of ['base.mjs', 'base.cjs', 'index.mjs', 'index.cjs']) {
   const seen = new Set();
   const visit = async (file) => {
     if (seen.has(file)) return;

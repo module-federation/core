@@ -453,16 +453,22 @@ function createConsumer<P extends object>(
 }
 
 /** Inject the existing router-aware or router-free Bridge renderer at the entry point. */
-export function createReactRemoteConsumers(
+export function createReactRemoteFactory(
   RemoteApp: React.ComponentType<RemoteAppWrapperProps>,
   useEnvironment: UseRemoteEnvironment,
-): { createReactRemote: CreateReactRemote; ReactRemote: ReactRemoteComponent } {
-  function createReactRemote<P extends object = Record<string, unknown>>(
+): CreateReactRemote {
+  return function createReactRemote<P extends object = Record<string, unknown>>(
     options: CreateReactRemoteOptions,
   ): React.ComponentType<P> {
     return createConsumer<P>(() => options, RemoteApp, useEnvironment);
-  }
-  function ReactRemote<P extends object = Record<string, unknown>>({
+  } as CreateReactRemote;
+}
+
+export function createReactRemoteComponentFactory(
+  RemoteApp: React.ComponentType<RemoteAppWrapperProps>,
+  useEnvironment: UseRemoteEnvironment,
+): ReactRemoteComponent {
+  return function ReactRemote<P extends object = Record<string, unknown>>({
     props,
     ...options
   }: ReactRemoteProps<P>) {
@@ -473,11 +479,7 @@ export function createReactRemoteConsumers(
       [],
     );
     return <Component {...(props as P)} />;
-  }
-  return {
-    createReactRemote: createReactRemote as CreateReactRemote,
-    ReactRemote: ReactRemote as ReactRemoteComponent,
-  };
+  } as ReactRemoteComponent;
 }
 
 export interface RemoteEnvironment {

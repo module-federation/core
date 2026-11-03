@@ -11,16 +11,17 @@ import {
 export type { LazyRemoteComponentInfo };
 
 const createLazyRemoteComponent: LazyRemoteComponentCreator =
-  createLazyRemoteComponentFactory(RemoteApp);
+  /* @__PURE__ */ createLazyRemoteComponentFactory(RemoteApp);
 
 export const createRemoteAppComponent: RemoteAppComponentCreator =
-  createRemoteAppComponentFactory(RemoteApp);
+  /* @__PURE__ */ createRemoteAppComponentFactory(RemoteApp);
 
 /**
  * @deprecated createRemoteComponent is deprecated, please use createRemoteAppComponent instead!
  */
-export const createRemoteComponent = createDeprecatedRemoteComponentFactory(
-  createRemoteAppComponent,
-);
+export const createRemoteComponent =
+  /* @__PURE__ */ createDeprecatedRemoteComponentFactory(
+    createRemoteAppComponent,
+  );
 
 export { createLazyRemoteComponent };

@@ -56,4 +56,4 @@ export function withRouterData(
 ) {
   return createRouterMount(WrappedComponent, useRouteSync);
 }
-export default withRouterData(RemoteAppWrapper);
+export default /* @__PURE__ */ withRouterData(RemoteAppWrapper);
