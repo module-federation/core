@@ -5,8 +5,8 @@ import type {
   BridgeSSRRequest,
   BridgeSSRResult,
 } from '../ssr';
-import { containsShellMarker, htmlFrames } from './frames.server';
-import { isolateReactStreamScripts } from './script-isolation.server';
+import { htmlFrames, type HTMLFrame } from './frames.server';
+import { createReactStreamScriptIsolator } from './script-isolation.server';
 import { channel } from './message-channel.server';
 
 export const BRIDGE_PRODUCER_PROTOCOL =
@@ -93,8 +93,17 @@ export async function normalizeBridgeSSR(
   }
   const send = (message: BridgeSSRMessage) => {
     if (stopped) throw Error('Bridge producer is closed');
+    if (message.type === 'done') {
+      output.push(message, Buffer.byteLength('{"type":"done"}'));
+      return;
+    }
     const text = JSON.stringify(message);
-    const serialized = JSON.parse(text) as BridgeSSRMessage;
+    // HTML is already an owned immutable string. Data must still be captured
+    // now, including toJSON, undefined-field validation and mutation isolation.
+    const serialized =
+      message.type === 'html'
+        ? message
+        : (JSON.parse(text) as BridgeSSRMessage);
     const required =
       message.type === 'ready' || message.type === 'data'
         ? 'snapshot'
@@ -126,7 +135,15 @@ export async function normalizeBridgeSSR(
       source = Readable.fromWeb(
         raw.stream as Parameters<typeof Readable.fromWeb>[0],
       );
-      framed = htmlFrames({ maxFrameBytes });
+      framed = htmlFrames({
+        maxFrameBytes,
+        includeMetadata: true,
+        shellMarker: hydration?.shellMarker,
+      });
+      const isolate = createReactStreamScriptIsolator(
+        info.identifierPrefix,
+        info.identifierPrefix,
+      );
       source.on('error', (reason) => framed?.destroy(reason));
       // Install error handlers even when cancellation races the first read.
       framed.on('error', () => {});
@@ -134,20 +151,12 @@ export async function normalizeBridgeSSR(
       if (!hydration) startUpdates(false);
       let ready = false;
       for await (const piece of framed) {
-        const html = String(piece);
+        const { html, scripts, hasShellMarker } = piece as HTMLFrame;
         send({
           type: 'html',
-          html: isolateReactStreamScripts(
-            html,
-            info.identifierPrefix,
-            info.identifierPrefix,
-          ),
+          html: isolate(html, scripts),
         });
-        if (
-          hydration &&
-          !ready &&
-          containsShellMarker(html, hydration.shellMarker)
-        ) {
+        if (hydration && !ready && hasShellMarker) {
           ready = true;
           readyTask = (async () => {
             const initial = await wait(hydration.snapshot);
