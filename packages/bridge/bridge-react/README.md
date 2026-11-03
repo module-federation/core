@@ -530,6 +530,30 @@ loading placeholder for client preparation. It also avoids a Bridge SSR task.
 
 ### Framework and version boundaries
 
+Streaming SSR and its corresponding hydration require **React and React DOM
+18 or newer**. Node Host and producer adapters require **Node.js 20 or newer**
+(including Web Streams, Fetch/Request, AbortSignal, and Node/Web stream interop).
+The Host must use a Suspense-capable streaming renderer and pass the same
+`identifierPrefix` when hydrating. Modern consumers call `useId` directly;
+missing required APIs are errors, not a request to fall back to CSR.
+
+Pure CSR retains the package's **React/React DOM >=16.9.0** peer range. The
+browser consumer selects its legacy CSR adapter once for React 16/17; changing
+`noSSR`, props, or Context does not change that Hook selection. The package-wide
+peer range describes CSR compatibility, not SSR or hydration support.
+
+To check a particular runtime without replacing workspace peers, install matching
+`react`, `react-dom`, and `jsdom@20.0.3` in a disposable directory, build this
+package, then run (under Node 20+):
+
+```sh
+pnpm --filter @module-federation/bridge-react exec node scripts/check-react-runtime-contract.mjs /path/to/fixture
+```
+
+The check exercises pure CSR on React 16/17 or streaming SSR plus DOM-preserving
+hydration on React 18/19, then verifies props updates retain component state.
+It is a focused runtime check, not full framework integration acceptance.
+
 Modern's initial integration validation uses React **19.3.1**. Core's generic
 stream engine, provider callbacks, and DOM hydration tests also run with React
 **18.3.1**, but that does not establish equivalent Modern SSR support.
