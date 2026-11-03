@@ -12,7 +12,7 @@ import { bridgeStreamBootstrap } from './bootstrap';
 import { hostPieces } from './host-stream';
 import { bridgeIdentifierPrefix } from './identity.server';
 import { normalizeBridgeSSR } from './producer.server';
-import { isolateReactStreamScripts } from './script-isolation.server';
+import { createReactStreamScriptIsolator } from './script-isolation.server';
 import {
   escapeHTMLAttribute,
   serializeBridgeFrame,
@@ -221,6 +221,10 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
       const closed = new AbortController();
       const pieces = hostPieces(options.shellEndMarker);
       const namespace = `host-${randomUUID()}`;
+      const isolate = createReactStreamScriptIsolator(
+        namespace,
+        options.identifierPrefix,
+      );
       let releaseShell!: () => void;
       const shellReady = new Promise<void>((resolve) => {
         releaseShell = resolve;
@@ -313,13 +317,7 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
       input.pipe(pieces);
       void (async () => {
         for await (const piece of pieces) {
-          await write(
-            isolateReactStreamScripts(
-              String(piece),
-              namespace,
-              options.identifierPrefix,
-            ),
-          );
+          await write(isolate(String(piece)));
           releaseShell();
         }
         // The Host may finish before a reserved loader resolves. Continue serving

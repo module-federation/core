@@ -590,3 +590,39 @@ both JSON measurements with the Markdown report. The JSON records source SHAs,
 lockfile hashes, tool versions, build settings, resolved modules and external
 imports. Git retains the inputs needed to rebuild each revision, while report
 artifacts are retained according to the repository's Actions retention policy.
+
+## Maintainer SSR stream benchmarks
+
+Build each revision independently with Node 24 and the frozen pnpm lockfile.
+Then use Node 20 to run the same head benchmark against both built directories:
+
+```sh
+node packages/bridge/bridge-react/scripts/benchmark-ssr-stream.mjs --runs 15 --compare-dist /path/to/base/packages/bridge/bridge-react/dist --output stream-performance.json
+```
+
+Each sample uses a fresh production Node process without application warmup.
+Paired runs alternate baseline/head order. The report includes raw samples,
+medians, p95, runtime/toolchain provenance and artifact hashes. It measures the
+SSR controller import, first Host and remote HTML, full response, CPU, heap,
+RSS and process peak RSS. Request times start after the controller import;
+`importAndResponseMs` includes it. Process spawn time is excluded and the OS file
+cache is not purged. Both variants must use the same peer versions and fixtures.
+Entries resolve from each package's Node/import exports, including `.mjs`/`.cjs`
+layouts. For saved standalone builds, use `--dist` with `--entry` and, when
+comparing, `--compare-dist` with `--compare-entry` (absolute entry-file paths).
+
+Fixtures cover 1/10/100 instances, large fragments, single-code-point-sized
+Unicode chunks, a slow reader and deferred hydration data. They use a real React
+Host with generated remote HTML and Fizz instructions; they do not measure
+network loading, business loaders or browser hydration. Correctness tests cover
+cancellation, deadlines, late registration, late containers, independent
+hydration and failure recovery separately. Keep runtime warnings in the logs.
+React 18.3.1's upstream rendering limitation described above still applies.
+
+Producer framing now supplies script offsets and shell-marker information to
+the instruction adapter in the same HTML scan. Entity-encoded marker IDs retain
+the previous decoding semantics by parsing only that exceptional opening tag.
+Pending-byte counters and search cursors avoid repeatedly scanning accumulated
+chunks. Script namespaces are stream-local, and ordered substitutions join the
+source once. HTML messages skip the redundant JSON parse; snapshot/update JSON
+capture, exact serialized-byte budgets and script escaping remain intact.

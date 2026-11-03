@@ -153,6 +153,81 @@ describe('producer-owned stream preparation', () => {
     reader.releaseLock();
   });
 
+  it('preserves JSON capture semantics for snapshots, toJSON, and unsupported values', async () => {
+    for (const progressive of [false, true]) {
+      const live = setup(progressive);
+      let calls = 0;
+      const value = {
+        count: 1,
+        toJSON(key: string) {
+          calls++;
+          return { key, count: this.count, omitted: undefined, nonfinite: NaN };
+        },
+      };
+      const result = await normalizeBridgeSSR(live.raw, live.info);
+      const reader = result.messages.getReader();
+      live.html.controller.enqueue(
+        Buffer.from('<template id="b-shell"></template>'),
+      );
+      live.html.controller.close();
+      await reader.read();
+      (progressive ? live.initial : live.final).resolve(value);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      value.count = 2;
+      expect((await reader.read()).value).toEqual({
+        type: progressive ? 'ready' : 'data',
+        snapshot: { key: 'snapshot', count: 1, nonfinite: null },
+      });
+      expect(calls).toBe(1);
+      await reader.cancel();
+      reader.releaseLock();
+    }
+    const cycle: Record<string, unknown> = {};
+    cycle.self = cycle;
+    for (const value of [
+      undefined,
+      () => {},
+      cycle,
+      {
+        toJSON() {
+          return undefined;
+        },
+      },
+    ]) {
+      const live = setup(false);
+      const result = await normalizeBridgeSSR(live.raw, live.info);
+      const reader = result.messages.getReader();
+      live.html.controller.enqueue(Buffer.from('<p>complete</p>'));
+      live.html.controller.close();
+      await reader.read();
+      live.final.resolve(value);
+      await expect(reader.read()).rejects.toThrow();
+      expect(live.aborted).toHaveLength(1);
+      reader.releaseLock();
+    }
+  });
+
+  it('keeps the exact serialized HTML budget including escapes', async () => {
+    const html =
+      '<section><p title="quoted">中🌿\n</p><script>window.x="<value>"</script></section>';
+    const bytes = Buffer.byteLength(JSON.stringify({ type: 'html', html }));
+    for (const limit of [bytes - 1, bytes]) {
+      const live = setup(false);
+      const result = await normalizeBridgeSSR(live.raw, live.info, {
+        maxBufferedBytes: limit,
+      });
+      const reader = result.messages.getReader();
+      live.html.controller.enqueue(Buffer.from(html));
+      if (limit < bytes)
+        await expect(reader.read()).rejects.toThrow('pending buffer');
+      else {
+        expect((await reader.read()).value).toEqual({ type: 'html', html });
+        await reader.cancel();
+      }
+      reader.releaseLock();
+    }
+  });
+
   it('rejects malformed or oversized HTML at the producer and cancels its streams', async () => {
     for (const html of ['<div>unfinished', `<p>${'x'.repeat(100)}</p>`]) {
       const live = setup(false);

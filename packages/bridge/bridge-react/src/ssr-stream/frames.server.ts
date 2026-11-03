@@ -19,13 +19,35 @@ const VOID_ELEMENTS = new Set([
   'wbr',
 ]);
 
+export type HTMLScript = {
+  start: number;
+  end: number;
+  executable: boolean;
+};
+
+export type HTMLFrame = {
+  html: string;
+  scripts: HTMLScript[];
+  hasShellMarker: boolean;
+};
+
 /** Preserve original markup; each output is a complete top-level HTML fragment. */
 export function htmlFrames({
   maxFrameBytes = 2 * 1024 * 1024,
+  includeMetadata = false,
+  shellMarker,
+}: {
+  maxFrameBytes?: number;
+  includeMetadata?: boolean;
+  shellMarker?: string;
 } = {}): Transform {
   const decoder = new StringDecoder('utf8');
   let buffer = '';
+  let bufferBytes = 0;
   let base = 0;
+  let scripts: HTMLScript[] = [];
+  let script: { start: number; executable: boolean } | undefined;
+  let hasShellMarker = false;
   const stack: string[] = [];
   let ending = false;
   let output: Transform;
@@ -33,16 +55,46 @@ export function htmlFrames({
     const count = end - base;
     if (count <= 0) return;
     const html = buffer.slice(0, count);
-    if (Buffer.byteLength(html) > maxFrameBytes)
-      throw Error('HTML frame exceeds limit');
+    const bytes = Buffer.byteLength(html);
+    if (bytes > maxFrameBytes) throw Error('HTML frame exceeds limit');
     buffer = buffer.slice(count);
+    bufferBytes -= bytes;
+    const frame: HTMLFrame = { html, scripts, hasShellMarker };
+    scripts = [];
+    hasShellMarker = false;
     base = end;
-    output.push(html);
+    output.push(includeMetadata ? frame : html);
   };
   const parser = new Parser(
     {
-      onopentag(name) {
+      onopentag(name, attributes) {
         if (stack.length === 0) emit(parser.startIndex);
+        if (includeMetadata) {
+          if (name === 'script') {
+            script = {
+              start: parser.endIndex + 1 - base,
+              executable:
+                !attributes.src &&
+                (!attributes.type ||
+                  attributes.type === 'text/javascript' ||
+                  attributes.type === 'application/javascript'),
+            };
+          }
+          if (shellMarker && name === 'template' && attributes.id) {
+            // Framing/script attributes remain raw. Decode an entity-bearing
+            // marker attribute with the same parser semantics as before, only
+            // for this exceptional opening tag (never reparse the whole frame).
+            hasShellMarker ||= attributes.id.includes('&')
+              ? containsShellMarker(
+                  buffer.slice(
+                    parser.startIndex - base,
+                    parser.endIndex + 1 - base,
+                  ),
+                  shellMarker,
+                )
+              : attributes.id === shellMarker;
+          }
+        }
         stack.push(name);
       },
       onclosetag(name, implied) {
@@ -52,6 +104,10 @@ export function htmlFrames({
           throw Error('HTML requires implicit tag repair');
         }
         if (stack.pop() !== name) throw Error('Unbalanced HTML fragment');
+        if (name === 'script' && script) {
+          scripts.push({ ...script, end: parser.startIndex - base });
+          script = undefined;
+        }
         if (stack.length === 0) emit(parser.endIndex + 1);
       },
       oncomment() {
@@ -66,8 +122,9 @@ export function htmlFrames({
       try {
         const text = decoder.write(chunk);
         buffer += text;
+        bufferBytes += Buffer.byteLength(text);
         parser.write(text);
-        if (Buffer.byteLength(buffer) > maxFrameBytes)
+        if (bufferBytes > maxFrameBytes)
           throw Error('HTML frame exceeds limit');
         callback();
       } catch (error) {
@@ -78,6 +135,7 @@ export function htmlFrames({
       try {
         const tail = decoder.end();
         buffer += tail;
+        bufferBytes += Buffer.byteLength(tail);
         parser.write(tail);
         ending = true;
         parser.end();
@@ -101,20 +159,27 @@ export async function* readFrames(
   const reader = stream.getReader();
   const decoder = new TextDecoder('utf-8', { fatal: true });
   let buffer = '';
+  let bufferBytes = 0;
+  let searchFrom = 0;
   try {
     while (true) {
       const next = await reader.read();
       if (next.done) break;
-      buffer += decoder.decode(next.value, { stream: true });
+      const text = decoder.decode(next.value, { stream: true });
+      buffer += text;
+      bufferBytes += Buffer.byteLength(text);
       let index: number;
-      while ((index = buffer.indexOf('\n')) >= 0) {
+      while ((index = buffer.indexOf('\n', searchFrom)) >= 0) {
         const line = buffer.slice(0, index);
         buffer = buffer.slice(index + 1);
-        if (Buffer.byteLength(line) > maxFrameBytes)
-          throw Error('Protocol frame exceeds limit');
+        const bytes = Buffer.byteLength(line);
+        bufferBytes -= bytes + 1;
+        searchFrom = 0;
+        if (bytes > maxFrameBytes) throw Error('Protocol frame exceeds limit');
         if (line) yield JSON.parse(line);
       }
-      if (Buffer.byteLength(buffer) > maxFrameBytes)
+      searchFrom = buffer.length;
+      if (bufferBytes > maxFrameBytes)
         throw Error('Protocol frame exceeds limit');
     }
     buffer += decoder.decode();
