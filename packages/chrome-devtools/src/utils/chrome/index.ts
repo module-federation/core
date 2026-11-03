@@ -55,6 +55,7 @@ export const injectPostMessage = (postMessageUrl: string) => {
 
 export const TabInfo = {
   currentTabId: 0,
+  currentWindowId: undefined as number | undefined,
 };
 
 export const setTargetTab = (tab?: chrome.tabs.Tab | null) => {
@@ -63,10 +64,71 @@ export const setTargetTab = (tab?: chrome.tabs.Tab | null) => {
   }
   window.targetTab = tab;
   TabInfo.currentTabId = tab.id;
+  TabInfo.currentWindowId =
+    typeof tab.windowId === 'number' ? tab.windowId : undefined;
 };
+
+const getPanelInspectedTabId = () => {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+  const params = new URLSearchParams(window.location.search);
+  const value = params.get('inspectedTabId');
+  if (value === null) {
+    return undefined;
+  }
+  const tabId = Number(value);
+  return Number.isInteger(tabId) ? tabId : undefined;
+};
+
+export const getInspectedWindowTabId = () => {
+  const panelTabId = getPanelInspectedTabId();
+  if (typeof panelTabId === 'number') {
+    return panelTabId;
+  }
+  const inspectedWindow =
+    typeof chrome !== 'undefined'
+      ? chrome.devtools?.inspectedWindow
+      : undefined;
+  const tabId = inspectedWindow?.tabId;
+  return typeof tabId === 'number' ? tabId : undefined;
+};
+
+export const isTabEventForCurrentContext = (
+  tabId?: number,
+  windowId?: number,
+) => {
+  const inspectedTabId = getInspectedWindowTabId();
+  if (typeof inspectedTabId === 'number') {
+    return inspectedTabId === tabId;
+  }
+
+  return (
+    typeof TabInfo.currentWindowId !== 'number' ||
+    typeof windowId !== 'number' ||
+    TabInfo.currentWindowId === windowId
+  );
+};
+
+export const isRuntimeMessageForCurrentTab = (tabId?: number) => {
+  const inspectedTabId = getInspectedWindowTabId();
+  const currentTabId = getCurrentTabId();
+  const expectedTabId =
+    typeof inspectedTabId === 'number' ? inspectedTabId : currentTabId;
+
+  return expectedTabId === 0 || expectedTabId === tabId;
+};
+
+const getInspectedTab = (tabId: number) => ({ id: tabId }) as chrome.tabs.Tab;
 
 export const syncActiveTab = async (tabId?: number) => {
   try {
+    const inspectedTabId = getInspectedWindowTabId();
+    if (typeof inspectedTabId === 'number') {
+      const tab = getInspectedTab(inspectedTabId);
+      setTargetTab(tab);
+      return tab;
+    }
     if (typeof tabId === 'number') {
       const tab = await chrome.tabs.get(tabId);
       setTargetTab(tab);
@@ -74,7 +136,7 @@ export const syncActiveTab = async (tabId?: number) => {
     }
     const tabs = await getTabs({
       active: true,
-      lastFocusedWindow: true,
+      currentWindow: true,
     });
     const activeTab = Array.isArray(tabs) ? tabs[0] : undefined;
     setTargetTab(activeTab);
@@ -91,7 +153,11 @@ export function getCurrentTabId() {
 
 export function getInspectWindowTabId() {
   return new Promise((resolve, reject) => {
-    if (chrome?.devtools?.inspectedWindow) {
+    const inspectedTabId = getInspectedWindowTabId();
+    if (
+      chrome?.devtools?.inspectedWindow &&
+      typeof inspectedTabId === 'number'
+    ) {
       // @ts-expect-error In dev mode, should resolve by hand
       if (chrome.isDevMode) {
         resolve(0);
@@ -99,13 +165,8 @@ export function getInspectWindowTabId() {
       chrome.devtools.inspectedWindow.eval(
         'typeof window.__FEDERATION__ !== "undefined" || typeof window.__VMOK__ !== "undefined"',
         function (info, error) {
-          const { tabId } = chrome.devtools.inspectedWindow;
-          getTabs().then((tabs) => {
-            const target = Array.isArray(tabs)
-              ? tabs.find((tab: chrome.tabs.Tab) => tab.id === tabId)
-              : undefined;
-            setTargetTab(target as chrome.tabs.Tab);
-          });
+          const tabId = inspectedTabId;
+          setTargetTab(getInspectedTab(tabId));
           console.log(
             'chrome.devtools.inspectedWindow.tabId',
             chrome.devtools.inspectedWindow.tabId,
@@ -151,8 +212,7 @@ export const getGlobalModuleInfo = async (
     message: { origin: string; data: any },
     sender?: chrome.runtime.MessageSender,
   ) => {
-    if (sender?.tab?.id !== undefined && sender.tab.id !== getCurrentTabId())
-      return;
+    if (!isRuntimeMessageForCurrentTab(sender?.tab?.id)) return;
     const { data } = message;
 
     if (!isModuleInfoSyncMessage(data) || data?.appInfos) {
