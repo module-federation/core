@@ -76,3 +76,13 @@ export type {
   BridgeRouterLocation,
   BridgeRouterSnapshot,
 } from './bridgeRouter';
+
+export type {
+  BridgeProviderInstance,
+  BridgeRendererContext,
+  HydrateParams,
+  BridgeSSRRequest,
+  BridgeSSRResult,
+  BridgeSSRMessage,
+  BridgeSSRMessageResult,
+} from './types';
