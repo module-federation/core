@@ -122,7 +122,7 @@ Entfernt Registrierung, Auswahl und Laden von Shared-Abhängigkeiten sowie deren
 
 Verwende die Option nur, wenn der Build keine `shared`-Konfiguration hat und auch über Runtime-APIs nie Shared-Abhängigkeiten registriert oder lädt.
 
-Behalte die Funktion bei, wenn React, Vue, eine Komponentenbibliothek oder eine andere Abhängigkeit anwendungsübergreifend wiederverwendet werden, als Singleton vorliegen oder an der Versionsauswahl teilnehmen muss.
+Behalte die Funktion bei, wenn React, Vue, eine Komponentenbibliothek oder eine andere Abhängigkeit anwendungsübergreifend wiederverwendet wird, als Singleton vorliegen oder an der Versionsauswahl teilnehmen muss.
 
 ### disableSnapshot {#disablesnapshot}
 
@@ -188,16 +188,16 @@ Die Test-Fixture im Repository ergab folgende Werte. Alle drei Builds zielen auf
 
 | Konfiguration | Minifizierte Größe | Verringerung |
 | --- | ---: | ---: |
-| Remote und Shared aktiviert | 73,154 B | - |
-| `disableRemote: true` | 52,916 B | etwa 27.66% |
-| `disableShared: true` | 50,008 B | etwa 31.64% |
+| Remote und Shared aktiviert | 73.154 B | - |
+| `disableRemote: true` | 52.916 B | etwa 27,66 % |
+| `disableShared: true` | 50.008 B | etwa 31,64 % |
 
 Ohne konfigurierte `exposes` betrifft die Verringerung die `main.js` des Consumers, nicht die `remoteEntry.js` des Producers. Die folgenden Builds verwenden denselben Entry, dieselben Abhängigkeiten und Produktionseinstellungen. Nur die Initialisierung des Container Entry unterscheidet sich.
 
 | Consumer-`main.js` | Minifiziert | Gzip | Verringerung |
 | --- | ---: | ---: | ---: |
-| Mit Initialisierung des Container Entry | 79,328 B | 23,897 B | - |
-| Ohne `exposes` | 78,344 B | 23,689 B | 984 B (1.24%), 208 B gzip (0.87%) |
+| Mit Initialisierung des Container Entry | 79.328 B | 23.897 B | - |
+| Ohne `exposes` | 78.344 B | 23.689 B | 984 B (1,24 %), 208 B gzip (0,87 %) |
 
 ### 3. Reale Anwendungsabläufe testen {#3-test-real-application-flows}
 

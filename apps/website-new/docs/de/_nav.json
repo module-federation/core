@@ -52,23 +52,23 @@
       },
       {
         "text": "Modern.js",
-        "link": "/integrations/framework/modernjs"
+        "link": "/integrations/framework/modernjs/index"
       },
       {
         "text": "Next.js",
-        "link": "/integrations/framework/nextjs"
+        "link": "/integrations/framework/nextjs/index"
       },
       {
         "text": "Angular",
-        "link": "/integrations/framework/angular"
+        "link": "/integrations/framework/angular/index"
       },
       {
         "text": "Monorepos",
-        "link": "/integrations/framework/monorepos"
+        "link": "/integrations/framework/monorepos/index"
       },
       {
         "text": "Praxis",
-        "link": "/integrations/practice"
+        "link": "/integrations/practice/index"
       }
     ]
   },

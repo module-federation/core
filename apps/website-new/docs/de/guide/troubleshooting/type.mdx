@@ -25,7 +25,7 @@ Beim Kompilieren der TypeScript-Typen bereitgestellter Dateien (`exposes`) wird 
 1. Entferne die tsconfig.json-Optionen `incremental` und `tsBuildInfoFile` aus dem `cmd`-Befehl.
 2. Führe `cmd` aus der Fehlermeldung im Terminal aus und korrigiere die Datei oder `tsconfig` anhand der Ausgabe.
 
-Wenn du Fehler der TypeScript-Typprüfung ignorieren möchtest, setze [`compilerOptions.noCheck`](https://www.typescriptlang.org/tsconfig/#noCheck) in `tsconfig.json` auf `true`. Dafür benötigst du TS 5.5 oder neuer.
+Wenn du Fehler der TypeScript-Typprüfung ignorieren möchtest, setze [`compilerOptions.noCheck`](https://www.typescriptlang.org/tsconfig/#noCheck) in `tsconfig.json` auf `true`. Dafür benötigst du TS 5.6 oder neuer.
 
 Wenn `cmd` ohne Fehler läuft, die TypeScript-Kompilierung aber weiterhin fehlschlägt, prüfe das Feld `exposes` in `ModuleFederationPlugin`:
 

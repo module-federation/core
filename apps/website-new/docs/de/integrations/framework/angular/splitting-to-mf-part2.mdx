@@ -72,10 +72,10 @@ Damit laufen Haupt- und Nebenanwendung auf getrennten Ports. Sie können unabhä
 
    - Passe bei Bedarf wie zuvor beschrieben den Port in mf.manifest.json an.
 
-   *Anwendungsrouting (`app-routing.module.ts)` aktualisieren:*
+   *Anwendungsrouting (`app-routing.module.ts`) aktualisieren:*
 
    - Entferne den bisherigen Importcode, zum Beispiel `import('@@login')`.
-   - Ersetze ihn durch einen Aufruf von `loadRemoteModule` aus dem `@angular-architects/module-federation module`.
+   - Ersetze ihn durch einen Aufruf von `loadRemoteModule` aus dem Paket `@angular-architects/module-federation`.
    - Konfiguriere `loadRemoteModule` mit folgendem Objekt:
 
 ```json

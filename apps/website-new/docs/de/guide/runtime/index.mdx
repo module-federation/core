@@ -18,16 +18,16 @@ Beide Ansätze lassen sich kombinieren. Du kannst je nach Anwendungsfall entsche
 
 ## Unterschiede zwischen den Ansätzen {#differences-between-the-two-approaches}
 
-|Module zur Laufzeit registrieren|Module im Plugin registrieren|
-|------------------------------------------------------------------------------------------------------------------|---------------------- |
-|Funktioniert ohne Build-Plugin; auch Projekte mit `webpack4` können Module direkt über die Runtime registrieren und laden|Das Build-Plugin setzt webpack5 oder höher voraus|
-|Unterstützt die dynamische Registrierung von Modulen|Unterstützt keine dynamische Registrierung von Modulen|
-|Unterstützt das Laden von Modulen mit `import`-Syntax nicht|Unterstützt das Laden von Modulen mit synchroner `import`-Syntax|
-|Unterstützt das Laden von Modulen mit `loadRemote`|Unterstützt das Laden von Modulen mit `loadRemote`|
-|Für `shared` sind konkrete Versions- und Instanzinformationen erforderlich|Für `shared` genügt die Konfiguration von Regeln; konkrete Versions- und Instanzinformationen sind nicht erforderlich|
-|`shared`-Abhängigkeiten können nur anderen bereitgestellt werden; externe `shared`-Abhängigkeiten können nicht verwendet werden|`shared`-Abhängigkeiten werden nach festgelegten Regeln in beide Richtungen geteilt|
-|Der Ladevorgang lässt sich über den `plugin`-Mechanismus der `runtime` beeinflussen|Unterstützt derzeit keine `plugin`-Angabe zur Beeinflussung des Ladevorgangs|
-|Unterstützt keine Typinformationen für Remotes|Unterstützt Typinformationen für Remotes|
+| Module zur Laufzeit registrieren | Module im Build-Plugin registrieren |
+| --- | --- |
+| Funktioniert ohne Build-Plugin; auch Projekte mit `webpack4` können Module direkt über die Runtime registrieren und laden | Benötigt eine passende Build-Integration, etwa für Webpack 5 oder Rspack; siehe [Integrationen](/integrations/index.html) |
+| Unterstützt die dynamische Registrierung von Modulen | Deklariert Remotes zunächst im Build; zusätzliche Remotes lassen sich über die Runtime-API registrieren |
+| Die Runtime allein verarbeitet keine `import`-Anweisungen für Remote-Module | Die Build-Integration verarbeitet statische und dynamische `import`-Anweisungen für konfigurierte Remotes |
+| Unterstützt das Laden von Modulen mit `loadRemote` | Unterstützt das Laden von Modulen mit `loadRemote` |
+| Für `shared` sind konkrete Versionsinformationen sowie eine Funktion zum Bereitstellen oder Laden der Abhängigkeit erforderlich | Für `shared` genügt die Konfiguration von Regeln; die Build-Integration ergänzt Versionen und Ladefunktionen |
+| Shared-Abhängigkeiten werden über die Runtime-API nach den angegebenen Versions- und Scope-Regeln bereitgestellt und wiederverwendet | Die Build-Integration verbindet die Shared-Abhängigkeiten der beteiligten Anwendungen mit der Runtime |
+| Der Ladevorgang lässt sich über Runtime-Plugins beeinflussen | Der Ladevorgang lässt sich ebenfalls über `runtimePlugins` und die Runtime-API beeinflussen |
+| Die Runtime allein lädt keine Remote-Typinformationen für den Editor herunter | Die Build-Integration unterstützt das Erzeugen und Laden von Remote-Typinformationen |
 
 import Runtime from '@docs/de/_components/runtime/index';
 

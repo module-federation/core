@@ -60,8 +60,8 @@ new ModuleFederationPlugin({
 Legt fest, ob innerhalb eines Share Scopes nur eine Version des Shared-Moduls zulässig ist (Singleton-Modus).
 
 - Bei true ist der Singleton-Modus aktiviert, bei false ist er deaktiviert.
-- Im Singleton-Modus werden die gemeinsamen Abhängigkeiten der Producer-Komponenten und des Consumers nur einmal geladen. Bei unterschiedlichen Versionen wird die höhere Version geladen. Die Seite mit der niedrigeren Version erhält eine Warnung.
-- Ohne Singleton-Modus lädt jede Seite ihre eigenen Abhängigkeiten, wenn Producer und Consumer unterschiedliche Versionen verwenden.
+- Im Singleton-Modus verwenden Producer und Consumer innerhalb desselben Share Scopes dieselbe ausgewählte Version. Welche Version gewählt wird, hängt unter anderem von der Ladestrategie und bereits geladenen Versionen ab. Erfüllt sie `requiredVersion` nicht, wird standardmäßig eine Warnung ausgegeben; mit `strictVersion` kann daraus ein Fehler werden.
+- Ohne Singleton-Modus können kompatible Versionen ebenfalls gemeinsam genutzt werden. Unterschiedliche Versionsanforderungen können dazu führen, dass mehrere Versionen geladen werden.
 
 ## requiredVersion
 
@@ -71,8 +71,9 @@ Legt fest, ob innerhalb eines Share Scopes nur eine Version des Shared-Moduls zu
 
 Die erforderliche Version, die auch als Versionsbereich angegeben werden kann. Standardmäßig wird die Version der Abhängigkeit in der aktuellen Anwendung verwendet.
 
-- Bei Shared-Abhängigkeiten wird geprüft, ob die Version mindestens `requiredVersion` entspricht. Ist das der Fall, wird sie verwendet. Ist sie niedriger, erscheint eine Warnung in der Konsole und die kleinste verfügbare Version der Shared-Abhängigkeit wird verwendet.
-- Wenn eine Seite `requiredVersion` und die andere `singleton` setzt, wird die Abhängigkeit mit `requiredVersion` geladen. Die Seite mit `singleton` verwendet die Abhängigkeit mit `requiredVersion` direkt, unabhängig davon, welche Version `requiredVersion` angibt.
+- `requiredVersion` wird als Semver-Versionsbereich ausgewertet, nicht pauschal als Mindestversion. Beispielsweise erlaubt `^1.2.0` kompatible Versionen aus der Hauptversion 1, aber nicht automatisch Version 2.
+- Ohne Singleton-Modus sucht die Runtime eine registrierte Version, die den Bereich erfüllt. Gibt es keine passende Version, kann die lokal bereitgestellte Abhängigkeit als Fallback dienen.
+- Im Singleton-Modus bleibt die ausgewählte gemeinsame Version maßgeblich. Erfüllt sie den angeforderten Bereich nicht, wird standardmäßig gewarnt; bei aktiviertem `strictVersion` wird ein Fehler ausgelöst. `requiredVersion` allein erzwingt daher keine bestimmte Singleton-Version.
 
 ## eager
 
