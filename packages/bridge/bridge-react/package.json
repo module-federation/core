@@ -22,11 +22,19 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "node": {
+        "import": "./dist/index.node.es.js",
+        "require": "./dist/index.node.cjs.js"
+      },
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     },
     "./base": {
       "types": "./dist/base.d.ts",
+      "node": {
+        "import": "./dist/base.node.es.js",
+        "require": "./dist/base.node.cjs.js"
+      },
       "import": "./dist/base.es.js",
       "require": "./dist/base.cjs.js"
     },
@@ -174,10 +182,11 @@
     "dev": "vite",
     "build": "vite build && tsc -p tsconfig.json && node scripts/write-dts-entrypoints.mjs",
     "preview": "vite preview",
-    "test": "pnpm run test:jest && pnpm run test:rstest && pnpm run test:types && pnpm run test:boundaries",
+    "test": "pnpm run test:jest && pnpm run test:rstest && pnpm run test:types && pnpm run test:ssr-entries && pnpm run test:boundaries",
     "test:jest": "pnpm exec jest --config jest.config.js --passWithNoTests",
     "test:rstest": "pnpm exec rstest --passWithNoTests && pnpm exec rstest --config rstest.ssr.config.ts",
     "test:types": "node scripts/check-react-remote-types.mjs",
+    "test:ssr-entries": "node scripts/check-bridge-ssr-entries.mjs",
     "test:boundaries": "node scripts/check-runtime-boundaries.mjs"
   },
   "dependencies": {

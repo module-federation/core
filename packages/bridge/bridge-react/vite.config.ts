@@ -10,6 +10,8 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         base: path.resolve(__dirname, 'src/base.ts'),
+        'base.node': path.resolve(__dirname, 'src/base.node.ts'),
+        'index.node': path.resolve(__dirname, 'src/index.node.ts'),
         ssr: path.resolve(__dirname, 'src/ssr.ts'),
         'ssr-node': path.resolve(__dirname, 'src/ssr-node.ts'),
         server: path.resolve(__dirname, 'src/server.ts'),

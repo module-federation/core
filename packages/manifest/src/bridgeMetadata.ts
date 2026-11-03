@@ -7,6 +7,10 @@ import type { Stats, moduleFederationPlugin } from '@module-federation/sdk';
 
 type Reference = { source: string; imported: string };
 type Expression = t.Node | Reference;
+const bridgeFactories = new Set([
+  'createBridgeComponent',
+  'createModernBridgeComponent',
+]);
 type ModuleInfo = {
   imports: Map<string, Reference>;
   locals: Map<string, t.Node>;
@@ -137,9 +141,9 @@ function describeExports(program: t.Program): ModuleExports {
     if (value.type === 'Identifier') {
       // Frameworks may bundle their own factory implementation. Recognize the
       // public naming convention without resolving or executing that factory.
-      if (value.name === 'createBridgeComponent') return true;
+      if (bridgeFactories.has(value.name)) return true;
       const imported = info.imports.get(value.name);
-      if (imported?.imported === 'createBridgeComponent') return true;
+      if (imported && bridgeFactories.has(imported.imported)) return true;
       if (seen.has(value.name)) return false;
       seen.add(value.name);
       const declaration = info.locals.get(value.name);
@@ -149,11 +153,12 @@ function describeExports(program: t.Program): ModuleExports {
       return (
         (!value.computed &&
           value.property.type === 'Identifier' &&
-          value.property.name === 'createBridgeComponent') ||
+          bridgeFactories.has(value.property.name)) ||
         (value.computed &&
           unwrap(value.property).type === 'StringLiteral' &&
-          (unwrap(value.property) as t.StringLiteral).value ===
-            'createBridgeComponent')
+          bridgeFactories.has(
+            (unwrap(value.property) as t.StringLiteral).value,
+          ))
       );
     }
     return false;

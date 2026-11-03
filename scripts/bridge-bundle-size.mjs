@@ -11,6 +11,18 @@ import { build, version as esbuildVersion } from 'esbuild';
 // unavailable capabilities, while declared exports with missing output are errors.
 const fixtures = [
   {
+    id: 'consumer-browser',
+    entry: './base',
+    api: 'createReactRemote',
+    target: 'browser',
+  },
+  {
+    id: 'consumer-node',
+    entry: './base',
+    api: 'createReactRemote',
+    target: 'node',
+  },
+  {
     id: 'producer-v18',
     entry: './v18',
     api: 'createBridgeComponent',

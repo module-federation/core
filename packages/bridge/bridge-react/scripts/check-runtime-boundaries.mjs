@@ -65,3 +65,62 @@ for (const format of ['esm', 'cjs']) {
     console.log(`${entry}/${format}: runtime boundary passed`);
   }
 }
+
+for (const format of ['esm', 'cjs']) {
+  for (const entry of ['base', 'index']) {
+    for (const server of [false, true]) {
+      const name = `${entry}${server ? '.node' : ''}`;
+      const file = resolve(
+        directory,
+        `dist/${name}.${format === 'esm' ? 'es' : 'cjs'}.js`,
+      );
+      const result = await build({
+        stdin: {
+          resolveDir: directory,
+          contents: `export { createReactRemote, ReactRemote } from ${JSON.stringify(file)}`,
+        },
+        bundle: true,
+        write: false,
+        metafile: true,
+        treeShaking: true,
+        platform: server ? 'node' : 'browser',
+        format,
+        packages: 'external',
+      });
+      const text = result.outputFiles[0].text;
+      const imports = Object.values(result.metafile.outputs).flatMap((output) =>
+        output.imports.map((item) => item.path),
+      );
+      if (server) {
+        assert(
+          !imports.some((path) => path.startsWith('react-dom/client')),
+          `${name}/${format} imported a DOM renderer`,
+        );
+        assert(
+          !/claimRemoteHydration|hydrateRemoteRoot|ownerRef/.test(text),
+          `${name}/${format} retained the browser mount lifecycle`,
+        );
+        assert(
+          text.includes('BridgeSSRContext'),
+          'Node consumer lost request registration',
+        );
+      } else {
+        assert(
+          !imports.some((path) =>
+            /^(node:|acorn$|htmlparser2$|react-dom\/server)/.test(path),
+          ),
+          `${name}/${format} imported Node rendering dependencies`,
+        );
+        assert(
+          !text.includes('BridgeSSRContext'),
+          `${name}/${format} retained Node request registration`,
+        );
+        assert(
+          text.includes('hydrateRemoteRoot'),
+          'Browser consumer lost independent hydration',
+        );
+      }
+      console.log(`${name}/${format}: consumer runtime boundary passed`);
+    }
+  }
+}
