@@ -1,7 +1,7 @@
 import type {
   Compiler,
   Falsy,
-  ModuleFederationPluginOptions,
+  ModuleFederationPluginOptions as RspackCoreModuleFederationPluginOptions,
   RspackPluginFunction,
   RspackPluginInstance,
 } from '@rspack/core';
@@ -18,6 +18,10 @@ import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
 import { RemoteEntryPlugin } from './RemoteEntryPlugin';
+import {
+  ExposeEagerPlugin,
+  type RspackModuleFederationPluginOptions,
+} from './ExposeEagerPlugin';
 import logger from './logger';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
@@ -102,10 +106,10 @@ export function resolveRspackRuntimeAlias(
 
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
-  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
+  private _options: RspackModuleFederationPluginOptions;
   private _statsPlugin?: StatsPlugin;
 
-  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
+  constructor(options: RspackModuleFederationPluginOptions) {
     this._options = options;
   }
 
@@ -176,6 +180,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       throw new Error('[ ModuleFederationPlugin ]: name is required');
     }
     this._checkSingleton(compiler);
+    new ExposeEagerPlugin({
+      name: options.name,
+      exposes: options.exposes,
+    }).apply(compiler);
     this._patchBundlerConfig(compiler);
     const containerManager = new ContainerManager();
     containerManager.init(options);
@@ -233,7 +241,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
 
     new compiler.webpack.container.ModuleFederationPlugin(
-      options as unknown as ModuleFederationPluginOptions,
+      options as unknown as RspackCoreModuleFederationPluginOptions,
     ).apply(compiler);
 
     let runtimePath: string;
@@ -452,6 +460,15 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 }
 
 export const GetPublicPathPlugin = RemoteEntryPlugin;
+
+export {
+  ExposeEagerPlugin,
+  type ExposeEagerPluginOptions,
+  type RspackExposes,
+  type RspackExposesConfig,
+  type RspackExposesObject,
+  type RspackModuleFederationPluginOptions,
+} from './ExposeEagerPlugin';
 
 export {
   TreeShakingSharedPlugin,
