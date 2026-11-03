@@ -156,6 +156,30 @@ test('measures receiver HTML through the same Node ESM export without requiring 
   assert.equal(receiver.minifiedBytes, undefined);
 });
 
+test('consumer fixtures select browser and Node conditions from the same public export', async () => {
+  const live = await fixture();
+  live.manifest.exports['./base'] = {
+    node: { import: './dist/consumer.node.mjs' },
+    import: './dist/consumer.browser.mjs',
+  };
+  for (const target of ['node', 'browser']) {
+    await writeFile(
+      join(live.directory, `dist/consumer.${target}.mjs`),
+      `export function createReactRemote() { return '${target}'; }`,
+    );
+  }
+  await live.saveManifest();
+  const result = await live.measure();
+  assert.equal(
+    result.fixtures['consumer-browser'].resolvedEntry,
+    'dist/consumer.browser.mjs',
+  );
+  assert.equal(
+    result.fixtures['consumer-node'].resolvedEntry,
+    'dist/consumer.node.mjs',
+  );
+});
+
 test('comparison retains real deltas and rejects mismatched toolchain settings', async () => {
   const live = await fixture();
   const base = await live.measure();

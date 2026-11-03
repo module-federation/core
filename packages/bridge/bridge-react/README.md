@@ -571,6 +571,11 @@ baseline. Non-peer runtime dependencies are bundled, while declared peers and
 Node builtins remain external. Bundle fixtures emit ESM. The receiver's response HTML is measured separately
 from JavaScript bundles. Size measurements do not establish runtime performance.
 
+The unified consumer fixtures also compare `createReactRemote` through `/base`
+under browser and Node conditions. An older Node consumer may only emit Bridge
+placeholders, so its bundle delta measures the implementation change, without
+claiming that both revisions support the same SSR behavior.
+
 After building both revisions, the Bridge section can also be reproduced locally
 from the current checkout:
 
