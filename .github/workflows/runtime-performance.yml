@@ -1,0 +1,103 @@
+name: Runtime Core Performance
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/runtime-core/**'
+      - 'packages/enhanced/src/lib/container/ContainerReferencePlugin.ts'
+      - 'packages/enhanced/src/lib/sharing/**'
+      - 'tools/scripts/benchmark-runtime-dod.mjs'
+      - 'tools/scripts/measure-runtime-footprint.mjs'
+      - 'tools/scripts/report-runtime-dod*'
+      - 'tools/scripts/tsdown/**'
+      - '.github/workflows/runtime-performance.yml'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: Git revision to compare with (empty uses HEAD parent)
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runtime-performance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  measure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      NODE_ENV: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24.18.1
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prod=false
+
+      - name: Build benchmark dependencies
+        run: pnpm exec turbo run build --filter=@module-federation/runtime-core --filter=@module-federation/enhanced --concurrency=4
+
+      - name: Resolve baseline
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          INPUT_BASE: ${{ inputs.baseline }}
+        run: |
+          BASELINE=$(git rev-parse --verify "${PR_BASE:-${INPUT_BASE:-HEAD^}}^{commit}")
+          echo "BASELINE=$BASELINE" >> "$GITHUB_ENV"
+          mkdir -p runtime-performance/profiles
+
+      - name: Validate report gates
+        run: node --test tools/scripts/report-runtime-dod.test.mjs
+
+      - name: Calibrate noise, compare CPU and profile startup
+        run: >-
+          node tools/scripts/benchmark-runtime-dod.mjs
+          --baseline "$BASELINE" --rounds 7
+          --output runtime-performance/performance.json
+          --profile-dir runtime-performance/profiles
+
+      - name: Measure complete runtime payloads
+        run: >-
+          node tools/scripts/measure-runtime-footprint.mjs
+          --baseline "$BASELINE"
+          --output runtime-performance/size.json
+
+      - name: Report results and enforce payload budgets
+        run: >-
+          node tools/scripts/report-runtime-dod.mjs
+          runtime-performance/performance.json
+          runtime-performance/size.json
+          runtime-performance/report.md
+
+      - name: Publish job summary
+        if: always()
+        run: |
+          if [ -f runtime-performance/report.md ]; then
+            cat runtime-performance/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload samples, sizes and profiles
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: runtime-performance
+          path: runtime-performance/
+          if-no-files-found: warn
+          retention-days: 30

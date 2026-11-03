@@ -20,9 +20,21 @@ import {
   xRange,
 } from './constants';
 
+// These patterns have no global/sticky flags, so matching does not carry state
+// between calls. Their sources are fixed and independent of user ranges.
+const hyphenRangeRegex = parseRegex(hyphenRange);
+const comparatorTrimRegex = parseRegex(comparatorTrim);
+const tildeTrimRegex = parseRegex(tildeTrim);
+const caretTrimRegex = parseRegex(caretTrim);
+const caretExpression = parseRegex(caret);
+const tildeExpression = parseRegex(tilde);
+const xRangeExpression = parseRegex(xRange);
+const starRegex = parseRegex(star);
+const gte0Regex = parseRegex(gte0);
+
 export function parseHyphen(range: string): string {
   return range.replace(
-    parseRegex(hyphenRange),
+    hyphenRangeRegex,
     (
       _range,
       from,
@@ -65,15 +77,15 @@ export function parseHyphen(range: string): string {
 }
 
 export function parseComparatorTrim(range: string): string {
-  return range.replace(parseRegex(comparatorTrim), '$1$2$3');
+  return range.replace(comparatorTrimRegex, '$1$2$3');
 }
 
 export function parseTildeTrim(range: string): string {
-  return range.replace(parseRegex(tildeTrim), '$1~');
+  return range.replace(tildeTrimRegex, '$1~');
 }
 
 export function parseCaretTrim(range: string): string {
-  return range.replace(parseRegex(caretTrim), '$1^');
+  return range.replace(caretTrimRegex, '$1^');
 }
 
 export function parseCarets(range: string): string {
@@ -82,7 +94,7 @@ export function parseCarets(range: string): string {
     .split(/\s+/)
     .map((rangeVersion) =>
       rangeVersion.replace(
-        parseRegex(caret),
+        caretExpression,
         (_, major, minor, patch, preRelease) => {
           if (isXVersion(major)) {
             return '';
@@ -137,7 +149,7 @@ export function parseTildes(range: string): string {
     .split(/\s+/)
     .map((rangeVersion) =>
       rangeVersion.replace(
-        parseRegex(tilde),
+        tildeExpression,
         (_, major, minor, patch, preRelease) => {
           if (isXVersion(major)) {
             return '';
@@ -167,7 +179,7 @@ export function parseXRanges(range: string): string {
       rangeVersion
         .trim()
         .replace(
-          parseRegex(xRange),
+          xRangeExpression,
           (ret, gtlt, major, minor, patch, preRelease) => {
             const isXMajor = isXVersion(major);
             const isXMinor = isXMajor || isXVersion(minor);
@@ -241,9 +253,9 @@ export function parseXRanges(range: string): string {
 }
 
 export function parseStar(range: string): string {
-  return range.trim().replace(parseRegex(star), '');
+  return range.trim().replace(starRegex, '');
 }
 
 export function parseGTE0(comparatorString: string): string {
-  return comparatorString.trim().replace(parseRegex(gte0), '');
+  return comparatorString.trim().replace(gte0Regex, '');
 }
