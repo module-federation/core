@@ -159,7 +159,6 @@ async function setup(
   const sendHTML = () => {
     runtime.accept(id, {
       type: 'meta',
-      protocol: 'mf-bridge/1',
       identifierPrefix: `${id}-`,
       hydration: 'progressive',
     });
