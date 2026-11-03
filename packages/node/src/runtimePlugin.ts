@@ -2,6 +2,7 @@ import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
 } from '@module-federation/runtime';
+import { loadEntryViaNativeHttpLoader } from './loader-hooks/entryLoader';
 type WebpackRequire = {
   (id: string): any;
   u: (chunkId: string) => string;
@@ -491,6 +492,13 @@ export const setupWebpackRequirePatching = (
 export default function (): ModuleFederationRuntimePlugin {
   return {
     name: 'node-federation-plugin',
+    // Opt-in native ESM HTTP loading: only takes effect when the loader hooks
+    // were registered via `@module-federation/node/register` (or the
+    // programmatic `registerNativeHttpLoader()`); otherwise resolves to
+    // undefined and the default vm-based entry loading runs unchanged.
+    async loadEntry(args) {
+      return loadEntryViaNativeHttpLoader(args.remoteInfo);
+    },
     beforeInit(args) {
       // Patch webpack chunk loading handlers
       (() => {
