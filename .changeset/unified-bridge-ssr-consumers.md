@@ -8,3 +8,5 @@ Enable Bridge application SSR through createReactRemote and ReactRemote when a H
 Select the existing Bridge renderer synchronously for server-marked containers, so Host updates during provider loading preserve the streamed DOM and apply through the hydrated instance.
 
 Recognize createModernBridgeComponent as a Bridge provider factory when generating expose rendering metadata, including imported aliases and namespace access.
+
+Select browser and Node consumer lifecycles at the package entry while preserving shared renderer selection, existing legacy entry behavior, remote inputs and inferred props.

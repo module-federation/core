@@ -1,11 +1,5 @@
 /** Shared Bridge lifecycle used by legacy and unified consumers. */
-import React, {
-  forwardRef,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import type { ModuleFederation } from '@module-federation/enhanced/runtime';
 import type { BridgeOperationContext } from '@module-federation/bridge-shared';
 import { getRootDomDefaultClassName } from '../utils';
@@ -16,7 +10,6 @@ import type {
   ErrorFallbackProps,
   RenderParams,
 } from '../types';
-import { BridgeSSRContext } from '../ssr';
 import {
   claimRemoteHydration,
   hydrateRemoteRoot,
@@ -53,17 +46,8 @@ export const RemoteAppWrapper = forwardRef<
   const { moduleName, providerInfo, loadProvider, className, style, loading } =
     props;
   const instance = props.instance || federationRuntime.instance;
-  const ssr = useContext(BridgeSSRContext);
   const instanceId = props.ssrInstanceId;
   const [serverHTML] = useState(() => readRemoteSSRHTML(instanceId));
-  if (typeof window === 'undefined' && ssr && instanceId && props.ssrProvider) {
-    ssr.reserve(instanceId).activate(() => props.ssrProvider!, {
-      moduleName,
-      basename: props.routing?.basename,
-      memoryRoute: props.routing?.memoryRoute,
-      props: props.remoteProps,
-    });
-  }
   const dom = useRef<HTMLDivElement | null>(null);
   const latest = useRef(props);
   latest.current = props;
@@ -232,7 +216,7 @@ export const RemoteAppWrapper = forwardRef<
       data-mf-bridge={moduleName}
       id={instanceId}
       data-mf-bridge-root={instanceId}
-      data-mf-bridge-ssr={props.ssrProvider || serverHTML ? '' : undefined}
+      data-mf-bridge-ssr={serverHTML ? '' : undefined}
       className={`${getRootDomDefaultClassName(moduleName)} ${className || ''}`}
       style={style}
       suppressHydrationWarning={Boolean(serverHTML)}

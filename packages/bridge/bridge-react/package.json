@@ -22,11 +22,19 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "node": {
+        "import": "./dist/index.node.es.js",
+        "require": "./dist/index.node.cjs.js"
+      },
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     },
     "./base": {
       "types": "./dist/base.d.ts",
+      "node": {
+        "import": "./dist/base.node.es.js",
+        "require": "./dist/base.node.cjs.js"
+      },
       "import": "./dist/base.es.js",
       "require": "./dist/base.cjs.js"
     },

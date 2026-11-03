@@ -2,7 +2,7 @@
 import React from 'react';
 import { PassThrough } from 'node:stream';
 import { renderToPipeableStream } from 'react-dom/server.node';
-import { createReactRemote } from '../src/reactRemote';
+import { createReactRemote } from '../src/reactRemote.node';
 import { BridgeSSRContext } from '../src/ssr';
 import { createBridgeSSRController } from '../src/ssr-stream/compositor.server';
 import { snapshotRuntime } from './reactRemote-runtime-utils';

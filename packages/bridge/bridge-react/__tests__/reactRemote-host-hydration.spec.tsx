@@ -5,6 +5,8 @@ import { JSDOM } from 'jsdom';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { renderToPipeableStream, renderToString } from 'react-dom/server.node';
 import { createReactRemote } from '../src/reactRemote';
+import { createReactRemote as createServerReactRemote } from '../src/reactRemote.node';
+import { createBridgeComponent as createServerBridgeComponent } from '../src/server';
 import { createBridgeComponent } from '../src/v18';
 import { BridgeSSRContext } from '../src/ssr';
 import { createBridgeSSRController } from '../src/ssr-stream/compositor.server';
@@ -31,7 +33,8 @@ it('keeps the streamed Bridge subtree while a parent updates before the browser 
       </>
     );
   };
-  const provider = createBridgeComponent({
+  const provider = createBridgeComponent({ rootComponent: Counter });
+  const serverProvider = createServerBridgeComponent({
     rootComponent: Counter,
     renderStream: async (element) => ({
       stream: new ReadableStream<Uint8Array>({
@@ -44,8 +47,8 @@ it('keeps the streamed Bridge subtree while a parent updates before the browser 
       abort() {},
     }),
   });
-  const serverRuntime = remoteRuntime({ default: provider }, 'bridge');
-  const ServerRemote = createReactRemote({
+  const serverRuntime = remoteRuntime({ default: serverProvider }, 'bridge');
+  const ServerRemote = createServerReactRemote({
     instance: serverRuntime.instance,
     remote: 'shop/Card',
   });

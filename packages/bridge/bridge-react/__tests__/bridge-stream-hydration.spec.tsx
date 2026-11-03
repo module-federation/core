@@ -5,6 +5,9 @@ import { renderToString } from 'react-dom/server';
 import { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import { RemoteAppWrapper } from '../src/remote/RemoteAppWrapper';
 import { createBridgeComponent } from '../src/v18';
+import { createBridgeComponent as createServerBridgeComponent } from '../src/server';
+import { RemoteAppWrapper as ServerRemoteAppWrapper } from '../src/remote/RemoteAppWrapper.server';
+import { TextEncoder } from 'node:util';
 import { bridgeStreamBootstrap } from '../src/ssr-stream/bootstrap';
 import type { BridgeStreamBrowserRuntime } from '../src/ssr-stream/protocol';
 import type { BridgeProviderInstance, BridgeSSRRequest } from '../src/types';
@@ -57,20 +60,25 @@ async function setup(
     );
   };
   let html = '';
-  const makeProvider = createBridgeComponent({
+  const makeProvider = createBridgeComponent({ rootComponent: Counter });
+  const makeServerProvider = createServerBridgeComponent({
     rootComponent: Counter,
     renderStream: async (element) => {
       html = renderToString(element);
       return {
-        stream:
-          new NodeReadableStream<Uint8Array>() as ReadableStream<Uint8Array>,
+        stream: new NodeReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode(html));
+            controller.close();
+          },
+        }) as ReadableStream<Uint8Array>,
         snapshot: Promise.resolve({ loaderData: { value: 'restored' } }),
         abort() {},
       };
     },
   });
-  const server = makeProvider();
-  await server.renderStream!({
+  const server = makeServerProvider();
+  const rendered = await server.renderStream!({
     instanceId: id,
     identifierPrefix: `${id}-`,
     url: 'https://host.example/inventory',
@@ -78,6 +86,11 @@ async function setup(
     props: { title: 'initial' },
     signal: new AbortController().signal,
   } as BridgeSSRRequest);
+  if ('messages' in rendered) {
+    const reader = rendered.messages.getReader();
+    while (!(await reader.read()).done) {}
+    reader.releaseLock();
+  }
   const hydrate = jest.fn();
   const render = jest.fn();
   const destroy = jest.fn();
@@ -122,19 +135,22 @@ async function setup(
       },
     };
   });
-  const view = (title: string, serverProvider?: BridgeProviderInstance) => (
-    <Boundary>
-      <RemoteAppWrapper
-        moduleName="shop/App"
-        ssrInstanceId={id}
-        ssrProvider={serverProvider}
-        providerInfo={factory}
-        routing={{ basename: '/inventory' }}
-        remoteProps={{ title }}
-        loading={<p>loading</p>}
-      />
-    </Boundary>
-  );
+  const view = (title: string, serverProvider?: BridgeProviderInstance) => {
+    const Wrapper = serverProvider ? ServerRemoteAppWrapper : RemoteAppWrapper;
+    return (
+      <Boundary>
+        <Wrapper
+          moduleName="shop/App"
+          ssrInstanceId={id}
+          ssrProvider={serverProvider}
+          providerInfo={factory}
+          routing={{ basename: '/inventory' }}
+          remoteProps={{ title }}
+          loading={<p>loading</p>}
+        />
+      </Boundary>
+    );
+  };
   const host = document.createElement('div');
   document.body.appendChild(host);
   host.innerHTML = renderToString(view('initial', server));

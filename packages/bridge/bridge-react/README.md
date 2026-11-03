@@ -559,6 +559,8 @@ data-layer responsibilities.
 
 The Node `/server` producer implements stream rendering without importing the browser Root lifecycle. Browser `/v18` and `/v19` producers implement mount, hydration, updates and unmount without including Node stream processing. Their shared tree construction keeps the server and browser markup consistent. Producer messages carry data snapshots in their `data` or `ready` messages, without a duplicate top-level snapshot promise.
 
+The default and `/base` consumption entries select a Node implementation through the `node` export condition. Their browser implementations keep DOM ownership and independent hydration, while Node implementations reserve SSR jobs and render mount containers without importing that browser lifecycle. Both delegate source loading and renderer selection to the same shared consumer. Explicit browser producer entries remain `/v18` and `/v19`, and the Node producer entry remains `/server`.
+
 ## Maintainer bundle-size reports
 
 The existing Bundle Size workflow compares the PR head with its Git merge-base,
