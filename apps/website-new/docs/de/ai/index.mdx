@@ -28,7 +28,7 @@ npx skills add module-federation/agent-skills --skill mf -y
 Bitte den Agenten anschließend, vor seiner Antwort die Doku zu lesen:
 
 ```text
-/mf docs What's the difference between singleton and requiredVersion in shared?
+/mf docs Was ist der Unterschied zwischen singleton und requiredVersion in shared?
 ```
 
 Die Idee dahinter:
@@ -59,8 +59,8 @@ Bitte den Agenten direkt darum:
 
 ```text
 /mf observability
-Open https://example.com with Divebell, reproduce the failing checkout flow,
-and tell me which Remote or Shared phase failed.
+Öffne https://example.com mit Divebell, reproduziere den fehlschlagenden Checkout
+und sag mir, welches Remote oder welche Shared-Phase fehlgeschlagen ist.
 ```
 
 Bei Bedarf installiert der Skill Divebell global auf dem Rechner des Agenten, liest den von `divebell skill` zurückgegebenen CLI-Skill, installiert `@divebell/extension-mf` und liest den Befehlsskill aus `divebell mf --skill`. Keines der beiden Pakete wird deiner Anwendung hinzugefügt.
@@ -69,13 +69,13 @@ Wenn du Daten kontinuierlich erfassen, Node-/SSR-Dateien schreiben, Berichte aus
 
 ```text
 /mf observability
-I saw this Module Federation console error:
+Ich habe diesen Module-Federation-Konsolenfehler gesehen:
 
 [Module Federation] Observability report generated
 traceId: mf-...
 read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
 
-Please read the report and fix the issue.
+Bitte lies den Bericht und behebe das Problem.
 ```
 
 Bitte den Agenten bei Node oder SSR, `.mf/observability/latest.json` zu lesen. Lade Berichte aus der Produktion über den Callback `onReport` des Plugins hoch und gib deinem Agenten den gespeicherten Bericht. Eine Trace-ID aus einer geschlossenen Browsersitzung ersetzt den gespeicherten Bericht nicht.
@@ -85,7 +85,7 @@ Bitte den Agenten bei Node oder SSR, `.mf/observability/latest.json` zu lesen. L
 Für einen einfachen Einstieg kannst du deinem Agenten direkt Folgendes schicken:
 
 ```text
-Before answering, please read https://module-federation.io/de/llms.txt to learn about the latest Module Federation 2.0 documentation, then answer my question.
+Bevor du antwortest, lies bitte https://module-federation.io/de/llms.txt, um die aktuelle Dokumentation zu Module Federation 2.0 kennenzulernen, und beantworte danach meine Frage.
 ```
 
 So gibst du dem Modell eine verlässliche Quelle, auch wenn der Skill noch nicht installiert ist.
@@ -105,10 +105,10 @@ https://module-federation.io/de/llms.txt
 Jede Seite der Doku ist auch als Markdown verfügbar. Ersetze dazu `.html` am Ende der URL durch `.md`:
 
 ```text
-# HTML version
+# HTML-Version
 https://module-federation.io/de/guide/runtime/index.html
 
-# Markdown version
+# Markdown-Version
 https://module-federation.io/de/guide/runtime/index.md
 ```
 

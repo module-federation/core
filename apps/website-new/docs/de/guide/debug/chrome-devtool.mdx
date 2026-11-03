@@ -138,9 +138,9 @@ Beide Varianten der Erweiterung registrieren beim Seitenstart automatisch WebMCP
 Frage einen WebMCP-fähigen Agenten zum Beispiel:
 
 ```text
-Read the current MF state and preserve the existing proxy rules.
-Proxy mf_playground to https://localhost:3006/mf-manifest.json,
-enable HMR, reload the page, and verify that the configuration took effect.
+Lies den aktuellen MF-Zustand und behalte die vorhandenen Proxy-Regeln bei.
+Leite mf_playground auf https://localhost:3006/mf-manifest.json um,
+aktiviere HMR, lade die Seite neu und prüfe, ob die Konfiguration wirksam wurde.
 ```
 
 `mf_set_proxy` ersetzt die gesamte Liste der Proxy-Regeln. Lies daher vor Änderungen den aktuellen Zustand. Konfigurationswerkzeuge geben `reloadRequired` zurück; der Agent sollte die Seite abhängig von diesem Ergebnis neu laden.
