@@ -22,10 +22,6 @@ export async function loadAndInitializeRemote(
   // TODO: Make this generic, possibly the runtime?
   const asyncContainer = loadScript(containerKey, remoteOptions);
 
-  if (!asyncContainer) {
-    throw new Error('Unable to load remote container');
-  }
-
   // TODO: look at init tokens, pass to getSharingScope
 
   if (!globalScope.__sharing_scope__) {
@@ -50,7 +46,7 @@ export async function getModule<T>({
   }
 
   try {
-    const modFactory = await remoteContainer?.get(modulePath);
+    const modFactory = await remoteContainer.get(modulePath);
 
     if (!modFactory) {
       return undefined;
@@ -66,7 +62,7 @@ export async function getModule<T>({
       return mod[exportName] as T;
     }
   } catch (error) {
-    console.log('[mf] - Unable to getModule', error);
+    console.error('[mf] - Unable to getModule', error);
   }
 }
 
