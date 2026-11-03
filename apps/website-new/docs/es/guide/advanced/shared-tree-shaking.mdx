@@ -70,7 +70,7 @@ Hay dos modos para adaptarse a distintas configuraciones de equipo y escalas de 
 
 ### server-calc
 
-`server-calc` es la **buena práctica muy recomendada**. Se apoya en un servicio centralizado para maximizar las ventajas de Tree Shaking y lograr un óptimo global.
+Recomendamos `server-calc` cuando puedes usar un servicio centralizado que reúna los exports que necesitan todas las aplicaciones. Así puedes generar un bundle compartido que cubra esas necesidades.
 
 import CreateSharedTreeShakingDeployServer from '@docs/es/_components/create-shared-tree-shaking-deploy-server.mdx'
 

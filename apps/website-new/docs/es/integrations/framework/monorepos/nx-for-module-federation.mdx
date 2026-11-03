@@ -1,19 +1,19 @@
 # Nx y Module Federation
 
-Nx es un potente sistema de build de código abierto que funciona especialmente bien con monorepos e incluye soporte integrado de Module Federation para proyectos Angular y React.
+Nx es una herramienta de build de código abierto para trabajar con monorepos. Incluye soporte para Module Federation en proyectos Angular y React.
 
 Si todavía no has leído las ventajas de usar un monorepo con Module Federation, asegúrate de leer primero [Ventajas de Module Federation en un monorepo](/integrations/framework/monorepos/index.html).
 
 ## ¿Qué es Nx?
 
-Nx es un potente sistema de build de código abierto que ofrece herramientas y técnicas para mejorar la productividad de los desarrolladores, optimizar el rendimiento de CI y mantener la calidad del código.
+Con Nx puedes organizar las tareas del repositorio, guardar sus resultados en caché y ejecutar solo las que necesiten tus cambios.
 Es la mejor herramienta tanto para construir y mantener monorepos como para gestionar proyectos de Module Federation.
 
 ### Funcionalidades principales de Nx
 
 - Ejecución eficiente de tareas: Nx [ejecuta las tareas en paralelo](https://nx.dev/features/run-tasks) y las ordena según las dependencias entre ellas.
 - Distribución de tareas en CI: Nx escala tu CI [distribuyendo las tareas](https://nx.dev/ci/features/distribute-task-execution) entre muchas VM. Tu CI es rápido sin importar el tamaño de tu repositorio.
-- Caché local y remota: con la caché [local](https://nx.dev/features/cache-task-results) y [remota](https://nx.dev/ci/features/remote-cache), Nx evita volver a ejecutar tareas innecesariamente, lo que te ahorra un valioso tiempo de desarrollo y reduce los tiempos de CI.
+- Caché local y remota: con la caché [local](https://nx.dev/features/cache-task-results) y [remota](https://nx.dev/ci/features/remote-cache), Nx reutiliza los resultados de tareas anteriores para ahorrar tiempo en local y en CI.
 - División de tests E2E y reejecución de tests inestables: Nx [divide automáticamente](https://nx.dev/ci/features/split-e2e-tasks) los tests e2e grandes para distribuirlos entre VM. Nx también puede [identificar y volver a ejecutar automáticamente los tests e2e inestables](https://nx.dev/ci/features/flaky-tasks).
 - Automatización de la actualización de dependencias: si aprovechas los [plugins de Nx](https://nx.dev/concepts/nx-plugins), obtienes funcionalidades adicionales como la [generación de código](https://nx.dev/features/generate-code) y herramientas para [actualizar automáticamente](https://nx.dev/features/automate-updating-dependencies) tu código y tus dependencias.
 - Adáptalo a tu medida: Nx es muy personalizable y extensible. Ajústalo [creando un plugin para tu organización](https://nx.dev/extending-nx/tutorials/organization-specific-plugin) o [creando un plugin de herramientas](https://nx.dev/extending-nx/tutorials/tooling-plugin).
@@ -41,7 +41,7 @@ Puedes obtener más información sobre cómo configurar Module Federation con Nx
 
 Nx ofrece executors para hacer el build y servir tus aplicaciones de Module Federation. El más importante es el executor `module-federation-dev-server`, que se usa para servir tu aplicación en local. Este executor ofrece las siguientes funcionalidades:
 
-- Soporte para servir el proyecto consumer (host) junto con todos sus producers (remotes) con un solo comando, con la mejor gestión de recursos y DX.
+- Arranca el consumer (host) y todos sus producers (remotes) con un solo comando.
 - Soporte para servir de forma individual los producers (remotes) en los que estás trabajando, con HMR y vigilancia de archivos para un desarrollo local más rápido.
 
 Más abajo puedes ver cómo [escalamos la experiencia de desarrollo](/integrations/framework/monorepos/nx-for-module-federation.html#scaling-developer-experience-dx) de Module Federation en Nx.

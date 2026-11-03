@@ -4,13 +4,13 @@ title: "Ampliar un monolito"
 
 # Ampliar apps Angular con Module Federation: guía paso a paso
 
-Te damos la bienvenida a la segunda parte de nuestra serie sobre cómo mejorar aplicaciones Angular con Module Federation (MF). En esta guía veremos cómo incorporar MF sin fricciones a una aplicación Angular sencilla ya existente.
+En esta segunda parte vamos a añadir Module Federation (MF) a la aplicación Angular que preparamos en la primera guía.
 
 ## Conocer nuestras herramientas: @angular-architects/module-federation
 
-Es importante tener en cuenta que, por defecto, Angular CLI no permite cargar configuraciones de Webpack personalizadas. Para solucionarlo, nuestro enfoque consiste en sustituir el builder de Angular CLI por un builder personalizado especializado. Esta modificación permite ampliar el archivo de configuración de Webpack, algo fundamental para integrar funcionalidades avanzadas como Module Federation.
+El builder por defecto de Angular CLI no permite añadir una configuración de Webpack personalizada. Vamos a sustituirlo por uno que sí lo permita para poder configurar Module Federation.
 
-Aunque esta guía se centra en el builder personalizado que proporciona la biblioteca `@angular-architects/module-federation`, tienes la flexibilidad de sustituirlo por otro builder si tu experiencia te lo permite. Si te interesa saber cómo implementar configuraciones de Webpack personalizadas en los builders de Angular CLI, te recomendamos leer el artículo [How To Use Custom webpack Configurations with Angular CLI Builders](https://www.digitalocean.com/community/tutorials/angular-custom-webpack-config) de DigitalOcean. Este recurso ofrece ideas valiosas y pasos prácticos para personalizar el proceso de build de Angular más allá de las configuraciones estándar.
+Usaremos el builder de `@angular-architects/module-federation`, aunque puedes elegir otro que admita configuraciones de Webpack personalizadas. Si quieres saber cómo funcionan, consulta [How To Use Custom webpack Configurations with Angular CLI Builders](https://www.digitalocean.com/community/tutorials/angular-custom-webpack-config) de DigitalOcean.
 
 ### Funciones de la biblioteca
 
@@ -53,7 +53,7 @@ Para evitar conflictos, cambia el puerto en el que se sirve la aplicación secun
 }
 ```
 
-Al actualizar estas configuraciones, estableces una estructura clara y funcional para ejecutar tus aplicaciones Angular principal y secundaria en puertos distintos, lo que facilita tanto su funcionamiento independiente como su integración.
+Con este cambio, las dos aplicaciones se ejecutan en puertos distintos y no compiten por el mismo puerto.
 
 - *Ejemplo simplificado:* en esta guía, la configuración del manifest se define de forma estática en un archivo JSON por simplicidad.
 
@@ -123,7 +123,7 @@ ng add @angular-architects/module-federation --project login --type remote --por
 
 ### Entender 'exposes'
 
-- *El papel de 'exposes':* la propiedad exposes del archivo `webpack.config.js` desempeña un papel fundamental. Contiene una configuración de objeto en la que cada par clave-valor se parece a una ruta. Esta propiedad determina qué módulos se exponen al cargador.
+- *El papel de 'exposes':* la propiedad `exposes` de `webpack.config.js` indica qué módulos pueden cargar otras aplicaciones. Cada entrada asocia un nombre público con la ruta del módulo.
 - *Relación con 'exposedModule':* esto enlaza con el paso anterior, en el que usamos la propiedad exposedModule en la configuración de rutas para indicar la ruta concreta del módulo que se debe cargar.
 
 ### Ajustes en la configuración de Webpack
@@ -152,4 +152,4 @@ Con esta actualización, las aplicaciones secundarias quedan correctamente confi
 
 ## Optimizar la configuración de build
 
-Aunque actualmente usamos `shareAll` del paquete `@angular-architects/module-federation/webpack`, un enfoque más refinado consiste en compartir solo las dependencias necesarias con la función `share`. Este uso selectivo de shared optimiza el rendimiento de la aplicación y el uso de recursos.
+Hasta ahora hemos usado `shareAll` de `@angular-architects/module-federation/webpack`. Puedes cambiarlo por `share` para elegir qué dependencias compartir y evitar incluir otras que no necesitas.

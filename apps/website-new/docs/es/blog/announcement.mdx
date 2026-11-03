@@ -14,8 +14,8 @@ import AnnouncementVideo from '@components/AnnouncementVideo.tsx';
 
 ## ¿Por qué usar Module Federation 2.0?
 
-Introducido en Webpack 5, Module Federation lleva más de tres años siendo una funcionalidad destacada.
-Como solución para compartir módulos, se ha adoptado ampliamente, sobre todo en proyectos web grandes, donde mejora la eficiencia y la simplicidad del desarrollo de aplicaciones grandes y facilita la colaboración entre equipos.
+Module Federation llegó con Webpack 5 hace más de tres años.
+Desde entonces, muchos proyectos web lo usan para compartir módulos entre aplicaciones y permitir que varios equipos trabajen en ellas por separado.
 Sin embargo, a medida que su uso se ha extendido, han surgido nuevos desafíos.
 
 La versión 2.0 aborda estos desafíos con varias mejoras:
@@ -23,20 +23,20 @@ La versión 2.0 aborda estos desafíos con varias mejoras:
 - **Buenas prácticas**: un nuevo sitio de documentación independiente, disponible [aquí](https://module-federation.io/), incluye buenas prácticas y configuraciones que mejoran su uso.
 - **Desacoplamiento del runtime respecto de las herramientas de build**: esta versión desacopla el runtime de las herramientas de build, estandariza la implementación en distintas plataformas y aumenta la flexibilidad de la carga de módulos.
 - **Seguridad de tipos**: el plugin de build actualizado genera y carga automáticamente los tipos en proyectos TypeScript, y en modo de desarrollo sincroniza los tipos para garantizar la seguridad.
-- **Herramientas de depuración**: unas nuevas Chrome DevTools facilitan la depuración y hacen el proceso más cómodo y eficiente.
+- **Herramientas de depuración**: las nuevas Chrome DevTools permiten inspeccionar las dependencias y probar módulos locales en páginas en producción.
 - **Plataformas de despliegue**: la incorporación del protocolo de archivo `mf-manifest.json` simplifica la integración con plataformas de despliegue y permite gestionar mejor los recursos de cada versión y las propias versiones.
 
 ## Introducción a las funcionalidades de Module Federation 2.0
 
 ### Nuevo sitio de documentación
 
-La nueva documentación presenta en detalle los escenarios de uso y las capacidades del framework. Cubre todo el proceso, desde iniciar un proyecto con Rspack hasta aprovechar sus funcionalidades. Además, ofrece un análisis y una explicación en profundidad de la configuración de su plugin.
+La nueva documentación explica cuándo usar Module Federation, cómo empezar un proyecto con Rspack y cómo configurar el plugin.
 
 ![](@public/blog/announcement/module-federation-doc.png)
 
 ### Mayor flexibilidad en la carga de módulos
 
-La versión actualizada trae cambios significativos. Las capacidades de runtime que antes estaban integradas en Webpack se han extraído para formar un SDK independiente. Este cambio permite registrar y cargar dinámicamente módulos remotos y shared sin depender de ninguna herramienta de build. Además, se ha mejorado el uso de la precarga de módulos y de los plugins de runtime, lo que ofrece un control más potente sobre el proceso de carga de módulos.
+El runtime que antes formaba parte de Webpack ahora es un SDK independiente. Puedes registrar y cargar módulos remotos y shared sin depender de una herramienta de build. También puedes precargar módulos y usar plugins de runtime para controlar cómo se cargan.
 
 ```typescript
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
@@ -63,19 +63,19 @@ loadRemote("app2/util").then((md)=>{
 ```
 ### Desacoplamiento de Webpack y soporte para compartir módulos entre herramientas
 
-La nueva versión del plugin de Module Federation adopta una arquitectura de runtime completamente nueva. Este cambio significa que la herramienta de build ya no está fuertemente acoplada al runtime. Ahora puedes incorporar libremente a tus proyectos artefactos generados por distintas herramientas de build y ensamblarlos con flexibilidad para que funcionen juntos.
+El plugin de Module Federation ahora usa un runtime independiente de la herramienta de build. Esto permite combinar en un proyecto módulos generados por distintas herramientas compatibles.
 
 Actualmente hay varias herramientas de build compatibles, entre ellas Webpack y Rspack. Otras herramientas de build también pueden implementar Module Federation a partir de este estándar, lo que mantiene la coherencia y la estandarización en el runtime.
 
 ### Sugerencias de tipos
 
-La nueva versión introduce una funcionalidad revolucionaria: ¡sugerencias de tipos para módulos dinámicos! Esta funcionalidad resuelve de forma eficaz la pérdida de tipos al convertir módulos locales en módulos remotos dinámicos en proyectos TypeScript. Ahora, con este plugin, no solo puedes generar y usar automáticamente los tipos remotos, sino también disfrutar de actualizaciones de tipos en tiempo real, similares a las de npm link, cuando todos los proyectos se ejecutan en local.
+La nueva versión añade sugerencias de tipos para módulos dinámicos. Así puedes conservar los tipos de TypeScript al convertir un módulo local en remoto. El plugin genera y carga los tipos automáticamente. Cuando ejecutas todos los proyectos en local, también actualiza los tipos en tiempo real, de forma parecida a npm link.
 
 ![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/demo-type-hint.gif)
 
 ### Chrome DevTools
 
-Las DevTools son una herramienta de depuración desarrollada específicamente para este framework. Muestran con claridad las dependencias entre módulos, así como la configuración de Expose y shared. Además, la herramienta permite hacer proxy de módulos de páginas en producción hacia el entorno de desarrollo local y mantiene la actualización en caliente para ofrecer una experiencia de desarrollo fluida.
+Las DevTools muestran las dependencias entre módulos y la configuración de Expose y shared. También permiten redirigir las peticiones de módulos de una página en producción a tu entorno local, con actualización en caliente.
 
 ![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/chrome-devtool-display.gif)
 
@@ -84,7 +84,7 @@ Las DevTools son una herramienta de depuración desarrollada específicamente pa
 El plugin de build de Module Federation genera un archivo de manifest.
 Este archivo contiene información básica sobre el sistema, como remoteEntry, shared, exposes, remotes, chunks y tipos.
 Esta información es la base para analizar las dependencias entre proyectos y nos ayuda a construir y optimizar la plataforma.
-De esta forma, podemos gestionar de forma granular las versiones y los lanzamientos graduales (gray release) de los módulos en distintas plataformas de despliegue.
+Con estos datos, podemos gestionar las versiones de cada módulo y sus lanzamientos graduales, o gray releases, en distintas plataformas de despliegue.
 Además, el plugin de build y el runtime pueden usar directamente el protocolo de archivo de manifest para implementar funcionalidades más avanzadas.
 Por ejemplo, la funcionalidad de sugerencias de tipos dinámicas de la última versión se desarrolló a partir del protocolo de archivo de manifest.
 
@@ -113,4 +113,4 @@ Para abordarlo, Module Federation tiene previsto ofrecer una serie de estrategia
 
 ### Colaborar con socios de la comunidad
 
-Por ahora, las nuevas funcionalidades de Module Federation 2.0 solo son compatibles con dos herramientas de build: Webpack y Rspack. Module Federation ofrece un amplio conjunto de SDK básicos que facilitan que otras herramientas de build los extiendan y encapsulen. Actualmente, Module Federation se usa principalmente como solución para compartir módulos. Nuestro plan es combinarlo con frameworks de nivel superior para ofrecer una serie de buenas prácticas de arquitectura micro-frontend basadas en Module Federation. Esto ayudará a los desarrolladores a cubrir mejor las necesidades de las aplicaciones web grandes en el desarrollo con arquitectura micro-frontend.
+Por ahora, las nuevas funciones de Module Federation 2.0 son compatibles con Webpack y Rspack. Otras herramientas de build pueden integrarlas a través de los SDK de Module Federation. También queremos trabajar con frameworks para documentar buenas prácticas de micro-frontends en aplicaciones web grandes.

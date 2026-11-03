@@ -17,7 +17,7 @@ export const ES_ES: Record<keyof typeof EN_US, string> = {
   community: 'Comunidad',
   benchmarkTitle: 'Rendimiento de build',
   benchmarkDesc:
-    'Combinamos TypeScript y Rust con una arquitectura paralelizada para ofrecerte la mejor experiencia de desarrollo.',
+    'Usamos TypeScript y Rust y ejecutamos tareas en paralelo durante el build.',
   benchmarkDetail: 'Ver detalles del benchmark',
   announcementVideo:
     'https://module-federation-assest.netlify.app/document/announcement/blog/announcement/announcement-video.mp4',
