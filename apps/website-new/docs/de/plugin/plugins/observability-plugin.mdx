@@ -194,10 +194,10 @@ Du kannst den hochgeladenen Bericht einem KI-Coding-Agenten geben:
 ```text
 /mf observability
 
-Here is an MF observability report uploaded from production.
-Please tell me whether the load succeeded, where it failed, who likely owns the issue, and how to fix it.
+Hier ist ein aus der Produktion hochgeladener MF-Observability-Bericht.
+Bitte sag mir, ob der Ladevorgang erfolgreich war, wo er fehlgeschlagen ist, wer das Problem wahrscheinlich verantwortet und wie es behoben wird.
 
-<paste report JSON>
+<Bericht-JSON einfügen>
 ```
 
 import DivebellObservability from '@docs/de/_components/divebell-observability.mdx';
@@ -379,28 +379,28 @@ Wenn die Konsole einen Observability-Hinweis ausgibt, bitte deinen Agenten um Fo
 
 ```text
 /mf observability
-I saw this Module Federation console error:
+Ich habe diesen Module-Federation-Konsolenfehler gesehen:
 
 [Module Federation] Observability report generated
 traceId: mf-...
 read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
 
-Please read the report and fix the issue.
+Bitte lies den Bericht und behebe das Problem.
 ```
 
 Unter Node oder SSR gibst du dem Agenten stattdessen den Dateipfad:
 
 ```text
 /mf observability
-Read .mf/observability/latest.json and explain the likely owner and fix.
+Lies .mf/observability/latest.json und erkläre die wahrscheinliche Ursache und die Behebung.
 ```
 
 Wenn deine Produktionsanwendung Berichte hochlädt, gib dem Agenten den hochgeladenen Bericht oder die `traceId`:
 
 ```text
 /mf observability
-Here is the uploaded report for traceId mf-...
-Tell me whether this is a host, remote, shared, network, or build issue.
+Hier ist der hochgeladene Bericht für die traceId mf-...
+Sag mir, ob es ein Problem von Host, Remote, Shared, Netzwerk oder Build ist.
 ```
 
 ## Was die KI zuerst liest {#what-the-ai-reads-first}

@@ -22,7 +22,7 @@ npx skills add module-federation/agent-skills --skill mf -y
 Danach verwendest du diesen Einstieg:
 
 ```text
-/mf <sub-command or question>
+/mf <Unterbefehl oder Frage>
 ```
 
 Wenn du die CLI nicht verwenden kannst, kannst du das Verzeichnis auch manuell von GitHub kopieren:
@@ -38,7 +38,7 @@ https://github.com/module-federation/agent-skills/tree/main/skills/mf
 Mit Unterbefehlen:
 
 ```text
-/mf docs How do I use Module Federation in Modern.js?
+/mf docs Wie verwende ich Module Federation in Modern.js?
 /mf integrate
 /mf type-check
 /mf runtime-error RUNTIME-008
@@ -48,10 +48,10 @@ Mit Unterbefehlen:
 In natürlicher Sprache:
 
 ```text
-/mf What's the difference between singleton and requiredVersion in shared?
-/mf Help me figure out why this project is not pulling remote types
-/mf Add Module Federation to the current project
-/mf I saw a Module Federation console error with traceId mf-...
+/mf Was ist der Unterschied zwischen singleton und requiredVersion in shared?
+/mf Hilf mir herauszufinden, warum dieses Projekt keine Remote-Typen lädt
+/mf Füge Module Federation zum aktuellen Projekt hinzu
+/mf Ich habe einen Module-Federation-Konsolenfehler mit der traceId mf-... gesehen
 ```
 
 ## Funktionen von `mf` {#what-mf-supports}
@@ -77,7 +77,7 @@ In natürlicher Sprache:
 Das ist der häufigste Anwendungsfall und ein guter Einstieg:
 
 ```text
-/mf docs What's the difference between singleton and requiredVersion in shared?
+/mf docs Was ist der Unterschied zwischen singleton und requiredVersion in shared?
 ```
 
 Damit liest der Agent zuerst die aktuelle Doku, statt sich auf veraltetes Wissen zu verlassen.
@@ -112,8 +112,8 @@ Gib dem Skill für eine einmalige Untersuchung die Ziel-URL und die Schritte in 
 
 ```text
 /mf observability
-Open https://example.com with Divebell, reproduce the failing checkout flow,
-and inspect the Remote and Shared loading chain.
+Öffne https://example.com mit Divebell, reproduziere den fehlschlagenden Checkout
+und untersuche die Ladekette von Remote und Shared.
 ```
 
 Der Skill ermittelt die installierten Skills für die Divebell CLI und die MF Extension, öffnet die Seite mit `divebell open <url> --mf` und wählt den kleinsten passenden `divebell mf`-Befehl. Seiteninteraktionen lösen nur den betreffenden asynchronen Ladevorgang aus. Schlussfolgerungen sollen auf strukturierten Daten zu Remotes, Shared-Abhängigkeiten, Bridge oder Modul-Performance beruhen.
@@ -126,20 +126,20 @@ Installiere das [Observability-Plugin](/plugin/plugins/observability-plugin.html
 
 ```text
 /mf observability
-I saw this Module Federation console error:
+Ich habe diesen Module-Federation-Konsolenfehler gesehen:
 
 [Module Federation] Observability report generated
 traceId: mf-...
 read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
 
-Please read the report and fix the issue.
+Bitte lies den Bericht und behebe das Problem.
 ```
 
 Für Node, SSR oder Uploads aus der Produktion:
 
 ```text
 /mf observability
-Read .mf/observability/latest.json and explain the likely owner and fix.
+Lies .mf/observability/latest.json und erkläre die wahrscheinliche Ursache und die Behebung.
 ```
 
 ## Das Wichtigste für den Einstieg {#the-one-thing-you-really-need-to-remember}
