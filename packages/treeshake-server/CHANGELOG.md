@@ -1,5 +1,7 @@
 # @module-federation/treeshake-server
 
+## 2.9.3
+
 ## 2.9.2
 
 ### Patch Changes

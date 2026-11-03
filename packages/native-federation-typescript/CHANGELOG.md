@@ -1,5 +1,11 @@
 # @module-federation/native-federation-typescript
 
+## 0.6.6
+
+### Patch Changes
+
+- ca9d449: Update Axios to 1.20.0 for security hardening and reliability fixes when downloading remote types and test archives.
+
 ## 0.6.5
 
 ### Patch Changes
