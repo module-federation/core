@@ -16,6 +16,7 @@ import {
   RemoteInfo,
   ShareScopeMap,
   InitScope,
+  InitTokens,
   RemoteEntryInitOptions,
   CallFrom,
   ResourceLoadContext,
@@ -378,6 +379,7 @@ export class ModuleFederation {
       from?: CallFrom;
       strategy?: Shared['strategy'];
       context?: SharedLoadContext;
+      initFrom?: InitTokens[string];
     },
   ): Array<Promise<void>> {
     return this.sharedHandler.initializeSharing(shareScopeName, extraOptions);
