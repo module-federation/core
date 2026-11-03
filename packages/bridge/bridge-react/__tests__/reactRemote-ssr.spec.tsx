@@ -2,7 +2,7 @@
 import React from 'react';
 import { Writable } from 'node:stream';
 import { renderToPipeableStream } from 'react-dom/server.node';
-import { createReactRemote } from '../src/reactRemote';
+import { createReactRemote } from '../src/reactRemote.node';
 import { remoteRuntime } from './reactRemote-utils';
 import { snapshotRuntime } from './reactRemote-runtime-utils';
 import { helpers } from '@module-federation/enhanced/runtime';

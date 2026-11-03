@@ -39,7 +39,7 @@ export default createBridgeComponent({
 });
 ```
 
-> set alias to proxy
+> Legacy Router wrapper setup. Framework adapters can use the router-free `/base` entry and the shared connector described below without a Router alias.
 
 ```js
 //rsbuild.config.ts
@@ -101,9 +101,9 @@ export default defineConfig({
 
 ```jsx
 // ./src/index.tsx
-import { createBridgeComponent } from '@module-federation/bridge-react';
+import { createReactRemote } from '@module-federation/bridge-react';
 
-const Remote1 = createBridgeComponent(()=> import('remote1/export-app'));
+const Remote1 = createReactRemote({ remote: 'remote1/export-app' });
 
 function App() {
   return ( <BrowserRouter basename="/">
@@ -166,12 +166,19 @@ gate or a second loading effect. Configured load and data fallbacks
 remain present in server HTML. Resolution failures also reach the runtime
 load-recovery and diagnostic hooks before the consumer fallback.
 
-An expose marked `render: 'bridge'` mounts its default provider in a separate
-client root. Each mounted consumer owns its provider lifecycle. On the server it
-outputs a placeholder and never invokes the provider. With a string input, the
-producer's Node expose is not loaded. A callback may already execute that module
-before its protocol can be identified. Bridge SSR and Service App execution are
-not supported by this API version.
+An expose marked `render: 'bridge'` owns a separate application Root. With a Host
+SSR adapter and a provider exposing `renderStream`, the unified consumer streams
+the application and hydrates that Root independently in the browser. The same
+provider instance then handles props updates, navigation, and cleanup. See
+[Bridge application SSR](#bridge-application-ssr) for the producer and Host
+contracts. Service App execution is outside this API.
+
+Without the Host SSR context, Bridge keeps its server placeholder. String inputs
+then avoid loading the producer's Node expose. Under that context, Bridge loads
+the Node expose to check its `renderStream` capability. A provider without that
+method keeps its existing CSR behavior. Function inputs may execute the module
+before its protocol can be identified. Use `noSSR` for an expose that must only
+execute in the browser.
 
 For an unmarked legacy provider, set `render: 'bridge'`. A hint conflicting with
 published metadata fails. Unmarked ordinary components keep the component path.
@@ -330,23 +337,27 @@ behavior, and independent `memoryRoute` cards do not attach a browser connector.
 with an initial `entryPath`. Existing Router wrappers use it to select a memory
 Router instead of browser history. It does not select a producer route scope.
 
-No routing metadata is added to manifests or Snapshots. Bridge SSR, service
-execution, and remote version replacement are outside these controls.
+No routing metadata is added to manifests or Snapshots. These routing controls do
+not select an SSR implementation, execute a service, or replace a remote version.
 
-## SSR framework primitives
+## Bridge application SSR
 
-Framework integrations can use Bridge's producer callbacks, request controller,
-and browser receiver to combine independently rendered React application roots.
-These primitives do not change the unified consumers' Bridge CSR behavior by
-themselves. A framework adapter owns request registration, stream hooks, route
-and loader restoration, and browser hydration.
+Bridge SSR combines a Host React stream with independently rendered Bridge
+applications. The HTTP response contains the producer's rendered HTML and data
+inside ordered script envelopes. A small browser receiver inserts that HTML into
+the matching container before the producer hydrates it. JavaScript is required
+for this delivery format. A successful CSR recovery is not evidence that SSR or
+DOM reuse succeeded.
 
-The HTTP response carries rendered HTML and data in ordered script envelopes.
-The receiver inserts those fragments into matching containers before hydration,
-so JavaScript is required. Inline classic scripts execute once. Application
-script elements remain in place for hydration, while identified React transport
-instructions are removed after replay. External and module scripts inside the
-remote HTML are outside this stream contract.
+The receiver replays inline classic scripts once and preserves application script
+elements for hydration. It removes only identified React transport instructions.
+External and module scripts inside remote HTML are outside this stream contract.
+
+The unified consumers choose a renderer and reuse the shared Bridge lifecycle.
+Framework adapters supply application rendering, route and loader restoration,
+and Host stream hooks. They do not need another consumer implementation or shared
+React Router aliases. This SSR path is enabled through `createReactRemote` and
+`ReactRemote`. The legacy consumer factories keep their existing CSR behavior.
 
 ### Package entries
 
@@ -438,57 +449,117 @@ after the shell and initial data arrive while remaining HTML and updates stream
 in. The framework owns serializable snapshot contents, deferred-data restoration,
 and update handling. Business props are passed to the renderer unchanged.
 
-### Host request controller
+### Host adapter
 
-Import `createBridgeSSRController` from `/ssr-node` and create a fresh controller
-for each request. Supply the Fetch `request`, an `identifierPrefix`, and a
-`shellEndMarker` matching the exact template markup in the raw Host React stream.
-The optional `nonce` applies to emitted scripts. `timeoutMs` defaults to 30 seconds.
-`onError(error, instanceId)` lets the framework log original producer failures on
-the server while the browser receives a generic error frame.
+Create one controller per SSR request and provide its context around the Host
+React tree. A framework integration wires these operations into its existing
+SSR pipeline:
 
-The adapter manages producers through `controller.context`:
+```tsx
+import { BridgeSSRContext } from '@module-federation/bridge-react/ssr';
+import { createBridgeSSRController } from '@module-federation/bridge-react/ssr-node';
 
-- `reserve(instanceId)` reserves work before an asynchronous producer lookup.
-- `reservation.wait(promise)` bounds that preparation by the request deadline.
-- `reservation.activate(factory, { props, basename, memoryRoute })` selects the
-  producer and supplies the consumer's fixed mount inputs.
-- `reservation.skip()` releases an ordinary component or CSR-only provider.
-- `reservation.fail(error)` cancels a failed preparation.
+const identifierPrefix = 'host-';
+const shellEndMarker = '<template id="bridge-host-shell"></template>';
+const bridge = createBridgeSSRController({
+  request,
+  nonce,
+  identifierPrefix,
+  shellEndMarker,
+  timeoutMs: 30_000,
+  onError(error, instanceId) {
+    // Use the framework's request logger. The browser receives a generic error.
+    logger.error({ error, instanceId });
+  },
+});
 
-Each application must have a unique, stable container ID. Provide the context
-through `BridgeSSRContext` from `/ssr` for framework consumers that register their
-own tasks. `getBootstrap()` returns receiver script HTML and styles known at that
-point. Insert it before any Bridge envelopes. `processStream(rawHostStream)`
-composes the raw Node Readable before the framework applies its document template.
-The Host shell is emitted before remote frames. The response remains open for
-registered tasks even after the Host React stream ends. Request aborts, a closed
-response, or `controller.abort(reason)` cancel remaining work.
+const tree = (
+  <BridgeSSRContext.Provider value={bridge.context}>
+    <HostApp />
+    <template id="bridge-host-shell" />
+  </BridgeSSRContext.Provider>
+);
 
-The receiver queues frames for containers that have not arrived and exposes each
-application's initial snapshot and optional update stream separately. An adapter
-claims the session, hydrates the existing producer DOM with its identifier prefix,
-and reuses that application Root for props updates and navigation. It releases the
-session and destroys the Root on unmount. It must also honor `csr=1` by serving a
-CSR document, because a failed stream requests that recovery path.
+// Render `tree` with the same identifierPrefix used by Host browser hydration.
+// Inject bridge.getBootstrap() into the document before any Bridge frames.
+// Pass the raw Host React Readable through bridge.processStream(rawHostStream).
+// Apply the framework's document template to that composed output.
+// Call bridge.abort(reason) when the framework cancels the response.
+```
 
-### Renderer compatibility
+`getBootstrap()` returns HTML containing the receiver script and any stylesheets
+known at that point. Styles discovered later travel with their application's
+metadata. `processStream()` accepts the raw Host React stream before document
+templating, including the exact shell marker. It preserves the Host shell before
+emitting remote envelopes and keeps the response open until its registered jobs
+finish, even if the Host React stream has ended. Request cancellation and a closed
+response abort outstanding work. `timeoutMs` defaults to 30 seconds and bounds
+preparation and rendering. `onError(error, instanceId)` reports original selected
+Bridge rendering failures on the server without exposing their details in HTML.
 
-Core's engine, provider callback, and DOM hydration tests use React 18.3.1. This
-is not a blanket compatibility guarantee for a framework or renderer version.
-Unpatched React 18.3.1 `renderToPipeableStream` has a confirmed UTF-8 boundary
+The consumer reserves a request task before resolving a remote or invoking its
+loader. The reservation's `wait` applies the deadline while the remote type is
+unknown. A selected Bridge provider with `renderStream` activates the task once
+its mount inputs are known. An ordinary component or CSR-only provider releases
+it without creating a browser session. Thus all three inputs support Bridge SSR:
+`'shop/Product'`, `() => loadRemote('shop/Product')`, and `() => Shop` where `Shop`
+is an MF export already loaded through the same runtime. They keep the type
+inference and provenance requirements described above. Function inputs are not
+automatically treated as client-only.
+
+The browser receiver can queue output before a remote container arrives. A
+container marked by the server also waits for metadata that arrives after Host
+hydration. Each mounted consumer claims one session and hydrates its actual
+server DOM with the producer's identifier prefix and restored data. Independent
+instances do not wait for another application's stream to complete. Ordinary
+props updates and navigation reuse the hydrated provider, Root, Router, and page
+state. Unmounting releases the session, cancels pending work, and destroys that
+provider. A changed basename requires a new mount, as described above.
+
+A server-marked Bridge container selects the existing Bridge renderer immediately
+while its browser provider loads. The Host can hydrate the mount container without
+suspending on module classification. Pending business props updates then pass
+through the same provider after its initial hydration, preserving the server DOM.
+
+Stream failures, timeout, or a claimed hydration failure request a document
+reload with `csr=1`. The Host adapter must honor that parameter by rendering its
+CSR document. Recovery must not rerun the broken SSR response indefinitely.
+Preparation failures before Bridge activation continue through the ordinary
+consumer error and retry path. `noSSR` skips server loading and preserves the
+loading placeholder for client preparation. It also avoids a Bridge SSR task.
+
+### Framework and version boundaries
+
+Modern's initial integration validation uses React **19.3.1**. Core's generic
+stream engine, provider callbacks, and DOM hydration tests also run with React
+**18.3.1**, but that does not establish equivalent Modern SSR support.
+
+Unpatched React 18.3.1 `renderToPipeableStream` has a confirmed UTF-8 buffer-boundary
 defect: it can insert NUL bytes and corrupt Unicode attributes after HTML parsing.
 Both development and production builds reproduce the defect through this
-normalizer and browser receiver. Correct visible text does not prove that the
-response bytes or attributes remain intact.
+normalizer and browser receiver. Correct visible text alone does not prove the
+response bytes or attributes are intact. The older experimental patch backports
+the buffer-length correction in [React #26228](https://github.com/facebook/react/pull/26228),
+with the React 18.3.1 report tracked in [React #31134](https://github.com/facebook/react/issues/31134).
+This implementation does not apply that dependency patch or strip bytes from the
+transport. React 18.3.1 Node Pipeable rendering is therefore outside the initial
+Modern SSR support boundary. Older React consumer versions without `useId` retain
+the existing CSR Bridge path.
 
-The older experimental patch backports the buffer-length correction in
-[React #26228](https://github.com/facebook/react/pull/26228), with the React 18.3.1
-report tracked in [React #31134](https://github.com/facebook/react/issues/31134).
-This package does not apply that dependency patch or strip bytes from transport.
-Framework integrations must validate their selected renderer separately.
+Browser routing remains the default for exported browser applications. Existing
+Hash configuration is preserved, and only explicit `memoryRoute` opts into
+independent memory navigation. Server adapters derive their initial route from
+the request and restore that route and its loader data for hydration. A URL
+fragment is absent from the HTTP request, so arbitrary initial Hash deep-link
+SSR is not established by the Browser SSR validation. A framework route selector
+chooses exported content: selecting `/product` and mounting at `/inventory`
+still gives `/inventory/detail/42`, without restoring the source prefix. Relative
+business links and producer data endpoint configuration remain application and
+data-layer responsibilities.
 
 The Node `/server` producer implements stream rendering without importing the browser Root lifecycle. Browser `/v18` and `/v19` producers implement mount, hydration, updates and unmount without including Node stream processing. Their shared tree construction keeps the server and browser markup consistent. Producer messages carry data snapshots in their `data` or `ready` messages, without a duplicate top-level snapshot promise.
+
+The default and `/base` consumption entries select a Node implementation through the `node` export condition. Their browser implementations keep DOM ownership and independent hydration, while Node implementations reserve SSR jobs and render mount containers without importing that browser lifecycle. Both delegate source loading and renderer selection to the same shared consumer. Explicit browser producer entries remain `/v18` and `/v19`, and the Node producer entry remains `/server`.
 
 ## Maintainer bundle-size reports
 
@@ -499,6 +570,11 @@ the base are reported as new capabilities with absolute sizes, never as a zero
 baseline. Non-peer runtime dependencies are bundled, while declared peers and
 Node builtins remain external. Bundle fixtures emit ESM. The receiver's response HTML is measured separately
 from JavaScript bundles. Size measurements do not establish runtime performance.
+
+The unified consumer fixtures also compare `createReactRemote` through `/base`
+under browser and Node conditions. An older Node consumer may only emit Bridge
+placeholders, so its bundle delta measures the implementation change, without
+claiming that both revisions support the same SSR behavior.
 
 After building both revisions, the Bridge section can also be reproduced locally
 from the current checkout:

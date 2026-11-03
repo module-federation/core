@@ -1,0 +1,12 @@
+---
+'@module-federation/bridge-react': minor
+'@module-federation/manifest': patch
+---
+
+Enable Bridge application SSR through createReactRemote and ReactRemote when a Host SSR adapter and stream-capable provider are present. Reserve preparation before resolving string or callback remotes, reuse streamed DOM and restored loader data during independent hydration, and retain the hydrated instance for props updates, navigation, and unmounting. Preserve ordinary component SSR, noSSR, and existing CSR-only providers.
+
+Select the existing Bridge renderer synchronously for server-marked containers, so Host updates during provider loading preserve the streamed DOM and apply through the hydrated instance.
+
+Recognize createModernBridgeComponent as a Bridge provider factory when generating expose rendering metadata, including imported aliases and namespace access.
+
+Select browser and Node consumer lifecycles at the package entry while preserving shared renderer selection, existing legacy entry behavior, remote inputs and inferred props.

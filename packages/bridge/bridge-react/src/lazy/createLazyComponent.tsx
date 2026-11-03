@@ -110,7 +110,7 @@ function getTargetModuleInfo(
   };
 }
 
-function collectSSRAssetDescriptors(
+export function collectSSRAssetDescriptors(
   options: IProps,
   resolvedRemoteInfo?: ReturnType<typeof getLoadedRemoteInfos>,
 ): SSRAssetDescriptors {

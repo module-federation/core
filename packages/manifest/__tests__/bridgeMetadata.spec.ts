@@ -35,6 +35,9 @@ describe('Bridge built module metadata', () => {
     return module;
   }
   it.each([
+    "import { createModernBridgeComponent } from '@modern-js/runtime/mf'; export default createModernBridgeComponent({ rootComponent: App });",
+    "import { createModernBridgeComponent as bridge } from '@modern-js/runtime/mf'; const provider = bridge({ rootComponent: App }); export default provider;",
+    "import * as mf from '@modern-js/runtime/mf'; export default mf.createModernBridgeComponent({ rootComponent: App });",
     "import { createBridgeComponent } from '@module-federation/bridge-react'; export default createBridgeComponent({ rootComponent: () => null });",
     "import { createBridgeComponent as bridge } from '@module-federation/bridge-react/v18'; const provider = bridge({ rootComponent: App }); export default provider;",
     "import * as bridge from '@module-federation/bridge-react/base'; const provider = bridge.createBridgeComponent({ rootComponent: App, isService: false }); export { provider as default };",
