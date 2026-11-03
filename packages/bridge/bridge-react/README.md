@@ -582,21 +582,6 @@ under browser and Node conditions. An older Node consumer may only emit Bridge
 placeholders, so its bundle delta measures the implementation change, without
 claiming that both revisions support the same SSR behavior.
 
-After building both revisions, the Bridge section can also be reproduced locally
-from the current checkout:
-
-```sh
-node scripts/bundle-size-report.mjs --bridge-only --output head.json
-node scripts/bundle-size-report.mjs --bridge-only --packages-dir /path/to/base/packages --output base.json
-node scripts/bundle-size-report.mjs --bridge-only --compare base.json --current head.json --output stats.txt
-```
-
-CI displays the comparison in the job summary and existing PR report, and uploads
-both JSON measurements with the Markdown report. The JSON records source SHAs,
-lockfile hashes, tool versions, build settings, resolved modules and external
-imports. Git retains the inputs needed to rebuild each revision, while report
-artifacts are retained according to the repository's Actions retention policy.
-
 Published JavaScript uses explicit `.mjs` and `.cjs` extensions. Conditional ESM
 type wrappers share the CommonJS declaration tree, including global data types.
 Node SSR bundles contain only the public htmlparser2 Parser path and its required
@@ -613,3 +598,18 @@ compatible paths. Public package exports, including legacy `dist/*.es.js` module
 select `.mjs`/`.cjs` directly. Importing legacy ESM files by absolute filesystem
 path retains their historical Node module-format detection behavior.
 The forwarding files do not duplicate the renderer or parser implementation.
+
+After building both revisions, the Bridge section can also be reproduced locally
+from the current checkout:
+
+```sh
+node scripts/bundle-size-report.mjs --bridge-only --output head.json
+node scripts/bundle-size-report.mjs --bridge-only --packages-dir /path/to/base/packages --output base.json
+node scripts/bundle-size-report.mjs --bridge-only --compare base.json --current head.json --output stats.txt
+```
+
+CI displays the comparison in the job summary and existing PR report, and uploads
+both JSON measurements with the Markdown report. The JSON records source SHAs,
+lockfile hashes, tool versions, build settings, resolved modules and external
+imports. Git retains the inputs needed to rebuild each revision, while report
+artifacts are retained according to the repository's Actions retention policy.
