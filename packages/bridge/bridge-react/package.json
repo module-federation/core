@@ -14,110 +14,221 @@
   },
   "files": [
     "dist/",
+    "!dist/build-modules.*.json",
     "README.md"
   ],
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.es.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
       "node": {
-        "import": "./dist/index.node.es.js",
-        "require": "./dist/index.node.cjs.js"
+        "import": {
+          "types": "./dist/index.d.mts",
+          "default": "./dist/index.node.mjs"
+        },
+        "require": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.node.cjs"
+        }
       },
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./base": {
-      "types": "./dist/base.d.ts",
       "node": {
-        "import": "./dist/base.node.es.js",
-        "require": "./dist/base.node.cjs.js"
+        "import": {
+          "types": "./dist/base.d.mts",
+          "default": "./dist/base.node.mjs"
+        },
+        "require": {
+          "types": "./dist/base.d.ts",
+          "default": "./dist/base.node.cjs"
+        }
       },
-      "import": "./dist/base.es.js",
-      "require": "./dist/base.cjs.js"
+      "import": {
+        "types": "./dist/base.d.mts",
+        "default": "./dist/base.mjs"
+      },
+      "require": {
+        "types": "./dist/base.d.ts",
+        "default": "./dist/base.cjs"
+      }
     },
     "./v18": {
-      "types": "./dist/v18.d.ts",
-      "import": "./dist/v18.es.js",
-      "require": "./dist/v18.cjs.js"
+      "import": {
+        "types": "./dist/v18.d.mts",
+        "default": "./dist/v18.mjs"
+      },
+      "require": {
+        "types": "./dist/v18.d.ts",
+        "default": "./dist/v18.cjs"
+      }
     },
     "./v19": {
-      "types": "./dist/v19.d.ts",
-      "import": "./dist/v19.es.js",
-      "require": "./dist/v19.cjs.js"
+      "import": {
+        "types": "./dist/v19.d.mts",
+        "default": "./dist/v19.mjs"
+      },
+      "require": {
+        "types": "./dist/v19.d.ts",
+        "default": "./dist/v19.cjs"
+      }
     },
     "./router": {
-      "types": "./dist/router.d.ts",
-      "import": "./dist/router.es.js",
-      "require": "./dist/router.cjs.js"
+      "import": {
+        "types": "./dist/router.d.mts",
+        "default": "./dist/router.mjs"
+      },
+      "require": {
+        "types": "./dist/router.d.ts",
+        "default": "./dist/router.cjs"
+      }
     },
     "./plugin": {
-      "types": "./dist/plugin.d.ts",
-      "import": "./dist/plugin.es.js",
-      "require": "./dist/plugin.cjs.js"
+      "import": {
+        "types": "./dist/plugin.d.mts",
+        "default": "./dist/plugin.mjs"
+      },
+      "require": {
+        "types": "./dist/plugin.d.ts",
+        "default": "./dist/plugin.cjs"
+      }
     },
     "./router-v5": {
-      "types": "./dist/router-v5.d.ts",
-      "import": "./dist/router-v5.es.js",
-      "require": "./dist/router-v5.cjs.js"
+      "import": {
+        "types": "./dist/router-v5.d.mts",
+        "default": "./dist/router-v5.mjs"
+      },
+      "require": {
+        "types": "./dist/router-v5.d.ts",
+        "default": "./dist/router-v5.cjs"
+      }
     },
     "./router-v6": {
-      "types": "./dist/router-v6.d.ts",
-      "import": "./dist/router-v6.es.js",
-      "require": "./dist/router-v6.cjs.js"
+      "import": {
+        "types": "./dist/router-v6.d.mts",
+        "default": "./dist/router-v6.mjs"
+      },
+      "require": {
+        "types": "./dist/router-v6.d.ts",
+        "default": "./dist/router-v6.cjs"
+      }
     },
     "./router-v7": {
-      "types": "./dist/router-v7.d.ts",
-      "import": "./dist/router-v7.es.js",
-      "require": "./dist/router-v7.cjs.js"
+      "import": {
+        "types": "./dist/router-v7.d.mts",
+        "default": "./dist/router-v7.mjs"
+      },
+      "require": {
+        "types": "./dist/router-v7.d.ts",
+        "default": "./dist/router-v7.cjs"
+      }
     },
     "./lazy-utils": {
-      "types": "./dist/lazy-utils.d.ts",
-      "import": "./dist/lazy-utils.es.js",
-      "require": "./dist/lazy-utils.cjs.js"
+      "import": {
+        "types": "./dist/lazy-utils.d.mts",
+        "default": "./dist/lazy-utils.mjs"
+      },
+      "require": {
+        "types": "./dist/lazy-utils.d.ts",
+        "default": "./dist/lazy-utils.cjs"
+      }
     },
     "./data-fetch-utils": {
-      "types": "./dist/data-fetch-utils.d.ts",
-      "import": "./dist/data-fetch-utils.es.js",
-      "require": "./dist/data-fetch-utils.cjs.js"
+      "import": {
+        "types": "./dist/data-fetch-utils.d.mts",
+        "default": "./dist/data-fetch-utils.mjs"
+      },
+      "require": {
+        "types": "./dist/data-fetch-utils.d.ts",
+        "default": "./dist/data-fetch-utils.cjs"
+      }
     },
     "./data-fetch": {
-      "types": "./dist/data-fetch.d.ts",
-      "import": "./dist/data-fetch.es.js",
-      "require": "./dist/data-fetch.cjs.js"
+      "import": {
+        "types": "./dist/data-fetch.d.mts",
+        "default": "./dist/data-fetch.mjs"
+      },
+      "require": {
+        "types": "./dist/data-fetch.d.ts",
+        "default": "./dist/data-fetch.cjs"
+      }
     },
     "./data-fetch-server-middleware": {
-      "types": "./dist/data-fetch-server-middleware.d.ts",
-      "import": "./dist/data-fetch-server-middleware.es.js",
-      "require": "./dist/data-fetch-server-middleware.cjs.js"
+      "import": {
+        "types": "./dist/data-fetch-server-middleware.d.mts",
+        "default": "./dist/data-fetch-server-middleware.mjs"
+      },
+      "require": {
+        "types": "./dist/data-fetch-server-middleware.d.ts",
+        "default": "./dist/data-fetch-server-middleware.cjs"
+      }
     },
     "./lazy-load-component-plugin": {
-      "types": "./dist/lazy-load-component-plugin.d.ts",
-      "import": "./dist/lazy-load-component-plugin.es.js",
-      "require": "./dist/lazy-load-component-plugin.cjs.js"
+      "import": {
+        "types": "./dist/lazy-load-component-plugin.d.mts",
+        "default": "./dist/lazy-load-component-plugin.mjs"
+      },
+      "require": {
+        "types": "./dist/lazy-load-component-plugin.d.ts",
+        "default": "./dist/lazy-load-component-plugin.cjs"
+      }
     },
     "./size-limited-cache": {
-      "types": "./dist/size-limited-cache.d.ts",
-      "import": "./dist/size-limited-cache.es.js",
-      "require": "./dist/size-limited-cache.cjs.js"
+      "import": {
+        "types": "./dist/size-limited-cache.d.mts",
+        "default": "./dist/size-limited-cache.mjs"
+      },
+      "require": {
+        "types": "./dist/size-limited-cache.d.ts",
+        "default": "./dist/size-limited-cache.cjs"
+      }
+    },
+    "./dist/*.es.js": {
+      "types": "./dist/*.d.mts",
+      "default": "./dist/*.mjs"
+    },
+    "./dist/*.cjs.js": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.cjs"
     },
     "./*": "./*",
     "./ssr": {
-      "types": "./dist/ssr.d.ts",
-      "import": "./dist/ssr.es.js",
-      "require": "./dist/ssr.cjs.js"
+      "import": {
+        "types": "./dist/ssr.d.mts",
+        "default": "./dist/ssr.mjs"
+      },
+      "require": {
+        "types": "./dist/ssr.d.ts",
+        "default": "./dist/ssr.cjs"
+      }
     },
     "./ssr-node": {
-      "types": "./dist/ssr-node.d.ts",
-      "import": "./dist/ssr-node.es.js",
-      "require": "./dist/ssr-node.cjs.js"
+      "import": {
+        "types": "./dist/ssr-node.d.mts",
+        "default": "./dist/ssr-node.mjs"
+      },
+      "require": {
+        "types": "./dist/ssr-node.d.ts",
+        "default": "./dist/ssr-node.cjs"
+      }
     },
     "./server": {
-      "types": "./dist/server.d.ts",
-      "import": "./dist/server.es.js",
-      "require": "./dist/server.cjs.js"
+      "import": {
+        "types": "./dist/server.d.mts",
+        "default": "./dist/server.mjs"
+      },
+      "require": {
+        "types": "./dist/server.d.ts",
+        "default": "./dist/server.cjs"
+      }
     }
   },
   "typesVersions": {
@@ -182,18 +293,18 @@
     "dev": "vite",
     "build": "vite build && tsc -p tsconfig.json && node scripts/write-dts-entrypoints.mjs",
     "preview": "vite preview",
-    "test": "pnpm run test:jest && pnpm run test:rstest && pnpm run test:types && pnpm run test:ssr-entries && pnpm run test:boundaries",
+    "test": "pnpm run test:jest && pnpm run test:rstest && pnpm run test:types && pnpm run test:ssr-entries && pnpm run test:boundaries && pnpm run test:compatibility",
     "test:jest": "pnpm exec jest --config jest.config.js --passWithNoTests",
     "test:rstest": "pnpm exec rstest --passWithNoTests && pnpm exec rstest --config rstest.ssr.config.ts",
     "test:types": "node scripts/check-react-remote-types.mjs",
     "test:ssr-entries": "node scripts/check-bridge-ssr-entries.mjs",
-    "test:boundaries": "node scripts/check-runtime-boundaries.mjs"
+    "test:boundaries": "node scripts/check-runtime-boundaries.mjs",
+    "test:compatibility": "node ../../../scripts/check-bridge-alias-compatibility.mjs"
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "acorn": "8.15.0",
-    "htmlparser2": "10.0.0"
+    "acorn": "8.15.0"
   },
   "peerDependencies": {
     "react": ">=16.9.0",
@@ -228,6 +339,7 @@
     "hono": "4.13.5",
     "@module-federation/enhanced": "workspace:*",
     "jsdom": "20.0.3",
-    "@types/jsdom": "20.0.1"
+    "@types/jsdom": "20.0.1",
+    "htmlparser2": "10.0.0"
   }
 }

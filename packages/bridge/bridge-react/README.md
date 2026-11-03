@@ -595,10 +595,33 @@ baseline. Non-peer runtime dependencies are bundled, while declared peers and
 Node builtins remain external. Bundle fixtures emit ESM. The receiver's response HTML is measured separately
 from JavaScript bundles. Size measurements do not establish runtime performance.
 
-The unified consumer fixtures also compare `createReactRemote` through `/base`
+Fixed Bridge (`createRemoteAppComponent`), ordinary component
+(`createLazyComponent`), and unified consumer (`createReactRemote`) fixtures
+compare independent ESM imports through `/base` under identical browser and Node
+settings. Fixed APIs tree shake independently; the unified consumer retains both
+renderers, including when `render: 'bridge'` is supplied as a runtime hint.
+
+The unified consumer fixtures compare `createReactRemote` through `/base`
 under browser and Node conditions. An older Node consumer may only emit Bridge
 placeholders, so its bundle delta measures the implementation change, without
 claiming that both revisions support the same SSR behavior.
+
+Published JavaScript uses explicit `.mjs` and `.cjs` extensions. Conditional ESM
+type wrappers share the CommonJS declaration tree, including global data types.
+Node SSR bundles contain only the public htmlparser2 Parser path and its required
+entity decoder; htmlparser2 remains a build dependency and Acorn remains the
+runtime JavaScript parser. Prebundled module provenance is recorded in
+`dist/build-modules.{es,cjs}.json` for local measurement and excluded from
+the published package. See the Bundle Size app's README for the
+separate fresh-process Node 20 SSR sampling command and its limitations.
+
+Legacy physical `*.es.js` and `*.cjs.js` files remain thin forwarding entries,
+so older Bridge plugins and documented browser aliases keep working without
+requiring synchronized package upgrades. Built-in aliases continue to use those
+compatible paths. Public package exports, including legacy `dist/*.es.js` module specifiers,
+select `.mjs`/`.cjs` directly. Importing legacy ESM files by absolute filesystem
+path retains their historical Node module-format detection behavior.
+The forwarding files do not duplicate the renderer or parser implementation.
 
 After building both revisions, the Bridge section can also be reproduced locally
 from the current checkout:

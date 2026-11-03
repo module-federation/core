@@ -11,26 +11,32 @@ import {
 export type { LazyRemoteComponentInfo };
 
 const createLazyRemoteComponent: LazyRemoteComponentCreator =
-  createLazyRemoteComponentFactory(RemoteApp);
+  /* @__PURE__ */ createLazyRemoteComponentFactory(RemoteApp);
 
 export const createRemoteAppComponent: RemoteAppComponentCreator =
-  createRemoteAppComponentFactory(RemoteApp);
+  /* @__PURE__ */ createRemoteAppComponentFactory(RemoteApp);
 
 /**
  * @deprecated createRemoteComponent is deprecated, please use createRemoteAppComponent instead!
  */
-export const createRemoteComponent = createDeprecatedRemoteComponentFactory(
-  createRemoteAppComponent,
-);
+export const createRemoteComponent =
+  /* @__PURE__ */ createDeprecatedRemoteComponentFactory(
+    createRemoteAppComponent,
+  );
 
 export { createLazyRemoteComponent };
 
 import {
-  createReactRemoteConsumers,
-  type createReactRemote as BaseCreateReactRemote,
-  type ReactRemote as BaseReactRemote,
-} from '../../reactRemote';
-const unifiedConsumers = createReactRemoteConsumers(RemoteApp);
-export const createReactRemote: typeof BaseCreateReactRemote =
-  unifiedConsumers.createReactRemote;
-export const ReactRemote: typeof BaseReactRemote = unifiedConsumers.ReactRemote;
+  createReactRemoteFactory,
+  createReactRemoteComponentFactory,
+} from '../../reactRemote.shared';
+import { useBrowserEnvironment } from '../environment.browser';
+
+export const createReactRemote = /* @__PURE__ */ createReactRemoteFactory(
+  RemoteApp,
+  useBrowserEnvironment,
+);
+export const ReactRemote = /* @__PURE__ */ createReactRemoteComponentFactory(
+  RemoteApp,
+  useBrowserEnvironment,
+);

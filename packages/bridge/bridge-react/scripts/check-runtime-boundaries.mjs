@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +13,7 @@ for (const format of ['esm', 'cjs']) {
     const server = entry === 'server';
     const file = resolve(
       directory,
-      `dist/${entry}.${format === 'esm' ? 'es' : 'cjs'}.js`,
+      `dist/${entry}.${format === 'esm' ? 'mjs' : 'cjs'}`,
     );
     const result = await build({
       stdin: {
@@ -72,7 +73,7 @@ for (const format of ['esm', 'cjs']) {
       const name = `${entry}${server ? '.node' : ''}`;
       const file = resolve(
         directory,
-        `dist/${name}.${format === 'esm' ? 'es' : 'cjs'}.js`,
+        `dist/${name}.${format === 'esm' ? 'mjs' : 'cjs'}`,
       );
       const result = await build({
         stdin: {
@@ -123,4 +124,75 @@ for (const format of ['esm', 'cjs']) {
       console.log(`${name}/${format}: consumer runtime boundary passed`);
     }
   }
+}
+
+// ESM consumers of the fixed APIs must not pay for the unified dispatcher or
+// the other renderer. CJS entry objects expose all exports and are not a
+// downstream tree-shaking contract.
+for (const entry of ['base', 'index']) {
+  for (const server of [false, true]) {
+    for (const api of ['createRemoteAppComponent', 'createLazyComponent']) {
+      const name = `${entry}${server ? '.node' : ''}`;
+      const result = await build({
+        stdin: {
+          resolveDir: directory,
+          contents: `export { ${api} } from ${JSON.stringify(resolve(directory, `dist/${name}.mjs`))}`,
+        },
+        bundle: true,
+        write: false,
+        treeShaking: true,
+        platform: server ? 'node' : 'browser',
+        format: 'esm',
+        packages: 'external',
+      });
+      const source = result.outputFiles[0].text;
+      assert(
+        !source.includes('createConsumer'),
+        `${name}/${api} retained the unified consumer`,
+      );
+      if (api === 'createRemoteAppComponent') {
+        assert(
+          !source.includes('createLazyComponentResource'),
+          `${name}/${api} retained the plain component loader`,
+        );
+      } else {
+        assert(
+          !source.includes('RemoteAppWrapper'),
+          `${name}/${api} retained the Bridge renderer`,
+        );
+        assert(
+          !source.includes('BridgeSSRContext'),
+          `${name}/${api} retained Bridge SSR registration`,
+        );
+      }
+      console.log(`${name}/${api}: independent ESM tree shaking passed`);
+    }
+  }
+}
+
+// The public Parser export is bundled once, without htmlparser2's unused DOM
+// convenience APIs and the second entities table pulled in by dom-serializer.
+for (const format of ['es', 'cjs']) {
+  const graph = JSON.parse(
+    readFileSync(
+      resolve(directory, `dist/build-modules.${format}.json`),
+      'utf8',
+    ),
+  );
+  const modules = Object.values(graph).flatMap((chunk) => Object.keys(chunk));
+  assert.equal(
+    modules.filter((id) => /htmlparser2.*\/Parser\.js$/.test(id)).length,
+    1,
+  );
+  assert(
+    modules.some((id) => /entities@6.*decode-data-html/.test(id)),
+    'Parser lost its entity decoder',
+  );
+  assert(
+    !modules.some((id) =>
+      /domhandler|domutils|dom-serializer|entities@4/.test(id),
+    ),
+    'Parser retained unused DOM utilities',
+  );
+  console.log(`${format}: public Parser dependency boundary passed`);
 }

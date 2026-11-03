@@ -10,6 +10,20 @@ import { build, version as esbuildVersion } from 'esbuild';
 // The head's fixtures and toolchain measure both revisions. Missing exports are
 // unavailable capabilities, while declared exports with missing output are errors.
 const fixtures = [
+  ...['browser', 'node'].flatMap((target) => [
+    {
+      id: `fixed-bridge-${target}`,
+      entry: './base',
+      api: 'createRemoteAppComponent',
+      target,
+    },
+    {
+      id: `component-${target}`,
+      entry: './base',
+      api: 'createLazyComponent',
+      target,
+    },
+  ]),
   {
     id: 'consumer-browser',
     entry: './base',
@@ -85,6 +99,10 @@ export async function measureBridge(packagesDirectory) {
   const manifest = existsSync(manifestPath)
     ? JSON.parse(readFileSync(manifestPath, 'utf8'))
     : {};
+  const graphFile = join(directory, 'dist/build-modules.es.json');
+  const buildModules = existsSync(graphFile)
+    ? JSON.parse(readFileSync(graphFile, 'utf8'))
+    : {};
   const lock = readFileSync(join(root, 'pnpm-lock.yaml'));
   const git = (...args) =>
     execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim();
@@ -147,6 +165,17 @@ export async function measureBridge(packagesDirectory) {
           name.replaceAll('\\', '/'),
           value.bytes,
         ]),
+      ),
+      // Prebundled package chunks retain their upstream module provenance.
+      // These rendered byte counts are diagnostic, not minified attribution.
+      prebundledInputs: Object.fromEntries(
+        Object.keys(minified.metafile.inputs).flatMap((input) => {
+          const chunk = relative(
+            join(directory, 'dist'),
+            resolve(directory, input),
+          ).replaceAll('\\', '/');
+          return Object.entries(buildModules[chunk] || {});
+        }),
       ),
       externalImports: [
         ...new Set(

@@ -42,13 +42,15 @@ export default defineConfig({
         ),
       },
       formats: ['cjs', 'es'],
-      fileName: (format, entryName) => `${entryName}.${format}.js`,
+      fileName: (format, entryName) =>
+        `${entryName}.${format === 'es' ? 'mjs' : 'cjs'}`,
     },
     rollupOptions: {
       external: [
         /^node:/,
         'acorn',
-        'htmlparser2',
+        // Bundle the public Parser export so Rollup removes htmlparser2's DOM
+        // utilities and their second entities dependency before consumption.
         ...perDepsKeys,
         /^@module-federation\/enhanced\//,
         '@remix-run/router',
@@ -68,6 +70,54 @@ export default defineConfig({
         {
           name: 'modify-output-plugin',
           generateBundle(options, bundle) {
+            // Older plugins and documented browser aliases address physical
+            // filenames directly. Keep forwarding files without duplicating
+            // the implementation or changing their browser/Node selection.
+            for (const chunk of Object.values(bundle)) {
+              if (chunk.type !== 'chunk' || !chunk.isEntry) continue;
+              const esm = options.format === 'es';
+              const lines = esm
+                ? [`export * from './${chunk.fileName}';`]
+                : [`module.exports = require('./${chunk.fileName}');`];
+              if (esm && chunk.exports.includes('default')) {
+                lines.push(`export { default } from './${chunk.fileName}';`);
+              }
+              this.emitFile({
+                type: 'asset',
+                fileName: `${chunk.name}.${esm ? 'es' : 'cjs'}.js`,
+                source: `${lines.join('\n')}\n`,
+              });
+            }
+            this.emitFile({
+              type: 'asset',
+              fileName: `build-modules.${options.format}.json`,
+              source: JSON.stringify(
+                Object.fromEntries(
+                  Object.entries(bundle)
+                    .filter(([, chunk]) => chunk.type === 'chunk')
+                    .map(([file, chunk]) => [
+                      file,
+                      chunk.type === 'chunk'
+                        ? Object.fromEntries(
+                            Object.entries(chunk.modules)
+                              .filter(([, module]) => module.renderedLength > 0)
+                              .map(([id, module]) => [
+                                path
+                                  .relative(__dirname, id)
+                                  .replaceAll('\\', '/'),
+                                {
+                                  originalBytes: module.originalLength,
+                                  renderedBytes: module.renderedLength,
+                                },
+                              ]),
+                          )
+                        : {},
+                    ]),
+                ),
+                null,
+                2,
+              ),
+            });
             for (const fileName in bundle) {
               const chunk = bundle[fileName];
               if (fileName.includes('router-v6') && chunk.type === 'chunk') {

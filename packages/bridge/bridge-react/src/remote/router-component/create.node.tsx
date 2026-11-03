@@ -1,6 +1,6 @@
 import { RemoteAppWrapper } from '../RemoteAppWrapper.server';
 import { createRouterMount } from './router-mount';
-const RemoteApp = createRouterMount(RemoteAppWrapper);
+const RemoteApp = /* @__PURE__ */ createRouterMount(RemoteAppWrapper);
 import {
   createLazyRemoteComponentFactory,
   createRemoteAppComponentFactory,
@@ -13,26 +13,32 @@ import {
 export type { LazyRemoteComponentInfo };
 
 const createLazyRemoteComponent: LazyRemoteComponentCreator =
-  createLazyRemoteComponentFactory(RemoteApp);
+  /* @__PURE__ */ createLazyRemoteComponentFactory(RemoteApp);
 
 export const createRemoteAppComponent: RemoteAppComponentCreator =
-  createRemoteAppComponentFactory(RemoteApp);
+  /* @__PURE__ */ createRemoteAppComponentFactory(RemoteApp);
 
 /**
  * @deprecated createRemoteComponent is deprecated, please use createRemoteAppComponent instead!
  */
-export const createRemoteComponent = createDeprecatedRemoteComponentFactory(
-  createRemoteAppComponent,
-);
+export const createRemoteComponent =
+  /* @__PURE__ */ createDeprecatedRemoteComponentFactory(
+    createRemoteAppComponent,
+  );
 
 export { createLazyRemoteComponent };
 
 import {
-  createReactRemoteConsumers,
-  type createReactRemote as BaseCreateReactRemote,
-  type ReactRemote as BaseReactRemote,
-} from '../../reactRemote.node';
-const unifiedConsumers = createReactRemoteConsumers(RemoteApp);
-export const createReactRemote: typeof BaseCreateReactRemote =
-  unifiedConsumers.createReactRemote;
-export const ReactRemote: typeof BaseReactRemote = unifiedConsumers.ReactRemote;
+  createReactRemoteFactory,
+  createReactRemoteComponentFactory,
+} from '../../reactRemote.shared';
+import { useServerEnvironment } from '../environment.server';
+
+export const createReactRemote = /* @__PURE__ */ createReactRemoteFactory(
+  RemoteApp,
+  useServerEnvironment,
+);
+export const ReactRemote = /* @__PURE__ */ createReactRemoteComponentFactory(
+  RemoteApp,
+  useServerEnvironment,
+);

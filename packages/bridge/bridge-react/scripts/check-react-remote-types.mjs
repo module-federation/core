@@ -65,6 +65,12 @@ import { createBridgeRouterConnector, type BridgeRouterAdapter, type BridgeRoute
 import { createBridgeRouterConnector as connect18 } from '@module-federation/bridge-react/v18';
 import { createBridgeRouterConnector as connect19 } from '@module-federation/bridge-react/v19';
 import Shop, * as namespace from './remote.js';
+import bridgePlugin from '@module-federation/bridge-react/plugin';
+import lazyPlugin from '@module-federation/bridge-react/lazy-load-component-plugin';
+import dataMiddleware from '@module-federation/bridge-react/data-fetch-server-middleware';
+bridgePlugin(); lazyPlugin();
+type MiddlewareArguments = Parameters<typeof dataMiddleware>;
+
 declare const routerAdapter: BridgeRouterAdapter;
 for (const connect of [connectDefault, createBridgeRouterConnector, connect18, connect19]) {
   const connection = connect({onError: () => {}});
