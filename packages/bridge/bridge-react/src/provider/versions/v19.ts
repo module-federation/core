@@ -41,6 +41,7 @@ export function createBridgeComponent<T = any>(
 ) {
   const fullBridgeInfo = {
     createRoot: createReact19Root,
+    hydrateRoot: hydrateReact19Root,
     ...bridgeInfo,
   } as unknown as ProviderFnParams<T>;
 

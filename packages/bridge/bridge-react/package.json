@@ -95,7 +95,22 @@
       "import": "./dist/size-limited-cache.es.js",
       "require": "./dist/size-limited-cache.cjs.js"
     },
-    "./*": "./*"
+    "./*": "./*",
+    "./ssr": {
+      "types": "./dist/ssr.d.ts",
+      "import": "./dist/ssr.es.js",
+      "require": "./dist/ssr.cjs.js"
+    },
+    "./ssr-node": {
+      "types": "./dist/ssr-node.d.ts",
+      "import": "./dist/ssr-node.es.js",
+      "require": "./dist/ssr-node.cjs.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.es.js",
+      "require": "./dist/server.cjs.js"
+    }
   },
   "typesVersions": {
     "*": {
@@ -143,6 +158,15 @@
       ],
       "size-limited-cache": [
         "./dist/size-limited-cache.d.ts"
+      ],
+      "ssr": [
+        "./dist/ssr.d.ts"
+      ],
+      "ssr-node": [
+        "./dist/ssr-node.d.ts"
+      ],
+      "server": [
+        "./dist/server.d.ts"
       ]
     }
   },
@@ -150,14 +174,17 @@
     "dev": "vite",
     "build": "vite build && tsc -p tsconfig.json && node scripts/write-dts-entrypoints.mjs",
     "preview": "vite preview",
-    "test": "pnpm run test:jest && pnpm run test:rstest && pnpm run test:types",
+    "test": "pnpm run test:jest && pnpm run test:rstest && pnpm run test:types && pnpm run test:boundaries",
     "test:jest": "pnpm exec jest --config jest.config.js --passWithNoTests",
-    "test:rstest": "pnpm exec rstest --passWithNoTests",
-    "test:types": "node scripts/check-react-remote-types.mjs"
+    "test:rstest": "pnpm exec rstest --passWithNoTests && pnpm exec rstest --config rstest.ssr.config.ts",
+    "test:types": "node scripts/check-react-remote-types.mjs",
+    "test:boundaries": "node scripts/check-runtime-boundaries.mjs"
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "acorn": "8.15.0",
+    "htmlparser2": "10.0.0"
   },
   "peerDependencies": {
     "react": ">=16.9.0",
@@ -190,6 +217,8 @@
     "typescript": "7.0.2",
     "vite": "^5.4.21",
     "hono": "4.13.5",
-    "@module-federation/enhanced": "workspace:*"
+    "@module-federation/enhanced": "workspace:*",
+    "jsdom": "20.0.3",
+    "@types/jsdom": "20.0.1"
   }
 }

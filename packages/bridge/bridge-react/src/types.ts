@@ -53,6 +53,7 @@ export interface RenderParams {
     initialState?: Record<string, unknown>;
   };
   dom: HTMLElement;
+  signal?: AbortSignal;
   /**
    * Options to pass to createRoot for React 18 and 19
    * @example
@@ -105,7 +106,22 @@ export interface ProviderFnParams<T> {
   render?: (
     App: React.ReactElement,
     id?: HTMLElement | string,
+    info?: RenderParams & BridgeRendererContext,
   ) => RootType | Promise<RootType>;
+  renderStream?: (
+    App: React.ReactElement,
+    info: BridgeSSRRequest & BridgeRendererContext,
+  ) => Promise<BridgeSSRResult | BridgeSSRMessageResult>;
+  hydrate?: (
+    App: React.ReactElement,
+    container: HTMLElement,
+    info: HydrateParams & BridgeRendererContext,
+  ) => RootType | Promise<RootType>;
+  hydrateRoot?: (
+    container: Element | DocumentFragment,
+    children: React.ReactNode,
+    options?: CreateRootOptions,
+  ) => Root;
   createRoot?: (
     container: Element | DocumentFragment,
     options?: CreateRootOptions,
@@ -120,6 +136,11 @@ export interface ProviderFnParams<T> {
    * }
    */
   defaultRootOptions?: CreateRootOptions;
+}
+
+/** Producer-local metadata. Never serialized into the Host's SSR request. */
+export interface BridgeRendererContext {
+  rootComponent: React.ComponentType<any>;
 }
 
 /**
@@ -176,7 +197,68 @@ declare const bridgeProviderProps: unique symbol;
 export type BridgeProvider<
   Props = Record<string, unknown>,
   RenderResult extends void | Promise<void> = void | Promise<void>,
-> = (() => {
-  render: (info: RenderParams) => RenderResult;
-  destroy: (info: DestroyParams) => void;
-}) & { readonly [bridgeProviderProps]?: Props };
+> = (() => BridgeProviderInstance<RenderResult>) & {
+  readonly [bridgeProviderProps]?: Props;
+};
+
+/** A mounted provider. The factory keeps business-props inference separately. */
+export interface BridgeProviderInstance<
+  RenderResult extends void | Promise<void> = void | Promise<void>,
+> {
+  render(info: RenderParams): RenderResult;
+  destroy(info: DestroyParams): void;
+  hydrate?(info: HydrateParams): void | Promise<void>;
+  renderStream?(
+    info: BridgeSSRRequest,
+  ): Promise<BridgeSSRResult | BridgeSSRMessageResult>;
+}
+
+export interface HydrateParams extends RenderParams {
+  snapshot: unknown;
+  updates?: ReadableStream<unknown>;
+}
+
+/** Application props and mount inputs rendered by the producer. */
+export interface BridgeSSRRenderParams {
+  moduleName?: string;
+  basename?: string;
+  memoryRoute?: RenderParams['memoryRoute'];
+  props: Record<string, unknown>;
+}
+
+export interface BridgeSSRRequest extends BridgeSSRRenderParams {
+  instanceId: string;
+  identifierPrefix: string;
+  url: string;
+  headers?: Record<string, string>;
+  nonce?: string;
+  signal: AbortSignal;
+}
+
+export interface BridgeSSRResult {
+  stylesheets?: string[];
+  hydration?: {
+    snapshot: Promise<unknown>;
+    updates: ReadableStream<unknown>;
+    shellMarker: string;
+  };
+  stream: ReadableStream<Uint8Array>;
+  snapshot: Promise<unknown>;
+  abort(reason?: unknown): void;
+}
+
+export type BridgeSSRMessage =
+  | { type: 'html'; html: string }
+  | { type: 'ready'; snapshot: unknown }
+  | { type: 'update'; value: unknown }
+  | { type: 'data'; snapshot: unknown }
+  | { type: 'done' };
+
+/** Complete producer-owned messages. Consumers preserve their order. */
+export interface BridgeSSRMessageResult {
+  protocol: 'module-federation/bridge-ssr/producer/v1';
+  stylesheets?: string[];
+  hydration: 'progressive' | 'complete';
+  messages: ReadableStream<BridgeSSRMessage>;
+  abort(reason?: unknown): void;
+}
