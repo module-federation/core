@@ -8,10 +8,10 @@ hero:
   actions:
     - theme: brand
       text: 🎉 Version 2.0 vorgestellt
-      link: /blog/v2-stable-version.html
+      link: /de/blog/v2-stable-version.html
     - theme: alt
       text: Schnellstart
-      link: /guide/start/quick-start.html
+      link: /de/guide/start/quick-start.html
   image:
     src: /svg.svg
     alt: Module-Federation-Logo

@@ -75,7 +75,7 @@ Die allgemeinen Optionen sind in der [Konfigurationsübersicht](/configure/index
 | `bundleAllCSS` | `boolean` | `false` | Fügt jedem bereitgestellten Modul alle CSS-Assets des Bundles hinzu. |
 | `moduleParseTimeout` | `number` | `10` | Maximale Wartezeit in Sekunden für das Parsen von Modulen während des Builds. |
 | `moduleParseIdleTimeout` | `number` | | Wie `moduleParseTimeout`, wird aber nach jedem geparsten Modul zurückgesetzt. Für große Codebasen empfohlen. |
-| `target` | `'web' \| 'node'` | `'web'`, bei aktiviertem `build.ssr` sonst `'node'` | Zielumgebung für Tree Shaking der Federation Runtime. |
+| `target` | `'web' \| 'node'` | `'node'` bei aktiviertem `build.ssr`, sonst `'web'` | Zielumgebung für Tree Shaking der Federation Runtime. |
 | `disableRemote` | `boolean` | `false` | Entfernt die Unterstützung zum Laden von Remotes aus der Runtime. Aktiviere dies nicht, wenn `remotes` konfiguriert sind. |
 | `disableShared` | `boolean` | `false` | Entfernt die Unterstützung für Shared-Abhängigkeiten aus der Runtime. Aktiviere dies nicht, wenn `shared` konfiguriert ist. |
 | `disableSnapshot` | `boolean` | `true` für Node-/SSR-Builds, sonst `false` | Entfernt die Snapshot-Unterstützung einschließlich Manifest-basierter Remotes, Preload, dynamischer Typhinweise, HMR und DevTools-Integration. |

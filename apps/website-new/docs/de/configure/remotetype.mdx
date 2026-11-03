@@ -33,10 +33,12 @@ type ExternalsType =
 | `'module'` | Laden als ESM-Modul |
 
 :::tip
-Meist musst du `remoteType` nicht manuell setzen: Der Standardwert `'script'` funktioniert in Browserumgebungen. Serverseitige Node.js-Anwendungen benötigen in der Regel `'commonjs2'` oder `'node-commonjs'`.
+Meist musst du `remoteType` nicht manuell setzen: Der Standardwert `'script'` funktioniert in Browserumgebungen. Wähle bei Node.js den Ladetyp passend zum Remote-Format und zur verwendeten Integration. Für über HTTP geladene Remotes zeigt die [Node-Integration](/blog/node.html) ein Setup mit `'script'` und `@module-federation/node/runtimePlugin`. Die CommonJS-Ladetypen sind keine allgemeine Node.js-Voreinstellung.
 :::
 
 ## Beispiel {#example}
+
+Für den Node.js-Ausschnitt installierst du zusätzlich `@module-federation/node` und setzt im Bundler `target: 'async-node'`. Die vollständige Einrichtung findest du in der [Node-Anleitung](/blog/node.html).
 
 ```ts
 // Browser (default)
@@ -48,10 +50,11 @@ new ModuleFederationPlugin({
   },
 });
 
-// Node.js server-side
+// Node.js server-side: use target: 'async-node' in the bundler configuration
 new ModuleFederationPlugin({
   name: '@demo/node-host',
-  remoteType: 'commonjs2',
+  remoteType: 'script',
+  runtimePlugins: ['@module-federation/node/runtimePlugin'],
   remotes: {
     provider: 'provider@http://localhost:3001/remoteEntry.js',
   },

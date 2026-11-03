@@ -146,14 +146,9 @@ function hardRefresh() {
   });
 }
 ```
-Mit dieser Implementierung liefert die Anwendung den Nutzern die aktuellen Inhalte.
+Das Beispiel deregistriert einen vorhandenen Service Worker und lädt anschließend die Seite neu. Es löscht keine Einträge aus der CacheStorage-API. Auch die bisher kontrollierte Seite kann bis zum Ende ihres Lebenszyklus noch vom Service Worker bedient werden. Das Beispiel garantiert deshalb weder einen vollständig geleerten Cache noch sofort aktuelle Inhalte.
 
-Bei einem Hard Refresh werden folgende Schritte ausgeführt:
-
-1. Den Service Worker deregistrieren.
-2. Alle vom Service Worker gecachten Dateien löschen.
-3. Die Webseite neu laden.
-
+Wenn du gespeicherte Dateien gezielt entfernen möchtest, musst du die zu deiner Anwendung gehörenden Caches zusätzlich verwalten. Lösche dabei nicht pauschal Caches anderer Anwendungen desselben Origins.
 
 ## Service Worker mit Workbox verwalten {#workbox-for-enhanced-service-worker-management}
 

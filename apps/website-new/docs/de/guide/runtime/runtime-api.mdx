@@ -254,7 +254,7 @@ if (!mfInstance) {
 mfInstance.loadRemote('remote/util');
 ```
 
-Wenn du kein Build-Plugin verwendest, löst ein Aufruf von `getInstance` eine Ausnahme aus. Verwende in diesem Fall [createInstance](#createinstance), um eine neue Instanz zu erstellen.
+Wenn noch keine Standardinstanz initialisiert wurde, gibt `getInstance` ohne Such-Callback `null` zurück. Verwende im reinen Runtime-Betrieb [createInstance](#createinstance) und arbeite mit der zurückgegebenen Instanz oder suche sie wie unten beschrieben über einen Callback.
 
 Mit [createInstance](#createinstance) erstellte Instanzen ersetzen die Standardinstanz nicht, werden aber in der globalen Instanzliste registriert. Selbst wenn du die zurückgegebene Referenz nicht gespeichert hast, kannst du sie später mit einem Such-Callback an `getInstance` wiederfinden.
 

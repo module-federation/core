@@ -188,18 +188,18 @@ Webpack muss installiert sein. Andernfalls schlägt der Build mit `MODULE_NOT_FO
 
 ### Server-Lifecycle ergänzen {#add-server-lifecycle}
 
-Damit Next.js eine Server-Runtime erstellt, muss `_document` entweder `getInitialProps` oder `getServerSideProps` implementieren.
+Das folgende Beispiel ergänzt `getInitialProps` in `_document`. Beachte: `getServerSideProps` gehört in eine Page und wird in einem [Custom Document](https://nextjs.org/docs/pages/building-your-application/routing/custom-document) nicht unterstützt.
 
 <div className="rspress-directive warning">
-Ohne Server-Lifecycle-Methode versucht Next, vermeintlich statische Seiten per `SSG` zu erzeugen.
+`getInitialProps` in `_document` allein erzwingt kein Rendering bei jeder Anfrage. Wenn eine Page bei jeder Anfrage serverseitig gerendert werden soll, kannst du dort `getServerSideProps` verwenden. Bei `SSG` entsteht das HTML dagegen während des Builds; eine Aktualisierung des Remotes allein erzeugt dieses HTML nicht neu.
 
-Ohne Server-Runtime gibt es keinen Server, der aktualisierte Remotes rendern kann.
+Die unten gezeigte Revalidierung setzt einen laufenden Next.js-Server voraus. Sie steht bei einem rein statischen Export nicht zur Verfügung.
 </div>
 
 ```jsx title="_document.js"
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 
-class MyDocument extends Document {
+export default class MyDocument extends Document {
   static async getInitialProps(ctx) {
     const initialProps = await Document.getInitialProps(ctx);
     return initialProps;
@@ -229,13 +229,13 @@ Die Revalidierung lässt sich im Wesentlichen auf zwei Arten umsetzen:
 
 <Tabs>
   <Tab label="Render Blocking">
-    Diese Implementierung wird für die meisten Anwendungsfälle empfohlen. Sie hält Server und Client synchron und hilft so, Hydratisierungsfehler zu vermeiden. Da vor dem Rendering auf Updates geprüft und gegebenenfalls gewartet wird, bleibt die Anwendung aktuell, ohne die Benutzererfahrung zu beeinträchtigen.
+    Diese Implementierung prüft vor dem Rendering auf Updates und wartet gegebenenfalls auf deren Verarbeitung. Das kann das Risiko unterschiedlicher Server- und Client-Stände verringern, aber auch die Antwortzeit erhöhen.
 
     **So funktioniert es:**
 
     - **Vor dem Rendern der Seite** prüft der Server, ob Updates verfügbar sind.
     - **Sind Updates verfügbar**, führt er Hot Module Replacement (HMR) aus, bevor er die Clientanfrage beantwortet.
-    - **Dadurch erhalten alle Nutzer** die aktuelle Anwendungsversion ohne Abweichungen zwischen serverseitig und clientseitig gerenderten Inhalten.
+    - **Der Server kann danach aktualisierte Remotes rendern.** Das ersetzt keine abgestimmte Deployment- und Cache-Strategie und garantiert für sich allein keine identischen Server- und Client-Stände.
 
     **Implementierungsbeispiel:**
 
@@ -244,7 +244,7 @@ Die Revalidierung lässt sich im Wesentlichen auf zwei Arten umsetzen:
     import { revalidate } from '@module-federation/nextjs-mf/utils';
     import Document, { Html, Head, Main, NextScript } from 'next/document';
 
-    class MyDocument extends Document {
+    export default class MyDocument extends Document {
       static async getInitialProps(ctx) {
         if (ctx?.pathname && !ctx?.pathname?.endsWith('_error')) {
           await revalidate().then((shouldUpdate) => {
@@ -309,7 +309,7 @@ import {
   flushChunks,
 } from '@module-federation/nextjs-mf/utils';
 
-class MyDocument extends Document {
+export default class MyDocument extends Document {
   static async getInitialProps(ctx) {
     if (ctx.pathname) {
       if (!ctx.pathname.endsWith('_error')) {

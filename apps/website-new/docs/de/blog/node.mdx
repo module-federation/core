@@ -66,7 +66,7 @@ Die Webpack-Konfiguration entspricht weitgehend dem Rspack-Beispiel oben.
 
 ### 2. Warum muss ich `remoteType: 'script'` setzen? {#2-why-do-i-need-to-set-remotetype-script}
 
-Die MF-Bundler-Runtime unterstützt derzeit nur den Remote-Ladetyp `script`. Deshalb musst du für die Nutzung in Node.js ausdrücklich `remoteType: 'script'` setzen.
+Das hier gezeigte Setup verwendet `remoteType: 'script'` zusammen mit `@module-federation/node/runtimePlugin`. Damit lädt die Node-Integration den Remote Entry über das Netzwerk und wertet ihn in Node.js aus. `script` bezeichnet hier den Ladeweg und bedeutet nicht, dass ein Browser mit einem `<script>`-Tag benötigt wird.
 
 ## Referenzen {#references}
 

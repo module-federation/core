@@ -242,7 +242,7 @@ export default Index;
 
 ## Flackernde CSS-Styles {#css-flickering-issue}
 
-Starte das Projekt und rufe `http://localhost:3007/` auf. SSR funktioniert und die Seite wird korrekt gerendert, allerdings können die Styles kurz flackern. Der Grund: Die Stylesheet-Dateien des Providers werden nicht in das zugehörige HTML eingefügt. Das lässt sich mit [createLazyComponent](/guide/bridge/react/load-component.html#what-is-createlazycomponent) beheben.
+Starte das Projekt und rufe `http://localhost:3007/` auf. SSR funktioniert und die Seite wird korrekt gerendert, allerdings können die Styles kurz flackern. Der Grund: Die Stylesheet-Dateien des Providers werden nicht in das zugehörige HTML eingefügt. Das lässt sich mit [createLazyComponent](/guide/bridge/react/load-component.html#basic-usage) beheben.
 
 Passe den Consumer-Code an, der den Provider einbindet:
 

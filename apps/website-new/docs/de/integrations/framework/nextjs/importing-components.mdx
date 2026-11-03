@@ -13,7 +13,7 @@ Der Import von Remote-Modulen mit `next/dynamic` führt zu **Hydratisierungsfehl
 :::
 
 ```javascript
-import React, { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 const SampleComponent = lazy(() => import('next2/sampleComponent'));
 
 const FormComponent = ()=>{
@@ -31,7 +31,7 @@ export default FormComponent
 Für benannte Exports muss ein künstlicher `default` an `React.lazy` zurückgegeben werden, da diese Funktion nur Default-Exports erwartet.
 
 ```javascript
-import React, { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 
 const SampleComponent = lazy(() => import('next2/sampleComponent').then((mod) => {
   return { default: mod.NamedComponent };
@@ -87,3 +87,5 @@ const ClientOnly = ({Component}) => {
 const App = ()=>{
   return <ClientOnly Component={RemoteModule} />
 }
+
+```

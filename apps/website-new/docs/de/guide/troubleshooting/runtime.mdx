@@ -54,7 +54,7 @@ Gehe entsprechend der Ursache vor:
 
 Wenn `window[remoteEntryKey]` nachweislich nicht vorhanden ist, das Skript den Container also nicht registriert hat, die Konsole aber keinen eindeutigen Fehler zeigt, kann das Producer-Skript eine Cross-Origin-Ressource sein. Browser verbergen standardmäßig Fehlerdetails solcher Skripte. `filename`, `lineno` und `message` bleiben dann leer.
 
-Mit dem Hook [`createScript`](/plugin/dev/index.html#createscript) kannst du dem Skript ein Attribut `crossorigin` hinzufügen. Voraussetzung ist, dass der Producer-Server `Access-Control-Allow-Origin` konfiguriert hat.
+Mit dem Hook [`createScript`](/guide/runtime/runtime-hooks.html#createscript) kannst du dem Skript ein Attribut `crossorigin` hinzufügen. Voraussetzung ist, dass der Producer-Server `Access-Control-Allow-Origin` konfiguriert hat.
 
 Erstelle zunächst die Runtime-Plugin-Datei:
 
@@ -164,7 +164,7 @@ Ein regulärer Producer-Container exportiert `{ get, init }`. Bei diesem Ladevor
 
 Prüfe in dieser Reihenfolge:
 
-1. Führe vor dem Laden des Producers window[remoteEntryKey] in `terminal` aus, um zu prüfen, ob dieses Objekt bereits belegt ist. Falls ja, ändere den [name](/configure/name.html#name) des Producers.
+1. Prüfe vor dem Laden des Producers in der Browserkonsole, ob `window[remoteEntryKey]` bereits belegt ist. Falls ja, ändere den [name](/configure/name.html#name) des Producers.
 2. Wenn du rspack als Build-Werkzeug verwendest, prüfe, ob [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) in der endgültigen Build-Konfiguration gesetzt ist. Entferne diese Einstellung gegebenenfalls.
 
 ## RUNTIME-003 {#runtime-003}
@@ -274,7 +274,7 @@ Die Skriptdatei wurde erfolgreich heruntergeladen, aber ihre IIFE hat bei der Au
 
 1. Öffne die Ressourcen-URL aus der Fehlermeldung direkt im Browser und prüfe ihre Erreichbarkeit.
 2. Prüfe die Adresskonfiguration von `publicPath` und `remoteEntry` des Producers.
-3. Prüfe auf CORS-Probleme. Konfiguriere gegebenenfalls CORS auf dem Server oder ergänze mit dem Hook [`createScript`](/plugin/dev/index.html#createscript) ein Attribut `crossOrigin`.
+3. Prüfe auf CORS-Probleme. Konfiguriere gegebenenfalls CORS auf dem Server oder ergänze mit dem Hook [`createScript`](/guide/runtime/runtime-hooks.html#createscript) ein Attribut `crossOrigin`.
 4. Ergänze bei instabilen Netzwerken einen Wiederholungsmechanismus. Siehe [Wiederholungsversuche zur Laufzeit](/plugin/plugins/retry-plugin.html).
 
 **Bei ScriptExecutionError:**
@@ -472,7 +472,7 @@ Konfiguriere `shared` mit dem Singleton-Modus `singleton: true`, um das zu verme
 #### Fehlerbild {#symptom}
 
 - Der Browser lädt zwei Kopien desselben Pakets, etwa `react-dom`.
-- React meldet „Invalid hook call“ oder Fehler wegen unterschiedlicher Hydrierung.
+- React meldet „Invalid hook call“ oder Fehler wegen unterschiedlicher Hydration.
 - `loadShare` gibt für Subpath-Imports wie `react-dom/client` den Wert `false` zurück.
 
 #### Ursache {#root-cause}
@@ -502,7 +502,7 @@ Wenn die Producer-URL ein Manifest ist, lädt die Runtime beim Laden des Produce
 
 #### Lösung {#solution-8}
 
-Ergänze über [runtimePlugins](/configure/runtimeplugins.html) ein Runtime-Plugin und konfiguriere das Attribut `crossorigin` im Hook [createLink](/plugin/dev/index.html#createlink). Sein Wert muss mit dem tatsächlichen `load script` übereinstimmen.
+Ergänze über [runtimePlugins](/configure/runtimeplugins.html) ein Runtime-Plugin und konfiguriere das Attribut `crossorigin` im Hook [createLink](/guide/runtime/runtime-hooks.html#createlink). Sein Wert muss mit dem tatsächlichen `load script` übereinstimmen.
 
 So setzt du beispielsweise das crossorigin-Attribut des vorgeladenen Links auf `anonymous`:
 

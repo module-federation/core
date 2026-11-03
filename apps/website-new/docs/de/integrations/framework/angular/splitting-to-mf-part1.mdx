@@ -256,9 +256,9 @@ Nachdem `Login` als eigenständige Anwendung eingerichtet ist, wird sie in die H
 ### `angular.json` aktualisieren {#updating-angularjson}
 
 1. **Projektkonfiguration anpassen**: Dupliziere in `angular.json` die Konfiguration einer Bibliothek und platziere sie zur besseren Übersicht unterhalb der Konfiguration von `login`. Benenne den Schlüssel in `login-lib` um und passe Verweise wie `root` und `sourceRoot` auf die Anwendung `login` an.
-+
+
 Passe die aktualisierte Konfiguration an die konkreten Pfade und Einstellungen der Anwendung `login` an.
-+
+
 2. **`ng-package.json` erstellen**: Diese Datei beschreibt für `ng-packagr`, wie die Anwendung paketiert werden soll. Kopiere eine vorhandene `ng-package.json` aus einer anderen Bibliothek in das Stammverzeichnis von `Login`. Setze `dest` auf `"../../dist/login-lib"`, um das Build-Ausgabeverzeichnis festzulegen.
 
 ### Öffentliche API festlegen {#establishing-the-public-api}
