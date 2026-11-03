@@ -90,6 +90,8 @@ export default {
       bridge: {
         // 启用 Bridge Router 路由能力，默认为 true
         enableBridgeRouter: true,
+        // 编译时打印路由 alias 调试日志，默认为 false
+        showBridgeRouterLogs: false,
       }
     }),
   ],
@@ -100,6 +102,8 @@ export default {
 
 - **`enableBridgeRouter: true`** (默认值) - 自动处理 basename 和路由协同，支持 React Router v5、v6、v7
 - **`enableBridgeRouter: false`** - 禁用 Bridge 默认的路由代理能力，用户需手动处理路由集成
+- **`showBridgeRouterLogs: true`** - 在编译时打印 React bridge webpack 插件的路由 alias 调试日志
+- **`showBridgeRouterLogs: false`** (默认值) - 不打印这些调试日志
 
 :::warning 重要
 启用 Bridge Router 时，请勿将 `react-router-dom` 配置为 shared 依赖，否则会导致路由功能异常。
