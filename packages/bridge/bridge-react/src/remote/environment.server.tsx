@@ -19,33 +19,37 @@ export const useServerEnvironment: UseRemoteEnvironment = (
 ) => {
   const options = getOptions();
   const ssr = useContext(BridgeSSRContext);
-  const reactId = React.useId?.();
-  const instanceId = reactId ? `mf-bridge-${reactId}` : undefined;
-  const reservation = useMemo(
-    () => (!options.noSSR && instanceId ? ssr?.reserve(instanceId) : undefined),
+  const instanceId = `mf-bridge-${React.useId()}`;
+  const session = useMemo(
+    () =>
+      !options.noSSR && ssr
+        ? { context: ssr, reservation: ssr.reserve(instanceId) }
+        : undefined,
     [ssr, instanceId, options.noSSR, attempt],
   );
   return useMemo(
     () => ({
-      server: true,
+      target: 'server' as const,
       instanceId,
       ClientOnlyRemote: ServerLoading,
-      skip: () => reservation?.skip(),
-      fail: (error: unknown) => reservation?.fail(error),
+      skip: () => session?.reservation.skip(),
+      fail: (error: unknown) => session?.reservation.fail(error),
       wait: <T,>(promise: Promise<T>) =>
-        reservation ? reservation.wait(promise) : promise,
+        session ? session.reservation.wait(promise) : promise,
       async prepareBridge(id, loadProvider, match) {
-        if (!reservation) return;
+        if (!session) return;
+        if (!instance)
+          throw new Error('An initialized MF runtime instance is required.');
         const factory = await loadProvider();
         const provider = await factory();
         if (typeof provider?.renderStream !== 'function') {
-          reservation.skip();
+          session.reservation.skip();
           return;
         }
-        ssr?.registerStyles(
-          instanceId!,
+        session.context.registerStyles(
+          instanceId,
           collectSSRAssetDescriptors(
-            { id, instance: instance!, injectLink: getOptions().injectLink },
+            { id, instance, injectLink: getOptions().injectLink },
             match?.remoteInfo && {
               ...match.remoteInfo,
               snapshot: match.remoteSnapshot,
@@ -56,6 +60,6 @@ export const useServerEnvironment: UseRemoteEnvironment = (
         return provider;
       },
     }),
-    [ssr, instanceId, reservation, instance, getOptions],
+    [instanceId, session, instance, getOptions],
   );
 };

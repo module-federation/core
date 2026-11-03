@@ -291,7 +291,8 @@ function createConsumer<P extends object>(
               }
             }
             const protocol = selection.render;
-            if (protocol !== 'bridge') environment.skip?.();
+            if (protocol !== 'bridge' && environment.target === 'server')
+              environment.skip();
             if (selection.recovered && protocol === 'component') {
               // A runtime fallback has no successful remote registry entry,
               // data loader or remote asset metadata to hydrate.
@@ -320,11 +321,14 @@ function createConsumer<P extends object>(
                   );
                 return module.default;
               };
-              const serverProvider = await environment.prepareBridge?.(
-                id,
-                loadProvider,
-                selection.match,
-              );
+              const serverProvider =
+                environment.target === 'server'
+                  ? await environment.prepareBridge(
+                      id,
+                      loadProvider,
+                      selection.match,
+                    )
+                  : undefined;
               return {
                 Component: bridgeComponent(id, loadProvider, serverProvider),
                 loadProvider,
@@ -354,7 +358,7 @@ function createConsumer<P extends object>(
                 // React error boundaries do not catch during server rendering.
                 // Keep the lazy data/loader fallback in the server response.
                 const fallback = getOptions().fallback;
-                if (environment.server && fallback) {
+                if (environment.target === 'server' && fallback) {
                   return fallback({ error: asError(error), retry });
                 }
                 throw error;
@@ -375,18 +379,18 @@ function createConsumer<P extends object>(
               },
             };
           })();
-          return (environment.wait ? environment.wait(work) : work).catch(
-            (error) => {
-              environment.fail?.(error);
-              const fallback = getOptions().fallback;
-              if (environment.server && fallback) {
-                return {
-                  Component: () => fallback({ error: asError(error), retry }),
-                };
-              }
-              throw error;
-            },
-          );
+          return (
+            environment.target === 'server' ? environment.wait(work) : work
+          ).catch((error) => {
+            if (environment.target === 'server') environment.fail(error);
+            const fallback = getOptions().fallback;
+            if (environment.target === 'server' && fallback) {
+              return {
+                Component: () => fallback({ error: asError(error), retry }),
+              };
+            }
+            throw error;
+          });
         })());
       return {
         prepare,
@@ -480,23 +484,30 @@ export function createReactRemoteConsumers(
   };
 }
 
-export interface RemoteEnvironment {
-  server: boolean;
+interface BrowserEnvironment {
+  target: 'browser';
   instanceId?: string;
   serverBridge?: {
     moduleName: string;
     remote: CreateReactRemoteOptions['remote'];
   };
   ClientOnlyRemote: React.ComponentType<any>;
-  skip?: () => void;
-  fail?: (error: unknown) => void;
-  wait?: <T>(promise: Promise<T>) => Promise<T>;
-  prepareBridge?: (
+}
+interface ServerEnvironment {
+  target: 'server';
+  instanceId: string;
+  serverBridge?: never;
+  ClientOnlyRemote: React.ComponentType<any>;
+  skip: () => void;
+  fail: (error: unknown) => void;
+  wait: <T>(promise: Promise<T>) => Promise<T>;
+  prepareBridge: (
     id: string,
     loadProvider: NonNullable<RemoteAppWrapperProps['loadProvider']>,
     match?: RemoteMatch,
   ) => Promise<BridgeProviderInstance | undefined>;
 }
+export type RemoteEnvironment = BrowserEnvironment | ServerEnvironment;
 export type UseRemoteEnvironment = (
   getOptions: () => CreateReactRemoteOptions,
   attempt: number,

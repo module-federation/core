@@ -65,13 +65,24 @@ function ClientOnlyRemote<P extends object>({
   return <Component {...remoteProps} />;
 }
 
+// Select once per React runtime, never from props or SSR context. React 16/17
+// retain CSR without invoking a hook they do not provide. Modern SSR hydration
+// requires useId; a broken modern runtime must fail instead of losing identity.
+const useInstanceId =
+  Number.parseInt(React.version, 10) >= 18
+    ? function useModernInstanceId() {
+        return `mf-bridge-${React.useId()}`;
+      }
+    : function useLegacyInstanceId() {
+        return undefined;
+      };
+
 export const useBrowserEnvironment: UseRemoteEnvironment = (
   getOptions,
   attempt,
 ) => {
   const options = getOptions();
-  const reactId = React.useId?.();
-  const instanceId = reactId ? `mf-bridge-${reactId}` : undefined;
+  const instanceId = useInstanceId();
   const [serverBridge] = useState(() => {
     if (typeof document === 'undefined' || !instanceId) return;
     const container = document.getElementById(instanceId);
@@ -80,7 +91,12 @@ export const useBrowserEnvironment: UseRemoteEnvironment = (
       return { moduleName, remote: options.remote };
   });
   return useMemo(
-    () => ({ server: false, instanceId, serverBridge, ClientOnlyRemote }),
+    () => ({
+      target: 'browser' as const,
+      instanceId,
+      serverBridge,
+      ClientOnlyRemote,
+    }),
     [instanceId, serverBridge, attempt],
   );
 };
