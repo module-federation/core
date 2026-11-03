@@ -5,11 +5,35 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { PassThrough, Readable } from 'node:stream';
 import { build } from 'esbuild';
 
 const directory = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const { exports: packageExports } = JSON.parse(
+  await readFile(resolve(directory, 'package.json'), 'utf8'),
+);
+// Follow conditional-export key order, enabling only this runtime and import.
+// The browser path deliberately excludes node even though the harness is Node.
+function runtimeEntry(subpath, runtime) {
+  const conditions = new Set([runtime, 'import']);
+  const select = (entry) => {
+    if (typeof entry === 'string') return entry;
+    if (!entry || typeof entry !== 'object') return;
+    for (const [condition, target] of Object.entries(entry)) {
+      if (condition === 'default' || conditions.has(condition)) {
+        const selected = select(target);
+        if (selected !== undefined) return selected;
+      }
+    }
+  };
+  const target = select(packageExports[subpath]);
+  assert.ok(
+    target?.startsWith('./'),
+    `Missing ${runtime}/import export: ${subpath}`,
+  );
+  return JSON.stringify(resolve(directory, target));
+}
 const fixture = resolve(process.argv[2] || directory);
 const require = createRequire(resolve(fixture, 'package.json'));
 const React = require('react');
@@ -37,15 +61,15 @@ try {
     stdin: {
       resolveDir: directory,
       contents: `
-        export {createReactRemote, ReactRemote} from './dist/base.es.js';
-        export {createReactRemote as createServerReactRemote} from './dist/base.node.es.js';
-        export {createBridgeComponent} from './dist/${major < 18 ? 'base' : major === 18 ? 'v18' : 'v19'}.es.js';
+        export {createReactRemote, ReactRemote} from ${runtimeEntry('./base', 'browser')};
+        export {createReactRemote as createServerReactRemote} from ${runtimeEntry('./base', 'node')};
+        export {createBridgeComponent} from ${runtimeEntry(major < 18 ? './base' : major === 18 ? './v18' : './v19', 'browser')};
         ${
           major >= 18
             ? `
-        export {createBridgeComponent as createServerBridgeComponent} from './dist/server.es.js';
-        export {BridgeSSRContext} from './dist/ssr.es.js';
-        export {createBridgeSSRController} from './dist/ssr-node.es.js';`
+        export {createBridgeComponent as createServerBridgeComponent} from ${runtimeEntry('./server', 'node')};
+        export {BridgeSSRContext} from ${runtimeEntry('./ssr', 'node')};
+        export {createBridgeSSRController} from ${runtimeEntry('./ssr-node', 'node')};`
             : ''
         }
       `,
