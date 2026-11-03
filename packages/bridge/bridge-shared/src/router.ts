@@ -65,6 +65,7 @@ export function createBridgeRouterConnector({
   let stopRouter: (() => void) | undefined;
   let stopHost: (() => void) | undefined;
   let observedLocation: BridgeRouterLocation | undefined;
+  let consumedHistory: BridgeRouterLocation | undefined;
 
   const flush = () => {
     queued = false;
@@ -75,15 +76,23 @@ export function createBridgeRouterConnector({
       const hostLocation = navigation?.getLocation();
       const committed = sameLocation(snapshot.location, history);
       const pending = sameLocation(snapshot.pendingLocation, history);
+      if (committed || pending) {
+        consumedHistory = { ...history };
+      }
+      // A loader redirect changes the pending destination before history is
+      // written. That navigation still consumes the original history entry.
+      const consumingHistory =
+        snapshot.pendingLocation && sameLocation(consumedHistory, history);
 
       if (
         (hostLocation === undefined || hostLocation === history.url) &&
-        !pending &&
+        !consumingHistory &&
         !committed
       ) {
         // A native POP can reach both Routers before the Host publishes its
         // location. Do not restart a Remote already loading that same entry.
         // A new entry key, even at the same URL, must cancel the old navigation.
+        consumedHistory = { ...history };
         adapter.syncFromHistory();
         return;
       }
@@ -122,6 +131,7 @@ export function createBridgeRouterConnector({
         stopRouter?.();
         adapter = next;
         observedLocation = undefined;
+        consumedHistory = undefined;
         stopRouter = next.subscribe(schedule);
       }
       schedule();

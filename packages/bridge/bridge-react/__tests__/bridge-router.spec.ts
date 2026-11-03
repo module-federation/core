@@ -206,6 +206,43 @@ describe('shared Bridge Router connector', () => {
     },
   );
 
+  it('resumes history synchronization when a consumed navigation becomes idle elsewhere', async () => {
+    const value = fixture();
+    const connector = createBridgeRouterConnector({ onError: jest.fn() });
+    connector.attach(value.adapter);
+    await tick();
+    const back = { url: '/inventory/previous', key: 'previous' };
+    value.setHistory(back);
+    value.setSnapshot({ ...value.snapshot(), pendingLocation: back });
+    await tick();
+    expect(value.adapter.syncFromHistory).not.toHaveBeenCalled();
+
+    value.setSnapshot({ ...value.snapshot(), pendingLocation: undefined });
+    await tick();
+    expect(value.adapter.syncFromHistory).toHaveBeenCalledTimes(1);
+    expect(value.snapshot().pendingLocation).toEqual(back);
+    connector.dispose();
+  });
+
+  it('does not carry a consumed history entry into a replacement Router adapter', async () => {
+    const previous = fixture();
+    const connector = createBridgeRouterConnector({ onError: jest.fn() });
+    connector.attach(previous.adapter);
+    await tick();
+
+    const next = fixture({
+      location: { url: '/inventory/old', key: 'old' },
+      pendingLocation: { url: '/inventory/slow', key: 'slow' },
+    });
+    next.setHistory(previous.history());
+    connector.attach(next.adapter);
+    await tick();
+    expect(previous.routerListeners.size).toBe(0);
+    expect(next.adapter.syncFromHistory).toHaveBeenCalledTimes(1);
+    expect(next.snapshot().pendingLocation).toEqual(previous.history());
+    connector.dispose();
+  });
+
   it('distinguishes a pending same-URL navigation from a new history entry', async () => {
     const value = fixture();
     const connector = createBridgeRouterConnector({
