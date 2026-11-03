@@ -165,7 +165,9 @@ test('consumer fixtures select browser and Node conditions from the same public 
   for (const target of ['node', 'browser']) {
     await writeFile(
       join(live.directory, `dist/consumer.${target}.mjs`),
-      `export function createReactRemote() { return '${target}'; }`,
+      `export function createReactRemote() { return '${target}'; }
+export function createRemoteAppComponent() { return '${target} bridge'; }
+export function createLazyComponent() { return '${target} component'; }`,
     );
   }
   await live.saveManifest();
@@ -178,6 +180,15 @@ test('consumer fixtures select browser and Node conditions from the same public 
     result.fixtures['consumer-node'].resolvedEntry,
     'dist/consumer.node.mjs',
   );
+  for (const target of ['browser', 'node']) {
+    for (const family of ['fixed-bridge', 'component', 'consumer']) {
+      assert.equal(
+        result.fixtures[`${family}-${target}`].resolvedEntry,
+        `dist/consumer.${target}.mjs`,
+      );
+      assert(result.fixtures[`${family}-${target}`].gzipBytes > 0);
+    }
+  }
 });
 
 test('comparison retains real deltas and rejects mismatched toolchain settings', async () => {
@@ -188,4 +199,30 @@ test('comparison retains real deltas and rejects mismatched toolchain settings',
   assert.match(compareBridge(base, current), /\+123 B/);
   current.config.target = 'es2022';
   assert.throws(() => compareBridge(base, current), /settings differ/);
+});
+
+test('retains prebundled dependency provenance only for reached chunks', async () => {
+  const live = await fixture();
+  await writeFile(
+    join(live.directory, 'dist/build-modules.es.json'),
+    JSON.stringify({
+      'browser.mjs': {
+        'node_modules/parser/Parser.js': {
+          originalBytes: 100,
+          renderedBytes: 70,
+        },
+      },
+      'unused.mjs': {
+        'node_modules/unused/index.js': {
+          originalBytes: 900,
+          renderedBytes: 900,
+        },
+      },
+    }),
+  );
+  const result = await live.measure();
+  assert.deepEqual(
+    Object.keys(result.fixtures['producer-v18'].prebundledInputs),
+    ['node_modules/parser/Parser.js'],
+  );
 });

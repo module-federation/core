@@ -3048,9 +3048,6 @@ importers:
       acorn:
         specifier: 8.15.0
         version: 8.15.0
-      htmlparser2:
-        specifier: 10.0.0
-        version: 10.0.0
     devDependencies:
       '@module-federation/enhanced':
         specifier: workspace:*
@@ -3085,6 +3082,9 @@ importers:
       hono:
         specifier: 4.13.5
         version: 4.13.5
+      htmlparser2:
+        specifier: 10.0.0
+        version: 10.0.0
       jsdom:
         specifier: 20.0.3
         version: 20.0.3
