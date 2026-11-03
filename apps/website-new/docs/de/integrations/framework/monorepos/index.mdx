@@ -1,0 +1,99 @@
+# Vorteile von Module Federation in einem Monorepo {#benefits-of-module-federation-in-a-monorepo}
+
+Mit Module Federation kannst du Code zwischen Anwendungen teilen und dadurch modularere, wartbarere und besser skalierbare Anwendungen entwickeln. Diese Anleitung beschreibt die Vorteile von Module Federation in einem Monorepo.
+
+Polyrepos, also mehrere Repositories, waren lange die übliche Wahl für die Entwicklung von Microfrontends, um organisatorische Probleme zu lösen. Sie schaffen jedoch neue Herausforderungen beim Teilen von Code, bei der Verwaltung von Abhängigkeiten, bei der Versionierung und bei der Autonomie der Teams.
+
+Der Wunsch nach autonomen Teams durch Microfrontends führte häufig zu einer Polyrepo-Struktur. Jedes Team erhielt ein eigenes Repository und war für seine eigene Codebasis verantwortlich. Zu den Folgen gehörten unter anderem weniger Zusammenarbeit und weniger Transparenz.
+
+In einem Monorepo kannst du alle Vorteile von Module Federation nutzen, ohne mehrere Repositories verwalten zu müssen. Dazu kommen Vorteile beim Teilen von Code und bei der Verwaltung von Abhängigkeiten.
+Diese Anleitung zeigt, wie Module Federation in einem Monorepo organisatorische Herausforderungen lösen kann.
+
+## Mögliche Nachteile eines Polyrepo-Ansatzes {#potential-drawbacks-of-a-polyrepo-approach}
+
+Vollständige Isolation kann für Teams attraktiv sein, bringt aber Einschränkungen und Probleme mit sich, besonders bei Module Federation. Leicht gerät aus dem Blick, dass Nutzer das Ergebnis eines Module-Federation-Systems als eine einzige Anwendung erleben.
+Die vollständige Isolation und freie Technologiewahl der einzelnen Polyrepos, aus denen Teile dieser Anwendung stammen, können deshalb zu einem uneinheitlichen Nutzungserlebnis führen.
+
+Sehen wir uns weitere Herausforderungen des Polyrepo-Ansatzes an.
+
+### Feedbackzyklen {#feedback-loops}
+
+Der Polyrepo-Ansatz kann Transparenz und schnelle Rückmeldungen erschweren. Das ist bei einem Module-Federation-System besonders problematisch.
+
+Wenn ein Team seinen Teil der Anwendung ändert, lassen sich die Auswirkungen auf andere Teile oft nur schwer abschätzen. Laufzeitprobleme und inkompatible Änderungen fallen möglicherweise erst nach einem Deployment auf.
+
+Selbst mit einer Qualitätssicherung, die Änderungen vor dem Produktionseinsatz prüft, bleibt der Feedbackzyklus langsam und kann die Arbeit unterbrechen. Teams müssen dann Änderungen zurückrollen oder aufgetretene Fehler kurzfristig beheben, statt neue Funktionen zu entwickeln.
+
+### Strategien zum Teilen von Code {#shared-code-strategies}
+
+Code zwischen Polyrepos zu teilen ist schwierig. Meist muss dafür eine private Paket-Registry eingerichtet und gepflegt werden. Gemeinsam genutzter Code wird gebaut, in dieser Registry veröffentlicht und von anderen Polyrepos eingebunden. Jede Änderung am gemeinsamen Code erfordert eine Veröffentlichung in der Registry.
+
+Das kostet Zeit und ist fehleranfällig. Funktionsentwicklung kann blockiert werden, wenn ein Team darauf wartet, dass der PR für den gemeinsamen Code in der Registry veröffentlicht wird.
+
+Damit kehrt auch das Problem langsamer Rückmeldungen zurück: Teams müssen auf die aktualisierte Registry warten, bevor sie die Auswirkungen ihrer Änderungen erkennen. Durch die Isolation der Teams werden manche Auswirkungen womöglich gar nicht sichtbar. So können unbemerkt inkompatible Änderungen entstehen, die andere Teams treffen.
+
+Teams, die den gemeinsamen Code nutzen, müssen außerdem ihre Paketversionen aktiv aktualisieren, um die Kompatibilität im föderierten System sicherzustellen. Andernfalls drohen Laufzeitfehler durch inkompatible Änderungen.
+
+### Verwaltung von Abhängigkeiten {#dependency-management}
+
+Polyrepos können auch die Verwaltung von Abhängigkeiten erschweren. Arbeiten Teams isoliert in eigenen Repositories, verwenden sie möglicherweise unterschiedliche Abhängigkeiten oder Versionen. Das kann Konflikte, Versionsprobleme oder durch doppelte Abhängigkeiten größere Bundles verursachen.
+
+Wenn beispielsweise ein Team React 18 verwendet und ein anderes auf React 19 aktualisiert, besteht nach dem Deployment ein hohes Risiko für inkompatiblen Code und Laufzeitfehler. Das gilt besonders, wenn andere Teile der Anwendung React 19 nicht unterstützen.
+
+In einer Polyrepo-Struktur erfährt das Team beim Update auf React 19 nicht sofort, dass dadurch andere Teams beeinträchtigt werden. Das kann viel Frust verursachen und das Zurückrollen von Änderungen nötig machen.
+
+### Teststrategien {#testing-strategies}
+
+Isoliert arbeitende Teams verwenden möglicherweise unterschiedliche Teststrategien und Werkzeuge. Daraus können uneinheitliche Tests im Gesamtsystem entstehen, was die Qualität der Anwendung beeinträchtigt.
+
+Auch die Qualitätssicherung wird schwieriger. Sie muss entweder jedes Microfrontend einzeln oder alle gemeinsam testen.
+
+Tests einzelner Microfrontends geben weniger Sicherheit über die Gesamtqualität der Anwendung: Sie prüfen weder die Integrationspunkte noch gemeinsam genutzten Context zwischen den Microfrontends.
+
+Außerdem wird ein Testgerüst benötigt, das bestimmte Ebenen der Gesamtanwendung nachbilden kann. Dessen Wartung erzeugt zusätzlichen Aufwand, weil es mit den anderen Anwendungsteilen aktuell gehalten werden muss.
+
+Tests der gesamten Anwendung schaffen mehr Sicherheit. In einer Polyrepo-Struktur benötigen sie aber konfigurierbare Testumgebungen, die die neuesten Versionen aller Microfrontends bereitstellen können.
+Das kostet Zeit und Cloud-Ressourcen. Rückmeldungen zu Testproblemen kommen später, wodurch sich die Iterationsgeschwindigkeit verringert.
+
+## Wie löst ein Monorepo diese Probleme? {#how-does-a-monorepo-address-these-drawbacks}
+
+Ein Monorepo ist ein einzelnes Repository, das den gesamten Code eines Projekts enthält. Es ist die zentrale verbindliche Quelle für das gesamte Projekt.
+Sehen wir uns an, wie es die genannten Herausforderungen adressiert.
+
+### Feedbackzyklen {#feedback-loops-1}
+
+In einem Monorepo wird der Feedbackzyklus einfacher, da der gesamte Code im selben Repository liegt. Änderungen einzelner Teams liefern unmittelbar Rückmeldung zu ihren Auswirkungen auf andere Teams und Microfrontends. Dadurch entfallen manuelle Veröffentlichungen und das Risiko inkompatibler Änderungen sinkt.
+
+Entwickler erkennen die Auswirkungen ihrer Änderung bereits während der Arbeit und können notwendige Anpassungen direkt vornehmen.
+
+### Strategien zum Teilen von Code {#shared-code-strategies-1}
+
+Mit Monorepo-Werkzeugen wie [Nx](https://nx.dev) können Teams Code ohne zentrale Paket-Registry teilen. Damit entfallen manuelle Veröffentlichungen in einer Registry und das Risiko von Konflikten und Versionsproblemen sinkt.
+
+Auch die Entwicklung wird deutlich schneller: Gemeinsamer Code muss nicht mehr in einem separaten Repository aktualisiert werden, bevor Teams auf eine Veröffentlichung in der Registry warten und die neue Version in den nutzenden Anwendungen installieren.
+
+Änderungen am gemeinsamen Code können im selben Repository wie der nutzende Code erfolgen. Das verbessert Zusammenarbeit und Transparenz zwischen Teams, erhöht durch unmittelbare Rückmeldungen die Qualität und verringert das Risiko inkompatibler Änderungen.
+
+Abhängigkeitsgraphen und IDE-Unterstützung machen außerdem besser sichtbar, wo gemeinsamer Code verwendet wird. Dadurch können Entwickler die Auswirkungen ihrer Änderungen fundierter einschätzen.
+
+### Verwaltung von Abhängigkeiten {#dependency-management-1}
+
+In einem Monorepo werden Versionsupdates wichtiger Abhängigkeiten wie React oder Angular auf alle nutzenden Anwendungen angewendet. Das sorgt für größtmögliche Kompatibilität im System und senkt das Risiko inkompatibler Änderungen.
+
+Teams _müssen_ dafür zusammenarbeiten und den Zeitpunkt dieser Updates abstimmen. Das Ergebnis ist jedoch eine verlässlichere und kompatiblere Anwendung für die Nutzer.
+
+Für weniger zentrale Abhängigkeiten wie `date-fns` oder `lodash` können Teams weiterhin eigene Versionen wählen. Dazu definieren sie diese Abhängigkeiten in ihrer eigenen `package.json` oder legen Aliasse in der `package.json` im Stammverzeichnis an.
+
+### Teststrategien {#testing-strategies-1}
+
+Auch Teststrategien werden in einem Monorepo einfacher. Da alle Systemteile im selben Repository liegen, lassen sie sich leichter und einheitlicher testen. Lokale Server für automatisierte E2E- und Integrationstests zu koordinieren ist einfacher, weil das Repository jederzeit den neuesten Stand jedes Microfrontends enthält.
+
+Diese automatisierten Tests können in einer CI/CD-Pipeline laufen, die durch Änderungen am Monorepo ausgelöst wird. So wird stets das gesamte System getestet. Früher schwer erkennbare Probleme an den Integrationspunkten zwischen Microfrontends fallen frühzeitig auf.
+
+Testsuiten können außerdem näher am tatsächlichen Verhalten der Nutzer in der bereitgestellten Anwendung geschrieben werden. Das verbessert die Qualität des Endprodukts.
+
+## Welche Rolle spielt Nx? {#where-does-nx-fit}
+
+Nx ist ein leistungsfähiges Open-Source-Build-System mit Werkzeugen und Verfahren für produktivere Entwicklung, schnellere CI und verlässliche Codequalität. Es eignet sich besonders gut für Monorepos und unterstützt Module Federation in Angular- und React-Projekten direkt.
+
+[Erfahre mehr über Nx als Werkzeug für Module Federation](/integrations/framework/monorepos/nx-for-module-federation.html)

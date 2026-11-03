@@ -1,0 +1,42 @@
+# Kommandozeilenwerkzeug {#command-line-tool}
+
+{props.name || 'Module Federation'} bietet das schlanke Kommandozeilenwerkzeug <code>{props.cmd || 'mf'}</code>, das mit <code>{props.cmdTool || '@module-federation/enhanced'}</code> ausgeliefert wird.
+
+:::note
+Wenn du die Einbindung anhand einer [Integrationsanleitung](/integrations/index.html) abgeschlossen hast, ist <code>{props.cmdTool || '@module-federation/enhanced'}</code> normalerweise bereits Teil deiner Abhängigkeiten und der Befehl direkt verfügbar. Andernfalls installiere das Paket zunächst manuell in deinem Projekt.
+:::
+
+## Alle Befehle anzeigen {#view-all-commands}
+
+import React from 'react';
+import ViewAllCmdsMdx from '@docs/de/_components/cli/view-all-cmds';
+
+{/* rspress flattenMdxContent issue */}
+{props.show || React.createElement(ViewAllCmdsMdx)}
+
+## Allgemeine Optionen {#common-options}
+
+Die CLI von {props.name || 'Module Federation'} bietet folgende Optionen für alle Befehle:
+
+| Option | Beschreibung |
+| --- | --- |
+| `-c, --config <config>` | Pfad zur Konfigurationsdatei, relativ oder absolut. Standardwert: {props.configName ? props.configName : 'module-federation.config.ts' } |
+| `-m, --mode <mode>` | Ausführungsumgebung: "dev" oder "prod". Standardwert: "dev". Je nach Wert wird die Umgebungsvariable `process.env.NODE_ENV` automatisch auf "development" oder "production" gesetzt. |
+| `-h, --help` | Hilfe zum Befehl anzeigen |
+
+## {props.cmd || 'mf'} dts {#dts}
+
+Mit <code>{props.cmd || 'mf'} dts</code>
+lädst du TypeScript-Typdeklarationsdateien herunter oder erzeugst sie.
+
+import CommandInfo from '@docs/_snippets/cli/cmd-info';
+
+{props.commandInfo || <CommandInfo />}
+
+:::info Hinweis
+
+Der Befehl <code>{props.cmd || 'mf'} dts</code> erzeugt oder lädt Typdeklarationsdateien automatisch anhand der Konfiguration in <code>{props.configName || 'module-federation.config.ts'}</code>. Dafür musst du eine gültige Konfigurationsdatei bereitstellen. Andernfalls funktioniert der Befehl nicht korrekt.
+
+Wenn du ausschließlich die Runtime-API verwendest, erstelle eine temporäre Datei <code>{props.configName || 'module-federation.config.ts'}</code>, konfiguriere [dts.consumeTypes.remoteTypeUrls](/configure/dts.html#remotetypeurls) und führe anschließend `mf dts` aus.
+
+:::

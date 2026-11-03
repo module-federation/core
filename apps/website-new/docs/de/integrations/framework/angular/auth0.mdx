@@ -1,0 +1,146 @@
+---
+title: "Authentifizierung mit Auth0"
+---
+# Authentifizierung: Gemeinsamen Benutzerkontext integrieren {#authentication-integrating-shared-user-context}
+
+Diese Dokumentation beschreibt, wie du Authentifizierungszustände, etwa den aktuellen Benutzerkontext, mit Auth0 und Angular zwischen Microfrontends innerhalb einer Application Shell teilst.
+
+## Überblick {#overview}
+
+In Microfrontend-Architekturen müssen häufig Kontextinformationen wie die Daten des aktuellen Nutzers zwischen verschiedenen Anwendungsteilen geteilt werden. Dieses Dokument zeigt, wie du den Authentifizierungszustand mit `@auth0/auth0-angular` gemeinsam nutzt. Das Paket integriert den Identitätsanbieter Auth0.
+
+## Voraussetzungen {#prerequisites}
+
+Bevor du beginnst, benötigst du:
+
+- Grundkenntnisse in Angular und Microfrontend-Konzepten.
+- Ein Auth0-Konto und eine registrierte Webanwendung im [Auth0-Verwaltungsdashboard](https://manage.auth0.com/).
+- Angular-Anwendungen, die mit Module Federation eingerichtet sind.
+
+## Schritt-für-Schritt-Anleitung {#step-by-step-guide}
+
+### Schritt 1: Auth0-Paket installieren {#step-1-installing-the-auth0-package}
+
+Installiere `@auth0/auth0-angular` über npm, um Auth0 zur Authentifizierung in deinen Angular-Anwendungen zu verwenden:
+
+```bash
+npm i @auth0/auth0-angular
+```
+
+### Schritt 2: Auth0 konfigurieren {#step-2-configuring-auth0}
+
+1. Öffne das [Auth0-Verwaltungsdashboard](https://manage.auth0.com/) und registriere deine Single Page Application (SPA).
+2. Notiere dir die nach der Registrierung angezeigten Werte für `domain` und `clientId`.
+3. Füge die URL deiner Anwendung, zum Beispiel `http://localhost:4200`, im Abschnitt „Allowed Callback URLs“ hinzu.
+
+### Schritt 3: AuthModule importieren {#step-3-importing-the-authmodule}
+
+Importiere `AuthModule` aus `@auth0/auth0-angular` in das AppModule der Shell-Anwendung und der Microfrontends.
+
+```typescript title="app.module.ts"
+
+import { AuthModule } from '@auth0/auth0-angular';
+
+@NgModule({
+  imports: [
+    AuthModule.forRoot({
+      domain: 'YOUR_AUTH0_DOMAIN',
+      clientId: 'YOUR_AUTH0_CLIENT_ID'
+    }),
+    // other imports...
+  ],
+  // other module properties...
+})
+export class AppModule { }
+```
+
+Ersetze `YOUR_AUTH0_DOMAIN` und `YOUR_AUTH0_CLIENT_ID` durch die tatsächlichen Werte aus den Einstellungen deiner Auth0-Anwendung.
+
+### Schritt 4: Anmeldung implementieren {#step-4-implementing-login-functionality}
+
+Verwende in deiner Shell-Anwendung den `AuthService`, um die Anmeldung zu implementieren.
+
+```typescript title="projects/shell/src/app/home/home.component.ts"
+
+import { Component } from '@angular/core';
+import { AuthService } from '@auth0/auth0-angular';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss']
+})
+export class HomeComponent {
+  user$ = this.auth.user$;
+
+  constructor(private auth: AuthService) {}
+
+  login(): void {
+    this.auth.loginWithRedirect();
+  }
+}
+```
+
+### Schritt 5: Benutzerinformationen anzeigen {#step-5-displaying-user-information}
+
+Zeige in der Home-Komponente der Shell den Namen des angemeldeten Nutzers an.
+
+```html title="projects/shell/src/app/home/home.component.html"
+<h1>Welcome!</h1>
+
+<p *ngIf="user$ | async as user">
+    User: {{user.name}}
+</p>
+
+<div>
+    <button (click)="login()" mat-flat-button color="primary">Login</button>
+</div>
+```
+
+#### Schritt 6: AuthService in Microfrontends verwenden {#step-6-using-authservice-in-micro-frontends}
+
+In deinen Microfrontend-Komponenten kannst du ebenfalls `AuthService` verwenden, um auf die Informationen des aktuellen Nutzers zuzugreifen.
+
+```typescript title="address.component.ts"
+import { AuthService } from '@auth0/auth0-angular';
+import { FormBuilder } from '@angular/forms';
+import { take } from 'rxjs/operators';
+
+@Component({
+  // component metadata...
+})
+export class AddressComponent {
+  // component properties...
+  constructor(
+    private auth: AuthService,
+    private fb: FormBuilder) {
+    this.auth.user$.pipe(take(1)).subscribe(user => {
+      if (!user) return;
+      // Use user information to pre-fill form, etc.
+    });
+  }
+  // other component methods...
+}
+```
+
+### Schritt 7: Module Federation für gemeinsame Authentifizierung konfigurieren {#step-7-configuring-module-federation-for-shared-authentication}
+
+Stelle sicher, dass das Paket `@auth0/auth0-angular` zwischen Shell und Microfrontends geteilt wird, damit ein gemeinsamer Authentifizierungszustand erhalten bleibt.
+
+```typescript
+// In webpack.config.js of both shell and micro frontends
+
+module.exports = {
+  // existing configuration...
+  shared: share({
+    "@auth0/auth0-angular": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+    // other shared packages...
+  })
+};
+```
+
+Mit dieser Konfiguration verwendet die gesamte Anwendung eine einzige Instanz von `AuthService`. Dadurch steht der Authentifizierungszustand gemeinsam zur Verfügung.
+
+## Fazit {#conclusion}
+
+Mit diesen Schritten kannst du den Authentifizierungszustand zwischen den Microfrontends deiner Angular-Anwendung teilen. Das vereinfacht die Verwaltung des Benutzerkontexts und sorgt für einen einheitlichen Anmeldestatus über die modularen Komponenten deiner Anwendung hinweg.

@@ -1,0 +1,154 @@
+# Chrome Devtool
+
+Mit Module Federation Devtools kannst du Federation-Module, ihre Abhängigkeitsbeziehungen und Shared-Abhängigkeiten auf einer Seite untersuchen. Außerdem kannst du Remote-Module per Proxy auf eine lokale oder bestimmte Version umleiten und den Ladevorgang verfolgen.
+
+::: tip Voraussetzung
+
+Die Visualisierungs- und Proxy-Funktionen setzen `mf-manifest.json` voraus.
+
+:::
+
+## Verwendung in verschiedenen Browsern {#use-in-different-browsers}
+
+Module Federation Devtools ist eine Chrome-Erweiterung mit zwei Varianten für unterschiedliche Browserumgebungen. Beide bieten dieselben Debugging-Funktionen; lediglich Installation und Einstiegspunkt unterscheiden sich:
+
+|Anwendungsfall|Variante der Erweiterung|So öffnest du sie|
+| --- | --- | --- |
+|Normaler Desktop-Chrome|Desktop Chrome (`dist/chrome`)|Über das Seitenpanel der Erweiterung oder das Panel `Module Federation` in Chrome DevTools|
+|Ein eingebetteter Browser einer KI-Anwendung, der Chrome-Erweiterungen unterstützt, etwa der eingebettete Browser von ChatGPT|Embedded browser (`dist/browser`)|Klicke auf das Erweiterungssymbol, um das kompakte Popup zu öffnen.|
+
+Beide Varianten unterstützen Modul-Proxys und Versionswechsel, Modulinformationen, Abhängigkeitsgraphen, Shared-Abhängigkeiten, React HMR / Fast Refresh, Loading Trace, den Export von Berichten und WebMCP.
+
+Aktiviere im selben Browser nur eine Variante, um doppelte Injektionen zu vermeiden.
+
+::: tip Headless-Browser und CI
+
+Die beiden Varianten sind für interaktive Browserumgebungen gedacht. Für Headless-Browser oder CI-Automatisierung verwendest du [Divebell](https://github.com/2heal1/divebell) mit seiner [Module-Federation-Extension](https://github.com/2heal1/divebell/tree/main/packages/extensions/mf).
+
+Divebell kann Seiten über die CLI laden, Runtime-Informationen von Module Federation sammeln und strukturierte Diagnoseergebnisse zurückgeben, ohne eine Erweiterungsoberfläche zu öffnen. Installation und Verwendung findest du unter [Runtime-Probleme mit Divebell untersuchen](/guide/debug/divebell.html).
+
+:::
+
+## Installation
+
+### Desktop Chrome
+
+Öffne die [Seite der Module-Federation-Erweiterung](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom) und klicke auf `Add to Chrome`.
+
+![](@public/guide/chrome-devtools/chrome-store-add-devtool.png)
+
+### Eingebetteter Browser {#embedded-browser}
+
+1. Öffne [Module Federation Releases](https://github.com/module-federation/core/releases) und lade das Browser-ZIP aus dem Bereich **Assets** eines stabilen Releases herunter. Verwende nicht die von GitHub automatisch erzeugten **Source code**-Archive.
+2. Entpacke das ZIP und lade das entpackte Verzeichnis über die Erweiterungsverwaltung des eingebetteten Browsers.
+3. Öffne oder aktualisiere die Zielseite und klicke auf das Erweiterungssymbol.
+
+Browser-Assets werden für stabile `latest`-Releases veröffentlicht. `next`-Vorabversionen erzeugen keine GitHub Releases. Wenn das gewünschte Release kein Browser-Asset enthält, führe Folgendes aus:
+
+```bash
+pnpm --filter @module-federation/devtools run build:devtool
+```
+
+Lade anschließend `packages/chrome-devtools/dist/browser`. Nach einem Update der Erweiterung lädst du sie neu und aktualisierst alle geöffneten Seiten.
+
+## Funktionen {#features}
+
+|Panel|Zweck|
+| --- | --- |
+|Proxy|Ein Remote-Modul auf einen lokalen Dienst, eine bestimmte Version oder eine eigene `mf-manifest.json`-URL umstellen|
+|Module Info|Die auf der aktuellen Seite geladenen Federation-Module einschließlich ihrer Versionen und Entry-URLs prüfen|
+|Dependency Graph|Abhängigkeitsbeziehungen zwischen Modulen untersuchen und filtern|
+|Shared|Das Laden von Shared-Abhängigkeiten, die Wiederverwendung von Versionen und Einstellungen wie Singleton und Strict Version prüfen|
+|Loading Trace|Ladevorgänge von Remotes, Shared und Komponenten verfolgen, Fehler untersuchen und Berichte exportieren|
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/shared-overview.png)
+
+## Die Erweiterung verwenden {#use-the-extension}
+
+Öffne in Desktop-Chrome die Zielseite, drücke F12 und wähle `Module Federation` in den DevTools. In einem eingebetteten Browser klickst du auf das Erweiterungssymbol.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
+
+### Ein Modul per Proxy umleiten {#proxy-a-module}
+
+1. Wähle im Proxy-Panel das Modul aus, das du umleiten möchtest.
+2. Wähle eine Zielversion oder gib einen lokalen Port beziehungsweise eine vollständige `mf-manifest.json`-URL ein, etwa `http://localhost:3000/mf-manifest.json`.
+3. Um mehrere Module umzuleiten, klicke auf `add new proxy module` und füge eine weitere Regel hinzu.
+4. Speichere die Konfiguration und aktualisiere die Seite.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
+
+Starte für die lokale Entwicklung zuerst den Producer und trage seine Manifest-URL in die Proxy-Regel ein. Die Consumer-Seite lädt automatisch neu, wenn du den Producer-Code änderst.
+
+![](@public/guide/chrome-devtools/dev-to-proxy.png)
+
+![](@public/guide/chrome-devtools/proxy-to-local.png)
+
+### Loading Trace
+
+Loading Trace hilft bei der Diagnose leerer Seiten, dauerhaft ladender Komponenten, unerwarteter Shared-Versionen und Fehler beim Laden von Producern.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-overview-en.png)
+
+Panel-Status:
+
+- `OFF`: Auf der aktuellen Seite ist kein lesbarer Ladebericht verfügbar.
+- `ON`: Die Erweiterung erfasst Daten für den aktuellen Tab.
+- `CUSTOM`: Die Seite verwendet das [Observability-Plugin](/plugin/plugins/observability-plugin.html), und Devtools liest dessen Berichte.
+
+So verfolgst du einen Ladevorgang:
+
+1. Öffne Loading Trace. Klicke bei Status `OFF` auf `Observe now`; die Seite lädt einmal neu.
+2. Reproduziere das Problem oder löse den Ladevorgang der Remote-Komponente aus, die du untersuchen möchtest.
+3. Wähle einen Bericht und prüfe Ergebnis, Ereigniszeitleiste, Fehlerphase und vorgeschlagene Maßnahmen.
+4. Klicke auf `Export`, um den vollständigen Bericht zu speichern.
+
+Die wichtigsten Berichtszustände sind Erfolg, Fehler, ausstehend und wiederhergestellt. Das exportierte JSON enthält `config`, `scopes` und `reports`. Achte besonders auf:
+
+- `diagnosis`: Schlussfolgerung, Belege und vorgeschlagene Maßnahmen.
+- `summary`: endgültiger Ladestatus.
+- `remote` / `shared`: geladenes Ziel, Provider und Versionsdetails.
+- `loadedBefore`: ob ein anderer Consumer denselben Producer bereits geladen hatte.
+- `events`: vollständige Ereignisfolge.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-shared-report-en.png)
+
+## Über WebMCP mit einem Coding-Agenten arbeiten {#work-with-a-coding-agent-through-webmcp}
+
+::: tip Veröffentlichungsstatus für Desktop-Chrome
+
+Die WebMCP-Unterstützung für Desktop-Chrome wird derzeit für die Veröffentlichung im Chrome Web Store geprüft. Bis zum Abschluss der Prüfung unterstützt die Store-Version die in diesem Abschnitt beschriebenen Funktionen nicht.
+
+:::
+
+Beide Varianten der Erweiterung registrieren beim Seitenstart automatisch WebMCP-Werkzeuge. Die Erweiterungsoberfläche muss dafür nicht geöffnet bleiben, und die Anwendung benötigt kein zusätzliches WebMCP-SDK.
+
+|Werkzeug|Zweck|
+| --- | --- |
+|`mf_get_state`|Runtime-Zustand, Proxy- und HMR-Konfiguration sowie Ladeberichte lesen|
+|`mf_get_modules`|Alle Module oder ein bestimmtes Modul prüfen|
+|`mf_get_dependencies`|Abhängigkeitsbeziehungen zwischen Modulen abrufen|
+|`mf_get_shared`|Versionen und Ladestatus von Shared-Abhängigkeiten prüfen|
+|`mf_set_proxy` / `mf_clear_proxy`|Modul-Proxys konfigurieren oder entfernen|
+|`mf_set_hmr`|React HMR / Fast Refresh aktivieren oder deaktivieren|
+|`mf_configure_loading_trace`|Loading Trace konfigurieren|
+|`mf_get_loading_reports`|Ladeberichte lesen|
+|`mf_export_snapshot`|Einen JSON-Snapshot zur Diagnose exportieren|
+
+Frage einen WebMCP-fähigen Agenten zum Beispiel:
+
+```text
+Read the current MF state and preserve the existing proxy rules.
+Proxy mf_playground to https://localhost:3006/mf-manifest.json,
+enable HMR, reload the page, and verify that the configuration took effect.
+```
+
+`mf_set_proxy` ersetzt die gesamte Liste der Proxy-Regeln. Lies daher vor Änderungen den aktuellen Zustand. Konfigurationswerkzeuge geben `reloadRequired` zurück; der Agent sollte die Seite abhängig von diesem Ergebnis neu laden.
+
+Graphlayout, Filter, Theme und Sprache bedienst du weiterhin über die Oberfläche. Für eine genauere Analyse von Runtime-Fehlern oder Performance-Engpässen verwendest du [Divebell](/guide/debug/divebell.html).
+
+## Hinweise {#notes}
+
+- Die Erweiterung umgeht weder CSP noch CORS oder Netzwerkbeschränkungen des Browsers. Auch beim Umleiten von einer HTTPS-Seite auf einen lokalen HTTP-Dienst müssen Seitenrichtlinien, Protokolle und Cross-Origin-Antwortheader zueinander passen.
+- Einstellungen für Proxy, HMR und Loading Trace werden im localStorage des Seiten-Origins gespeichert. Tabs mit demselben Origin können Einstellungen teilen. Verwende unterschiedliche Origins oder getrennte Browserprofile, wenn du widersprüchliche Konfigurationen benötigst.
+- Wenn ein Agent die WebMCP-Werkzeuge nicht findet, lade die Erweiterung neu, aktualisiere die Seite und prüfe anschließend `window.__MF_DEVTOOLS_WEBMCP__` in der Konsole. `registered` bedeutet, dass die Registrierung erfolgreich war, `unavailable`, dass der Host keine verwendbare API bereitgestellt hat, und `error` enthält die konkrete Ursache.

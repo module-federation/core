@@ -1,0 +1,72 @@
+import CommonMfManifestStatsFields from '@docs/de/_components/configure/mf-manifest-stats-common.mdx'
+
+# Stats-Feldreferenz {#stats-field-reference}
+
+`mf-stats.json` wird bei aktivierter Option [manifest](/configure/manifest.html) erzeugt. Es enthält vollständige Build-Statistiken, darunter Assets von exposes, shared und remotes, `metaData` mit Build-Informationen und remoteEntry sowie Ergebnisse der Asset-Analyse.
+
+Diese Referenz erläutert alle Felder von `mf-stats.json` und unterstützt dich bei Debugging und Analyse.
+
+## Oberste Ebene {#top-level}
+
+| Feld | Typ | Erforderlich | Beschreibung |
+| --- | --- | --- | --- |
+| `id` | `string` | Ja | Eindeutige Build-Kennung |
+| `name` | `string` | Ja | Federation-Name |
+| `metaData` | `StatsMetaData` | Ja | Build- und Remote-Entry-Informationen |
+| `shared` | `StatsShared[]` | Ja | Shared-Abhängigkeiten (vollständige Details) |
+| `remotes` | `StatsRemote[]` | Ja | Remotes (Entry/Version und Verwendung) |
+| `exposes` | `StatsExpose[]` | Ja | Exposes (Assets und Abhängigkeiten) |
+
+<CommonMfManifestStatsFields />
+
+## shared {#shared}
+
+### StatsShared {#statsshared}
+
+| Feld | Typ | Erforderlich | Beschreibung |
+| --- | --- | --- | --- |
+| `id` | `string` | Ja | Shared-Kennung |
+| `name` | `string` | Ja | Paketname |
+| `version` | `string` | Ja | In diesem Build verwendete Version |
+| `singleton` | `boolean` | Ja | Singleton |
+| `requiredVersion` | `string` | Ja | requiredVersion |
+| `hash` | `string` | Ja | Inhaltshash |
+| `assets` | `StatsAssets` | Ja | Assets |
+| `deps` | `string[]` | Ja | Abhängigkeiten |
+| `usedIn` | `string[]` | Ja | Verwendung durch Container/Module |
+| `usedExports` | `string[]` | Ja | Verwendete Exporte |
+| `fallback` | `string` | Ja | Pfad/Kennung des Tree-Shaking-Fallbacks |
+| `fallbackName` | `string` | Ja | Name des Tree-Shaking-Fallbacks |
+| `fallbackType` | `RemoteEntryType` | Ja | Typ des Tree-Shaking-Fallbacks |
+
+## remotes {#remotes}
+
+`StatsRemote` beschreibt die Verwendung von Remotes. Es enthält immer entweder `entry` oder `version`.
+
+### StatsRemoteVal (gemeinsame Felder) {#statsremoteval-shared-fields}
+
+| Feld | Typ | Erforderlich | Beschreibung |
+| --- | --- | --- | --- |
+| `moduleName` | `string` | Ja | Name des Remote-Moduls |
+| `federationContainerName` | `string` | Ja | Name des Remote-Containers |
+| `consumingFederationContainerName` | `string` | Ja | Name des Consumer-Containers |
+| `alias` | `string` | Ja | Alias |
+| `usedIn` | `string[]` | Ja | Verwendung durch Container/Module |
+
+### StatsRemote (gegenseitig ausschließend) {#statsremote-mutually-exclusive}
+
+- `entry: string` (falls vorhanden, kein `version`)
+- `version: string` (falls vorhanden, kein `entry`)
+
+## exposes {#exposes}
+
+### StatsExpose {#statsexpose}
+
+| Feld | Typ | Erforderlich | Beschreibung |
+| --- | --- | --- | --- |
+| `id` | `string` | Ja | Expose-Kennung |
+| `name` | `string` | Ja | Expose-Name (z. B. `./Button`) |
+| `path` | `string` | Nein | Quellpfad |
+| `file` | `string` | Ja | Ausgabedatei |
+| `requires` | `string[]` | Ja | Abhängigkeiten |
+| `assets` | `StatsAssets` | Ja | Assets |

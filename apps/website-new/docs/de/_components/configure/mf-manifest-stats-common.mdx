@@ -1,0 +1,68 @@
+## metaData (beide Dateien) {#metadata-both-files}
+
+`metaData` beschreibt den Build-Kontext und wie dieser Build zur Laufzeit eingebunden wird. Sowohl `mf-stats.json` als auch `mf-manifest.json` enthalten dieses Feld.
+
+### StatsMetaData
+
+`StatsMetaData` hat zwei Formen, die sich gegenseitig ausschließen:
+
+- **Funktionsform**: `getPublicPath: string`
+- **Stringform**: `publicPath: string` (optional `ssrPublicPath: string`)
+
+Gemeinsame Felder:
+
+| Feld | Typ | Erforderlich | Beschreibung |
+| ---------------- | ---------------- | -------- | ------------------------------- |
+| `name` | `string` | Ja | Name des aktuellen Remotes/Hosts |
+| `globalName` | `string` | Ja | Globaler Name für den remoteEntry |
+| `buildInfo` | `StatsBuildInfo` | Ja | Build-Informationen |
+| `remoteEntry` | `ResourceInfo` | Ja | Ressource des Remote Entrys |
+| `ssrRemoteEntry` | `ResourceInfo` | Nein | SSR-Remote-Entry (falls vorhanden) |
+| `types` | `MetaDataTypes` | Nein | Informationen zum Typen-Bundle (falls vorhanden) |
+| `type` | `string` | Ja | APP, NPM |
+| `pluginVersion` | `string` | Nein | Version des MF-Plugins |
+
+### ResourceInfo
+
+| Feld | Typ | Erforderlich | Beschreibung |
+| ------ | ----------------- | -------- | ------------------------------------------ |
+| `path` | `string` | Ja | Relativer Pfad in der Build-Ausgabe |
+| `name` | `string` | Ja | Dateiname |
+| `type` | `RemoteEntryType` | Ja | Format des Remote Entrys (`var/umd/system/...`) |
+
+### StatsBuildInfo
+
+| Feld | Typ | Erforderlich | Beschreibung |
+| ---------------- | ---------- | -------- | ---------------------------- |
+| `buildVersion` | `string` | Ja | Build-Version |
+| `buildName` | `string` | Ja | Build-Name |
+| `target` | `string[]` | Nein | Build-Ziele |
+| `plugins` | `string[]` | Nein | Tree-Shaking-Plugins |
+| `excludePlugins` | `string[]` | Nein | Beim Tree Shaking ausgeschlossene Plugins |
+
+### MetaDataTypes
+
+| Feld | Typ | Erforderlich | Beschreibung |
+| ------ | -------- | -------- | --------------------------------------------------------- |
+| `path` | `string` | Ja | Ausgabepfad |
+| `name` | `string` | Ja | Dateiname (für ältere Typen erforderlich; wird künftig abgelöst) |
+| `api` | `string` | Ja | API-Einstiegspunkt |
+| `zip` | `string` | Ja | Zip-Pfad |
+
+## assets (beide Dateien) {#assets-both-files}
+
+`StatsAssets` beschreibt synchrone und asynchrone Assets eines Shared-Moduls oder eines bereitgestellten Moduls. Beide Dateien verwenden diesen Typ.
+
+### StatsAssets
+
+| Feld | Typ | Erforderlich | Beschreibung |
+| ----- | ----------------- | -------- | ----------------- |
+| `js` | `StatsAssetsInfo` | Ja | JavaScript-Assets |
+| `css` | `StatsAssetsInfo` | Ja | CSS-Assets |
+
+### StatsAssetsInfo
+
+| Feld | Typ | Erforderlich | Beschreibung |
+| ------- | ---------- | -------- | -------------- |
+| `sync` | `string[]` | Ja | Initiale Assets |
+| `async` | `string[]` | Ja | Asynchrone Assets |

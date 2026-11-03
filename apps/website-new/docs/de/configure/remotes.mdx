@@ -1,0 +1,77 @@
+# remotes
+
+- Typ: `PluginRemoteOptions`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+- Einsatzzweck: Bindet Module eines Producers mit <code>{props.brandName || props.name || 'Module Federation'}</code> ein.
+
+:::tip
+Dieser Parameter ist für Consumer vorgesehen. Wenn `remotes` gesetzt ist, dient das Modul als Consumer.
+:::
+
+Der Typ `PluginRemoteOptions` ist wie folgt definiert:
+
+```tsx
+type ModuleFederationInfo = string;
+type ShareScope = string | string[];
+
+type RemoteConfig = {
+  external: ModuleFederationInfo | ModuleFederationInfo[];
+  shareScope?: ShareScope;
+};
+
+interface PluginRemoteOptions {
+  [remoteAlias: string]: ModuleFederationInfo | RemoteConfig;
+}
+```
+
+- `remoteAlias` ist der Name, den der Consumer tatsächlich für Referenzen verwendet. Du kannst ihn frei konfigurieren. Ist `remoteAlias` auf `demo` gesetzt, erfolgt der Import beispielsweise über `import xx from 'demo'`.
+- `ModuleFederationInfo` setzt sich aus `ModuleFederation name` + `@` + `ModuleFederation entry` zusammen.
+  - `ModuleFederation name` ist der vom Producer festgelegte Name.
+  - `entry` kann `mf-manifest.json` oder `remoteEntry.js` sein.
+  - Mit `mf-manifest.json` als `entry` stehen zusätzlich folgende Funktionen zur Verfügung:
+    - Dynamische Typhinweise für Module
+    - Preloading von Ressourcen
+    - Debugging mit dem Chrome-DevTools-Werkzeug
+
+```js
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      // The `remotes` below defines two producers, named `manifest-provider` for the project started on port 3011 and `js-entry-provider` for the project started on port 3012
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+        'js-entry-provider':
+          'js_entry_provider@http://localhost:3012/remoteEntry.js',
+      },
+    }),
+  ],
+};
+```
+
+## shareScope
+
+- Typ: `string | string[]`
+- Erforderlich: Nein
+- Standardwert: `'default'`
+
+Legt fest, welche Share Scopes der Consumer mit einem bestimmten Producer abgleicht. Damit kannst du ausgewählte Shared-Abhängigkeiten vom Standardpool isolieren, beispielsweise ein internes Designsystem in `scope1`, während React in `default` bleibt.
+
+```ts
+new ModuleFederationPlugin({
+  name: 'host',
+  remotes: {
+    remote: {
+      external: 'app_remote@http://localhost:2001/remoteEntry.js',
+      shareScope: ['default', 'scope1'],
+    },
+  },
+});
+```
+
+Zugehörige Konfiguration:
+
+- Der Producer sollte über [shareScope](/configure/shareScope.html) angeben, welche Scopes er initialisiert.
+- Jede Shared-Abhängigkeit wählt ihren Scope über [shared.shareScope](/configure/shared.html#sharescope).

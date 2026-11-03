@@ -1,0 +1,76 @@
+import {Steps} from '@theme'
+
+# Mit Express.js arbeiten {#working-with-expressjs}
+
+Bei Verwendung von Express funktioniert serverseitiges Hot Module Reloading nach [diesen Schritten](/integrations/framework/nextjs/basic-example.html#step-3-implementing-ssr) möglicherweise noch nicht.
+
+Express hat einen eigenen Route-Stack. Den require-Cache neu zu laden reicht daher nicht aus, um die Routen innerhalb von Express zu aktualisieren.
+
+<Steps>
+### Globalen Callback in Express ergänzen {#add-global-callback-in-express}
+Für Hot Module Reloading mit Express und Next.js ist ein globaler Callback erforderlich, der den Express-Routen-Cache leert.
+So werden Routenänderungen ohne Serverneustart erkannt.
+
+```javascript title="server/express.js"
+import express from 'express';
+import next from 'next';
+
+const dev = process.env.NODE_ENV !== 'production';
+const hostname = 'localhost';
+const port = 3000;
+const app = next({ dev, hostname, port });
+const handle = app.getRequestHandler();
+
+global.clearRoutes = () => {
+  server._router.stack = server._router.stack.filter((k) => !(k && k.route && k.route.path));
+};
+
+app.prepare().then(() => {
+  const server = express();
+
+  server.all('*', (req, res) => {
+    const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+    const { pathname, query } = parsedUrl;
+
+    handle(req, res, parsedUrl);
+  });
+
+  server.listen(port, () => {
+    console.log(`> Ready on http://${hostname}:${port}`);
+  });
+});
+```
+
+### Callback bei der Revalidierung auslösen {#trigger-callback-in-revalidation}
+
+Ergänze in `_document.js` einen globalen Callback, der den Express-Routen-Cache bei der Revalidierung leert. So werden aktualisierte Routen ohne Serverneustart ausgeliefert.
+```jsx title="pages/_document.js"
+class MyDocument extends Document {
+  static async getInitialProps(ctx) {
+    if (ctx?.pathname && !ctx?.pathname?.endsWith('_error')) {
+      await revalidate().then((shouldUpdate) => {
+        if (shouldUpdate) {
+          global.clearRoutes();
+        }
+      });
+    }
+
+    const initialProps = await Document.getInitialProps(ctx);
+    return initialProps;
+  }
+
+  render() {
+    return (
+      <Html>
+        <Head />
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
+```
+
+</Steps>

@@ -1,0 +1,11 @@
+# injectTreeShakingUsedExports
+
+Legt fest, ob die von `shared` verwendeten Exports in die Bundler-Runtime eingefügt werden.
+
+- Typ: `boolean`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Diese Option steuert, ob die tatsächlich genutzten Exports von Shared-Modulen in die Bundler-Runtime eingefügt werden. Das ermöglicht eine genauere Verwaltung und Optimierung von Abhängigkeiten.
+
+Bei `mode: 'server-calc'` empfiehlt es sich, diese Option auf `false` zu setzen.

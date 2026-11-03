@@ -1,0 +1,89 @@
+# Komponenten importieren {#importing-components}
+
+Remote-Module lassen sich auf unterschiedliche Arten importieren.
+
+### Lazy- / asynchroner Import {#lazy--async-import}
+
+#### Default-Exports {#default-exports}
+
+Verwende `React.lazy` und `React.Suspense`.
+
+:::danger Hydratisierungsfehler
+Der Import von Remote-Modulen mit `next/dynamic` führt zu **Hydratisierungsfehlern**.
+:::
+
+```javascript
+import React, { lazy } from 'react';
+const SampleComponent = lazy(() => import('next2/sampleComponent'));
+
+const FormComponent = ()=>{
+  return (
+    <Suspense fallback="loading">
+      <SampleComponent/>
+    </Suspense>
+  )
+}
+
+export default FormComponent
+```
+
+#### Benannte Exports {#named-exports}
+Für benannte Exports muss ein künstlicher `default` an `React.lazy` zurückgegeben werden, da diese Funktion nur Default-Exports erwartet.
+
+```javascript
+import React, { lazy } from 'react';
+
+const SampleComponent = lazy(() => import('next2/sampleComponent').then((mod) => {
+  return { default: mod.NamedComponent };
+}));
+
+const FormComponent = () => {
+  return (
+    <Suspense fallback="loading">
+      <SampleComponent />
+    </Suspense>
+  );
+};
+
+export default FormComponent;
+```
+
+### Eager- / synchroner Import {#eager--sync-import}
+
+Eager-Imports funktionieren ebenfalls. Verwende nach Möglichkeit jedoch dynamische Imports, um große anfängliche Netzwerkübertragungen oder Anfragen zu vermeiden.
+
+```javascript
+let SomeHook = require('next2/someHook');
+SomeHook = SomeHook.default || SomeHook;
+
+import SomeComponent, {NamedExportComponent} from 'next2/sampleComponent';
+```
+### Nur auf dem Client {#client-side-only}
+
+In manchen Fällen möchtest du ein Remote-Modul ausschließlich auf dem Client laden.
+
+Das ist beispielsweise nötig, wenn dein Remote nicht sowohl einen CommonJS- als auch einen Browser-Build bereitstellt.
+
+Node benötigt einen remoteEntry im CommonJS-Format. Ein für den Browser vorgesehenes Remote kann nicht auf dem Server verwendet werden.
+
+```jsx
+import {lazy, Suspense, useEffect, useState} from 'react';
+
+const RemoteModule = typeof window === 'undefined' ? ()=>{} : lazy(() => import('app3/sampleComponent'));
+
+const ClientOnly = ({Component}) => {
+  const [mounted, setMount] = useState(false);
+  useEffect(() => {
+    setMount(true);
+  }, []);
+  if (!mounted) return null;
+  return (
+    <Suspense fallback="loading">
+      <Component />
+    </Suspense>
+  );
+};
+
+const App = ()=>{
+  return <ClientOnly Component={RemoteModule} />
+}

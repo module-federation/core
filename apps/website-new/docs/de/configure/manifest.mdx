@@ -1,0 +1,52 @@
+# manifest
+
+- Typ: `boolean | PluginManifestOptions`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Steuert, ob und wie das Plugin Manifest-Artefakte erzeugt. Ist die Option aktiviert, gibt das Plugin bei jedem Build <code>{props.manifest || 'mf-manifest.json' }</code> und <code>{props.stats || 'mf-stats.json' }</code> aus. Die Namen lassen sich über `fileName` anpassen. Andere Werkzeuge können diese Dateien direkt über `processAssets` oder aus der fertigen Build-Ausgabe lesen.
+
+- <code>{props.stats || 'mf-stats.json'}</code>: Enthält die vollständige Build-Statistik, einschließlich der Assets für exposes/shared/remotes, `metaData` (Plugin-Version, Build-Informationen, `remoteEntry` usw.) und zusätzlicher Asset-Analysen. Die Datei eignet sich für das Debugging oder das Zusammenführen von Statistiken verschiedener Umgebungen. Die Feldreferenz findest du unter [{props.stats || 'mf-stats.json'}](/guide/advanced/stats-fields.html).
+- <code>{props.manifest || 'mf-manifest.json'}</code>: Ein auf die Runtime ausgerichtetes Manifest, das aus den Statistiken abgeleitet wird. Es behält die stabile Struktur bei, die Consumer von {props.brandName  || 'Module Federation'} beim Laden von Remote-Modulen lesen. Die Einträge für exposes/shared/remotes beschreiben, was Consumern tatsächlich zur Verfügung steht. Die Feldreferenz findest du unter [{props.manifest || 'mf-manifest.json'}](/guide/advanced/manifest-fields.html).
+
+Der Typ `PluginManifestOptions` ist wie folgt definiert:
+
+```ts
+interface PluginManifestOptions {
+  filePath?: string;
+  disableAssetsAnalyze?: boolean;
+  fileName?: string;
+}
+```
+
+## filePath
+
+- Typ: `string`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Pfad der Manifest-Datei.
+
+## fileName
+
+- Typ: `string`
+- Erforderlich: Nein
+- Standardwert: `'mf-manifest.json'`
+
+Name der Manifest-Datei.
+
+Wenn du `fileName` angibst, erhält die zugehörige Statistikdatei automatisch das Suffix `-stats`. Beispielsweise erzeugt `fileName: 'mf.json'` die Dateien `mf.json` und `mf-stats.json`. Ist `filePath` gesetzt, werden die generierten Dateien unter diesem Pfad gespeichert.
+
+## disableAssetsAnalyze
+
+:::warning
+Diese Option sollte in der Regel nicht gesetzt werden: Sie deaktiviert das Preloading!
+:::
+
+- Typ: `boolean`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+In komplexen Projekten kann die Asset-Analyse viel Zeit beanspruchen. Mit `true` deaktivierst du sie und verkürzt damit die Build-Zeit.
+Bei reinen Consumer-Projekten ist die Option in der Entwicklung standardmäßig auf `true` gesetzt.
+Bei `true` enthält das Manifest keine Felder `shared` und `exposes`; außerdem fehlt `assets` in `remotes`.

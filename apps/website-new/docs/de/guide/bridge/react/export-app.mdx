@@ -1,0 +1,265 @@
+# Anwendungen exportieren {#export-applications}
+
+In diesem Kapitel erfährst du, wie du mit `createBridgeComponent` deine React-Anwendung als Modul exportierst, das sich über einen Remote laden lässt.
+
+## Installation
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
+
+## Grundlegende Verwendung {#basic-usage}
+
+### Schritt 1: Export-Einstiegspunkt erstellen {#step-1-create-export-entry}
+
+Um eine React-Anwendung zu exportieren, erstellst du eine eigene Exportdatei und kapselst die Anwendung mit `createBridgeComponent` als Remote-Modul.
+
+Angenommen, der Einstiegspunkt deiner Anwendung ist `App.tsx`. Erstelle dann die Datei `export-app.tsx`:
+
+```tsx
+// ./src/export-app.tsx
+import App from './App';
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+// Use createBridgeComponent to wrap App as a remote module and export
+export default createBridgeComponent({
+  rootComponent: App
+});
+```
+
+### Schritt 2: Export mit `exposes` konfigurieren {#step-2-configure-exposes-export}
+
+Konfiguriere anschließend Module Federation in deinem Build-Tool so, dass die Exportdatei für andere Anwendungen verfügbar ist.
+
+:::tip Unterstützte Build-Tools
+Das folgende Beispiel verwendet die Rsbuild-Konfiguration. Passe sie an dein Build-Tool an:
+- **Rsbuild**: `@module-federation/rsbuild-plugin`
+- **Rspack**: `@module-federation/enhanced/rspack`
+- **Webpack**: `@module-federation/enhanced/webpack`
+- **Vite**: `@module-federation/vite`
+
+:::
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx', // Export application-type remote module
+      },
+    }),
+  ],
+};
+```
+
+## Bridge Router konfigurieren {#bridge-router-configuration}
+
+React Bridge stimmt das Routing aufeinander ab: Abhängig vom aktuellen Pfad kann es basename dynamisch setzen und den Routing-Kontext weitergeben.
+
+:::info Unterstützte Routing-Frameworks
+- Bridge Router unterstützt die Routing-Proxy-Funktion derzeit für React Router v5, v6 und v7.
+
+- Andere Routing-Frameworks wie `@tanstack/react-router` werden nicht unterstützt. Wenn deine Anwendung ein anderes Routing-Framework verwendet, musst du `enableBridgeRouter` ausdrücklich deaktivieren und die Routing-Logik selbst übernehmen.
+
+:::
+
+### Bridge Router aktivieren {#enable-bridge-router}
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx',
+      },
+      bridge: {
+        // Enable Bridge Router routing capabilities, default is true
+        enableBridgeRouter: true,
+      }
+    }),
+  ],
+};
+```
+
+### Beschreibung der Konfiguration {#configuration-description}
+
+- **`enableBridgeRouter: true`** (Standard) – Übernimmt basename und die Abstimmung des Routings automatisch; unterstützt React Router v5, v6 und v7
+- **`enableBridgeRouter: false`** – Deaktiviert die standardmäßigen Routing-Proxy-Funktionen von Bridge; du musst die Routing-Integration selbst übernehmen
+
+:::warning Wichtig
+Wenn du Bridge Router aktivierst, darfst du `react-router-dom` nicht als Shared-Abhängigkeit konfigurieren, da dies zu Problemen mit dem Routing führt.
+:::
+
+## API-Referenz für createBridgeComponent {#createbridgecomponent-api-reference}
+
+:::warning Wichtig
+`@module-federation/bridge-react/v18` und `/v19` importieren `createRoot` aus `react-dom/client`.
+
+Wenn du nur `"react-dom"` als Shared-Abhängigkeit konfigurierst, wird `react-dom/client` nicht gemeinsam genutzt. Das kann zu Fehlern durch unterschiedliche React-Versionen führen. Verwende deshalb die Präfixschreibweise mit abschließendem Schrägstrich:
+
+```ts
+shared: {
+  'react-dom/': {
+    singleton: true,
+  },
+}
+```
+:::
+
+### Funktionssignatur {#function-signature}
+
+```tsx
+function createBridgeComponent<T = any>(
+  bridgeInfo: Omit<ProviderFnParams<T>, 'createRoot'>
+): () => {
+  render(info: RenderParams): Promise<void>;
+  destroy(info: DestroyParams): void;
+}
+```
+
+### ProviderFnParams\<T\>
+
+Konfigurationsparameter der Bridge-Komponente:
+
+```tsx
+interface ProviderFnParams<T> {
+  // Root component
+  rootComponent: React.ComponentType<T>;
+  
+  // Custom render function (optional)
+  render?: (App: React.ReactElement, id?: HTMLElement | string) => RootType | Promise<RootType>;
+  
+  // Custom createRoot function (optional, React 18+)
+  createRoot?: (container: Element | DocumentFragment, options?: CreateRootOptions) => Root;
+  
+  // Default createRoot options (React 18+)
+  defaultRootOptions?: CreateRootOptions;
+}
+```
+
+### RenderParams
+
+Schnittstelle für Rendering-Parameter:
+
+```tsx
+interface RenderParams {
+  moduleName?: string;
+  basename?: string;
+  memoryRoute?: {
+    entryPath: string;
+    initialState?: Record<string, unknown>;
+  };
+  dom: HTMLElement;                    // Target DOM element for rendering
+  rootOptions?: CreateRootOptions;     // React 18+ createRoot options
+  [key: string]: unknown;             // Other custom properties
+}
+```
+
+### DestroyParams
+
+Schnittstelle für Parameter beim Zerstören der Instanz:
+
+```tsx
+interface DestroyParams {
+  moduleName: string;
+  dom: HTMLElement;
+}
+```
+
+### CreateRootOptions
+
+createRoot-Optionen für React 18+:
+
+```tsx
+interface CreateRootOptions {
+  identifierPrefix?: string;                                    // Identifier prefix
+  onRecoverableError?: (error: unknown) => void;              // Recoverable error handling
+  transitionCallbacks?: unknown;                               // Transition callbacks
+}
+```
+
+### Beispiele für erweiterte Anwendungsfälle {#advanced-usage-examples}
+
+#### Eigene Rendering-Logik {#custom-rendering-logic}
+
+```tsx
+// ./src/export-app.tsx
+import App from './App';
+import { createBridgeComponent } from '@module-federation/bridge-react';
+import { createRoot } from 'react-dom/client';
+
+export default createBridgeComponent({
+  rootComponent: App,
+  
+  // Custom render function
+  render: (App, container) => {
+    const root = createRoot(container as HTMLElement, {
+      identifierPrefix: 'my-app-'
+    });
+    root.render(App);
+    return root;
+  },
+  
+  // Default createRoot options
+  defaultRootOptions: {
+    identifierPrefix: 'remote-app-',
+    onRecoverableError: (error) => {
+      console.error('Remote app recoverable error:', error);
+    }
+  }
+});
+```
+
+#### Mehrere Exports unterstützen {#supporting-multiple-exports}
+
+```tsx
+// ./src/export-app.tsx
+import App from './App';
+import Dashboard from './Dashboard';
+import { createBridgeComponent } from '@module-federation/bridge-react';
+
+// Export main application
+export default createBridgeComponent({
+  rootComponent: App
+});
+
+// Export dashboard component
+export const dashboard = createBridgeComponent({
+  rootComponent: Dashboard
+});
+```
+
+Zugehörige Module-Federation-Konfiguration:
+
+```ts
+// rsbuild.config.ts
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'remote1',
+      exposes: {
+        './export-app': './src/export-app.tsx',     // Main application
+        './dashboard': './src/export-app.tsx',      // Dashboard
+      },
+    }),
+  ],
+};
+```
+
+## Nächste Schritte {#next-steps}
+
+Wenn du den Export der Anwendung konfiguriert hast, erfährst du unter [Remote-Anwendungen laden](/guide/bridge/react/load-app.html), wie du diese Remote-Anwendung in eine Host-Anwendung einbindest.

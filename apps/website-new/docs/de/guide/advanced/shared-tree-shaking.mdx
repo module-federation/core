@@ -1,0 +1,132 @@
+# Shared Tree Shaking {#shared-tree-shaking}
+
+Mit { props.name || 'Module Federation' } teilen wir häufig gemeinsame Abhängigkeiten wie antd oder React über die Konfiguration `shared`. Das verhindert doppelte Bundles und hält Versionen anwendungsübergreifend konsistent. Der klassische `shared`-Mechanismus stellt jedoch immer das **vollständige** Bundle der Abhängigkeit bereit, selbst wenn deine Anwendung nur einen kleinen Teil verwendet, etwa die Komponente `Button` von antd.
+
+Das kann folgende Auswirkungen haben:
+
+* **Große Build-Artefakte**: Unnötiger Code wird gebündelt und vergrößert die Ausgabe.
+* **Zusätzlicher Runtime-Aufwand**: Der Browser lädt und verarbeitet mehr JavaScript als nötig. Laden und Rendern der Seite dauern länger.
+
+**Shared Tree Shaking** analysiert deinen Code, ermittelt die tatsächlich verwendeten Exporte und bündelt nur diese Teilmenge. Deine Anwendung kann dadurch eine kleinere, optimierte Shared-Abhängigkeit verwenden.
+
+:::tip Vorteile
+
+* **Kleinere Ausgabe**: Unnötiger Code entfällt bereits an der Quelle.
+* **Schnelleres Laden**: Es wird nur heruntergeladen, was benötigt wird.
+* **Bessere Runtime-Performance**: Weniger JavaScript muss geparst und ausgeführt werden.
+
+:::
+
+## Schnellstart {#quick-start}
+
+Aktiviere Shared Tree Shaking über die Option `treeShaking` in deiner Konfiguration.
+
+### Beispiel {#example}
+
+```ts title="rspack.config.ts"
+export default {
+  // ...
+  plugins: [
+    new ModuleFederationPlugin({
+      // ...
+      shared: {
+        antd: {
+          treeShaking: { mode: 'runtime-infer' },
+        },
+      },
+    }),
+  ],
+};
+```
+
+### Lokal überprüfen {#local-verification}
+
+Prüfe nach einem lokalen Build die Größe und die exportierten Inhalte der Shared-Abhängigkeit, etwa antd. Sie sollte nur die tatsächlich verwendeten Module enthalten.
+
+## Konfiguration {#configuration}
+
+Die zentrale Option ist [sharedItem.treeShaking](/configure/shared.html#treeshaking). Wo die Tree-Shaking-Artefakte erzeugt werden, steuerst du außerdem über:
+
+* [treeShakingDir](/configure/treeShakingDir.html)
+* [injectTreeShakingUsedExports](/configure/injectTreeShakingUsedExports.html)
+* [treeShakingSharedPlugins](/configure/treeShakingSharedPlugins.html)
+* [treeShakingSharedExcludePlugins](/configure/treeShakingSharedExcludePlugins.html)
+
+## Modi {#modes}
+
+Für unterschiedliche Teamstrukturen und Projektgrößen gibt es zwei Modi.
+
+### runtime-infer {#runtime-infer}
+
+`runtime-infer` ist eine schlanke Strategie ohne zentralen Dienst.
+
+- **Aktivieren**: Setze `mode` auf `runtime-infer`.
+- **Geeignet für**:
+  - lokale Entwicklung und schnelle Überprüfung,
+  - Teams ohne Deployment- oder CI-Dienst,
+  - kleinere Projekte mit einem einzelnen Consumer.
+- **Funktionsweise**: Wenn ein bereits geladenes, durch Tree Shaking verkleinertes Shared-Bundle den Bedarf der aktuellen Seite abdeckt, wird es wiederverwendet. Andernfalls **wird das vollständige Bundle der Abhängigkeit geladen**, um korrektes Verhalten sicherzustellen.
+- **Trefferquote verbessern**: Ohne globale Übersicht ist die Wiederverwendungsrate von `runtime-infer` möglicherweise begrenzt. Du kannst die Liste `usedExports` in deiner Konfiguration manuell ergänzen und zusätzlich benötigte Module vorab angeben. So erzeugt der Compiler ein besser passendes Shared-Bundle, das häufiger wiederverwendet werden kann.
+
+### server-calc {#server-calc}
+
+`server-calc` ist die **ausdrücklich empfohlene Vorgehensweise**. Ein zentraler Dienst ermöglicht eine übergreifende Optimierung und nutzt Tree Shaking möglichst umfassend.
+
+import CreateSharedTreeShakingDeployServer from '@docs/de/_components/create-shared-tree-shaking-deploy-server.mdx'
+
+{!props.name && (
+  <CreateSharedTreeShakingDeployServer />
+)}
+
+## Überprüfung und Rollback {#validation-and-rollback}
+
+### Wie prüfe ich, ob Tree Shaking funktioniert? {#how-to-confirm-tree-shaking-is-working}
+
+1. **Network-Panel prüfen**: Filtere in den Browser-DevTools die geladenen JavaScript-Dateien. Prüfe, ob das Artefakt des sekundären Builds statt des ursprünglichen vollständigen Bundles geladen wird. Sein Name enthält häufig `secondary` oder einen Hash, und es sollte deutlich kleiner sein.
+2. **Bundle-Inhalt prüfen**: Lade die JavaScript-Datei der Shared-Abhängigkeit herunter und suche nach Exporten, die du **nicht verwendest**. Wenn du nur `Button` nutzt, suche beispielsweise nach `Modal`. Fehlen diese Exporte, wurden sie erfolgreich entfernt.
+3. **In Chrome DevTools prüfen**: Öffne das Panel „Shared“ und wähle die betreffende Abhängigkeit. `Tree Shaking Loaded` bedeutet, dass das verkleinerte Artefakt geladen ist. `Loaded` bedeutet, dass auf das vollständige Bundle zurückgegriffen wurde. `Tree Shaking Loading` zeigt an, dass gerade über den Tree-Shaking-Pfad geladen wird.
+
+![](https://module-federation-assest.netlify.app/document/guide/performance/shared-tree-shaking/tree-shaking-devtool.jpg)
+
+### Wie rolle ich sicher zurück? {#how-to-safely-roll-back}
+
+Shared Tree Shaking hat einen **automatischen Fallback**. Erkennt die Runtime Probleme wie einen fehlenden Snapshot, Netzwerkfehler oder Versionskonflikte, lädt sie standardmäßig das vollständige Shared-Bundle. So bleibt die Anwendung stabil.
+
+Um Tree Shaking manuell zu deaktivieren, stoppe die Schritte für den sekundären Build und die Snapshot-Aktualisierung in deinem Deployment-Dienst.
+
+import SecondaryBuild from '@docs/de/_components/secondary-build.mdx'
+import React from 'react';
+
+{props.secondaryBuild || React.createElement(SecondaryBuild)}
+
+## FAQ {#faq}
+
+**1. Lässt sich Shared Tree Shaking mit `eager: true` kombinieren?**
+
+**Nein.** `eager: true` bündelt Shared-Abhängigkeiten in den initialen Chunk. Das widerspricht dem bedarfsgesteuerten Laden von Tree Shaking. Du musst dich entscheiden:
+
+- Ist die Shared-Abhängigkeit klein und die erste Ladezeit entscheidend, kommt `eager: true` infrage.
+- Ist sie groß, etwa eine Komponentenbibliothek, **deaktiviere `eager`** und verwende Tree Shaking, um Größe und Ladeaufwand deutlich zu reduzieren.
+
+**2. Was ist bei Singleton-Abhängigkeiten mit `runtime-infer` zu beachten?**
+
+Vorsicht bei `singleton: true`, wenn eine Shared-Abhängigkeit global nur einmal existieren darf. Folgendes Szenario ist möglich:
+
+- Anwendung A verwendet nur `antd/Button` und lädt ihr verkleinertes Bundle.
+- Anwendung B verwendet `antd/Modal` und lädt ihr eigenes vollständiges Bundle.
+
+Dadurch können zwei verschiedene antd-Instanzen auf derselben Seite entstehen, eine reduzierte und eine vollständige. Das verletzt die Singleton-Bedingung und kann Style-Konflikte, getrennten Zustand oder sogar Abstürze verursachen.
+
+**Empfehlung**: Verwende für Bibliotheken, die Singletons bleiben müssen, bevorzugt **`server-calc`**. Damit laden alle Consumer dasselbe global optimierte Bundle. Wenn du `runtime-infer` benötigst, erweitere `usedExports`, damit das Bundle vollständiger wird und das Konfliktrisiko sinkt.
+
+**3. Welche Voraussetzungen hat Tree Shaking?**
+
+Tree Shaking hängt vor allem von der statischen Analyse des Bundlers ab. Dein Code muss ES Modules (`import`/`export`) verwenden, damit der Compiler die verwendeten Exporte erkennen kann. CommonJS-Module (`require`/`module.exports`) lassen sich normalerweise nicht wirksam durch Tree Shaking verkleinern.
+
+**4. Werden Shared-Abhängigkeiten bereits veröffentlichter Projekte beeinträchtigt?**
+
+**Nein.** Datenquelle und Ladepfad des Tree Shaking sind vom bisherigen Shared-Mechanismus getrennt. Strenge Trefferbedingungen und ein sicherer Fallback schützen bestehende Projekte.
+
+## Weiterführende Informationen {#further-reading}
+
+* [Funktionsweise des Tree Shaking für Shared-Abhängigkeiten](https://github.com/module-federation/core/discussions/4302)

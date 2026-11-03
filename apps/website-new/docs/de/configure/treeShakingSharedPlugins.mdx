@@ -1,0 +1,34 @@
+# treeShakingSharedPlugins
+
+Eine Liste von Plugin-Modulpfaden, die beim Build eigenständiger Shared-Fallbacks verwendet werden. Beim sekundären Tree-Shaking-Build wird jeder Eintrag über `require(p)` geladen und instanziiert, um an der Kompilierung teilzunehmen.
+
+- Typ: `string[]`
+- Erforderlich: Nein
+- Standardwert: `undefined`
+
+Bei `shared.treeShaking.mode` mit dem Wert `'server-calc'` baut der Deployment-Dienst diejenigen Shared-Abhängigkeiten neu, für die Tree Shaking erforderlich ist. Dabei werden ausschließlich die Shared-Abhängigkeiten gebaut; die Build-Konfiguration des ursprünglichen Projekts wird nicht geladen.
+
+Benötigt das ursprüngliche Projekt spezielle Build-Einstellungen wie `externals`, kannst du diese in ein npm-Plugin verpacken und veröffentlichen. Trage anschließend den Paketnamen in `treeShakingSharedPlugins` ein. Der sekundäre Tree-Shaking-Durchlauf lädt diese Plugins automatisch über `require` und instanziiert sie, sodass der Build des Shared-Moduls die ursprüngliche Konfiguration übernimmt.
+
+Angenommen, dein Plugin `my-build-plugin` setzt `externals`:
+
+```ts title='my-build-plugin'
+class MyBuildPlugin {
+  apply(compiler){
+    compiler.options.externals = {
+      'react': 'React',
+    }
+  }
+}
+export default MyBuildPlugin;
+```
+
+Nach der Veröffentlichung auf npm trägst du den Paketnamen in `treeShakingSharedPlugins` ein:
+
+```ts title='module-federation.config.ts'
+
+export default {
+  // ...
+  treeShakingSharedPlugins: ['my-build-plugin@0.0.2'],
+}
+```

@@ -1,0 +1,230 @@
+import { Steps, Tab, Tabs, Badge, Aside } from '@theme';
+
+
+# Angular CLI einrichten {#angular-cli-setup}
+
+Diese Anleitung zeigt, wie du Module Federation mit Angular CLI integrierst. Dabei unterstützt dich das Plugin `@angular-architects/module-federation`.
+
+## Voraussetzungen {#prerequisites}
+
+- **Angular CLI**: Version 10 oder höher.
+- **Plugin-Installation**: Installiere das Plugin `@angular-architects/module-federation`.
+
+## Installation
+
+
+  Konfiguriere Angular CLI zunächst so, dass Module Federation beim Build verwendet wird.
+  Dafür benötigst du einen eigenen Builder.
+
+  Das Paket `@angular-architects/module-federation` stellt diesen Builder bereit.
+  Füge ihn mit dem Befehl ng add zu deinen Projekten hinzu:
+
+  <Tabs>
+    <Tab label="Angular CLI">
+      ```bash
+      ng add @angular-architects/module-federation --project shell --port 4200 --type host
+      ng add @angular-architects/module-federation --project mfe1 --port 4201 --type remote
+      ```
+    </Tab>
+    <Tab label="Nx Cli">
+      Für Nx unterscheidet sich das Vorgehen etwas.
+
+      ```bash
+      npm i @angular-architects/module-federation -D
+      ng g @angular-architects/module-federation:init --project shell --port 4200 --type host
+      ng g @angular-architects/module-federation:init --project mfe1 --port 4201 --type remote
+      ```
+
+    </Tab>
+  </Tabs>
+  <div className={"rspress-directive tip"}>
+    Das seit Version 14.3 verfügbare Argument `--type` sorgt dafür, dass nur die benötigte Konfiguration erzeugt wird.
+  </div>
+
+## Shell (Host) konfigurieren {#shell-host-configuration}
+
+Die Shell (der Host) ist ein zentraler Teil der Module-Federation-Integration.
+Hier konfigurierst du die Shell so, dass sie ein `FlightModule` über das Routing verzögert laden kann.
+<Steps>
+### Routing konfigurieren {#routing-configuration}
+
+  Definiere zunächst die Anwendungsrouten und gib für das verzögert geladene `FlightModule` einen virtuellen Pfad an:
+
+  ```javascript
+  export const APP_ROUTES: Routes = [
+    {
+      path: '',
+      component: HomeComponent,
+      pathMatch: 'full'
+    },
+    {
+      path: 'flights',
+      loadChildren: () => import('mfe1/Module').then(m => m.FlightsModule)
+    },
+  ];
+  ```
+
+  In dieser Konfiguration ist `'mfe1/Module'` ein virtueller Pfad: Er existiert nicht physisch in der Shell-Anwendung, sondern verweist auf ein Modul in einem separaten Projekt.
+
+### TypeScript-Typisierung {#typescript-typing}
+
+Erstelle eine Typdefinition für den virtuellen Pfad:
+
+```typescript
+// decl.d.ts
+declare module 'mfe1/Module';
+```
+
+Damit kann der TypeScript-Compiler den virtuellen Pfad erkennen.
+
+### Webpack konfigurieren {#webpack-configuration}
+
+Weise Webpack an, alle mit `mfe1` beginnenden Pfade auf ein Remote-Projekt aufzulösen. Das konfigurierst du in `webpack.config.js`:
+
+```javascript
+const { shareAll, withModuleFederationPlugin } = require('@angular-architects/module-federation/webpack');
+
+module.exports = withModuleFederationPlugin({
+
+   remotes: {
+     "mfe1": "http://localhost:4201/remoteEntry.js",
+   },
+
+   shared: {
+     ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
+   },
+
+});
+```
+  Im Abschnitt `remotes` wird der Pfad `mfe1` dem Einstiegspunkt des Remote-Microfrontends zugeordnet. Dieser von Webpack erzeugte Einstiegspunkt enthält die Informationen, die für die Interaktion mit dem Microfrontend erforderlich sind.
+
+<details>
+
+  Für die Entwicklung genügt eine fest eingetragene URL des Remote-Entry. Für die Produktion brauchst du einen dynamischen Ansatz. Mehr zum Konzept dynamischer Remotes findest du auf der entsprechenden Dokumentationsseite zu Dynamic Remotes.
+
+  - Die Eigenschaft `shared` legt fest, welche npm-Pakete Shell und Microfrontends gemeinsam verwenden. Die Hilfsmethode `shareAll` teilt alle in deiner `package.json` aufgeführten Abhängigkeiten. Das erleichtert den Einstieg, kann aber zu unnötig vielen Shared-Abhängigkeiten führen und die Optimierung erschweren.
+  - Die Kombination aus `singleton: true` und `strictVersion: true` weist Webpack an, bei nicht passenden Versionen zwischen Shell und Microfrontends einen Runtime-Fehler auszulösen. Mit `strictVersion` auf `false` wird stattdessen eine Warnung ausgegeben.
+  - Die Option `requiredVersion: 'auto'` des Plugins `@angular-architects/module-federation` ermittelt die Version automatisch aus deiner `package.json` und hilft so, Versionsprobleme zu vermeiden.
+</details>
+</Steps>
+
+
+## Den Remote konfigurieren {#configuring-the-remote}
+
+Das Microfrontend, in Module Federation auch Remote genannt, ist ähnlich wie eine normale Angular-App aufgebaut. Es enthält bestimmte Routen im `AppModule` und ein `FlightsModule` für flugbezogene Funktionen. Dieser Abschnitt zeigt, wie du das `FlightsModule` in die Shell (den Host) lädst.
+
+<Steps>
+### Routen definieren {#route-definition}
+
+Lege die grundlegenden Routen im `AppModule` fest:
+
+```typescript
+export const APP_ROUTES: Routes = [
+     { path: '', component: HomeComponent, pathMatch: 'full'}
+ ];
+```
+
+Dieses einfache Routing führt beim Öffnen der Anwendung zur `HomeComponent`.
+
+### Ein Modul erstellen {#module-creation}
+
+Erstelle ein `FlightsModule` für flugbezogene Funktionen:
+
+```typescript
+@NgModule({
+   imports: [
+     CommonModule,
+     RouterModule.forChild(FLIGHTS_ROUTES)
+   ],
+   declarations: [
+     FlightsSearchComponent
+   ]
+ })
+ export class FlightsModule { }
+```
+
+Dieses Modul enthält eine Route zu einer `FlightsSearchComponent`, die wie folgt definiert ist:
+
+```typescript
+export const FLIGHTS_ROUTES: Routes = [
+     {
+       path: 'flights-search',
+       component: FlightsSearchComponent
+     }
+ ];
+```
+
+### Module über die Webpack-Konfiguration bereitstellen {#exposing-modules-via-webpack-configuration}
+
+Damit die Shell das `FlightsModule` laden kann, stellst du es über die Webpack-Konfiguration des Remotes bereit:
+
+```javascript
+const { shareAll, withModuleFederationPlugin } = require('@angular-architects/module-federation/webpack');
+
+module.exports = withModuleFederationPlugin({
+   name: 'mfe1',
+   exposes: {
+     './Module': './projects/mfe1/src/app/flights/flights.module.ts',
+   },
+   shared: {
+     ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
+   },
+});
+```
+
+<details>
+In dieser Konfiguration gilt:
+
+- Die Eigenschaft `name` identifiziert das Microfrontend als `mfe1`.
+- Die Eigenschaft `exposes` stellt das `FlightsModule` unter dem öffentlichen Namen `Module` bereit, sodass die Shell es verwenden kann.
+- Die Eigenschaft `shared` listet die mit der Shell geteilten Bibliotheken auf. Die Methode `shareAll` teilt alle in deiner `package.json` enthaltenen Abhängigkeiten. `singleton: true` sorgt für eine einzige verwendete Version der Shared-Bibliotheken; `strictVersion: true` löst bei inkompatiblen Versionen einen Runtime-Fehler aus.
+</details>
+
+</Steps>
+
+## Anwendungen starten {#starting-the-applications}
+
+Nachdem Shell (Host) und Microfrontend (Remote) eingerichtet sind, kannst du die Konfiguration testen und die Integration von Module Federation prüfen.
+
+Starte die Shell und das Microfrontend mit folgenden Befehlen:
+
+```bash
+ng serve shell -o
+ng serve mfe1 -o
+```
+
+Öffne den Flights-Bereich in der Shell, um das dynamisch geladene Microfrontend zu sehen.
+
+:::tip
+Das Plugin installiert während der Schematics `ng-add` und `init` ein npm-Script `run:all`, mit dem du alle Anwendungen gleichzeitig bereitstellen kannst:
+
+```bash
+npm run run:all
+# or
+npm run run:all shell mfe1
+```
+:::
+
+
+## Das Teilen von Abhängigkeiten optimieren {#optimizing-dependency-sharing}
+
+Der Einstieg mit `shareAll` ist einfach und funktioniert, kann aber unnötig große Shared-Bundles erzeugen.
+
+Für mehr Kontrolle über die Shared-Abhängigkeiten kannst du von `shareAll` zur Hilfsfunktion `share` wechseln. Damit legst du genauer fest, welche Abhängigkeiten geteilt werden:
+
+```javascript
+// Replace shareAll with share:
+const { share, withModuleFederationPlugin } = require('@angular-architects/module-federation/webpack');
+
+module.exports = withModuleFederationPlugin({
+    // Specify the packages to share:
+    shared: share({
+        "@angular/core": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+        "@angular/common": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+        "@angular/common/http": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+        "@angular/router": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+    })
+});
+```
+
+In dieser Konfiguration erlaubt dir `share`, ausgewählte Pakete explizit zu teilen. Das kann das Teilen von Bundles optimieren und Ladezeiten verkürzen.

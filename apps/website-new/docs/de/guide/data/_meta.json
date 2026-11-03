@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "data-fetch",
+    "label": "Daten abrufen"
+  },
+  {
+    "type": "file",
+    "name": "data-fetch-cache",
+    "label": "Daten-Cache"
+  },
+  {
+    "type": "file",
+    "name": "data-prefetch",
+    "label": "Daten vorladen"
+  }
+]

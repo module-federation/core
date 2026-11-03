@@ -1,0 +1,83 @@
+# Einführung {#introduction}
+
+### 💡 Was ist Module Federation? {#-what-is-module-federation}
+
+Module Federation ist ein Architekturmuster zur Dezentralisierung von JavaScript-Anwendungen, ähnlich wie Microservices auf der Serverseite. Damit kannst du Code und Ressourcen zwischen mehreren JavaScript-Anwendungen oder Microfrontends teilen. Das hilft dir dabei:
+
+- Doppelten Code zu reduzieren
+- Die Wartbarkeit zu verbessern
+- Die Gesamtgröße deiner Anwendungen zu verringern
+- Die Performance deiner Anwendungen zu verbessern
+
+### ✨ Was ist Module Federation 2.0? {#-what-is-module-federation-20}
+
+`Module Federation 2.0` erweitert die in `Webpack5` integrierte `Module Federation`. Neben den Kernfunktionen zum Exportieren und Laden von Modulen sowie zum Teilen von Abhängigkeiten bietet sie dynamische Typhinweise, `Manifest`, `Federation Runtime` und ein `Runtime Plugin System`. Dadurch eignet sich `Module Federation` auch als Microfrontend-Architektur für große `Web`-Anwendungen.
+
+### 🔥 Funktionen {#-features}
+
+Module Federation bietet folgende Funktionen:
+
+- ⚡ Code teilen und Abhängigkeiten wiederverwenden
+- 📝 Manifest
+- 🎨 [Module Federation Runtime](/guide/runtime/index.html)
+- 🧩 [Runtime-Plugin-System](/plugin/dev/index.html)
+- 🚀 [Dynamische Typhinweise](/guide/basic/type-prompt.html)
+- 🛠️ [Chrome DevTools](/guide/debug/chrome-devtool.html)
+- 🦀 Unterstützung für [Rspack](/integrations/bundler/rspack.html) und [Webpack](/integrations/bundler/webpack.html)
+
+### 🎯 Anwendungsfälle {#-use-cases}
+
+Module Federation eignet sich für folgende Szenarien:
+
+- **Große Anwendungen**: Teile eine große Anwendung in mehrere Microfrontends auf und verwende Module Federation, um Code und Ressourcen zwischen ihnen zu teilen.
+- **Microfrontend-Architektur**: Module Federation unterstützt den Aufbau von Microfrontend-Architekturen.
+- **Entwicklung in mehreren Teams**: Mehrere Teams können gemeinsam an großen Anwendungen arbeiten.
+
+### 🕠 Die Geschichte von Module Federation {#-history-of-module-federation}
+
+Module Federation wurde als Funktion in Webpack 5 eingeführt, ihre Geschichte reicht aber bis 2017 zurück. Damals begann das Webpack-Team, Möglichkeiten zum Teilen von Code zwischen mehreren Anwendungen zu untersuchen.
+
+- 2018 erschien Webpack 4.20 mit Module Hooks, die den Grundstein für Module Federation legten.
+
+- 2019 erschien Webpack 5 mit der offiziellen Einführung von Module Federation.
+
+Module Federation hat sich zu einem leistungsfähigen Werkzeug für moderne Webanwendungen entwickelt.
+
+### 🕰️ Die Zukunft von Module Federation {#️-the-future-of-module-federation}
+
+Module Federation soll einen architektonischen Ansatz für große Webanwendungen bieten, vergleichbar mit Microservices im Backend. Geplant sind weitere Funktionen, die die Dezentralisierung großer Webanwendungen unterstützen. Dazu gehören derzeit:
+
+- Umfassende DevTools
+- Übergeordnete Framework-Funktionen wie Router, Sandbox und SSR
+- Bewährte Vorgehensweisen für große Webanwendungen mit Module Federation
+
+## Folge uns {#follow-us}
+
+* [GitHub – Gib uns einen Stern auf GitHub](https://github.com/module-federation/core)
+* [Discord](https://discord.com/channels/1055442562959290389/1055442563718467637)
+* [Lark-Gruppe (chinesische Community)](https://applink.larkoffice.com/client/chat/chatter/add_by_link?link_token=a41s8f79-741f-41ba-8349-395d9a0e9662)
+
+## ✨ Nächste Schritte {#-next-steps}
+
+Hier kannst du weitermachen:
+
+import NextSteps from '@components/NextSteps';
+import Step from '@components/Step';
+
+<NextSteps>
+  <Step
+    href="/guide/start/quick-start"
+    title="Schneller Einstieg"
+    description="Lerne, wie du Module Federation verwendest"
+  />
+  <Step
+    href="/integrations"
+    title="Integrationen"
+    description="Wähle das passende Paket für dein Projekt"
+  />
+  <Step
+    href="/configure/index"
+    title="Konfiguration nachschlagen"
+    description="Erfahre, wie du Module Federation konfigurierst"
+  />
+</NextSteps>

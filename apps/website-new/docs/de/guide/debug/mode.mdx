@@ -1,0 +1,25 @@
+# Debug-Modus aktivieren {#enable-debug-mode}
+
+{props.name || 'Module Federation'} bietet einen Debug-Modus, der die Fehlersuche erleichtert. Du aktivierst ihn, indem du beim Build die Umgebungsvariable `FEDERATION_DEBUG=true` setzt oder im Browser `localStorage.setItem('FEDERATION_DEBUG','true')` ausführst.
+
+Umgebungsvariable beim Build setzen:
+
+```bash
+# Debug development mode
+FEDERATION_DEBUG=true pnpm dev
+
+# Debug production mode
+FEDERATION_DEBUG=true pnpm build
+```
+
+Einstellung zur Laufzeit setzen:
+
+```
+localStorage.setItem('FEDERATION_DEBUG','true')
+```
+
+## Log-Ausgaben {#log-information}
+
+Nach dem Aktivieren des Debug-Modus siehst du die folgenden Informationen in der Konsole:
+
+Im Debug-Modus erscheinen im Terminal Log-Ausgaben mit dem Präfix [ <code>{props.name || 'Module Federation'}</code> ].

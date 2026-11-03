@@ -1,0 +1,34 @@
+### Szenario 1: Nur Daten vorab abrufen {#scenario-1-prefetching-data-only}
+
+Wenn jemand mit dem Mauszeiger über einen Link zur Shop-Seite fährt, können wir die benötigten Daten für diese Seite vorab abrufen.
+
+```ts
+import { getInstance } from '@module-federation/enhanced/runtime';
+
+const instance = getInstance();
+
+const handleMouseEnter = () => {
+  instance.prefetch({
+    id: 'shop/Button',
+    dataFetchParams: { productId: '12345' },
+  });
+};
+```
+
+### Szenario 2: Daten vorab abrufen und Komponentenressourcen vorladen {#scenario-2-prefetching-data-and-preloading-component-resources}
+
+Zur weiteren Optimierung können wir die JS- und CSS-Dateien der Komponente gleichzeitig mit dem Vorababruf der Daten herunterladen.
+
+```ts
+import { getInstance } from '@module-federation/enhanced/runtime';
+
+const instance = getInstance();
+
+const handleMouseEnter = () => {
+  instance.prefetch({
+    id: 'shop/Button',
+    dataFetchParams: { productId: '12345' },
+    preloadComponentResource: true,
+  });
+};
+```
