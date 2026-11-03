@@ -178,7 +178,7 @@
     "rambda": "11.1.0",
     "regenerator-runtime": "0.14.1",
     "sharp": "^0.35.5",
-    "storybook": "8.6.17",
+    "storybook": "8.6.19",
     "tapable": "2.3.0",
     "typedoc": "0.28.17",
     "undici": "7.30.1",
