@@ -27,7 +27,6 @@ it('preserves application scripts through progressive hydration and executes the
   const runtime = window.__MF_BRIDGE_SSR__ as BridgeStreamBrowserRuntime;
   runtime.accept('script-app', {
     type: 'meta',
-    protocol: 'mf-bridge/1',
     identifierPrefix: 'script-',
     hydration: 'progressive',
   });

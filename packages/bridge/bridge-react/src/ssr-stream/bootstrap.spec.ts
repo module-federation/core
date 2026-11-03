@@ -34,7 +34,6 @@ function createDocument(
 }
 const meta = (prefix: string) => ({
   type: 'meta' as const,
-  protocol: 'mf-bridge/1' as const,
   identifierPrefix: prefix,
 });
 afterEach(() => {

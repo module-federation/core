@@ -1,10 +1,7 @@
 /** Private transport shared by the Host SSR adapter and its early bootstrap. */
-export const BRIDGE_STREAM_PROTOCOL = 'mf-bridge/1';
-
 export type BridgeStreamFrame =
   | {
       type: 'meta';
-      protocol: typeof BRIDGE_STREAM_PROTOCOL;
       identifierPrefix: string;
       stylesheets?: string[];
       hydration?: 'progressive';

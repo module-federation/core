@@ -14,7 +14,6 @@ import { bridgeIdentifierPrefix } from './identity.server';
 import { normalizeBridgeSSR } from './producer.server';
 import { isolateReactStreamScripts } from './script-isolation.server';
 import {
-  BRIDGE_STREAM_PROTOCOL,
   escapeHTMLAttribute,
   serializeBridgeFrame,
   type BridgeStreamFrame,
@@ -254,7 +253,6 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
             reader = result.messages.getReader();
             await emit(id, {
               type: 'meta',
-              protocol: BRIDGE_STREAM_PROTOCOL,
               identifierPrefix: job.prefix,
               stylesheets: [
                 ...new Set([...job.stylesheets, ...(result.stylesheets || [])]),

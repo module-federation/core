@@ -8,4 +8,4 @@ Extend provider factories with optional stream and hydration callbacks while pre
 
 Preserve application script elements after replay so their server-rendered structure remains available for hydration. Remove only identified React transport instructions, including while Suspense content continues streaming.
 
-Keep Node producer stream rendering separate from the browser mount and hydration lifecycle, sharing only the React tree construction. Remove unused revision and duplicate message-result metadata.
+Keep Node producer stream rendering separate from the browser mount and hydration lifecycle, sharing only the React tree construction. Remove unused revision and duplicate message-result metadata. Version only the producer-to-consumer contract, without a separate protocol identifier for the consumer's inline browser transport.

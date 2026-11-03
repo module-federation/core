@@ -311,11 +311,7 @@ export function bridgeStreamBootstrap(
         if (state.streamDone) throw Error('Bridge frame after completion');
         if (frame.type === 'error') throw Error(frame.message);
         if (frame.type === 'meta') {
-          if (
-            state.meta ||
-            frame.protocol !== 'mf-bridge/1' ||
-            !frame.identifierPrefix
-          ) {
+          if (state.meta || !frame.identifierPrefix) {
             throw Error('Invalid Bridge stream metadata');
           }
           if (
