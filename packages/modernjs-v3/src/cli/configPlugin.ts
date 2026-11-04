@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { createRequire } from 'module';
 import path from 'path';
 import { isWebTarget, skipByTarget } from './utils';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
@@ -20,6 +21,10 @@ import type {
 } from '@modern-js/app-tools';
 import type { BundlerChainConfig } from '../interfaces/bundler';
 
+// `require.resolve` locates runtime plugins and the federation runtime. The
+// ESM build runs as native ESM, which has no `require`.
+const requireFromPlugin = createRequire(import.meta.url);
+
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 
 export type ConfigType = Rspack.Configuration;
@@ -33,7 +38,7 @@ const resolvePackageFile = (
   esmRelativePath: string,
   cjsRelativePath: string,
 ): string => {
-  const packageEntry = require.resolve(packageName);
+  const packageEntry = requireFromPlugin.resolve(packageName);
   let packageRoot = path.dirname(packageEntry);
   while (!fs.existsSync(path.join(packageRoot, 'package.json'))) {
     const parentDir = path.dirname(packageRoot);
@@ -45,12 +50,10 @@ const resolvePackageFile = (
     packageRoot = parentDir;
   }
 
-  return require.resolve(
+  return requireFromPlugin.resolve(
     path.join(
       packageRoot,
-      process.env['IS_ESM_BUILD'] === 'true'
-        ? esmRelativePath
-        : cjsRelativePath,
+      process.env.IS_ESM_BUILD === 'true' ? esmRelativePath : cjsRelativePath,
     ),
   );
 };
@@ -510,8 +513,9 @@ export const moduleFederationConfigPlugin = (
         resolve: {
           alias: {
             // TODO: deprecated
-            '@modern-js/runtime/mf':
-              require.resolve('@module-federation/modern-js-v3/runtime'),
+            '@modern-js/runtime/mf': requireFromPlugin.resolve(
+              '@module-federation/modern-js-v3/runtime',
+            ),
           },
         },
         source: {
