@@ -67,6 +67,11 @@ export interface SharedConfig {
 
 export type TreeShakingArgs = {
   usedExports?: string[];
+  /**
+   * Exports actually present in the provider's tree-shaken bundle.
+   * Preferred over `usedExports` when deciding coverage for `runtime-infer`.
+   */
+  providedExports?: string[];
   get?: SharedGetter;
   lib?: () => Module;
   status?: TreeShakingStatus;
