@@ -60,6 +60,21 @@ describe('getResourceUrl', () => {
     expect(result).toBe('https://ssr.com/test.js');
   });
 
+  test('lets the caller decide the browser environment', () => {
+    const publicPath = 'https://public.com/';
+    const ssrPublicPath = 'https://ssr.com/';
+    module = { publicPath, ssrPublicPath } as ModuleInfo;
+    mockedEnv.isBrowserEnvValue = false;
+    mockedEnv.isReactNativeEnv.mockReturnValue(false);
+    expect(getResourceUrl(module, sourceUrl, true)).toBe(
+      'https://public.com/test.js',
+    );
+    mockedEnv.isBrowserEnvValue = true;
+    expect(getResourceUrl(module, sourceUrl, false)).toBe(
+      'https://ssr.com/test.js',
+    );
+  });
+
   test('should fallback to publicPath when ssrPublicPath is undefined', () => {
     const publicPath = 'https://public.com/';
     module = { publicPath, ssrPublicPath: undefined } as ModuleInfo;

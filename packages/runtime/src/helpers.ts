@@ -3,7 +3,7 @@ import {
   type IGlobalUtils,
   type IShareUtils,
 } from '@module-federation/runtime-core';
-import { getGlobalFederationInstance } from './utils';
+import { getGlobalFederationInstance } from './instance';
 
 export type {
   IGlobalUtils,

@@ -1,4 +1,4 @@
-import type { ModuleFederation } from '../core';
+import type { ModuleFederation } from '../index';
 import type { Module } from '../module';
 import type { SnapshotHandler } from '../plugins/snapshot/SnapshotHandler';
 import type { SharedHandler } from '../shared';

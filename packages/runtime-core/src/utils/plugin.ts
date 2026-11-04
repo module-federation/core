@@ -1,4 +1,4 @@
-import { ModuleFederation } from '../core';
+import type { ModuleFederation } from '../index';
 import {
   ModuleFederationRuntimePlugin,
   RuntimePluginHooks,

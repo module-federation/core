@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@rstest/core';
 import { RUNTIME_005 } from '@module-federation/error-codes';
-import { ModuleFederation } from '../src/core';
+import { ModuleFederation } from '../src';
 import { resetFederationGlobalInfo } from '../src/global';
 import type {
   ModuleFederationRuntimePlugin,
