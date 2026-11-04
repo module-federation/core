@@ -41,13 +41,11 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       return null;
     }
     let found;
-    if (chunk.name) {
-      for (const dep of this.containerEntrySet) {
-        const mod = compilation.moduleGraph.getModule(dep);
-        if (mod && compilation.chunkGraph.isModuleInChunk(mod, chunk)) {
-          found = mod as NormalModuleType;
-          break;
-        }
+    for (const dep of this.containerEntrySet) {
+      const mod = compilation.moduleGraph.getModule(dep);
+      if (mod && compilation.chunkGraph.isModuleInChunk(mod, chunk)) {
+        found = mod as NormalModuleType;
+        break;
       }
     }
     if (!found) {
