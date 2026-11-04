@@ -19,6 +19,7 @@ import {
   LoadShareExtraOptions,
   SharedLoadContext,
   SharedLoadTrigger,
+  ResourceLoadContext,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
@@ -46,7 +47,8 @@ import {
 } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
 import type { LoadRemoteMatch } from '../remote';
-import { createRemoteEntryInitOptions } from '../module';
+import { createRemoteEntryInitOptions, Module } from '../module';
+import { getRemoteInfo } from '../utils/load';
 
 export class SharedHandler {
   host: ModuleFederation;
@@ -526,17 +528,21 @@ export class SharedHandler {
     };
 
     const initRemoteModule = async (key: string): Promise<void> => {
-      const { module } = await host.remoteHandler.getRemoteModuleAndOptions({
-        id: key,
-      });
+      const remote = host.options.remotes.find(({ name }) => name === key);
+      const remoteInfo = remote && getRemoteInfo(remote);
+      let module: Module | undefined;
       let remoteEntryExports: RemoteEntryExports | undefined = undefined;
-      const resourceContext = {
-        initiator: 'loadShare' as const,
-        id: key,
-        resourceType: 'remoteEntry' as const,
-        url: module.remoteInfo.entry,
-      };
+      let resourceContext: ResourceLoadContext | undefined;
       try {
+        ({ module } = await host.remoteHandler.getRemoteModuleAndOptions({
+          id: key,
+        }));
+        resourceContext = {
+          initiator: 'loadShare',
+          id: key,
+          resourceType: 'remoteEntry',
+          url: module.remoteInfo.entry,
+        };
         remoteEntryExports = await module.getEntry(undefined, resourceContext);
       } catch (error) {
         remoteEntryExports =
@@ -545,15 +551,25 @@ export class SharedHandler {
             error,
             from: 'runtime',
             lifecycle: 'beforeLoadShare',
-            remote: module.remoteInfo,
+            remote: module?.remoteInfo || remoteInfo,
             origin: host,
           })) as RemoteEntryExports;
         if (!remoteEntryExports) {
           return;
         }
+        if (!module && remoteInfo) {
+          // Keep the fallback module transient so a later load can retry the manifest.
+          module = new Module({ host, remoteInfo });
+          resourceContext = {
+            initiator: 'loadShare',
+            id: key,
+            resourceType: 'remoteEntry',
+            url: module.remoteInfo.entry,
+          };
+        }
       } finally {
         // prevent self load loop: when host load self , the initTokens is not the same
-        if (remoteEntryExports?.init && !module.initing) {
+        if (remoteEntryExports?.init && module && !module.initing) {
           module.remoteEntryExports = remoteEntryExports;
           await module.init(
             undefined,
