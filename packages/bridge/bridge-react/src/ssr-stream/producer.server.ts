@@ -36,10 +36,11 @@ export async function normalizeBridgeSSR(
     )
   )
     throw Error('Bridge producer byte limits must be positive integers');
-  void raw.snapshot.catch(() => {});
+  void raw.snapshot?.catch(() => {});
   void raw.hydration?.snapshot.catch(() => {});
   const hydration =
     options.hydrationMode === 'complete' ? undefined : raw.hydration;
+  const snapshot = hydration ? undefined : raw.snapshot;
   let rejectInterrupted!: (reason: unknown) => void;
   const interrupted = new Promise<never>((_, reject) => {
     rejectInterrupted = reject;
@@ -86,6 +87,13 @@ export async function normalizeBridgeSSR(
   if (info.signal.aborted) onAbort();
   const wait = <T>(promise: Promise<T>) => Promise.race([promise, interrupted]);
   if (stopped) await interrupted;
+  if (!hydration && !snapshot) {
+    const failure = Error(
+      'Complete Bridge hydration requires a final snapshot',
+    );
+    abort(failure);
+    throw failure;
+  }
   if (hydration && !hydration.shellMarker) {
     const failure = Error('Incomplete producer hydration metadata');
     abort(failure);
@@ -172,8 +180,8 @@ export async function normalizeBridgeSSR(
         throw Error('Missing Bridge application shell marker');
       await readyTask;
       await updatesTask;
-      if (!hydration) {
-        send({ type: 'data', snapshot: await wait(raw.snapshot) });
+      if (snapshot) {
+        send({ type: 'data', snapshot: await wait(snapshot) });
       }
       send({ type: 'done' });
       stopped = true;

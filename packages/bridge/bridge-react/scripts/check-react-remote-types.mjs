@@ -60,6 +60,7 @@ import { createReactRemote as createBaseRemote, ReactRemote as BaseRemote } from
 import { createBridgeComponent as create18 } from '@module-federation/bridge-react/v18';
 import { createBridgeComponent as create19 } from '@module-federation/bridge-react/v19';
 import { createBridgeComponent as create17 } from '@module-federation/bridge-react';
+import type { BridgeSSRResult } from '@module-federation/bridge-react/ssr';
 import { createBridgeRouterConnector as connectDefault } from '@module-federation/bridge-react';
 import { createBridgeRouterConnector, type BridgeRouterAdapter, type BridgeRouterLocation } from '@module-federation/bridge-react/base';
 import { createBridgeRouterConnector as connect18 } from '@module-federation/bridge-react/v18';
@@ -70,6 +71,24 @@ import lazyPlugin from '@module-federation/bridge-react/lazy-load-component-plug
 import dataMiddleware from '@module-federation/bridge-react/data-fetch-server-middleware';
 bridgePlugin(); lazyPlugin();
 type MiddlewareArguments = Parameters<typeof dataMiddleware>;
+
+const htmlStream = new ReadableStream<Uint8Array>();
+const hydration = {
+  snapshot: Promise.resolve({ pending: [] }),
+  updates: new ReadableStream<unknown>(),
+  shellMarker: 'application-shell',
+};
+const completeResult: BridgeSSRResult = {
+  stream: htmlStream, snapshot: Promise.resolve({}), abort() {},
+};
+const progressiveResult: BridgeSSRResult = {
+  stream: htmlStream, hydration, abort() {},
+};
+const legacyHybridResult: BridgeSSRResult = { ...completeResult, hydration };
+// @ts-expect-error an SSR renderer must provide complete or progressive hydration data
+const missingHydration: BridgeSSRResult = { stream: htmlStream, abort() {} };
+// @ts-expect-error progressive hydration requires its update stream and shell marker
+const incompleteHydration: BridgeSSRResult = { stream: htmlStream, hydration: { snapshot: Promise.resolve({}) }, abort() {} };
 
 declare const routerAdapter: BridgeRouterAdapter;
 for (const connect of [connectDefault, createBridgeRouterConnector, connect18, connect19]) {

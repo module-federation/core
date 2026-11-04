@@ -235,17 +235,24 @@ export interface BridgeSSRRequest extends BridgeSSRRenderParams {
   signal: AbortSignal;
 }
 
-export interface BridgeSSRResult {
+interface BridgeSSRStream {
   stylesheets?: string[];
-  hydration?: {
-    snapshot: Promise<unknown>;
-    updates: ReadableStream<unknown>;
-    shellMarker: string;
-  };
   stream: ReadableStream<Uint8Array>;
-  snapshot: Promise<unknown>;
   abort(reason?: unknown): void;
 }
+
+interface BridgeSSRHydration {
+  snapshot: Promise<unknown>;
+  updates: ReadableStream<unknown>;
+  shellMarker: string;
+}
+
+/** Complete renderers provide a final snapshot; progressive renderers may omit it. */
+export type BridgeSSRResult = BridgeSSRStream &
+  (
+    | { snapshot: Promise<unknown>; hydration?: BridgeSSRHydration }
+    | { snapshot?: never; hydration: BridgeSSRHydration }
+  );
 
 export type BridgeSSRMessage =
   | { type: 'html'; html: string }
