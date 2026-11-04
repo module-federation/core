@@ -13,6 +13,10 @@ export default defineConfig({
     },
   },
   output: {
+    // Manifest V3 extensions run in modern Chromium, not legacy web browsers.
+    // Avoid core-js's IE Object.create fallback, which writes inline scripts.
+    overrideBrowserslist: ['Chrome >= 114'],
+    polyfill: 'off',
     distPath: { root: 'dist/.extension-build' },
     disableInlineRuntimeChunk: true,
     disableFilenameHash: true,
