@@ -690,4 +690,108 @@ describe('initContainerEntry with non-array-based share scopes', () => {
       mockOptions.webpackRequire.federation.instance?.initShareScopeMap,
     ).toHaveBeenCalledWith('key2', expect.anything(), expect.anything());
   });
+
+  test('should preserve non-default share scopes across repeated init with string shareScopeKey and array hostShareScopeKeys', () => {
+    const defaultScope = {
+      react: {
+        '18.2.0': {
+          scope: ['default'],
+        },
+      },
+    };
+    const customScope = {
+      '@tanstack/react-query': {
+        '5.0.0': {
+          scope: ['custom'],
+        },
+      },
+    };
+    const shareScopeMap: Record<string, Record<string, any>> = {};
+    const federationInstance = createMockFederationInstance({
+      shareScopeMap,
+      initShareScopeMap: jest.fn(
+        (scopeName: string, scope: Record<string, any>) => {
+          shareScopeMap[scopeName] = {
+            ...shareScopeMap[scopeName],
+            ...scope,
+          };
+        },
+      ),
+      options: { shared: false },
+    });
+    const webpackRequire = createMockWebpackRequire({
+      I: jest.fn().mockReturnValue(Promise.resolve(true)),
+      federation: createMockFederation({
+        instance: federationInstance,
+        initOptions: {
+          name: 'test-app',
+          shared: false,
+        },
+      }),
+    });
+
+    const baseOptions = {
+      webpackRequire,
+      shareScopeKey: 'default',
+      shareScope: defaultScope,
+    };
+
+    initContainerEntry(
+      createMockOptions({
+        ...baseOptions,
+        remoteEntryInitOptions: createMockRemoteEntryInitOptions({
+          shareScopeKeys: ['default', 'custom'],
+          shareScopeMap: {
+            default: defaultScope,
+            custom: customScope,
+          },
+        }),
+      }),
+    );
+
+    expect(federationInstance.shareScopeMap.custom).toEqual(customScope);
+
+    // Isolation: default must not be polluted with custom-scope-only packages
+    expect(Object.keys(federationInstance.shareScopeMap.default)).toContain(
+      'react',
+    );
+    expect(Object.keys(federationInstance.shareScopeMap.default)).not.toContain(
+      '@tanstack/react-query',
+    );
+
+    // Re-init with empty custom scope
+    initContainerEntry(
+      createMockOptions({
+        ...baseOptions,
+        remoteEntryInitOptions: createMockRemoteEntryInitOptions({
+          shareScopeKeys: ['default', 'custom'],
+          shareScopeMap: {
+            default: defaultScope,
+            custom: {},
+          },
+        }),
+      }),
+    );
+
+    expect(federationInstance.shareScopeMap.custom).toEqual(customScope);
+
+    // Re-init with missing custom scope
+    initContainerEntry(
+      createMockOptions({
+        ...baseOptions,
+        remoteEntryInitOptions: createMockRemoteEntryInitOptions({
+          shareScopeKeys: ['default', 'custom'],
+          shareScopeMap: {
+            default: defaultScope,
+          },
+        }),
+      }),
+    );
+
+    expect(federationInstance.shareScopeMap.custom).toEqual(customScope);
+
+    expect(Object.keys(federationInstance.shareScopeMap.default)).not.toContain(
+      '@tanstack/react-query',
+    );
+  });
 });
