@@ -238,6 +238,114 @@ describe('Retry Plugin', () => {
         tagName: 'fetch',
       });
     });
+
+    const statusResponse = (status: number, body: string) =>
+      new Response(body, {
+        status,
+        headers: {
+          'content-type': status === 200 ? 'application/json' : 'text/html',
+        },
+      });
+
+    it('retries a listed status until the manifest loads', async () => {
+      mockFetch
+        .mockResolvedValueOnce(
+          statusResponse(503, '<html>Service Unavailable</html>'),
+        )
+        .mockResolvedValueOnce(statusResponse(200, '{"id":"remote"}'));
+
+      const result = await fetchRetry({
+        url: 'https://example.com/mf-manifest.json',
+        retryTimes: 2,
+        retryDelay: 0,
+        retryStatuses: [503],
+      });
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      await expect(result.json()).resolves.toEqual({ id: 'remote' });
+    });
+
+    it('fails at once on a status that is not listed', async () => {
+      const onRetry = rs.fn();
+      const onError = rs.fn();
+      mockFetch.mockResolvedValue(
+        statusResponse(404, '<html>Not Found</html>'),
+      );
+
+      await expect(
+        fetchRetry({
+          url: 'https://example.com/mf-manifest.json',
+          retryTimes: 2,
+          retryDelay: 0,
+          retryStatuses: [503],
+          onRetry,
+          onError,
+        }),
+      ).rejects.toThrow('Request failed: 404');
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(onRetry).not.toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+    });
+
+    it('still retries network errors when statuses are listed', async () => {
+      mockFetch
+        .mockRejectedValueOnce(new TypeError('fetch failed'))
+        .mockResolvedValueOnce(statusResponse(200, '{"id":"remote"}'));
+
+      await fetchRetry({
+        url: 'https://example.com/mf-manifest.json',
+        retryTimes: 1,
+        retryDelay: 0,
+        retryStatuses: [503],
+      });
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('calls onError when a non-retryable status ends the final retry', async () => {
+      const onError = rs.fn();
+      mockFetch
+        .mockResolvedValueOnce(
+          statusResponse(503, '<html>Service Unavailable</html>'),
+        )
+        .mockResolvedValueOnce(statusResponse(404, '<html>Not Found</html>'));
+
+      await expect(
+        fetchRetry({
+          url: 'https://example.com/mf-manifest.json',
+          retryTimes: 1,
+          retryDelay: 0,
+          retryStatuses: [503],
+          onError,
+        }),
+      ).rejects.toThrow('Request failed: 404');
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onError).toHaveBeenCalledWith({
+        domains: undefined,
+        url: 'https://example.com/mf-manifest.json',
+        tagName: 'fetch',
+      });
+    });
+
+    it('passes retryStatuses from the plugin to manifest fetches', async () => {
+      mockFetch.mockResolvedValue(
+        statusResponse(404, '<html>Not Found</html>'),
+      );
+      const plugin = RetryPlugin({
+        retryTimes: 2,
+        retryDelay: 0,
+        retryStatuses: [503],
+      });
+
+      await expect(
+        plugin.fetch!('https://example.com/mf-manifest.json', {}),
+      ).rejects.toThrow('Request failed: 404');
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('scriptRetry', () => {
