@@ -53,8 +53,9 @@ Enable only the output channels that match the environment:
 - Node / SSR: use the Node entry
   `@module-federation/observability-plugin/node` and set `fileOutput: true` when
   local files are needed.
-- Build: use `ObservabilityBuildPlugin` when build-side files are needed for
-  later comparison.
+- Build: use `ObservabilityBuildPlugin` (Webpack/Rspack) or
+  `ObservabilityVitePlugin` (Vite + `@module-federation/vite`) when build-side
+  files are needed for later comparison.
 
 Reports include the loading timeline, selected host/remote/shared facts,
 original runtime URLs, original error message/stack, clipped deployment
@@ -638,6 +639,48 @@ exposes, and shared dependencies. It intentionally omits local expose source
 paths, asset lists, source code, and environment variables. Remote URLs and the
 `remoteEntry.publicPath` deployment locator keep query/hash data. If build
 observability output fails, the build continues and a bundler warning is emitted.
+
+Vite uses the same build-info format through a sibling plugin. Keep
+`@module-federation/vite` lean and add `ObservabilityVitePlugin` next to
+`federation()`. Runtime observability stays on `ObservabilityPlugin` via
+runtime plugins / `createInstance`.
+
+```ts
+import { defineConfig } from 'vite';
+import { federation } from '@module-federation/vite';
+import { ObservabilityVitePlugin } from '@module-federation/observability-plugin/vite';
+
+const moduleFederationOptions = {
+  name: 'host',
+  remotes: {
+    remote1: {
+      type: 'module',
+      name: 'remote1',
+      entry: 'http://localhost:3001/mf-manifest.json',
+    },
+  },
+  exposes: {
+    './Button': './src/Button.tsx',
+  },
+  shared: {
+    react: { singleton: true, requiredVersion: '^18.0.0' },
+  },
+  manifest: true,
+};
+
+export default defineConfig({
+  plugins: [
+    federation(moduleFederationOptions),
+    ObservabilityVitePlugin({
+      moduleFederation: moduleFederationOptions,
+    }),
+  ],
+});
+```
+
+The Vite adapter can also be imported from
+`@module-federation/observability-plugin/build`. After emit it reads
+`mf-manifest.json` / `mf-stats.json` from disk and sets `bundler: "vite"`.
 
 When the build has compilation errors, or when the observability plugin cannot
 write its own build output, the build plugin writes
