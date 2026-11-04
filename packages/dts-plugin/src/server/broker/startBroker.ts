@@ -12,7 +12,10 @@ async function startBroker(): Promise<void> {
   }
   broker = new Broker();
 
-  await broker.start();
+  if (!(await broker.start())) {
+    broker.exit();
+    return;
+  }
 
   process.send?.('ready');
 }
