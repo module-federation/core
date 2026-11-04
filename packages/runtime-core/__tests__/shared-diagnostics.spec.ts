@@ -167,6 +167,144 @@ describe('shared lifecycle hooks', () => {
     });
     expect(errorEvent?.error).toBeInstanceOf(Error);
   });
+
+  it('retries an async shared after a transient load failure', async () => {
+    let attempts = 0;
+    const factory = () => ({ value: 'recovered' });
+    const mf = new ModuleFederation({
+      name: 'shared-retry-host',
+      remotes: [],
+      shared: {
+        retryable: {
+          version: '1.0.0',
+          get: () => {
+            attempts += 1;
+            return attempts === 1
+              ? Promise.reject(new Error('transient shared failure'))
+              : Promise.resolve(factory);
+          },
+        },
+      },
+    });
+
+    await expect(mf.loadShare('retryable')).rejects.toThrow(
+      'transient shared failure',
+    );
+    await expect(mf.loadShare('retryable')).resolves.toBe(factory);
+    expect(attempts).toBe(2);
+  });
+
+  it('retries an async shared when the selected provider is not registered', async () => {
+    let attempts = 0;
+    const factory = () => ({ value: 'recovered' });
+    const mf = new ModuleFederation({
+      name: 'unregistered-shared-retry-host',
+      remotes: [],
+      shared: {
+        retryable: {
+          version: '1.0.0',
+          scope: 'custom',
+          get: () => Promise.resolve(factory),
+        },
+      },
+    });
+
+    const resolver = () => ({
+      version: '2.0.0',
+      scope: ['default'],
+      strategy: 'version-first' as const,
+      shareConfig: {
+        requiredVersion: '^2.0.0',
+        singleton: false,
+        eager: false,
+        strictVersion: false,
+      },
+      from: 'resolver',
+      deps: [],
+      useIn: [],
+      loading: null,
+      get: () => {
+        attempts += 1;
+        return attempts === 1
+          ? Promise.reject(new Error('transient unregistered failure'))
+          : Promise.resolve(factory);
+      },
+    });
+
+    await expect(mf.loadShare('retryable', { resolver })).rejects.toThrow(
+      'transient unregistered failure',
+    );
+    await expect(mf.loadShare('retryable', { resolver })).resolves.toBe(
+      factory,
+    );
+    expect(attempts).toBe(2);
+  });
+
+  it('clears a failed load from every scope the resolved shared uses', async () => {
+    const mf = new ModuleFederation({
+      name: 'multi-scope-shared-retry-host',
+      remotes: [],
+      shared: {
+        retryable: {
+          version: '1.0.0',
+          scope: 'custom',
+          get: () => Promise.resolve(() => ({})),
+        },
+      },
+    });
+    const resolver = () => ({
+      version: '2.0.0',
+      scope: ['default', 'other'],
+      strategy: 'version-first' as const,
+      shareConfig: {
+        requiredVersion: '^2.0.0',
+        singleton: false,
+        eager: false,
+        strictVersion: false,
+      },
+      from: 'resolver',
+      deps: [],
+      useIn: [],
+      loading: null,
+      get: () => Promise.reject(new Error('multi-scope failure')),
+    });
+
+    await expect(mf.loadShare('retryable', { resolver })).rejects.toThrow(
+      'multi-scope failure',
+    );
+    expect(
+      ['default', 'other'].map(
+        (scope) => mf.shareScopeMap[scope].retryable['2.0.0'].loading,
+      ),
+    ).toEqual([null, null]);
+  });
+
+  it('retries a shared when the provider throws synchronously', async () => {
+    let attempts = 0;
+    const factory = () => ({ value: 'recovered' });
+    const mf = new ModuleFederation({
+      name: 'sync-throw-shared-retry-host',
+      remotes: [],
+      shared: {
+        retryable: {
+          version: '1.0.0',
+          get: () => {
+            attempts += 1;
+            if (attempts === 1) {
+              throw new Error('synchronous shared failure');
+            }
+            return factory;
+          },
+        },
+      },
+    });
+
+    await expect(mf.loadShare('retryable')).rejects.toThrow(
+      'synchronous shared failure',
+    );
+    await expect(mf.loadShare('retryable')).resolves.toBe(factory);
+    expect(attempts).toBe(2);
+  });
 });
 
 type RawSharedEvent =
