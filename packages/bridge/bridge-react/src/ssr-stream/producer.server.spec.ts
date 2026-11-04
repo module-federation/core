@@ -28,7 +28,7 @@ function channel<T>() {
     },
   };
 }
-function setup(progressive = true) {
+function setup(progressive = true, includeFinalSnapshot = true) {
   const html = channel<Uint8Array>();
   const updates = channel<unknown>();
   const aborter = new AbortController();
@@ -42,26 +42,64 @@ function setup(progressive = true) {
     props: {},
     signal: aborter.signal,
   };
-  const raw: BridgeSSRResult = {
+  const stream = {
     stream: html.stream,
-    snapshot: final.promise,
-    ...(progressive
-      ? {
-          hydration: {
-            snapshot: initial.promise,
-            updates: updates.stream,
-            shellMarker: 'b-shell',
-          },
-        }
-      : {}),
-    abort(reason) {
+    abort(reason?: unknown) {
       aborted.push(reason);
     },
   };
+  const raw: BridgeSSRResult = progressive
+    ? {
+        ...stream,
+        ...(includeFinalSnapshot ? { snapshot: final.promise } : {}),
+        hydration: {
+          snapshot: initial.promise,
+          updates: updates.stream,
+          shellMarker: 'b-shell',
+        },
+      }
+    : { ...stream, snapshot: final.promise };
   return { raw, info, html, updates, initial, final, aborter, aborted };
 }
 
 describe('producer-owned stream preparation', () => {
+  it('hydrates progressively without requiring or producing a final snapshot', async () => {
+    const live = setup(true, false);
+    expect(live.raw).not.toHaveProperty('snapshot');
+    const result = await normalizeBridgeSSR(live.raw, live.info);
+    expect(result.hydration).toBe('progressive');
+    const reader = result.messages.getReader();
+    live.html.controller.enqueue(
+      Buffer.from('<template id="b-shell"></template>'),
+    );
+    expect((await reader.read()).value?.type).toBe('html');
+    live.initial.resolve({ pending: ['stock'] });
+    expect((await reader.read()).value).toEqual({
+      type: 'ready',
+      snapshot: { pending: ['stock'] },
+    });
+    live.updates.controller.enqueue({ id: 'stock', value: 42 });
+    expect((await reader.read()).value).toEqual({
+      type: 'update',
+      value: { id: 'stock', value: 42 },
+    });
+    live.html.controller.close();
+    live.updates.controller.close();
+    expect((await reader.read()).value).toEqual({ type: 'done' });
+    expect((await reader.read()).done).toBe(true);
+    reader.releaseLock();
+  });
+
+  it('rejects complete mode without a final snapshot and cancels the progressive streams', async () => {
+    const live = setup(true, false);
+    await expect(
+      normalizeBridgeSSR(live.raw, live.info, { hydrationMode: 'complete' }),
+    ).rejects.toThrow('Complete Bridge hydration requires a final snapshot');
+    expect(live.aborted).toHaveLength(1);
+    expect(live.html.cancelled).toBeInstanceOf(Error);
+    expect(live.updates.cancelled).toBeInstanceOf(Error);
+  });
+
   it('emits complete HTML before a deferred snapshot, then readiness before data updates', async () => {
     const live = setup();
     const result = await normalizeBridgeSSR(live.raw, live.info);

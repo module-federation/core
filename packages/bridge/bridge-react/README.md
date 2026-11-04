@@ -439,15 +439,18 @@ with a separately constructed tree in a renderer callback.
 
 The producer-to-consumer message contract uses `module-federation/bridge-ssr/producer/v1`. The Host's inline browser receiver and response frames are generated together and do not carry a separate protocol identifier.
 
-`BridgeSSRResult` contains a byte `ReadableStream`, a final `snapshot` promise,
-and `abort(reason)`. Optional `stylesheets` describe CSS required by the
-application. Without progressive hydration metadata, hydration waits for the
-complete HTML and snapshot. For progressive hydration, return `hydration` with
+`BridgeSSRResult` contains a byte `ReadableStream` and `abort(reason)`.
+Optional `stylesheets` describe CSS required by the application. Complete
+hydration requires a final `snapshot` promise and waits for the complete HTML
+and snapshot. For progressive hydration, return `hydration` with
 the shell's `snapshot` promise, an ordered `updates` stream, and a `shellMarker`
 matching a `<template>` ID in the HTML stream. The receiver can then start hydration
 after the shell and initial data arrive while remaining HTML and updates stream
 in. The framework owns serializable snapshot contents, deferred-data restoration,
-and update handling. Business props are passed to the renderer unchanged.
+and update handling. Progressive renderers can omit the final `snapshot` entirely.
+Existing renderers can continue returning both forms, and explicitly selecting
+complete hydration requires the final snapshot. Business props are passed to the
+renderer unchanged.
 
 ### Host adapter
 
