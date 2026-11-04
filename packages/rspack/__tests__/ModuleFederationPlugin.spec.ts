@@ -1,3 +1,8 @@
+import { execFile } from 'child_process';
+import { mkdtempSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
+import path from 'path';
+import { promisify } from 'util';
 import {
   ModuleFederationPlugin,
   resolveRspackRuntimeAlias,
@@ -97,6 +102,21 @@ describe('runtime resolution compatibility', () => {
       '/legacy/runtime/dist/index.cjs',
     );
   });
+});
+
+describe('runtime plugin integration', () => {
+  it('loads retry-plugin directly with options and retries manifest requests', async () => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'mf-retry-rspack-'));
+    try {
+      await promisify(execFile)(
+        process.execPath,
+        [path.join(__dirname, 'fixtures/retry-plugin.cjs'), directory],
+        { timeout: 30000 },
+      );
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  }, 35000);
 });
 
 describe('runtime capability optimization defines', () => {

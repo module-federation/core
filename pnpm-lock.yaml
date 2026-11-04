@@ -4123,6 +4123,9 @@ importers:
         specifier: '>=1.0.24'
         version: 2.2.12(typescript@7.0.2)
     devDependencies:
+      '@module-federation/retry-plugin':
+        specifier: workspace:*
+        version: link:../retry-plugin
       '@rspack/core':
         specifier: 2.1.10
         version: 2.1.10(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
