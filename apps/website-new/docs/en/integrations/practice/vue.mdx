@@ -131,6 +131,65 @@ const router = createRouter({
 export default router;
 ```
 
+## Meta-framework hosts (Nuxt, Next, Modern.js)
+
+One Bridge remote (`createBridgeComponent` → `./bridge/export-app`) can be loaded by many hosts. The remote does not need a per-host build.
+
+| Host | Consumer API | Typical mount route |
+| --- | --- | --- |
+| Vue / Nuxt | `@module-federation/bridge-vue3` `createRemoteAppComponent` | `/remote/:pathMatch(.*)*` |
+| React / Next / Modern.js | `@module-federation/bridge-react` `createRemoteAppComponent` | `/remote/*` |
+
+### Nuxt host tips
+
+- Mount the Bridge remote as a **client island** (`ClientOnly` / `ssr: false` for that page). Bridge SSR for meta-framework adapters is out of scope of the Vue Bridge CSR path.
+- Prefer a host catch-all that uses Vue Router’s `:pathMatch(.*)*` so basename auto-detect works. An explicit `basename` option on `createRemoteAppComponent` is tracked in [core#4984](https://github.com/module-federation/core/pull/4984).
+- If you also use `@module-federation/nuxt` component federation, expose the Bridge entry with a **slashed** name (for example `./bridge/export-app`) so host manifest discovery does not register it as a Vue component.
+
+```ts
+// Nuxt host — catch-all page (client only)
+// Register route path: '/bridge/:pathMatch(.*)*'
+import { createRemoteAppComponent } from '@module-federation/bridge-vue3';
+
+const RemoteApp = createRemoteAppComponent({
+  loader: () => import('remote/bridge/export-app'),
+  asyncComponentOptions: { suspensible: false },
+});
+```
+
+### React / Next / Modern.js host tips
+
+Load the **same Vue Bridge remote** with the React consumer:
+
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+
+function BridgeFallback() {
+  return <div>failed</div>;
+}
+
+const RemoteVueApp = createRemoteAppComponent({
+  loader: () => import('remote/bridge/export-app'),
+  fallback: BridgeFallback,
+  loading: <div>loading</div>,
+});
+```
+
+- **React Router / Modern.js**: a host route like `/bridge/*` can supply basename via router context.
+- **Next.js** (no React Router context): pass `basename` explicitly on the wrapper, e.g. under `app/bridge/[[...path]]/page.tsx`:
+
+```tsx
+export default function BridgePage() {
+  return <RemoteVueApp basename="/bridge" />;
+}
+```
+
+Modern.js re-exports React Bridge APIs from `@module-federation/modern-js-v3/react` — use the same `createRemoteAppComponent` pattern.
+
+### What this is not
+
+Bridge remotes are isolated Vue/React apps with their own router. They do not share Nuxt `#app` / Nitro or Next App Router internals across the boundary. For Nuxt↔Nuxt **component** SSR, keep using `@module-federation/nuxt` component federation.
+
 ## Parameters
 
 ### createRemoteAppComponent
