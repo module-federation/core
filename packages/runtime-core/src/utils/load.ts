@@ -165,6 +165,7 @@ async function loadEntryScript({
   loaderHook,
   getEntryUrl,
   resourceContext,
+  timeout,
 }: {
   name: string;
   globalName: string;
@@ -173,6 +174,7 @@ async function loadEntryScript({
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
   resourceContext?: ResourceLoadContext;
+  timeout?: number;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -187,6 +189,7 @@ async function loadEntryScript({
   const url = getEntryUrl ? getEntryUrl(entry) : entry;
   return loadScript(url, {
     attrs: {},
+    timeout,
     createScriptHook: (url, attrs) => {
       const res = loaderHook.lifecycle.createScript.emit({
         url,
@@ -244,12 +247,14 @@ async function loadEntryDom({
   loaderHook,
   getEntryUrl,
   resourceContext,
+  timeout,
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
   resourceContext?: ResourceLoadContext;
+  timeout?: number;
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   if (isEsmRemoteType(type)) {
@@ -268,6 +273,7 @@ async function loadEntryDom({
     loaderHook,
     getEntryUrl,
     resourceContext,
+    timeout,
   });
 }
 
@@ -388,6 +394,7 @@ export async function getRemoteEntry(params: {
               loaderHook,
               getEntryUrl,
               resourceContext,
+              timeout: origin.options.loadEntryTimeout,
             })
           : loadEntryNode({ remoteInfo, loaderHook, resourceContext });
       })
