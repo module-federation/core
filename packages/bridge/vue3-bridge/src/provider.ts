@@ -19,7 +19,7 @@ type AddOptionsFnParams = {
 
 export type ProviderFnParams = {
   rootComponent: Vue.Component;
-  appOptions: (params: AddOptionsFnParams) => {
+  appOptions?: (params: AddOptionsFnParams) => {
     router?: VueRouter.Router;
     /** Called with the bridge's internal router after creation but before navigation.
      *  Use this to register global guards (beforeEach, afterEach, etc.) that would
@@ -29,9 +29,13 @@ export type ProviderFnParams = {
 };
 
 export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
-  const rootMap = new Map();
   const instance = getInstance();
   return () => {
+    // A provider instance owns the roots it mounts. Keeping this map here
+    // prevents roots from leaking across independently created providers.
+    const rootMap = new Map<HTMLElement, Vue.App<Vue.Component>>();
+    const renderGenerations = new WeakMap<HTMLElement, number>();
+
     return {
       __APP_VERSION__,
       async render(info: RenderFnParams) {
@@ -44,6 +48,10 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           hashRoute,
           ...propsInfo
         } = info;
+        const renderGeneration = (renderGenerations.get(dom) ?? 0) + 1;
+        renderGenerations.set(dom, renderGeneration);
+        const isCurrentRender = () =>
+          renderGenerations.get(dom) === renderGeneration;
         const operationContext: BridgeOperationContext = {
           side: 'producer',
           framework: 'vue',
@@ -52,13 +60,16 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
         };
 
         const app = Vue.createApp(bridgeInfo.rootComponent, propsInfo);
-        rootMap.set(dom, app);
 
         const beforeBridgeRenderRes =
           await instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
             info,
             operationContext,
           );
+
+        if (!isCurrentRender()) {
+          return;
+        }
 
         const extraProps =
           beforeBridgeRenderRes &&
@@ -67,7 +78,7 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
             ? beforeBridgeRenderRes?.extraProps
             : {};
 
-        const bridgeOptions = bridgeInfo.appOptions({
+        const bridgeOptions = bridgeInfo.appOptions?.({
           app,
           basename,
           memoryRoute,
@@ -116,6 +127,9 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
               route,
             };
             const result = await router.push(memoryRoute.entryPath);
+            if (!isCurrentRender()) {
+              return;
+            }
             instance?.bridgeHook?.lifecycle?.afterBridgeRouteSync?.emit({
               context: routeContext,
               result,
@@ -125,13 +139,30 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           app.use(router);
         }
 
+        const previousApp = rootMap.get(dom);
+        if (previousApp) {
+          // Vue apps cannot be mounted twice. Recreate the app for updates,
+          // but release the previous root before mounting the replacement.
+          previousApp.unmount();
+          rootMap.delete(dom);
+        }
+        if (!isCurrentRender()) {
+          return;
+        }
         app.mount(dom);
+        rootMap.set(dom, app);
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
           context: operationContext,
         });
       },
       destroy(info: { dom: HTMLElement; moduleName?: string }) {
         LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
+        if (info?.dom) {
+          renderGenerations.set(
+            info.dom,
+            (renderGenerations.get(info.dom) ?? 0) + 1,
+          );
+        }
         const root = rootMap.get(info?.dom);
         const operationContext: BridgeOperationContext = {
           side: 'producer',
@@ -145,6 +176,9 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           operationContext,
         );
         root?.unmount();
+        if (root) {
+          rootMap.delete(info.dom);
+        }
         instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
           context: operationContext,
         });
