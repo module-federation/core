@@ -1,8 +1,67 @@
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   ModuleFederationPlugin,
   resolveRspackRuntimeAlias,
   resolveRspackRuntimeImplementation,
 } from '../src/ModuleFederationPlugin';
+
+describe('emitted module formats', () => {
+  it.each(['js', 'mjs'])(
+    'compiles the emitted %s entry with dts disabled',
+    (ext) => {
+      const output = mkdtempSync(join(tmpdir(), 'mf-rspack-format-'));
+      try {
+        execFileSync(
+          process.execPath,
+          [
+            '--input-type=module',
+            '-e',
+            `
+          import { createRequire, Module } from 'node:module';
+          import { pathToFileURL } from 'node:url';
+          const require = createRequire(import.meta.url);
+          const originalLoad = Module._load;
+          Module._load = function(id, ...args) {
+            if (id.startsWith('@module-federation/dts-plugin')) {
+              throw new Error('DTS must remain unloaded when disabled');
+            }
+            return originalLoad.call(this, id, ...args);
+          };
+          const entry = process.argv[1];
+          const { ModuleFederationPlugin } = entry.endsWith('.mjs')
+            ? await import(pathToFileURL(entry).href) : require(entry);
+          const { rspack } = require('@rspack/core');
+          const compiler = rspack({
+            mode: 'none', entry: {}, output: { path: process.argv[2] },
+            plugins: [new ModuleFederationPlugin({
+              name: 'formatTest', dts: false, manifest: false
+            })]
+          });
+          try {
+            await new Promise((resolve, reject) => compiler.run((error, stats) => {
+              if (error) reject(error);
+              else if (stats.hasErrors()) reject(new Error(stats.toString()));
+              else resolve();
+            }));
+          } finally {
+            await new Promise((resolve, reject) => compiler.close(error => error ? reject(error) : resolve()));
+            Module._load = originalLoad;
+          }
+          `,
+            join(__dirname, '../dist', `index.${ext}`),
+            output,
+          ],
+          { cwd: join(__dirname, '..'), timeout: 30000 },
+        );
+      } finally {
+        rmSync(output, { recursive: true, force: true });
+      }
+    },
+  );
+});
 
 function getOptimizationDefines(
   optimization?: NonNullable<
@@ -131,5 +190,75 @@ describe('runtime capability optimization defines', () => {
       FEDERATION_OPTIMIZE_NO_REMOTE: true,
       FEDERATION_OPTIMIZE_NO_SHARED: true,
     });
+  });
+});
+
+describe('dts plugin loading', () => {
+  function createCompiler() {
+    class NoopPlugin {
+      apply() {}
+    }
+    return {
+      context: __dirname,
+      options: {
+        plugins: [],
+        resolve: { alias: {} },
+      },
+      webpack: {
+        DefinePlugin: NoopPlugin,
+        container: { ModuleFederationPlugin: NoopPlugin },
+      },
+      hooks: {
+        afterPlugins: { tap: jest.fn() },
+      },
+    };
+  }
+
+  function loadPluginWithDtsFactory(
+    dtsPluginFactory: () => Record<string, unknown>,
+  ) {
+    let Plugin!: typeof ModuleFederationPlugin;
+    jest.isolateModules(() => {
+      jest.doMock('@module-federation/dts-plugin', dtsPluginFactory);
+      ({ ModuleFederationPlugin: Plugin } =
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        require('../src/ModuleFederationPlugin') as typeof import('../src/ModuleFederationPlugin'));
+    });
+    return Plugin;
+  }
+
+  afterEach(() => {
+    jest.dontMock('@module-federation/dts-plugin');
+  });
+
+  it('does not load @module-federation/dts-plugin when dts is disabled', () => {
+    const dtsPluginFactory = jest.fn(() => ({ DtsPlugin: jest.fn() }));
+    const Plugin = loadPluginWithDtsFactory(dtsPluginFactory);
+
+    new Plugin({ name: 'host', dts: false, manifest: false }).apply(
+      createCompiler() as any,
+    );
+
+    expect(dtsPluginFactory).not.toHaveBeenCalled();
+  });
+
+  it('loads and applies @module-federation/dts-plugin when dts is enabled', () => {
+    const dtsApply = jest.fn();
+    const addRuntimePlugins = jest.fn();
+    const DtsPlugin = jest.fn(() => ({ apply: dtsApply, addRuntimePlugins }));
+    const dtsPluginFactory = jest.fn(() => ({ DtsPlugin }));
+    const Plugin = loadPluginWithDtsFactory(dtsPluginFactory);
+
+    expect(dtsPluginFactory).not.toHaveBeenCalled();
+
+    const compiler = createCompiler();
+    new Plugin({ name: 'host', manifest: false }).apply(compiler as any);
+
+    expect(dtsPluginFactory).toHaveBeenCalledTimes(1);
+    expect(DtsPlugin).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'host' }),
+    );
+    expect(dtsApply).toHaveBeenCalledWith(compiler);
+    expect(addRuntimePlugins).toHaveBeenCalled();
   });
 });
