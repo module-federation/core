@@ -1,0 +1,282 @@
+# Metro
+
+Metro Module Federation lleva la potencia de una arquitectura distribuida al desarrollo móvil con React Native.
+
+## Descripción general
+
+La implementación de Module Federation para React Native usa una integración personalizada con el bundler Metro que permite:
+
+- **Arquitectura micro-frontend** para apps React Native
+- **Compartir código** entre varias aplicaciones React Native  
+- **Despliegue independiente** de los módulos de la aplicación
+- **Carga de módulos en runtime** para actualizaciones dinámicas
+
+> **Nota**: El soporte de Module Federation para el bundler Metro todavía es experimental y puede que le falten algunas funcionalidades o ciertas integraciones. Los proyectos o bibliotecas que dependen de configuraciones personalizadas de Metro todavía no están soportados y puede que no funcionen.
+
+## Paquetes
+
+El ecosistema de Module Federation para React Native se compone de varios paquetes:
+
+- `@module-federation/metro` - Integración principal con Metro para habilitar Module Federation
+- `@module-federation/metro-plugin-rnc-cli` - Integración con React Native CLI  
+- `@module-federation/metro-plugin-rock` - Integración con [Rock](https://www.rockjs.dev/)
+- `@module-federation/metro-plugin-rnef` - Integración con RNEF (obsoleto; usa `metro-plugin-rock` en su lugar)
+
+## Instalación
+
+Instala los paquetes necesarios en tu proyecto React Native con tu gestor de paquetes preferido:
+
+```shell
+# Core package (required)
+pnpm add @module-federation/metro
+
+# If your project is using React Native CLI
+pnpm add @module-federation/metro-plugin-rnc-cli
+
+# If your project is using Rock (formerly RNEF)
+pnpm add @module-federation/metro-plugin-rock
+```
+
+## Configuración
+
+Envuelve tu configuración de Metro con la función `withModuleFederation` para habilitar Module Federation. Debes envolver con este hook la configuración de Metro de todos los módulos federados: la aplicación host y las mini aplicaciones.
+
+```javascript
+const { withModuleFederation } = require('@module-federation/metro');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+
+const config = {};
+
+module.exports = withModuleFederation(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
+    // Module Federation configuration follows the same format as documented at:
+    // https://module-federation.io/configure/index.html
+    // Note: Some features might not be available in React Native environment
+    name: 'YourAppName',
+    remotes: {
+      // Define remote applications (for host apps)
+      // remoteName: 'remoteName@http://localhost:8082/mf-manifest.json',
+    },
+    exposes: {
+      // Expose modules (for remote apps)
+      // './Component': './src/Component.tsx',
+    },
+    shared: {
+      // Host applications should set eager: true for all the shared dependencies
+      react: {
+        singleton: true,
+        eager: true,
+        requiredVersion: '19.1.0',
+        version: '19.1.0',
+      },
+      'react-native': {
+        singleton: true,
+        eager: true,
+        requiredVersion: '0.80.0',
+        version: '0.80.0',
+      },
+    },
+  },
+  {
+    // These experimental flags have to be enabled in order to patch older packages
+    // Can be omitted if your project is using supported React Native and Metro versions
+    flags: {
+      // Enable patching HMR Client from React Native
+      unstable_patchHMRClient: true,
+      // Enable patching React Native CLI
+      unstable_patchInitializeCore: true,
+      // Enable patching runtime require from Metro
+      unstable_patchRuntimeRequire: true,
+    },
+  }
+);
+```
+
+### Configurar el límite asíncrono de la app
+
+Envuelve el componente App principal con `withAsyncStartup` para habilitar el runtime de Module Federation. Esto crea un límite asíncrono que garantiza que el runtime de Module Federation esté correctamente inicializado antes de que se renderice el componente de tu app.
+
+```javascript
+import { withAsyncStartup } from '@module-federation/runtime';
+import { AppRegistry } from 'react-native';
+
+// Create async boundary through withAsyncStartup helper
+// Pass the getter function for the app component
+// Optionally pass a getter function for the fallback component
+const WrappedApp = withAsyncStartup(
+  () => require('./App'),
+  () => require('./Fallback') // Optional fallback component
+);
+
+AppRegistry.registerComponent('YourAppName', WrappedApp);
+```
+
+La función `withAsyncStartup`:
+
+- Espera a que se inicialice el runtime de Module Federation antes de renderizar tu app
+- Usa React Suspense para gestionar la carga asíncrona
+- Acepta un componente de fallback opcional que se muestra durante la inicialización
+
+## Patrones de uso
+
+### Aplicación host
+
+Una aplicación host consume módulos remotos de otras aplicaciones:
+
+```javascript
+// metro.config.js for host app
+module.exports = withModuleFederation(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
+    name: 'HostApp',
+    remotes: {
+      'mini-app': 'miniApp@http://localhost:8082/mf-manifest.json',
+      'another-app': 'anotherApp@http://192.168.1.100:8083/mf-manifest.json',
+    },
+    shared: {
+      react: { singleton: true, eager: true },
+      'react-native': { singleton: true, eager: true },
+    },
+  }
+);
+```
+
+### Aplicación remote (mini app)
+
+Una aplicación remote expone módulos que pueden consumir las aplicaciones host:
+
+```javascript
+// metro.config.js for remote app
+module.exports = withModuleFederation(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
+    name: 'MiniApp',
+    // Optional: enable federated type generation for TS projects
+    // Generates `@mf-types.zip` (and `@mf-types.d.ts` when enabled) during `bundle-mf-remote`
+    // and writes filenames into `mf-manifest.json` under `metaData.types`.
+    dts: true,
+    exposes: {
+      './Screen': './src/Screen.tsx',
+      './Component': './src/Component.tsx',
+    },
+    shared: {
+      react: { singleton: true, eager: true },
+      'react-native': { singleton: true, eager: true },
+    },
+  }
+);
+```
+
+## Comandos de la CLI
+
+La integración con React Native CLI proporciona comandos adicionales para empaquetar aplicaciones federadas:
+
+### Empaquetar un host de Module Federation
+
+Empaqueta una aplicación host que consume módulos remotos:
+
+```shell
+# Bundle for iOS
+react-native bundle-mf-host --entry-file index.js --platform ios
+
+# Bundle for Android
+react-native bundle-mf-host --entry-file index.js --platform android
+```
+
+### Empaquetar un remote de Module Federation
+
+Empaqueta una aplicación remote (mini app) que expone módulos:
+
+```shell
+# Bundle for iOS
+react-native bundle-mf-remote --platform ios
+
+# Bundle for Android
+react-native bundle-mf-remote --platform android
+```
+
+Ambos comandos admiten las mismas opciones que el comando estándar `react-native bundle`.
+
+> **Nota**: Estos comandos los proporciona el paquete `@module-federation/metro-plugin-rnc-cli`.
+
+## Integración con Rock
+
+En proyectos que usan [Rock](https://www.rockjs.dev/) (antes RNEF), añade el plugin de Module Federation a tu `rock.config.mjs`:
+
+```javascript
+import { pluginMetroModuleFederation } from '@module-federation/metro-plugin-rock';
+import { platformAndroid } from '@rock-js/platform-android';
+import { platformIOS } from '@rock-js/platform-ios';
+import { pluginMetro } from '@rock-js/plugin-metro';
+
+/** @type {import('rock').Config} */
+export default {
+  bundler: pluginMetro(),
+  platforms: {
+    ios: platformIOS(),
+    android: platformAndroid(),
+  },
+  plugins: [pluginMetroModuleFederation()],
+};
+```
+
+> **Nota**: Si estás migrando desde RNEF, sustituye `@module-federation/metro-plugin-rnef` por `@module-federation/metro-plugin-rock` y renombra `rnef.config.mjs` a `rock.config.mjs`. Consulta el [README de metro-plugin-rock](https://www.npmjs.com/package/@module-federation/metro-plugin-rock) para ver todos los detalles de la migración.
+
+## Referencia de la API
+
+### `withModuleFederation(metroConfig, federationConfig, options?)`
+
+Envuelve tu configuración de Metro para habilitar Module Federation.
+
+#### Parámetros
+
+- `metroConfig` (MetroConfig) - Tu configuración de Metro existente
+- `federationConfig` (FederationConfig) - Configuración de Module Federation  
+- `options` (Options) - Configuración opcional para funcionalidades experimentales
+
+#### Interfaz FederationConfig
+
+```typescript
+export interface ModuleFederationConfig {
+  name: string;
+  filename?: string;
+  remotes?: Record<string, string>;
+  exposes?: Record<string, string>;
+  shared?: Shared;
+  shareStrategy?: 'loaded-first' | 'version-first';
+  runtimePlugins?: string[];
+  /**
+   * @deprecated Use runtimePlugins instead.
+   * Scheduled for removal in the next major version.
+   */
+  plugins?: string[];
+  dts?: boolean | PluginDtsOptions;
+}
+```
+
+#### Interfaz SharedConfig
+
+```typescript
+export interface SharedConfig {
+  singleton: boolean;
+  eager: boolean;
+  version: string;
+  requiredVersion: string;
+  import?: false;
+}
+```
+
+#### Avisos de opciones no soportadas
+
+Actualmente Metro solo admite un subconjunto de las opciones de configuración comunes de Module Federation.
+Cuando se proporcionan opciones no soportadas, Metro emite avisos durante la validación indicando que esas opciones **no están soportadas y no tendrán ningún efecto**.
+
+Usa `runtimePlugins` para las rutas de los plugins de runtime.
+`plugins` está obsoleto y se eliminará en la próxima versión mayor.
+
+## Ejemplos y buenas prácticas
+
+La configuración sigue el [formato de configuración estándar de Module Federation](https://module-federation.io/configure/). Para obtener información completa sobre los conceptos, las opciones de configuración y los patrones de uso de Module Federation, consulta la [documentación oficial de Module Federation](https://module-federation.io/).
+
+Para ver ejemplos funcionales y guías de implementación detalladas, echa un vistazo al [repositorio de Module Federation para Metro](https://github.com/module-federation/metro), que incluye varias aplicaciones de ejemplo que muestran distintos patrones de uso e integraciones.

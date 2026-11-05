@@ -1,0 +1,49 @@
+# shareStrategy
+
+- Tipo: `'version-first' | 'loaded-first'`
+- Obligatorio: No
+- Valor por defecto: `'version-first'` (establecido por el plugin de webpack/runtime del bundler)
+
+Controla la estrategia de carga de las dependencias shared:
+
+- `'version-first'`: prioridad de versión, garantiza que se use la versión más alta de las dependencias shared. **Los archivos de entrada de todos los remotes se cargan automáticamente durante la inicialización** para registrar las dependencias shared y asegurar la compatibilidad de versiones. Se recomienda esta estrategia cuando hay requisitos de versión estrictos.
+
+- `'loaded-first'`: prioriza la reutilización de las dependencias shared ya cargadas. Los remotes se cargan bajo demanda en lugar de durante la inicialización. Se recomienda esta estrategia cuando quieres reutilizar dependencias ya cargadas para mejorar el rendimiento.
+
+:::warning Consideraciones sobre remotes sin conexión
+
+La estrategia `'version-first'` carga automáticamente los archivos de entrada de los remotes durante el arranque de la aplicación para inicializar las dependencias shared. Si algún remote está sin conexión o es inaccesible, se activará el hook `errorLoadRemote` con `lifecycle: 'beforeLoadShare'` durante el arranque. Sin un manejo de errores adecuado, esto puede provocar fallos en la inicialización de la aplicación.
+
+La estrategia `'loaded-first'` aplaza la carga de los remotes hasta que los módulos se solicitan realmente, lo que significa que los remotes sin conexión solo provocan fallos cuando se accede a esos remotes concretos, no durante el arranque de la aplicación.
+
+**Qué ocurre con version-first y remotes sin conexión:**
+1. Durante la inicialización, los remotes se cargan mediante `initializeSharing()`
+2. Si el manifest/entry del remote está sin conexión, `module.getEntry()` falla
+3. Se llama al hook `errorLoadRemote` con `lifecycle: 'beforeLoadShare'`
+4. Si no se proporciona un fallback, la inicialización puede quedarse colgada o fallar
+
+**Manejo de errores necesario para version-first:**
+```ts
+const plugin = {
+  name: 'offline-resilient-plugin',
+  errorLoadRemote(args) {
+    if (args.lifecycle === 'beforeLoadShare') {
+      // Handle version-first offline remote during startup
+      return {
+        init: () => Promise.resolve(),
+        get: (module) => () => Promise.resolve(() => 'Offline Fallback')
+      };
+    }
+  }
+};
+```
+
+Para aplicaciones en producción con posibles problemas de red, considera:
+- Usar la estrategia `'loaded-first'` para una mayor resiliencia
+- Implementar un manejo de errores completo para el ciclo de vida `'beforeLoadShare'`
+- Añadir mecanismos de reintento mediante plugins
+- Usar error boundaries y componentes de fallback adecuados
+
+Consulta [Soluciones para Error Load Remote](/blog/error-load-remote.html) para ver estrategias detalladas de manejo de remotes sin conexión.
+
+:::

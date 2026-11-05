@@ -1,0 +1,298 @@
+# Descripción general de Bridge
+
+`Bridge` es una solución multiframework de carga e integración de módulos a nivel de aplicación proporcionada por Module Federation. No es solo un cargador de componentes, sino un sistema completo de gestión del ciclo de vida diseñado específicamente para manejar "módulos a nivel de aplicación".
+
+El problema central que resuelve Bridge es el siguiente: cómo permitir que aplicaciones completas desarrolladas con distintos frameworks frontend se carguen, rendericen e integren dinámicamente como módulos en otras aplicaciones, manteniendo la independencia de sus respectivos stacks tecnológicos y la integridad de su negocio. A diferencia del uso compartido tradicional a nivel de componente, Bridge gestiona módulos de aplicación completos que incluyen sistemas de enrutamiento y lógica de negocio.
+
+Con Bridge puedes:
+
+- **Integración multiframework**: cargar aplicaciones Vue en aplicaciones React y aplicaciones React en aplicaciones Vue, logrando una integración verdaderamente agnóstica de la tecnología
+- **Modularidad a nivel de aplicación**: exportar y consumir aplicaciones completas (incluidos el enrutamiento y la lógica de negocio) como módulos
+- **Carga diferida a nivel de componente**: admitir una carga granular a nivel de componente para la carga bajo demanda y la optimización del rendimiento
+- **Colaboración entre sistemas de enrutamiento**: admitir escenarios complejos de rutas anidadas, garantizando una colaboración fluida entre el enrutamiento del host y el de la aplicación remota
+- **Gestión del ciclo de vida**: gestionar automáticamente el montaje, desmontaje y actualización de las aplicaciones remotas, garantizando una gestión adecuada de los recursos
+- **Aislamiento de aplicaciones**: garantizar que los estilos, scripts y contextos de las distintas aplicaciones estén aislados entre sí para evitar conflictos
+- **Migración progresiva**: admitir la división gradual de aplicaciones monolíticas en arquitecturas de micro-frontends, reduciendo los riesgos de migración
+
+Estas capacidades convierten a Bridge en la infraestructura central para construir arquitecturas de micro-frontends modernas y escalables.
+
+## Frameworks compatibles
+
+### React Bridge (`@module-federation/bridge-react`)
+
+Un conjunto de herramientas Bridge diseñado específicamente para aplicaciones React, compatible con todas las versiones de React 16 a 19 y con las herramientas principales del ecosistema React.
+
+#### Funcionalidades principales
+
+- **Compatibilidad de versiones**: admite todas las versiones de React 16.x a 19.x y resuelve automáticamente los problemas de compatibilidad entre versiones
+- **Integración con el enrutamiento**: integración profunda con React Router, compatible con las versiones v5, v6 y v7, con gestión automática de basename y de rutas anidadas
+- **Aislamiento del framework**: garantiza que los contextos de React y los árboles de componentes de las distintas aplicaciones estén aislados entre sí
+- **Optimización del rendimiento**: mecanismos integrados de carga diferida, code splitting y precarga de recursos
+
+#### APIs principales
+
+**`createBridgeComponent`**
+
+- Propósito: envuelve aplicaciones React como módulos que se pueden cargar de forma remota
+- Caso de uso: cuando quieres exportar una aplicación React como módulo para que la usen otras aplicaciones
+- Características: gestiona automáticamente el ciclo de vida de la aplicación, la configuración del enrutamiento y los error boundaries
+
+**`createRemoteAppComponent`**
+
+- Propósito: carga y renderiza aplicaciones React remotas en aplicaciones host
+- Características: crea automáticamente el contexto de renderizado y gestiona la integración del enrutamiento y el ciclo de vida
+- Ventajas: admite la recuperación de errores, la gestión del estado de carga y la monitorización del rendimiento
+
+**`createLazyComponent`**
+
+- Propósito: carga diferida a nivel de componente; requiere usarse junto con runtime plugins
+- Ventajas: control de carga más granular y optimización del rendimiento
+- Escenarios: adecuado para la carga bajo demanda de bibliotecas de componentes grandes o de componentes de negocio complejos
+
+#### Guías prácticas
+
+- [Práctica con React](/integrations/practice/react/index.html)
+- [Práctica con Vue Bridge](/integrations/practice/vue.html)
+
+### Vue Bridge (`@module-federation/bridge-vue3`)
+
+Un conjunto de herramientas Bridge diseñado específicamente para aplicaciones Vue 3, que aprovecha al máximo las funcionalidades modernas de Vue 3.
+
+#### Funcionalidades principales
+
+- **Integración profunda con Vue 3**: compatibilidad total con Composition API, el sistema de reactividad, Teleport y otras funcionalidades nuevas
+- **Sistema de enrutamiento**: integración profunda con Vue Router 4, compatible con rutas dinámicas y rutas anidadas
+- **Aislamiento de aplicaciones**: garantiza que las instancias de Vue y los sistemas de reactividad de las distintas aplicaciones estén aislados entre sí
+- **Compatibilidad con TypeScript**: proporciona definiciones e inferencia de tipos de TypeScript completas
+- **Experiencia de desarrollo**: compatible con Vue DevTools y hot module replacement
+
+#### APIs principales
+
+**`createBridgeComponent`**
+
+- Propósito: envuelve aplicaciones Vue 3 como módulos que se pueden cargar de forma remota
+- Compatibilidad: integración completa con el ecosistema de Vue 3, incluidos el sistema de plugins y las directivas personalizadas
+- Características: gestiona automáticamente la creación, el montaje y la destrucción de la instancia de la aplicación
+
+**`createRemoteAppComponent`**
+
+- Propósito: carga módulos de aplicación de otros frameworks en aplicaciones Vue
+- Características: gestiona automáticamente la Composition API de Vue 3 y la administración de la instancia de la aplicación
+- Ventajas: admite el renderizado DOM multiframework y la gestión de eventos
+
+## Preguntas frecuentes
+
+### ¿Por qué Bridge?
+
+Bridge aborda varios retos clave del desarrollo frontend moderno:
+
+1. **Gestión de la diversidad de stacks tecnológicos**
+   - En las grandes organizaciones, los distintos equipos suelen usar frameworks frontend diferentes
+   - Bridge permite que estos equipos desarrollen de forma independiente manteniendo la interoperabilidad entre aplicaciones
+   - Evita los costos de migración y los problemas de eficiencia de desarrollo que provoca forzar la unificación del stack tecnológico
+
+2. **Modularidad a nivel de aplicación**
+   - La federación de módulos tradicional gestiona principalmente el uso compartido a nivel de componente
+   - Bridge admite la modularidad a nivel de aplicación, incluidas la lógica de negocio y la experiencia de usuario completas
+   - Logra una arquitectura de micro-frontends de granularidad más gruesa, pero más fácil de gestionar
+
+3. **Colaboración entre sistemas de enrutamiento**
+   - Admite la carga de módulos de aplicación con enrutamiento complejo
+   - Garantiza que el enrutamiento del host y el de la aplicación remota puedan funcionar conjuntamente
+   - Admite funcionalidades avanzadas como rutas anidadas, rutas dinámicas y guardas de rutas
+
+4. **Evolución progresiva de la arquitectura**
+   - Admite la división gradual de aplicaciones monolíticas existentes en arquitecturas de micro-frontends
+   - Reduce los riesgos y costos de las refactorizaciones a gran escala
+   - Ofrece rutas de migración fluidas
+
+### Bridge frente al uso compartido tradicional de componentes
+
+| Característica                 | Uso compartido tradicional de componentes | Uso compartido de aplicaciones con Bridge |
+| ------------------------------ | ----------------------------------------- | ----------------------------------------- |
+| Granularidad                   | Nivel de componente                       | Nivel de aplicación                       |
+| Enrutamiento                   | No compatible                             | Compatibilidad total                      |
+| Aislamiento de aplicaciones    | Compatibilidad limitada                   | Aislamiento completo                      |
+| Integridad del negocio         | Fragmentada                               | Unidades de negocio completas             |
+| Independencia de desarrollo    | Media                                     | Muy alta                                  |
+| Estrategia de despliegue       | Dependiente del host                      | Despliegue independiente                  |
+
+### Análisis en profundidad de la carga a nivel de componente
+
+Además de la modularidad a nivel de aplicación, Bridge también admite la carga diferida a nivel de componente mediante la API `createLazyComponent`, lo que proporciona un control de carga más granular.
+
+#### Casos de uso
+
+**1. Bibliotecas de componentes grandes**
+
+- Cargar bajo demanda componentes de negocio complejos, reduciendo el tamaño del bundle inicial
+- Admitir la gestión de versiones a nivel de componente y las actualizaciones independientes
+- Adecuado para sistemas de diseño y escenarios de bibliotecas de componentes compartidas
+
+**2. Módulos de funcionalidades condicionales**
+
+- Cargar dinámicamente módulos de funcionalidades según los permisos del usuario o los escenarios de negocio
+- Admitir pruebas A/B y feature flags
+- Reducir la complejidad de la aplicación principal
+
+**3. Optimización del rendimiento**
+
+- Diferir la carga de componentes que no están en la ruta crítica
+- Admitir la precarga y estrategias de caché inteligentes
+- Trabajar con Intersection Observer para cargar en función del viewport
+
+#### Funcionalidades principales
+
+- **Precarga de datos**: admite la precarga de datos a nivel de componente, garantizando que los datos estén listos cuando se cargan los componentes
+- **Error boundaries**: mecanismos integrados de gestión de errores; los fallos de carga de componentes no afectan a la aplicación principal
+- **Estados de carga**: gestión completa del estado de carga, con soporte para indicadores de carga personalizados
+- **Mecanismo de caché**: caché inteligente de los componentes cargados, evitando solicitudes de red duplicadas
+- **Seguridad de tipos**: compatibilidad completa con TypeScript, garantizando la seguridad de tipos de las interfaces de los componentes
+
+#### Integración con la carga a nivel de aplicación
+
+La carga a nivel de componente y la carga a nivel de aplicación funcionan perfectamente juntas:
+
+```tsx
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react/data-fetch';
+
+// Application-level loading - Load complete remote application
+const RemoteApp = createRemoteAppComponent({
+  loader: () => import('remote/app'),
+  fallback: <AppSkeleton />,
+});
+
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+// Component-level loading - Load components on demand within remote applications
+const LazyComponent = instance.createLazyComponent({
+  loader: () => import('remote/heavy-component'),
+  loading: <ComponentSkeleton />,
+  fallback: ({ error }) => <ErrorBoundary error={error} />,
+});
+```
+
+Esta estrategia de carga por capas te permite:
+
+- Lograr el desacoplamiento y el despliegue independiente entre aplicaciones con una granularidad gruesa
+- Optimizar el rendimiento y la experiencia de usuario con una granularidad fina
+- Elegir con flexibilidad la granularidad de carga adecuada según las necesidades del negocio
+
+### Consideraciones de rendimiento
+
+**Rendimiento de carga**
+
+- Bridge admite la carga diferida y la precarga a nivel de aplicación
+- Mecanismos integrados de caché de recursos y gestión de versiones
+- Admite estrategias de carga progresiva
+
+**Rendimiento en tiempo de ejecución**
+
+- El aislamiento de frameworks garantiza que las distintas aplicaciones no se afecten entre sí
+- Admite la monitorización y optimización del rendimiento a nivel de aplicación
+- Gestión automatizada de la memoria y limpieza de recursos
+
+**Optimización de red**
+
+- Admite el uso compartido y la deduplicación de recursos
+- Estrategias integradas de carga de recursos compatibles con CDN
+- Admite caché sin conexión y renderizado del lado del servidor
+
+### ¿Cómo extenderlo a otros frameworks?
+
+Actualmente, Module Federation proporciona oficialmente implementaciones de Bridge para React y Vue 3. Si necesitas compatibilidad con otros frameworks:
+
+1. **Envía tus requisitos**: cuéntanos tus necesidades a través de [GitHub Issues](https://github.com/module-federation/core/issues)
+2. **Consulta la implementación de referencia**: revisa las [implementaciones de Bridge](https://github.com/module-federation/core/blob/main/packages/bridge/bridge-react) existentes para entender cómo desarrollarlo
+3. **Contribuye con código**: te invitamos a contribuir a la comunidad con la compatibilidad para nuevos frameworks
+
+### Principios de implementación de Bridge
+
+La idea central de Bridge es sencilla: una abstracción de renderizado basada en el DOM. Este es el principio de implementación simplificado:
+
+#### Lado exportador (aplicación remota)
+
+```tsx
+export default function createProvider() {
+  const rootMap = new Map<HTMLElement, ReactDOM.Root>();
+
+  return {
+    // Render application to specified DOM node
+    render(info: {
+      dom: HTMLElement;
+      basename?: string;
+      memoryRoute?: { entryPath: string };
+    }) {
+      const root = ReactDOM.createRoot(info.dom);
+      rootMap.set(info.dom, root);
+
+      root.render(
+        <BrowserRouter basename={info.basename}>
+          <App />
+        </BrowserRouter>,
+      );
+    },
+
+    // Clean up resources
+    destroy(info: { dom: HTMLElement }) {
+      const root = rootMap.get(info.dom);
+      root?.unmount();
+      rootMap.delete(info.dom);
+    },
+  };
+}
+```
+
+#### Lado consumidor (aplicación host)
+
+```tsx
+const RemoteApp = React.lazy(async () => {
+  // Load remote module
+  const module = await loadRemote('remote1/export-app');
+  const provider = module.default;
+
+  return {
+    default: () => {
+      const containerRef = useRef<HTMLDivElement>(null);
+      const providerRef = useRef<any>(null);
+
+      useEffect(() => {
+        if (containerRef.current) {
+          // Create provider instance
+          const instance = provider();
+          providerRef.current = instance;
+
+          // Render remote application
+          instance.render({
+            dom: containerRef.current,
+            basename: '/remote-app',
+          });
+        }
+
+        // Cleanup function
+        return () => {
+          if (providerRef.current && containerRef.current) {
+            providerRef.current.destroy({
+              dom: containerRef.current,
+            });
+          }
+        };
+      }, []);
+
+      return <div ref={containerRef} />;
+    },
+  };
+});
+
+function App() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RemoteApp />
+    </Suspense>
+  );
+}
+```
+
+Mediante este patrón, Bridge logra una carga de módulos a nivel de aplicación independiente del framework, proporcionando una base técnica sólida para las arquitecturas de micro-frontends.

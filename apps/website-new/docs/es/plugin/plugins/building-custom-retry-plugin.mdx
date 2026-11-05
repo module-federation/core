@@ -1,0 +1,450 @@
+# Crear un plugin de reintentos personalizado
+
+Esta guía muestra cómo crear un plugin de reintentos personalizado con funcionalidades avanzadas como el patrón circuit breaker, componentes de fallback y un manejo de errores inteligente para aplicaciones con Module Federation.
+
+## Descripción general
+
+Al crear aplicaciones distribuidas con Module Federation, gestionar con elegancia los remotes sin conexión es fundamental para mantener la estabilidad de la aplicación. Un plugin de reintentos personalizado puede ofrecer un manejo de errores sofisticado que va más allá de los mecanismos de reintento básicos.
+
+## Funcionalidades principales
+
+Un plugin de reintentos robusto debería incluir:
+
+- **Lógica de reintentos**: número de reintentos configurable con backoff exponencial
+- **Patrón circuit breaker**: evita fallos en cascada deshabilitando temporalmente los remotes que fallan
+- **Componentes de fallback**: degradación elegante de la UI cuando los remotes no están disponibles
+- **Gestión de timeouts**: evita peticiones que se quedan colgadas
+- **Gestión de estado inteligente**: hace seguimiento de la salud de los remotes y de los patrones de fallo
+
+## Implementación
+
+### Estructura básica del plugin
+
+```ts
+import type { ModuleFederationRuntimePlugin } from "@module-federation/enhanced/runtime";
+
+interface RetryConfig {
+  enableLogging?: boolean;
+  fallbackTimeout?: number;
+  retryAttempts?: number;
+  retryDelay?: number;
+  enableCircuitBreaker?: boolean;
+  circuitBreakerThreshold?: number;
+  circuitBreakerResetTimeout?: number;
+}
+
+const customRetryPlugin = (config: RetryConfig = {}): ModuleFederationRuntimePlugin => {
+  const {
+    enableLogging = true,
+    fallbackTimeout = 5000,
+    retryAttempts = 2,
+    retryDelay = 1000,
+    enableCircuitBreaker = true,
+    circuitBreakerThreshold = 3,
+    circuitBreakerResetTimeout = 60000,
+  } = config;
+
+  return {
+    name: "custom-retry-plugin",
+    // Implementation details below...
+  };
+};
+```
+
+### Gestión de estado
+
+Haz seguimiento de la salud de los remotes mediante un sistema de gestión de estado:
+
+```ts
+interface RemoteState {
+  failureCount: number;
+  lastFailureTime: number;
+  isCircuitOpen: boolean;
+}
+
+// Track remote states for circuit breaker pattern
+const remoteStates = new Map<string, RemoteState>();
+
+const getRemoteState = (remoteId: string): RemoteState => {
+  if (!remoteStates.has(remoteId)) {
+    remoteStates.set(remoteId, {
+      failureCount: 0,
+      lastFailureTime: 0,
+      isCircuitOpen: false,
+    });
+  }
+  return remoteStates.get(remoteId)!;
+};
+
+const updateRemoteState = (remoteId: string, isSuccess: boolean) => {
+  const state = getRemoteState(remoteId);
+  
+  if (isSuccess) {
+    // Reset on success
+    state.failureCount = 0;
+    state.isCircuitOpen = false;
+  } else {
+    // Increment failure count
+    state.failureCount++;
+    state.lastFailureTime = Date.now();
+    
+    // Open circuit if threshold reached
+    if (enableCircuitBreaker && state.failureCount >= circuitBreakerThreshold) {
+      state.isCircuitOpen = true;
+      
+      // Auto-reset circuit after timeout
+      setTimeout(() => {
+        state.isCircuitOpen = false;
+        state.failureCount = 0;
+      }, circuitBreakerResetTimeout);
+    }
+  }
+};
+```
+
+### Lógica de reintentos con timeout
+
+Implementa backoff exponencial con protección por timeout:
+
+```ts
+const withRetry = async <T>(
+  operation: () => Promise<T>,
+  remoteId: string,
+  attempts = retryAttempts
+): Promise<T> => {
+  let lastError: Error;
+  
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const result = await Promise.race([
+        operation(),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), fallbackTimeout)
+        )
+      ]);
+      
+      // Success - update state
+      updateRemoteState(remoteId, true);
+      return result;
+    } catch (error) {
+      lastError = error as Error;
+      
+      // Wait before retry (exponential backoff)
+      if (i < attempts - 1) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay * (i + 1)));
+      }
+    }
+  }
+  
+  // All attempts failed
+  updateRemoteState(remoteId, false);
+  throw lastError!;
+};
+```
+
+### Manejo de errores según el ciclo de vida
+
+Gestiona los distintos tipos de error según la fase en la que se produce el fallo:
+
+```ts
+async errorLoadRemote(args) {
+  const { id, error, from, lifecycle } = args;
+  const remoteId = id || from || 'unknown';
+
+  // Different handling based on lifecycle
+  switch (lifecycle) {
+    case 'beforeRequest':
+    case 'afterResolve':
+      // Manifest loading failed
+      const state = getRemoteState(remoteId);
+      if (state.isCircuitOpen) {
+        return createFallbackModule(remoteId, error);
+      }
+      
+      try {
+        // Retry the original request
+        return await withRetry(() => args.origin(), remoteId);
+      } catch (retryError) {
+        return createFallbackModule(remoteId, error);
+      }
+
+    case 'onLoad':
+      // Module loading failed after manifest was loaded
+      return () => createFallbackModule(remoteId, error);
+
+    case 'beforeLoadShare':
+      // Shared dependency loading failed
+      return createFallbackModule(remoteId, error);
+
+    default:
+      return createFallbackModule(remoteId, error);
+  }
+}
+```
+
+### Componentes de fallback
+
+Crea componentes de UI de fallback que degraden con elegancia:
+
+```ts
+const createFallbackComponent = (remoteId: string, error?: Error) => {
+  const FallbackComponent = async () => {
+    // Dynamically import React to avoid eager loading issues
+    const React = await import('react');
+    
+    // Build error details safely
+    const errorDetails = error ? [
+      React.createElement("details", { key: "error" }, [
+        React.createElement("summary", { key: "summary" }, "Error Details"),
+        React.createElement("pre", { 
+          key: "error-details",
+          style: { 
+            overflow: "auto",
+            fontSize: "12px",
+            textAlign: "left" as const
+          }
+        }, error?.message || String(error))
+      ])
+    ] : null;
+    
+    return React.createElement("div", {
+      style: {
+        padding: "16px",
+        margin: "8px",
+        border: "2px dashed #ffa39e",
+        borderRadius: "8px",
+        backgroundColor: "#fff2f0",
+        color: "#cf1322",
+        textAlign: "center" as const,
+      },
+    }, [
+      React.createElement("h3", { key: "title" }, "Remote Module Unavailable"),
+      React.createElement("p", { key: "description" }, 
+        `The remote module "${remoteId}" is currently offline.`),
+      errorDetails
+    ].filter(Boolean));
+  };
+
+  FallbackComponent.displayName = `FallbackComponent_${remoteId}`;
+  return FallbackComponent;
+};
+
+const createFallbackModule = (remoteId: string, error?: Error) => {
+  try {
+    const FallbackComponent = createFallbackComponent(remoteId, error);
+    
+    return {
+      __esModule: true,
+      default: FallbackComponent,
+      [remoteId]: FallbackComponent,
+    };
+  } catch (createError) {
+    // If fallback creation fails, return minimal module
+    console.error('Failed to create fallback module:', createError);
+    return {
+      __esModule: true,
+      default: () => null,
+    };
+  }
+};
+```
+
+## Uso
+
+### Configuración
+
+```ts
+import { init } from '@module-federation/enhanced/runtime';
+import customRetryPlugin from './custom-retry-plugin';
+
+init({
+  name: 'host',
+  remotes: [
+    {
+      name: 'remote1',
+      entry: 'http://localhost:3001/remoteEntry.js'
+    }
+  ],
+  plugins: [
+    customRetryPlugin({
+      enableLogging: true,
+      retryAttempts: 3,
+      retryDelay: 1000,
+      fallbackTimeout: 5000,
+      enableCircuitBreaker: true,
+      circuitBreakerThreshold: 5,
+      circuitBreakerResetTimeout: 30000,
+    })
+  ]
+});
+```
+
+### Integración con shareStrategy
+
+Ten en cuenta cómo afecta `shareStrategy` a la carga de los remotes:
+
+```ts
+// Version-first strategy eagerly loads remotes
+// This can trigger failures during app startup
+shareStrategy: 'version-first'
+
+// Loaded-first strategy loads remotes on-demand
+// Failures occur only when modules are actually requested
+shareStrategy: 'loaded-first' // Recommended for offline scenarios
+```
+
+Para aplicaciones que necesitan gestionar con elegancia los escenarios sin conexión, considera usar la estrategia `loaded-first` junto con tu plugin de reintentos.
+
+## Buenas prácticas
+
+1. **Degradación elegante**: proporciona siempre una UI de fallback útil
+2. **Circuit breaker**: evita fallos en cascada con el patrón circuit breaker
+3. **Logging**: incluye logs completos para facilitar la depuración
+4. **Rendimiento**: guarda en caché los módulos de fallback para no tener que recrearlos
+5. **Recuperación**: permite la recuperación automática cuando los remotes vuelvan a estar en línea
+6. **Configuración**: haz que el comportamiento de reintentos sea configurable por entorno
+
+## Ejemplo completo
+
+Esta es una versión simplificada de un plugin de reintentos listo para producción:
+
+```ts
+import type { ModuleFederationRuntimePlugin } from "@module-federation/enhanced/runtime";
+import type { ComponentType } from "react";
+
+interface OfflineFallbackConfig {
+  enableLogging?: boolean;
+  fallbackTimeout?: number;
+  retryAttempts?: number;
+  retryDelay?: number;
+  enableCircuitBreaker?: boolean;
+  circuitBreakerThreshold?: number;
+  circuitBreakerResetTimeout?: number;
+  fallbackComponents?: Record<string, ComponentType>;
+}
+
+const enhancedOfflineFallbackPlugin = (
+  config: OfflineFallbackConfig = {}
+): ModuleFederationRuntimePlugin => {
+  const {
+    enableLogging = true,
+    fallbackTimeout = 5000,
+    retryAttempts = 2,
+    retryDelay = 1000,
+    enableCircuitBreaker = true,
+    circuitBreakerThreshold = 3,
+    circuitBreakerResetTimeout = 60000,
+    fallbackComponents = {},
+  } = config;
+
+  const remoteStates = new Map<string, any>();
+  const fallbackCache = new Map<string, ComponentType>();
+
+  const log = (message: string, ...args: any[]) => {
+    if (enableLogging) {
+      console.warn(`[OfflineFallbackPlugin] ${message}`, ...args);
+    }
+  };
+
+  const createFallbackComponent = (remoteId: string, error?: Error) => {
+    if (fallbackComponents[remoteId]) {
+      return fallbackComponents[remoteId];
+    }
+
+    const FallbackComponent = async () => {
+      // Dynamically import React to avoid eager loading issues
+      const React = await import('react');
+      
+      return React.createElement("div", {
+        style: {
+          padding: "16px",
+          border: "2px dashed #ffa39e",
+          borderRadius: "8px",
+          backgroundColor: "#fff2f0",
+          color: "#cf1322",
+          textAlign: "center",
+        },
+      }, [
+        React.createElement("h3", { key: "title" }, "Remote Module Unavailable"),
+        React.createElement("p", { key: "description" }, 
+          `The remote module "${remoteId}" is currently offline.`),
+      ]);
+    };
+
+    return FallbackComponent;
+  };
+
+  return {
+    name: "enhanced-offline-fallback-plugin",
+    
+    async errorLoadRemote(args) {
+      const { id, error, lifecycle } = args;
+      log(`Remote loading failed: ${id}`, { lifecycle, error: error?.message });
+
+      switch (lifecycle) {
+        case 'afterResolve':
+          // Manifest loading failed
+          return {
+            id: 'fallback',
+            name: 'fallback',
+            metaData: {},
+            shared: [],
+            remotes: [],
+            exposes: []
+          };
+
+        case 'onLoad':
+          // Module loading failed
+          return () => ({
+            __esModule: true,
+            default: createFallbackComponent(id, error),
+          });
+
+        default:
+          return createFallbackComponent(id, error);
+      }
+    },
+
+    onLoad(args) {
+      log(`Successfully loaded remote: ${args.id}`);
+      return args;
+    },
+  };
+};
+
+export default enhancedOfflineFallbackPlugin;
+```
+
+### Uso en la configuración de Rspack
+
+```ts
+import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
+import enhancedOfflineFallbackPlugin from "./enhanced-offline-fallback-plugin";
+
+export default defineConfig({
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "hostApp",
+      shareStrategy: "loaded-first", // Recommended for offline handling
+      remotes: {
+        "remote-app": "remoteApp@http://localhost:8081/remote-mf-manifest.json",
+      },
+      runtimePlugins: [
+        "./enhanced-offline-fallback-plugin.ts",
+      ],
+    }),
+  ],
+});
+```
+
+## Funcionalidades avanzadas
+
+Considera añadir estas funcionalidades avanzadas:
+
+- **Health checks**: comprobaciones de salud periódicas para la recuperación del circuit breaker
+- **Fuentes alternativas**: intenta cargar desde varias URL de manifest
+- **Métricas**: recopila métricas sobre la fiabilidad de los remotes
+- **Notificaciones a usuarios**: avisa a los usuarios de los remotes sin conexión
+- **Mejora progresiva**: gestiona con elegancia la funcionalidad parcial
+
+Este enfoque proporciona un manejo de errores robusto y mantiene una buena experiencia de usuario incluso cuando los módulos remotos no están disponibles.

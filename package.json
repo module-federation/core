@@ -188,7 +188,7 @@
     "storybook": "8.6.17",
     "tapable": "2.3.0",
     "typedoc": "0.28.17",
-    "undici": "7.29.1",
+    "undici": "7.30.1",
     "unplugin": "3.0.0"
   },
   "devDependencies": {
@@ -205,7 +205,7 @@
     "@fontsource/roboto": "5.1.0",
     "@fontsource/roboto-mono": "5.1.0",
     "@mermaid-js/mermaid-cli": "11.16.0",
-    "@playwright/test": "1.57.0",
+    "@playwright/test": "1.64.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "@rollup/plugin-alias": "5.1.1",
     "@rollup/plugin-replace": "6.0.1",
