@@ -308,6 +308,23 @@ class ModuleHandler {
       }
     };
 
+    // Webpack consume identifiers join their fields with '|', but a requiredVersion
+    // OR range ('^17 || ^18') contains '||', which splits into an empty token.
+    // Share scope names are never empty, so rejoin each empty token with its
+    // neighbours to keep the range in one field.
+    const splitWebpackConsumeIdentifier = (value: string) => {
+      const tokens = value.split('|');
+      const fields: string[] = [];
+      for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i] === '' && fields.length > 0 && i + 1 < tokens.length) {
+          fields[fields.length - 1] += `||${tokens[++i]}`;
+        } else {
+          fields.push(tokens[i]);
+        }
+      }
+      return fields;
+    };
+
     const parseResolvedIdentifier = (nameAndVersion: string) => {
       let name = '';
       let version = '';
@@ -346,8 +363,9 @@ class ModuleHandler {
     if (moduleType === 'consume-shared-module') {
       // identifier(rspack) = consume shared module (default) lodash/get@^4.17.21 (strict) (fallback: /temp/node_modules/.pnpm/lodash@4.17.21/node_modules/lodash/get.js)
       // identifier(webpack) = consume-shared-module|default|react-dom|!=1.8...2...0|false|/temp/node_modules/.pnpm/react-dom@18.2.0_react@18.2.0/node_modules/react-dom/index.js|true|false
-      const SEPARATOR = this.isRspack ? ' ' : '|';
-      const data = identifier.split(SEPARATOR);
+      const data = this.isRspack
+        ? identifier.split(' ')
+        : splitWebpackConsumeIdentifier(identifier);
 
       let pkgName = '';
       let pkgVersion = '';

@@ -101,8 +101,15 @@ jest.mock(
       }
     },
     SharedManager: class {
-      normalizedOptions: Record<string, { requiredVersion?: string }> = {};
-      init() {}
+      normalizedOptions: Record<
+        string,
+        { requiredVersion?: string; version?: string }
+      > = {};
+      init(options?: {
+        shared?: Record<string, { requiredVersion?: string; version?: string }>;
+      }) {
+        this.normalizedOptions = { ...(options?.shared || {}) };
+      }
     },
   }),
   { virtual: true },
@@ -228,6 +235,7 @@ describe('ModuleHandler', () => {
     const collectShared = (
       identifiers: string[],
       bundler: 'webpack' | 'rspack',
+      shared?: moduleFederationPlugin.ModuleFederationPluginOptions['shared'],
     ) => {
       const modules = identifiers.map(
         (identifier) =>
@@ -238,9 +246,13 @@ describe('ModuleHandler', () => {
               : 'consume-shared-module',
           }) as StatsModule,
       );
-      const { sharedMap } = new ModuleHandler({ name: 'host' }, modules, {
-        bundler,
-      }).collect();
+      const { sharedMap } = new ModuleHandler(
+        { name: 'host', shared },
+        modules,
+        {
+          bundler,
+        },
+      ).collect();
       return Object.values(sharedMap);
     };
 
@@ -327,6 +339,39 @@ describe('ModuleHandler', () => {
         version: '18.2.0',
         shareScope: ['default', 'custom'],
       });
+    });
+
+    it('parses webpack consume identifiers whose required version is an OR range', () => {
+      const shared = collectShared(
+        [
+          'consume-shared-module|default|react|^17 || ^18|false|/app/node_modules/react/index.js|true|false|undefined',
+          'consume-shared-module|default|custom|react-dom|^17 || ^18 || ^19|false|undefined|true|false|undefined',
+        ],
+        'webpack',
+        {
+          react: { version: '18.2.0', requiredVersion: '^17 || ^18' },
+          'react-dom': {
+            version: '18.2.0',
+            requiredVersion: '^17 || ^18 || ^19',
+            import: false,
+          },
+        },
+      );
+
+      expect(
+        shared.map(({ name, version, shareScope }) => ({
+          name,
+          version,
+          shareScope,
+        })),
+      ).toEqual([
+        { name: 'react', version: '18.2.0', shareScope: 'default' },
+        {
+          name: 'react-dom',
+          version: '18.2.0',
+          shareScope: ['default', 'custom'],
+        },
+      ]);
     });
   });
 });
