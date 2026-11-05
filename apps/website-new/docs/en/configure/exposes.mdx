@@ -22,6 +22,8 @@ interface PluginExposesOptions {
 interface ExposesConfig {
   // File entry
   import: string;
+  // Layer in which to build the exposed module
+  layer?: string;
 }
 ```
 
@@ -42,3 +44,13 @@ module.exports = {
   ],
 };
 ```
+
+Use `layer` in the object form to build an exposed module in a named layer:
+
+```js
+exposes: {
+  './Server': { import: './src/Server.ts', layer: 'server' },
+}
+```
+
+Layer names must be nonempty. With Webpack, enable `experiments.layers`. Omitting `layer` preserves the bundler's existing layer behavior; string exposes continue to work unchanged.

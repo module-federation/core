@@ -1,6 +1,7 @@
 const { ModuleFederationPlugin } = require('../../../../dist/src');
 
 module.exports = {
+  experiments: { layers: true },
   optimization: {
     chunkIds: 'named',
     moduleIds: 'named',
@@ -15,14 +16,14 @@ module.exports = {
       filename: 'container.[chunkhash:8].js',
       library: { type: 'commonjs-module' },
       exposes: {
-        'expose-a': './module.js',
+        'expose-a': { import: './module.js', layer: 'server' },
       },
       remoteType: 'script',
       remotes: {
         remote: 'remote@http://localhost:8000/remoteEntry.js',
       },
       shared: {
-        react: {},
+        react: { layer: 'server', shareScope: ['server', 'default'] },
       },
       manifest: {
         disableAssetsAnalyze: true,

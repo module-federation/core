@@ -58,6 +58,7 @@ class ContainerPlugin {
         (item) => ({
           import: Array.isArray(item.import) ? item.import : [item.import],
           name: item.name || undefined,
+          ...(item.layer !== undefined ? { layer: item.layer } : {}),
         }),
       ),
       runtimePlugins: options.runtimePlugins,
@@ -297,10 +298,19 @@ class ContainerPlugin {
           new ContainerEntryModuleFactory(),
         );
 
-        compilation.dependencyFactories.set(
-          ContainerExposedDependency,
-          normalModuleFactory,
-        );
+        compilation.dependencyFactories.set(ContainerExposedDependency, {
+          create(data, callback) {
+            const dependency = data
+              .dependencies[0] as ContainerExposedDependency;
+            if (dependency.layer !== undefined) {
+              data.contextInfo = {
+                ...data.contextInfo,
+                issuerLayer: dependency.layer,
+              };
+            }
+            normalModuleFactory.create(data, callback);
+          },
+        });
 
         if (!compilation.dependencyFactories.has(EntryDependency)) {
           compilation.dependencyFactories.set(

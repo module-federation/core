@@ -9,6 +9,8 @@ import { RemoteWithEntry, RemoteWithVersion } from './common';
 
 export interface ManifestShared {
   id: string;
+  layer?: string;
+  shareScope?: string | string[];
   name: string;
   version: string;
   singleton: boolean;
@@ -32,7 +34,7 @@ export type ManifestRemote<T = ManifestRemoteCommonInfo> =
 
 export type ManifestExpose = Pick<
   StatsExpose,
-  'assets' | 'id' | 'name' | 'path'
+  'assets' | 'id' | 'name' | 'path' | 'layer' | 'requiredShared'
 >;
 
 export interface Manifest<

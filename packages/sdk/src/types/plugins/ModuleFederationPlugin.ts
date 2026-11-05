@@ -31,6 +31,10 @@ export interface ExposesConfig {
    * Custom chunk name for the exposed module.
    */
   name?: string;
+  /**
+   * Layer in which to build the exposed module.
+   */
+  layer?: string;
 }
 
 /**
@@ -342,6 +346,8 @@ export interface AdditionalDataOptions {
 export interface PluginManifestOptions {
   filePath?: string;
   disableAssetsAnalyze?: boolean;
+  /** Use the legacy JavaScript stats reader for Webpack. Defaults to false. Native Rspack stats are unaffected. */
+  useLegacyStats?: boolean;
   fileName?: string;
   additionalData?: (
     options: AdditionalDataOptions,

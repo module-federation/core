@@ -23,6 +23,8 @@ interface PluginExposesOptions {
 interface ExposesConfig {
   // 文件入口
   import: string;
+  // 构建暴露模块时使用的层
+  layer?: string;
 }
 ```
 
@@ -43,3 +45,13 @@ module.exports = {
   ],
 };
 ```
+
+在对象形式中使用 `layer`，可以在指定的层中构建暴露模块：
+
+```js
+exposes: {
+  './Server': { import: './src/Server.ts', layer: 'server' },
+}
+```
+
+层名不能为空字符串。使用 Webpack 时，需要启用 `experiments.layers`。省略 `layer` 会保留构建工具现有的层行为；字符串形式的 exposes 配置继续保持原有行为。

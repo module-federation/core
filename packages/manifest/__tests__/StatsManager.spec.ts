@@ -1,5 +1,5 @@
 import type { Stats, moduleFederationPlugin } from '@module-federation/sdk';
-import type { Compiler } from 'webpack';
+import type { Compiler, Compilation } from 'webpack';
 
 jest.mock(
   '@module-federation/dts-plugin/core',
@@ -14,12 +14,18 @@ jest.mock(
   '@module-federation/managers',
   () => ({
     ContainerManager: class {
-      init() {}
+      enable = true;
+      containerPluginExposesOptions = {};
+      init(options: { exposes?: object }) {
+        this.containerPluginExposesOptions = options.exposes || {};
+      }
     },
     RemoteManager: class {
+      statsRemoteWithEmptyUsedIn = [];
       init() {}
     },
     SharedManager: class {
+      normalizedOptions = {};
       init() {}
     },
     PKGJsonManager: class {},
@@ -30,6 +36,8 @@ jest.mock(
 );
 
 import { StatsManager } from '../src/StatsManager';
+import { ModuleHandler } from '../src/ModuleHandler';
+import { ManifestManager } from '../src/ManifestManager';
 
 describe('StatsManager', () => {
   it.each([
@@ -86,3 +94,147 @@ describe('StatsManager', () => {
     expect(updated.metaData.remoteEntry.type).toBe(expectedType);
   });
 });
+
+it('keeps assets separate for layered aliases of the same source', () => {
+  const manager = new StatsManager();
+  manager.init(
+    {
+      name: 'host',
+      exposes: {
+        './Server': {
+          import: './src/Button.tsx',
+          name: 'server',
+          layer: 'server',
+        },
+        './Client': {
+          import: './src/Button.tsx',
+          name: 'client',
+          layer: 'client',
+        },
+      },
+    },
+    { pluginVersion: 'test', bundler: 'rspack' },
+  );
+  const chunks = new Set(
+    ['server', 'client', 'server-split'].map((name) => ({
+      name,
+      groupsIterable: [{ name, getFiles: () => [`${name}.js`] }],
+      getAllAsyncChunks: () => [],
+    })),
+  );
+  const assets = manager['_getModuleAssets'](
+    { chunks } as unknown as Compilation,
+    [],
+  );
+  expect(assets['./Server'].js.sync).toEqual(['server.js', 'server-split.js']);
+  expect(assets['./Client'].js.sync).toEqual(['client.js']);
+});
+
+it.each([false, true])(
+  'emits each public expose once with its metadata (disableAssetsAnalyze=%s)',
+  async (disableAssetsAnalyze) => {
+    const options = {
+      name: 'host',
+      manifest: { disableAssetsAnalyze },
+      exposes: {
+        './Server': {
+          import: ['./src/Button.tsx', './src/setup.ts'],
+          name: 'server',
+          layer: 'server',
+        },
+        './Client': {
+          import: ['./src/Button.tsx'],
+          name: 'client',
+          layer: 'client',
+        },
+      },
+    };
+    const consume = {
+      identifier: 'consume shared module (default) react@19.0.0',
+      name: 'consume shared module (default) react@19.0.0',
+      moduleType: 'consume-shared-module',
+      issuer: '/setup|server',
+      issuerName: './src/setup.ts',
+    };
+    const modules = [
+      {
+        identifier: `container entry (default) ${JSON.stringify(Object.entries(options.exposes))}`,
+      },
+      { identifier: '/setup|server', name: './src/setup.ts', layer: 'server' },
+      consume,
+      { identifier: '/react.js', issuerName: consume.name, chunks: [3] },
+    ];
+    const chunks = new Set(
+      ['server', 'client', 'shared'].map((name, index) => ({
+        id: index + 1,
+        name,
+        files: [`${name}.js`],
+        groupsIterable: [
+          {
+            name,
+            getFiles: () =>
+              name === 'shared' ? ['shared.js'] : [`${name}.js`, 'shared.js'],
+          },
+        ],
+        getAllAsyncChunks: () => [],
+      })),
+    );
+    const compiler = {
+      context: process.cwd(),
+      options: { output: { publicPath: '/' } },
+    } as unknown as Compiler;
+    const compilation = {
+      chunks,
+      entrypoints: new Map(),
+      getStats: () => ({ toJson: () => ({ modules }) }),
+    } as unknown as Compilation;
+    const manager = new StatsManager();
+    manager.init(options, { pluginVersion: 'test', bundler: 'rspack' });
+    jest
+      .spyOn(
+        manager as unknown as { _getMetaData(): Stats['metaData'] },
+        '_getMetaData',
+      )
+      .mockReturnValue({} as Stats['metaData']);
+    const stats = await manager.generateStats(compiler, compilation);
+    expect(stats.exposes).toHaveLength(2);
+    expect(stats.exposes.map(({ path }) => path)).toEqual([
+      './Server',
+      './Client',
+    ]);
+    expect(stats.exposes[0]).toMatchObject({
+      id: 'host:Server',
+      name: 'Server',
+      file: 'src/Button.tsx',
+      layer: 'server',
+      requires: disableAssetsAnalyze ? [] : ['react'],
+      assets: {
+        js: { sync: disableAssetsAnalyze ? [] : ['server.js'], async: [] },
+        css: { sync: [], async: [] },
+      },
+    });
+    expect(stats.exposes[1]).toMatchObject({
+      id: 'host:Client',
+      name: 'Client',
+      file: 'src/Button.tsx',
+      layer: 'client',
+      requires: [],
+      assets: {
+        js: { sync: disableAssetsAnalyze ? [] : ['client.js'], async: [] },
+        css: { sync: [], async: [] },
+      },
+    });
+    const manifest = new ManifestManager().generateManifest({
+      stats,
+      compiler,
+      compilation,
+      publicPath: '/',
+      bundler: 'rspack',
+    });
+    expect(manifest.exposes.map(({ layer }) => layer)).toEqual([
+      'server',
+      'client',
+    ]);
+    expect(manifest.exposes[0].assets).toEqual(stats.exposes[0].assets);
+  },
+);

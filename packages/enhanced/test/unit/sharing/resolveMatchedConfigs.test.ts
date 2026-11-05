@@ -134,6 +134,37 @@ describe('resolveMatchedConfigs', () => {
   });
 
   describe('relative path resolution', () => {
+    it.each(['./shared.js', '/resolved/shared.js'])(
+      'keeps issuer layers separate for %s',
+      async (request) => {
+        mockResolver.resolve.mockImplementation(
+          (_context, _base, _request, _resolveContext, callback) =>
+            callback(null, '/resolved/shared.js'),
+        );
+        const configs = ['server', 'client'].map(
+          (issuerLayer) =>
+            [request, { shareScope: issuerLayer, issuerLayer }] as [
+              string,
+              PartialConsumeOptions,
+            ],
+        );
+        const result = await resolveMatchedConfigs(
+          compilation,
+          toConsumeOptionsArray(configs),
+        );
+        expect(
+          [
+            ...(request.startsWith('.')
+              ? result.unresolved
+              : result.resolved
+            ).values(),
+          ]
+            .map((config) => config.issuerLayer)
+            .sort(),
+        ).toEqual(['client', 'server']);
+      },
+    );
+
     it('should resolve relative paths successfully', async () => {
       const configs: [string, PartialConsumeOptions][] = [
         ['./relative-module', { shareScope: 'default' }],

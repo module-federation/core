@@ -83,6 +83,11 @@ export default {
           description: 'Custom chunk name for the exposed module.',
           type: 'string',
         },
+        layer: {
+          description: 'Layer in which to build the exposed module.',
+          type: 'string',
+          minLength: 1,
+        },
       },
       required: ['import'],
     },
@@ -1073,6 +1078,11 @@ export default {
             },
             disableAssetsAnalyze: {
               description: 'Disable assets analyze for manifest generation',
+              type: 'boolean',
+            },
+            useLegacyStats: {
+              description:
+                'Use the legacy JavaScript stats reader for Webpack. Defaults to false. Native Rspack stats are unaffected.',
               type: 'boolean',
             },
             fileName: {

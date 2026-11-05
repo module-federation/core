@@ -1,5 +1,4 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import type { Rspack } from '@rsbuild/core';
 
 // lib-polyfill.js: include core-js，@babel/runtime，@swc/helpers，tslib.
 // lib-react.js: include react，react-dom.
@@ -33,12 +32,14 @@ const SHARED_SPLIT_CHUNK_MAP = {
   axios: SPLIT_CHUNK_MAP.AXIOS,
 };
 
-type OptimizationConfig = Rspack.Configuration['optimization'];
-type SplitChunksConfig = NonNullable<OptimizationConfig>['splitChunks'];
+type SplitChunksConfig =
+  | { cacheGroups?: Record<string, unknown> }
+  | false
+  | undefined;
 
-export function autoDeleteSplitChunkCacheGroups(
+export function autoDeleteSplitChunkCacheGroups<T extends SplitChunksConfig>(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  splitChunks: SplitChunksConfig,
+  splitChunks: T,
 ) {
   if (!mfConfig.shared) {
     return;

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#101720" />
+    <title>Orbit Control · Lynx Web E2E</title>
+    <link rel="icon" href="data:," />
+    <link
+      rel="stylesheet"
+      href="/node_modules/@lynx-js/web-elements/index.css"
+    />
+    <link
+      rel="stylesheet"
+      href="/node_modules/@lynx-js/web-core/dist/client_prod/static/css/client.css"
+    />
+    <style>
+      html,
+      body,
+      lynx-view {
+        display: block;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      body {
+        background: #101720;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "@lynx-js/web-core/client": "/node_modules/@lynx-js/web-core/dist/client_prod/static/js/client.js"
+        }
+      }
+    </script>
+    <script type="module" src="/test/real-web/shell.js"></script>
+  </head>
+  <body></body>
+</html>

@@ -43,7 +43,9 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
               sharedArgs.forEach((sharedArg) => {
                 shared.push([sharedName, sharedArg]);
                 if ('get' in sharedArg) {
-                  sharedArg.treeShaking ||= {};
+                  if (!sharedArg.treeShaking) {
+                    sharedArg.treeShaking = {};
+                  }
                   sharedArg.treeShaking.get = sharedArg.get;
                   sharedArg.get = bundlerRuntime!.getSharedFallbackGetter({
                     shareKey: sharedName,
@@ -75,7 +77,20 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
 
             const patchShared = (pkgName: string, shared: ShareArgs) => {
               const shareSnapshot = hostGlobalSnapshot.shared.find(
-                (item) => item.sharedName === pkgName,
+                (item) =>
+                  item.sharedName === pkgName &&
+                  (!item.version || item.version === shared.version) &&
+                  item.layer === (shared.shareConfig?.layer ?? undefined) &&
+                  (!item.shareScope ||
+                    (Array.isArray(item.shareScope)
+                      ? item.shareScope
+                      : [item.shareScope]
+                    ).some((scope) =>
+                      (Array.isArray(shared.scope)
+                        ? shared.scope
+                        : [shared.scope || 'default']
+                      ).includes(scope),
+                    )),
               );
               if (!shareSnapshot) {
                 return;
@@ -132,7 +147,9 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
         };
       };
 
-    initOptions.plugins ||= [];
+    if (!initOptions.plugins) {
+      initOptions.plugins = [];
+    }
     initOptions.plugins.push(treeShakingSharePlugin());
   }
   return runtime!.init(initOptions);

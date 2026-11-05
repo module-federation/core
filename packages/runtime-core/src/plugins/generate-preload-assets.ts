@@ -269,10 +269,10 @@ export function generatePreloadAssets(
 
       if (registeredShared && typeof registeredShared.lib === 'function') {
         snapshotShared.assets.js.sync.forEach((asset) => {
-          loadedSharedJsAssets.add(asset);
+          loadedSharedJsAssets.add(getResourceUrl(remoteSnapshot, asset));
         });
         snapshotShared.assets.css.sync.forEach((asset) => {
-          loadedSharedCssAssets.add(asset);
+          loadedSharedCssAssets.add(getResourceUrl(remoteSnapshot, asset));
         });
       }
     };
@@ -281,10 +281,14 @@ export function generatePreloadAssets(
       if (!shareInfos) {
         return;
       }
-      // if no version, preload all shared
-      const sharedOptions = shared.version
-        ? shareInfos.find((s) => s.version === shared.version)
-        : shareInfos;
+      const snapshotScopes = arrayOptions(shared.shareScope || 'default');
+      const sharedOptions = shareInfos.filter(
+        (s) =>
+          (!shared.version || s.version === shared.version) &&
+          (s.shareConfig.layer ?? undefined) === shared.layer &&
+          (!shared.shareScope ||
+            s.scope.some((scope) => snapshotScopes.includes(scope))),
+      );
 
       if (!sharedOptions) {
         return;

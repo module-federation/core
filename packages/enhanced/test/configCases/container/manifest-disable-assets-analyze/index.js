@@ -19,25 +19,27 @@ const expectEmptyAssets = (entry) => {
 };
 
 it('should omit asset details from stats when disableAssetsAnalyze is true', () => {
-  if (stats.shared.length) {
-    expect(stats.shared).toHaveLength(1);
-    expectEmptyAssets(stats.shared[0]);
-  } else {
-    expect(stats.shared).toEqual([]);
-  }
+  expect(stats.shared).toHaveLength(1);
+  expectEmptyAssets(stats.shared[0]);
+  expect(stats.shared[0]).toMatchObject({
+    layer: 'server',
+    shareScope: ['server', 'default'],
+  });
   expect(stats.exposes).toHaveLength(1);
   expectEmptyAssets(stats.exposes[0]);
+  expect(stats.exposes[0].layer).toBe('server');
 });
 
 it('should omit asset details from manifest when disableAssetsAnalyze is true', () => {
-  if (manifest.shared.length) {
-    expect(manifest.shared).toHaveLength(1);
-    expectEmptyAssets(manifest.shared[0]);
-  } else {
-    expect(manifest.shared).toEqual([]);
-  }
+  expect(manifest.shared).toHaveLength(1);
+  expectEmptyAssets(manifest.shared[0]);
+  expect(manifest.shared[0]).toMatchObject({
+    layer: 'server',
+    shareScope: ['server', 'default'],
+  });
   expect(manifest.exposes).toHaveLength(1);
   expectEmptyAssets(manifest.exposes[0]);
+  expect(manifest.exposes[0].layer).toBe('server');
 });
 
 it('should mark remote usage locations as UNKNOWN', () => {

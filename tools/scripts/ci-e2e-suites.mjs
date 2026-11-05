@@ -12,6 +12,10 @@ export const E2E_SUITE_DEFINITIONS = {
       'tools/scripts/run-manifest-e2e.mjs',
     ],
   },
+  lynx: {
+    appNames: ['lynx-module-federation-demo'],
+    inputs: ['.github/workflows/e2e-lynx.yml'],
+  },
   metro: {
     appNames: ['example-host'],
     inputs: [
