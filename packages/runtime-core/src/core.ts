@@ -53,6 +53,7 @@ import { formatShareConfigs } from './utils/share';
 declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
 declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
+declare const ENV_TARGET: 'web' | 'node';
 
 type BridgeHookContext = object;
 type BridgeHookResult = {
@@ -72,7 +73,26 @@ const USE_SHARED =
     ? !FEDERATION_OPTIMIZE_NO_SHARED
     : true;
 
+// What this build of the runtime can do. `init` in another bundle reuses an instance only
+// when this string matches its own: remote loading, shared loading, snapshot plugins, and
+// the entry loader the build target selects.
+const RUNTIME_CAPABILITIES = [
+  USE_REMOTE && 'remote',
+  USE_SHARED && 'shared',
+  USE_REMOTE && USE_SNAPSHOT && 'snapshot',
+  typeof ENV_TARGET !== 'undefined' ? ENV_TARGET : 'universal',
+]
+  .filter(Boolean)
+  .join(',');
+
 export class ModuleFederation {
+  /** @internal A getter, because a static field compiles to a static block that Metro's Babel rejects. */
+  static get runtimeCapabilities(): string {
+    return RUNTIME_CAPABILITIES;
+  }
+  /** @internal Read by other bundles, so it lives on the instance. */
+  readonly runtimeCapabilities = RUNTIME_CAPABILITIES;
+
   options: Options;
   hooks = new PluginSystem({
     beforeInit: new SyncWaterfallHook<{
