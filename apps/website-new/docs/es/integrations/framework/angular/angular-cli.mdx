@@ -14,7 +14,7 @@ Esta guía explica cómo integrar Module Federation con Angular CLI. Para facili
 
 
   Para empezar, configura Angular CLI para que use Module Federation durante la fase de build.
-  Se necesita un builder personalizado para aprovechar todo el potencial de Module Federation.
+  Necesitas un builder personalizado para añadir la configuración de Module Federation.
 
   El paquete `@angular-architects/module-federation` proporciona este builder personalizado.
   Usa el comando ng add para incorporarlo a tus proyectos:
@@ -111,7 +111,7 @@ module.exports = withModuleFederationPlugin({
 
 ## Configurar el remote
 
-El micro-frontend, también conocido como remote en Module Federation, tiene una estructura similar a la de una app Angular estándar. Tiene rutas específicas en el `AppModule` y un `FlightsModule` para las tareas relacionadas con vuelos. En esta sección se explica cómo cargar sin problemas el `FlightsModule` en el Shell (host).
+El micro-frontend, o remote, tiene una estructura parecida a la de una app Angular habitual. Incluye rutas en el `AppModule` y un `FlightsModule` para las tareas relacionadas con vuelos. En esta sección verás cómo cargar ese `FlightsModule` en el Shell, o host.
 
 <Steps>
 ### Definición de rutas
@@ -184,7 +184,7 @@ En esta configuración:
 
 ## Iniciar las aplicaciones
 
-Con el Shell (host) y el micro-frontend (remote) ya configurados, es momento de probar la configuración para asegurarte de que la integración de Module Federation funciona sin problemas.
+Ahora que has configurado el Shell y el micro-frontend, comprueba que puedes cargar el módulo remoto.
 
 Para iniciar el Shell y el micro-frontend, usa los siguientes comandos:
 

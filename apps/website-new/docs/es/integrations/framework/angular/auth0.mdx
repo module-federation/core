@@ -7,7 +7,7 @@ Esta documentación describe el proceso para compartir estados de autenticación
 
 ## Descripción general
 
-En las arquitecturas de micro-frontends es habitual necesitar compartir información de contexto, como los datos del usuario actual, entre distintas partes de la aplicación. Este documento describe cómo compartir el estado de autenticación sin fricciones usando `@auth0/auth0-angular`, un paquete que facilita la integración con Auth0, un proveedor de gestión de identidades.
+Si varias partes de tu aplicación necesitan saber quién ha iniciado sesión, puedes compartir el estado de autenticación entre ellas. Aquí verás cómo hacerlo con `@auth0/auth0-angular`, el paquete de integración de Auth0 para Angular.
 
 ## Requisitos previos
 
@@ -143,4 +143,4 @@ Esta configuración garantiza que se use una única instancia de `AuthService` e
 
 ## Conclusión
 
-Siguiendo estos pasos, puedes compartir sin fricciones el estado de autenticación entre los micro-frontends de tus aplicaciones Angular. Esta configuración no solo simplifica la gestión de los contextos de usuario, sino que también mejora la experiencia general del usuario al mantener estados de autenticación coherentes entre los componentes modulares de tu aplicación.
+Con esta configuración, el shell y los micro-frontends consultan el mismo estado de autenticación y los mismos datos del usuario.

@@ -7,7 +7,7 @@ sidebar: false
 
 Module Federation ahora ofrece una única **skill `mf`** unificada.
 
-No necesitas elegir entre una larga lista de skills independientes, ni leer primero la documentación para luego trasladársela a tu agente. Lo más sencillo es instalar esta única skill y dejar que el agente decida si debe leer la documentación, inspeccionar la configuración o resolver un problema.
+Instala la skill `mf` y cuéntale al agente qué necesitas. Según tu pregunta, puede consultar la documentación, revisar la configuración o investigar un problema.
 
 Cuando un problema solo existe en el runtime de la página en vivo, la skill usa la
 Divebell MF Extension para obtener evidencia estructurada sobre Remote, Shared, Bridge y el
@@ -107,11 +107,11 @@ Si ya tienes un problema concreto:
 /mf observability
 ```
 
-En ese punto, el objetivo no es que investigues tú primero manualmente, sino que el agente empiece a diagnosticar de inmediato.
+Con esa información, el agente puede empezar a investigar el problema.
 
 ### 4. Dejar que el agente depure una página de MF en vivo
 
-Para una investigación puntual, proporciona a la skill la URL de destino y el recorrido del usuario:
+Para investigar un problema concreto, pásale a la skill la URL y los pasos que sigue el usuario:
 
 ```text
 /mf observability
