@@ -45,7 +45,7 @@ const mocks = rs.hoisted(() => {
     mockGetCompilationHooks: rs.fn().mockReturnValue({
       addContainerEntryDependency: { tap: mockCompilationHookTap },
       addFederationRuntimeDependency: { tap: mockCompilationHookTap },
-      addRemoteDependency: { tap: mockCompilationHookTap },
+      addRemoteDependency: { tap: mockCompilationHookTap, call: rs.fn() },
     }),
     mockExternalsPluginApply,
     mockExternalsPlugin: rs.fn().mockImplementation(() => ({
@@ -255,6 +255,75 @@ describe('ContainerReferencePlugin', () => {
   });
 
   describe('apply', () => {
+    describe.each([0, 31, 32])('with %i unrelated remotes', (padding) => {
+      it.each([
+        [['app', 'app/nested'], 'app/nested/Button', './nested/Button', 'app'],
+        [['app/nested', 'app'], 'app/nested/Button', './Button', 'app/nested'],
+        [['app', 'app'], 'app/Button', './Button', 'app'],
+        [['@scope/app'], '@scope/app', '.', '@scope/app'],
+        [['@scope/app'], '@scope/app/Button', './Button', '@scope/app'],
+        [['app/'], 'app//Button', './Button', 'app/'],
+        [[''], '/Button', './Button', ''],
+        [['app'], 'application/Button', undefined, undefined],
+        [['app'], 'loader!app/Button', undefined, undefined],
+        [['app'], 'other/app/Button', undefined, undefined],
+        [[], 'app/Button', undefined, undefined],
+      ])(
+        'preserves ordered prefix matching for %j and %s',
+        (keys, request, expose, key) => {
+          const plugin = new ContainerReferencePlugin({
+            remoteType: 'script',
+            remotes: [
+              ...Array.from({ length: padding }, (_, i) => `unrelated-${i}`),
+              ...keys,
+            ].map((name, index) => ({
+              [name]: {
+                external: [
+                  `internal local-container-${index}`,
+                  'remote@https://example.test/entry.js',
+                ],
+                shareScope: ['default', 'custom'],
+              },
+            })),
+          });
+          plugin.apply(mockCompiler);
+          const { mockCompilation } = createMockCompilation();
+          Object.assign(mockCompilation.hooks, {
+            runtimeRequirementInTree: {
+              for: rs.fn().mockReturnValue({ tap: rs.fn() }),
+            },
+          });
+          const factorize = { tap: rs.fn() };
+          getTap(
+            mockCompiler.hooks.compilation.tap as unknown as Mock,
+            'ContainerReferencePlugin',
+          )?.(mockCompilation, {
+            normalModuleFactory: { hooks: { factorize } },
+          });
+          const result: any = getTap(
+            factorize.tap,
+            'ContainerReferencePlugin',
+          )?.({ request });
+          if (expose === undefined) {
+            expect(result).toBeUndefined();
+          } else {
+            expect(result).toMatchObject({
+              request,
+              internalRequest: expose,
+              shareScope: ['default', 'custom'],
+              externalRequests: [
+                `local-container-${padding + keys.indexOf(key!)}`,
+                `webpack/container/reference/${key}/fallback-1`,
+              ],
+            });
+            expect(
+              mocks.mockGetCompilationHooks().addRemoteDependency.call,
+            ).toHaveBeenCalledWith(result);
+          }
+        },
+      );
+    });
+
     it('should register compilation factory hook', () => {
       const options = {
         remotes: {
