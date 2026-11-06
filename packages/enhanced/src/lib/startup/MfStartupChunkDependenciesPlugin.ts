@@ -1,6 +1,6 @@
 'use strict';
 
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackModule } from '../webpack';
 import {
   federationStartup,
   generateEntryStartup,
@@ -9,12 +9,7 @@ import {
 import type { Compiler, Chunk } from 'webpack';
 import ContainerEntryModule from '../container/ContainerEntryModule';
 
-const { RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const StartupEntrypointRuntimeModule = require(
-  normalizeWebpackPath('webpack/lib/runtime/StartupEntrypointRuntimeModule'),
-) as typeof import('webpack/lib/runtime/StartupEntrypointRuntimeModule');
+const { RuntimeGlobals } = getWebpack();
 
 interface Options {
   asyncChunkLoading?: boolean;
@@ -39,6 +34,11 @@ class StartupChunkDependenciesPlugin {
   }
 
   apply(compiler: Compiler): void {
+    const StartupEntrypointRuntimeModule = getWebpackModule(
+      getWebpack(compiler).runtime?.StartupEntrypointRuntimeModule,
+      'webpack/lib/runtime/StartupEntrypointRuntimeModule',
+    ) as typeof import('webpack/lib/runtime/StartupEntrypointRuntimeModule');
+
     compiler.hooks.thisCompilation.tap(
       'MfStartupChunkDependenciesPlugin',
       (compilation) => {

@@ -4,27 +4,34 @@
 */
 
 'use strict';
+import type { Entrypoint } from 'webpack';
+import { getWebpack, getWebpackModule } from '../webpack';
 import type { Compilation, Chunk, ChunkGraph } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { EntryModuleWithChunkGroup } from 'webpack/lib/ChunkGraph';
-import type RuntimeTemplate from 'webpack/lib/RuntimeTemplate';
-import type Entrypoint from 'webpack/lib/Entrypoint';
+type RuntimeTemplate = Compilation['runtimeTemplate'];
 
-const { RuntimeGlobals, Template } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { isSubset } = require(
-  normalizeWebpackPath('webpack/lib/util/SetHelpers'),
+const { RuntimeGlobals, Template } = getWebpack();
+const { isSubset } = getWebpackModule(
+  getWebpack().util?.SetHelpers,
+  'webpack/lib/util/SetHelpers',
 ) as typeof import('webpack/lib/util/SetHelpers');
-const { getAllChunks } = require(
-  normalizeWebpackPath('webpack/lib/javascript/ChunkHelpers'),
+const { getAllChunks } = getWebpackModule(
+  getWebpack().javascript?.ChunkHelpers,
+  'webpack/lib/javascript/ChunkHelpers',
 ) as typeof import('webpack/lib/javascript/ChunkHelpers');
-const HotUpdateChunk = require(
-  normalizeWebpackPath('webpack/lib/HotUpdateChunk'),
+const HotUpdateChunk = getWebpackModule(
+  getWebpack().HotUpdateChunk,
+  'webpack/lib/HotUpdateChunk',
+  'webpack/lib/graph/HotUpdateChunk',
 ) as typeof import('webpack/lib/HotUpdateChunk');
-const { getUndoPath } = require(
-  normalizeWebpackPath('webpack/lib/util/identifier'),
-) as typeof import('webpack/lib/util/identifier');
+const getUndoPath =
+  getWebpack().util?.getUndoPath ??
+  (
+    require(
+      normalizeWebpackPath('webpack/lib/util/identifier'),
+    ) as typeof import('webpack/lib/util/identifier')
+  ).getUndoPath;
 
 const EXPORT_PREFIX = `var ${RuntimeGlobals.exports} = `;
 

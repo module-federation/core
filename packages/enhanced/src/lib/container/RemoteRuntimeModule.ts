@@ -2,26 +2,28 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { ExternalModule } from 'webpack';
+import { getWebpack, getWebpackModule } from '../webpack';
 import type { Compilation } from 'webpack';
 import RemoteModule from './RemoteModule';
 import { getFederationGlobalScope } from './runtime/utils';
-import type ExternalModule from 'webpack/lib/ExternalModule';
+
 import type FallbackModule from './FallbackModule';
 import type {
   ModuleIdToRemoteDataMapping,
   RemotesOptions,
 } from '@module-federation/webpack-bundler-runtime';
 
-const extractUrlAndGlobal = require(
-  normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
+const extractUrlAndGlobal = getWebpackModule(
+  getWebpack().container?.extractUrlAndGlobal,
+  'webpack/lib/util/extractUrlAndGlobal',
+  'webpack/lib/externals/extractUrlAndGlobal',
 ) as typeof import('webpack/lib/util/extractUrlAndGlobal');
 
-const { Template, RuntimeModule, RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { compareModulesByIdentifier } = require(
-  normalizeWebpackPath('webpack/lib/util/comparators'),
+const { Template, RuntimeModule, RuntimeGlobals } = getWebpack();
+const { compareModulesByIdentifier } = getWebpackModule(
+  getWebpack().util?.comparators,
+  'webpack/lib/util/comparators',
 ) as typeof import('webpack/lib/util/comparators');
 
 class RemoteRuntimeModule extends RuntimeModule {

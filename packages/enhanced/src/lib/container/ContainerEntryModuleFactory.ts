@@ -5,12 +5,14 @@
 
 'use strict';
 
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackModule } from '../webpack';
 import ContainerEntryModule from './ContainerEntryModule';
 import ContainerEntryDependency from './ContainerEntryDependency';
 
-const ModuleFactory = require(
-  normalizeWebpackPath('webpack/lib/ModuleFactory'),
+const ModuleFactory = getWebpackModule(
+  getWebpack().ModuleFactory,
+  'webpack/lib/ModuleFactory',
+  'webpack/lib/module/ModuleFactory',
 ) as typeof import('webpack/lib/ModuleFactory');
 import type {
   ModuleFactoryCreateData,

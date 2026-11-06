@@ -1,17 +1,21 @@
+import { getWebpack, getWebpackModule } from '../../webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-const compileBooleanMatcher = require(
-  normalizeWebpackPath('webpack/lib/util/compileBooleanMatcher'),
+const compileBooleanMatcher = getWebpackModule(
+  getWebpack().util?.compileBooleanMatcher,
+  'webpack/lib/util/compileBooleanMatcher',
 ) as typeof import('webpack/lib/util/compileBooleanMatcher');
-const { getUndoPath } = require(
-  normalizeWebpackPath('webpack/lib/util/identifier'),
-) as typeof import('webpack/lib/util/identifier');
+const getUndoPath =
+  getWebpack().util?.getUndoPath ??
+  (
+    require(
+      normalizeWebpackPath('webpack/lib/util/identifier'),
+    ) as typeof import('webpack/lib/util/identifier')
+  ).getUndoPath;
 // inspired by react-refresh-webpack-plugin
 import getFederationGlobal from './getFederationGlobal';
 import type { NormalizedRuntimeInitOptionsWithOutShared } from './utils';
 
-const { RuntimeModule, RuntimeGlobals, Template } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const { RuntimeModule, RuntimeGlobals, Template } = getWebpack();
 
 class FederationRuntimeModule extends RuntimeModule {
   runtimeRequirements: ReadonlySet<string>;

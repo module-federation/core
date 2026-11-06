@@ -2,17 +2,16 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
+import { getWebpack, getWebpackModule } from '../webpack';
 import type { Module, ChunkGraph, Compilation, Chunk } from 'webpack';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import { getFederationGlobalScope } from '../container/runtime/utils';
 
-const { Template, RuntimeGlobals, RuntimeModule } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { compareModulesByIdentifier } = require(
-  normalizeWebpackPath('webpack/lib/util/comparators'),
+const { Template, RuntimeGlobals, RuntimeModule } = getWebpack();
+const { compareModulesByIdentifier } = getWebpackModule(
+  getWebpack().util?.comparators,
+  'webpack/lib/util/comparators',
 ) as typeof import('webpack/lib/util/comparators');
 
 class ConsumeSharedRuntimeModule extends RuntimeModule {

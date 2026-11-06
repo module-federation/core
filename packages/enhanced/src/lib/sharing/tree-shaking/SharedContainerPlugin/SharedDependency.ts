@@ -1,16 +1,17 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-
-import makeSerializable from '../../../makeSerializable';
-const { dependencies } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-
 import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
-} from 'webpack/lib/dependencies/ModuleDependency';
+} from 'webpack';
+import { getWebpack, getWebpackModule } from '../../../webpack';
 
-class SharedDependency extends dependencies.ModuleDependency {
+import makeSerializable from '../../../makeSerializable';
+const ModuleDependency = getWebpackModule(
+  getWebpack().dependencies?.ModuleDependency,
+  'webpack/lib/dependencies/ModuleDependency',
+  'webpack/lib/dependencies/core/ModuleDependency',
+) as typeof import('webpack/lib/dependencies/ModuleDependency');
+
+class SharedDependency extends ModuleDependency {
   sharedName: string;
   override request: string;
 

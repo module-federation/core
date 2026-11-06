@@ -1,6 +1,7 @@
+import type { RuntimeGlobals } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { getFederationGlobalScope } from './utils';
-import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+
 import type { NormalizedRuntimeInitOptionsWithOutShared } from './utils';
 import type { RemoteInfos } from '@module-federation/webpack-bundler-runtime';
 

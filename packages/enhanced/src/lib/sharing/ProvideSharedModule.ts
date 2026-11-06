@@ -2,9 +2,15 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
+import type {
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  InputFileSystem,
+  WebpackError,
+} from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
-import type WebpackError from 'webpack/lib/WebpackError';
+
 import type {
   CodeGenerationContext,
   CodeGenerationResult,
@@ -12,12 +18,10 @@ import type {
   NeedBuildContext,
   RequestShortener,
   ResolverWithOptions,
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
 } from 'webpack/lib/Module';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import { WEBPACK_MODULE_TYPE_PROVIDE } from '../Constants';
-import type { InputFileSystem } from 'webpack/lib/util/fs';
+
 import type { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
 
 const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(

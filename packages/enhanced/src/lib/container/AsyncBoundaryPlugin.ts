@@ -2,7 +2,7 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackModule } from '../webpack';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import type {
   Compiler,
@@ -15,8 +15,9 @@ import type {
 } from 'webpack';
 import type { SyncWaterfallHook } from 'tapable';
 
-const SortableSet = require(
-  normalizeWebpackPath('webpack/lib/util/SortableSet'),
+const SortableSet = getWebpackModule(
+  getWebpack().util?.SortableSet,
+  'webpack/lib/util/SortableSet',
 ) as typeof import('webpack/lib/util/SortableSet');
 
 type CompilationHooksJavascriptModulesPlugin = ReturnType<

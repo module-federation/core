@@ -5,20 +5,22 @@
 
 'use strict';
 
+import type {
+  InputFileSystem,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  WebpackError,
+} from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Chunk, ChunkGraph } from 'webpack';
 import type {
   CodeGenerationContext,
   CodeGenerationResult,
   Compilation,
-  InputFileSystem,
   LibIdentOptions,
   NeedBuildContext,
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
   RequestShortener,
   ResolverWithOptions,
-  WebpackError,
   WebpackOptions,
 } from 'webpack/lib/Module';
 import { WEBPACK_MODULE_TYPE_FALLBACK } from '../Constants';

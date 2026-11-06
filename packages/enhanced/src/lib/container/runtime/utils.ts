@@ -2,11 +2,12 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { RuntimeGlobals } from 'webpack';
+import { getWebpack, getWebpackModule } from '../../webpack';
 import crypto from 'crypto';
 import { parseOptions } from '../options';
 import type webpack from 'webpack';
-import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { init } from '@module-federation/runtime-tools';
 
@@ -19,8 +20,10 @@ export interface NormalizedRuntimeInitOptionsWithOutShared {
   >;
 }
 
-const extractUrlAndGlobal = require(
-  normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
+const extractUrlAndGlobal = getWebpackModule(
+  getWebpack().container?.extractUrlAndGlobal,
+  'webpack/lib/util/extractUrlAndGlobal',
+  'webpack/lib/externals/extractUrlAndGlobal',
 ) as typeof import('webpack/lib/util/extractUrlAndGlobal');
 
 type EntryStaticNormalized = Awaited<

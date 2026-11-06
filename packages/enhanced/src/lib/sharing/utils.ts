@@ -6,12 +6,8 @@
 import { isRequiredVersion } from '@module-federation/sdk';
 import type { ConsumeOptions } from '@module-federation/sdk';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { InputFileSystem } from 'webpack/lib/util/fs';
+import { join, dirname, readJson, type InputFileSystem } from '../fs';
 import type { Compilation } from 'webpack';
-
-const { join, dirname, readJson } = require(
-  normalizeWebpackPath('webpack/lib/util/fs'),
-) as typeof import('webpack/lib/util/fs');
 
 const { WebpackError } = require(
   normalizeWebpackPath('webpack'),

@@ -4,15 +4,14 @@
 */
 
 'use strict';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackModule } from '../webpack';
 import type { Compilation, ChunkGraph } from 'webpack';
 import { getFederationGlobalScope } from '../container/runtime/utils';
 
-const { Template, RuntimeGlobals, RuntimeModule } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { compareModulesByIdentifier } = require(
-  normalizeWebpackPath('webpack/lib/util/comparators'),
+const { Template, RuntimeGlobals, RuntimeModule } = getWebpack();
+const { compareModulesByIdentifier } = getWebpackModule(
+  getWebpack().util?.comparators,
+  'webpack/lib/util/comparators',
 ) as typeof import('webpack/lib/util/comparators');
 
 class ShareRuntimeModule extends RuntimeModule {

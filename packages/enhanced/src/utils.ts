@@ -1,8 +1,15 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-
-const memoize = require(
-  normalizeWebpackPath('webpack/lib/util/memoize'),
-) as typeof import('webpack/lib/util/memoize');
+// Adapted from webpack's memoize helper (MIT).
+function memoize<T>(fn: () => T): () => T {
+  let factory: (() => T) | undefined = fn;
+  let result: T;
+  return () => {
+    if (factory) {
+      result = factory();
+      factory = undefined;
+    }
+    return result;
+  };
+}
 
 const getValidate = memoize(() => require('schema-utils').validate);
 

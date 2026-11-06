@@ -4,22 +4,25 @@
 */
 
 'use strict';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type {
+  InputFileSystem,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  WebpackError,
+} from 'webpack';
+import { getWebpack, getWebpackModule } from '../webpack';
 import { infrastructureLogger as logger } from '@module-federation/sdk';
 import { buildDescMap, BUILD_001 } from '@module-federation/error-codes';
 import { logAndReport } from '@module-federation/error-codes/node';
 import type { Compilation, Dependency, Module as WebpackModule } from 'webpack';
 import type {
-  InputFileSystem,
   LibIdentOptions,
   NeedBuildContext,
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
   RequestShortener,
   ResolverWithOptions,
   WebpackOptions,
 } from 'webpack/lib/Module';
-import type WebpackError from 'webpack/lib/WebpackError';
+
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { getFederationGlobalScope } from './runtime/utils';
@@ -31,12 +34,16 @@ const {
   Template,
   Module,
   RuntimeGlobals,
-} = require(normalizeWebpackPath('webpack')) as typeof import('webpack');
-const StaticExportsDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
+} = getWebpack();
+const StaticExportsDependency = getWebpackModule(
+  getWebpack().dependencies?.StaticExportsDependency,
+  'webpack/lib/dependencies/StaticExportsDependency',
+  'webpack/lib/dependencies/core/StaticExportsDependency',
 ) as typeof import('webpack/lib/dependencies/StaticExportsDependency');
-const EntryDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
+const EntryDependency = getWebpackModule(
+  getWebpack().dependencies?.EntryDependency,
+  'webpack/lib/dependencies/EntryDependency',
+  'webpack/lib/entry/EntryDependency',
 ) as typeof import('webpack/lib/dependencies/EntryDependency');
 
 const SOURCE_TYPES = new Set(['javascript']);

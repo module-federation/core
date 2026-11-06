@@ -3,17 +3,16 @@
   Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
+import type {
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+} from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 import makeSerializable from '../makeSerializable';
 const { Dependency } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-
-import type {
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
-} from 'webpack/lib/Dependency';
 
 class ProvideSharedDependency extends Dependency {
   shareScope: string | string[];

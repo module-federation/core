@@ -1,9 +1,11 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackModule } from '../../../webpack';
 import type SharedEntryDependency from './SharedEntryDependency';
 import SharedEntryModule from './SharedEntryModule';
 
-const ModuleFactory = require(
-  normalizeWebpackPath('webpack/lib/ModuleFactory'),
+const ModuleFactory = getWebpackModule(
+  getWebpack().ModuleFactory,
+  'webpack/lib/ModuleFactory',
+  'webpack/lib/module/ModuleFactory',
 ) as typeof import('webpack/lib/ModuleFactory');
 import type {
   ModuleFactoryCreateData,

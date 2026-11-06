@@ -11,6 +11,8 @@ const ABSOLUTE_PATH_REGEX = /^(\/|[A-Za-z]:|\\\\)/;
 const RELATIVE_OR_ABSOLUTE_PATH_REGEX = /^(?:\.{1,2}[\\/]|\/|[A-Za-z]:|\\\\)/;
 const PACKAGE_NAME_REGEX = /^((?:@[^\\/]+[\\/])?[^\\/]+)/;
 
+import type { InputFileSystem } from 'webpack';
+import { getWebpack, getWebpackModule } from '../webpack';
 import {
   getWebpackPath,
   normalizeWebpackPath,
@@ -37,14 +39,16 @@ import ProvideForSharedDependency from './ProvideForSharedDependency';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
-import type { InputFileSystem } from 'webpack/lib/util/fs';
+
 import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
 import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
 import type { ConsumeOptions } from '@module-federation/sdk';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
-const { satisfy, parseRange } = require(
-  normalizeWebpackPath('webpack/lib/util/semver'),
+const { satisfy, parseRange } = getWebpackModule(
+  getWebpack().sharing?.semver,
+  'webpack/lib/util/semver',
+  'webpack/lib/sharing/semver',
 ) as typeof import('webpack/lib/util/semver');
 import {
   addSingletonFilterWarning,
@@ -53,17 +57,18 @@ import {
   extractPathAfterNodeModules,
 } from './utils';
 
-const ModuleNotFoundError = require(
-  normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
+const ModuleNotFoundError = getWebpackModule(
+  getWebpack().ModuleNotFoundError,
+  'webpack/lib/ModuleNotFoundError',
 ) as typeof import('webpack/lib/ModuleNotFoundError');
-const { RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const LazySet = require(
-  normalizeWebpackPath('webpack/lib/util/LazySet'),
+const { RuntimeGlobals } = getWebpack();
+const LazySet = getWebpackModule(
+  getWebpack().util?.LazySet,
+  'webpack/lib/util/LazySet',
 ) as typeof import('webpack/lib/util/LazySet');
-const WebpackError = require(
-  normalizeWebpackPath('webpack/lib/WebpackError'),
+const WebpackError = getWebpackModule(
+  getWebpack().WebpackError,
+  'webpack/lib/WebpackError',
 ) as typeof import('webpack/lib/WebpackError');
 
 const validate = createSchemaValidation(

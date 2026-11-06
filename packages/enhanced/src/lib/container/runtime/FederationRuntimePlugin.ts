@@ -1,3 +1,4 @@
+import { getWebpack, getWebpackModule } from '../../webpack';
 import fs from 'fs';
 import path from 'path';
 import type {
@@ -6,7 +7,6 @@ import type {
   Compilation,
   Chunk,
 } from 'webpack';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
@@ -21,16 +21,7 @@ import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
 
-const ModuleDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
-) as typeof import('webpack/lib/dependencies/ModuleDependency');
-
-const { RuntimeGlobals, Template } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { mkdirpSync } = require(
-  normalizeWebpackPath('webpack/lib/util/fs'),
-) as typeof import('webpack/lib/util/fs');
+const { RuntimeGlobals, Template } = getWebpack();
 
 type ResolveFn = typeof require.resolve;
 type RuntimeEntrySpec = {
@@ -312,7 +303,7 @@ class FederationRuntimePlugin {
     try {
       fsLike.readFileSync(filePath);
     } catch {
-      mkdirpSync(fsLike as any, TEMP_DIR);
+      fsLike.mkdirSync(TEMP_DIR, { recursive: true });
       fsLike.writeFileSync(
         filePath,
         FederationRuntimePlugin.getTemplate(
@@ -337,6 +328,12 @@ class FederationRuntimePlugin {
   }
 
   prependEntry(compiler: Compiler) {
+    const ModuleDependency = getWebpackModule(
+      getWebpack(compiler).dependencies?.ModuleDependency,
+      'webpack/lib/dependencies/ModuleDependency',
+      'webpack/lib/dependencies/core/ModuleDependency',
+    ) as typeof import('webpack/lib/dependencies/ModuleDependency');
+
     if (!this.options?.virtualRuntimeEntry) {
       this.ensureFile(compiler);
     }
