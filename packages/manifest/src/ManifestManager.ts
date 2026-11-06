@@ -79,6 +79,9 @@ class ManifestManager {
         fallback: cur.fallback,
         fallbackName: cur.fallbackName,
         fallbackType: cur.fallbackType,
+        ...(cur.providers && cur.providers.length > 1
+          ? { providers: cur.providers }
+          : {}),
       };
       sum.push(shared);
       return sum;

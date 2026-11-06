@@ -4,6 +4,25 @@
 
 This package contains the manifest plugin for webpack/rspack internal.
 
+### Provider metadata proposal
+
+The independent provider-metadata draft records multiple concrete version/import
+pairs and their assets in an optional `shared[].providers` array. Existing shared
+fields remain unchanged; singleton and consumer-only rows omit the array.
+This draft implements [RFC #5082](https://github.com/module-federation/core/issues/5082)
+for review independently of the active layers stack. It preserves the mapping
+between each concrete provider and its import/assets that a single shared
+summary cannot express.
+
+Webpack/Rspack parity is a goal for that RFC. This main-based draft uses the
+existing stats collector; graph collection, layer/scope identity integration and
+native Rspack emission must be reconciled before adoption. The earlier stacked
+implementation and its layer tests remain preserved in [PR #5078](https://github.com/module-federation/core/pull/5078)
+at [commit 964500cbb](https://github.com/module-federation/core/commit/964500cbb7debbe644c7c64ac0780d2255526233).
+The subsequent resolved-provider-identifier fix is included in this draft; its
+original commit and full history are retained at local ref
+`backup/provider-before-independent-draft-3afa5e71e` (`3afa5e71e`).
+
 ## Installation
 
 ```sh
