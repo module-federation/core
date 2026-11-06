@@ -1,0 +1,334 @@
+---
+title: "Microfrontends mit Angular"
+---
+
+import {Steps, Tabs, Tab} from '@theme';
+
+# Microfrontends mit Angular und Webpack Module Federation {#micro-frontends-with-angular-and-webpack-module-federation}
+
+## Überblick {#overview}
+
+Module Federation hat die Entwicklung von Microfrontends geprägt. Zusammen mit Angular ermöglicht es eine belastbare und skalierbare verteilte Frontend-Architektur. Diese Anleitung zeigt ein praktisches Beispiel und erklärt die Konfiguration des Webpack-`ModuleFederationPlugin` in einer Angular-Shell und einer Remote-Anwendung.
+
+
+### Voraussetzungen {#prerequisites}
+
+Prüfe vor dem Einrichten diese Voraussetzungen:
+
+- **Node.js und npm:** Node.js und npm müssen installiert sein.
+- **Angular- und Webpack-Kenntnisse:** Grundkenntnisse in Angular und Webpack sind erforderlich.
+- **Module Federation:** Vertrautheit mit Module Federation wird vorausgesetzt.
+
+## Vorbereitung {#preparatory-steps}
+
+<Steps>
+
+### Webpack 5 erzwingen {#force-resolution-of-webpack-5}
+
+Angular-CLI-Projekte sind häufig bereits mit Webpack vorkonfiguriert. Damit Module Federation vollständig unterstützt wird, musst du Webpack 5 aktivieren.
+
+<Tabs>
+<Tab label="Yarn">
+  Öffne deine `package.json` und ergänze den Schlüssel `resolutions`, um Webpack 5 zu erzwingen:
+  ```json title="package.json"
+  {
+    "resolutions": {
+      "webpack": "^5.0.0"
+    }
+  }
+  ```
+</Tab>
+<Tab label="Npm">
+  npm unterstützt den Schlüssel `resolutions` nicht von Haus aus. <br/>
+  Es empfiehlt sich, Yarn als Paketmanager zu verwenden.<br/>
+  Alternativ kannst du das Paket `npm-force-resolutions` ausprobieren; es wurde für diese Konfiguration allerdings noch nicht umfassend getestet.
+</Tab>
+</Tabs>
+
+
+### Paketmanager in Angular CLI festlegen {#specify-package-manager-in-angular-cli}
+
+
+```json title="angular.json"
+{
+  "cli": {
+    "packageManager": "yarn"
+  }
+}
+```
+
+
+
+### Anpassbare Webpack-Konfiguration hinzufügen {#add-customizable-webpack-configuration}
+
+Du hast mehrere Möglichkeiten, die Webpack-Konfiguration zugänglich zu machen, etwa `Ngx-build-plus` oder `@angular-builders/custom-webpack`.
+
+In diesem Beispiel verwenden wir die zweite Option.
+
+Installiere zunächst das Paket:
+
+```bash
+yarn add @angular-builders/custom-webpack -D
+# or
+npm i -D @angular-builders/custom-webpack
+```
+
+Aktualisiere anschließend deine `angular.json`, damit dieser eigene Builder sowohl beim Build als auch beim Serve-Befehl verwendet wird:
+
+```json title="angular.json"
+{
+  "projects": {
+    "your-project-name": {
+      "architect": {
+        "build": {
+          "builder": "@angular-builders/custom-webpack:browser",
+          "options": {
+            "customWebpackConfig": {
+              "path": "webpack.config.ts"
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-builders/custom-webpack:dev-server"
+        }
+      }
+    }
+  }
+}
+```
+
+<div className={"rspress-directive tip"}>
+ Die eigene Webpack-Konfiguration wird mit der Standardkonfiguration von Angular zusammengeführt. Du musst daher nur die für Module Federation erforderlichen Änderungen angeben.
+</div>
+
+</Steps>
+
+## Webpack-Konfiguration für die Shell-Anwendung {#webpack-configuration-for-shell-application}
+
+<Steps>
+
+### Eindeutigen Ausgabenamen konfigurieren {#unique-output-name-configuration}
+
+Webpack verwendet standardmäßig den Namen aus `package.json`. Um besonders in Monorepos Konflikte zu vermeiden, solltest du einen eindeutigen Namen manuell festlegen.
+
+
+
+```javascript title="webpack.config.ts"
+config.output.uniqueName = 'shell';
+```
+:::tip
+HINWEIS: Wenn du kein Monorepo verwendest und deine `package.json` bereits eindeutige Namen enthält, kannst du diesen Schritt überspringen.
+:::
+
+### Runtime-Chunk-Optimierung {#runtime-chunk-optimization}
+
+
+Wegen eines derzeitigen Fehlers musst du die Optimierung `runtimeChunk` auf `false` setzen. Andernfalls funktioniert die Module-Federation-Konfiguration nicht.
+
+
+```javascript title="webpack.config.ts"
+config.optimization.runtimeChunk = false;
+```
+
+### Module-Federation-Plugin hinzufügen {#adding-module-federation-plugin}
+
+
+Füge in deiner `webpack.config.ts` das `ModuleFederationPlugin` zum Plugins-Array hinzu:
+
+```typescript title="webpack.config.ts"
+import { CustomWebpackBrowserSchema, TargetOptions } from '@angular-builders/custom-webpack';
+import { Configuration, container } from 'webpack';
+
+export default (config: Configuration, options: CustomWebpackBrowserSchema, targetOptions: TargetOptions) => {
+  // ... existing configuration
+  config.plugins.push(
+    new container.ModuleFederationPlugin({
+      remotes: {
+        'mf1': 'mf1@http://localhost:4300/mf1.js'
+      },
+      shared: {
+        '@angular/animations': {singleton: true, strictVersion: true},
+        '@angular/core': {singleton: true, strictVersion: true},
+        // ... other shared modules
+      }
+    })
+  );
+
+  return config;
+};
+```
+
+Hier ordnen wir im Objekt `remotes` die Namen der Remote-Module ihren Speicherorten zu. Der Schlüssel (in diesem Beispiel 'mf1') ist der Name für den Modulimport in der Shell-Anwendung. Der Wert gibt den Speicherort der Remote-Datei an, hier `http://localhost:4300/mf1.js`.
+
+</Steps>
+## Remote-Modul beziehungsweise Remote-Anwendung konfigurieren {#configuring-the-remote-moduleapplication}
+
+<Steps>
+
+### Eindeutigen Ausgabenamen festlegen und Runtime-Chunk deaktivieren {#setting-unique-output-name-and-disabling-runtime-chunk}
+
+Lege wie in der Shell-Anwendung einen eindeutigen Ausgabenamen fest und deaktiviere die Optimierung `runtimeChunk`:
+
+```typescript
+config.output.uniqueName = 'contact';
+config.optimization.runtimeChunk = false;
+```
+
+### Module-Federation-Plugin hinzufügen {#adding-module-federation-plugin-1}
+
+Konfiguriere das `ModuleFederationPlugin` wie folgt:
+
+```typescript
+import { CustomWebpackBrowserSchema, TargetOptions } from '@angular-builders/custom-webpack';
+import { Configuration, container } from 'webpack';
+import * as path from 'path';
+
+export default (config: Configuration, options: CustomWebpackBrowserSchema, targetOptions: TargetOptions) => {
+  // ... existing configuration
+
+  config.plugins.push(
+    new container.ModuleFederationPlugin({
+      filename: "mf1.js",
+      name: "mf1",
+      exposes: {
+        './Contact': path.resolve(__dirname, './src/app/contact/contact.module.ts'),
+        './Clock': path.resolve(__dirname, './src/app/clock/index.ts'),
+      },
+      shared: {
+        '@angular/animations': {singleton: true, strictVersion: true},
+        // ... other shared modules
+      }
+    })
+  );
+
+  return config;
+};
+```
+
+Die Eigenschaften `filename` und `name` legen hier den Namen der JavaScript-Datei und den Namespace des Modulcontainers im globalen window-Objekt fest. Genau diese Werte verwendet die Shell-Anwendung beim Laden des Remote-Moduls.
+
+### Module bereitstellen {#exposing-modules}
+
+Das Objekt `exposes` legt fest, welche Module exportiert werden. In diesem Beispiel:
+
+- `./Contact` exportiert ein Angular-`NgModule` mit untergeordneten Routen.
+- `./Clock` exportiert eine Angular-Komponente zum Rendern zur Laufzeit.
+
+</Steps>
+
+## Angular-Routing {#angular-routing}
+
+
+### Remote-Module deklarieren {#declare-remote-modules}
+
+Bevor du die Remote-Module verwenden kannst, musst du TypeScript über sie informieren, da sie erst dynamisch zur Laufzeit geladen werden.
+
+Erstelle neben deinem Routing-Modul eine neue TypeScript-Deklarationsdatei `remote-modules.d.ts`:
+
+```typescript
+declare module 'mf1/Contact';
+declare module 'mf1/Clock';
+```
+
+### Remote-Module in Routen verzögert laden {#lazy-loading-remote-modules-in-routes}
+
+Wie bei nativen verzögert geladenen Modulen kannst du Remote-Module jetzt in deine Angular-Routing-Konfiguration importieren.
+
+Passe deine Routenkonfiguration wie folgt an:
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    loadChildren: () => HomeModule
+  },
+  {
+    path: 'contact',
+    loadChildren: () => import('mf1/Contact').then(m => m.ContactModule)
+  },
+  // ... other routes
+];
+```
+
+## Komponenten aus Remote-Modulen dynamisch erstellen {#dynamic-component-creation-of-remote-modules}
+
+Das dynamische Erstellen von Komponenten aus Remote-Modulen ermöglicht eine weitergehende Integration.
+Dafür richtest du einen Service und eine Direktive für das dynamische Rendern ein.
+
+### Der Remote-Module-Loader-Service {#the-remote-module-loader-service}
+
+Dieser Service lädt Remote-Module dynamisch und löst Komponenten-Factorys auf.
+
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+export class RemoteModuleLoader {
+  constructor(private _componentFactoryResolver: ComponentFactoryResolver) {}
+
+  async loadRemoteModule(name: string) {
+    const [scope, moduleName] = name.split('/');
+    const moduleFactory = await window[scope].get('./' + moduleName);
+    return moduleFactory();
+  }
+
+  getComponentFactory(component: Type<unknown>): ComponentFactory<unknown> {
+    return this._componentFactoryResolver.resolveComponentFactory(component);
+  }
+}
+```
+
+### Die Remote-Component-Renderer-Direktive {#the-remote-component-renderer-directive}
+
+Diese strukturelle Direktive erzeugt Komponenten dynamisch in ihrem eigenen View-Container. Dazu verwendet sie die vom Remote-Module-Loader-Service gelieferte Komponenten-Factory.
+```typescript
+@Directive({
+  selector: '[remoteComponentRenderer]'
+})
+export class RemoteComponentRenderer implements OnInit {
+  @Input() set remoteComponentRenderer(componentName: string) { /* ... */ }
+  @Input() set remoteComponentRendererModule(moduleName: RemoteModule) { /* ... */ }
+
+  // ... other code
+
+  private async renderComponent() {
+    const module = await this.remoteModuleLoaderService.loadRemoteModule(this._moduleName);
+    const componentFactory = this.remoteModuleLoaderService.getComponentFactory(module[this._componentName]);
+    this.viewContainerRef.createComponent(componentFactory, undefined, this.injector);
+  }
+}
+```
+
+#### Verwendung in der View {#usage-in-view}
+
+In deiner Angular-View verwendest du die Direktive wie folgt:
+```html
+<ng-container *remoteComponentRenderer="'ClockComponent'; module:'mf1/Clock'"></ng-container>
+```
+
+## Shared-Abhängigkeiten {#shared-dependencies}
+
+#### Warum Shared-Abhängigkeiten wichtig sind {#importance-of-shared-dependencies}
+
+Der Abschnitt `shared` in der Webpack-Konfiguration legt die Module fest, die Shell und Remote-Modul gemeinsam verwenden. Das kann die Bundle-Größe deutlich reduzieren und die Nutzererfahrung verbessern.
+
+#### Mit unterschiedlichen Versionen umgehen {#handling-version-mismatches}
+
+Bei unterschiedlichen Hauptversionen zwischen Shell und Remote-Apps kann Webpack Runtime-Fehler auslösen. Für geteilte `singletons` müssen die Versionen deshalb konsistent abgestimmt sein.
+
+#### Semantic Versioning und Flexibilität {#semantic-versioning-and-flexibility}
+
+Webpack verwendet Semantic Versioning zur Auflösung von Shared-Abhängigkeiten. Etwas Spielraum bei der Versionsauswahl durch Operatoren wie `^` oder `>=` ist sinnvoll. So werden nur die benötigten Versionen geladen, und das Risiko mehrerer inkompatibler Versionen einer Bibliothek sinkt.
+
+
+## Zusammenfassung {#summary}
+
+Diese Anleitung hat gezeigt, wie du Remote-Module mit Webpack Module Federation dynamisch in eine Angular-Anwendung integrierst. Du hast insbesondere gelernt:
+
+- Yarn als Paketmanager einzurichten.
+- die Webpack-Konfiguration für deinen Angular-Build anzupassen.
+- Module Federation in Shell- und Microfrontend-Anwendungen zu verwenden.
+- Remote-Module im Angular-Routing verzögert zu laden.
+- Komponenten aus Remote-Modulen dynamisch zu erstellen.
+
+Für eine produktionsreife Konfiguration sind weitere Schritte nötig, die eine künftige Anleitung behandelt. Bei Fragen zu dieser Technik kannst du uns über unsere sozialen Netzwerke erreichen.

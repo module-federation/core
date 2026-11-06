@@ -1,0 +1,266 @@
+import React from 'react';
+import ShareScopeAlignmentPlayground from '@components/common/ShareScopeAlignmentPlayground';
+
+# Shared-Abhängigkeiten isolieren: mehrere Share Scopes {#shared-dependency-isolation-multiple-share-scopes}
+
+In {props.name || 'Module Federation'} werden `shared`-Abhängigkeiten standardmäßig im Share Scope `default` registriert. Ein einzelner Scope reicht oft nicht aus, wenn:
+
+* Du einen Teil der Shared-Abhängigkeiten vom Standardpool isolieren möchtest, etwa für zwei parallele React-Umgebungen, schrittweise Upgrades oder getrennte Domänen in Microfrontends.
+* Dasselbe Paket in verschiedenen Domänen unterschiedliche Versionen oder Strategien verwenden soll, innerhalb jeder Domäne aber weiter geteilt wird. Singleton und Wiederverwendung funktionieren weiterhin innerhalb einer Domäne.
+
+Mehrere Share Scopes **verlagern die Registrierung und Auflösung von Shared-Abhängigkeiten in getrennte Namensräume (Scopes)**. So kannst du Shared-Pools isolieren und Regeln für sie festlegen.
+
+## Konfiguration im Überblick {#configuration-quick-map}
+
+Entscheidend ist, was du beim Producer, beim Consumer und in jedem Shared-Eintrag konfigurierst. Interne Datenstrukturen oder Variablennamen der Runtime musst du dafür nicht kennen.
+
+* **Producer**: Mit [shareScope](/configure/shareScope.html) legst du fest, welche Share Scopes der Provider initialisiert. Standard: `default`; unterstützt `string | string[]`.
+* **Consumer**: Mit [remotes[remote].shareScope](/configure/remotes.html#sharescope) legst du fest, welche Share Scopes der Consumer mit einem bestimmten Provider abgleicht. Standard: `default`.
+* **Shared-Eintrag**: Mit `shared[pkg].shareScope` bestimmst du den Pool, in dem eine Abhängigkeit registriert und aufgelöst wird. Siehe [shared.shareScope](/configure/shared.html#sharescope).
+
+## Verhalten verschiedener Kombinationen {#what-happens-for-different-combinations}
+
+Beim Initialisieren eines Providers gleicht der Consumer zunächst die Share Scopes anhand der `shareScope`-Einstellungen beider Seiten ab. Dadurch weiß der Provider, welche Shared-Pools er wiederverwenden kann. Anschließend initialisiert er Shared-Abhängigkeiten gemäß seinem eigenen `shareScope`.
+
+Für die Beschreibung von Abgleich und Initialisierung verwenden wir folgende Bezeichnungen:
+
+- **HostShareScope** für das auf Consumer-Seite konfigurierte `remotes[remote].shareScope`
+- **RemoteShareScope** für das auf Provider-Seite konfigurierte `shareScope`
+
+:::warning Hinweis
+
+Konfiguriere `shareScope` / `remotes[remote].shareScope` nicht als `['default']` oder `[]`:
+
+* **Einzelner Scope**: Verwende einen String statt eines Arrays. Beide Varianten nutzen intern unterschiedliche Abläufe zum Abgleichen und Initialisieren der Shared-Pools. Verwendet der Consumer ein Array und der Provider einen String, gleicht der Provider anhand der Consumer-Liste ab. Verwendet der Provider ein Array, verarbeitet er nur seine eigene Liste.
+* **Leeres Array `[]`**: Es werden keine Scopes initialisiert, weder `default` noch ein Abgleich. Das ist eine Fehlkonfiguration.
+
+:::
+
+| HostShareScope | RemoteShareScope | Verhalten des Shared-Pools |
+| --- | --- | --- |
+| `'default'` | `'default'` | `default` wird vollständig geteilt. |
+| `['default','scope1']` | `'default'` | Nur `default` wird geteilt. Der Provider initialisiert `scope1` nicht; dafür muss auch er mehrere Share Scopes konfigurieren. |
+| `'default'` | `['default','scope1']` | `default` wird geteilt. Der Consumer stellt `scope1` nicht bereit; es wird zu `{}`. Abhängigkeiten darin können deshalb nicht vom Consumer wiederverwendet werden und greifen auf lokale Abhängigkeiten zurück. |
+| `['scope1','default']` | `['scope1','scope2']` | `scope1` wird geteilt. Der Consumer stellt `scope2` nicht bereit; es wird zu `{}`. Abhängigkeiten darin können nicht vom Consumer wiederverwendet werden. |
+
+:::tip Faustregel
+
+**Der Consumer stellt Shared-Pools bereit, der Provider initialisiert sie.** Scopes, die der Consumer nicht auflistet, werden mit `{}` befüllt. Fehlende Scope-Namen führen dadurch nicht zu Abstürzen. Scopes, die der Provider nicht auflistet, werden nicht initialisiert. Beide Seiten müssen einen Scope auflisten, damit Shared-Abhängigkeiten darin tatsächlich wiederverwendet werden können.
+
+:::
+
+### Playground {#playground}
+
+{props.shareScopeAlignmentPlayground ||
+  React.createElement(ShareScopeAlignmentPlayground)}
+
+## Build-Plugin konfigurieren {#build-plugin-configuration}
+
+### Producer {#producer}
+
+```ts title="remote/rspack.config.ts"
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+
+export default {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'app_remote',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Button': './src/Button',
+      },
+      shareScope: ['default', 'scope1'],
+      shared: {
+        react: {
+          singleton: true,
+          requiredVersion: false,
+          shareScope: 'default',
+        },
+        'react-dom': {
+          singleton: true,
+          requiredVersion: false,
+          shareScope: 'default',
+        },
+        '@company/design-system': {
+          singleton: true,
+          requiredVersion: false,
+          shareScope: 'scope1',
+        },
+      },
+    }),
+  ],
+};
+```
+
+Die wichtigsten Punkte:
+
+* `shareScope: ['default','scope1']` steuert, welche Scopes der remoteEntry des Providers zur Laufzeit initialisiert.
+* `shared[pkg].shareScope` legt fest, in welchem Scope eine Abhängigkeit registriert und aufgelöst wird. Liegt `@company/design-system` in `scope1`, nimmt es nur innerhalb des Pools `scope1` an Versionsauswahl und Wiederverwendung teil.
+
+### Consumer {#consumer}
+
+```ts title="host/rspack.config.ts"
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+
+export default {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'app_host',
+      remotes: {
+        app_remote: {
+          external: 'app_remote@http://localhost:2001/remoteEntry.js',
+          shareScope: ['default', 'scope1'],
+        },
+      },
+    }),
+  ],
+};
+```
+
+Die wichtigsten Punkte:
+
+* `remotes[remote].shareScope` steuert, welche Scopes der Consumer bei der Provider-Initialisierung abgleicht. Sie werden als `shareScopeKeys` übergeben.
+* Hat der Consumer mehrere Scopes, der Provider aber nur einen, wird die scopeMap abgeglichen. Der Provider initialisiert jedoch nur seinen einzelnen Scope. Siehe die Kombinationstabelle oben. Für die Wiederverwendung über mehrere Pools müssen Consumer und Provider normalerweise dieselben Scopes vereinbaren.
+
+## Nur Runtime (Runtime-API) {#pure-runtime-runtime-api}
+
+Wenn du Provider und Shared-Abhängigkeiten nicht über das Build-Plugin deklarierst, sondern beispielsweise dynamisch zur Laufzeit registrierst, kannst du mit der Runtime-API ebenfalls mehrere Share Scopes nutzen. Die beiden wesentlichen APIs:
+
+* **Provider registrieren**: `registerRemotes` oder `createInstance({ remotes })`. In jeder Provider-Konfiguration legt `shareScope: string | string[]` die abzugleichenden Share Scopes fest.
+* **Shared-Abhängigkeiten registrieren**: `registerShared` oder `createInstance({ shared })`. In jedem Eintrag legt `scope: string | string[]` den Share Scope der Abhängigkeit fest.
+
+:::warning Unterschiedliche Feldnamen
+Beim Registrieren von Shared-Abhängigkeiten heißt das Feld **`scope`**, nicht `shareScope`. Es unterscheidet sich damit von `shared[pkg].shareScope` im Build-Plugin.
+:::
+
+```ts title="host/runtime.ts"
+import React from 'react';
+import { registerRemotes, registerShared } from '@module-federation/enhanced/runtime';
+
+registerRemotes([
+  {
+    name: 'app_remote',
+    alias: 'remote',
+    entry: 'http://localhost:2001/mf-manifest.json',
+    shareScope: ['default', 'scope1'],
+  },
+]);
+
+registerShared({
+  react: {
+    version: '18.0.0',
+    scope: 'default',
+    lib: () => React,
+    shareConfig: {
+      singleton: true,
+      requiredVersion: '^18.0.0',
+    },
+  },
+  '@company/design-system': {
+    version: '1.2.3',
+    scope: 'scope1',
+    lib: () => require('@company/design-system'),
+    shareConfig: {
+      singleton: true,
+      requiredVersion: false,
+    },
+  },
+});
+```
+
+## Gezielte Steuerung mit Runtime Hooks {#fine-grained-control-with-runtime-hooks}
+
+Mehrere Share Scopes gruppieren Shared-Pools nach Namen. Für eine feinere Steuerung von Scope-Auswahl, Abgleich und Fallback-Strategien kannst du mit Runtime Hooks während der Initialisierung oder Shared-Auflösung eingreifen.
+
+### 1. shareScopeKeys je Provider anpassen (beforeInitContainer) {#1-rewrite-sharescopekeys-per-provider-beforeinitcontainer}
+
+Das folgende Beispiel erzwingt für `legacy_remote` immer den Scope `legacy`, auch wenn beim Build oder bei der Runtime-Registrierung ein anderer shareScope gesetzt wurde:
+
+```ts title="multi-scope-policy-plugin.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export function multiScopePolicyPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'multi-scope-policy',
+    async beforeInitContainer(args) {
+      if (args.remoteInfo.name !== 'legacy_remote') return args;
+
+      const hostShareScopeMap = args.origin.shareScopeMap;
+      if (!hostShareScopeMap.legacy) hostShareScopeMap.legacy = {};
+
+      args.remoteEntryInitOptions.shareScopeKeys = ['legacy'];
+
+      return {
+        ...args,
+        shareScope: hostShareScopeMap.legacy,
+      };
+    },
+  };
+}
+```
+
+### 2. Alias oder Fallback bei fehlendem Scope (initContainerShareScopeMap / resolveShare) {#2-alias--fallback-when-a-scope-is-missing-initcontainersharescopemap--resolveshare}
+
+* `initContainerShareScopeMap`: Passe die `shareScope`-Zuordnung jedes Scopes während der Shared-Pool-Initialisierung des Providers an.
+* `resolveShare`: Ersetze `args.resolver`, um die endgültige Auswahl zu überschreiben. Nur `{ ...args, scope: 'default' }` zurückzugeben reicht in der aktuellen Runtime-Implementierung nicht aus.
+
+Beispiel: Wird ein Paket in `scope1` nicht gefunden, greife auf den Scope `default` zurück:
+
+```ts title="scope-fallback-plugin.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export function scopeFallbackPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'scope-fallback',
+    resolveShare(args) {
+      const current =
+        args.shareScopeMap[args.scope]?.[args.pkgName]?.[args.version];
+      if (current) return args;
+
+      args.resolver = () => {
+        const fallbackVersionMap = args.shareScopeMap.default?.[args.pkgName];
+        if (!fallbackVersionMap) {
+          return undefined;
+        }
+
+        const fallbackShared =
+          fallbackVersionMap[args.version] ??
+          Object.values(fallbackVersionMap)[0];
+
+        if (!fallbackShared) {
+          return undefined;
+        }
+
+        return {
+          shared: fallbackShared,
+          useTreesShaking: false,
+        };
+      };
+
+      return args;
+    },
+  };
+}
+```
+
+In `initContainerShareScopeMap` kannst du außerdem einen Scope als Alias eines anderen festlegen. Dann teilen beide dasselbe Pool-Objekt:
+
+```ts title="scope-alias-plugin.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export function scopeAliasPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'scope-alias',
+    initContainerShareScopeMap(args) {
+      if (args.scopeName !== 'scope1') return args;
+      if (!args.hostShareScopeMap?.default) return args;
+
+      args.hostShareScopeMap.scope1 = args.hostShareScopeMap.default;
+      return {
+        ...args,
+        shareScope: args.hostShareScopeMap.default,
+      };
+    },
+  };
+}
+```

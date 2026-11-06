@@ -1,0 +1,97 @@
+# Typhinweise {#type-hinting}
+
+Wie ein NPM-Paket erzeugen auch Artefakte von {props.name || 'Module Federation'} Typen und unterstützen deren Hot Reloading – selbst wenn sie auf einem entfernten CDN liegen.
+
+In <code>{props.pkgName || '@module-federation/enhanced'}</code> sind Typhinweise standardmäßig aktiviert. Diese Seite beschreibt häufige Anwendungsfälle und die jeweilige Konfiguration.
+
+## Anwendungsfälle {#usage-scenarios}
+
+### Typen erzeugen {#generating-types}
+
+Beim Build mit dem Build-Plugin von <code>{props.pkgName || '@module-federation/enhanced'}</code> werden Typdateien automatisch erzeugt.
+
+### Typen laden {#loading-types}
+
+1. Ergänze im Consumer `paths` in der `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  }
+}
+```
+
+2. Starte die Anwendungen.
+
+Nach dem Start lädt der Consumer die Typdateien des Producers automatisch.
+
+:::tip
+Die Startreihenfolge von Producer und Consumer spielt dabei keine Rolle.
+:::
+
+### Hot Reloading für Typen {#type-hot-reloading}
+
+Wenn du Code im Producer änderst, ruft der Consumer dessen Typen automatisch erneut ab.
+
+![Hot Reloading für statische Typen](@public/guide/type-prompt/hot-types-reload-static.gif)
+
+### Typhinweise für die Runtime-API {#runtime-api-type-hinting}
+
+Ergänze `./@mf-types/*` im Feld `include`, um Typhinweise und Hot Reloading für `Runtime` `loadRemote` zu nutzen:
+
+```json title="tsconfig.json"
+{
+  "include": ["./@mf-types/*"]
+}
+```
+
+![Hot Reloading für Typen](@public/guide/type-prompt/hot-types-reload.gif)
+
+:::info
+Bei `webpack` als Build-Werkzeug ergänze `**/@mf-types/**` in [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored), um Kompilierungsschleifen durch Typaktualisierungen zu vermeiden.
+:::
+
+### Typen von Drittanbieterpaketen extrahieren {#third-party-package-type-extraction}
+
+{props.name || 'Module Federation'} extrahiert Typen von Drittanbieterpaketen automatisch, damit die Typen der `exposes`-Dateien normal verfügbar sind.
+
+![Typen aus Drittanbieterpaketen](@public/guide/type-prompt/third-party.jpg)
+
+### Verschachtelte Typen erneut exportieren {#nested-type-re-export}
+
+{props.name || 'Module Federation'} unterstützt verschachtelte Remotes und extrahiert deren Typen automatisch.
+
+![Verschachtelte Remotes](@public/guide/type-prompt/nested-remote.jpg)
+
+### Dynamische Typhinweise {#dynamic-type-hinting}
+
+{props.name || 'Module Federation'} unterstützt das Laden dynamischer Typen einschließlich Hot Updates.
+
+![Hot Reloading für dynamische Remote-Typen](@public/guide/type-prompt/dynamic-remote-hot-types-reload-static.gif)
+
+## Konfiguration {#configuration}
+
+- [dts](/configure/dts.html): Typen erzeugen und laden
+- [dev](/configure/dev.html): Hot Reloading für Typen
+
+## FAQ {#faq}
+
+### Das Projekt kompiliert in einer Schleife und lässt sich nicht beenden {#project-has-circular-compilation-and-cannot-be-terminated}
+
+Wahrscheinlich überwacht der Compiler Änderungen im Typordner oder im Verzeichnis `dist`. Nimm `@mf-types` von der Überwachung aus. Beispiel für webpack/rspack:
+
+```ts
+config.watchOptions = {
+  ignored: ['**/node_modules/**', '**/@mf-types/**'],
+};
+```
+
+### Es werden keine Typdateien erzeugt. Wie finde ich die Ursache? {#no-type-files-are-generated-how-to-find-the-reason}
+
+1. Setze vor dem Startbefehl des Projekts die Umgebungsvariable `FEDERATION_DEBUG=true`.
+2. Setze [dts.displayErrorInTerminal](/configure/dts.html#displayerrorinterminal) auf `true`.
+3. Starte das Projekt und prüfe die Konsolenausgabe.
+4. Falls die Konsole keinen Fehler zeigt, prüfe optional die Logdatei `.mf/typesGenerate.log`.

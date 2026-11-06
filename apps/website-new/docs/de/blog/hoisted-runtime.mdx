@@ -1,0 +1,76 @@
+import {Tabs, Tab} from '@theme'
+
+# Asynchroner Start mit Module Federation {#async-startup-in-module-federation}
+
+> 5. September 2024
+
+Wir stellen eine neue experimentelle Funktion vor: `experiments.asyncStartup = true`.
+
+Diese Version führt den **asynchronen Start** ein. Damit werden Einstiegspunkte von Module Federation automatisch asynchron initialisiert.
+
+## 🚀 Die wichtigsten Funktionen {#-key-features}
+
+### Automatische asynchrone Initialisierung {#automatic-async-initialization}
+
+Wenn du den asynchronen Start aktivierst, **brauchst du am Anfang deiner Anwendung keine dynamischen Imports (`import()`) mehr**. Alle Einstiegspunkte werden standardmäßig asynchron initialisiert. Das bedeutet:
+- Keine Fehler mehr durch vorzeitige synchrone Nutzung von Shared-Abhängigkeiten
+- Keine manuell angelegten „Async Boundaries“ im Anwendungscode
+- Automatische Verwaltung der asynchronen Initialisierung
+
+:::note
+Das betrifft nur die Initialisierung der Einstiegspunkte. Du kannst dynamische Imports weiterhin überall in deiner Anwendung verwenden, auch für Remote-Module. Die Funktion ändert oder beschränkt ihre Verwendung nicht.
+:::
+
+:::tip
+**Hinweis:** Asynchrone Einstiegspunkte exportieren immer ein Promise. Das ist besonders wichtig, wenn du einen gebündelten Einstiegspunkt manuell per require lädst oder beispielsweise eine UMD-Bibliothek im globalen Scope bereitstellst.
+:::
+
+#### Vorher und nachher {#before--after-comparison}
+
+Die folgenden Beispiele zeigen, wie das asynchrone Verhalten Einstiegspunkte vereinfacht. Wechsle zwischen den Tabs „Vorher“ und „Nachher“, um den Unterschied zu sehen.
+
+<Tabs>
+  <Tab label="Vorher">
+    ```jsx
+    // entrypoint
+    import('./bootstrap.js')
+
+    // bootstrap.js
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import App from './App';
+
+    const root = ReactDOM.createRoot(document.getElementById('root')!);
+    root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    );
+    ```
+  </Tab>
+  <Tab label="Nachher">
+    ```jsx
+    // entrypoint
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import App from './App';
+
+    const root = ReactDOM.createRoot(document.getElementById('root')!);
+    root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    );
+    ```
+  </Tab>
+</Tabs>
+
+### Wichtige Hinweise {#important-notes}
+
+Beim asynchronen Start gilt:
+- Alle Einstiegspunkte werden standardmäßig asynchron initialisiert.
+- Die Exporte der Einstiegspunkte sind Promises, die zu den eigentlichen Exporten aufgelöst werden.
+- Du brauchst keine manuellen Async Boundaries oder dynamischen Imports.
+- Die asynchrone Initialisierung verhindert automatisch Fehler bei der vorzeitigen synchronen Nutzung von Shared-Abhängigkeiten.
+
+Die Funktion vereinfacht die Einrichtung von Module Federation: Du musst die asynchrone Verarbeitung nicht mehr selbst organisieren, während die korrekte Initialisierung der föderierten Module sichergestellt bleibt.

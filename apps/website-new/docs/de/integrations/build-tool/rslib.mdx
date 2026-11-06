@@ -1,0 +1,75 @@
+# Rslib {#rslib}
+
+Rslib kann mit `@module-federation/rsbuild-plugin` Module-Federation-Producer erstellen. Das eignet sich etwa für Komponentenbibliotheken, fachliche Module oder SSR-Producer, die als eigenständige Artefakte veröffentlicht und von anderen Apps geladen werden sollen.
+
+## Schnellstart {#quick-start}
+
+### Installation {#installation}
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rsbuild-plugin --save-dev',
+    yarn: 'yarn add @module-federation/rsbuild-plugin --save-dev',
+    pnpm: 'pnpm add @module-federation/rsbuild-plugin --save-dev',
+    bun: 'bun add @module-federation/rsbuild-plugin --save-dev',
+  }}
+/>
+
+### Plugin registrieren {#register-plugin}
+
+```ts title='rslib.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rslib/core';
+
+export default defineConfig({
+  lib: [
+    {
+      format: 'mf',
+      output: {
+        distPath: {
+          root: './dist/mf',
+        },
+        assetPrefix: 'https://example.com/mf/',
+      },
+      plugins: [
+        pluginModuleFederation({
+          name: 'rslib_provider',
+          exposes: {
+            '.': './src/index.tsx',
+          },
+          shared: {
+            react: {
+              singleton: true,
+            },
+            'react-dom': {
+              singleton: true,
+            },
+          },
+        }),
+      ],
+    },
+  ],
+});
+```
+
+## SSR {#ssr}
+
+Wenn du Artefakte für den Browser und für Node.js erstellen möchtest, verwende `target: 'dual'` in den Plugin-Optionen.
+
+```ts title='rslib.config.ts'
+pluginModuleFederation(
+  {
+    name: 'rslib_provider',
+    exposes: {
+      '.': './src/index.tsx',
+    },
+  },
+  {
+    target: 'dual',
+  },
+);
+```
+
+Alle Optionen findest du in der [Konfiguration des Rsbuild-Plugins](/integrations/build-tool/rsbuild.html#rsbuildoptions).

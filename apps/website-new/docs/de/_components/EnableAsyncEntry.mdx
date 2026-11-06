@@ -1,0 +1,24 @@
+Wenn du das Plugin `@module-federation/modern-js-v3` verwendest, wird standardmäßig je nach Builder-Typ der passende asynchrone Einstiegspunkt aktiviert.
+
+Im [Build-Modus](https://modernjs.dev/en/guides/concept/entries.html#build-mode-entry) musst du den asynchronen Einstiegspunkt jedoch weiterhin manuell einrichten.
+
+So aktivierst du einen asynchronen Einstiegspunkt:
+
+Erstelle die Datei bootstrap.js und kopiere den Inhalt der ursprünglichen Entry-Datei hinein:
+
+```diff title="bootstrap.js"
++ import React from 'react';
++ import ReactDOM from 'react-dom';
++ import App from './App';
++ ReactDOM.render(<App />, document.getElementById('root'));
+```
+
+Ändere anschließend die ursprüngliche Entry-Datei so, dass sie stattdessen bootstrap.js referenziert:
+
+```diff title="index.js"
++ import('./bootstrap');
+- import React from 'react';
+- import ReactDOM from 'react-dom';
+- import App from './App';
+- ReactDOM.render(<App />, document.getElementById('root'));
+```

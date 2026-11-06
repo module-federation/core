@@ -1,0 +1,44 @@
+## Deploy Server (Referenzimplementierung) {#deploy-server-reference-implementation}
+
+Wenn du einen eigenen Deploy Server entwickeln möchtest, kannst du `server-calc` nach folgendem groben Ablauf implementieren.
+
+### 1. `usedExports` beim Deployment sammeln {#1-aggregate-usedexports-during-deployment}
+
+In deiner CI/CD-Deployment-Pipeline sollte der Dienst:
+
+- die Build-Metadaten aller zur Veröffentlichung vorgesehenen Anwendungen sammeln, üblicherweise `mf-stats.json` oder ähnliche Dateien;
+- für dieselbe Shared-Abhängigkeit, etwa `antd@6.1.0`, die von den Anwendungen angegebenen `usedExports` zusammenführen.
+
+### 2. Die globale minimale Vereinigungsmenge berechnen {#2-compute-the-global-minimum-union}
+
+Führe alle gesammelten Listen von `usedExports` zusammen und entferne Duplikate. So erhältst du die minimale globale Menge, die das System benötigt.
+
+### 3. Ein optimiertes Shared-Bundle mit einem sekundären Build erzeugen {#3-run-a-secondary-build-to-produce-the-optimized-shared-bundle}
+
+Starte dein Build-Werkzeug, etwa die Rspack-CLI, als isolierten Build und übergib:
+
+- Name und Version der gewünschten Shared-Abhängigkeit, etwa `antd@6.1.0`;
+- die globale Vereinigungsmenge von `usedExports` aus dem vorherigen Schritt.
+  Das Ergebnis ist ein eigenständiges Shared-Bundle, das nur die benötigten Module enthält.
+
+### 4. Den Snapshot aktualisieren und veröffentlichen {#4-update-and-publish-the-snapshot}
+
+Lade das optimierte Bundle auf deinen Host für statische Assets (CDN) hoch. Aktualisiere anschließend die Snapshot-Datei von Module Federation, üblicherweise die Remote-Version von `mf-manifest.json`, mit Feldern wie:
+
+- `secondarySharedTreeShakingEntry`: URL des optimierten Bundles,
+- `secondarySharedTreeShakingName`: eindeutiger Bundle-Name,
+- `treeShakingStatus`: als verfügbar markieren.
+
+Verteile den aktualisierten Snapshot anschließend an alle Consumer.
+
+### 5. Bei Bedarf zur Laufzeit laden {#5-runtime-on-demand-loading}
+
+Wenn jemand die Anwendung öffnet, liest die MF-Runtime den Snapshot. Ist `treeShakingStatus` verfügbar und erfüllt die Umgebung die Ladebedingungen, lädt sie das optimierte Bundle über `secondarySharedTreeShakingEntry` statt des vollständigen Bundles.
+
+:::tip Versionierung, Caching und Kompatibilität
+
+- **Strikte Versionierung** ist die Grundlage. Sekundäre Builds und das Laden zur Laufzeit müssen auf exakt derselben Version wie `antd@6.1.0` beruhen, damit keine Abweichungen entstehen.
+- Verwende eine **passende Caching-Strategie** für die Artefakte sekundärer Builds. Da sich der Inhalt mit den globalen `usedExports` ändert, eignen sich Dateinamen mit Content-Hash für langfristiges Caching.
+- Dieser Ablauf ist **vorwärtskompatibel**: Ist er nicht aktiviert oder sind die Bedingungen nicht erfüllt, greifen Consumer auf das vollständige Bundle zurück. Die bestehenden Funktionen bleiben erhalten.
+
+:::

@@ -1,0 +1,20 @@
+Für die einmalige Untersuchung einer laufenden Seite installierst du zunächst die MF-Erweiterung manuell auf dem Rechner des Agenten. Divebell kann die Diagnosefunktionen der Erweiterung dann vor der Navigation aktivieren. Das Observability-Plugin musst du der Anwendung dafür nicht hinzufügen:
+
+```bash
+npm install --global @divebell/cli
+divebell extensions add @divebell/extension-mf
+divebell setup
+divebell open "https://example.com" --mf
+```
+
+Ein KI-Coding-Agent sollte zuerst den CLI-Skill lesen, den `divebell skill` zurückgibt, sowie den Erweiterungs-Skill von `divebell mf --skill`. Anschließend kann er den aktuellen MF-Zustand, Ladeabläufe, die Shared-Auswahl, Bridge-Operationen oder die Modul-Performance untersuchen. Zum Beispiel:
+
+```bash
+divebell mf module-perf --report --view timeline
+```
+
+[![Performance-Zeitleiste für Module Federation in Divebell](https://raw.githubusercontent.com/2heal1/divebell/main/assets/mf-module-perf-timeline.png)](https://github.com/2heal1/divebell#quick-start)
+
+Die vollständige Befehlsübersicht findest du in der [Dokumentation der Divebell-MF-Erweiterung](https://github.com/2heal1/divebell/blob/main/packages/extensions/mf/README.md). Alternativ kannst du der Anleitung [Runtime-Probleme beheben](/guide/debug/divebell.html) folgen.
+
+Behalte das Observability-Plugin der Anwendung bei, wenn Berichte fortlaufend gesammelt, aufbewahrt oder aus der Produktion hochgeladen werden sollen.

@@ -1,0 +1,219 @@
+# Runtime-Größe optimieren {#optimize-runtime-size}
+
+Die Runtime von {props.name || 'Module Federation'} unterstützt standardmäßig die Verwendung von Remotes, Shared-Abhängigkeiten sowie Manifest und Snapshot. Das deckt die meisten Anwendungsfälle ab. Allerdings kann dadurch auch Code für ungenutzte Funktionen in der Ausgabe enthalten sein.
+
+Mit `experiments.optimization` entfernst du Funktionen, die ein Build sicher nicht verwendet, und verkleinerst seine Runtime.
+
+:::warning Vor dem Aktivieren beachten
+
+Diese Optionen entfernen Code beim Build. Sie sind keine Feature Flags, die sich nach dem Seitenstart wieder aktivieren lassen. Der Aufruf einer API, deren Funktion entfernt wurde, löst einen Fehler aus. Nach dem Ändern einer Option musst du neu bauen und bereitstellen.
+
+:::
+
+## Welche Funktionen benötigt dieser Build? {#decide-what-this-build-needs}
+
+Entscheide nicht allein anhand der Rolle Host oder Remote. Ein Remote kann weitere Remotes verwenden, während ein Host vollständig ohne Shared-Abhängigkeiten auskommen kann. Entscheidend ist das tatsächliche Verhalten dieses Builds.
+
+| Funktion | Beibehalten, wenn | Aktivieren, wenn sicher ungenutzt |
+| --- | --- | --- |
+| Remotes verwenden | `remotes` konfiguriert ist oder der Build `loadRemote`, `registerRemotes` oder `preloadRemote` aufruft | `disableRemote` |
+| Shared-Abhängigkeiten | `shared` konfiguriert ist oder der Build Shared-Abhängigkeiten registriert, initialisiert oder lädt | `disableShared` |
+| Manifest / Snapshot | Der Build Manifest-Remotes, Vorladen, Typsynchronisierung, Hot Updates, DevTools oder Runtime-Plugins verwendet, die Snapshot-Daten voraussetzen | `disableSnapshot` |
+
+`disableRemote` entfernt die Möglichkeit, mit dem aktuellen Build andere Remotes zu verwenden. Die vom Bundler erzeugten Producer-Funktionen `exposes` und `container.get` bleiben erhalten. Ein Producer, der nur Module bereitstellt und nie andere Remotes verwendet, kann die Option daher aktivieren.
+
+Wenn ein Build keine `exposes` hat, entfernen die Webpack- und Rspack-Plugins außerdem automatisch die Initialisierung des Container Entry aus der `main.js` des Consumers. Eine Option `disableExpose` ist nicht nötig. Die `remoteEntry.js` des Producers bleibt davon unberührt.
+
+## Konfiguration {#configuration}
+
+Webpack und Rspack unterstützen dieselben Optionen in `ModuleFederationPlugin`:
+
+```ts title="rspack.config.ts"
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+
+export default {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'app_remote',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Button': './src/Button',
+      },
+      experiments: {
+        optimization: {
+          target: 'web',
+          disableRemote: true,
+          disableShared: true,
+          disableSnapshot: true,
+        },
+      },
+    }),
+  ],
+};
+```
+
+Für Webpack ändere den Import auf `@module-federation/enhanced/webpack`.
+
+Diese Kombination eignet sich für einen minimalen Producer, der nur Module bereitstellt, keine anderen Remotes verwendet, keine Shared-Abhängigkeiten hat und keine Manifest- oder Snapshot-Daten benötigt. Beginne mit den Standardeinstellungen und aktiviere nur Optionen, die für deinen Build sicher sind.
+
+### Ein Runtime-Projekt über Umgebungsvariablen konfigurieren {#configure-a-runtime-only-project-with-environment-variables}
+
+Wenn dein Projekt `@module-federation/runtime` oder `@module-federation/runtime-core` direkt und ohne `ModuleFederationPlugin` bündelt, verwende Umgebungsvariablen. Ersetze sie in der Bundler-Konfiguration beim Build durch boolesche Werte.
+
+Ein Projekt ohne Remotes, Shared-Abhängigkeiten, Snapshot-Daten und `exposes` kann beispielsweise so gebaut werden:
+
+```bash
+FEDERATION_OPTIMIZE_NO_REMOTE=true \
+FEDERATION_OPTIMIZE_NO_SHARED=true \
+FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN=true \
+FEDERATION_HAS_EXPOSES=false \
+pnpm build
+```
+
+Webpack muss die Werte explizit ersetzen:
+
+```ts title="webpack.config.ts"
+import webpack from 'webpack';
+
+const federationDefines = {
+  FEDERATION_OPTIMIZE_NO_REMOTE: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_REMOTE === 'true',
+  ),
+  FEDERATION_OPTIMIZE_NO_SHARED: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_SHARED === 'true',
+  ),
+  FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'true',
+  ),
+  FEDERATION_HAS_EXPOSES: JSON.stringify(
+    process.env.FEDERATION_HAS_EXPOSES !== 'false',
+  ),
+};
+
+export default {
+  plugins: [new webpack.DefinePlugin(federationDefines)],
+};
+```
+
+Bei Rspack übergibst du dasselbe Objekt `federationDefines` an `rspack.DefinePlugin`. Bei Vite übergibst du es an die übergeordnete Option `define`.
+
+Es reicht nicht, die Umgebungsvariablen als Strings zur Laufzeit zu belassen. Der Bundler muss sie beim Build durch `true` oder `false` ersetzen, damit der Minifier den zugehörigen Code entfernen kann. Ohne gesetzten Wert bleiben alle Funktionen aktiviert und das bisherige Verhalten erhalten.
+
+## Was entfernen die einzelnen Optionen? {#what-each-option-removes}
+
+### disableRemote {#disableremote}
+
+Entfernt Remote-Registrierung, Entry-Laden, Vorladen sowie Abruf und Ausführung bereitgestellter Module. Außerdem werden die ausschließlich für das Laden von Remotes verwendete Snapshot-Verarbeitung und die von Webpack erzeugte Remote-Ladefunktion entfernt.
+
+Geeignet für:
+
+- Producer, die ausschließlich Module bereitstellen und nie andere Remotes verwenden;
+- eigenständige Builds ohne `remotes`, die auch zur Laufzeit keine Remotes registrieren.
+
+Nicht geeignet für:
+
+- Hosts mit konfigurierten `remotes`;
+- Anwendungen mit Aufrufen von `loadRemote`, `registerRemotes` oder `preloadRemote`;
+- Anwendungen, die ein Manifest zum dynamischen Ermitteln oder Laden von Remotes verwenden.
+
+### disableShared {#disableshared}
+
+Entfernt Registrierung, Auswahl und Laden von Shared-Abhängigkeiten sowie deren Verwendung und Initialisierung durch Webpack, die anfängliche Shared-Installation, Fallback-Verarbeitung und das Shared-Tree-Shaking-Plugin. Ein minimaler leerer Share Scope bleibt erhalten, damit ein Remote Entry ohne Shared-Abhängigkeiten weiterhin initialisiert werden kann.
+
+Verwende die Option nur, wenn der Build keine `shared`-Konfiguration hat und auch über Runtime-APIs nie Shared-Abhängigkeiten registriert oder lädt.
+
+Behalte die Funktion bei, wenn React, Vue, eine Komponentenbibliothek oder eine andere Abhängigkeit anwendungsübergreifend wiederverwendet wird, als Singleton vorliegen oder an der Versionsauswahl teilnehmen muss.
+
+### disableSnapshot {#disablesnapshot}
+
+Entfernt Manifest, Snapshot und zugehörige Preload-Funktionen. Das kann die Ausgabe weiter verkleinern, hat aber umfassendere Auswirkungen als die anderen Optionen.
+
+Aktiviere die Option nur für reine JavaScript-Remotes ohne Typsynchronisierung, Hot Updates, Vorladen, DevTools, dynamische Ermittlung oder andere Snapshot-abhängige Funktionen. Die vollständigen Auswirkungen erläutert die [Anleitung zu Manifest und Snapshot](/guide/basic/manifest-snapshot.html#impact-of-disablesnapshot).
+
+## Häufige Kombinationen {#common-combinations}
+
+### Producer, der nur Module bereitstellt {#producer-that-only-exposes-modules}
+
+Wenn er keine anderen Remotes verwendet, aktiviere:
+
+```ts
+optimization: {
+  disableRemote: true,
+}
+```
+
+Aktiviere `disableShared` oder `disableSnapshot` zusätzlich nur, wenn der Producer diese Funktionen nicht verwendet.
+
+### Host ohne Shared-Abhängigkeiten {#host-without-shared-dependencies}
+
+Der Host benötigt weiterhin die Verwendung von Remotes. Deaktiviere deshalb nur Shared-Funktionen:
+
+```ts
+optimization: {
+  disableShared: true,
+}
+```
+
+### Schlanker Host mit reinen JavaScript-Remotes {#lightweight-host-using-plain-javascript-remotes}
+
+Wenn er keine Shared-Abhängigkeiten und keine Manifest- oder Snapshot-Daten verwendet:
+
+```ts
+optimization: {
+  target: 'web',
+  disableShared: true,
+  disableSnapshot: true,
+}
+```
+
+Die Verwendung von Remotes muss aktiviert bleiben.
+
+## Unterschied zu externalRuntime {#difference-from-externalruntime}
+
+`externalRuntime` lagert Runtime-Code aus jeder `remoteEntry.js` aus, damit mehrere Builds dieselbe externe Runtime verwenden können. Das reduziert vor allem doppelte Downloads. `disableRemote`, `disableShared` und `disableSnapshot` entfernen dagegen Funktionen, die der Build nicht benötigt.
+
+Du kannst beide Ansätze kombinieren: Entferne zunächst ungenutzte Funktionen und reduziere anschließend mit `externalRuntime` doppelten Code über mehrere Ausgaben hinweg. Bei einer externen Runtime muss die Seite vorab eine kompatible Runtime bereitstellen. Konfigurationsdetails findest du unter [experiments.externalRuntime](/configure/experiments.html#externalruntime).
+
+## Optimierung überprüfen {#verify-that-the-optimization-works}
+
+### 1. Vergleichbare Ausgangswerte erfassen {#1-establish-a-comparable-baseline}
+
+Erfasse die Ausgabegröße vor der Optimierung mit demselben Build-Modus, denselben Minifier-Einstellungen und denselben Abhängigkeitsversionen. Vergleiche keine Entwicklungs- mit Produktionsausgaben.
+
+### 2. Optionen einzeln aktivieren {#2-enable-one-option-at-a-time}
+
+Baue das Projekt und erfasse die Größe von `remoteEntry.js` oder der Datei, die die Runtime tatsächlich enthält. Prüfe jede Verringerung einzeln, bevor du Optionen kombinierst. So lassen sich sowohl Einsparungen als auch entfallene Funktionen leichter zuordnen.
+
+Die Test-Fixture im Repository ergab folgende Werte. Alle drei Builds zielen auf das Web und deaktivieren Snapshot-Unterstützung, um die beiden Optionen getrennt zu untersuchen. Die Werte zeigen die relative Verringerung; tatsächliche Ergebnisse hängen von Projekt und Version ab.
+
+| Konfiguration | Minifizierte Größe | Verringerung |
+| --- | ---: | ---: |
+| Remote und Shared aktiviert | 73.154 B | - |
+| `disableRemote: true` | 52.916 B | etwa 27,66 % |
+| `disableShared: true` | 50.008 B | etwa 31,64 % |
+
+Ohne konfigurierte `exposes` betrifft die Verringerung die `main.js` des Consumers, nicht die `remoteEntry.js` des Producers. Die folgenden Builds verwenden denselben Entry, dieselben Abhängigkeiten und Produktionseinstellungen. Nur die Initialisierung des Container Entry unterscheidet sich.
+
+| Consumer-`main.js` | Minifiziert | Gzip | Verringerung |
+| --- | ---: | ---: | ---: |
+| Mit Initialisierung des Container Entry | 79.328 B | 23.897 B | - |
+| Ohne `exposes` | 78.344 B | 23.689 B | 984 B (1,24 %), 208 B gzip (0,87 %) |
+
+### 3. Reale Anwendungsabläufe testen {#3-test-real-application-flows}
+
+Prüfe mindestens:
+
+- Erstes Laden und Neuladen der Seite;
+- alle Einstiege in Remote-Module;
+- dynamische Registrierung und Vorladepfade;
+- Singleton- und Versionsverhalten von Shared-Abhängigkeiten;
+- Hot Updates und Typsynchronisierung in der Entwicklung;
+- DevTools, Runtime-Plugins und Monitoring.
+
+Wenn ein expliziter Fehler wegen einer deaktivierten Funktion auftritt, benötigt der Build diese weiterhin. Setze die entsprechende Option wieder auf `false` und baue erneut.
+
+## Weiterführende Informationen {#further-reading}
+
+- [Vollständige experiments-Konfiguration](/configure/experiments.html)
+- [Manifest / Snapshot](/guide/basic/manifest-snapshot.html)
+- [Tree Shaking für Shared-Abhängigkeiten](/guide/advanced/shared-tree-shaking.html)

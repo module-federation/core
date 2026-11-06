@@ -1,0 +1,116 @@
+# Ankündigung der Veröffentlichung {#announcement-of-release}
+
+> 26. April 2024
+
+Heute veröffentlichen wir Module Federation 2.0 offiziell!
+Die neue Version ist gemeinsam mit dem Team von [ByteDance Web Infra](https://github.com/web-infra-dev), dem Autor von Module Federation, [Zack Jackson](https://github.com/ScriptedAlchemy),
+und mehreren Mitgliedern unserer Community entstanden. Ein besonderer Dank gilt [@ilteoood](https://github.com/ilteoood), [@patricklafrance](https://github.com/patricklafrance) und [@crutch12](https://github.com/crutch12).
+Module Federation 2.0 löst viele Probleme der vorherigen Version. Grundlage dafür sind die internen Erfahrungen von ByteDance und das bestehende Community-Ökosystem von Module Federation.
+
+import AnnouncementVideo from '@components/AnnouncementVideo.tsx';
+
+<AnnouncementVideo customWidthScale={0.5} />
+
+## Warum Module Federation 2.0 verwenden? {#why-use-module-federation-20}
+
+Module Federation wurde mit Webpack 5 eingeführt und ist seit über drei Jahren eine wichtige Funktion.
+Als Lösung für die gemeinsame Nutzung von Modulen hat es sich besonders in großen Webprojekten verbreitet. Es vereinfacht die Entwicklung großer Anwendungen und erleichtert die Zusammenarbeit zwischen Teams.
+Mit der zunehmenden Nutzung sind jedoch neue Herausforderungen entstanden.
+
+Version 2.0 begegnet diesen Herausforderungen mit mehreren Verbesserungen:
+
+- **Bewährte Vorgehensweisen**: Die neue eigenständige [Dokumentationsseite](/de/) beschreibt bewährte Vorgehensweisen und Konfigurationen für den Einsatz.
+- **Entkopplung von Runtime und Build-Tools**: Die Runtime ist jetzt unabhängig von Build-Tools. Das vereinheitlicht die Implementierung auf verschiedenen Plattformen und macht das Laden von Modulen flexibler.
+- **Typsicherheit**: Das aktualisierte Build-Plugin erzeugt und lädt Typen für TypeScript-Projekte automatisch. Im Entwicklungsmodus hält es die Typen synchron.
+- **Debugging-Werkzeuge**: Neue Chrome DevTools erleichtern das Debugging und machen es effizienter.
+- **Deployment-Plattformen**: Das Dateiprotokoll `mf-manifest.json` vereinfacht die Integration mit Deployment-Plattformen und verbessert die Verwaltung von Ressourcen und Versionen.
+
+## Die Funktionen von Module Federation 2.0 {#introduction-to-features-of-module-federation-20}
+
+### Neue Dokumentationsseite {#new-documentation-site}
+
+Die neue Dokumentation beschreibt ausführlich die Einsatzszenarien und Möglichkeiten des Frameworks. Sie begleitet dich vom Projektstart mit Rspack bis zur Nutzung der einzelnen Funktionen und erläutert die Konfiguration des Plugins im Detail.
+
+![](@public/blog/announcement/module-federation-doc.png)
+
+### Flexibleres Laden von Modulen {#enhanced-module-loading-flexibility}
+
+Die neue Version bringt wesentliche Änderungen mit. Die ursprünglich in Webpack eingebetteten Runtime-Funktionen wurden in ein eigenständiges SDK ausgelagert. Damit kannst du Remote- und Shared-Module dynamisch registrieren und laden, ohne ein Build-Tool zu benötigen. Außerdem wurden das Vorabladen von Modulen und die Runtime-Plugins erweitert. So kannst du den Ladevorgang genauer steuern.
+
+```typescript
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+
+init({
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: "@demo/app1",
+      entry: "http://localhost:3005/mf-manifest.json",
+      alias: "app1"
+    },
+    {
+      name: "@demo/app2",
+      entry: "http://localhost:3006/remoteEntry.js",
+      alias: "app2"
+    },
+  ],
+});
+
+loadRemote("app2/util").then((md)=>{
+  md.add(1,2,3);
+});
+```
+
+### Entkopplung von Webpack und gemeinsame Modulnutzung über Tool-Grenzen hinweg {#decoupling-webpack-and-supporting-cross-tool-sharing-of-modules}
+
+Das neue Module-Federation-Plugin verwendet eine vollständig neue Runtime-Architektur. Das Build-Tool ist dadurch nicht mehr eng mit der Runtime gekoppelt. Du kannst Artefakte verschiedener Build-Tools in dein Projekt einbinden und flexibel gemeinsam ausführen.
+
+Mehrere Build-Tools sind bereits kompatibel, darunter Webpack und Rspack. Auch andere Build-Tools können Module Federation auf Basis dieses Standards implementieren. Dadurch bleibt das Laufzeitverhalten einheitlich.
+
+### Typhinweise {#type-hints}
+
+Die neue Version bietet dynamische Typhinweise für Module. Diese lösen das Problem verlorener Typinformationen, wenn lokale Module in TypeScript-Projekten zu dynamischen Remote-Modulen werden. Das Plugin kann Remote-Typen automatisch erzeugen und verwenden. Wenn alle Projekte lokal laufen, aktualisiert es die Typen außerdem in Echtzeit, ähnlich wie bei npm link.
+
+![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/demo-type-hint.gif)
+
+### Chrome DevTools {#chrome-devtools}
+
+Die DevTools wurden speziell für dieses Framework entwickelt. Sie zeigen die Abhängigkeiten zwischen Modulen sowie die Konfiguration von Exposes und Shared übersichtlich an. Außerdem können sie Module einer online bereitgestellten Seite auf die lokale Entwicklungsumgebung umleiten. Hot Updates bleiben dabei erhalten, damit du ohne Unterbrechung weiterentwickeln kannst.
+
+![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/chrome-devtool-display.gif)
+
+### Manifest-Protokoll {#manifest-protocol}
+
+Das Build-Plugin von Module Federation erzeugt eine Manifest-Datei.
+Diese enthält grundlegende Informationen zum System, etwa remoteEntry, shared, exposes, remotes, chunks und type.
+Die Informationen bilden die Grundlage für die Analyse projektübergreifender Abhängigkeiten und helfen beim Aufbau und der Optimierung der Plattform.
+Damit lassen sich Modulversionen und schrittweise Rollouts auf verschiedenen Deployment-Plattformen gezielt verwalten.
+Außerdem können Build-Plugin und Runtime das Manifest-Dateiprotokoll direkt für weiterführende Funktionen nutzen.
+Die dynamischen Typhinweise der aktuellen Version basieren beispielsweise auf diesem Protokoll.
+
+![](https://module-federation-assest.netlify.app/document/announcement/blog/announcement/manifest-file.gif)
+
+## Danksagung {#acknowledgments}
+
+Die neue Version von Module Federation wäre ohne die Anregungen und Unterstützung vieler Community-Projekte nicht möglich gewesen.
+Wir bedanken uns besonders bei folgenden Projekten:
+
+- [Webpack Module Federation](https://webpack.js.org/concepts/module-federation/): Die neue Version von Module Federation wurde davon abgeleitet und auf dieser Grundlage neu entworfen und implementiert.
+- Das Repository [Module Federation Universe](https://github.com/module-federation/core): Die ursprüngliche Universe-Implementierung bildet die Grundlage der neuen Module-Federation-Version.
+- Das Projekt [Rspack](https://github.com/web-infra-dev/rspack): Das Rspack-Team hat Module Federation auf Basis der Module Federation Runtime implementiert und damit die vollständige Kompatibilität von Version 2.0 mit dem Rspack-Ökosystem sichergestellt.
+
+## Weitere Pläne {#future-plans}
+
+### Entwicklung vereinfachen {#enhancing-developer-experience}
+
+Die neue Version bietet zwar dynamische Typhinweise und Unterstützung durch die Chrome DevTools, deren Funktionsumfang reicht aber noch nicht für alle Anforderungen aus.
+Wir wollen die Debugging-Werkzeuge weiter ausbauen, beispielsweise durch eine Visualisierung der Wiederverwendung von Shared-Abhängigkeiten.
+
+### Leistungsfähige Lösungen bereitstellen {#providing-high-performance-solutions}
+
+Als Lösung für Microfrontend-Architekturen muss Module Federation auch das für diese Architekturen typische Problem aufeinanderfolgender Netzwerkanfragen lösen.
+Dafür planen wir mehrere Performance-Strategien, darunter Server-Side Rendering (SSR) und das Vorabladen von Daten.
+
+### Mit Partnern aus der Community zusammenarbeiten {#collaborating-with-community-partners}
+
+Die neuen Funktionen von Module Federation 2.0 werden derzeit nur von Webpack und Rspack unterstützt. Module Federation bietet verschiedene grundlegende SDKs, auf denen andere Build-Tools eigene Erweiterungen und Integrationen aufbauen können. Bisher dient Module Federation vor allem der gemeinsamen Nutzung von Modulen. Wir wollen es künftig mit übergeordneten Frameworks verbinden und bewährte Vorgehensweisen für Microfrontend-Architekturen bereitstellen. Das soll Entwicklern helfen, die Anforderungen großer Webanwendungen mit Microfrontends besser umzusetzen.

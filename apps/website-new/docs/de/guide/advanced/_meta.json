@@ -1,0 +1,19 @@
+[
+  {
+    "type": "file",
+    "name": "runtime-size-optimization",
+    "label": "Runtime-Größe optimieren"
+  },
+  "shared-tree-shaking",
+  "multiple-shared-scope",
+  {
+    "type": "file",
+    "name": "manifest-fields",
+    "label": "Manifest-Feldreferenz"
+  },
+  {
+    "type": "file",
+    "name": "stats-fields",
+    "label": "Stats-Feldreferenz"
+  }
+]

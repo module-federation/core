@@ -1,128 +1,157 @@
 {
   "languagesText": {
     "pt-BR": "Idiomas",
-    "es": "Idiomas"
+    "es": "Idiomas",
+    "de": "Sprachen"
   },
   "themeText": {
     "pt-BR": "Tema",
-    "es": "Tema"
+    "es": "Tema",
+    "de": "Design"
   },
   "versionsText": {
     "pt-BR": "Versões",
-    "es": "Versiones"
+    "es": "Versiones",
+    "de": "Versionen"
   },
   "menuTitle": {
     "pt-BR": "Menu",
-    "es": "Menú"
+    "es": "Menú",
+    "de": "Menü"
   },
   "outlineTitle": {
     "pt-BR": "Nesta página",
-    "es": "En esta página"
+    "es": "En esta página",
+    "de": "Auf dieser Seite"
   },
   "scrollToTopText": {
     "pt-BR": "Voltar ao topo",
-    "es": "Volver arriba"
+    "es": "Volver arriba",
+    "de": "Nach oben"
   },
   "lastUpdatedText": {
     "pt-BR": "Última atualização",
-    "es": "Última actualización"
+    "es": "Última actualización",
+    "de": "Zuletzt aktualisiert"
   },
   "prevPageText": {
     "pt-BR": "Página anterior",
-    "es": "Página anterior"
+    "es": "Página anterior",
+    "de": "Vorherige Seite"
   },
   "nextPageText": {
     "pt-BR": "Próxima página",
-    "es": "Página siguiente"
+    "es": "Página siguiente",
+    "de": "Nächste Seite"
   },
   "sourceCodeText": {
     "pt-BR": "Código-fonte",
-    "es": "Código fuente"
+    "es": "Código fuente",
+    "de": "Quellcode"
   },
   "searchPlaceholderText": {
     "pt-BR": "Buscar",
-    "es": "Buscar"
+    "es": "Buscar",
+    "de": "Suchen"
   },
   "searchPanelCancelText": {
     "pt-BR": "Cancelar",
-    "es": "Cancelar"
+    "es": "Cancelar",
+    "de": "Abbrechen"
   },
   "searchNoResultsText": {
     "pt-BR": "Nenhum resultado encontrado",
-    "es": "No se encontraron resultados"
+    "es": "No se encontraron resultados",
+    "de": "Keine Ergebnisse gefunden"
   },
   "searchSuggestedQueryText": {
     "pt-BR": "Tente buscar por palavras-chave diferentes",
-    "es": "Prueba a buscar con otras palabras clave"
+    "es": "Prueba a buscar con otras palabras clave",
+    "de": "Versuche es mit anderen Suchbegriffen"
   },
   "overview.filterNameText": {
     "pt-BR": "Filtro",
-    "es": "Filtro"
+    "es": "Filtro",
+    "de": "Filter"
   },
   "overview.filterPlaceholderText": {
     "pt-BR": "Buscar API",
-    "es": "Buscar API"
+    "es": "Buscar API",
+    "de": "API suchen"
   },
   "overview.filterNoResultText": {
     "pt-BR": "Nenhuma API correspondente encontrada",
-    "es": "No se encontró ninguna API coincidente"
+    "es": "No se encontró ninguna API coincidente",
+    "de": "Keine passende API gefunden"
   },
   "openInText": {
     "pt-BR": "Abrir em {{name}}",
-    "es": "Abrir en {{name}}"
+    "es": "Abrir en {{name}}",
+    "de": "In {{name}} öffnen"
   },
   "copyMarkdownText": {
     "pt-BR": "Copiar Markdown",
-    "es": "Copiar Markdown"
+    "es": "Copiar Markdown",
+    "de": "Markdown kopieren"
   },
   "copyMarkdownLinkText": {
     "pt-BR": "Copiar link Markdown",
-    "es": "Copiar enlace Markdown"
+    "es": "Copiar enlace Markdown",
+    "de": "Markdown-Link kopieren"
   },
   "editLinkText": {
     "pt-BR": "Editar esta página",
-    "es": "Editar esta página"
+    "es": "Editar esta página",
+    "de": "Diese Seite bearbeiten"
   },
   "codeButtonGroupCopyButtonText": {
     "pt-BR": "Copiar código",
-    "es": "Copiar código"
+    "es": "Copiar código",
+    "de": "Code kopieren"
   },
   "codeButtonGroupWrapButtonText": {
     "en": "Toggle line wrap",
     "zh": "切换自动换行",
     "pt-BR": "Alternar quebra de linha",
-    "es": "Alternar ajuste de línea"
+    "es": "Alternar ajuste de línea",
+    "de": "Zeilenumbruch umschalten"
   },
   "notFoundText": {
     "pt-BR": "PÁGINA NÃO ENCONTRADA",
-    "es": "PÁGINA NO ENCONTRADA"
+    "es": "PÁGINA NO ENCONTRADA",
+    "de": "SEITE NICHT GEFUNDEN"
   },
   "takeMeHomeText": {
     "pt-BR": "Voltar para a página inicial",
-    "es": "Volver a la página de inicio"
+    "es": "Volver a la página de inicio",
+    "de": "Zur Startseite"
   },
   "promptCopyText": {
     "en": "Copy prompt",
     "zh": "复制提示词",
     "pt-BR": "Copiar prompt",
-    "es": "Copiar prompt"
+    "es": "Copiar prompt",
+    "de": "Prompt kopieren"
   },
   "promptCopiedText": {
     "en": "Copied",
     "zh": "已复制",
     "pt-BR": "Copiado",
-    "es": "Copiado"
+    "es": "Copiado",
+    "de": "Kopiert"
   },
   "promptExpandText": {
     "en": "Expand",
     "zh": "展开",
     "pt-BR": "Expandir",
-    "es": "Expandir"
+    "es": "Expandir",
+    "de": "Ausklappen"
   },
   "promptCollapseText": {
     "en": "Collapse",
     "zh": "收起",
     "pt-BR": "Recolher",
-    "es": "Contraer"
+    "es": "Contraer",
+    "de": "Einklappen"
   }
 }

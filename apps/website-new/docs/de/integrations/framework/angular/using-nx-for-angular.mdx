@@ -1,0 +1,172 @@
+import { Steps, Badge } from '@theme';
+
+# Nx CLI für Angular verwenden {#using-nx-cli-for-angular}
+
+Diese Anleitung zeigt dir, wie du Module Federation mit der [Nx CLI](https://nx.dev) in Angular-Projekte integrierst.
+
+## Installation
+
+  Erstelle zunächst einen neuen Nx-Workspace für die Anwendungsentwicklung.
+
+  ```bash
+  npx -y create-nx-workspace@latest myorg --preset=apps
+  cd myorg
+  ```
+
+  Füge anschließend das Plugin `@nx/angular` hinzu, um Angular in deinem Nx-Workspace zu nutzen.
+
+  ```bash
+  npx nx add @nx/angular
+  ```
+
+## Shell (Host) mit Remotes erzeugen {#generate-shell-host-with-remotes}
+
+Die Shell (der Host) ist ein zentraler Teil der Module-Federation-Integration. Nx bietet [Generatoren](https://nx.dev/features/generate-code#generate-code), die das Einrichten einer Anwendung mit Module Federation vereinfachen.
+Das sind die Generatoren [`host`](https://nx.dev/nx-api/angular/generators/host) und [`remote`](https://nx.dev/nx-api/angular/generators/remote).
+Beim Generator `host` kannst du mit der Option `--remotes` die bereits benötigten Remotes in einem einzigen Befehl mit anlegen.
+
+_<Badge text="Hinweis:" type="info" /> <small>Nx verwendet derzeit `@module-federation/enhanced/webpack`, um Module Federation mit Webpack für Angular bereitzustellen.</small>_
+
+<Steps>
+### Shell-Anwendung (Host) anlegen {#scaffold-the-shell-host-application}
+
+  Erstelle im Verzeichnis `apps/` eine Shell namens `shop` mit den Remotes `products`, `cart` und `checkout`.
+
+  ```bash
+  npx nx g @nx/angular:host apps/shop --remotes=products,cart,checkout
+  ```
+
+  Im Verzeichnis `apps/` findest du nun vier erzeugte Anwendungen.
+  Zu diesem Zeitpunkt ist alles angelegt und korrekt konfiguriert.
+
+  _<Badge text="Hinweis:" type="info" /> <small>Nx konfiguriert das Routing zwischen Shell und Remote-Anwendungen. Außerdem trägt es jede Remote-Anwendung in der Datei `module-federation.config.ts` der Shell ein, damit Module Federation die Remotes kennt.</small>_
+
+### Die Module-Federation-Umgebung bereitstellen {#serving-your-module-federation-setup}
+
+  Nx verwendet bei Module Federation verschiedene Verfahren, um Entwicklung, Performance und Skalierbarkeit zu unterstützen.
+  Eines davon ist die Dateiüberwachung nur für die Remotes, an denen du gerade arbeitest. Nx nennt diese `dev remotes`.
+  Die übrigen Projekte baut Nx und stellt sie statisch über `http-server` bereit. Diese heißen `static remotes`.
+
+  _<Badge text="Hinweis:" type="info" /> <small>Ein weiterer Vorteil von Nx mit statischen Remotes ist das [Nx-Caching](https://nx.dev/features/cache-task-results): Unveränderte Remotes werden aus dem Cache wiederhergestellt und bereitgestellt. Das spart Rechenaufwand.</small>_
+
+  Um die Shell mit allen Remotes als statische Remotes bereitzustellen, führe Folgendes aus:
+
+  ```bash
+  npx nx serve shop
+  ```
+
+  Du kannst `shop` jetzt unter `localhost:4200` öffnen und über die Links oben auf der Seite zwischen den Remote-Anwendungen wechseln.
+
+  Wenn du aktiv an einer Remote-Anwendung arbeitest (einem Dev Remote), gib das Flag `--devRemotes` an. Nx verwendet dann `webpack-dev-server` für diesen Remote und ermöglicht damit HMR und Dateiüberwachung.
+
+  ```bash
+  npx nx serve shop --devRemotes=products
+  ```
+
+  Änderungen an deiner Anwendung `products` werden jetzt in der Shell-Anwendung im Browser sichtbar.
+
+  _<Badge text="Hinweis:" type="info" /> <small>Warum Nx empfiehlt, alle Anwendungen bereitzustellen, erfährst du [hier](https://nx.dev/concepts/module-federation/module-federation-and-nx#develop-as-a-user).</small>_
+
+### Die Module-Federation-Umgebung bauen {#building-your-module-federation-setup}
+
+  Nx legt besonderen Wert auf Performance und Entwicklererfahrung, vor allem in Monorepos. Ein Befehl baut alle Projekte gleichzeitig. Das ist hilfreich, wenn du alle Projekte des Module-Federation-Systems erneut deployen möchtest.
+
+  ```bash
+  npx nx run-many -t build
+  ```
+
+  Erkennt Nx bei diesem Befehl ein unverändertes Projekt, stellt es dessen Build-Artefakt aus dem Cache wieder her, statt es neu zu bauen. Manchmal ist aber auch das noch mehr als nötig.
+  Deshalb bietet Nx einen Befehl, der nur betroffene Projekte neu verarbeitet. Damit baust du nur tatsächlich geänderte Projekte neu und sparst die Zeit für das Wiederherstellen weiterer Build-Artefakte.
+
+  ```bash
+  npx nx affected -t build
+  ```
+
+  Die Build-Artefakte findest du unter `dist/apps`.
+
+</Steps>
+
+## Weitere Remotes hinzufügen {#adding-additional-remotes}
+
+Im Laufe der Entwicklung benötigst du häufig weitere Remote-Anwendungen. Dafür eignet sich der Generator `remote` von Nx.
+Er legt ein Angular-Projekt mit konfiguriertem Module Federation an. Wenn du die zugehörige `host`-Anwendung angibst, aktualisiert er auch deren Konfiguration für den neuen Remote und bindet ihn in den `host` ein.
+
+<Steps>
+### Eine neue Remote-Anwendung anlegen {#scaffold-new-remote-application}
+
+  Füge einen neuen Remote namens `login` hinzu und verbinde ihn mit der Shell `shop`.
+
+  ```bash
+  npx nx g @nx/angular:remote apps/login --host=shop
+  ```
+
+  Mit `npx nx serve shop --devRemotes` kannst du anschließend am Remote `login` weiterarbeiten und die Ergebnisse im Browser sehen.
+</Steps>
+
+## Die Module-Federation-Abstraktionen von Nx verstehen {#understanding-nxs-module-federation-abstractions}
+
+Nx soll die Arbeit mit Module Federation vereinfachen. Gleichzeitig braucht das Nx-Team eine Möglichkeit, Optimierungen, neue Funktionen und Fehlerkorrekturen möglichst einfach auszuliefern.
+Dafür nutzt Nx einige Abstraktionen über dem zugrunde liegenden `ModuleFederationPlugin`.
+
+### Die ModuleFederationConfig von Nx {#nxs-modulefederationconfig}
+
+Nx stellt eine eigene Schnittstelle `ModuleFederationConfig` bereit, die auf die benötigten Optionen des `ModuleFederationPlugin` zugeschnitten ist.
+Die vollständige Definition findest du [hier](https://github.com/nrwl/nx/blob/master/packages/webpack/src/utils/module-federation/models/index.ts#L41).
+
+Die wichtigsten Aspekte sind:
+
+<Steps>
+#### Remotes
+
+  Die Option `remotes` bietet zwei Möglichkeiten, Remote-Anwendungen für die Shell (den Host) zu definieren.
+
+  Du kannst ein Array mit Nx-Projektnamen oder ein Tupel mit Nx-Projektname und Einstiegspunkt des Remotes angeben.
+
+  ```js
+  remotes: ["products", ["cart", "http://my-live-cart.myapp.com/mf-manifest.json"]]
+  ```
+
+  Intern wertet Nx seinen [Projektgraphen](https://nx.dev/features/explore-graph) aus, um den Einstiegspunkt des Remote-Projekts zu ermitteln und das `ModuleFederationPlugin` entsprechend zu konfigurieren.
+  Diese Informationen nutzt Nx auch beim Bereitstellen der Module-Federation-Umgebung mit `npx nx serve shop`.
+
+#### Exposes
+
+  Die Option `exposes` entspricht der gleichnamigen Option im `ModuleFederationPlugin`. Damit legst du fest, welche Module eine Remote-Anwendung über Module Federation bereitstellt.
+
+#### Shared
+
+  Nx ermittelt über den Projektgraphen alle npm- und lokalen Abhängigkeiten der Projekte in deiner Module-Federation-Umgebung. Anschließend teilt es alle diese Abhängigkeiten in der erkannten Version als Singletons. Das erleichtert den Einstieg; manchmal möchtest du dieses Verhalten aber genauer steuern.
+  Mit der Option `shared` übergibst du eine Funktion mit eigener Logik, die festlegt, wie eine Abhängigkeit geteilt wird.
+
+  ```js
+  // do not share lodash to allow better tree-shaking
+  shared: function(libraryName, shareConfig) {
+    if(libraryName === 'lodash') {
+      return false
+    }
+  }
+  ```
+</Steps>
+
+### Der withModuleFederation-Helper von Nx {#nxs-withmodulefederation}
+
+Die Hilfsfunktion `withModuleFederation` befindet sich in `webpack.config.ts`.
+Sie richtet vor allem das `ModuleFederationPlugin` anhand der von `module-federation.config.ts` gelieferten `config` ein.
+
+Außerdem kannst du damit weitere Eigenschaften von `ModuleFederationConfig` konfigurieren.
+
+```js
+withModuleFederation(config, {
+  dts: false,
+  runtimePlugins: []
+});
+```
+
+## Mehr erfahren {#learn-more}
+
+Unter den folgenden Links erfährst du mehr über die Unterstützung von Module Federation in Nx.
+
+- [Module Federation und Nx](https://nx.dev/concepts/module-federation/module-federation-and-nx)
+- [Microfrontend-Architektur](https://nx.dev/concepts/module-federation/micro-frontend-architecture)
+- [Technischer Überblick zu Nx Module Federation](https://nx.dev/concepts/module-federation/nx-module-federation-technical-overview)
+- [Anleitungen zu Nx Module Federation](https://nx.dev/recipes/module-federation)
