@@ -101,8 +101,15 @@ jest.mock(
       }
     },
     SharedManager: class {
-      normalizedOptions: Record<string, { requiredVersion?: string }> = {};
-      init() {}
+      normalizedOptions: Record<
+        string,
+        { requiredVersion?: string; version?: string }
+      > = {};
+      init(options?: {
+        shared?: Record<string, { requiredVersion?: string; version?: string }>;
+      }) {
+        this.normalizedOptions = { ...(options?.shared || {}) };
+      }
     },
   }),
   { virtual: true },
@@ -223,4 +230,148 @@ describe('ModuleHandler', () => {
       });
     },
   );
+
+  describe('shared share scopes', () => {
+    const collectShared = (
+      identifiers: string[],
+      bundler: 'webpack' | 'rspack',
+      shared?: moduleFederationPlugin.ModuleFederationPluginOptions['shared'],
+    ) => {
+      const modules = identifiers.map(
+        (identifier) =>
+          ({
+            identifier,
+            moduleType: identifier.startsWith('provide')
+              ? 'provide-module'
+              : 'consume-shared-module',
+          }) as StatsModule,
+      );
+      const { sharedMap } = new ModuleHandler(
+        { name: 'host', shared },
+        modules,
+        {
+          bundler,
+        },
+      ).collect();
+      return Object.values(sharedMap);
+    };
+
+    it('records the share scope from rspack identifiers', () => {
+      const shared = collectShared(
+        [
+          'provide shared module (custom) react@18.3.1 = /app/node_modules/react/index.js',
+          'consume shared module (custom) react@^18.0.0 (strict) (fallback: /app/node_modules/react/index.js)',
+        ],
+        'rspack',
+      );
+
+      expect(shared).toHaveLength(1);
+      expect(shared[0]).toMatchObject({
+        id: 'host:react',
+        name: 'react',
+        version: '18.3.1',
+        shareScope: 'custom',
+      });
+    });
+
+    it('records every scope of a multi-scope rspack entry', () => {
+      const shared = collectShared(
+        [
+          'provide shared module (default|custom) react@18.3.1 = /app/node_modules/react/index.js',
+        ],
+        'rspack',
+      );
+
+      expect(shared[0].shareScope).toEqual(['default', 'custom']);
+    });
+
+    it('keeps one entry per scope when a package is shared in two scopes', () => {
+      const shared = collectShared(
+        [
+          'provide shared module (default) react@18.3.1 = /app/node_modules/react/index.js',
+          'provide shared module (legacy) react@17.0.2 = /app/node_modules/react17/index.js',
+        ],
+        'rspack',
+      );
+
+      expect(
+        shared.map(({ name, version, shareScope }) => ({
+          name,
+          version,
+          shareScope,
+        })),
+      ).toEqual([
+        { name: 'react', version: '18.3.1', shareScope: 'default' },
+        { name: 'react', version: '17.0.2', shareScope: 'legacy' },
+      ]);
+      expect(new Set(shared.map(({ id }) => id)).size).toBe(2);
+    });
+
+    it('records the share scope from webpack identifiers', () => {
+      const shared = collectShared(
+        [
+          'provide module (custom) react@18.2.0 = /app/node_modules/react/index.js',
+          'consume-shared-module|custom|react|=18.2.0|false|/app/node_modules/react/index.js|true|false|undefined',
+        ],
+        'webpack',
+      );
+
+      expect(shared).toHaveLength(1);
+      expect(shared[0]).toMatchObject({
+        id: 'host:react',
+        name: 'react',
+        version: '18.2.0',
+        shareScope: 'custom',
+      });
+    });
+
+    it('parses webpack consume identifiers with an array share scope', () => {
+      const shared = collectShared(
+        [
+          'consume-shared-module|default|custom|react|=18.2.0|false|/app/node_modules/react/index.js|true|false|undefined',
+        ],
+        'webpack',
+      );
+
+      expect(shared).toHaveLength(1);
+      expect(shared[0]).toMatchObject({
+        name: 'react',
+        version: '18.2.0',
+        shareScope: ['default', 'custom'],
+      });
+    });
+
+    it('parses webpack consume identifiers whose required version is an OR range', () => {
+      const shared = collectShared(
+        [
+          'consume-shared-module|default|react|^17 || ^18|false|/app/node_modules/react/index.js|true|false|undefined',
+          'consume-shared-module|default|custom|react-dom|^17 || ^18 || ^19|false|undefined|true|false|undefined',
+        ],
+        'webpack',
+        {
+          react: { version: '18.2.0', requiredVersion: '^17 || ^18' },
+          'react-dom': {
+            version: '18.2.0',
+            requiredVersion: '^17 || ^18 || ^19',
+            import: false,
+          },
+        },
+      );
+
+      expect(
+        shared.map(({ name, version, shareScope }) => ({
+          name,
+          version,
+          shareScope,
+        })),
+      ).toEqual([
+        { name: 'react', version: '18.2.0', shareScope: 'default' },
+        {
+          name: 'react-dom',
+          version: '18.2.0',
+          shareScope: ['default', 'custom'],
+        },
+      ]);
+    });
+  });
 });
