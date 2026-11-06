@@ -741,12 +741,18 @@ export class RemoteHandler {
         const remoteInfo = loadedModule.remoteInfo;
         const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
 
-        if (CurrentGlobal[key]) {
-          if (
-            Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
-          ) {
+        const descriptor = Object.getOwnPropertyDescriptor(CurrentGlobal, key);
+        // A failed load or a later global replacement does not give this
+        // module ownership of the current global value.
+        if (
+          loadedModule.remoteEntryExports &&
+          descriptor &&
+          'value' in descriptor &&
+          descriptor.value === loadedModule.remoteEntryExports
+        ) {
+          if (descriptor.configurable) {
             delete CurrentGlobal[key];
-          } else {
+          } else if (descriptor.writable) {
             // @ts-ignore
             CurrentGlobal[key] = undefined;
           }
