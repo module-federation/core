@@ -10,6 +10,11 @@ const entrypoints = {
   'dist/router-v5.d.ts': ["export * from './router/v5';"],
   'dist/router-v6.d.ts': ["export * from './router/v6';"],
   'dist/router-v7.d.ts': ["export * from './router/v7';"],
+  'dist/router-v8.d.ts': ["export * from './router/v8';"],
+  'dist/router-v8-dom.d.ts': ["export * from './router/v8-dom';"],
+  'dist/router-runtime.d.ts': [
+    "export * from './remote/router-component/router-runtime';",
+  ],
   'dist/lazy-load-component-plugin.d.ts': [
     "export { default } from './plugins/lazy-load-component-plugin';",
     "export * from './plugins/lazy-load-component-plugin';",
