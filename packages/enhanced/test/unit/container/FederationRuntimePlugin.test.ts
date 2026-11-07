@@ -15,7 +15,9 @@ const mocks = rs.hoisted(() => ({
 }));
 
 rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  normalizeWebpackPath: (path: string) => path,
+  normalizeWebpackPath: rs.requireActual<
+    typeof import('@module-federation/sdk/normalize-webpack-path')
+  >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
   getWebpackPath: mocks.mockGetWebpackPath,
 }));
 

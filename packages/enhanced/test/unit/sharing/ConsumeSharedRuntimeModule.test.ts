@@ -6,7 +6,11 @@ import { createMockCompilation, createWebpackMock, shareScopes } from './utils';
 
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 const mocks = rs.hoisted(() => ({
-  mockNormalizeWebpackPath: rs.fn((path: string) => path),
+  mockNormalizeWebpackPath: rs.fn(
+    rs.requireActual<
+      typeof import('@module-federation/sdk/normalize-webpack-path')
+    >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
+  ),
   mockCompareModulesByIdentifier: rs.fn(
     (a: { identifier?: () => string }, b: { identifier?: () => string }) => {
       if (!a.identifier || !b.identifier) return 0;

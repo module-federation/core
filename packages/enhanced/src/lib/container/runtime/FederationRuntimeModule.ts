@@ -13,6 +13,8 @@ const { RuntimeModule, RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
+const HASH_PLACEHOLDER = /\[(?:full|chunk|content)?hash(?::[^\]]+)?\]/g;
+
 class FederationRuntimeModule extends RuntimeModule {
   runtimeRequirements: ReadonlySet<string>;
   containerName: string;
@@ -56,18 +58,36 @@ class FederationRuntimeModule extends RuntimeModule {
         } else {
           matcher = hasJsMatcher('chunkId');
         }
-        const outputName = this.compilation.getPath(
-          jsModulePlugin.getChunkFilenameTemplate(
+        const runtimeTemplate = this.compilation
+          .runtimeTemplate as typeof this.compilation.runtimeTemplate & {
+          chunkRootOutputDir?: (
+            chunk: import('webpack').Chunk,
+            enforceRelative: boolean,
+          ) => string;
+        };
+        // Runtime modules are generated for hashing before chunk hashes exist.
+        if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
+          rootOutputDir = runtimeTemplate.chunkRootOutputDir(this.chunk, false);
+        } else {
+          // Webpack < 5.110 has no chunkRootOutputDir. Hashes never affect the
+          // output depth, so neutralize them like Webpack does.
+          const template = jsModulePlugin.getChunkFilenameTemplate(
             this.chunk,
             this.compilation.outputOptions,
-          ),
-          { chunk: this.chunk, contentHashType: 'javascript' },
-        );
-        rootOutputDir = getUndoPath(
-          outputName,
-          this.compilation.outputOptions.path || '',
-          false,
-        );
+          );
+          const outputName = this.compilation.getPath(
+            typeof template === 'function'
+              ? (...args: Parameters<typeof template>) =>
+                  template(...args).replace(HASH_PLACEHOLDER, 'x')
+              : template.replace(HASH_PLACEHOLDER, 'x'),
+            { chunk: this.chunk, contentHashType: 'javascript' },
+          );
+          rootOutputDir = getUndoPath(
+            outputName,
+            this.compilation.outputOptions.path || '',
+            false,
+          );
+        }
       }
     }
 

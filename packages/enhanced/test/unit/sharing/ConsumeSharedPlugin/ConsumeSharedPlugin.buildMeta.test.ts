@@ -17,7 +17,11 @@ const toSemVerRange = (range: string): SemVerRange =>
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 const mocks = rs.hoisted(() => ({
   mockGetWebpackPath: rs.fn(() => 'webpack'),
-  mockNormalizeWebpackPath: rs.fn((p: string) => p),
+  mockNormalizeWebpackPath: rs.fn(
+    rs.requireActual<
+      typeof import('@module-federation/sdk/normalize-webpack-path')
+    >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
+  ),
   mockFederationRuntimePluginApply: rs.fn(),
   mockFederationRuntimePlugin: rs.fn(),
 }));

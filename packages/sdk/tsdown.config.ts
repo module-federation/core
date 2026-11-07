@@ -15,11 +15,20 @@ export default defineConfig([
         index: 'src/index.ts',
         'normalize-webpack-path': 'src/normalize-webpack-path.ts',
       },
-      external: ['@module-federation/*', 'isomorphic-rslog', 'webpack'],
+      external: [
+        '@module-federation/*',
+        'isomorphic-rslog',
+        'webpack',
+        /^node:/,
+      ],
       define: {},
       copyLicense: true,
       unbundle: true,
     }),
+    // The main SDK entry also runs in browsers. Node targeting can inject
+    // createRequire into Rolldown's shared ESM helper, even for browser entries.
+    // The Node-only resolver entry imports its builtins explicitly instead.
+    platform: 'neutral',
     dts: {
       resolver: 'tsc',
     },

@@ -14,7 +14,11 @@ import {
 // Create plain mocks - NO self-references or mockImplementation inside rs.hoisted()
 const mocks = rs.hoisted(() => ({
   mockGetWebpackPath: rs.fn(() => 'webpack'),
-  mockNormalizeWebpackPath: rs.fn((value: string) => value),
+  mockNormalizeWebpackPath: rs.fn(
+    rs.requireActual<
+      typeof import('@module-federation/sdk/normalize-webpack-path')
+    >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
+  ),
   mockFederationRuntimePluginApply: rs.fn(),
   mockFederationRuntimePlugin: rs.fn(), // Don't configure with mockImplementation here
 }));
@@ -62,6 +66,7 @@ rs.mock('webpack/lib/util/fs', () => ({
     });
   },
 }));
+rs.mock('webpack/lib/fs/fs', () => require('webpack/lib/util/fs'));
 
 describe('ProvideSharedPlugin integration scenarios', () => {
   beforeEach(() => {
