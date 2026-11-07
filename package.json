@@ -298,7 +298,7 @@
     "vitest": "4.1.11",
     "vue-tsc": "^2.2.10",
     "wait-on": "^7.2.0",
-    "webpack": "5.104.1",
+    "webpack": "5.112.2",
     "webpack-cli": "^5.1.4",
     "webpack-node-externals": "^3.0.0",
     "webpack-virtual-modules": "0.6.2",

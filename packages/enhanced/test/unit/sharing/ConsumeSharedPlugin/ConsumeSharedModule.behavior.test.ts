@@ -24,7 +24,11 @@ const mocks = rs.hoisted(() => {
   }
 
   return {
-    mockNormalizeWebpackPath: rs.fn((path: string) => path),
+    mockNormalizeWebpackPath: rs.fn(
+      rs.requireActual<
+        typeof import('@module-federation/sdk/normalize-webpack-path')
+      >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
+    ),
     mockRangeToString: rs.fn((range: unknown) => (range ? String(range) : '*')),
     mockStringifyHoley: rs.fn((version: unknown) => JSON.stringify(version)),
     mockMakeSerializable: rs.fn(),
@@ -40,6 +44,10 @@ rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
 rs.mock('webpack', () => createWebpackMock());
 
 rs.mock('webpack/lib/util/semver', () => ({
+  rangeToString: mocks.mockRangeToString,
+  stringifyHoley: mocks.mockStringifyHoley,
+}));
+rs.mock('webpack/lib/sharing/semver', () => ({
   rangeToString: mocks.mockRangeToString,
   stringifyHoley: mocks.mockStringifyHoley,
 }));
