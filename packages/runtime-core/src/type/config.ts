@@ -161,6 +161,8 @@ export type RemoteEntryInitOptions = {
   version: string;
   shareScopeMap?: ShareScopeMap;
   shareScopeKeys: string | string[];
+  // Init token of the container sharing init that triggered this init
+  initFrom?: InitTokens[string];
 };
 
 export type InitTokens = Record<string, Record<string, any>>;
