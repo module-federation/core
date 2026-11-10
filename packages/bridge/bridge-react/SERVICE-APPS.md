@@ -19,7 +19,7 @@ bridgeServicePlugin({
 })
 ```
 
-Only Node receives upstream URLs and service credentials. Register the browser plugin from `@module-federation/bridge-react/service` with same-origin ingress URLs and optional timeouts. Framework adapters should generate these public bindings from the private deployment configuration.
+Install private bindings from the server bootstrap. Do not serialize upstream URLs or credentials into bundler runtime-plugin arguments, because Node SSR bundles may also be downloadable. A framework adapter can carry only a runtime identity in the bundle and resolve its private bindings from server-owned process configuration. Only Node receives upstream URLs and service credentials. Register the browser plugin from `@module-federation/bridge-react/service` with same-origin ingress URLs and optional timeouts. Framework adapters should generate these public bindings from the private deployment configuration.
 
 The Node plugin examines the current expose after manifest resolution, then supplies a lightweight factory through runtime-core's `beforeLoadRemote` hook. It neither fetches SSR output during module loading nor loads the Node container. Ordinary exposes still load the real entry. Both paths share factory execution hooks, `onLoad`, `afterLoadRemote`, namespace/default behavior, deferred bundler factories and provenance. No virtual container or error recovery represents a successful Service load.
 
