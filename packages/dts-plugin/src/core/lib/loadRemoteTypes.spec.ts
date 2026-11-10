@@ -14,13 +14,11 @@ import { DTSManager } from './DTSManager';
 import { retrieveHostConfig } from '../configurations/hostPlugin';
 import { REMOTE_ALIAS_IDENTIFIER, HOST_API_TYPES_FILE_NAME } from '../constant';
 
-describe('generated remote module registry', () => {
+describe('generated loadRemote declarations', () => {
   it.each(['module', 'commonjs'])(
     'type-checks %s consumers without installing React or SDK directly',
     (mode) => {
-      const context = mkdtempSync(
-        join(tmpdir(), 'mf-generated-type-registry-'),
-      );
+      const context = mkdtempSync(join(tmpdir(), 'mf-generated-load-remote-'));
       const packageRoot = resolve(__dirname, '../../..');
       const packagesRoot = resolve(packageRoot, '..');
       const compiler = join(
@@ -51,7 +49,7 @@ describe('generated remote module registry', () => {
         });
         const directory = join(context, '@mf-types', 'shop');
         mkdirSync(directory, { recursive: true });
-        // Use the actual producer API generator and consumer merger. No hand-built map.
+        // Exercise the producer API generator and consumer merger together.
         writeFileSync(
           join(directory, 'apis.d.ts'),
           manager
@@ -75,14 +73,13 @@ describe('generated remote module registry', () => {
           join(context, 'index.ts'),
           `
         import { loadRemote } from '@module-federation/enhanced/runtime';
-        type Module = ModuleFederation.RemoteModuleMap['shop/App'];
-        const valid: Parameters<Module['default']>[0] = {value: 1};
-        // @ts-expect-error generated mapping retains exported component props
-        const invalid: Parameters<Module['default']>[0] = {value: 'bad'};
         loadRemote('shop/App').then(module => {
           module.default({value: 1});
-          // @ts-expect-error existing runtime loadRemote inference is preserved
+          module.named(true);
+          // @ts-expect-error generated declarations retain default export props
           module.default({value: 'bad'});
+          // @ts-expect-error generated declarations retain named export parameters
+          module.named('bad');
         });
       `,
         );

@@ -390,12 +390,6 @@ class DTSManager {
     const fileStr = `${importTypeStr}
     ${remoteKeysStr}
     ${packageTypesStr}
-    type GeneratedRemoteModules = { [Key in RemoteKeys]: PackageType<Key, unknown> };
-    declare global {
-      namespace ModuleFederation {
-        interface RemoteModuleMap extends GeneratedRemoteModules {}
-      }
-    }
     ${pkgsDeclareStr}
     `;
 
