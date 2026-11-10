@@ -90,8 +90,12 @@ for (const mode of modes) {
     registerPlugins() {},
     remoteHandler: {
       idToRemoteMap: {},
-      async getRemoteModuleAndOptions() {
+      getLoadedRemoteInfo(value) {
+        if (value !== factory) return;
         return {
+          id: 'shop/App',
+          isModule: false,
+          recovered: false,
           remoteMatchInfo: {
             expose: './App',
             remoteSnapshot: {
@@ -100,13 +104,10 @@ for (const mode of modes) {
           },
         };
       },
-      async loadRemote() {
-        return { default: factory };
-      },
     },
   };
   const Remote = createReactRemote({
-    remote: 'shop/App',
+    remote: () => factory,
     instance,
     basename: '/inventory',
   });

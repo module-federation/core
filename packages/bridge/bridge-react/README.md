@@ -102,8 +102,9 @@ export default defineConfig({
 ```jsx
 // ./src/index.tsx
 import { createReactRemote } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/enhanced/runtime';
 
-const Remote1 = createReactRemote({ remote: 'remote1/export-app' });
+const Remote1 = createReactRemote({ remote: () => loadRemote('remote1/export-app') });
 
 function App() {
   return ( <BrowserRouter basename="/">
@@ -138,22 +139,23 @@ root.render(
 `/base` entries. They read the selected expose's rendering protocol from the
 Snapshot returned by the completed runtime `afterResolve` chain before choosing
 the consumer. This includes platform-provided snapshots and request rewrites.
-String inputs select the protocol before executing the expose. The same resolved
-request continues through the normal load lifecycle without resolving or fetching
-its manifest again. Callback inputs execute once per consumer attempt, then use
+The `remote` option requires a function returning a supported MF export or module
+namespace, or its Promise. Callbacks execute once per consumer attempt, then use
 the completed load's recorded source and Snapshot to select the consumer.
 
 ```tsx
 import { createReactRemote, ReactRemote } from '@module-federation/bridge-react/base'
+import { loadRemote } from '@module-federation/enhanced/runtime'
 
+const loadCard = () => loadRemote('shop/Card')
 const Card = createReactRemote<{ label: string }>({
-  remote: 'shop/Card',
+  remote: loadCard,
   loading: <span>Loading</span>,
   fallback: ({ error, retry }) => <button onClick={retry}>{error.message}</button>,
 })
 
 <Card label="Example" />
-<ReactRemote remote="shop/Card" props={{ label: 'Example' }} />
+<ReactRemote remote={loadCard} props={{ label: 'Example' }} />
 ```
 
 Pass `instance` when consuming through a particular Enhanced runtime. The default
@@ -173,16 +175,15 @@ provider instance then handles props updates, navigation, and cleanup. See
 [Bridge application SSR](#bridge-application-ssr) for the producer and Host
 contracts. Service App execution is outside this API.
 
-Without the Host SSR context, Bridge keeps its server placeholder. String inputs
-then avoid loading the producer's Node expose. Under that context, Bridge loads
-the Node expose to check its `renderStream` capability. A provider without that
-method keeps its existing CSR behavior. Function inputs may execute the module
-before its protocol can be identified. Use `noSSR` for an expose that must only
-execute in the browser.
+Without the Host SSR context, Bridge keeps its server placeholder and does not
+invoke the provider. The callback executes the Node expose before its protocol
+can be identified. Under that context, Bridge invokes the provider to check its
+`renderStream` capability. A provider without that method keeps its existing CSR
+behavior. Use `noSSR` for an expose that must only execute in the browser.
 
 For an unmarked legacy provider, set `render: 'bridge'`. A hint conflicting with
 published metadata fails. Unmarked ordinary components keep the component path.
-The same `remote` option also accepts synchronous or asynchronous callbacks:
+The two main forms are a runtime loader and a callback returning a static import:
 
 ```tsx
 import Shop from 'shop/Card';
@@ -212,17 +213,19 @@ consume the value through the same runtime instance. Older runtimes can still
 return a namespace carrying `mf_module_id`, with an extra metadata resolution.
 A local component without MF provenance, an unassociated accessor export, or one
 value reused by multiple exposes or deployments cannot be identified reliably.
-Use a string input or an unambiguous namespace in those cases. Multiple names for
+Return an unambiguous MF namespace in those cases. Multiple names for
 one export within the same expose are allowed. Default interop getters may be
 read to record provenance, while arbitrary named getters are not evaluated.
 A named component selected from a namespace still uses `exportName`. A callback
 returning an individual export treats that value as the default export.
 
 Business props are inferred from callback results, namespace default or named
-component exports, and generated remote ID declarations. Generated host types
-extend the shared `ModuleFederation.RemoteModuleMap` interface. Applications can
-also augment that interface for a typed remote ID without generated declarations.
-Unknown dynamic strings can still use `createReactRemote<Props>` explicitly.
+component exports, and typed `loadRemote` results. Use generated host declarations
+or an explicit module type such as `loadRemote<typeof import('shop/Card')>` to
+retain the loaded module's types.
+Loaders with unknown results can still use `createReactRemote<Props>` explicitly.
+Direct strings are rejected, including when explicit props are supplied. Migrate
+`remote: 'shop/Card'` to `remote: () => loadRemote('shop/Card')`.
 
 Loading defaults to null. Without `fallback`, errors reach the parent boundary.
 Retry creates fresh failed-load and consumer state, without promising a network

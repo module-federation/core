@@ -45,10 +45,18 @@ export function remoteRuntime(
         .remoteSnapshot,
     },
   }));
-  const loadResolvedRemote = jest.fn(async (id, _options, resolvedRemote) => {
+  const sources = new WeakMap<object, object>();
+  const consume = async (id: string) => {
     try {
-      await resolvedRemote;
-      return await loadRemote(id);
+      const { remoteMatchInfo } = await getRemoteModuleAndOptions({ id });
+      const value = await loadRemote(id);
+      sources.set(value, {
+        id,
+        remoteMatchInfo,
+        recovered: false,
+        isModule: true,
+      });
+      return value;
     } catch (error) {
       const recovered = await errorLoadRemote({
         id,
@@ -56,9 +64,10 @@ export function remoteRuntime(
         lifecycle: 'onLoad',
       });
       if (!recovered) throw error;
+      sources.set(recovered, { id, recovered: true, isModule: true });
       return recovered;
     }
-  });
+  };
   const instance = {
     name: 'host',
     options: {
@@ -73,12 +82,12 @@ export function remoteRuntime(
       ],
     },
     registerPlugins: jest.fn(),
-    loadRemote,
+    loadRemote: consume,
     moduleCache,
     remoteHandler: {
       idToRemoteMap,
       getRemoteModuleAndOptions,
-      loadRemote: loadResolvedRemote,
+      getLoadedRemoteInfo: (value: object) => sources.get(value),
       hooks: { lifecycle: { errorLoadRemote: { emit: errorLoadRemote } } },
     },
     snapshotHandler,
@@ -86,10 +95,10 @@ export function remoteRuntime(
   return {
     instance,
     loadRemote,
+    remote: () => consume('shop/Card'),
     metadata,
     snapshotHandler,
     errorLoadRemote,
     getRemoteModuleAndOptions,
-    loadResolvedRemote,
   };
 }

@@ -50,7 +50,7 @@ it('keeps the streamed Bridge subtree while a parent updates before the browser 
   const serverRuntime = remoteRuntime({ default: serverProvider }, 'bridge');
   const ServerRemote = createServerReactRemote({
     instance: serverRuntime.instance,
-    remote: 'shop/Card',
+    remote: serverRuntime.remote,
   });
   let hostUpdated!: () => void;
   const parentUpdated = new Promise<void>((resolve) => (hostUpdated = resolve));
@@ -118,17 +118,12 @@ it('keeps the streamed Bridge subtree while a parent updates before the browser 
     const clientRuntime = remoteRuntime({ default: provider }, 'bridge');
     let release!: () => void;
     const pending = new Promise<void>((resolve) => (release = resolve));
-    const resolveProtocol =
-      clientRuntime.getRemoteModuleAndOptions.getMockImplementation()!;
-    clientRuntime.getRemoteModuleAndOptions.mockImplementation(
-      async (...args) => {
-        await pending;
-        return resolveProtocol(...args);
-      },
-    );
     const ClientRemote = createReactRemote({
       instance: clientRuntime.instance,
-      remote: 'shop/Card',
+      remote: async () => {
+        await pending;
+        return clientRuntime.remote();
+      },
     });
     root = hydrateRoot(
       container,

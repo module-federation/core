@@ -51,41 +51,6 @@ function namespace(
   );
 }
 
-async function resolveProtocol(
-  instance: ModuleFederation,
-  id: string,
-  hint?: CreateReactRemoteOptions['render'],
-) {
-  // Resolve through the runtime's full beforeRequest / afterResolve chain.
-  // Its final result includes the platform-selected snapshot and expose.
-  const resolvedRemote = instance.remoteHandler.getRemoteModuleAndOptions({
-    id,
-  });
-  // Keep protocol selection before loading. Without a framework SSR context,
-  // Bridge exposes retain their existing server placeholder behavior.
-  const load = () =>
-    instance.remoteHandler.loadRemote(id, undefined, resolvedRemote);
-  let match: Awaited<typeof resolvedRemote>['remoteMatchInfo'];
-  try {
-    match = (await resolvedRemote).remoteMatchInfo;
-  } catch {
-    // Continue through the normal runtime error and diagnostic hooks without
-    // resolving twice or executing an unknown provider on Node.
-    return {
-      render: hint || 'component',
-      recovered: namespace(await load(), id),
-      match: undefined,
-      load,
-    };
-  }
-  return {
-    render: selectProtocol(match, id, hint),
-    recovered: undefined,
-    match,
-    load,
-  };
-}
-
 export type RemoteMatch = Awaited<
   ReturnType<ModuleFederation['remoteHandler']['getRemoteModuleAndOptions']>
 >['remoteMatchInfo'];
@@ -214,100 +179,76 @@ function createConsumer<P extends object>(
               configured.add(instance);
             }
             let id: string;
-            let loaded: Promise<Namespace> | undefined;
-            let selection: Awaited<ReturnType<typeof resolveProtocol>>;
-            if (typeof options.remote === 'string') {
-              id = options.remote;
-              selection = await resolveProtocol(instance, id, options.render);
-            } else {
-              // Calling a loader executes the module, not a Bridge provider or
-              // React component. Cache the exact result for this render attempt.
-              // Unlike strings, loaders must run before source/type discovery, so
-              // framework SSR must also account for their module-level side effects.
-              const value = await options.remote();
-              const handler = instance.remoteHandler as {
-                getLoadedRemoteInfo?: (value: unknown) =>
-                  | {
-                      remoteMatchInfo?: RemoteMatch;
-                      id: string;
-                      recovered: boolean;
-                      isModule: boolean;
-                    }
-                  | undefined;
-              };
-              let source = handler.getLoadedRemoteInfo?.(value);
-              let selectedNamespace: Namespace | undefined;
-              if (
-                !source &&
-                handler.getLoadedRemoteInfo &&
-                value &&
-                typeof value === 'object'
-              ) {
-                // Bundler interop may create another namespace after the factory
-                // returns. Identify only the export actually requested here.
-                const exportName = options.exportName || 'default';
-                const selected = (value as Namespace)[exportName];
-                source = handler.getLoadedRemoteInfo(selected);
-                if (source) selectedNamespace = { [exportName]: selected };
-              }
-              if (source) {
-                id = source.id;
-                const module = namespace(
-                  selectedNamespace || value,
-                  id,
-                  !selectedNamespace && !source.isModule,
-                );
-                loaded = Promise.resolve(module);
-                selection = source.recovered
-                  ? {
-                      render: options.render || 'component',
-                      recovered: module,
-                      match: undefined,
-                      load: () => loaded!,
-                    }
-                  : {
-                      render: selectProtocol(
-                        source.remoteMatchInfo!,
-                        id,
-                        options.render,
-                      ),
-                      recovered: undefined,
-                      match: source.remoteMatchInfo!,
-                      load: () => loaded!,
-                    };
-              } else {
-                // Older runtimes only identify module namespaces. Never guess
-                // the source of a default export or another runtime's object.
-                const module = namespace(value);
-                const identity =
-                  !handler.getLoadedRemoteInfo && module[moduleId];
-                if (typeof identity !== 'string')
-                  throw new Error(
-                    'The remote loader returned no MF module identity for this runtime instance. Use a remote alias/expose, or load the value with the same updated runtime instance.',
-                  );
-                id = identity;
-                loaded = Promise.resolve(module);
-                selection = await resolveProtocol(instance, id, options.render);
-              }
+            let module: Namespace;
+            let match: RemoteMatch | undefined;
+            let recovered = false;
+            // The loader executes the module before protocol discovery. SSR
+            // reserves this work before it starts, including late Bridge jobs.
+            const value = await options.remote();
+            const handler = instance.remoteHandler as {
+              getLoadedRemoteInfo?: (value: unknown) =>
+                | {
+                    remoteMatchInfo?: RemoteMatch;
+                    id: string;
+                    recovered: boolean;
+                    isModule: boolean;
+                  }
+                | undefined;
+            };
+            let source = handler.getLoadedRemoteInfo?.(value);
+            let selectedNamespace: Namespace | undefined;
+            if (
+              !source &&
+              handler.getLoadedRemoteInfo &&
+              value &&
+              typeof value === 'object'
+            ) {
+              // Bundler interop may create another namespace after the factory
+              // returns. Identify only the export actually requested here.
+              const exportName = options.exportName || 'default';
+              const selected = (value as Namespace)[exportName];
+              source = handler.getLoadedRemoteInfo(selected);
+              if (source) selectedNamespace = { [exportName]: selected };
             }
-            const protocol = selection.render;
+            if (source) {
+              id = source.id;
+              module = namespace(
+                selectedNamespace || value,
+                id,
+                !selectedNamespace && !source.isModule,
+              );
+              recovered = source.recovered;
+              match = source.remoteMatchInfo;
+            } else {
+              // Older runtimes only identify module namespaces. Never guess
+              // the source of a default export or another runtime's object.
+              module = namespace(value);
+              const identity = !handler.getLoadedRemoteInfo && module[moduleId];
+              if (typeof identity !== 'string')
+                throw new Error(
+                  'The remote loader returned no MF module identity for this runtime instance. Load the value with the same updated runtime instance.',
+                );
+              id = identity;
+              match = (
+                await instance.remoteHandler.getRemoteModuleAndOptions({ id })
+              ).remoteMatchInfo;
+            }
+            const protocol =
+              match && !recovered
+                ? selectProtocol(match, id, options.render)
+                : options.render || 'component';
             if (protocol !== 'bridge' && environment.target === 'server')
               environment.skip();
-            if (selection.recovered && protocol === 'component') {
+            if (recovered && protocol === 'component') {
               // A runtime fallback has no successful remote registry entry,
               // data loader or remote asset metadata to hydrate.
               return {
-                Component: selection.recovered[
+                Component: module[
                   options.exportName || 'default'
                 ] as React.ComponentType<P>,
               };
             }
-            if (selection.recovered)
-              loaded = Promise.resolve(selection.recovered);
-            const load = () =>
-              (loaded ||= selection
-                .load()
-                .then((value) => namespace(value, id)));
+            const load = () => Promise.resolve(module);
             if (protocol === 'bridge') {
               if (options.exportName && options.exportName !== 'default')
                 throw new Error(
@@ -323,27 +264,23 @@ function createConsumer<P extends object>(
               };
               const serverProvider =
                 environment.target === 'server'
-                  ? await environment.prepareBridge(
-                      id,
-                      loadProvider,
-                      selection.match,
-                    )
+                  ? await environment.prepareBridge(id, loadProvider, match)
                   : undefined;
               return {
                 Component: bridgeComponent(id, loadProvider, serverProvider),
                 loadProvider,
               };
             }
-            const resolvedRemoteInfo = selection.match?.remoteInfo && {
-              ...selection.match.remoteInfo,
-              snapshot: selection.match.remoteSnapshot,
-              expose: selection.match.expose,
+            const resolvedRemoteInfo = match?.remoteInfo && {
+              ...match.remoteInfo,
+              snapshot: match.remoteSnapshot,
+              expose: match.expose,
             };
-            if (selection.match?.remoteInfo) {
+            if (match?.remoteInfo) {
               initializeRemoteDataFetch({
                 id,
-                moduleInfo: selection.match.remoteInfo,
-                remoteSnapshot: selection.match.remoteSnapshot,
+                moduleInfo: match.remoteInfo,
+                remoteSnapshot: match.remoteSnapshot,
                 host: instance,
               });
             }
