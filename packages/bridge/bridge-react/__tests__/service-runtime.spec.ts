@@ -9,6 +9,18 @@ it('loads only a reusable Service description, preserves deferred factories and 
   const entry = jest.fn(() => {
     throw Error('blocked Node entry');
   });
+  const snapshot = {
+    version: '1',
+    buildVersion: 'build-1',
+    modules: [
+      {
+        moduleName: 'App',
+        modulePath: './App',
+        render: 'bridge',
+        isService: true,
+      },
+    ],
+  } as any;
   const instance = createInstance({
     name: 'service-description',
     shareStrategy: 'loaded-first',
@@ -25,21 +37,11 @@ it('loads only a reusable Service description, preserves deferred factories and 
       }),
       {
         name: 'resolved-service-fixture',
+        loadSnapshot: (args) => ({ ...args, remoteSnapshot: snapshot }),
         afterResolve(args) {
           return {
             ...args,
-            remoteSnapshot: {
-              version: '1',
-              buildVersion: 'build-1',
-              modules: [
-                {
-                  moduleName: 'App',
-                  modulePath: './App',
-                  render: 'bridge',
-                  isService: true,
-                },
-              ],
-            } as any,
+            remoteSnapshot: snapshot,
           };
         },
         loadEntry: entry,
