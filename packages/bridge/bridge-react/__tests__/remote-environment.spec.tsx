@@ -24,7 +24,7 @@ it.each([
     };
     function Probe({ noSSR }: { noSSR: boolean }) {
       const environment = useEnvironment(
-        () => ({ remote: 'shop/Card', noSSR }),
+        () => ({ remote: () => null, noSSR }),
         0,
         null,
       );

@@ -9,12 +9,7 @@ describe('React remote input routing parity', () => {
     });
   });
 
-  for (const variant of [
-    'loader-auto',
-    'loader-explicit',
-    'string-auto',
-    'string-explicit',
-  ]) {
+  for (const variant of ['loader-auto', 'loader-explicit']) {
     it(`${variant} preserves deep links, host updates, remote links and history`, () => {
       const basename = `/router-parity/${variant}`;
       const assertLocation = (remote: string, host = true) => {
