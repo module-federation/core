@@ -13,7 +13,7 @@ it.each([
     const descriptor = Object.getOwnPropertyDescriptor(React, 'useId')!;
     function Probe() {
       const environment = useEnvironment(
-        () => ({ remote: 'shop/Card' }),
+        () => ({ remote: () => null }),
         0,
         null,
       );

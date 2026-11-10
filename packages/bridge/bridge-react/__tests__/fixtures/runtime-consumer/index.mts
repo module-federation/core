@@ -32,7 +32,7 @@ helpers.utils.matchRemoteWithNameAndExpose(
 import { createReactRemote } from '@module-federation/bridge-react/base';
 import type { ComponentProps } from 'react';
 const Card = createReactRemote<{ label: string }>({
-  remote: 'shop/Card',
+  remote: () => instance.loadRemote('shop/Card'),
   instance,
 });
 const validProps: ComponentProps<typeof Card> = { label: 'valid' };

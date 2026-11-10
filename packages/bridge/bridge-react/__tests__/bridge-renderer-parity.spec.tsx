@@ -32,7 +32,7 @@ function consumer(
         ),
       })
     : createUnifiedBase({
-        remote: 'shop/Card',
+        remote: runtime.remote,
         instance: runtime.instance,
         navigation,
         fallback: ({ error, retry }) => (
@@ -167,7 +167,7 @@ describe.each([true, false])('shared Bridge renderer (legacy=%s)', (legacy) => {
           fallback: () => null,
         })
       : createUnifiedBase({
-          remote: 'shop/Card',
+          remote: runtime.remote,
           instance: runtime.instance,
           loading,
         });
@@ -271,7 +271,7 @@ describe.each([true, false])(
               fallback: () => null,
             })
           : createReactRemote({
-              remote: 'shop/Card',
+              remote: runtime.remote,
               instance: runtime.instance,
               basename,
             });
@@ -334,7 +334,7 @@ it('keeps the default-entry Root when navigation integration is enabled and disa
   const element = (adapter?: BridgeNavigation) => (
     <MemoryRouter initialEntries={['/app']}>
       <ReactRemote
-        remote="shop/Card"
+        remote={runtime.remote}
         instance={runtime.instance}
         navigation={adapter}
       />

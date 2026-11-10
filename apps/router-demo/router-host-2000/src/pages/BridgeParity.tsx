@@ -15,18 +15,6 @@ const ExplicitLoaderRemote = createReactRemote({
   loading,
 });
 
-// Both input forms use the expose's manifest protocol to select Bridge.
-// Function inputs identify the source after the loader completes.
-const StringRemote = createReactRemote({
-  remote: 'remote6/export-app',
-  loading,
-});
-const ExplicitStringRemote = createReactRemote({
-  remote: 'remote6/export-app',
-  basename: '/router-parity/string-explicit',
-  loading,
-});
-
 export default function BridgeParity() {
   const { variant } = useParams();
   const location = useLocation();
@@ -52,8 +40,6 @@ export default function BridgeParity() {
       </nav>
       {variant === 'loader-auto' && <LoaderRemote />}
       {variant === 'loader-explicit' && <ExplicitLoaderRemote />}
-      {variant === 'string-auto' && <StringRemote />}
-      {variant === 'string-explicit' && <ExplicitStringRemote />}
     </section>
   );
 }

@@ -183,8 +183,12 @@ if (args[0] !== '--probe') {
     registerPlugins() {},
     remoteHandler: {
       idToRemoteMap: {},
-      async getRemoteModuleAndOptions() {
+      getLoadedRemoteInfo(value) {
+        if (value !== factory) return;
         return {
+          id: 'shop/App',
+          isModule: false,
+          recovered: false,
           remoteMatchInfo: {
             expose: './App',
             remoteSnapshot: {
@@ -193,13 +197,10 @@ if (args[0] !== '--probe') {
           },
         };
       },
-      async loadRemote() {
-        return { default: factory };
-      },
     },
   };
   const Remote = createReactRemote({
-    remote: 'shop/App',
+    remote: () => factory,
     instance,
     basename: '/inventory',
   });

@@ -139,6 +139,13 @@ describe('remote callback inputs', () => {
       [Symbol.for('mf_module_id')]: 'shop/Card',
     };
     const runtime = remoteRuntime(raw);
+    Object.defineProperty(
+      runtime.instance.remoteHandler,
+      'getLoadedRemoteInfo',
+      {
+        value: undefined,
+      },
+    );
     await runtime.loadRemote('shop/Card');
     const loader = jest.fn(() => raw);
     render(<ReactRemote remote={loader} instance={runtime.instance} />);

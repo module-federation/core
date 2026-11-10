@@ -16,7 +16,7 @@ describe('unified React remote consumption', () => {
         default: () => <strong>client weather</strong>,
       });
       const Remote = createReactRemote({
-        remote: 'shop/Card',
+        remote: () => instance.loadRemote('shop/Card'),
         instance,
         noSSR: true,
         loading: <p>connecting</p>,
@@ -68,12 +68,14 @@ describe('unified React remote consumption', () => {
         </button>
       );
     }
-    const { instance, loadRemote } = remoteRuntime({ default: Weather });
+    const { instance, loadRemote, remote } = remoteRuntime({
+      default: Weather,
+    });
     const view = render(
       <StrictMode>
         <ReactRemote
           noSSR
-          remote="shop/Card"
+          remote={remote}
           instance={instance}
           props={{ label: 'first' }}
         />
@@ -85,7 +87,7 @@ describe('unified React remote consumption', () => {
       <StrictMode>
         <ReactRemote
           noSSR
-          remote="shop/Card"
+          remote={remote}
           instance={instance}
           props={{ label: 'updated' }}
         />
@@ -102,7 +104,7 @@ describe('unified React remote consumption', () => {
       render(
         <ReactRemote
           noSSR
-          remote="shop/Card"
+          remote={runtime.remote}
           instance={runtime.instance}
           fallback={({ error, retry }) => (
             <button onClick={retry}>{error.message}</button>
@@ -126,7 +128,7 @@ describe('unified React remote consumption', () => {
     runtime.errorLoadRemote.mockResolvedValue({
       default: () => <p>runtime recovered weather</p>,
     });
-    render(<ReactRemote remote="shop/Card" instance={runtime.instance} />);
+    render(<ReactRemote remote={runtime.remote} instance={runtime.instance} />);
     await screen.findByText('runtime recovered weather');
     expect(runtime.errorLoadRemote).toHaveBeenCalledTimes(1);
     expect(runtime.errorLoadRemote).toHaveBeenCalledWith(
@@ -141,7 +143,7 @@ describe('unified React remote consumption', () => {
     const { instance } = remoteRuntime({ default: provider }, 'bridge');
     const view = render(
       <ReactRemote
-        remote="shop/Card"
+        remote={() => instance.loadRemote('shop/Card')}
         instance={instance}
         loading={<em>host loading</em>}
       />,
@@ -169,7 +171,7 @@ describe('unified React remote consumption', () => {
       const { instance } = remoteRuntime({ default: provider }, 'bridge');
       render(
         <ReactRemote
-          remote="shop/Card"
+          remote={() => instance.loadRemote('shop/Card')}
           instance={instance}
           fallback={({ error, retry }) => (
             <button onClick={retry}>{error.message}</button>
@@ -192,7 +194,12 @@ describe('unified React remote consumption', () => {
       default: () => <span>plugin export</span>,
     });
     const { instance } = remoteRuntime(module);
-    render(<ReactRemote remote="shop/Card" instance={instance} />);
+    render(
+      <ReactRemote
+        remote={() => instance.loadRemote('shop/Card')}
+        instance={instance}
+      />,
+    );
     await screen.findByText('plugin export');
     expect(typeof module).toBe('function');
     expect(Object.getOwnPropertySymbols(module)).toEqual([]);
@@ -208,7 +215,7 @@ describe('unified React remote consumption', () => {
     });
     const { instance, loadRemote } = remoteRuntime(raw);
     const Card = createReactRemote<{ name: string }>({
-      remote: 'alias/Card',
+      remote: () => instance.loadRemote('alias/Card'),
       instance,
     });
     const view = render(
@@ -227,7 +234,7 @@ describe('unified React remote consumption', () => {
     expect(Object.getOwnPropertySymbols(raw)).toEqual([]);
   });
   it('supports named memo exports through the declarative API without recreating on rerender', async () => {
-    const { instance, loadRemote } = remoteRuntime(
+    const { instance, loadRemote, remote } = remoteRuntime(
       {
         Named: React.memo(({ value }: { value: string }) => (
           <span>{value}</span>
@@ -237,7 +244,7 @@ describe('unified React remote consumption', () => {
     );
     const view = render(
       <ReactRemote
-        remote="shop/Card"
+        remote={remote}
         instance={instance}
         exportName="Named"
         props={{ value: 'first' }}
@@ -246,7 +253,7 @@ describe('unified React remote consumption', () => {
     await screen.findByText('first');
     view.rerender(
       <ReactRemote
-        remote="shop/Card"
+        remote={remote}
         instance={instance}
         exportName="Named"
         props={{ value: 'second' }}
@@ -271,7 +278,7 @@ describe('unified React remote consumption', () => {
     });
     const { instance } = remoteRuntime({ default: factory }, 'bridge');
     const Card = createReactRemote<{ value: string }>({
-      remote: 'shop/Card',
+      remote: () => instance.loadRemote('shop/Card'),
       instance,
     });
     const view = render(
@@ -309,7 +316,10 @@ describe('unified React remote consumption', () => {
     const { instance } = remoteRuntime({ default: factory }, 'bridge');
     const view = render(
       <StrictMode>
-        <ReactRemote remote="shop/Card" instance={instance} />
+        <ReactRemote
+          remote={() => instance.loadRemote('shop/Card')}
+          instance={instance}
+        />
       </StrictMode>,
     );
     await screen.findByText('strict');
@@ -326,7 +336,11 @@ describe('unified React remote consumption', () => {
     }));
     const { instance } = remoteRuntime({ default: factory });
     render(
-      <ReactRemote remote="shop/Card" instance={instance} render="bridge" />,
+      <ReactRemote
+        remote={() => instance.loadRemote('shop/Card')}
+        instance={instance}
+        render="bridge"
+      />,
     );
     await screen.findByText('legacy');
   });
@@ -334,25 +348,27 @@ describe('unified React remote consumption', () => {
     ['conflict', 'bridge' as const, false, 'component' as const, /conflicts/],
     ['service', 'bridge' as const, true, undefined, /Service App/],
   ])(
-    'reports %s without invoking the module loader',
+    'reports %s after loading without invoking the export',
     async (_name, protocol, service, hint, message) => {
       const errors = jest.spyOn(console, 'error').mockImplementation(() => {});
       try {
+        const exported = jest.fn(() => null);
         const { instance, loadRemote, errorLoadRemote } = remoteRuntime(
-          { default: () => null },
+          { default: exported },
           protocol,
           service,
         );
         render(
           <ReactRemote
-            remote="shop/Card"
+            remote={() => instance.loadRemote('shop/Card')}
             instance={instance}
             render={hint}
             fallback={({ error }) => <span>{error.message}</span>}
           />,
         );
         await screen.findByText(message);
-        expect(loadRemote).not.toHaveBeenCalled();
+        expect(loadRemote).toHaveBeenCalledTimes(1);
+        expect(exported).not.toHaveBeenCalled();
         expect(errorLoadRemote).not.toHaveBeenCalled();
       } finally {
         errors.mockRestore();
@@ -367,7 +383,7 @@ describe('unified React remote consumption', () => {
       runtime.loadRemote.mockRejectedValueOnce(new Error('offline'));
       render(
         <ReactRemote
-          remote="shop/Card"
+          remote={runtime.remote}
           instance={runtime.instance}
           fallback={({ error, retry }) => (
             <button onClick={retry}>{error.message}</button>
@@ -395,7 +411,7 @@ describe('unified React remote consumption', () => {
     );
     const view = render(
       <ReactRemote
-        remote="shop/Card"
+        remote={runtime.remote}
         instance={runtime.instance}
         loading={<span>waiting</span>}
       />,
@@ -440,14 +456,14 @@ describe('Bridge routing controls', () => {
     const view = render(
       <>
         <ReactRemote
-          remote="shop/Card"
+          remote={() => instance.loadRemote('shop/Card')}
           instance={instance}
           basename="/inventory"
           navigation={first}
           props={{ label: 'inventory' }}
         />
         <ReactRemote
-          remote="shop/Card"
+          remote={() => instance.loadRemote('shop/Card')}
           instance={instance}
           basename="/warehouse"
           navigation={second}
@@ -476,7 +492,10 @@ describe('Bridge routing controls', () => {
       const provider = { render: jest.fn(), destroy: jest.fn() };
       const factory = jest.fn(() => provider);
       const { instance } = remoteRuntime({ default: factory }, 'bridge');
-      const options = { remote: 'shop/Card', instance };
+      const options = {
+        remote: () => instance.loadRemote('shop/Card'),
+        instance,
+      };
       type Props = { basename: string; memoryRoute: { entryPath: string } };
       const Remote =
         api === 'factory'
@@ -512,7 +531,7 @@ describe('Bridge routing controls', () => {
     const memoryRoute = { entryPath: '/product/detail/42' };
     const view = render(
       <ReactRemote
-        remote="shop/Card"
+        remote={() => instance.loadRemote('shop/Card')}
         instance={instance}
         basename="/inventory"
         memoryRoute={memoryRoute}
@@ -539,7 +558,7 @@ describe('Bridge routing controls', () => {
       providers.push(provider);
       return provider;
     });
-    const { instance, loadRemote } = remoteRuntime(
+    const { instance, loadRemote, remote } = remoteRuntime(
       { default: factory },
       'bridge',
     );
@@ -551,7 +570,7 @@ describe('Bridge routing controls', () => {
     const second = { ...first, getLocation: () => '/stores/200/app/product' };
     const view = render(
       <ReactRemote
-        remote="shop/Card"
+        remote={remote}
         instance={instance}
         basename="/stores/100/app"
         navigation={first}
@@ -561,7 +580,7 @@ describe('Bridge routing controls', () => {
     await waitFor(() => expect(received).toHaveLength(1));
     view.rerender(
       <ReactRemote
-        remote="shop/Card"
+        remote={remote}
         instance={instance}
         basename="/stores/200/app"
         navigation={second}
@@ -640,7 +659,7 @@ describe('Bridge routing controls', () => {
     });
     render(
       <ReactRemote
-        remote="shop/Card"
+        remote={() => instance.loadRemote('shop/Card')}
         instance={instance}
         basename="/app"
         props={{ label: 'business' }}
@@ -662,7 +681,11 @@ it('destroys a provider factory that resolves after its consumer unmounts', asyn
   );
   const { instance } = remoteRuntime({ default: factory }, 'bridge');
   const view = render(
-    <ReactRemote remote="shop/Card" instance={instance} basename="/app" />,
+    <ReactRemote
+      remote={() => instance.loadRemote('shop/Card')}
+      instance={instance}
+      basename="/app"
+    />,
   );
   await waitFor(() => expect(factory).toHaveBeenCalledTimes(1));
   view.unmount();

@@ -100,8 +100,12 @@ try {
     registerPlugins() {},
     remoteHandler: {
       idToRemoteMap: {},
-      async getRemoteModuleAndOptions() {
+      getLoadedRemoteInfo(value) {
+        if (value !== factory) return;
         return {
+          id: 'shop/App',
+          isModule: false,
+          recovered: false,
           remoteMatchInfo: {
             expose: './App',
             remoteSnapshot: {
@@ -109,9 +113,6 @@ try {
             },
           },
         };
-      },
-      async loadRemote() {
-        return { default: factory };
       },
     },
   });
@@ -155,7 +156,7 @@ try {
       return body;
     })();
     const Remote = bridge.createServerReactRemote({
-      remote: 'shop/App',
+      remote: () => serverProvider,
       instance: instanceFor(serverProvider),
     });
     const render = renderToPipeableStream(
@@ -197,11 +198,12 @@ try {
   const container = document.getElementById('host');
   const originalButton = container.querySelector('button');
   const instance = instanceFor(browserProvider);
+  const remote = () => browserProvider;
   const content = (title) =>
     h(
       React.Fragment,
       null,
-      h(bridge.ReactRemote, { remote: 'shop/App', instance, props: { title } }),
+      h(bridge.ReactRemote, { remote, instance, props: { title } }),
       major >= 18 ? h('template', { id: 'shell-end' }) : null,
     );
   if (major >= 18) {
@@ -235,7 +237,7 @@ try {
   if (major < 18) {
     const { renderToString } = require('react-dom/server');
     const Remote = bridge.createServerReactRemote({
-      remote: 'shop/App',
+      remote,
       instance,
     });
     assert.throws(() => renderToString(h(Remote)), /useId/);
@@ -243,7 +245,7 @@ try {
     const { renderToString } = require('react-dom/server');
     const descriptor = Object.getOwnPropertyDescriptor(React, 'useId');
     const serverRemote = bridge.createServerReactRemote({
-      remote: 'shop/App',
+      remote,
       instance,
     });
     try {

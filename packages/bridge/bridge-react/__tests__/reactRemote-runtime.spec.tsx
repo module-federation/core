@@ -25,7 +25,10 @@ describe('React remote runtime snapshot resolution', () => {
         globalSnapshot,
       });
       const view = render(
-        <ReactRemote remote="alias/Card" instance={runtime.instance} />,
+        <ReactRemote
+          remote={() => runtime.instance.loadRemote('alias/Card')}
+          instance={runtime.instance}
+        />,
       );
       await screen.findByText('platform bridge');
       expect(runtime.beforeRequest).toHaveBeenCalledTimes(1);
@@ -50,7 +53,10 @@ describe('React remote runtime snapshot resolution', () => {
       id: `${runtime.name}/Selected`,
     }));
     const view = render(
-      <ReactRemote remote="deployment/Card" instance={runtime.instance} />,
+      <ReactRemote
+        remote={() => runtime.instance.loadRemote('deployment/Card')}
+        instance={runtime.instance}
+      />,
     );
     await screen.findByText('platform bridge');
     expect(runtime.get).toHaveBeenCalledWith('./Selected');
@@ -78,7 +84,10 @@ describe('React remote runtime snapshot resolution', () => {
       },
     ]);
     const view = render(
-      <ReactRemote remote="alias/Card" instance={runtime.instance} />,
+      <ReactRemote
+        remote={() => runtime.instance.loadRemote('alias/Card')}
+        instance={runtime.instance}
+      />,
     );
     await screen.findByText('platform bridge');
     expect(runtime.loadSnapshot).not.toHaveBeenCalled();
@@ -98,7 +107,7 @@ describe('React remote runtime snapshot resolution', () => {
       });
       const view = render(
         <ReactRemote
-          remote="alias/Card"
+          remote={() => runtime.instance.loadRemote('alias/Card')}
           instance={runtime.instance}
           render={renderHint === 'bridge' ? renderHint : undefined}
         />,
@@ -112,7 +121,7 @@ describe('React remote runtime snapshot resolution', () => {
     },
   );
 
-  it('rejects Service App metadata supplied by a late platform hook before executing the expose', async () => {
+  it('rejects Service App metadata supplied by a late platform hook after loading the expose', async () => {
     const errors = jest.spyOn(console, 'error').mockImplementation(() => {});
     const runtime = snapshotRuntime({
       module: provider(),
@@ -128,14 +137,14 @@ describe('React remote runtime snapshot resolution', () => {
     try {
       render(
         <ReactRemote
-          remote="alias/Card"
+          remote={() => runtime.instance.loadRemote('alias/Card')}
           instance={runtime.instance}
           fallback={({ error }) => <p>{error.message}</p>}
         />,
       );
       await screen.findByText(/Service App.*not supported/);
-      expect(runtime.loadEntry).not.toHaveBeenCalled();
-      expect(runtime.factory).not.toHaveBeenCalled();
+      expect(runtime.loadEntry).toHaveBeenCalledTimes(1);
+      expect(runtime.factory).toHaveBeenCalledTimes(1);
     } finally {
       errors.mockRestore();
     }
@@ -156,7 +165,12 @@ describe('React remote runtime snapshot resolution', () => {
     ]);
     const warnings = jest.spyOn(console, 'warn').mockImplementation(() => {});
     try {
-      render(<ReactRemote remote="alias/Card" instance={runtime.instance} />);
+      render(
+        <ReactRemote
+          remote={() => runtime.instance.loadRemote('alias/Card')}
+          instance={runtime.instance}
+        />,
+      );
       await screen.findByText('runtime recovery');
       expect(runtime.beforeRequest).toHaveBeenCalledTimes(1);
       expect(recover).toHaveBeenCalledTimes(1);
@@ -195,7 +209,7 @@ it('retries failed platform resolution with a fresh request', async () => {
   try {
     render(
       <ReactRemote
-        remote="alias/Card"
+        remote={() => runtime.instance.loadRemote('alias/Card')}
         instance={runtime.instance}
         fallback={({ error, retry }) => (
           <button onClick={retry}>{error.message}</button>
@@ -234,7 +248,12 @@ it('preserves onLoad wrappers when continuing a resolved request', async () => {
       },
     },
   ]);
-  render(<ReactRemote remote="alias/Card" instance={runtime.instance} />);
+  render(
+    <ReactRemote
+      remote={() => runtime.instance.loadRemote('alias/Card')}
+      instance={runtime.instance}
+    />,
+  );
   await screen.findByText('runtime wrapped export');
   expect(runtime.factory).toHaveBeenCalledTimes(1);
   expect(runtime.onLoad).toHaveBeenCalledTimes(1);

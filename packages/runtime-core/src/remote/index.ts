@@ -233,7 +233,7 @@ export class RemoteHandler {
     if (!matches?.size) return;
     if (matches.size !== 1) {
       throw new Error(
-        'The preloaded remote value has multiple expose or version identities. Use a remote alias/expose instead.',
+        'The preloaded remote value has multiple expose or version identities. Return an unambiguous MF module namespace instead.',
       );
     }
     return matches.values().next().value;
@@ -376,9 +376,6 @@ export class RemoteHandler {
   async loadRemote<T>(
     id: string,
     options?: { loadFactory?: boolean; from: CallFrom },
-    // Internal continuation for consumers that inspect the completed
-    // afterResolve result before deciding whether to execute the module.
-    resolvedRemote?: ReturnType<RemoteHandler['getRemoteModuleAndOptions']>,
   ): Promise<T | null> {
     const { host } = this;
     const startMatchInfo = matchRemoteWithNameAndExpose(
@@ -408,7 +405,7 @@ export class RemoteHandler {
       // id: alias(app1) + expose(button) = app1/button
       // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
       const { module, moduleOptions, remoteMatchInfo } =
-        await (resolvedRemote || this.getRemoteModuleAndOptions({ id }));
+        await this.getRemoteModuleAndOptions({ id });
       const {
         pkgNameOrAlias,
         remote,

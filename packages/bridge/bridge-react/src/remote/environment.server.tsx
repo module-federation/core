@@ -40,7 +40,7 @@ export const useServerEnvironment: UseRemoteEnvironment = (
         if (!session) return;
         if (!instance)
           throw new Error('An initialized MF runtime instance is required.');
-        const factory = await loadProvider();
+        const factory = await session.reservation.wait(loadProvider());
         const provider = await factory();
         if (typeof provider?.renderStream !== 'function') {
           session.reservation.skip();

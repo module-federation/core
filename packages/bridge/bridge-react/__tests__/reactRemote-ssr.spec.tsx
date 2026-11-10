@@ -32,14 +32,17 @@ describe('React remote SSR protocol selection', () => {
       { default: () => <strong>server content</strong> },
       'component',
     );
-    const Remote = createReactRemote({ remote: 'shop/Card', instance });
+    const Remote = createReactRemote({
+      remote: () => instance.loadRemote('shop/Card'),
+      instance,
+    });
     expect(await html(<Remote />)).toContain('<strong>server content</strong>');
   });
   it('renders the configured fallback for server-side loader failures', async () => {
     const { instance, loadRemote } = remoteRuntime({ default: () => null });
     loadRemote.mockRejectedValue(new Error('weather API unavailable'));
     const Remote = createReactRemote({
-      remote: 'shop/Card',
+      remote: () => instance.loadRemote('shop/Card'),
       instance,
       fallback: ({ error }) => <p role="alert">{error.message}</p>,
     });
@@ -53,33 +56,33 @@ describe('React remote SSR protocol selection', () => {
       new Error('manifest unavailable'),
     );
     const Remote = createReactRemote({
-      remote: 'shop/Card',
+      remote: () => instance.loadRemote('shop/Card'),
       instance,
       fallback: ({ error }) => <p>{error.message}</p>,
     });
     expect(await html(<Remote />)).toContain('manifest unavailable');
     expect(loadRemote).not.toHaveBeenCalled();
   });
-  it('outputs a Bridge placeholder without executing its Node expose or provider', async () => {
+  it('outputs a Bridge placeholder after loading its Node expose without invoking the provider', async () => {
     const factory = jest.fn();
     const { instance, loadRemote, snapshotHandler } = remoteRuntime(
       { default: factory },
       'bridge',
     );
     const Remote = createReactRemote({
-      remote: 'shop/Card',
+      remote: () => instance.loadRemote('shop/Card'),
       instance,
       loading: <span>client application</span>,
     });
     expect(await html(<Remote />)).toContain('client application');
     expect(snapshotHandler.loadRemoteSnapshotInfo).toHaveBeenCalled();
-    expect(loadRemote).not.toHaveBeenCalled();
+    expect(loadRemote).toHaveBeenCalledTimes(1);
     expect(factory).not.toHaveBeenCalled();
   });
   it('does not load a noSSR component on the server', async () => {
     const { instance, loadRemote } = remoteRuntime({ default: () => null });
     const Remote = createReactRemote({
-      remote: 'shop/Card',
+      remote: () => instance.loadRemote('shop/Card'),
       instance,
       noSSR: true,
       loading: <span>client only</span>,
@@ -93,7 +96,7 @@ describe('React remote SSR with platform snapshots', () => {
   beforeEach(() => helpers.global.resetFederationGlobalInfo());
 
   it.each([false, true])(
-    'selects Bridge before loading its Node expose (pure entry: %s)',
+    'selects Bridge after loading its Node expose (pure entry: %s)',
     async (pureEntry) => {
       const provider = jest.fn();
       const runtime = snapshotRuntime({
@@ -113,16 +116,16 @@ describe('React remote SSR with platform snapshots', () => {
         ]);
       }
       const Remote = createReactRemote({
-        remote: 'alias/Card',
+        remote: () => runtime.instance.loadRemote('alias/Card'),
         instance: runtime.instance,
         loading: <span>platform placeholder</span>,
       });
       expect(await html(<Remote />)).toContain('platform placeholder');
       expect(runtime.beforeRequest).toHaveBeenCalledTimes(1);
       expect(runtime.afterResolve).toHaveBeenCalledTimes(1);
-      expect(runtime.loadEntry).not.toHaveBeenCalled();
-      expect(runtime.get).not.toHaveBeenCalled();
-      expect(runtime.factory).not.toHaveBeenCalled();
+      expect(runtime.loadEntry).toHaveBeenCalledTimes(1);
+      expect(runtime.get).toHaveBeenCalledTimes(1);
+      expect(runtime.factory).toHaveBeenCalledTimes(1);
       expect(provider).not.toHaveBeenCalled();
     },
   );
@@ -134,7 +137,7 @@ describe('React remote SSR with platform snapshots', () => {
       globalSnapshot: true,
     });
     const Remote = createReactRemote({
-      remote: 'alias/Card',
+      remote: () => runtime.instance.loadRemote('alias/Card'),
       instance: runtime.instance,
     });
     expect(await html(<Remote />)).toContain(
@@ -159,7 +162,7 @@ it('preserves component SSR metadata lookup after a deployment request rewrite',
     id: `${runtime.name}/Card`,
   }));
   const Remote = createReactRemote({
-    remote: 'deployment/Card',
+    remote: () => runtime.instance.loadRemote('deployment/Card'),
     instance: runtime.instance,
     fallback: ({ error }) => <p>{error.message}</p>,
   });

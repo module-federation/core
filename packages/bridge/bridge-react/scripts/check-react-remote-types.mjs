@@ -66,6 +66,7 @@ import { createBridgeRouterConnector, type BridgeRouterAdapter, type BridgeRoute
 import { createBridgeRouterConnector as connect18 } from '@module-federation/bridge-react/v18';
 import { createBridgeRouterConnector as connect19 } from '@module-federation/bridge-react/v19';
 import Shop, * as namespace from './remote.js';
+import { loadRemote } from '@module-federation/enhanced/runtime';
 import bridgePlugin from '@module-federation/bridge-react/plugin';
 import lazyPlugin from '@module-federation/bridge-react/lazy-load-component-plugin';
 import dataMiddleware from '@module-federation/bridge-react/data-fetch-server-middleware';
@@ -102,15 +103,12 @@ const entry: BridgeRouterLocation = {url: '/inventory', key: 'one'};
 const noEntryIdentity: BridgeRouterLocation = {url: '/inventory'};
 
 
-declare global { namespace ModuleFederation { interface RemoteModuleMap {
-  'shop/App': typeof namespace;
-} } }
 const Sync = createReactRemote({ remote: () => Shop });
 const Async = createReactRemote({ remote: async () => Shop });
 const Namespace = createReactRemote({ remote: () => namespace });
 const Loader = createReactRemote({ remote: () => import('./remote.js') });
-const Literal = createReactRemote({ remote: 'shop/App' });
-const BaseLiteral = createBaseRemote({ remote: 'shop/App' });
+const Literal = createReactRemote({ remote: () => loadRemote<typeof namespace>('shop/App') });
+const BaseLiteral = createBaseRemote({ remote: () => loadRemote<typeof namespace>('shop/App') });
 const Named = createReactRemote({ remote: () => import('./remote.js'), exportName: 'Named' });
 <Sync value={1} />; <Async value={1} />; <Namespace value={1} />;
 <Loader value={1} />; <Literal value={1} />; <BaseLiteral value={1} />; <Named label="x" />;
@@ -122,26 +120,40 @@ const Named = createReactRemote({ remote: () => import('./remote.js'), exportNam
 <Namespace value="bad" />;
 // @ts-expect-error import loader keeps props
 <Loader value="bad" />;
-// @ts-expect-error literal registry keeps props
+// @ts-expect-error typed runtime loaders keep props
 <Literal value="bad" />;
-// @ts-expect-error base uses same registry
+// @ts-expect-error base uses the same loader inference
 <BaseLiteral value="bad" />;
 // @ts-expect-error named export keeps props
 <Named value={1} />;
 // @ts-expect-error reject missing export rather than widen
 createReactRemote({ remote: () => namespace, exportName: 'Missing' });
-// @ts-expect-error known literal missing export
-createReactRemote({ remote: 'shop/App', exportName: 'Missing' });
+// @ts-expect-error known loader missing export
+createReactRemote({ remote: () => loadRemote<typeof namespace>('shop/App'), exportName: 'Missing' });
+// @ts-expect-error direct strings are not remote sources
+createReactRemote({ remote: 'shop/App' });
+// @ts-expect-error base rejects direct strings too
+createBaseRemote({ remote: 'shop/App' });
+// @ts-expect-error explicit business props cannot restore string inputs
+createReactRemote<{value:number}>({ remote: 'shop/App' });
+// @ts-expect-error the options type itself requires a function
+const invalidOptions: CreateReactRemoteOptions = { remote: 'shop/App' };
 <ReactRemote remote={() => Shop} props={{value:1}} />;
 <ReactRemote remote={async () => Shop} props={{value:1}} />;
 <ReactRemote remote={() => import('./remote.js')} props={{value:1}} />;
+<ReactRemote remote={() => loadRemote<typeof namespace>('shop/App')} props={{value:1}} />;
+<BaseRemote remote={() => loadRemote<typeof namespace>('shop/App')} props={{value:1}} />;
+// @ts-expect-error declarative API rejects direct strings
 <ReactRemote remote="shop/App" props={{value:1}} />;
+// @ts-expect-error base declarative API rejects direct strings
 <BaseRemote remote="shop/App" props={{value:1}} />;
+// @ts-expect-error explicit declarative props still require a function source
+<ReactRemote<{value:number}> remote="shop/App" props={{value:1}} />;
 <ReactRemote remote={() => namespace} exportName="Named" props={{label:'x'}} />;
 // @ts-expect-error required declaration props
 <ReactRemote remote={() => Shop} />;
-// @ts-expect-error declared literal keeps exact props
-<ReactRemote remote="shop/App" props={{value:'bad'}} />;
+// @ts-expect-error declared loader keeps exact props
+<ReactRemote remote={() => loadRemote<typeof namespace>('shop/App')} props={{value:'bad'}} />;
 // @ts-expect-error declared thunk keeps exact props
 <ReactRemote remote={() => Shop} props={{value:'bad'}} />;
 // @ts-expect-error declared named export rejects wrong props
@@ -190,7 +202,7 @@ const Empty = createReactRemote({remote:()=>NoProps});
 const Optional = (props: {value?:number}) => <p>{props.value}</p>;
 <ReactRemote remote={()=>Optional} />;
 type LabOptions = Omit<CreateReactRemoteOptions, 'remote' | 'fallback'>;
-function genericOptionsFactory<P extends object>(options: LabOptions, remote: string): React.ComponentType<P & {labFailure?:string;labRun?:string}> {
+function genericOptionsFactory<P extends object>(options: LabOptions, remote: () => unknown): React.ComponentType<P & {labFailure?:string;labRun?:string}> {
   return React.useMemo(() => createReactRemote<P & {labFailure?:string;labRun?:string}>({
     ...options,
     remote,
@@ -205,27 +217,27 @@ function genericWholeOptions<P extends object>(options: CreateReactRemoteOptions
   return createReactRemote<P>({...options});
 }
 const dynamicExport: string | undefined = Math.random() > 0.5 ? 'Named' : undefined;
-const OptionsGeneric = genericOptionsFactory<{required:string}>({exportName:dynamicExport}, 'dynamic/Options');
+const OptionsGeneric = genericOptionsFactory<{required:string}>({exportName:dynamicExport}, () => loadRemote('dynamic/Options'));
 const WholeOptionsGeneric = genericWholeOptions<{required:string}>({remote:()=>Shop, exportName:dynamicExport});
 <OptionsGeneric required="ok"/>; <WholeOptionsGeneric required="ok"/>;
-GenericOptionsDeclaration({required:'ok'}, {remote:'dynamic/Options', exportName:dynamicExport});
+GenericOptionsDeclaration({required:'ok'}, {remote:() => loadRemote('dynamic/Options'), exportName:dynamicExport});
 // @ts-expect-error spreading broad options must not erase explicit business props
 <OptionsGeneric required={1}/>;
 // @ts-expect-error a whole options object must retain required explicit props
 <WholeOptionsGeneric />;
-function genericPublicFactory<P extends object>(remote: string): React.ComponentType<P> {
+function genericPublicFactory<P extends object>(remote: () => unknown): React.ComponentType<P> {
   return createReactRemote<P>({remote});
 }
 function genericFactory<P extends object>(id: string): React.ComponentType<P & {labFailure?:string;labRun?:string}> {
-  return createReactRemote<P & {labFailure?:string;labRun?:string}>({remote:id});
+  return createReactRemote<P & {labFailure?:string;labRun?:string}>({remote:() => loadRemote(id)});
 }
 function genericCallbackFactory<P extends object>(source: () => unknown) {
   return createReactRemote<P & {labFailure?:string;labRun?:string}>({remote:source});
 }
 function GenericDeclaration<P extends object>(props: P) {
-  return <ReactRemote<P & {labFailure?:string;labRun?:string}> remote="dynamic/Generic" props={props}/>;
+  return <ReactRemote<P & {labFailure?:string;labRun?:string}> remote={() => loadRemote('dynamic/Generic')} props={props}/>;
 }
-const PublicGeneric = genericPublicFactory<{required:string}>('dynamic/Generic');
+const PublicGeneric = genericPublicFactory<{required:string}>(() => loadRemote('dynamic/Generic'));
 <PublicGeneric required="ok"/>;
 // @ts-expect-error annotated wrapper retains exact business prop errors
 <PublicGeneric required={1}/>;
@@ -238,7 +250,7 @@ const GenericCallback = genericCallbackFactory<{required:string}>(()=>Shop);
 <Generic required={1}/>;
 // @ts-expect-error generic callback wrapper retains required props
 <GenericCallback />;
-const dynamic: string = String(Math.random());
+const dynamic: () => unknown = () => loadRemote(String(Math.random()));
 const Dynamic = createReactRemote({remote:dynamic});
 <Dynamic anything={1}/>;
 <ReactRemote remote={dynamic} props={{anything:1}}/>;

@@ -17,6 +17,10 @@ function streamHost(element: React.ReactElement, timeoutMs = 1000) {
     timeoutMs,
   });
   const input = new PassThrough();
+  let shellReady!: () => void;
+  const shell = new Promise<void>((resolve) => {
+    shellReady = resolve;
+  });
   let response = '';
   const result = new Promise<string>((resolve, reject) => {
     const output = controller.processStream(input);
@@ -24,6 +28,7 @@ function streamHost(element: React.ReactElement, timeoutMs = 1000) {
       response += chunk.toString();
     });
     output.on('end', () => resolve(response));
+    output.on('close', () => resolve(response));
     output.on('error', reject);
   });
   const react = renderToPipeableStream(
@@ -35,11 +40,12 @@ function streamHost(element: React.ReactElement, timeoutMs = 1000) {
       identifierPrefix: 'host-',
       onShellReady() {
         react.pipe(input);
+        shellReady();
       },
       onError() {},
     },
   );
-  return { result, controller, react };
+  return { result, controller, react, shell };
 }
 function provider() {
   const renderStream = jest.fn(async (info: BridgeSSRRequest) => ({
@@ -62,7 +68,7 @@ function provider() {
   return { factory, renderStream };
 }
 
-it.each(['string', 'loader', 'preloaded'] as const)(
+it.each(['loader', 'preloaded'] as const)(
   'streams real Bridge content for %s input with one factory and request-local mount props',
   async (form) => {
     const { factory, renderStream } = provider();
@@ -77,11 +83,9 @@ it.each(['string', 'loader', 'preloaded'] as const)(
           )
         : undefined;
     const remote =
-      form === 'string'
-        ? 'alias/Card'
-        : form === 'loader'
-          ? () => runtime.instance.loadRemote('alias/Card')
-          : () => preloaded!.default;
+      form === 'loader'
+        ? () => runtime.instance.loadRemote('alias/Card')
+        : () => preloaded!.default;
     const Remote = createReactRemote({
       remote,
       instance: runtime.instance,
@@ -118,6 +122,79 @@ it('finishes naturally when an unclassified loader never resolves', async () => 
   expect(body).not.toContain('"type":"error"');
 });
 
+it('keeps the Host response open while a delayed function is still unclassified', async () => {
+  const { factory, renderStream } = provider();
+  const runtime = snapshotRuntime({
+    module: { default: factory },
+    render: 'bridge',
+  });
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const Remote = createReactRemote({
+    instance: runtime.instance,
+    remote: async () => {
+      await pending;
+      return runtime.instance.loadRemote('alias/Card');
+    },
+    loading: <p>awaiting remote type</p>,
+  });
+  const { result, shell } = streamHost(<Remote title="late SSR body" />);
+  let ended = false;
+  void result.then(() => {
+    ended = true;
+  });
+  await shell;
+  await new Promise((resolve) => setImmediate(resolve));
+  expect(ended).toBe(false);
+  expect(factory).not.toHaveBeenCalled();
+  release();
+  const body = await result;
+  expect(body).toContain('awaiting remote type');
+  const frames = Array.from(
+    body.matchAll(
+      /\.accept\.apply\(window\.__MF_BRIDGE_SSR__,(\[.*?\])\)<\/script>/g,
+    ),
+    ([, frame]) => JSON.parse(frame)[1],
+  );
+  expect(frames).toContainEqual({
+    type: 'html',
+    html: '<strong>late SSR body</strong>',
+  });
+  expect(body).toContain('"loaderData":{"title":"late SSR body"}');
+  expect(body).toContain('"type":"done"');
+  expect(renderStream).toHaveBeenCalledTimes(1);
+});
+
+it('does not instantiate a Bridge provider after request cancellation during classification', async () => {
+  const { factory } = provider();
+  const runtime = snapshotRuntime({
+    module: { default: factory },
+    render: 'bridge',
+  });
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const Remote = createReactRemote({
+    instance: runtime.instance,
+    remote: async () => {
+      await pending;
+      return runtime.instance.loadRemote('alias/Card');
+    },
+    fallback: ({ error }) => <p>{error.message}</p>,
+  });
+  const { controller, result, shell, react } = streamHost(<Remote />);
+  await shell;
+  controller.abort(new Error('request cancelled'));
+  react.abort();
+  expect(await result).not.toContain('"type":"html"');
+  release();
+  await new Promise((resolve) => setImmediate(resolve));
+  expect(factory).not.toHaveBeenCalled();
+});
+
 it('does not start a timed out loader after its late completion', async () => {
   const { factory, renderStream } = provider();
   const runtime = snapshotRuntime({
@@ -136,6 +213,7 @@ it('does not start a timed out loader after its late completion', async () => {
   await streamHost(<Remote />, 25).result;
   release(await runtime.instance.loadRemote('alias/Card'));
   await new Promise((resolve) => setImmediate(resolve));
+  expect(factory).not.toHaveBeenCalled();
   expect(renderStream).not.toHaveBeenCalled();
 });
 
@@ -146,7 +224,7 @@ it('preserves CSR-only providers and noSSR without starting an application strea
     render: 'bridge',
   });
   const Remote = createReactRemote({
-    remote: 'alias/Card',
+    remote: () => runtime.instance.loadRemote('alias/Card'),
     instance: runtime.instance,
     loading: <p>CSR</p>,
   });
@@ -154,7 +232,7 @@ it('preserves CSR-only providers and noSSR without starting an application strea
   expect(body).toContain('CSR');
   expect(body).not.toContain('data-mf-bridge-ssr');
   const ClientOnly = createReactRemote({
-    remote: 'alias/Card',
+    remote: () => runtime.instance.loadRemote('alias/Card'),
     instance: runtime.instance,
     noSSR: true,
     loading: <p>client only</p>,

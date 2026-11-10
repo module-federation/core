@@ -1,10 +1,9 @@
 import type * as React from 'react';
 import type { ModuleFederation } from '@module-federation/enhanced/runtime';
-import type { RemoteModuleMap } from '@module-federation/sdk';
 import type { DataFetchParams } from './lazy/types';
 import type { BridgeProvider, ProviderParams } from './types';
 
-export type RemoteSource = string | (() => unknown);
+export type RemoteSource = () => unknown;
 
 export interface ReactRemoteErrorInfo {
   error: Error;
@@ -15,7 +14,7 @@ export interface CreateReactRemoteOptions<
   Source extends RemoteSource = RemoteSource,
   Export extends string = string,
 > {
-  /** A registered remote ID, or a thunk returning a namespace or its component. */
+  /** A function returning an MF export or module namespace, or its Promise. */
   remote: Source;
   instance?: ModuleFederation | null;
   exportName?: Export;
@@ -32,13 +31,10 @@ export interface CreateReactRemoteOptions<
   navigation?: ProviderParams['navigation'];
 }
 
-type RemoteModule<Source extends RemoteSource> = Source extends string
-  ? Source extends keyof RemoteModuleMap
-    ? RemoteModuleMap[Source]
-    : unknown
-  : Source extends () => infer Result
-    ? NonNullable<Awaited<Result>>
-    : never;
+type RemoteModule<Source extends RemoteSource> =
+  unknown extends Awaited<ReturnType<Source>>
+    ? unknown
+    : NonNullable<Awaited<ReturnType<Source>>>;
 
 type ExportProps<Value> =
   Value extends BridgeProvider<infer Props>
