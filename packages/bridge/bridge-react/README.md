@@ -173,7 +173,7 @@ SSR adapter and a provider exposing `renderStream`, the unified consumer streams
 the application and hydrates that Root independently in the browser. The same
 provider instance then handles props updates, navigation, and cleanup. See
 [Bridge application SSR](#bridge-application-ssr) for the producer and Host
-contracts. Service App execution is outside this API.
+contracts. Service exposes use the same consumers with deployment bindings described in [Service Apps](./SERVICE-APPS.md).
 
 Without the Host SSR context, Bridge keeps its server placeholder and does not
 invoke the provider. The callback executes the Node expose before its protocol

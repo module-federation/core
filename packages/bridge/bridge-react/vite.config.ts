@@ -15,6 +15,16 @@ export default defineConfig({
         ssr: path.resolve(__dirname, 'src/ssr.ts'),
         'ssr-node': path.resolve(__dirname, 'src/ssr-node.ts'),
         server: path.resolve(__dirname, 'src/server.ts'),
+        service: path.resolve(__dirname, 'src/service.ts'),
+        'service-node': path.resolve(__dirname, 'src/service-node.ts'),
+        'service-runtime-plugin': path.resolve(
+          __dirname,
+          'src/service/runtime-plugin.ts',
+        ),
+        'service-runtime-plugin.node': path.resolve(
+          __dirname,
+          'src/service/runtime-plugin.node.ts',
+        ),
         plugin: path.resolve(__dirname, 'src/provider/plugin.ts'),
         router: path.resolve(__dirname, 'src/router/default.tsx'),
         'router-v5': path.resolve(__dirname, 'src/router/v5.tsx'),

@@ -1,3 +1,4 @@
+import { getBridgeService, type BrowserServiceRequest } from './service/config';
 import React, { Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import {
   getInstance,
@@ -69,8 +70,10 @@ function selectProtocol(
             item.moduleName === expose.replace(/^\.\//, ''),
         )
       : undefined;
-  if (metadata?.isService)
-    throw new Error(`Service App '${id}' is not supported by this consumer.`);
+  if (metadata?.isService && metadata.render !== 'bridge')
+    throw new Error(
+      `Service App '${id}' requires the Bridge rendering protocol.`,
+    );
   if (
     metadata?.render &&
     metadata.render !== 'bridge' &&
@@ -149,6 +152,7 @@ function createConsumer<P extends object>(
           id: string,
           loadProvider: NonNullable<RemoteAppWrapperProps['loadProvider']>,
           serverProvider?: BridgeProviderInstance,
+          service?: BrowserServiceRequest,
         ) =>
         (businessProps: P) => (
           <RemoteApp
@@ -157,6 +161,7 @@ function createConsumer<P extends object>(
             moduleName={id}
             ssrInstanceId={instanceId}
             ssrProvider={serverProvider}
+            service={service}
             loading={getOptions().loading}
             remoteProps={businessProps as Record<string, unknown>}
             routing={{
@@ -250,6 +255,34 @@ function createConsumer<P extends object>(
             }
             const load = () => Promise.resolve(module);
             if (protocol === 'bridge') {
+              const metadata =
+                match?.remoteSnapshot && 'modules' in match.remoteSnapshot
+                  ? match.remoteSnapshot.modules.find(
+                      (item) =>
+                        item.modulePath === match.expose ||
+                        item.moduleName === match.expose.replace(/^\.\//, ''),
+                    )
+                  : undefined;
+              let service: BrowserServiceRequest | undefined;
+              if (
+                environment.target === 'browser' &&
+                metadata?.isService &&
+                !options.noSSR &&
+                !new URLSearchParams(location.search).get('csr')
+              ) {
+                const binding = getBridgeService(instance, id);
+                const buildVersion = match?.remoteSnapshot?.buildVersion;
+                if (!binding || !buildVersion)
+                  throw Error(
+                    `Service '${id}' requires an ingress binding and build identity.`,
+                  );
+                service = {
+                  moduleName: binding.moduleName,
+                  url: binding.url,
+                  timeoutMs: binding.timeoutMs,
+                  buildVersion,
+                };
+              }
               if (options.exportName && options.exportName !== 'default')
                 throw new Error(
                   'Bridge exposes use the default provider export.',
@@ -267,7 +300,12 @@ function createConsumer<P extends object>(
                   ? await environment.prepareBridge(id, loadProvider, match)
                   : undefined;
               return {
-                Component: bridgeComponent(id, loadProvider, serverProvider),
+                Component: bridgeComponent(
+                  id,
+                  loadProvider,
+                  serverProvider,
+                  service,
+                ),
                 loadProvider,
               };
             }

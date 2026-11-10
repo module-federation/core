@@ -36,10 +36,13 @@ export function htmlFrames({
   maxFrameBytes = 2 * 1024 * 1024,
   includeMetadata = false,
   shellMarker,
+  independentSuspense = false,
 }: {
   maxFrameBytes?: number;
   includeMetadata?: boolean;
   shellMarker?: string;
+  /** React 19.2+ queues independent streams beyond the document lifetime. */
+  independentSuspense?: boolean;
 } = {}): Transform {
   const decoder = new StringDecoder('utf8');
   let buffer = '';
@@ -110,7 +113,13 @@ export function htmlFrames({
         }
         if (stack.length === 0) emit(parser.endIndex + 1);
       },
-      oncomment() {
+      oncomment(value) {
+        if (independentSuspense && value === '$?') {
+          // Same-length replacement preserves script ranges. Only parser-owned
+          // comments change, never strings inside application scripts or text.
+          const offset = parser.startIndex - base + 5;
+          buffer = buffer.slice(0, offset) + '~' + buffer.slice(offset + 1);
+        }
         if (stack.length === 0 && !ending) emit(parser.endIndex + 1);
       },
     },

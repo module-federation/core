@@ -121,7 +121,7 @@ describe('React remote runtime snapshot resolution', () => {
     },
   );
 
-  it('rejects Service App metadata supplied by a late platform hook after loading the expose', async () => {
+  it('rejects Service metadata without a matching Bridge capability from a late platform hook', async () => {
     const errors = jest.spyOn(console, 'error').mockImplementation(() => {});
     const runtime = snapshotRuntime({
       module: provider(),
@@ -142,7 +142,9 @@ describe('React remote runtime snapshot resolution', () => {
           fallback={({ error }) => <p>{error.message}</p>}
         />,
       );
-      await screen.findByText(/Service App.*not supported/);
+      await screen.findByText(
+        /Service App.*requires the Bridge rendering protocol/,
+      );
       expect(runtime.loadEntry).toHaveBeenCalledTimes(1);
       expect(runtime.factory).toHaveBeenCalledTimes(1);
     } finally {

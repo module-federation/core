@@ -808,6 +808,24 @@ describe('runtimePlugin', () => {
     });
   });
 
+  it('installs container chunk loading even when an existing instance skips its named hook', () => {
+    const localReadFile = jest.fn();
+    (global as any).__webpack_require__ = {
+      ...mockWebpackRequire,
+      f: { readFileVm: localReadFile },
+    };
+    const plugin = runtimePlugin();
+    // An existing instance may retain the first bundle's beforeInit callback.
+    // This second bundle must already have its own handler without invoking it.
+    expect(plugin.name).toBe('node-federation-plugin');
+    expect((global as any).__webpack_require__.f.readFileVm).not.toBe(
+      localReadFile,
+    );
+    expect(typeof (global as any).__webpack_require__.f.readFileVm).toBe(
+      'function',
+    );
+  });
+
   describe('setupChunkHandler', () => {
     beforeEach(() => {
       jest.clearAllMocks();

@@ -15,7 +15,8 @@
   "files": [
     "dist/",
     "!dist/build-modules.*.json",
-    "README.md"
+    "README.md",
+    "SERVICE-APPS.md"
   ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -229,6 +230,46 @@
         "types": "./dist/server.d.ts",
         "default": "./dist/server.cjs"
       }
+    },
+    "./service": {
+      "import": {
+        "types": "./dist/service.d.mts",
+        "default": "./dist/service.mjs"
+      },
+      "require": {
+        "types": "./dist/service.d.ts",
+        "default": "./dist/service.cjs"
+      }
+    },
+    "./service-node": {
+      "import": {
+        "types": "./dist/service-node.d.mts",
+        "default": "./dist/service-node.mjs"
+      },
+      "require": {
+        "types": "./dist/service-node.d.ts",
+        "default": "./dist/service-node.cjs"
+      }
+    },
+    "./service-runtime-plugin": {
+      "import": {
+        "types": "./dist/service-runtime-plugin.d.mts",
+        "default": "./dist/service-runtime-plugin.mjs"
+      },
+      "require": {
+        "types": "./dist/service-runtime-plugin.d.ts",
+        "default": "./dist/service-runtime-plugin.cjs"
+      }
+    },
+    "./service-runtime-plugin.node": {
+      "import": {
+        "types": "./dist/service-runtime-plugin.node.d.mts",
+        "default": "./dist/service-runtime-plugin.node.mjs"
+      },
+      "require": {
+        "types": "./dist/service-runtime-plugin.node.d.ts",
+        "default": "./dist/service-runtime-plugin.node.cjs"
+      }
     }
   },
   "typesVersions": {
@@ -286,6 +327,18 @@
       ],
       "server": [
         "./dist/server.d.ts"
+      ],
+      "service": [
+        "./dist/service.d.ts"
+      ],
+      "service-node": [
+        "./dist/service-node.d.ts"
+      ],
+      "service-runtime-plugin": [
+        "./dist/service-runtime-plugin.d.ts"
+      ],
+      "service-runtime-plugin.node": [
+        "./dist/service-runtime-plugin.node.d.ts"
       ]
     }
   },

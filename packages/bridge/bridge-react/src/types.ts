@@ -102,6 +102,8 @@ export interface RenderFnParams extends ProviderParams {
  * Parameters for the provider function
  */
 export interface ProviderFnParams<T> {
+  /** Execute application SSR in a separately configured HTTP service. */
+  isService?: boolean;
   rootComponent: React.ComponentType<T>;
   render?: (
     App: React.ReactElement,

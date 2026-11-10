@@ -25,6 +25,26 @@ async function collectHTML(html: string, limit?: number) {
 }
 
 describe('Bridge HTML framing', () => {
+  it('queues independent React 19 boundaries while preserving scripts and split input', async () => {
+    const source =
+      '<section><!--$?--><template id="B:0"></template><!--/$--><script>const literal="<!--$?-->"</script></section><!--$?-->';
+    const input = Readable.from(
+      Array.from(Buffer.from(source), (value) => Buffer.from([value])),
+    );
+    const parts: HTMLFrame[] = [];
+    for await (const part of input.pipe(
+      htmlFrames({ includeMetadata: true, independentSuspense: true }),
+    ))
+      parts.push(part);
+    expect(parts.map((part) => part.html).join('')).toBe(
+      '<section><!--$~--><template id="B:0"></template><!--/$--><script>const literal="<!--$?-->"</script></section><!--$~-->',
+    );
+    const first = parts[0];
+    expect(first.html.slice(first.scripts[0].start, first.scripts[0].end)).toBe(
+      'const literal="<!--$?-->"',
+    );
+    expect((await collectHTML(source)).join('')).toBe(source);
+  });
   it('preserves UTF-8, comments, void elements and scripts across byte boundaries', async () => {
     const html =
       '<main><img src="x"><p>你好 &amp; 🌿</p><!--$?--><template id="B:0"></template><!--/$--></main><div hidden id="S:0">ready</div><script>if(1<2){window.x="</not-script>"}</script>';

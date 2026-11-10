@@ -110,9 +110,12 @@ function collectModule(program: t.Program): ModuleInfo {
   return info;
 }
 
-type ExportValue = Reference | { bridge: true } | { error: string };
+type ExportValue =
+  | Reference
+  | { bridge: true; isService?: boolean }
+  | { error: string };
 type ModuleExports = Record<string, ExportValue>;
-type BridgeMetadata = Map<string, boolean | Error>;
+type BridgeMetadata = Map<string, boolean | { isService: true } | Error>;
 type BridgeBuildInfo = Module['buildInfo'] & {
   federationBridgeExports?: ModuleExports;
 };
@@ -205,6 +208,7 @@ function describeExports(program: t.Program): ModuleExports {
         'Bridge provider options must be a statically analyzable object.',
       );
     }
+    let isService = false;
     for (const rawProperty of object.properties) {
       const property = unwrap(rawProperty);
       if (
@@ -228,13 +232,9 @@ function describeExports(program: t.Program): ModuleExports {
       if (flag.type !== 'BooleanLiteral') {
         throw new Error('Bridge isService must be a statically known boolean.');
       }
-      if (flag.value) {
-        throw new Error(
-          'Service App metadata is not supported by this Bridge integration.',
-        );
-      }
+      isService = flag.value;
     }
-    return { bridge: true };
+    return { bridge: true, isService };
   };
   const exports: ModuleExports = Object.create(null);
   for (const [name, expression] of info.exports) {
@@ -278,7 +278,7 @@ export function createBridgeMetadataReader(compilation: Compilation) {
     module: Module,
     exported = 'default',
     visited = new Map<Module, Set<string>>(),
-  ): Promise<boolean> => {
+  ): Promise<boolean | { isService: true }> => {
     const seen = visited.get(module) || new Set<string>();
     if (seen.has(exported)) return false;
     seen.add(exported);
@@ -286,7 +286,7 @@ export function createBridgeMetadataReader(compilation: Compilation) {
     const value = read(module)[exported];
     if (!value) return false;
     if ('error' in value) throw new Error(value.error);
-    if ('bridge' in value) return true;
+    if ('bridge' in value) return value.isService ? { isService: true } : true;
     const dependency = module.dependencies.find(
       (dep) =>
         dep.category === 'esm' &&
@@ -364,7 +364,7 @@ export function collectBridgeMetadata(
             );
             const target = compilation.moduleGraph.getModule(dep);
             if (!names || !target) continue;
-            let result: boolean | Error;
+            let result: boolean | { isService: true } | Error;
             try {
               result = await read(target);
             } catch (error) {
@@ -390,16 +390,17 @@ export function annotateBridgeExposes(
       const bridge = metadata.get(name);
       if (bridge instanceof Error) throw bridge;
       if (!bridge) continue;
+      const isService = typeof bridge === 'object' && bridge.isService === true;
       if (
         (expose.render && expose.render !== 'bridge') ||
-        expose.isService === true
+        (expose.isService !== undefined && expose.isService !== isService)
       ) {
         throw new Error(
           'Bridge export conflicts with manifest rendering metadata.',
         );
       }
       expose.render = 'bridge';
-      expose.isService = false;
+      expose.isService = isService;
     } catch (error) {
       throw new Error(
         `[ Module Federation ] ${name}: ${error instanceof Error ? error.message : String(error)}`,

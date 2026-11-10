@@ -36,7 +36,7 @@ new StatsPlugin(mfOptions, {
 ## Bridge rendering metadata
 
 Statically identifiable default exports created with `createBridgeComponent` publish
-`render: 'bridge'` and `isService: false` on the corresponding expose. Other exposes
+`render: 'bridge'` and the statically declared `isService` flag (default `false`) on the corresponding expose. Other exposes
 keep their existing shape. The fields are also preserved in MF runtime Snapshots.
 
 The plugin collects metadata after modules are built and before module concatenation,
@@ -56,7 +56,7 @@ Remote, external and ignored modules are opaque and keep their existing metadata
 The analyzer does not resolve their requests against the local filesystem.
 
 Provider options must be static objects without spreads or computed keys.
-Service App declarations and ambiguous wrappers are diagnosed at build time.
+Service App declarations accept a statically known `isService: true`. Dynamic flags and ambiguous wrappers are diagnosed at build time. Service addresses and credentials are not capability metadata.
 Webpack reuses its parser AST and caches compact export descriptions with each
 module. Rspack analyzes the already transformed source of reachable built modules
 once per compilation. Loader output and resource queries therefore use the actual

@@ -291,8 +291,6 @@ class Module {
     options?: { loadFactory?: boolean },
     remoteSnapshot?: ModuleInfo,
   ) {
-    const { loadFactory = true } = options || { loadFactory: true };
-
     const remoteEntryExports = await this.init(
       id,
       remoteSnapshot,
@@ -362,6 +360,17 @@ class Module {
       throw getExposeError;
     }
 
+    return this.getModuleExports(id, expose, moduleFactory, options);
+  }
+
+  /** Complete a successful container or plugin factory through one lifecycle. */
+  async getModuleExports(
+    id: string,
+    expose: string,
+    moduleFactory: RemoteModuleFactory,
+    options?: { loadFactory?: boolean },
+  ) {
+    const { loadFactory = true } = options || {};
     // keep symbol for module name always one format
     const symbolName = processModuleAlias(this.remoteInfo.name, expose);
     const wrapModuleFactory = this.wraperFactory(moduleFactory, symbolName);

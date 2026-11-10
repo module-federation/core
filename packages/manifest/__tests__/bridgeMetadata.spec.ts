@@ -57,6 +57,25 @@ describe('Bridge built module metadata', () => {
       ).toBe(true);
     },
   );
+  it('preserves Service metadata through re-exports and annotates only its expose', async () => {
+    source(
+      "import { createBridgeComponent } from '@module-federation/bridge-react'; export default createBridgeComponent({rootComponent: App, isService: true});",
+      'service.ts',
+    );
+    const metadata = await read(source("export { default } from './service';"));
+    expect(metadata).toEqual({ isService: true });
+    const stats = {
+      exposes: [
+        { name: 'App', path: './App' },
+        { name: 'Card', path: './Card' },
+      ],
+    } as Stats;
+    expect(
+      annotateBridgeExposes(stats, new Map([['./App', metadata]])),
+    ).toMatchObject({
+      exposes: [{ render: 'bridge', isService: true }, { name: 'Card' }],
+    });
+  });
   it('follows static imports and re-exports', async () => {
     source(
       "import {createBridgeComponent as bridge} from '@module-federation/bridge-react'; export const provider = bridge({rootComponent: App});",
@@ -166,7 +185,6 @@ describe('Bridge built module metadata', () => {
       'export default bridge({isService: chooseService()});',
       /statically known boolean/,
     ],
-    ['export default bridge({isService: true});', /Service App/],
     [
       'export default decorate(bridge({rootComponent: App}));',
       /wrapped Bridge/,

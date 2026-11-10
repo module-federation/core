@@ -107,6 +107,12 @@ export class RemoteHandler {
       ],
       void
     >('afterMatchRemote'),
+    /** Resolve a module without loading its container. The normal success
+     * lifecycle and provenance apply equally to plugin and container factories. */
+    beforeLoadRemote: new AsyncHook<
+      [LoadRemoteMatch],
+      { factory: () => unknown } | void
+    >('beforeLoadRemote'),
     onLoad: new AsyncHook<
       [
         {
@@ -417,12 +423,18 @@ export class RemoteHandler {
       completeExpose = expose;
       completeRemote = getRemoteInfo(remote);
 
-      const moduleOrFactory = (await module.get(
-        idRes,
-        expose,
-        options,
-        remoteSnapshot,
-      )) as T;
+      const resolved =
+        await this.hooks.lifecycle.beforeLoadRemote.emit(remoteMatchInfo);
+      const moduleOrFactory = (
+        resolved
+          ? await module.getModuleExports(
+              idRes,
+              expose,
+              resolved.factory,
+              options,
+            )
+          : await module.get(idRes, expose, options, remoteSnapshot)
+      ) as T;
 
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,

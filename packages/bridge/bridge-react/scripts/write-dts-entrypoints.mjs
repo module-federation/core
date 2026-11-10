@@ -2,6 +2,12 @@ import { mkdir, writeFile, readdir, readFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
 const entrypoints = {
+  'dist/service-runtime-plugin.d.ts': [
+    "export { default } from './service/runtime-plugin';",
+  ],
+  'dist/service-runtime-plugin.node.d.ts': [
+    "export { default } from './service/runtime-plugin.node';",
+  ],
   'dist/plugin.d.ts': [
     "export { default } from './provider/plugin';",
     "export * from './provider/plugin';",
