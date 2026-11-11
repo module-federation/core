@@ -91,4 +91,69 @@ describe('ModuleFederation', () => {
     expect(module.initing).toBe(false);
     expect((module as any).initPromise).toBeUndefined();
   });
+
+  describe('a shared module registered by several containers', () => {
+    type SharedLib = { owner: string };
+    const sharedLib = (
+      owner: string,
+      get: () => Promise<() => SharedLib> = () =>
+        new Promise((resolve) => {
+          const instance = { owner };
+          setTimeout(() => resolve(() => instance), 10);
+        }),
+    ) => ({
+      version: '1.0.0',
+      shareConfig: { singleton: true, requiredVersion: '^1.0.0' },
+      get,
+    });
+    const joinShareScope = async (
+      name: string,
+      lib: ReturnType<typeof sharedLib>,
+      scope?: ModuleFederation['shareScopeMap'][string],
+    ) => {
+      const federation = new ModuleFederation({
+        name,
+        remotes: [],
+        shared: { lib },
+      });
+      if (scope) {
+        federation.initShareScopeMap('default', scope);
+      }
+      await Promise.all(federation.initializeSharing('default'));
+      return federation;
+    };
+
+    it('keeps a module that is loading when a later container registers the same version', async () => {
+      const appA = await joinShareScope('app_a', sharedLib('app_a'));
+      const scope = appA.shareScopeMap['default'];
+      const libForA = appA.loadShare<SharedLib>('lib');
+      while (!scope['lib']['1.0.0'].loading) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+
+      // 'app_b' sorts after 'app_a', and app_a's module is loading but not loaded
+      const appB = await joinShareScope('app_b', sharedLib('app_b'), scope);
+      const libForB = appB.loadShare<SharedLib>('lib');
+
+      const [factoryA, factoryB] = await Promise.all([libForA, libForB]);
+      expect(factoryA && factoryA()).toBe(factoryB && factoryB());
+      expect(scope['lib']['1.0.0'].from).toBe('app_a');
+    });
+
+    it('lets a later container replace a module that failed to load', async () => {
+      const appA = await joinShareScope(
+        'app_a',
+        sharedLib('app_a', () => Promise.reject(new Error('chunk failed'))),
+      );
+      const scope = appA.shareScopeMap['default'];
+      await expect(appA.loadShare<SharedLib>('lib')).rejects.toThrow(
+        'chunk failed',
+      );
+
+      const appB = await joinShareScope('app_b', sharedLib('app_b'), scope);
+      const factoryB = await appB.loadShare<SharedLib>('lib');
+
+      expect(factoryB && factoryB().owner).toBe('app_b');
+    });
+  });
 });
