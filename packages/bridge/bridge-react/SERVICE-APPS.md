@@ -22,6 +22,8 @@ bridgeServicePlugin({
 
 `forwardHeaders` allows selected incoming business request headers into the serialized renderer request, for application loaders. Its default is an empty list. `serviceHeaders` authenticates the Host's HTTP request to the producer and is not passed to loaders as business headers. Install private policies from server-owned bootstrap configuration, not bundler runtime-plugin arguments. Node SSR bundles may also be downloadable. Neither credentials nor header forwarding policies belong in public discovery metadata.
 
+Framework adapters may pass a synchronous function returning the same policy table, such as `bridgeServicePlugin(() => readServerPolicies(runtimeName))`. The function is stored during runtime initialization and called only after the resolved Snapshot identifies the current expose as Service, when preparing its HTTP provider. Ordinary exposes and preloading do not read it. Missing server context errors remain visible at Service consumption, while a registered empty table uses the default request policy. The function reads the current process's configuration for that runtime name, not another application's server memory or policies. This is deferred configuration lookup, not per-request authentication.
+
 The browser plugin from `@module-federation/bridge-react/service` takes one same-origin ingress prefix, regardless of the number of Service exposes:
 
 ```ts

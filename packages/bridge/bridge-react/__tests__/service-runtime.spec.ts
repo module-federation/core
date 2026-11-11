@@ -259,6 +259,121 @@ async function renderService(module: {
   while (!(await reader.read()).done) {}
   reader.releaseLock();
 }
+it.each(['weather/App', 'forecast/App'])(
+  'reads lazy private policies only for a resolved Service expose, keyed by %s',
+  async (policyId) => {
+    const resolveServices = jest.fn(() => ({
+      [policyId]: {
+        forwardHeaders: ['cookie'],
+        serviceHeaders: { authorization: 'private-service-key' },
+        timeoutMs: 15000,
+      },
+    }));
+    const entry = jest.fn(() => ({
+      init() {},
+      get: () => () => ({ default: 'ordinary Card' }),
+    }));
+    const requests = jest
+      .spyOn(global, 'fetch')
+      .mockImplementation(async (url, init) => {
+        if (String(url).endsWith('mf-manifest.json'))
+          return new Response(JSON.stringify(manifestFixture()));
+        expect(String(url)).toBe(
+          'https://producer.test/application/services/App',
+        );
+        const body = JSON.parse(init!.body as string);
+        expect(body.request.moduleName).toBe('forecast/App');
+        expect(body.request.headers).toEqual({ cookie: 'host-user-session' });
+        expect(new Headers(init!.headers).get('authorization')).toBe(
+          'private-service-key',
+        );
+        return renderedResponse(body.request.identifierPrefix);
+      });
+    try {
+      const plugin = bridgeServicePlugin(resolveServices);
+      expect(resolveServices).not.toHaveBeenCalled();
+      const instance = createInstance({
+        name: `lazy-policy-${policyId}`,
+        shareStrategy: 'loaded-first',
+        remotes: [
+          {
+            name: 'weather',
+            alias: 'forecast',
+            entry: 'https://cdn.test/mf-manifest.json',
+          },
+        ],
+        plugins: [plugin, { name: 'ordinary-container', loadEntry: entry }],
+      });
+      await Promise.all(instance.initializeSharing('default'));
+      await instance.preloadRemote([
+        { nameOrAlias: 'forecast', exposes: ['App'] },
+      ]);
+      expect(resolveServices).not.toHaveBeenCalled();
+      expect(await instance.loadRemote('forecast/Card')).toEqual({
+        default: 'ordinary Card',
+      });
+      expect(resolveServices).not.toHaveBeenCalled();
+
+      const service = await instance.loadRemote<{
+        default: () => BridgeProviderInstance;
+      }>('weather/App');
+      expect(resolveServices).toHaveBeenCalledTimes(1);
+      expect(requests).toHaveBeenCalledTimes(1); // Only discovery, no HTTP render.
+      expect(entry).toHaveBeenCalledTimes(1);
+      await renderService(service!);
+      expect(resolveServices).toHaveBeenCalledTimes(1);
+      expect(await instance.loadRemote('weather/Card')).toEqual({
+        default: 'ordinary Card',
+      });
+      expect(resolveServices).toHaveBeenCalledTimes(1);
+      expect(entry).toHaveBeenCalledTimes(1);
+    } finally {
+      requests.mockRestore();
+    }
+  },
+);
+it('reports a missing private context only when consuming Service and leaves ordinary exposes usable', async () => {
+  const resolveServices = jest.fn(() => {
+    throw Error('Service runtime weather has no server configuration');
+  });
+  const requests = jest
+    .spyOn(global, 'fetch')
+    .mockImplementation(
+      async () => new Response(JSON.stringify(manifestFixture())),
+    );
+  const entry = jest.fn(() => ({
+    init() {},
+    get: () => () => ({ default: 'ordinary Card' }),
+  }));
+  try {
+    const instance = createInstance({
+      name: 'missing-private-context',
+      shareStrategy: 'loaded-first',
+      remotes: [
+        { name: 'weather', entry: 'https://cdn.test/mf-manifest.json' },
+      ],
+      plugins: [
+        bridgeServicePlugin(resolveServices),
+        { name: 'ordinary-container', loadEntry: entry },
+      ],
+    });
+    expect(await instance.loadRemote('weather/Card')).toEqual({
+      default: 'ordinary Card',
+    });
+    expect(resolveServices).not.toHaveBeenCalled();
+    await expect(instance.loadRemote('weather/App')).rejects.toThrow(
+      'Service runtime weather has no server configuration',
+    );
+    expect(resolveServices).toHaveBeenCalledTimes(1);
+    expect(await instance.loadRemote('weather/Card')).toEqual({
+      default: 'ordinary Card',
+    });
+    expect(entry).toHaveBeenCalledTimes(1);
+    expect(requests).toHaveBeenCalledTimes(1);
+  } finally {
+    requests.mockRestore();
+  }
+});
 it.each(['service-first', 'ordinary-first', 'concurrent'])(
   'discovers the manifest endpoint without Host policy and keeps mixed exposes independent: %s',
   async (order) => {
