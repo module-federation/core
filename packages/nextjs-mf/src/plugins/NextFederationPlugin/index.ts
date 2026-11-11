@@ -84,6 +84,7 @@ export class NextFederationPlugin {
     bindLoggerToCompiler(logger, compiler, 'NextFederationPlugin');
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] ||
+      // @ts-ignore webpack version is not the same as the one used in the plugin
       getWebpackPath(compiler, { framework: 'nextjs' });
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
@@ -95,6 +96,7 @@ export class NextFederationPlugin {
     this._options = normalFederationPluginOptions;
     this.applyConditionalPlugins(compiler, isServer);
 
+    // @ts-ignore webpack version is not the same as the one used in the plugin
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
 
     const noop = this.getNoopPath();

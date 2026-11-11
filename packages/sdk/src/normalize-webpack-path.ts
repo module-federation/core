@@ -1,6 +1,6 @@
 import type webpack from 'webpack';
 import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
+import { isAbsolute, resolve } from 'node:path';
 
 // Webpack 5.112 reorganized internals without retaining every old location.
 // Keep the old layout preferred for older installations and patched copies.
@@ -28,6 +28,43 @@ const webpackInternalPaths: Record<string, string> = {
 };
 
 let webpackRequire: NodeRequire | undefined;
+
+const createSdkWebpackRequire = (): NodeRequire =>
+  createRequire(
+    // This entrypoint is emitted as both CJS and ESM.
+    // @ts-ignore import.meta is used only in the ESM output.
+    process.env.IS_ESM_BUILD === 'true' ? import.meta.url : __filename,
+  );
+
+const getWebpackRequire = (): NodeRequire => {
+  if (process.env['FEDERATION_WEBPACK_PATH']) {
+    webpackRequire ??= createSdkWebpackRequire();
+    return webpackRequire;
+  }
+
+  // Resolve undeclared peer internals from the package calling this helper,
+  // rather than from the SDK (which does not depend on Webpack at runtime).
+  const prepareStackTrace = Error.prepareStackTrace;
+  const stackTraceLimit = Error.stackTraceLimit;
+  try {
+    Error.prepareStackTrace = (_error, callSites) => callSites;
+    Error.stackTraceLimit = Math.max(stackTraceLimit ?? 0, 10);
+    const error = new Error();
+    Error.captureStackTrace(error, getWebpackRequire);
+    const callSites = error.stack as unknown;
+    const caller = (Array.isArray(callSites) ? callSites : [])
+      .slice(1)
+      .map((callSite: NodeJS.CallSite) => callSite.getFileName())
+      .find(
+        (fileName): fileName is string =>
+          !!fileName && (isAbsolute(fileName) || fileName.startsWith('file:')),
+      );
+    return createRequire(caller || resolve(process.cwd(), 'package.json'));
+  } finally {
+    Error.prepareStackTrace = prepareStackTrace;
+    Error.stackTraceLimit = stackTraceLimit;
+  }
+};
 
 export function getWebpackPath(
   compiler: webpack.Compiler,
@@ -82,20 +119,16 @@ export const normalizeWebpackPath = (fullPath: string): string => {
     return candidate;
   }
 
-  webpackRequire ??= createRequire(
-    // This entrypoint is emitted as both CJS and ESM.
-    // @ts-ignore import.meta is used only in the ESM output.
-    process.env.IS_ESM_BUILD === 'true' ? import.meta.url : __filename,
-  );
+  const requestWebpack = getWebpackRequire();
   try {
     // Resolve only: never execute a module while choosing its layout.
-    webpackRequire.resolve(candidate);
+    requestWebpack.resolve(candidate);
     return candidate;
   } catch (error) {
     const missing = error as NodeJS.ErrnoException;
     if (
       missing.code !== 'MODULE_NOT_FOUND' ||
-      !missing.message.startsWith(`Cannot find module '${candidate}'\n`)
+      !missing.message.startsWith(`Cannot find module '${candidate}'`)
     ) {
       throw error;
     }
@@ -103,6 +136,6 @@ export const normalizeWebpackPath = (fullPath: string): string => {
   const fallback = normalize(relocatedPath);
   // A missing fallback, package exports restriction, or other resolution error
   // must propagate instead of returning an unusable path.
-  webpackRequire.resolve(fallback);
+  requestWebpack.resolve(fallback);
   return fallback;
 };

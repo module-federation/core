@@ -1,6 +1,12 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -71,6 +77,76 @@ describe('Webpack internal layout compatibility (real module resolution)', () =>
     expect(() => require(normalizeWebpackPath(oldPath))).toThrow(
       'broken old module',
     );
+  });
+
+  it('uses caller-relative resolution without a compiler path', () => {
+    delete process.env['FEDERATION_WEBPACK_PATH'];
+    const normalized = normalizeWebpackPath(oldPath);
+    expect([oldPath, newPath]).toContain(normalized);
+    expect(require(normalized)).toBeInstanceOf(Function);
+  });
+
+  it('does not require Webpack to be resolvable from the SDK', () => {
+    delete process.env['FEDERATION_WEBPACK_PATH'];
+    const isolatedRoot = path.join(root, 'isolated');
+    mkdirSync(isolatedRoot, { recursive: true });
+    const isolatedSdk = path.join(isolatedRoot, 'sdk.cjs');
+    copyFileSync(
+      require.resolve('@module-federation/sdk/normalize-webpack-path'),
+      isolatedSdk,
+    );
+    const callerWebpack = path.join(isolatedRoot, 'node_modules', oldPath);
+    mkdirSync(path.dirname(callerWebpack), { recursive: true });
+    writeFileSync(callerWebpack + '.js', 'module.exports = "caller";');
+    const caller = path.join(isolatedRoot, 'caller.cjs');
+    writeFileSync(
+      caller,
+      `const { normalizeWebpackPath } = require('./sdk.cjs');
+       Error.stackTraceLimit = 0;
+       const request = ${JSON.stringify(oldPath)};
+       const normalized = normalizeWebpackPath(request);
+       console.log(JSON.stringify([normalized, require(normalized)]));`,
+    );
+    const result = execFileSync(process.execPath, [caller], {
+      encoding: 'utf8',
+      env: process.env,
+    });
+    expect(JSON.parse(result)).toEqual([oldPath, 'caller']);
+  });
+
+  it('falls back with Jest-style module resolution errors', () => {
+    delete process.env['FEDERATION_WEBPACK_PATH'];
+    const isolatedRoot = path.join(root, 'isolated-jest');
+    mkdirSync(isolatedRoot, { recursive: true });
+    copyFileSync(
+      require.resolve('@module-federation/sdk/normalize-webpack-path'),
+      path.join(isolatedRoot, 'sdk.cjs'),
+    );
+    const callerWebpack = path.join(isolatedRoot, 'node_modules', newPath);
+    mkdirSync(path.dirname(callerWebpack), { recursive: true });
+    writeFileSync(callerWebpack + '.js', 'module.exports = "new";');
+    const caller = path.join(isolatedRoot, 'caller.cjs');
+    writeFileSync(
+      caller,
+      `const Module = require('node:module');
+       const { normalizeWebpackPath } = require('./sdk.cjs');
+       const original = Module._resolveFilename;
+       Module._resolveFilename = function (request, ...args) {
+         if (request === ${JSON.stringify(oldPath)}) {
+           const error = new Error("Cannot find module '" + request + "' from 'caller.cjs'");
+           error.code = 'MODULE_NOT_FOUND';
+           throw error;
+         }
+         return original.call(this, request, ...args);
+       };
+       const normalized = normalizeWebpackPath(${JSON.stringify(oldPath)});
+       console.log(JSON.stringify([normalized, require(normalized)]));`,
+    );
+    const result = execFileSync(process.execPath, [caller], {
+      encoding: 'utf8',
+      env: process.env,
+    });
+    expect(JSON.parse(result)).toEqual([newPath, 'new']);
   });
 
   it('leaves unmapped requests and the top-level compiler path unchanged', () => {
