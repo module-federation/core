@@ -26,6 +26,8 @@ interface BasicModuleInfo {
 }
 
 export interface BasicProviderModuleInfo extends BasicModuleInfo {
+  /** Absolute HTTP service base copied from the selected manifest/deployment. */
+  serviceBaseUrl?: string;
   remoteEntry: string;
   remoteEntryType: RemoteEntryType;
   // ssrRemoteEntry/ssrRemoteEntryType only appear while manifest has serveSideRemoteEntry field

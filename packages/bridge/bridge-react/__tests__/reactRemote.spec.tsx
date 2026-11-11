@@ -346,7 +346,13 @@ describe('unified React remote consumption', () => {
   });
   it.each([
     ['conflict', 'bridge' as const, false, 'component' as const, /conflicts/],
-    ['service', 'bridge' as const, true, undefined, /Service App/],
+    [
+      'unbound service',
+      'bridge' as const,
+      true,
+      undefined,
+      /requires an ingress binding and build identity/,
+    ],
   ])(
     'reports %s after loading without invoking the export',
     async (_name, protocol, service, hint, message) => {

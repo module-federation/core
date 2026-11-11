@@ -5,14 +5,14 @@ let sequence = 0;
 export function snapshotRuntime({
   module,
   render,
-  isService = false,
+  servicePath,
   pureEntry = false,
   globalSnapshot = false,
   dataFetch,
 }: {
   module: Record<string, unknown>;
   render?: 'component' | 'bridge';
-  isService?: boolean;
+  servicePath?: string;
   pureEntry?: boolean;
   globalSnapshot?: boolean;
   dataFetch?: () => unknown;
@@ -20,6 +20,8 @@ export function snapshotRuntime({
   const name = `react_remote_${++sequence}`;
   const snapshot = {
     version: 'selected',
+    buildVersion: 'build-1',
+    serviceBaseUrl: 'https://service.test/',
     globalName: name,
     remoteEntry: 'entry.js',
     publicPath: `https://${name}.test/`,
@@ -29,7 +31,7 @@ export function snapshotRuntime({
         moduleName: 'Card',
         modulePath: './Card',
         ...(render && { render }),
-        isService,
+        ...(servicePath !== undefined && { servicePath }),
         assets: { js: { sync: [], async: [] }, css: { sync: [], async: [] } },
       },
     ],
@@ -40,7 +42,6 @@ export function snapshotRuntime({
     snapshot.modules.push({
       moduleName: 'Card.data',
       modulePath: './Card.data',
-      isService: false,
       assets: { js: { sync: [], async: [] }, css: { sync: [], async: [] } },
     });
   }

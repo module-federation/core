@@ -1,3 +1,4 @@
+import { version as reactVersion } from 'react';
 import { Readable, type Transform } from 'node:stream';
 import type {
   BridgeSSRMessage,
@@ -9,8 +10,8 @@ import { htmlFrames, type HTMLFrame } from './frames.server';
 import { createReactStreamScriptIsolator } from './script-isolation.server';
 import { channel } from './message-channel.server';
 
-export const BRIDGE_PRODUCER_PROTOCOL =
-  'module-federation/bridge-ssr/producer/v1';
+import { BRIDGE_PRODUCER_PROTOCOL } from '../service/protocol';
+export { BRIDGE_PRODUCER_PROTOCOL } from '../service/protocol';
 
 /** Framework byte streams are normalized once, inside the producer's Node entry. */
 export async function normalizeBridgeSSR(
@@ -147,6 +148,11 @@ export async function normalizeBridgeSSR(
         maxFrameBytes,
         includeMetadata: true,
         shellMarker: hydration?.shellMarker,
+        // React 19.2+ treats $? as abandoned once its owner document finishes.
+        // $~ is its native queued boundary and retains _reactRetry after load.
+        independentSuspense:
+          Number(reactVersion.split('.')[0]) === 19 &&
+          Number(reactVersion.split('.')[1]) >= 2,
       });
       const isolate = createReactStreamScriptIsolator(
         info.identifierPrefix,

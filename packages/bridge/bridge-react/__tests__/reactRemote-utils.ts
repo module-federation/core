@@ -10,10 +10,11 @@ export function remoteRuntime(
     modulePath: './Card',
     assets: { js: { sync: [], async: [] }, css: { sync: [], async: [] } },
     ...(render && { render }),
-    isService,
+    ...(isService && { servicePath: 'render' }),
   };
   const snapshot = {
     modules: [metadata],
+    serviceBaseUrl: 'https://service.test/',
     publicPath: '',
     remoteEntry: '',
     version: '1',

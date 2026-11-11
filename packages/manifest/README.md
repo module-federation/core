@@ -36,8 +36,11 @@ new StatsPlugin(mfOptions, {
 ## Bridge rendering metadata
 
 Statically identifiable default exports created with `createBridgeComponent` publish
-`render: 'bridge'` and `isService: false` on the corresponding expose. Other exposes
-keep their existing shape. The fields are also preserved in MF runtime Snapshots.
+`render: 'bridge'` on the corresponding expose. Application options retain the
+statically declared `isService` flag, which is available as build analysis in Stats.
+Published manifests and runtime Snapshots identify a Service App by the presence
+of `servicePath`, without an additional `isService` flag. Ordinary exposes keep
+their existing shape.
 
 The plugin collects metadata after modules are built and before module concatenation,
 then writes it during manifest generation. It follows the expose's default export
@@ -56,7 +59,22 @@ Remote, external and ignored modules are opaque and keep their existing metadata
 The analyzer does not resolve their requests against the local filesystem.
 
 Provider options must be static objects without spreads or computed keys.
-Service App declarations and ambiguous wrappers are diagnosed at build time.
+Service App declarations accept a statically known `isService: true`. Dynamic flags
+and ambiguous wrappers are diagnosed at build time. Framework integrations receive
+analyzed Bridge metadata in `manifest.additionalData`, and assign a relative
+`servicePath` to each Service expose and one absolute `metaData.serviceBaseUrl` for
+the producer deployment. This base is independent of the static asset `publicPath`.
+The framework must use the same route definition to register its HTTP middleware.
+Changing metadata alone does not register a server route.
+
+Compilation fails when a Service declaration has no valid service path or base.
+Paths cannot be empty, absolute, or traverse outside the service base. The SDK
+copies the base to `Snapshot.serviceBaseUrl` and paths to its modules. Consumers
+resolve endpoints from the selected Snapshot, including directly supplied Snapshots,
+without fetching another manifest or deriving the service origin from the asset URL.
+Service authentication credentials belong in private server configuration and must
+not be included in these public fields.
+
 Webpack reuses its parser AST and caches compact export descriptions with each
 module. Rspack analyzes the already transformed source of reachable built modules
 once per compilation. Loader output and resource queries therefore use the actual

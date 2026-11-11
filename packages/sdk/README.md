@@ -100,6 +100,21 @@ generateSnapshotFromManifest(manifest, options);
 - Type: `generateSnapshotFromManifest(manifest: Manifest, options?: IOptions)`
 - Generates a snapshot from a manifest.
 
+Service metadata is preserved as `Snapshot.serviceBaseUrl` and each module's
+`servicePath`. The presence of `servicePath` identifies a Service App. Application
+definitions still declare `isService: true`, but this build declaration is not a
+manifest or Snapshot field.
+
+### getServiceUrl
+
+- Type: `getServiceUrl(serviceBaseUrl: string | undefined, servicePath: string): string`
+
+Resolve an HTTP render endpoint from the selected Snapshot's service base and
+expose path. The base is independent of the manifest URL and asset public path.
+It must be an absolute HTTP(S) URL without credentials, query or fragment. The
+path must be nonempty and relative, without dot-segment traversal. Invalid
+metadata throws instead of falling back to ordinary remote module loading.
+
 ## Testing
 
 The SDK uses Jest for testing. The configuration can be found in `jest.config.js`. The tests are located in the **tests** directory.

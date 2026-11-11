@@ -11,7 +11,7 @@ const REBUILD_TIMEOUT_MS = 30_000;
 const PROCESS_TIMEOUT_MS = 120_000;
 
 describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
-  '%s Bridge metadata rebuilds',
+  '%s Service metadata rebuilds',
   (bundler) => {
     it(
       'updates an aliased re-export in both directions while retaining cached modules',
@@ -33,7 +33,7 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
         );
         fs.writeFileSync(
           path.join(directory, 'bridge.js'),
-          'const createBridgeComponent = options => options; export default createBridgeComponent({rootComponent: () => null});',
+          'const createBridgeComponent = options => options; export default createBridgeComponent({rootComponent: () => null, isService: true});',
         );
         fs.writeFileSync(
           path.join(directory, 'card.js'),
@@ -51,9 +51,16 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
           const fs = require('node:fs');
           const {StatsPlugin} = require('../dist/index.js');
           const build = ${bundler === 'webpack' ? "require('webpack')" : "(await import(require.resolve('@rspack/core'))).rspack"};
-          const options = {name: 'watch_remote', exposes: {'./App': './entry.js'}};
+          const options = {name: 'watch_remote', exposes: {'./App': './entry.js'}, manifest: {
+            additionalData({stats}) {
+              stats.metaData.serviceBaseUrl = 'https://renderer.example.test/base/';
+              for (const item of stats.exposes) {
+                if (item.isService) item.servicePath = 'render/' + item.name;
+              }
+            },
+          }};
           const config = {
-            mode: 'production', context: ${JSON.stringify(directory)}, entry: {}, cache: ${bundler === 'webpack' ? `{type: 'filesystem', cacheDirectory: ${JSON.stringify(path.join(directory, 'cache'))}}` : 'true'},
+            mode: 'development', context: ${JSON.stringify(directory)}, entry: {}, cache: ${bundler === 'webpack' ? `{type: 'filesystem', cacheDirectory: ${JSON.stringify(path.join(directory, 'cache'))}}` : 'true'},
             output: {path: ${JSON.stringify(path.join(directory, 'dist'))}, publicPath: 'https://example.test/'},
             resolve: {alias: {
               '@barrel': ${JSON.stringify(path.join(directory, 'barrel.js'))},
@@ -61,7 +68,7 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
               '@card': ${JSON.stringify(path.join(directory, 'card.js'))},
             }},
             plugins: [
-              new ${bundler === 'rspack' ? 'build.container.ModuleFederationPluginV1' : 'build.container.ModuleFederationPlugin'}({...options, ${bundler === 'rspack-native' ? "implementation: require.resolve('../../runtime-tools'), manifest: true," : ''}}),
+              new ${bundler === 'rspack' ? 'build.container.ModuleFederationPluginV1' : 'build.container.ModuleFederationPlugin'}({name: options.name, exposes: options.exposes, ${bundler === 'rspack-native' ? "implementation: require.resolve('../../runtime-tools'), manifest: true," : ''}}),
               new StatsPlugin(options, {pluginVersion: 'test', bundler: ${JSON.stringify(bundler === 'webpack' ? 'webpack' : 'rspack')}}),
             ],
           };
@@ -86,7 +93,8 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
               }
               const manifest = JSON.parse(fs.readFileSync(${JSON.stringify(path.join(directory, 'dist/mf-manifest.json'))}, 'utf8'));
               const item = manifest.exposes.find(item => item.path === './App');
-              revisions.push(item?.render || null);
+              if ('isService' in item) throw new Error('Build-only isService leaked into the manifest');
+              revisions.push(item?.servicePath || null);
               if (revisions.length === 3) {
                 clearTimeout(timer);
                 watcher.close(error => error ? reject(error) : resolve());
@@ -112,7 +120,7 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
           await new Promise((resolve, reject) => cachedCompiler.run((error, stats) => error || stats.hasErrors() ? reject(error || new Error(stats.toString({all:false, errors:true}))) : resolve(stats)));
           if (!foundEntry || rebuiltEntry) throw new Error('Filesystem cache was not reused: ' + JSON.stringify({foundEntry, rebuiltEntry}));
           const cachedManifest = JSON.parse(fs.readFileSync(${JSON.stringify(path.join(directory, 'dist/mf-manifest.json'))}, 'utf8'));
-          if (cachedManifest.exposes.find(item => item.path === './App')?.render !== 'bridge') throw new Error('Cached Bridge metadata was lost');
+          if (cachedManifest.exposes.find(item => item.path === './App')?.servicePath !== 'render/App') throw new Error('Cached Service metadata was lost');
           await new Promise(resolve => cachedCompiler.close(resolve));
           `
               : ''
@@ -138,7 +146,7 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
             JSON.parse(
               fs.readFileSync(path.join(directory, 'revisions.json'), 'utf8'),
             ),
-          ).toEqual(['bridge', null, 'bridge']);
+          ).toEqual(['render/App', null, 'render/App']);
         } finally {
           fs.rmSync(directory, { recursive: true, force: true });
         }
