@@ -70,12 +70,6 @@ export function getWebpackPath(
   compiler: webpack.Compiler,
   options: { framework: 'nextjs' | 'other' } = { framework: 'other' },
 ): string {
-  const resolveWithContext = new Function(
-    'id',
-    'options',
-    'return typeof require === "undefined" ? "" : require.resolve(id, options)',
-  ) as (id: string, options?: { paths?: string[] }) => string;
-
   try {
     // @ts-ignore just throw err
     compiler.webpack();
@@ -97,7 +91,7 @@ export function getWebpackPath(
       }
       return '';
     }
-    return resolveWithContext('webpack', { paths: [webpackPath] });
+    return webpackPath ? createRequire(webpackPath).resolve('webpack') : '';
   }
 }
 

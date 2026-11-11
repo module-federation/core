@@ -158,6 +158,32 @@ describe('Webpack internal layout compatibility (real module resolution)', () =>
     );
   });
 
+  it.each(['cjs', 'mjs'])(
+    'detects the active compiler from a %s caller without global require',
+    (extension) => {
+      const entry = require
+        .resolve('@module-federation/sdk/normalize-webpack-path')
+        .replace(/\.cjs$/, extension === 'mjs' ? '.js' : '.cjs');
+      const webpackEntry = require.resolve('webpack');
+      const caller = path.join(root, `compiler.${extension}`);
+      writeFileSync(
+        caller,
+        extension === 'cjs'
+          ? `const { getWebpackPath } = require(${JSON.stringify(entry)});
+             const webpack = require(${JSON.stringify(webpackEntry)});
+             console.log(getWebpackPath({ webpack }));`
+          : `import { getWebpackPath } from ${JSON.stringify(entry)};
+             import webpack from ${JSON.stringify(webpackEntry)};
+             console.log(getWebpackPath({ webpack }));`,
+      );
+      const result = execFileSync(process.execPath, [caller], {
+        encoding: 'utf8',
+        env: process.env,
+      });
+      expect(result.trim()).toBe(webpackEntry);
+    },
+  );
+
   it.each(['cjs', 'js'])(
     'resolves old and relocated layouts in the emitted %s entry',
     (extension) => {
