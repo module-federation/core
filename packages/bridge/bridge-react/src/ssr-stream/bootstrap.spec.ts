@@ -353,8 +353,10 @@ describe('Bridge stylesheet readiness', () => {
     completeFrames(runtime, 'a', ['/shared.css']);
     completeFrames(runtime, 'b', ['/shared.css']);
     const link = document.querySelector('link')!;
+    const released = runtime.get('a')!;
     runtime.release('a', document.getElementById('a')!);
-    await expect(runtime.get('a')!.done).rejects.toThrow('unmounted');
+    await expect(released.done).rejects.toThrow('unmounted');
+    expect(runtime.get('a')).toBeUndefined();
     expect(link.isConnected).toBe(true);
     link.dispatchEvent(new dom.window.Event('load'));
     await runtime.get('b')!.done;
@@ -371,8 +373,10 @@ describe('Bridge stylesheet readiness', () => {
     existing.href = '/shared.css';
     document.head.appendChild(existing);
     completeFrames(runtime, 'a', ['/shared.css']);
+    const released = runtime.get('a')!;
     runtime.release('a', document.getElementById('a')!);
-    await expect(runtime.get('a')!.done).rejects.toThrow('unmounted');
+    await expect(released.done).rejects.toThrow('unmounted');
+    expect(runtime.get('a')).toBeUndefined();
     existing.dispatchEvent(new dom.window.Event('load'));
     await Promise.resolve();
     expect(existing.isConnected).toBe(true);

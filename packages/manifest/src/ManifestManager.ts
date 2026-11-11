@@ -7,6 +7,7 @@ import {
   ManifestRemote,
   moduleFederationPlugin,
   getManifestFileName,
+  getServiceUrl,
 } from '@module-federation/sdk';
 import { isDev } from './utils';
 import logger from './logger';
@@ -58,13 +59,32 @@ class ManifestManager {
     };
 
     manifest.exposes = stats.exposes.reduce((sum, cur) => {
+      if (
+        cur.isService ||
+        Object.prototype.hasOwnProperty.call(cur, 'servicePath')
+      ) {
+        if (cur.render !== 'bridge') {
+          throw new Error(
+            `Service expose ${cur.name} must use Bridge rendering.`,
+          );
+        }
+        try {
+          getServiceUrl(metaData.serviceBaseUrl, cur.servicePath as string);
+        } catch (error) {
+          throw new Error(
+            `Service expose ${cur.name}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      }
       const expose: ManifestExpose = {
         id: cur.id,
         name: cur.name,
         assets: cur.assets,
         path: cur.path,
         ...(cur.render !== undefined && { render: cur.render }),
-        ...(cur.isService !== undefined && { isService: cur.isService }),
+        ...(Object.prototype.hasOwnProperty.call(cur, 'servicePath') && {
+          servicePath: cur.servicePath,
+        }),
       };
       sum.push(expose);
       return sum;

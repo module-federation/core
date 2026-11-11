@@ -157,7 +157,8 @@ export function bridgeStreamBootstrap(
     fallback(error);
   };
   const expect = (id: string) => {
-    if (entries[id]) return;
+    // A null tombstone rejects late frames without retaining a released session.
+    if (id in entries) return;
     let resolve: (value: any) => void = () => {};
     let reject: (reason: unknown) => void = () => {};
     const done = new Promise<any>((yes, no) => {
@@ -412,7 +413,7 @@ export function bridgeStreamBootstrap(
   const runtime: BridgeStreamBrowserRuntime = {
     expect,
     get(id) {
-      return entries[id];
+      return entries[id] || undefined;
     },
     claim(id, container) {
       const state = entries[id];
@@ -428,6 +429,9 @@ export function bridgeStreamBootstrap(
     release(id, container) {
       const state = entries[id];
       if (!state || (state.container && state.container !== container)) return;
+      entries[id] = null;
+      state.container = undefined;
+      state.snapshot = undefined;
       state.cancelled = true;
       state.pending = [];
       state.queuedBytes = 0;
@@ -446,7 +450,7 @@ export function bridgeStreamBootstrap(
     accept(id, frame) {
       expect(id);
       const state = entries[id];
-      if (state.cancelled) return;
+      if (!state || state.cancelled) return;
       if (state.complete) {
         fallback(Error('Bridge frame after completion'));
         return;
@@ -474,8 +478,10 @@ export function bridgeStreamBootstrap(
   global.__MF_BRIDGE_SSR__ = runtime;
   const observer = new MutationObserver(() => {
     Object.keys(entries).forEach((id) => {
-      if (entries[id].pending.length) drain(id);
-      finish(id, entries[id]);
+      const state = entries[id];
+      if (!state) return;
+      if (state.pending.length) drain(id);
+      finish(id, state);
     });
   });
   observer.observe(document.documentElement, {
@@ -490,6 +496,10 @@ export function bridgeStreamBootstrap(
       observer.disconnect();
       Object.keys(entries).forEach((id) => {
         const state = entries[id];
+        if (!state) return;
+        entries[id] = null;
+        state.container = undefined;
+        state.snapshot = undefined;
         state.cancelled = true;
         const error = Error('Bridge document unloaded');
         state.updateController?.error(error);

@@ -1,4 +1,6 @@
 /** Shared Bridge lifecycle used by legacy and unified consumers. */
+import type { receiveBridgeService } from '../service/browser';
+import type { BrowserServiceRequest } from '../service/config';
 import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import type { ModuleFederation } from '@module-federation/enhanced/runtime';
 import type { BridgeOperationContext } from '@module-federation/bridge-shared';
@@ -34,6 +36,7 @@ export interface RemoteAppWrapperProps {
   ssrInstanceId?: string;
   /** Request-local producer instance, only present during server rendering. */
   ssrProvider?: BridgeProviderInstance;
+  service?: BrowserServiceRequest;
 }
 
 const asError = (error: unknown) =>
@@ -65,6 +68,7 @@ export const RemoteAppWrapper = forwardRef<
     const element = dom.current!;
     const controller = new AbortController();
     let hydration: ReturnType<typeof claimRemoteHydration>;
+    let service: ReturnType<typeof receiveBridgeService> | undefined;
     let renderedProps: RemoteAppWrapperProps | undefined;
     const initialProps = latest.current;
     let destroyed = false;
@@ -148,6 +152,33 @@ export const RemoteAppWrapper = forwardRef<
       .then(async () => {
         if (!owner.active) return;
         hydration = claimRemoteHydration(instanceId, element);
+        if (!hydration && initialProps.service) {
+          if (!instanceId)
+            throw Error('Service hydration requires React 18 or newer.');
+          const { receiveBridgeService } = await import('../service/browser');
+          if (!owner.active) return;
+          service = receiveBridgeService(
+            element,
+            instanceId,
+            {
+              moduleName,
+              url: new URL(
+                initialProps.routing?.navigation?.getLocation() ||
+                  location.href,
+                location.href,
+              ).href,
+              basename: initialProps.routing?.basename,
+              memoryRoute: initialProps.routing?.memoryRoute,
+              props: initialProps.remoteProps,
+              signal: controller.signal,
+            },
+            initialProps.service,
+          );
+          hydration = service;
+          void service.done.catch((failure) => {
+            if (owner.active) setError(asError(failure));
+          });
+        }
         const factory = loadProvider ? await loadProvider() : providerInfo;
         if (!owner.active) return;
         const provider = await factory?.();
@@ -187,7 +218,9 @@ export const RemoteAppWrapper = forwardRef<
       owner.active = false;
       // Producer abort listeners may synchronously cancel hydration readers.
       // Mark transport cancellation first so that cleanup cannot trigger recovery.
-      if (instanceId) hydration?.runtime.release(instanceId, element);
+      service?.release();
+      if (!service && instanceId)
+        hydration?.runtime.release(instanceId, element);
       controller.abort();
       void owner.queue.then(destroy).catch((failure) => console.error(failure));
     };
@@ -207,22 +240,25 @@ export const RemoteAppWrapper = forwardRef<
 
   if (error) throw error;
   return (
-    <div
-      ref={(element) => {
-        dom.current = element;
-        if (typeof ref === 'function') ref(element);
-        else if (ref) ref.current = element;
-      }}
-      data-mf-bridge={moduleName}
-      id={instanceId}
-      data-mf-bridge-root={instanceId}
-      data-mf-bridge-ssr={serverHTML ? '' : undefined}
-      className={`${getRootDomDefaultClassName(moduleName)} ${className || ''}`}
-      style={style}
-      suppressHydrationWarning={Boolean(serverHTML)}
-      {...(serverHTML
-        ? { dangerouslySetInnerHTML: serverHTML }
-        : { children: prepared?.active ? null : loading })}
-    />
+    <>
+      {props.service && !prepared?.active && !serverHTML ? loading : null}
+      <div
+        ref={(element) => {
+          dom.current = element;
+          if (typeof ref === 'function') ref(element);
+          else if (ref) ref.current = element;
+        }}
+        data-mf-bridge={moduleName}
+        id={instanceId}
+        data-mf-bridge-root={instanceId}
+        data-mf-bridge-ssr={serverHTML ? '' : undefined}
+        className={`${getRootDomDefaultClassName(moduleName)} ${className || ''}`}
+        style={style}
+        suppressHydrationWarning={Boolean(serverHTML)}
+        {...(serverHTML
+          ? { dangerouslySetInnerHTML: serverHTML }
+          : { children: props.service || prepared?.active ? null : loading })}
+      />
+    </>
   );
 });

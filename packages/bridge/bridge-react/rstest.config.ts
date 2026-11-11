@@ -21,7 +21,10 @@ export default defineConfig({
     path.resolve(__dirname, 'src/**/*.spec.ts'),
     path.resolve(__dirname, 'src/**/*.spec.tsx'),
   ],
-  exclude: [path.resolve(__dirname, 'src/ssr-stream/**/*.spec.ts')],
+  exclude: [
+    path.resolve(__dirname, 'src/ssr-stream/**/*.spec.ts'),
+    path.resolve(__dirname, 'src/service/**/*.server.spec.ts'),
+  ],
   globals: true,
   testTimeout: 10000,
   setupFiles: [path.resolve(__dirname, '__tests__/setupTests.ts')],

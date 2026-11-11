@@ -5,27 +5,67 @@ describe('generateSnapshotFromManifest', () => {
   it('preserves per-expose rendering metadata without changing legacy modules', () => {
     const input = {
       ...manifest.devAppManifest,
+      metaData: {
+        ...manifest.devAppManifest.metaData,
+        serviceBaseUrl: 'https://service.example.test/weather/',
+      },
       exposes: manifest.devAppManifest.exposes.map((item, index) =>
         index === 0
-          ? { ...item, render: 'bridge' as const, isService: false }
+          ? {
+              ...item,
+              render: 'bridge' as const,
+              servicePath: '__mf/service/App',
+              // Old metadata must not be copied to the runtime Snapshot.
+              isService: true,
+            }
           : item,
       ),
     };
     const result = generateSnapshotFromManifest(input);
     expect(result.modules[0]).toMatchObject({
       render: 'bridge',
-      isService: false,
+      servicePath: '__mf/service/App',
     });
+    expect(result.modules[0]).not.toHaveProperty('isService');
+    expect(result.serviceBaseUrl).toBe('https://service.example.test/weather/');
     expect(result.modules.slice(1)).toEqual(
       snapshot.devAppSnapshot.modules.slice(1),
     );
     expect(manifest.devAppManifest.exposes[0]).not.toHaveProperty('render');
+  });
+  it('does not replace a service deployment with the manifest or asset origin', () => {
+    const input = {
+      ...manifest.devAppManifest,
+      metaData: {
+        ...manifest.devAppManifest.metaData,
+        publicPath: 'https://cdn.example.test/assets/',
+        serviceBaseUrl: 'https://private-render.example.test/base/',
+      },
+    };
+    const result = generateSnapshotFromManifest(input, {
+      version: 'https://registry.example.test/mf-manifest.json',
+    });
+    expect(result.serviceBaseUrl).toBe(
+      'https://private-render.example.test/base/',
+    );
+    expect(result.publicPath).toBe('https://cdn.example.test/assets/');
   });
   it('return basic app snapshot with only manifest params in dev', () => {
     const remoteSnapshot = generateSnapshotFromManifest(
       manifest.devAppManifest,
     );
     expect(remoteSnapshot).toEqual(snapshot.devAppSnapshot);
+  });
+  it('retains the Service discriminator even when its value is invalid', () => {
+    const input = {
+      ...manifest.devAppManifest,
+      exposes: manifest.devAppManifest.exposes.map((item, index) =>
+        index === 0 ? { ...item, servicePath: undefined } : item,
+      ),
+    };
+    const result = generateSnapshotFromManifest(input);
+    expect(result.modules[0]).toHaveProperty('servicePath', undefined);
+    expect(result.modules[1]).not.toHaveProperty('servicePath');
   });
 
   it('return modulePath while expose.path existed', () => {
