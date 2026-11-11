@@ -16,6 +16,7 @@ function setup(
   timeoutMs = 1000,
   signal?: AbortSignal,
   onError?: BridgeSSRControllerOptions['onError'],
+  work?: BridgeSSRControllerOptions['work'],
 ) {
   return createBridgeSSRController({
     request: new Request('https://host.example/inventory/detail/42', {
@@ -27,6 +28,7 @@ function setup(
     identifierPrefix: 'host-',
     timeoutMs,
     onError,
+    work,
   });
 }
 function producer() {
@@ -92,6 +94,62 @@ function collect(
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe('request-scoped Bridge composition', () => {
+  it.each(['resolve', 'reject'] as const)(
+    'retains original work after abort until its promises %s',
+    async (settlement) => {
+      const pending = new Set<Promise<unknown>>();
+      const work = {
+        track<T>(promise: Promise<T>) {
+          pending.add(promise);
+          void promise.then(
+            () => pending.delete(promise),
+            () => pending.delete(promise),
+          );
+          return promise;
+        },
+      };
+      const abort = new AbortController();
+      const controller = setup(1000, abort.signal, undefined, work);
+      let finishPreparation!: () => void;
+      const preparation = new Promise<void>((resolve, reject) => {
+        finishPreparation =
+          settlement === 'resolve'
+            ? resolve
+            : () => reject(Error('preparation cancelled'));
+      });
+      const reserved = controller.context.reserve('preparing');
+      const waiting = reserved.wait(preparation);
+      const rejected = expect(waiting).rejects.toThrow('disconnected');
+      let finishProducer!: () => void;
+      const producerWork = new Promise<void>((resolve, reject) => {
+        finishProducer =
+          settlement === 'resolve'
+            ? resolve
+            : () => reject(Error('producer cancelled'));
+      });
+      const remote = producer();
+      const renderStream = remote.provider.renderStream!;
+      remote.provider.renderStream = (request) => {
+        expect(request.work).toBe(work);
+        request.work!.track(producerWork);
+        return renderStream(request);
+      };
+      controller.context
+        .reserve('rendering')
+        .activate(() => remote.provider, { props: {} });
+      await tick();
+      abort.abort(new Error('disconnected'));
+      await rejected;
+      await tick();
+      expect(pending.has(preparation)).toBe(true);
+      expect(pending.has(producerWork)).toBe(true);
+      finishPreparation();
+      finishProducer();
+      await tick();
+      expect(pending.size).toBe(0);
+    },
+  );
+
   it('keeps the response open after Host EOF while a reserved loader becomes a Bridge', async () => {
     const controller = setup();
     const slot = controller.context.reserve('a');

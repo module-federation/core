@@ -39,6 +39,9 @@ export async function normalizeBridgeSSR(
     throw Error('Bridge producer byte limits must be positive integers');
   void raw.snapshot?.catch(() => {});
   void raw.hydration?.snapshot.catch(() => {});
+  for (const snapshot of new Set([raw.snapshot, raw.hydration?.snapshot])) {
+    if (snapshot) info.work?.track(snapshot);
+  }
   const hydration =
     options.hydrationMode === 'complete' ? undefined : raw.hydration;
   const snapshot = hydration ? undefined : raw.snapshot;
@@ -81,12 +84,14 @@ export async function normalizeBridgeSSR(
     () => {
       if (started || stopped) return;
       started = true;
-      void produce();
+      const producing = produce();
+      info.work?.track(producing);
     },
   );
   info.signal.addEventListener('abort', onAbort, { once: true });
   if (info.signal.aborted) onAbort();
-  const wait = <T>(promise: Promise<T>) => Promise.race([promise, interrupted]);
+  const wait = <T>(promise: Promise<T>) =>
+    Promise.race([info.work?.track(promise) ?? promise, interrupted]);
   if (stopped) await interrupted;
   if (!hydration && !snapshot) {
     const failure = Error(

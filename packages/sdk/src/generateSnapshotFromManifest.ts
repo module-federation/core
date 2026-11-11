@@ -137,6 +137,7 @@ export function generateSnapshotFromManifest(
   const { exposes } = manifest;
 
   let basicRemoteSnapshot: BasicProviderModuleInfo = {
+    providerName: manifest.name,
     version: version ? version : '',
     buildVersion,
     globalName,

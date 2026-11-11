@@ -30,6 +30,7 @@ export function assignRemoteInfo(
     entryUrl = `https:${entryUrl}`;
   }
 
+  remoteInfo.providerName = remoteSnapshot.providerName;
   remoteInfo.type = remoteEntryInfo.type;
   remoteInfo.entryGlobalName = remoteEntryInfo.globalName;
   remoteInfo.entry = entryUrl;

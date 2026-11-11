@@ -38,18 +38,25 @@ export function createInstance(options: UserOptions) {
 }
 
 let FederationInstance: ModuleFederation | null = null;
+function rememberDefault(instance: ModuleFederation) {
+  FederationInstance = instance;
+  instance.hooks?.lifecycle.dispose?.on(({ origin }) => {
+    if (FederationInstance === origin) FederationInstance = null;
+  });
+}
 export function init(options: UserOptions): ModuleFederation {
   // Retrieve the same instance with the same name
   const instance = getGlobalFederationInstance(options.name, options.version);
   const normalizedOptions = { ...options, id: options.id || '' };
   if (!instance) {
-    FederationInstance = createInstance(normalizedOptions);
-    return FederationInstance;
+    const created = createInstance(normalizedOptions);
+    rememberDefault(created);
+    return created;
   } else {
     // Merge options
     instance.initOptions(normalizedOptions);
     if (!FederationInstance) {
-      FederationInstance = instance;
+      rememberDefault(instance);
     }
     return instance;
   }
@@ -99,6 +106,21 @@ export function registerRemotes(
   assert(FederationInstance, RUNTIME_009, runtimeDescMap);
   // eslint-disable-next-line prefer-spread
   return FederationInstance.registerRemotes.apply(FederationInstance, args);
+}
+
+export function updateRemotes(
+  ...args: Parameters<ModuleFederation['updateRemotes']>
+): ReturnType<ModuleFederation['updateRemotes']> {
+  assert(FederationInstance, RUNTIME_009, runtimeDescMap);
+  return FederationInstance.updateRemotes(...args);
+}
+
+export function removeRemote(
+  ...args: Parameters<ModuleFederation['removeRemote']>
+): ReturnType<ModuleFederation['removeRemote']> {
+  assert(FederationInstance, RUNTIME_009, runtimeDescMap);
+  // eslint-disable-next-line prefer-spread
+  return FederationInstance.removeRemote.apply(FederationInstance, args);
 }
 
 export function registerPlugins(

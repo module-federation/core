@@ -4,8 +4,34 @@ import { RemotesOptions } from './types';
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { decodeName, ENCODE_NAME_PREFIX } from '@module-federation/sdk';
 import { updateRemoteOptions } from './updateOptions';
+import {
+  getRemoteKeysForChunk,
+  runStaleRemoteCleanups,
+  waitForRemoteClear,
+} from './clearCache';
 
 export function remotes(options: RemotesOptions) {
+  const { chunkId, promises, webpackRequire } = options;
+  const remoteKeys = getRemoteKeysForChunk(webpackRequire, chunkId);
+  runStaleRemoteCleanups(webpackRequire, remoteKeys);
+  const wait = waitForRemoteClear(webpackRequire, remoteKeys);
+  if (wait) {
+    promises.push(
+      wait.then(() => {
+        const remotePromises: Promise<any>[] = [];
+        loadRemotes({
+          ...options,
+          promises: remotePromises,
+        });
+        return Promise.all(remotePromises);
+      }),
+    );
+    return;
+  }
+  loadRemotes(options);
+}
+
+function loadRemotes(options: RemotesOptions) {
   updateRemoteOptions(options);
 
   const {

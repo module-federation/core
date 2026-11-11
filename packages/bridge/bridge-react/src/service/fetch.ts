@@ -71,7 +71,7 @@ export async function fetchBridgeService(
         timeoutMs,
       );
   }
-  void (async () => {
+  const transfer = (async () => {
     try {
       if (settled) return;
       const response = await (options.fetch ?? fetch)(endpoint, {
@@ -220,5 +220,6 @@ export async function fetchBridgeService(
       reader?.releaseLock();
     }
   })();
+  info.work?.track(transfer);
   return initial.promise;
 }

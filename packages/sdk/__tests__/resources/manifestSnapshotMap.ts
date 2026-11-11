@@ -572,6 +572,7 @@ const manifest: { [key: string]: Stats } = {
 
 const snapshot: { [key: string]: ModuleInfo } = {
   devAppSnapshot: {
+    providerName: manifest.devAppManifest.name,
     version: '',
     buildVersion: 'local',
     globalName: '__FEDERATION_@garfish/micro-app-sub2:local__',
@@ -667,6 +668,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     publicPath: 'http://localhost:2004/',
   },
   devAppSnapshotWithVersion: {
+    providerName: manifest.devAppManifest.name,
     version: 'http://localhost:2006/vmok-manifest.json',
     buildVersion: 'local',
     globalName: '__FEDERATION_@garfish/micro-app-sub2:local__',
@@ -762,6 +764,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     publicPath: 'http://localhost:2004/',
   },
   devAppSnapshotWithGetPublicPath: {
+    providerName: manifest.devAppManifestWithGetPublicPath.name,
     version: '',
     buildVersion: 'local',
     globalName: '__FEDERATION_@garfish/micro-app-sub3:local__',
@@ -867,6 +870,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     getPublicPath: "return 'http://localhost:2005/'",
   },
   prodAppSnapshot: {
+    providerName: manifest.prodAppManifest.name,
     version: '',
     buildVersion: '1.0.0.1517',
     globalName: '__FEDERATION_@garfish/micro-app-sub2:1.0.0.1517__',
@@ -956,6 +960,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     publicPath: 'https://__CDN_PREFIX__/micro-app-sub2/1.0.0.1517/',
   },
   prodAppSnapshotWithGetPublicPath: {
+    providerName: manifest.prodAppManifestWithGetPublicPath.name,
     version: '',
     buildVersion: '1.0.0.1513',
     globalName: '__FEDERATION_@garfish/micro-app-sub3:1.0.0.1513__',
@@ -1055,6 +1060,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
       "return 'https://xxx.com/__FEDERATION_micro-app-sub3/1.0.0.1513/'",
   },
   ssrProdAppSnapshotWithAllParams: {
+    providerName: manifest.ssrAppManifest.name,
     version: '',
     buildVersion: '1.0.0.1517',
     globalName: '__FEDERATION_@mf/ssr-manifest-provider:1.0.0.1517__',
@@ -1086,6 +1092,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     publicPath: 'https://__CDN_PREFIX__/ssr-manifest-provider/1.0.0.1517/',
   },
   prodAppSnapshotWithAllParams: {
+    providerName: manifest.prodAppManifest.name,
     version: '',
     buildVersion: '1.0.0.1517',
     globalName: '__FEDERATION_@garfish/micro-app-sub2:1.0.0.1517__',
@@ -1178,6 +1185,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     publicPath: 'https://__CDN_PREFIX__/micro-app-sub2/1.0.0.1517/',
   },
   devAppSnapshotWithOverrides: {
+    providerName: manifest.devAppManifest.name,
     version: '',
     buildVersion: 'local',
     globalName: '__FEDERATION_@garfish/micro-app-sub2:local__',
@@ -1273,6 +1281,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     publicPath: 'http://localhost:2004/',
   },
   devAppSnapshotWithRemotes: {
+    providerName: manifest.devAppManifest.name,
     version: '',
     buildVersion: 'local',
     globalName: '__FEDERATION_@garfish/micro-app-sub2:local__',
@@ -1368,6 +1377,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     publicPath: 'http://localhost:2004/',
   },
   devAppSnapshotWithPartRemotes: {
+    providerName: manifest.devAppManifest.name,
     version: '',
     buildVersion: 'local',
     globalName: '__FEDERATION_@garfish/micro-app-sub2:local__',
@@ -1460,6 +1470,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     publicPath: 'http://localhost:2004/',
   },
   devAppSnapshotWithAllParams: {
+    providerName: manifest.devAppManifest.name,
     version: '',
     buildVersion: 'local',
     globalName: '__FEDERATION_@garfish/micro-app-sub2:local__',
@@ -1555,6 +1566,7 @@ const snapshot: { [key: string]: ModuleInfo } = {
     publicPath: 'http://localhost:2004/',
   },
   devAppSnapshotWithRemotesAndOverrides: {
+    providerName: manifest.devAppManifest.name,
     version: '',
     buildVersion: 'local',
     globalName: '__FEDERATION_@garfish/micro-app-sub2:local__',

@@ -52,6 +52,15 @@ const handler = createBridgeServiceHandler({
 })
 ```
 
+A framework coordinating SSR updates can call `handler(request, { work })`, where
+`work.track(promise)` registers original producer work with that HTTP request and
+returns the same promise. Both successful and rejected settlement release its
+ownership. Rendering, snapshots, normalization and message pumping remain owned
+after an abort race has ended the response. Framework-specific background work
+must also register through `info.work`. This optional context stays on the server
+and does not enter the request body, transcript cache key or response frames.
+The producer supplies its own request owner when it runs in a separate process.
+
 `authorize` executes before every cache lookup. `validate` optionally checks deployment-specific module and page constraints. A framework adapter loads the producer's real Node expose and supplies its existing manifest build identity. Configure a unique `MF_BUILD_VERSION` once for each paired browser/Node build. Core otherwise falls back to package version, which does not distinguish rebuilding the same package version. Deploy the manifest, provider artifacts and service together. A mismatched expected build returns 409 before rendering. Unsupported protocol or response build metadata fails consumption.
 
 The wire protocol remains `module-federation/bridge-ssr/producer/v1`. The first NDJSON message is `meta` with build identity, identifier prefix, hydration mode and CSS URLs, followed by the producer's complete `html`, `ready`, `update` and `done` messages. Generic complete providers retain their existing `data` mode. Modern only uses initial snapshots plus updates.
