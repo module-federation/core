@@ -75,9 +75,15 @@ export function createBridgeServiceHandler(
       if (!reader) throw new Error('Missing request body.');
       const chunks: Uint8Array[] = [];
       let size = 0;
+      const abortBody = () => {
+        void reader.cancel(request.signal.reason).catch(() => {});
+      };
+      request.signal.addEventListener('abort', abortBody, { once: true });
       try {
+        request.signal.throwIfAborted();
         while (true) {
           const next = await reader.read();
+          request.signal.throwIfAborted();
           if (next.done) break;
           size += next.value.byteLength;
           if (size > bound.frame)
@@ -92,6 +98,7 @@ export function createBridgeServiceHandler(
         void reader.cancel(reason).catch(() => {});
         throw reason;
       } finally {
+        request.signal.removeEventListener('abort', abortBody);
         reader.releaseLock();
       }
       if (
@@ -108,6 +115,7 @@ export function createBridgeServiceHandler(
         throw new Error('Invalid Bridge service request.');
       validateServiceRequest(input.request);
     } catch {
+      request.signal.throwIfAborted();
       return new Response('Invalid Bridge service request', { status: 400 });
     }
     const invalid = await options.validate?.(

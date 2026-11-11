@@ -5,7 +5,6 @@ import type { BridgeSSRRequest } from '../types';
 import type { BrowserServiceRequest } from './config';
 import { fetchBridgeService } from './fetch';
 
-const usedRenderIds = new Set<string>();
 let sequence = 0;
 
 /** Called after the Host commits an empty container. Network reading stays
@@ -24,10 +23,7 @@ export function receiveBridgeService(
     document.querySelector<HTMLScriptElement>('script[nonce]')?.nonce;
   bridgeStreamBootstrap({ nonce });
   const runtime = window.__MF_BRIDGE_SSR__ as BridgeStreamBrowserRuntime;
-  const renderId = usedRenderIds.has(instanceId)
-    ? `${instanceId}-mount-${++sequence}`
-    : instanceId;
-  usedRenderIds.add(renderId);
+  const renderId = `${instanceId}-mount-${++sequence}`;
   const sessionId = `${renderId}-receive-${++sequence}`;
   element.id = sessionId;
   runtime.expect(sessionId);

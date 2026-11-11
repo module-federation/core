@@ -224,3 +224,111 @@ describe('Service input and completion boundaries', () => {
     expect(f.render).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('Service inbound body lifetime', () => {
+  function request(body: ReadableStream<Uint8Array>, signal: AbortSignal) {
+    return new Request('https://service.test/render', {
+      method: 'POST',
+      body,
+      signal,
+      duplex: 'half',
+    } as RequestInit);
+  }
+  async function promptly<T>(result: Promise<T>): Promise<T> {
+    let timer: ReturnType<typeof setTimeout>;
+    try {
+      return await Promise.race([
+        result,
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () => reject(Error('handler kept waiting for body')),
+            500,
+          );
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer!);
+    }
+  }
+  it('rejects an already aborted request without locking its open body', async () => {
+    const f = fixture();
+    const aborter = new AbortController();
+    aborter.abort(Error('already cancelled'));
+    const body = new ReadableStream<Uint8Array>();
+    await expect(
+      promptly(f.handler(request(body, aborter.signal))),
+    ).rejects.toThrow('already cancelled');
+    expect(body.locked).toBe(false);
+    expect(f.render).not.toHaveBeenCalled();
+  });
+  it('cancels a reader waiting after a partial body without the adapter closing the stream', async () => {
+    const f = fixture();
+    const aborter = new AbortController();
+    let read!: () => void;
+    const reading = new Promise<void>((resolve) => {
+      read = resolve;
+    });
+    // Reader cancellation must unblock read even if the source cleanup stays pending.
+    const cancel = rstest.fn(() => new Promise<void>(() => {}));
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(encoder.encode('{"protocol":'));
+      },
+      pull() {
+        read();
+      },
+      cancel,
+    });
+    const req = request(body, aborter.signal);
+    const remove = rstest.spyOn(req.signal, 'removeEventListener');
+    const result = f.handler(req);
+    await reading;
+    await Promise.resolve();
+    expect(body.locked).toBe(true);
+    const reason = Error('body cancelled');
+    aborter.abort(reason);
+    await expect(promptly(result)).rejects.toBe(reason);
+    expect(cancel).toHaveBeenCalledTimes(1);
+    expect(cancel).toHaveBeenCalledWith(reason);
+    expect(body.locked).toBe(false);
+    expect(remove).toHaveBeenCalledWith('abort', expect.any(Function));
+    expect(f.render).not.toHaveBeenCalled();
+  });
+  it('unlocks and returns a bad request when the body itself errors', async () => {
+    const f = fixture();
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.error(Error('broken body'));
+      },
+    });
+    const req = request(body, new AbortController().signal);
+    const remove = rstest.spyOn(req.signal, 'removeEventListener');
+    expect((await promptly(f.handler(req))).status).toBe(400);
+    expect(body.locked).toBe(false);
+    expect(remove).toHaveBeenCalledWith('abort', expect.any(Function));
+    expect(f.render).not.toHaveBeenCalled();
+  });
+  it('renders a valid streamed request and unlocks the body', async () => {
+    const f = fixture();
+    const { signal, ...info } = input();
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          encoder.encode(
+            JSON.stringify({
+              protocol: BRIDGE_PRODUCER_PROTOCOL,
+              buildVersion: 'build-1',
+              request: info,
+            }),
+          ),
+        );
+        controller.close();
+      },
+    });
+    const response = await f.handler(request(body, signal));
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('"type":"done"');
+    expect(body.locked).toBe(false);
+    expect(f.render).toHaveBeenCalledTimes(1);
+  });
+});

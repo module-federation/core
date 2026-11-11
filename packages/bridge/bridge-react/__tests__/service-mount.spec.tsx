@@ -130,3 +130,123 @@ it('hands off an empty container, hydrates once before done, and retains the net
     delete window.__MF_BRIDGE_SSR__;
   }
 });
+
+it.each([true, false])(
+  'releases completed=%s Service sessions across real StrictMode unmounts and fresh mounts',
+  async (complete) => {
+    delete window.__MF_BRIDGE_SSR__;
+    const originalFetch = global.fetch;
+    const snapshots: unknown[] = [];
+    const responses: Array<{ cancel: jest.Mock }> = [];
+    const encoder = new TextEncoder();
+    global.fetch = jest.fn(async (_url, init) => {
+      const input = JSON.parse(init!.body as string);
+      const snapshot = { data: `mount-${snapshots.length}` };
+      snapshots.push(snapshot);
+      const cancel = jest.fn();
+      responses.push({ cancel });
+      return {
+        status: 200,
+        headers: { get: () => 'application/x-ndjson' },
+        body: new ReadableStream<Uint8Array>({
+          start(controller) {
+            const send = (frame: unknown) =>
+              controller.enqueue(encoder.encode(JSON.stringify(frame) + '\n'));
+            send({
+              type: 'meta',
+              protocol: BRIDGE_PRODUCER_PROTOCOL,
+              buildVersion: 'build-1',
+              identifierPrefix: input.request.identifierPrefix,
+              hydration: 'progressive',
+            });
+            send({
+              type: 'html',
+              html: renderToString(
+                <Counter label={input.request.props.label} />,
+              ),
+            });
+            send({ type: 'ready', snapshot });
+            if (complete) {
+              send({ type: 'done' });
+              controller.close();
+            }
+          },
+          cancel,
+        }),
+      } as unknown as Response;
+    });
+    const released: string[] = [];
+    try {
+      for (let mount = 0; mount < 3; mount++) {
+        let root: Root;
+        const provider: BridgeProviderInstance = {
+          hydrate: jest.fn((info) => {
+            expect(info.snapshot).toEqual(snapshots[mount]);
+            root = hydrateRoot(
+              info.dom,
+              <Counter label={info.label as string} />,
+            );
+          }),
+          render: jest.fn((info) =>
+            root.render(<Counter label={info.label as string} />),
+          ),
+          destroy: jest.fn(() => root.unmount()),
+        };
+        const view = render(
+          <React.StrictMode>
+            <RemoteAppWrapper
+              moduleName="weather/App"
+              ssrInstanceId="repeat-service"
+              service={{
+                moduleName: 'weather/App',
+                url: '/render',
+                buildVersion: 'build-1',
+              }}
+              loadProvider={async () => () => provider}
+              remoteProps={{ label: `mount-${mount}` }}
+            />
+          </React.StrictMode>,
+        );
+        await waitFor(() => expect(provider.hydrate).toHaveBeenCalledTimes(1));
+        const container =
+          view.container.querySelector<HTMLElement>('[data-mf-bridge]')!;
+        const id = container.id;
+        const runtime = window.__MF_BRIDGE_SSR__!;
+        const session = runtime.get(id) as any;
+        expect(session.container).toBe(container);
+        expect(session.snapshot).toEqual(snapshots[mount]);
+        if (complete) await session.done;
+        else expect(session.complete).toBe(false);
+        for (const old of released) {
+          runtime.expect(old);
+          runtime.accept(old, { type: 'html', html: '<p>late old HTML</p>' });
+          runtime.accept(old, { type: 'error', message: 'late old failure' });
+          expect(runtime.get(old)).toBeUndefined();
+        }
+        const button = container.querySelector('button')!;
+        fireEvent.click(button);
+        await waitFor(() =>
+          expect(button.textContent).toBe(`mount-${mount}: 1`),
+        );
+        expect(container.textContent).not.toContain('late old HTML');
+        expect(new Set([...released, id]).size).toBe(mount + 1);
+        view.unmount();
+        await waitFor(() => expect(provider.destroy).toHaveBeenCalledTimes(1));
+        expect(runtime.get(id)).toBeUndefined();
+        expect(runtime.claim(id, container)).toBeUndefined();
+        expect(session.container).toBeUndefined();
+        expect(session.snapshot).toBeUndefined();
+        expect(container.isConnected).toBe(false);
+        if (!complete)
+          await waitFor(() =>
+            expect(responses[mount].cancel).toHaveBeenCalledTimes(1),
+          );
+        released.push(id);
+      }
+      expect(global.fetch).toHaveBeenCalledTimes(3);
+    } finally {
+      global.fetch = originalFetch;
+      delete window.__MF_BRIDGE_SSR__;
+    }
+  },
+);
