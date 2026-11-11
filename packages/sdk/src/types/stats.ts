@@ -51,6 +51,8 @@ export interface BasicStatsMetaData {
   buildInfo: StatsBuildInfo;
   remoteEntry: ResourceInfo;
   ssrRemoteEntry?: ResourceInfo;
+  /** Absolute HTTP service base, independent of the static asset publicPath. */
+  serviceBaseUrl?: string;
   types?: MetaDataTypes;
   type: string;
   pluginVersion?: string;
@@ -124,10 +126,13 @@ export interface ManifestModuleInfos {
 /** Rendering protocol of an exposed module, independent of its container format. */
 export interface ExposeRenderMetadata {
   render?: 'component' | 'bridge';
-  isService?: boolean;
+  /** A relative HTTP render path. Its presence identifies a Service App. */
+  servicePath?: string;
 }
 
 export interface StatsExpose extends ExposeRenderMetadata {
+  /** Build analysis only. Published manifests identify services by servicePath. */
+  isService?: boolean;
   id: string;
   name: string;
   path?: string;

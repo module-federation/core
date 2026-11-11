@@ -40,7 +40,7 @@ describe('resolved module factories', () => {
                     modulePath: './App',
                     moduleName: 'App',
                     render: 'bridge',
-                    isService: true,
+                    servicePath: 'render/App',
                   },
                   {
                     modulePath: './Card',
@@ -114,3 +114,51 @@ describe('resolved module factories', () => {
     },
   );
 });
+
+it.each(['serviceBaseUrl', 'servicePath'])(
+  'keeps Service provenance unambiguous when a platform changes %s',
+  async (field) => {
+    resetFederationGlobalInfo();
+    const service = { default: () => ({}) };
+    let revision = 0;
+    const instance = new ModuleFederation({
+      name: 'service-identity',
+      inBrowser: false,
+      shareStrategy: 'loaded-first',
+      remotes: [{ name: 'weather', entry: 'https://cdn.test/entry.js' }],
+      plugins: [
+        {
+          name: 'selected-deployment',
+          afterResolve: (args) => ({
+            ...args,
+            remoteSnapshot: {
+              version: '1',
+              buildVersion: '1',
+              serviceBaseUrl:
+                field === 'serviceBaseUrl'
+                  ? `https://service-${revision}.test/`
+                  : 'https://service.test/',
+              modules: [
+                {
+                  moduleName: 'App',
+                  modulePath: './App',
+                  render: 'bridge',
+                  servicePath:
+                    field === 'servicePath' ? `render-${revision}` : 'render',
+                },
+              ],
+            } as ModuleInfo,
+          }),
+          beforeLoadRemote: () => ({ factory: () => service }),
+        },
+      ],
+    });
+    await instance.loadRemote('weather/App');
+    expect(instance.remoteHandler.getLoadedRemoteInfo(service)).toBeDefined();
+    revision++;
+    await instance.loadRemote('weather/App');
+    expect(() => instance.remoteHandler.getLoadedRemoteInfo(service)).toThrow(
+      'multiple expose or version identities',
+    );
+  },
+);

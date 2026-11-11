@@ -4,14 +4,15 @@ A Service App runs application SSR and initial data access in its producer HTTP 
 
 ## Capabilities and deployment
 
-Export `createBridgeComponent({ rootComponent, isService: true, render, hydrate, renderStream })`. A framework helper can supply the three callbacks. Static analysis carries `render: 'bridge'` and `isService: true` through the manifest and Snapshot for that expose. A mixed remote's other exposes retain their existing behavior.
+Export `createBridgeComponent({ rootComponent, isService: true, render, hydrate, renderStream })`. A framework helper can supply the three callbacks. Source declarations keep `isService`, while the generated manifest carries `render: 'bridge'` and a relative `servicePath` for that expose. The deployment supplies one public `metaData.serviceBaseUrl`. Snapshot generation preserves both as the expose's `servicePath` and the Snapshot's `serviceBaseUrl`. A mixed remote's other exposes retain their existing behavior.
 
-Addresses belong to deployment configuration. Register `bridgeServicePlugin` from `@module-federation/bridge-react/service-node` in the Node runtime, with bindings keyed by module ID:
+The runtime derives the producer HTTP URL from the final resolved Snapshot. For example, `serviceBaseUrl: 'https://weather.example/app/'` and `servicePath: 'services/App'` resolve to `https://weather.example/app/services/App`. This is independent of the manifest's static-asset `publicPath`, remote entry and CDN. A platform can supply its selected Snapshot through the existing snapshot hooks. A present but invalid `servicePath`, missing base URL or invalid URL fails Service loading before the Node entry is attempted.
+
+Register `bridgeServicePlugin` from `@module-federation/bridge-react/service-node` in the Node runtime. Discovery works with `bridgeServicePlugin()` and needs no per-Host URL bindings. Optional policies are keyed by canonical or alias module ID:
 
 ```ts
 bridgeServicePlugin({
   'weather/App': {
-    url: 'http://weather-service/services/render',
     timeoutMs: 15000,
     forwardHeaders: ['accept-language'],
     serviceHeaders: { authorization: serviceCredential }
@@ -19,11 +20,22 @@ bridgeServicePlugin({
 })
 ```
 
-Install private bindings from the server bootstrap. Do not serialize upstream URLs or credentials into bundler runtime-plugin arguments, because Node SSR bundles may also be downloadable. A framework adapter can carry only a runtime identity in the bundle and resolve its private bindings from server-owned process configuration. Only Node receives upstream URLs and service credentials. Register the browser plugin from `@module-federation/bridge-react/service` with same-origin ingress URLs and optional timeouts. Framework adapters should generate these public bindings from the private deployment configuration.
+`forwardHeaders` allows selected incoming business request headers into the serialized renderer request, for application loaders. Its default is an empty list. `serviceHeaders` authenticates the Host's HTTP request to the producer and is not passed to loaders as business headers. Install private policies from server-owned bootstrap configuration, not bundler runtime-plugin arguments. Node SSR bundles may also be downloadable. Neither credentials nor header forwarding policies belong in public discovery metadata.
+
+The browser plugin from `@module-federation/bridge-react/service` takes one same-origin ingress prefix, regardless of the number of Service exposes:
+
+```ts
+bridgeServicePlugin({
+  ingressPath: '/_modern/mf/service/',
+  services: { 'weather/App': { timeoutMs: 15000 } }
+})
+```
+
+`services` is optional. The browser appends the encoded resolved module ID to the prefix, such as `/_modern/mf/service/weather%2FApp`, and loads the real client provider. It never requests the producer URL directly. The ingress independently resolves the trusted remote's final Snapshot and chooses that upstream. Browser-safe timeouts may be included in generated configuration, while service credentials remain server-only.
 
 The Node plugin examines the current expose after manifest resolution, then supplies a lightweight factory through runtime-core's `beforeLoadRemote` hook. It neither fetches SSR output during module loading nor loads the Node container. Ordinary exposes still load the real entry. Both paths share factory execution hooks, `onLoad`, `afterLoadRemote`, namespace/default behavior, deferred bundler factories and provenance. No virtual container or error recovery represents a successful Service load.
 
-Default Node asset preloading remains empty. Use loaded-first sharing, as Modern does, to avoid eager container discovery. The Service plugin rejects explicit version-first configuration, including per-share strategies, with a diagnostic because eager container discovery precedes expose selection.
+Default Node asset preloading remains empty. Use loaded-first sharing, as Modern does, to avoid eager container discovery. The Service plugin diagnoses a resolved remote containing any Service expose under version-first configuration, including per-share strategies, because eager container discovery precedes expose selection. This works without a configured policy and leaves ordinary-only remotes unchanged. Snapshot plugins run before this diagnosis. A later custom `afterResolve` hook that replaces metadata must run before the Service plugin for shared discovery to see its result.
 
 ## HTTP producer
 
@@ -44,7 +56,7 @@ The wire protocol remains `module-federation/bridge-ssr/producer/v1`. The first 
 
 The producer alone frames HTML, isolates React scripts and determines readiness. React 19.2+ independent streams use its native queued Suspense marker so document completion does not abandon pending boundaries. React 18 output stays unchanged. Consumers decode and validate JSON messages without reparsing producer HTML. A JSON newline is the record separator, while newlines inside HTML remain escaped JSON content.
 
-`fetchBridgeService(info, binding)` keeps its timeout active until validated EOF after done. The default timeout is 30 seconds. Unmounting and request aborts cancel HTTP reading and producer rendering. No local fallback is provided. Before or after metadata failure, the existing Bridge recovery policy applies, and explicit `csr=1` recovery bypasses Service requests.
+`fetchBridgeService(info, binding)` keeps its timeout active until validated EOF after done. The default timeout is 30 seconds. Unmounting and request aborts cancel HTTP reading and producer rendering. No local fallback is provided. Before or after metadata failure, the existing Bridge recovery policy applies, and explicit `csr=1` recovery bypasses Service requests and Service address validation.
 
 ## CSR mounts
 
@@ -66,4 +78,4 @@ Default limits are 3 MiB per serialized HTTP message and request body, 2 MiB per
 
 ## Migration
 
-Existing local Bridge providers and ordinary components need no Service configuration. Earlier experiments using dedicated loaders, manual module IDs, separate Service/browser protocols, hand-filled revisions or complete-snapshot Modern CSR recovery should migrate to function remotes, expose metadata, deployment bindings and progressive hydration. Do not merge the older framework-specific Service engine alongside this implementation.
+Existing local Bridge providers and ordinary components need no Service configuration. Earlier experiments using dedicated loaders, manual module IDs, separate Service/browser protocols, hand-filled revisions or complete-snapshot Modern CSR recovery should migrate to function remotes, expose `servicePath`, one deployment `serviceBaseUrl` and progressive hydration. Per-Host Service maps now contain optional request policy instead of repeated producer URLs. The browser takes one same-origin ingress prefix instead of per-expose ingress URLs. Do not merge the older framework-specific Service engine alongside this implementation.

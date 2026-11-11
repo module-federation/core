@@ -13,6 +13,7 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
       );
       const exposes = {
         './App': './app.js',
+        './Service': './service.js',
         './Card': './card.js',
         './Bundled': './bundled.js',
         './Named': './named.js',
@@ -102,6 +103,10 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
         'export default () => null;',
       );
       fs.writeFileSync(
+        path.join(directory, 'service.js'),
+        "import * as provider from '@framework/bundled-provider'; export default provider.createBridgeComponent({rootComponent: () => null, isService: true});",
+      );
+      fs.writeFileSync(
         path.join(directory, 'bundled.js'),
         'const createBridgeComponent = (options) => () => ({render() {}, destroy() {}}); export default createBridgeComponent({rootComponent: () => null});',
       );
@@ -140,7 +145,7 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
         const originalParse = parser.parse;
         let parseCalls = 0;
         parser.parse = (...args) => { parseCalls++; return originalParse(...args); };
-        const compiler = build({
+        const config = {
           mode: 'production',
           context: ${JSON.stringify(directory)},
           entry: './entry.js',
@@ -169,14 +174,33 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
             new build.NormalModuleReplacementPlugin(/replacement-target\\.js$/, ${JSON.stringify(path.join(directory, 'app.js'))}),
             new build.NormalModuleReplacementPlugin(/bridge-target\\.js$/, ${JSON.stringify(path.join(directory, 'card.js'))}),
             new ${bundler === 'rspack' ? 'build.container.ModuleFederationPluginV1' : 'build.container.ModuleFederationPlugin'}({name: 'metadata_remote', filename: 'remoteEntry.js', exposes: ${JSON.stringify(exposes)}, remotes: ${JSON.stringify(remotes)}, ${bundler === 'rspack-native' ? "implementation: require.resolve('../../runtime-tools'), manifest: true," : ''}}),
-            new StatsPlugin({name: 'metadata_remote', exposes: ${JSON.stringify(exposes)}, remotes: ${JSON.stringify(remotes)}}, {pluginVersion: 'test', bundler: ${JSON.stringify(bundler === 'webpack' ? 'webpack' : 'rspack')}}),
+            new StatsPlugin({name: 'metadata_remote', exposes: ${JSON.stringify(exposes)}, remotes: ${JSON.stringify(remotes)}, manifest: {
+              additionalData({stats}) {
+                const services = stats.exposes.filter(item => item.isService);
+                if (services.length !== 1 || services[0].name !== 'Service') throw new Error('Framework callback did not receive analyzed Service metadata');
+                stats.metaData.serviceBaseUrl = 'https://renderer.example.test/weather/';
+                for (const item of services) item.servicePath = '__mf/service/' + item.name;
+              },
+            }}, {pluginVersion: 'test', bundler: ${JSON.stringify(bundler === 'webpack' ? 'webpack' : 'rspack')}}),
           ],
-        });
+        };
+        const compiler = build(config);
         await new Promise((resolve, reject) => compiler.run((error, stats) => {
           if (error || stats?.hasErrors()) reject(error || new Error(stats.toString({all: false, errors: true})));
           else resolve();
         }));
         await new Promise(resolve => compiler.close(resolve));
+        const unboundConfig = {
+          ...config,
+          output: {...config.output, path: ${JSON.stringify(path.join(directory, 'unbound-dist'))}},
+          plugins: [...config.plugins.slice(0, -1), new StatsPlugin({name: 'metadata_remote', exposes: ${JSON.stringify(exposes)}, remotes: ${JSON.stringify(remotes)}}, {pluginVersion: 'test', bundler: ${JSON.stringify(bundler === 'webpack' ? 'webpack' : 'rspack')}})],
+        };
+        const unboundCompiler = build(unboundConfig);
+        const diagnostic = await new Promise(resolve => unboundCompiler.run((error, stats) => {
+          resolve(error?.message || (stats.hasErrors() ? stats.toString({all: false, errors: true}) : ''));
+        }));
+        await new Promise(resolve => unboundCompiler.close(resolve));
+        if (!diagnostic.includes('Service expose Service:')) throw new Error('Missing Service deployment did not fail compilation: ' + diagnostic);
         require('node:fs').writeFileSync(${JSON.stringify(path.join(directory, 'parse-count.json'))}, JSON.stringify({parseCalls, version: build.rspackVersion || build.version}));
       `,
           ],
@@ -197,6 +221,15 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
         if (bundler === 'webpack') expect(parseCalls).toBe(0);
         else expect(parseCalls).toBeGreaterThan(0);
         for (const output of [manifest, stats]) {
+          expect(output.metaData.serviceBaseUrl).toBe(
+            'https://renderer.example.test/weather/',
+          );
+          expect(
+            output.exposes.find((item: any) => item.name === 'Service'),
+          ).toMatchObject({
+            render: 'bridge',
+            servicePath: '__mf/service/Service',
+          });
           for (const name of [
             'App',
             'Bundled',
@@ -215,7 +248,7 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
           ]) {
             expect(
               output.exposes.find((item: any) => item.name === name),
-            ).toMatchObject({ render: 'bridge', isService: false });
+            ).toMatchObject({ render: 'bridge' });
           }
           for (const name of [
             'Card',
@@ -234,6 +267,14 @@ describe.each(['webpack', 'rspack', 'rspack-native'] as const)(
             ).not.toHaveProperty('render');
           }
         }
+        for (const expose of manifest.exposes) {
+          expect(expose).not.toHaveProperty('isService');
+          if (expose.name !== 'Service')
+            expect(expose).not.toHaveProperty('servicePath');
+        }
+        expect(
+          stats.exposes.find((item: any) => item.name === 'Service').isService,
+        ).toBe(true);
       } finally {
         fs.rmSync(directory, { recursive: true, force: true });
       }

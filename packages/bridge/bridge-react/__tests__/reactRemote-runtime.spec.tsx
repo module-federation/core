@@ -1,7 +1,11 @@
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { helpers } from '@module-federation/enhanced/runtime';
-import { ReactRemote } from '../src/reactRemote';
+import { ReactRemote, createReactRemote } from '../src/reactRemote';
+import bridgeServicePlugin from '../src/service/runtime-plugin';
+import { BRIDGE_PRODUCER_PROTOCOL } from '../src/service/protocol';
+import { ReadableStream } from 'node:stream/web';
+global.ReadableStream = ReadableStream as typeof global.ReadableStream;
 import { snapshotRuntime } from './reactRemote-runtime-utils';
 
 const provider = () => ({
@@ -126,7 +130,7 @@ describe('React remote runtime snapshot resolution', () => {
     const runtime = snapshotRuntime({
       module: provider(),
       pureEntry: true,
-      isService: true,
+      servicePath: 'render',
     });
     runtime.instance.registerPlugins([
       {
@@ -261,3 +265,119 @@ it('preserves onLoad wrappers when continuing a resolved request', async () => {
   expect(runtime.onLoad).toHaveBeenCalledTimes(1);
   expect(runtime.beforeRequest).toHaveBeenCalledTimes(1);
 });
+
+it.each([
+  'ReactRemote-load',
+  'ReactRemote-static',
+  'factory-load',
+  'factory-static',
+])(
+  'discovers Service without a Host policy and sends only to same-origin ingress (%s)',
+  async (mode) => {
+    delete window.__MF_BRIDGE_SSR__;
+    const hydrate = jest.fn(({ dom }: { dom: HTMLElement }) => {
+      dom.dataset.hydrated = 'true';
+    });
+    const destroy = jest.fn();
+    const localRender = jest.fn();
+    const runtime = snapshotRuntime({
+      module: { default: () => ({ hydrate, destroy, render: localRender }) },
+      render: 'bridge',
+      servicePath: 'producer/render',
+    });
+    runtime.instance.registerPlugins([
+      bridgeServicePlugin({ ingressPath: '/_modern/mf/service/' }),
+    ]);
+    const originalFetch = global.fetch;
+    const fetcher = jest.fn(async (url, init) => {
+      expect(String(url)).toBe(
+        `${location.origin}/_modern/mf/service/alias%2FCard`,
+      );
+      const body = JSON.parse(init.body);
+      expect(body.request.moduleName).toBe('alias/Card');
+      expect(body.request.headers ?? {}).toEqual({});
+      const frames = [
+        {
+          type: 'meta',
+          protocol: BRIDGE_PRODUCER_PROTOCOL,
+          buildVersion: 'build-1',
+          identifierPrefix: body.request.identifierPrefix,
+          hydration: 'progressive',
+        },
+        { type: 'html', html: '<p>service HTML</p>' },
+        { type: 'ready', snapshot: { value: 'restored' } },
+        { type: 'done' },
+      ];
+      return {
+        status: 200,
+        headers: { get: () => 'application/x-ndjson' },
+        body: new ReadableStream({
+          start(controller) {
+            controller.enqueue(
+              new TextEncoder().encode(
+                frames.map((frame) => JSON.stringify(frame)).join('\n') + '\n',
+              ),
+            );
+            controller.close();
+          },
+        }),
+      } as Response;
+    });
+    global.fetch = fetcher;
+    try {
+      const loaded = mode.endsWith('static')
+        ? await runtime.instance.loadRemote<{ default: () => any }>(
+            'alias/Card',
+          )
+        : undefined;
+      const remote = loaded
+        ? () => loaded.default
+        : () => runtime.instance.loadRemote('alias/Card');
+      const Component = mode.startsWith('factory')
+        ? createReactRemote({ remote, instance: runtime.instance })
+        : () => <ReactRemote remote={remote} instance={runtime.instance} />;
+      const view = render(<Component />);
+      await screen.findByText('service HTML');
+      await waitFor(() => expect(hydrate).toHaveBeenCalledTimes(1));
+      expect(localRender).not.toHaveBeenCalled();
+      expect(runtime.loadEntry).toHaveBeenCalledTimes(1); // The real browser provider still loads.
+      expect(fetcher).toHaveBeenCalledTimes(1);
+      await act(async () => view.unmount());
+      await waitFor(() => expect(destroy).toHaveBeenCalledTimes(1));
+    } finally {
+      global.fetch = originalFetch;
+      delete window.__MF_BRIDGE_SSR__;
+    }
+  },
+);
+
+it.each(['noSSR', 'csr-recovery'])(
+  'keeps explicit %s independent of invalid Service endpoint configuration',
+  async (mode) => {
+    const runtime = snapshotRuntime({
+      module: provider(),
+      render: 'bridge',
+      servicePath: '',
+    });
+    const originalFetch = global.fetch;
+    const fetcher = jest.fn();
+    global.fetch = fetcher;
+    const originalLocation = location.href;
+    if (mode === 'csr-recovery') history.replaceState(null, '', '?csr=1');
+    try {
+      const view = render(
+        <ReactRemote
+          remote={() => runtime.instance.loadRemote('alias/Card')}
+          instance={runtime.instance}
+          noSSR={mode === 'noSSR'}
+        />,
+      );
+      await screen.findByText('platform bridge');
+      expect(fetcher).not.toHaveBeenCalled();
+      await act(async () => view.unmount());
+    } finally {
+      history.replaceState(null, '', originalLocation);
+      global.fetch = originalFetch;
+    }
+  },
+);

@@ -1,4 +1,9 @@
-import { getBridgeService, type BrowserServiceRequest } from './service/config';
+import {
+  getBridgeService,
+  getBridgeServiceIngress,
+  type BrowserServiceRequest,
+} from './service/config';
+import { getServiceUrl } from '@module-federation/sdk';
 import React, { Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import {
   getInstance,
@@ -70,7 +75,9 @@ function selectProtocol(
             item.moduleName === expose.replace(/^\.\//, ''),
         )
       : undefined;
-  if (metadata?.isService && metadata.render !== 'bridge')
+  const service =
+    metadata && Object.prototype.hasOwnProperty.call(metadata, 'servicePath');
+  if (service && metadata.render !== 'bridge')
     throw new Error(
       `Service App '${id}' requires the Bridge rendering protocol.`,
     );
@@ -266,19 +273,31 @@ function createConsumer<P extends object>(
               let service: BrowserServiceRequest | undefined;
               if (
                 environment.target === 'browser' &&
-                metadata?.isService &&
+                metadata &&
+                Object.prototype.hasOwnProperty.call(metadata, 'servicePath') &&
                 !options.noSSR &&
                 !new URLSearchParams(location.search).get('csr')
               ) {
+                const snapshot = match?.remoteSnapshot;
+                getServiceUrl(
+                  snapshot && 'serviceBaseUrl' in snapshot
+                    ? snapshot.serviceBaseUrl
+                    : undefined,
+                  metadata.servicePath!,
+                );
                 const binding = getBridgeService(instance, id);
                 const buildVersion = match?.remoteSnapshot?.buildVersion;
-                if (!binding || !buildVersion)
+                const ingressUrl = getBridgeServiceIngress(
+                  instance,
+                  binding.moduleName,
+                );
+                if (!ingressUrl || !buildVersion)
                   throw Error(
                     `Service '${id}' requires an ingress binding and build identity.`,
                   );
                 service = {
                   moduleName: binding.moduleName,
-                  url: binding.url,
+                  url: ingressUrl,
                   timeoutMs: binding.timeoutMs,
                   buildVersion,
                 };

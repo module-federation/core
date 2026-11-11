@@ -1,12 +1,17 @@
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
-import { registerBridgeServices, type BrowserBridgeServices } from './config';
+import {
+  registerBridgeServices,
+  registerBridgeServiceIngress,
+  type BrowserBridgeServiceOptions,
+} from './config';
 export default function bridgeServicePlugin(
-  services: BrowserBridgeServices,
+  options: BrowserBridgeServiceOptions,
 ): ModuleFederationRuntimePlugin {
   return {
     name: 'bridge-service',
     apply(instance) {
-      registerBridgeServices(instance, services);
+      registerBridgeServices(instance, options.services || {});
+      registerBridgeServiceIngress(instance, options.ingressPath);
     },
   };
 }

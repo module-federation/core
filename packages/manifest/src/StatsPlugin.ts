@@ -78,6 +78,11 @@ export class StatsPlugin implements WebpackPluginInstance {
                   typeof this._options.manifest === 'object' &&
                   this._options.manifest.additionalData
                 ) {
+                  // Frameworks bind Service addresses using the analyzed export.
+                  updatedStats = annotateBridgeExposes(
+                    updatedStats,
+                    bridgeMetadata,
+                  );
                   updatedStats =
                     (await this._options.manifest.additionalData({
                       stats: updatedStats,
@@ -117,11 +122,11 @@ export class StatsPlugin implements WebpackPluginInstance {
                 compiler,
                 compilation,
               );
-
               if (
                 typeof this._options.manifest === 'object' &&
                 this._options.manifest.additionalData
               ) {
+                stats = annotateBridgeExposes(stats, bridgeMetadata);
                 stats =
                   (await this._options.manifest.additionalData({
                     stats,

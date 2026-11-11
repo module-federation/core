@@ -283,7 +283,10 @@ export class RemoteHandler {
               ? snapshot.publicPath
               : undefined,
             metadata?.render,
-            metadata?.isService,
+            metadata?.servicePath,
+            snapshot && 'serviceBaseUrl' in snapshot
+              ? snapshot.serviceBaseUrl
+              : undefined,
           ]
         : ['recovered', recoveredId],
     );

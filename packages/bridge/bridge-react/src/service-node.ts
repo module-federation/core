@@ -6,4 +6,8 @@ export type {
 export { fetchBridgeService } from './service/fetch';
 export type { BridgeServiceFetchOptions } from './service/fetch';
 export { default as bridgeServicePlugin } from './service/runtime-plugin.node';
-export type { BridgeServiceBinding, BridgeServices } from './service/config';
+export type {
+  BridgeServiceBinding,
+  BridgeServicePolicy,
+  BridgeServices,
+} from './service/config';
