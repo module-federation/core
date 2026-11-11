@@ -43,7 +43,7 @@ _<Badge text="Nota:" type="info" /> <small>Actualmente, Nx usa `@module-federati
 
   ### Servir tu configuración de Module Federation
 
-  Nx emplea varias técnicas al trabajar con Module Federation para garantizar una gran experiencia de desarrollo (DX), rendimiento y escalabilidad.
+  Nx distingue entre los remotes que estás editando y los que solo necesitas cargar.
   Una de esas técnicas consiste en servir con observación de archivos solo los remotes en los que estás trabajando activamente. En Nx, se llaman `dev remotes`.
   Nx hace el build del resto de proyectos y los sirve de forma estática mediante `http-server`. Se llaman `static remotes`.
 
@@ -69,7 +69,7 @@ _<Badge text="Nota:" type="info" /> <small>Actualmente, Nx usa `@module-federati
 
   ### Hacer el build de tu configuración de Module Federation
 
-  A Nx le importan mucho el rendimiento y la DX, sobre todo en monorepos. Te ofrece un comando para hacer el build de todo a la vez. Resulta útil para redesplegar por completo todos los proyectos del sistema de Module Federation.
+  Puedes compilar todos los proyectos con un solo comando. Esto resulta útil cuando quieres volver a desplegar todas las aplicaciones:
 
   ```bash
   npx nx run-many -t build
@@ -88,8 +88,8 @@ _<Badge text="Nota:" type="info" /> <small>Actualmente, Nx usa `@module-federati
 
 ## Añadir más remotes
 
-A medida que desarrollamos nuestra aplicación, a menudo necesitamos añadir más aplicaciones remote. Es entonces cuando el generador `remote` de Nx resulta extremadamente útil.
-No solo crea un proyecto de Angular con Module Federation configurado, sino que también nos permite indicarle a qué aplicación `host` pertenece, y actualizará el `host` para configurar el nuevo remote.
+Para añadir otra aplicación remota, usa el generador `remote` de Nx.
+Crea el proyecto con Module Federation y actualiza la configuración del `host` que le indiques para conectar el nuevo remote.
 
 <Steps>
   ### Crear una nueva aplicación remote
@@ -105,7 +105,7 @@ No solo crea un proyecto de Angular con Module Federation configurado, sino que 
 
 ## Entender las abstracciones de Module Federation de Nx
 
-Nx pretende que trabajar con Module Federation sea lo más sencillo posible, y a la vez ofrecer un mecanismo con el que el equipo de Nx pueda publicar optimizaciones, nuevas funcionalidades y correcciones de la forma más fluida posible.
+Nx incluye una configuración propia de Module Federation para que puedas recibir mejoras y correcciones al actualizar sus paquetes.
 Para lograrlo, usa algunas abstracciones sobre el `ModuleFederationPlugin` subyacente.
 
 ### ModuleFederationConfig de Nx

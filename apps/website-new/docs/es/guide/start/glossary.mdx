@@ -6,7 +6,7 @@ Module Federation (MF) es un patrón de arquitectura para dividir aplicaciones J
 
 Esto permite crear aplicaciones de estilo micro-frontend en las que varios sistemas comparten código y se actualizan de forma dinámica, sin necesidad de volver a compilar toda la aplicación.
 
-También abrió la puerta a un conjunto más amplio de casos de uso en el lado del servidor: como la federación funciona de forma universal, tiene varios casos de uso dinámicos en el backend.
+También puedes cargar módulos remotos en el servidor, por ejemplo, en aplicaciones Node.js.
 
 ## Producer (Remote)
 
@@ -18,12 +18,12 @@ Una aplicación que consume módulos de otros Producers mediante el plugin de bu
 
 ## Micro-frontend
 
-Micro-frontend (MFE) es un estilo de arquitectura similar a los microservicios, en el que un único producto cohesionado se compone de varias aplicaciones frontend que se entregan de forma independiente. Divide una aplicación frontend en aplicaciones más pequeñas y sencillas que se pueden desarrollar, probar y desplegar de forma independiente, sin dejar de presentarse ante el usuario como un único producto.
+Un micro-frontend (MFE) es una parte de una aplicación frontend que puedes desarrollar, probar y desplegar por separado. Varias de estas partes forman la aplicación que ve el usuario.
 
 Resuelve principalmente dos problemas:
 
 - El tamaño creciente y la dificultad de mantenimiento de las aplicaciones a medida que evolucionan con cada iteración.
-- La baja eficiencia de la colaboración entre equipos o departamentos en el desarrollo de proyectos.
+- Las dificultades para coordinar el trabajo entre equipos o departamentos.
 
 ## Bundler
 

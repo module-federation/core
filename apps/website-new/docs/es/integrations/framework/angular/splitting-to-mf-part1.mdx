@@ -6,7 +6,7 @@ import {Steps} from '@theme'
 # Dividir una aplicación Angular en aplicaciones micro-frontend: guía paso a paso
 ## Introducción a los micro-frontends
 
-Los micro-frontends ofrecen una solución escalable para gestionar aplicaciones grandes dividiéndolas en piezas más pequeñas e independientes. Este enfoque permite que equipos especializados desarrollen, prueben y desplieguen secciones de una aplicación por separado, lo que mejora la eficiencia y reduce la complejidad.
+Los micro-frontends dividen una aplicación grande en partes que cada equipo puede desarrollar, probar y desplegar por separado.
 
 ### ¿Qué es un micro-frontend?
 
@@ -14,11 +14,11 @@ Los micro-frontends aplican los principios de los microservicios al desarrollo f
 
 #### Perspectivas
 
-Los usuarios ven una aplicación unificada, mientras que los desarrolladores disfrutan de flexibilidad en las opciones de despliegue y de servicio, incluido Module Federation para integrar las micro-apps.
+El usuario sigue viendo una sola aplicación, aunque cada equipo despliegue su parte por separado. Module Federation permite conectar esas micro-apps.
 
 ## Panorama tecnológico de los micro-frontends
 
-Los micro-frontends permiten usar distintos frameworks o bibliotecas en diferentes partes de la aplicación, lo que ofrece flexibilidad pero también plantea retos, como la movilidad entre equipos. Herramientas como Single SPA o soluciones específicas de cada framework, como Nx para Angular, ayudan a integrar estas tecnologías en una aplicación cohesionada. El objetivo es compilar, probar y desplegar cada micro-app de forma independiente, garantizando al mismo tiempo una experiencia de usuario fluida.
+Cada micro-frontend puede usar un framework o una biblioteca diferente. Eso permite elegir herramientas por equipo, aunque cambiar de equipo puede requerir aprender otras tecnologías. Herramientas como Single SPA o Nx para Angular ayudan a conectar esas partes en una misma aplicación.
 
 ## Abordar la transición a micro-frontends
 
@@ -30,7 +30,7 @@ Hay numerosos métodos para implementar micro-frontends, y existen diversas guí
 
 ## Refactorizar una aplicación existente
 
-Sin embargo, esta guía se centra en refactorizar una aplicación existente, posiblemente creada con Angular CLI, en bibliotecas compartidas y aplicaciones individuales. Después, estos componentes se integran sin fricciones en la aplicación principal, manteniendo una experiencia de usuario unificada y mejorando la eficiencia del desarrollo.
+En esta guía partiremos de una aplicación existente creada con Angular CLI. La dividiremos en bibliotecas compartidas y aplicaciones independientes, y después conectaremos esas partes con la aplicación principal.
 
 ## Revisar la aplicación base para implementar micro-frontends
 
@@ -102,7 +102,7 @@ Este módulo de enrutamiento muestra el uso de guards (`isLogged` e `isNotLogged
 
 #### Enfoque para migrar una aplicación compleja
 
-Migrar una aplicación compleja a una arquitectura de micro-frontends puede ser todo un reto. Para facilitar el proceso, es fundamental contar con pasos claros y, posiblemente, con herramientas adicionales (para gestionar mejor las dependencias).
+Para dividir la aplicación sin perder de vista sus dependencias, empieza por el código que puedas separar más fácilmente.
 
 ##### Primer objetivo: archivos sin dependencias
 
@@ -196,7 +196,7 @@ ng build auth
 Cambia las sentencias import de la aplicación para que usen la nueva biblioteca `auth`.
 
 </Steps>
-¡Enhorabuena! Has migrado con éxito partes de tu aplicación a bibliotecas. Esto no solo mantiene la aplicación en funcionamiento, sino que además puede acelerarla, ya que Angular no necesita recompilar toda la aplicación. Ahora tienes varias bibliotecas con pruebas y builds aislados, algo adecuado para aplicaciones grandes en las que se comparten componentes, servicios, pipes y otros elementos.
+Ahora tienes varias bibliotecas con sus propias pruebas y builds. Puedes compartir sus componentes, servicios y pipes sin recompilar toda la aplicación cada vez.
 
 #### Organización avanzada de bibliotecas
 
@@ -248,11 +248,11 @@ Al principio, puede que la nueva aplicación aparezca sin estilos. Para resolver
 
 ### Resultado
 
-Si lo has hecho correctamente, la aplicación `login` debería ejecutarse ahora de forma independiente, con estilos y funcional, lo que supone un paso importante en tu camino hacia una arquitectura de micro-frontends completamente implementada.
+Comprueba que la aplicación `login` se ejecuta por separado y que conserva sus estilos y funciones.
 
 ## Integrar la aplicación de login en la aplicación principal
 
-Después de configurar la aplicación `Login` como una entidad independiente, el siguiente paso crítico es integrarla con la aplicación principal. Para ello, se compila la aplicación `Login` como una biblioteca y se importa usando la funcionalidad de carga diferida existente en el módulo principal.
+Ahora vamos a conectar `Login` con la aplicación principal. Compílala como una biblioteca e impórtala con la carga diferida que ya usa el módulo principal.
 
 ### Actualizar `angular.json`
 
@@ -282,7 +282,7 @@ Este proceso compila el módulo `Login` como una biblioteca.
 
 ### Importar la biblioteca
 
-1. **Actualiza `tsconfig.json`**: añade un nuevo mapeo de rutas para `login-lib` en `tsconfig.json` que apunte a `"dist/login-lib"`. Este paso es crucial para que TypeScript localice correctamente la biblioteca.
+1. **Actualiza `tsconfig.json`**: añade un mapeo de rutas para `login-lib` que apunte a `"dist/login-lib"`. Así TypeScript podrá encontrar la biblioteca.
 
 2. **Modifica el enrutamiento de la aplicación**: en `app-routing.module.ts`, actualiza la ruta de carga diferida para usar la nueva biblioteca:
 ```javascript
@@ -291,7 +291,7 @@ loadChildren: () => import('@@login').then((m) => m.LoginModule),
 
 ### Ejecutar la aplicación integrada
 
-Con estos cambios, puedes servir la aplicación como de costumbre. El módulo `Login`, ahora un proyecto independiente, debería funcionar sin problemas dentro de la aplicación principal.
+Arranca la aplicación como de costumbre y comprueba que puedes usar el módulo `Login` desde la aplicación principal.
 
 ### Otras oportunidades y consideraciones
 

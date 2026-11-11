@@ -6,13 +6,13 @@ import {Steps} from '@theme'
 
 # Module Federation en Angular con renderizado en el servidor
 
-Históricamente, Module Federation se limitaba al renderizado en el cliente (CSR), lo que beneficiaba principalmente a las Single Page Applications (SPA). Sin embargo, la evolución del desarrollo web ha ido favoreciendo cada vez más el renderizado en el servidor (SSR) por sus múltiples ventajas.
+Las primeras integraciones de Module Federation se centraban en el renderizado en el cliente, o CSR. Para renderizar los módulos remotos en el servidor necesitas una integración compatible con SSR.
 
 ## La apuesta de Nx por SSR con Module Federation (desde la versión 15.4)
 
-Con la llegada de la versión 15.4, Nx introdujo Module Federation con soporte para SSR, lo que supuso un hito importante. Esta combinación de Module Federation y SSR en los workspaces de Nx aprovecha los puntos fuertes de ambas tecnologías.
+Nx añadió soporte para Module Federation con SSR en la versión 15.4.
 
-Para comprender a fondo Nx y su integración con Module Federation, te recomendamos encarecidamente consultar la documentación oficial de Nx. Ofrece información detallada y orientación práctica para sacar el máximo partido a estas tecnologías. Puedes acceder a este valioso recurso aquí:
+Puedes consultar los detalles de la integración en la documentación de Nx:
 
 - [Documentación oficial de Nx sobre Module Federation](https://nx.dev/recipes/module-federation).
 
@@ -22,7 +22,7 @@ Esta guía se centra en acompañarte en la configuración de Module Federation c
 
 En una aplicación SSR tradicional, el servidor se encarga de renderizar la aplicación en función de la ruta que solicita el navegador. Al combinar Module Federation con SSR, este concepto se amplía. Si una ruta apunta a un módulo remoto, el servidor host delega el procesamiento de la ruta en el servidor remote, que renderiza el HTML y lo devuelve al navegador.
 
-Esta integración no solo aprovecha todo el potencial del SSR, sino que también mantiene la flexibilidad de dividir el build en segmentos más pequeños. Facilita el despliegue independiente de funcionalidades dentro de la aplicación, lo que permite actualizar el servidor remote sin tener que volver a desplegar por completo el servidor host.
+Puedes compilar y desplegar cada parte por separado. Por ejemplo, puedes actualizar el servidor remote sin volver a desplegar el servidor host.
 
 ## Guía paso a paso
 

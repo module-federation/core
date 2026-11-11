@@ -2,16 +2,16 @@
 
 ### 💡 ¿Qué es Module Federation?
 
-Module Federation es un patrón arquitectónico para descentralizar aplicaciones JavaScript (similar a los microservicios en el lado del servidor). Te permite compartir código y recursos entre varias aplicaciones JavaScript (o micro-frontends). Esto puede ayudarte a:
+Module Federation te permite compartir código y recursos entre aplicaciones JavaScript o micro-frontends. Cada aplicación puede desarrollarse y desplegarse por separado, de forma parecida a los microservicios en el servidor. Esto puede ayudarte a:
 
 - Reducir la duplicación de código
-- Mejorar la mantenibilidad del código
+- Hacer que el código sea más fácil de mantener
 - Reducir el tamaño total de tus aplicaciones
 - Mejorar el rendimiento de tus aplicaciones
 
 ### ✨ ¿Qué es Module Federation 2.0?
 
-`Module Federation 2.0` se diferencia del `Module Federation` integrado en `Webpack5` en que no solo ofrece las funcionalidades principales de exportación de módulos, carga y compartición de dependencias, sino también sugerencias de tipos dinámicas, `Manifest`, `Federation Runtime` y `Runtime Plugin System`. Estas funcionalidades hacen que `Module Federation` sea más adecuado como arquitectura de micro-frontends en aplicaciones `Web` a gran escala.
+`Module Federation 2.0` amplía las funciones de `Module Federation` integrado en `Webpack5`. Además de exportar y cargar módulos y compartir dependencias, incluye sugerencias de tipos dinámicas, `Manifest`, `Federation Runtime` y `Runtime Plugin System`. Estas herramientas te ayudan a trabajar con micro-frontends en aplicaciones web grandes.
 
 ### 🔥 Funcionalidades
 
@@ -28,11 +28,11 @@ Module Federation ofrece las siguientes funcionalidades:
 
 ### 🎯 Casos de uso
 
-Module Federation es adecuado para los siguientes escenarios:
+Puedes usar Module Federation cuando trabajes con:
 
 - **Aplicaciones grandes**: en aplicaciones grandes, puedes dividir la aplicación en varios micro-frontends y usar Module Federation para compartir código y recursos entre ellos.
-- **Arquitectura de micro-frontends**: Module Federation es una herramienta ideal para construir arquitecturas de micro-frontends.
-- **Desarrollo con varios equipos**: Module Federation puede ayudar a varios equipos a desarrollar de forma colaborativa aplicaciones grandes.
+- **Arquitectura de micro-frontends**: carga módulos de otras aplicaciones y comparte dependencias entre ellas.
+- **Desarrollo con varios equipos**: cada equipo puede trabajar en su parte de la aplicación y compartir código con los demás.
 
 ### 🕠 Historia de Module Federation
 
@@ -42,11 +42,9 @@ Module Federation es una funcionalidad introducida en Webpack 5, pero su histori
 
 - En 2019 se publicó Webpack 5, que introdujo oficialmente la funcionalidad de Module Federation.
 
-Module Federation se ha convertido en una herramienta potente para construir aplicaciones web modernas.
-
 ### 🕰️ El futuro de Module Federation
 
-Module Federation aspira a convertirse en un método arquitectónico para construir aplicaciones web grandes, similar a los microservicios en el backend. Module Federation ofrecerá más capacidades para cubrir las necesidades fundamentales de la descentralización de aplicaciones web grandes, que actualmente incluyen:
+Queremos que sea más fácil construir aplicaciones web grandes con partes que se desarrollen y desplieguen por separado. Para ello, tenemos previsto trabajar en:
 
 - Ofrecer herramientas Devtool completas
 - Ofrecer más capacidades de framework de alto nivel, como Router, Sandbox y SSR

@@ -1,13 +1,13 @@
 # Ventajas de Module Federation en un monorepo
 
-Module Federation es una herramienta potente que te permite compartir código entre aplicaciones. Te permite construir aplicaciones más modulares, mantenibles y escalables. En esta guía exploraremos las ventajas de usar Module Federation en un monorepo.
+Module Federation te permite compartir código entre aplicaciones. En esta guía verás qué cambia cuando guardas esas aplicaciones en un mismo repositorio.
 
-Los polyrepos (varios repositorios) han sido durante mucho tiempo la opción de facto para desarrollar micro-frontends y combatir problemas organizativos; sin embargo, introducen más desafíos organizativos en torno a la compartición de código, la gestión de dependencias, el versionado y la autonomía de los equipos.
+Es habitual guardar cada micro-frontend en un repositorio distinto, una organización conocida como polyrepo. Cada equipo controla su repositorio, pero compartir código y coordinar versiones y dependencias requiere trabajo adicional.
 
-Fomentar la autonomía de los equipos mediante micro-frontends empujó, sin pretenderlo, a los equipos hacia una estructura de polyrepo. Cada equipo tenía su propio repositorio y era responsable de mantener su propio código. Este enfoque provocó, entre otros problemas, falta de colaboración y de transparencia.
+Cuando cada equipo trabaja en su propio repositorio, puede ser más difícil ver qué cambian los demás y cómo afecta a tu aplicación.
 
 Si eliges un monorepo, puedes obtener todas las ventajas de Module Federation sin la complicación de gestionar varios repositorios, además de algunas ventajas adicionales en cuanto a compartición de código y gestión de dependencias.
-Esta guía te ayudará a entender las ventajas de usar Module Federation en un monorepo y cómo resuelven los desafíos organizativos.
+Veamos cómo un monorepo puede ayudarte a coordinar esos cambios.
 
 ## Posibles inconvenientes del enfoque polyrepo
 
@@ -94,6 +94,6 @@ Las suites de pruebas también pueden escribirse de forma más cercana a como el
 
 ## ¿Dónde encaja Nx?
 
-Nx es un potente sistema de build de código abierto que ofrece herramientas y técnicas para mejorar la productividad de los desarrolladores, optimizar el rendimiento de la CI y mantener la calidad del código. Funciona especialmente bien con monorepos e incluye soporte integrado para Module Federation en proyectos de Angular y React.
+Nx es una herramienta de build de código abierto para organizar tareas, reutilizar resultados en caché y ejecutar pruebas en monorepos. Incluye soporte para Module Federation en Angular y React.
 
-[Descubre por qué Nx es la mejor opción como herramienta para Module Federation](/integrations/framework/monorepos/nx-for-module-federation.html)
+[Consulta cómo usar Nx con Module Federation](/integrations/framework/monorepos/nx-for-module-federation.html)
