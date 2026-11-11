@@ -155,5 +155,34 @@ describe('ModuleFederation', () => {
 
       expect(factoryB && factoryB().owner).toBe('app_b');
     });
+
+    it('lets a later container replace a module that failed to load after its container moved to another share scope', async () => {
+      let rejectLoad: (error: Error) => void = () => undefined;
+      const appA = await joinShareScope(
+        'app_a',
+        sharedLib(
+          'app_a',
+          () =>
+            new Promise((_, reject) => {
+              rejectLoad = reject;
+            }),
+        ),
+      );
+      const scope = appA.shareScopeMap['default'];
+      const libForA = appA.loadShare<SharedLib>('lib');
+      while (!scope['lib']['1.0.0'].loading) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+
+      // app_a is attached to another share scope while its load is in flight, as container init can do
+      appA.initShareScopeMap('default', {});
+      rejectLoad(new Error('chunk failed'));
+      await expect(libForA).rejects.toThrow('chunk failed');
+
+      const appB = await joinShareScope('app_b', sharedLib('app_b'), scope);
+      const factoryB = await appB.loadShare<SharedLib>('lib');
+
+      expect(factoryB && factoryB().owner).toBe('app_b');
+    });
   });
 });

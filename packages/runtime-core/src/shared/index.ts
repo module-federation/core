@@ -833,7 +833,7 @@ export class SharedHandler {
   }
 
   // A registered module whose factory failed to load stops counting as loading, so that it can be replaced or
-  // loaded again
+  // loaded again. The entries are collected now: a share scope can be replaced while the load is in flight.
   private clearLoadingOnFailure({
     pkgName,
     shared,
@@ -845,14 +845,16 @@ export class SharedHandler {
     loading: Promise<unknown>;
     treeShaking?: boolean;
   }): void {
-    loading.catch(() => {
-      const { version, scope = 'default' } = shared;
-      const scopes: string[] = Array.isArray(scope) ? scope : [scope];
-      scopes.forEach((sc) => {
+    const { version, scope = 'default' } = shared;
+    const scopes: string[] = Array.isArray(scope) ? scope : [scope];
+    const loadingEntries = scopes
+      .map((sc) => {
         const registeredShared = this.shareScopeMap[sc]?.[pkgName]?.[version];
-        const targetShared = treeShaking
-          ? registeredShared?.treeShaking
-          : registeredShared;
+        return treeShaking ? registeredShared?.treeShaking : registeredShared;
+      })
+      .filter((targetShared) => targetShared?.loading === loading);
+    loading.catch(() => {
+      loadingEntries.forEach((targetShared) => {
         if (targetShared && targetShared.loading === loading) {
           targetShared.loading = null;
         }
