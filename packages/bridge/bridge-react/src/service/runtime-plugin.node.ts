@@ -10,7 +10,7 @@ import { fetchBridgeService } from './fetch';
 
 /** Only module descriptions are shared. Every render owns a new HTTP session. */
 export default function bridgeServicePlugin(
-  services: BridgeServices = {},
+  services: BridgeServices | (() => BridgeServices) = {},
 ): ModuleFederationRuntimePlugin {
   const modules = new Map<string, { default: () => BridgeProviderInstance }>();
   const checkSharing = (
