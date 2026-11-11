@@ -10,6 +10,8 @@ Control the loading strategy of shared dependencies:
 
 - `'loaded-first'`: Prioritize reuse of already loaded shared dependencies. Remotes are loaded on-demand rather than during initialization. This strategy is recommended when you want to reuse loaded dependencies for performance.
 
+When several containers register the same version of a shared dependency, one registration provides it to every consumer. An eager registration takes precedence over a non-eager one; otherwise the container whose name sorts last provides it. Once a consumer has started loading that version, its provider no longer changes, so every consumer gets the same instance. A version registered with `'loaded-first'` keeps its first provider.
+
 :::warning Offline Remote Considerations
 
 The `'version-first'` strategy automatically loads remote entry files during application startup to initialize shared dependencies. If any remote is offline or unreachable, this will trigger the `errorLoadRemote` hook with `lifecycle: 'beforeLoadShare'` during startup. Without proper error handling, this can cause application initialization failures.
