@@ -1,3 +1,13 @@
+import type { BridgeServiceVersionMismatchMetadata } from '../service/version-mismatch';
+
+export type BridgeStreamErrorFrame = {
+  type: 'error';
+  message: string;
+  versionMismatch?: BridgeServiceVersionMismatchMetadata & {
+    code: 'BRIDGE_SERVICE_VERSION_MISMATCH';
+  };
+};
+
 /** Private transport shared by the Host SSR adapter and its early bootstrap. */
 export type BridgeStreamFrame =
   | {
@@ -11,7 +21,7 @@ export type BridgeStreamFrame =
   | { type: 'update'; value: unknown }
   | { type: 'data'; snapshot: unknown }
   | { type: 'done' }
-  | { type: 'error'; message: string };
+  | BridgeStreamErrorFrame;
 
 export interface BridgeBrowserSnapshot {
   updates?: ReadableStream<unknown>;

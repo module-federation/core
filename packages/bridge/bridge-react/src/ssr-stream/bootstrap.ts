@@ -117,6 +117,30 @@ export function bridgeStreamBootstrap(
   };
   const timeout = options.timeoutMs || 30000;
   const limit = options.maxQueuedBytes || 8 * 1024 * 1024;
+  // This bootstrap is serialized into HTML, so the protocol guard must remain
+  // self-contained. Never classify an ordinary 409 or message text as a signal.
+  const versionMismatch = (value: any) =>
+    value &&
+    typeof value === 'object' &&
+    value.code === 'BRIDGE_SERVICE_VERSION_MISMATCH' &&
+    typeof value.expectedBuildVersion === 'string' &&
+    Boolean(value.expectedBuildVersion) &&
+    typeof value.actualBuildVersion === 'string' &&
+    Boolean(value.actualBuildVersion) &&
+    value.expectedBuildVersion !== value.actualBuildVersion;
+  const frameError = (frame: Extract<BridgeStreamFrame, { type: 'error' }>) =>
+    versionMismatch(frame.versionMismatch)
+      ? Object.assign(
+          Error('Bridge service returned HTTP 409: buildVersion mismatch.'),
+          {
+            name: 'BridgeServiceVersionMismatchError',
+            status: 409,
+            code: 'BRIDGE_SERVICE_VERSION_MISMATCH',
+            expectedBuildVersion: frame.versionMismatch!.expectedBuildVersion,
+            actualBuildVersion: frame.versionMismatch!.actualBuildVersion,
+          },
+        )
+      : Error(frame.message);
   let redirecting = false;
   let leaving = false;
   const showError = () => {
@@ -128,8 +152,16 @@ export function bridgeStreamBootstrap(
       'The application could not be loaded. Please try again.';
     (document.body || document.documentElement).appendChild(element);
   };
-  const fallback = (_error?: unknown) => {
+  const fallback = (error?: unknown) => {
     if (leaving || redirecting) return;
+    // CSR would repeat the same Service version selection. Expose the terminal
+    // error to its consumer and leave update/reload policy to the application.
+    if (
+      versionMismatch(error) &&
+      (error as any).name === 'BridgeServiceVersionMismatchError' &&
+      (error as any).status === 409
+    )
+      return;
     const url = new URL(window.location.href);
     let csr = '';
     url.searchParams.forEach((value, name) => {
@@ -310,7 +342,7 @@ export function bridgeStreamBootstrap(
       state.queuedBytes -= next.bytes;
       try {
         if (state.streamDone) throw Error('Bridge frame after completion');
-        if (frame.type === 'error') throw Error(frame.message);
+        if (frame.type === 'error') throw frameError(frame);
         if (frame.type === 'meta') {
           if (state.meta || !frame.identifierPrefix) {
             throw Error('Invalid Bridge stream metadata');
@@ -458,7 +490,7 @@ export function bridgeStreamBootstrap(
       try {
         // A server failure must not wait behind HTML held for pending CSS.
         if (frame.type === 'error') {
-          fail(state, Error(frame.message));
+          fail(state, frameError(frame));
           return;
         }
         const bytes = new TextEncoder().encode(

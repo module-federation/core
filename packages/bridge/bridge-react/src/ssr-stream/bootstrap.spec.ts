@@ -1,10 +1,17 @@
-import { afterEach, describe, expect, it } from '@rstest/core';
+import { afterEach, describe, expect, it, rstest } from '@rstest/core';
 import { JSDOM } from 'jsdom';
 import {
   bridgeStreamBootstrap,
   type BridgeBootstrapOptions,
 } from './bootstrap';
 import type { BridgeStreamBrowserRuntime } from './protocol';
+import { receiveBridgeService } from '../service/browser';
+import { createBridgeServiceHandler } from '../service/http.server';
+import {
+  bridgeServiceErrorFrame,
+  BridgeServiceVersionMismatchError,
+  isBridgeServiceVersionMismatchError,
+} from '../service/version-mismatch';
 
 const documents: JSDOM[] = [];
 function createDocument(
@@ -41,6 +48,136 @@ afterEach(() => {
 });
 
 describe('Bridge early bootstrap', () => {
+  it('preserves a Service mismatch and exposes it without generic CSR recovery', async () => {
+    const { dom, runtime } = createDocument('<div id="a"></div>', 1000, {}, [
+      'a',
+    ]);
+    runtime.accept(
+      'a',
+      bridgeServiceErrorFrame(
+        new BridgeServiceVersionMismatchError({
+          expectedBuildVersion: 'old',
+          actualBuildVersion: 'new',
+        }),
+        'Bridge server rendering failed',
+      ),
+    );
+    const failure = await runtime.get('a')!.done.catch((error) => error);
+    expect(isBridgeServiceVersionMismatchError(failure)).toBe(true);
+    expect(failure).toMatchObject({
+      expectedBuildVersion: 'old',
+      actualBuildVersion: 'new',
+    });
+    runtime.fallback(failure);
+    expect(
+      dom.window.document.getElementById('mf-bridge-fatal-error'),
+    ).toBeNull();
+    // A real non-version failure still follows the established recovery policy.
+    runtime.fallback(Error('ordinary failure'));
+    expect(
+      dom.window.document.getElementById('mf-bridge-fatal-error'),
+    ).not.toBeNull();
+  });
+
+  it.each([
+    undefined,
+    {
+      code: 'APPLICATION_CONFLICT',
+      expectedBuildVersion: 'old',
+      actualBuildVersion: 'new',
+    },
+    {
+      code: 'BRIDGE_SERVICE_VERSION_MISMATCH',
+      expectedBuildVersion: 'same',
+      actualBuildVersion: 'same',
+    },
+  ])(
+    'keeps generic recovery for unverified version error frames %j',
+    async (versionMismatch) => {
+      const { dom, runtime } = createDocument('<div id="a"></div>', 1000, {}, [
+        'a',
+      ]);
+      runtime.accept('a', {
+        type: 'error',
+        message: 'BridgeServiceVersionMismatchError: HTTP 409',
+        versionMismatch,
+      } as any);
+      const failure = await runtime.get('a')!.done.catch((error) => error);
+      expect(isBridgeServiceVersionMismatchError(failure)).toBe(false);
+      expect(
+        dom.window.document.getElementById('mf-bridge-fatal-error'),
+      ).not.toBeNull();
+    },
+  );
+
+  it('retains a real handler/fetch mismatch through the browser Service receive session without replay', async () => {
+    const { dom } = createDocument('<div id="app"></div>', 1000, {}, []);
+    const render = rstest.fn(async () => {
+      throw Error('Unexpected producer rendering');
+    });
+    const handler = createBridgeServiceHandler({ buildVersion: 'new', render });
+    const transport = rstest.fn(async (url, init) =>
+      handler(new Request(url, init)),
+    );
+    const values = {
+      window: dom.window,
+      document: dom.window.document,
+      location: dom.window.location,
+      fetch: transport,
+    };
+    const previous = new Map(
+      Object.keys(values).map((key) => [
+        key,
+        Object.getOwnPropertyDescriptor(globalThis, key),
+      ]),
+    );
+    for (const [key, value] of Object.entries(values))
+      Object.defineProperty(globalThis, key, {
+        configurable: true,
+        writable: true,
+        value,
+      });
+    let receive: ReturnType<typeof receiveBridgeService> | undefined;
+    try {
+      receive = receiveBridgeService(
+        dom.window.document.getElementById('app')!,
+        'app',
+        {
+          url: dom.window.location.href,
+          props: {},
+          signal: new AbortController().signal,
+        },
+        {
+          moduleName: 'remote/App',
+          url: '/service',
+          buildVersion: 'old',
+        },
+      );
+      const transportError = await receive.done.catch((error) => error);
+      const readinessError = await receive.session.ready!.catch(
+        (error) => error,
+      );
+      const completionError = await receive.session.done.catch(
+        (error) => error,
+      );
+      expect(isBridgeServiceVersionMismatchError(transportError)).toBe(true);
+      expect(isBridgeServiceVersionMismatchError(readinessError)).toBe(true);
+      expect(isBridgeServiceVersionMismatchError(completionError)).toBe(true);
+      receive.runtime.fallback(readinessError);
+      expect(
+        dom.window.document.getElementById('mf-bridge-fatal-error'),
+      ).toBeNull();
+      expect(transport).toHaveBeenCalledTimes(1);
+      expect(render).not.toHaveBeenCalled();
+    } finally {
+      receive?.release();
+      for (const [key, descriptor] of previous) {
+        if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+        else Reflect.deleteProperty(globalThis, key);
+      }
+    }
+  });
+
   it('claims a server-marked container before its first metadata arrives', async () => {
     const { dom, runtime } = createDocument(
       '<div id="late">loading</div>',

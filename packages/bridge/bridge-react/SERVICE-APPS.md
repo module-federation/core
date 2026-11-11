@@ -92,6 +92,15 @@ instead of replaying rendered work. A browser holding an old document needs a
 new document to use a newly selected release. Core leaves production update
 and reload decisions to the application.
 
+The browser receive session and Host error frames retain the dedicated mismatch
+metadata. They reject their pending hydration promises with an error recognized
+by `isBridgeServiceVersionMismatchError`. This error does not trigger the generic
+`csr=1` document recovery, which would repeat the same Service version selection.
+It remains visible to the consumer's error UI and application policy. A framework
+development watcher may reload after it successfully installs the new release.
+Ordinary transport, rendering and authentication failures keep their existing
+recovery behavior.
+
 The wire protocol remains `module-federation/bridge-ssr/producer/v1`. The first NDJSON message is `meta` with build identity, identifier prefix, hydration mode and CSS URLs, followed by the producer's complete `html`, `ready`, `update` and `done` messages. Generic complete providers retain their existing `data` mode. Modern only uses initial snapshots plus updates.
 
 The producer alone frames HTML, isolates React scripts and determines readiness. React 19.2+ independent streams use its native queued Suspense marker so document completion does not abandon pending boundaries. React 18 output stays unchanged. Consumers decode and validate JSON messages without reparsing producer HTML. A JSON newline is the record separator, while newlines inside HTML remain escaped JSON content.

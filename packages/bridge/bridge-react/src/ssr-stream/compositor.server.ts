@@ -14,6 +14,7 @@ import { hostPieces } from './host-stream';
 import { bridgeIdentifierPrefix } from './identity.server';
 import { normalizeBridgeSSR } from './producer.server';
 import { createReactStreamScriptIsolator } from './script-isolation.server';
+import { bridgeServiceErrorFrame } from '../service/version-mismatch';
 import {
   escapeHTMLAttribute,
   serializeBridgeFrame,
@@ -291,10 +292,13 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
               } catch {
                 // Diagnostic callbacks must not prevent the recovery frame.
               }
-              await emit(id, {
-                type: 'error',
-                message: 'Bridge server rendering failed',
-              });
+              await emit(
+                id,
+                bridgeServiceErrorFrame(
+                  error,
+                  'Bridge server rendering failed',
+                ),
+              );
             }
           } finally {
             if (!complete)

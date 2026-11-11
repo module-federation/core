@@ -1,4 +1,5 @@
 import { BRIDGE_PRODUCER_PROTOCOL } from './protocol';
+import type { BridgeStreamErrorFrame } from '../ssr-stream/protocol';
 
 export const BRIDGE_SERVICE_VERSION_MISMATCH =
   'BRIDGE_SERVICE_VERSION_MISMATCH' as const;
@@ -45,6 +46,26 @@ export function isBridgeServiceVersionMismatchError(
     typeof candidate.message === 'string' &&
     hasVersions(candidate)
   );
+}
+
+/** Preserve only the public deployment mismatch across the browser transport. */
+export function bridgeServiceErrorFrame(
+  error: unknown,
+  message: string,
+): BridgeStreamErrorFrame {
+  return {
+    type: 'error',
+    message,
+    ...(isBridgeServiceVersionMismatchError(error)
+      ? {
+          versionMismatch: {
+            code: BRIDGE_SERVICE_VERSION_MISMATCH,
+            expectedBuildVersion: error.expectedBuildVersion,
+            actualBuildVersion: error.actualBuildVersion,
+          },
+        }
+      : {}),
+  };
 }
 
 // Reserved for this protocol's pre-render version check and transparent ingress.
