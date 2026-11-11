@@ -24,12 +24,12 @@ export interface BrowserBridgeServiceOptions {
 const bindings = Symbol.for('module-federation/bridge-services');
 const ingress = Symbol.for('module-federation/bridge-service-ingress');
 type ServiceRuntime = ModuleFederation & {
-  [bindings]?: BridgeServices;
+  [bindings]?: BridgeServices | (() => BridgeServices);
   [ingress]?: string;
 };
 export function registerBridgeServices(
   instance: ModuleFederation,
-  services: BridgeServices,
+  services: BridgeServices | (() => BridgeServices),
 ) {
   Object.defineProperty(instance, bindings, {
     value: services,
@@ -55,7 +55,10 @@ export function getBridgeServiceIngress(
   return path && `${path}${encodeURIComponent(id)}`;
 }
 export function getBridgeService(instance: ModuleFederation, id: string) {
-  const services = (instance as ServiceRuntime)[bindings];
+  // Callers resolve policy only after identifying the current Service expose.
+  // Registering a nested container must not require its private server context.
+  const source = (instance as ServiceRuntime)[bindings];
+  const services = typeof source === 'function' ? source() : source;
   const remote = instance.options.remotes.find(
     (remote) =>
       id === remote.name ||
