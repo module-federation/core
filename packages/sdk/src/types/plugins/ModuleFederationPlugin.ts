@@ -484,6 +484,11 @@ export interface ModuleFederationPluginOptions {
   dts?: boolean | PluginDtsOptions;
   virtualRuntimeEntry?: boolean;
   experiments?: {
+    /**
+     * Framework-managed build identity. Read once per compilation and shared by
+     * the runtime identifier and manifest. A callback supports watch rebuilds.
+     */
+    buildVersion?: string | (() => string);
     externalRuntime?: boolean;
     provideExternalRuntime?: boolean;
     asyncStartup?: boolean;

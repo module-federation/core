@@ -2,6 +2,8 @@ import {
   nativeGlobal,
   resetFederationGlobalInfo,
   setGlobalFederationInstance,
+  getRemoteFederationInstance,
+  hasRemoteModuleConsumers,
   getGlobalFederationConstructor,
   setGlobalFederationConstructor,
   getInfoWithoutType,
@@ -17,16 +19,26 @@ import {
   setPreloaded,
   Global,
 } from './global';
-import { getRegisteredShare, getGlobalShareScope } from './utils/share';
-import { getRemoteInfo, matchRemoteWithNameAndExpose } from './utils';
+import {
+  getRegisteredShare,
+  getGlobalShareScope,
+  getRemoteSharedOwnership,
+} from './utils/share';
+import {
+  getRemoteInfo,
+  getRemoteEntryUniqueKey,
+  matchRemoteWithNameAndExpose,
+} from './utils';
 import { preloadAssets } from './utils/preload';
 interface IShareUtils {
   getRegisteredShare: typeof getRegisteredShare;
   getGlobalShareScope: typeof getGlobalShareScope;
+  getRemoteSharedOwnership: typeof getRemoteSharedOwnership;
 }
 const ShareUtils: IShareUtils = {
   getRegisteredShare,
   getGlobalShareScope,
+  getRemoteSharedOwnership,
 };
 
 interface IGlobalUtils {
@@ -34,6 +46,8 @@ interface IGlobalUtils {
   nativeGlobal: typeof global;
   resetFederationGlobalInfo: typeof resetFederationGlobalInfo;
   setGlobalFederationInstance: typeof setGlobalFederationInstance;
+  getRemoteFederationInstance: typeof getRemoteFederationInstance;
+  hasRemoteModuleConsumers: typeof hasRemoteModuleConsumers;
   getGlobalFederationConstructor: typeof getGlobalFederationConstructor;
   setGlobalFederationConstructor: typeof setGlobalFederationConstructor;
   getInfoWithoutType: typeof getInfoWithoutType;
@@ -54,6 +68,8 @@ const GlobalUtils: IGlobalUtils = {
   nativeGlobal,
   resetFederationGlobalInfo,
   setGlobalFederationInstance,
+  getRemoteFederationInstance,
+  hasRemoteModuleConsumers,
   getGlobalFederationConstructor,
   setGlobalFederationConstructor,
   getInfoWithoutType,
@@ -76,6 +92,7 @@ export default {
     matchRemoteWithNameAndExpose,
     preloadAssets,
     getRemoteInfo,
+    getRemoteEntryUniqueKey,
   },
 };
 

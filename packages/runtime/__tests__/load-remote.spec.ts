@@ -484,9 +484,10 @@ describe('lazy loadRemote and add remote into snapshot', () => {
     expect(beforeRemotesLength).toBe(0);
 
     await federationInstance.loadRemote('app2/say');
-    const afterHostRemotesInfo = hostModuleInfo.remotesInfo;
+    const afterHostRemotesInfo = federationInstance.moduleInfo!.remotesInfo;
     const afterRemotesLength = Object.keys(afterHostRemotesInfo).length;
     expect(afterRemotesLength).toBe(1);
+    expect(hostModuleInfo.remotesInfo).toEqual({});
     reset();
   });
   it('loads manifest', async () => {
@@ -527,9 +528,10 @@ describe('lazy loadRemote and add remote into snapshot', () => {
     expect(beforeRemotesLength).toBe(0);
 
     await federationInstance.loadRemote('main/say');
-    const afterHostRemotesInfo = hostModuleInfo.remotesInfo;
+    const afterHostRemotesInfo = federationInstance.moduleInfo!.remotesInfo;
     const afterRemotesLength = Object.keys(afterHostRemotesInfo).length;
     expect(afterRemotesLength).toBe(1);
+    expect(hostModuleInfo.remotesInfo).toEqual({});
     reset();
   });
 });

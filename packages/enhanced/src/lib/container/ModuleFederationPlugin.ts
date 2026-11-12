@@ -6,7 +6,7 @@
 'use strict';
 import { DtsPlugin } from '@module-federation/dts-plugin';
 import { ContainerManager, utils } from '@module-federation/managers';
-import { StatsPlugin } from '@module-federation/manifest';
+import { BuildVersionPlugin, StatsPlugin } from '@module-federation/manifest';
 import {
   bindLoggerToCompiler,
   composeKeyWithSeparator,
@@ -106,9 +106,15 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     ).length;
 
     if (name && MFPluginNum < 2) {
-      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
-        composeKeyWithSeparator(name, utils.getBuildVersion()),
-      );
+      if (experiments?.buildVersion !== undefined) {
+        new BuildVersionPlugin(name, experiments.buildVersion).apply(
+          compiler as unknown as Parameters<BuildVersionPlugin['apply']>[0],
+        );
+      } else {
+        definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
+          composeKeyWithSeparator(name, utils.getBuildVersion()),
+        );
+      }
     }
 
     const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;

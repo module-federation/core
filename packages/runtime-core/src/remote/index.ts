@@ -1,7 +1,6 @@
 import {
   isBrowserEnvValue,
   warn,
-  composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
@@ -11,6 +10,8 @@ import {
   getInfoWithoutType,
   globalLoading,
   CurrentGlobal,
+  getRemoteFederationInstance,
+  hasRemoteModuleConsumers,
 } from '../global';
 import {
   Options,
@@ -38,7 +39,6 @@ import {
   error,
   getRemoteInfo,
   getRemoteEntryUniqueKey,
-  getFMId,
   composeRemoteRequestId,
   matchRemoteWithNameAndExpose,
   optionsToMFContext,
@@ -47,7 +47,12 @@ import {
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
-import { getGlobalShareScope } from '../utils/share';
+import {
+  getGlobalShareScope,
+  getRemoteSharedOwnership,
+  retireShareScope,
+  pruneRetiredShareScopes,
+} from '../utils/share';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
 
 export interface LoadRemoteMatch {
@@ -83,6 +88,7 @@ const clearRemoteSnapshotCache = (
   host: ModuleFederation,
   remote: Remote,
   remoteInfo?: RemoteInfo,
+  preserveGlobal = false,
 ): void => {
   const remoteNames = new Set(
     [remote.name, remoteInfo?.name].filter(Boolean) as string[],
@@ -92,25 +98,44 @@ const clearRemoteSnapshotCache = (
   );
   const globalModuleInfo = Global.__FEDERATION__.moduleInfo;
 
-  Object.values(globalModuleInfo).forEach((moduleInfo) => {
-    if (!('remotesInfo' in moduleInfo) || !moduleInfo.remotesInfo) {
-      return;
-    }
-
+  const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
+  if (hostGlobalSnapshot?.remotesInfo) {
     remoteNames.forEach((remoteName) => {
       const remoteRecord = getInfoWithoutType(
-        moduleInfo.remotesInfo,
+        hostGlobalSnapshot.remotesInfo,
         remoteName,
       );
       if (remoteRecord.value) {
-        delete moduleInfo.remotesInfo?.[remoteRecord.key];
+        delete hostGlobalSnapshot.remotesInfo[remoteRecord.key];
       }
     });
+  }
+
+  remoteEntries.forEach((entry) => {
+    host.snapshotHandler.manifestCache.delete(entry);
   });
+  if (preserveGlobal) return;
 
   Object.keys(globalModuleInfo).forEach((moduleKey) => {
+    const snapshot = globalModuleInfo[moduleKey];
+    // Another build can already occupy the same registration/manifest URL.
+    if (
+      remoteInfo?.buildVersion &&
+      snapshot &&
+      'buildVersion' in snapshot &&
+      snapshot.buildVersion &&
+      snapshot.buildVersion !== remoteInfo.buildVersion
+    )
+      return;
     remoteNames.forEach((remoteName) => {
-      if (moduleKey === remoteName || moduleKey.startsWith(`${remoteName}:`)) {
+      if (
+        moduleKey === remoteName ||
+        [...remoteEntries].some(
+          (entry) => moduleKey === `${remoteName}:${entry}`,
+        ) ||
+        (remoteInfo?.version &&
+          moduleKey === `${remoteName}:${remoteInfo.version}`)
+      ) {
         delete globalModuleInfo[moduleKey];
       }
     });
@@ -118,9 +143,7 @@ const clearRemoteSnapshotCache = (
 
   remoteEntries.forEach((entry) => {
     host.snapshotHandler.manifestCache.delete(entry);
-    if (Global.__FEDERATION__.__MANIFEST_LOADING__[entry]) {
-      delete Global.__FEDERATION__.__MANIFEST_LOADING__[entry];
-    }
+    delete Global.__FEDERATION__.__MANIFEST_LOADING__[entry];
   });
 };
 
@@ -1018,10 +1041,21 @@ export class RemoteHandler {
     }
   }
 
-  removeRemote(remote: Remote): Promise<void> {
+  async removeRemote(remote: Remote): Promise<void> {
     const { host } = this;
     const { name } = remote;
     const loadedModule = host.moduleCache.get(remote.name);
+    // Resolve before hooks or destructive changes, so ambiguous providers fail
+    // without selecting the first same-name instance in the registry.
+    const remoteIns = loadedModule
+      ? getRemoteFederationInstance(loadedModule.remoteInfo, [
+          ...CurrentGlobal.__FEDERATION__.__INSTANCES__,
+          ...host.retainedProviders,
+        ])
+      : undefined;
+    const sharedOwnership = loadedModule
+      ? getRemoteSharedOwnership(loadedModule.remoteInfo, remoteIns)
+      : undefined;
     return Promise.resolve(
       this.hooks.lifecycle.removeRemote.emit({
         remote,
@@ -1038,7 +1072,23 @@ export class RemoteHandler {
         if (remoteIndex !== -1) {
           host.options.remotes.splice(remoteIndex, 1);
         }
-        clearRemoteSnapshotCache(host, remote, loadedModule?.remoteInfo);
+        const preserveContainer =
+          loadedModule &&
+          hasRemoteModuleConsumers(
+            host,
+            new Set([loadedModule.remoteEntryExports, loadedModule.lib]),
+            remoteIns ? [remoteIns] : [],
+          );
+        clearRemoteSnapshotCache(
+          host,
+          remote,
+          loadedModule?.remoteInfo,
+          preserveContainer,
+        );
+        if (preserveContainer) {
+          host.moduleCache.delete(remote.name);
+          return;
+        }
         if (loadedModule) {
           const remoteInfo = loadedModule.remoteInfo;
           const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
@@ -1046,42 +1096,10 @@ export class RemoteHandler {
 
           // Keep a removed provider's runtime alive while another remote uses it.
           let preserveRemoteRuntime = false;
-          // A runtime registration name may differ from the container/provider
-          // name (for example dynamic -> catalog). Shared.from uses the provider
-          // identity, so scanning only the registration name can clear live libs.
-          const providerNames = new Set(
-            [
-              remoteInfo.providerName,
-              remoteInfo.name,
-              remoteInfo.entryGlobalName,
-            ].filter((name): name is string => Boolean(name)),
-          );
-          let remoteInsId = remoteInfo.buildVersion
-            ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
-            : remoteInfo.name;
-          const remoteInsIndex =
-            CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
-              if (remoteInfo.buildVersion) {
-                return Array.from(providerNames).some(
-                  (providerName) =>
-                    ins.options.id ===
-                    composeKeyWithSeparator(
-                      providerName,
-                      remoteInfo.buildVersion,
-                    ),
-                );
-              } else {
-                return providerNames.has(ins.name);
-              }
-            });
-          const remoteIns =
-            remoteInsIndex !== -1
-              ? CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex]
-              : undefined;
-          if (remoteIns) {
-            remoteInsId = remoteIns.options.id || remoteInsId;
-            providerNames.add(remoteIns.name);
-          }
+          const remoteInsId = sharedOwnership!.id;
+          const remoteInsIndex = remoteIns
+            ? CurrentGlobal.__FEDERATION__.__INSTANCES__.indexOf(remoteIns)
+            : -1;
           // Shared factories can outlive removal from the instance registry.
           // Scan their ownership even when this provider was removed before.
           const globalShareScopeMap = getGlobalShareScope();
@@ -1102,8 +1120,13 @@ export class RemoteHandler {
                         if (
                           shared &&
                           typeof shared === 'object' &&
-                          providerNames.has(shared.from)
+                          sharedOwnership!.owns(shared)
                         ) {
+                          if (sharedOwnership!.sharedWithPeer(shared)) {
+                            isAllSharedNotUsed = false;
+                            preserveRemoteRuntime = true;
+                            return;
+                          }
                           const hasExternalConsumer = shared.useIn.some(
                             (usedHostName) => usedHostName !== shared.from,
                           );
@@ -1144,6 +1167,7 @@ export class RemoteHandler {
               });
           });
 
+          if (remoteIns) retireShareScope(remoteIns.shareScopeMap);
           if (isAllSharedNotUsed && remoteIns) {
             remoteIns.shareScopeMap = {};
             delete globalShareScopeMap[remoteInsId];
@@ -1161,24 +1185,32 @@ export class RemoteHandler {
               1,
             );
           }
+          pruneRetiredShareScopes();
 
+          const globalEntry = CurrentGlobal[key] as
+            | RemoteEntryExports
+            | undefined;
+          const ownsGlobalEntry =
+            !remoteInfo.buildVersion ||
+            globalEntry === loadedModule.remoteEntryExports ||
+            globalEntry === loadedModule.lib;
           if (preserveRemoteRuntime) {
             if (remoteIns) host.retainedProviders.add(remoteIns);
             // Keeping a shared factory without its execution cache can create a
             // second singleton or break its later lazy dependencies. Retain
             // the shared closure and clear unrelated execution caches.
-            loadedModule.remoteEntryExports?.__webpack_clear_exposed_cache__!();
-            loadedModule.lib?.__webpack_clear_exposed_cache__!();
-            (CurrentGlobal[key] as RemoteEntryExports | undefined)
-              ?.__webpack_clear_exposed_cache__!();
+            loadedModule.remoteEntryExports?.__webpack_clear_exposed_cache__?.();
+            loadedModule.lib?.__webpack_clear_exposed_cache__?.();
+            if (ownsGlobalEntry)
+              globalEntry?.__webpack_clear_exposed_cache__?.();
           } else {
             clearRemoteEntryCache(loadedModule.remoteEntryExports);
             clearRemoteEntryCache(loadedModule.lib);
-            clearRemoteEntryCache(CurrentGlobal[key] as RemoteEntryExports);
+            if (ownsGlobalEntry) clearRemoteEntryCache(globalEntry);
           }
           // Shared factories may retain their runtime, but future loads must not
           // rediscover the retired container through globals or loading promises.
-          if (CurrentGlobal[key]) {
+          if (globalEntry && ownsGlobalEntry) {
             if (
               Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
             ) {
@@ -1211,41 +1243,47 @@ export class RemoteHandler {
     try {
       const { host } = this;
       const { name } = remote;
+      const loadedModule = host.moduleCache.get(remote.name);
+      const remoteIns = loadedModule
+        ? getRemoteFederationInstance(loadedModule.remoteInfo)
+        : undefined;
+      const sharedOwnership = loadedModule
+        ? getRemoteSharedOwnership(loadedModule.remoteInfo, remoteIns)
+        : undefined;
       const remoteIndex = host.options.remotes.findIndex(
         (item) => item.name === name,
       );
       if (remoteIndex !== -1) {
         host.options.remotes.splice(remoteIndex, 1);
       }
-      const globalSnapshotKey = getInfoWithoutType(
-        CurrentGlobal.__FEDERATION__.moduleInfo,
-        getFMId(remote),
-      ).key;
-      delete CurrentGlobal.__FEDERATION__.moduleInfo[globalSnapshotKey];
-
-      if ('entry' in remote) {
-        host.snapshotHandler.manifestCache.delete(remote.entry);
-        delete Global.__FEDERATION__.__MANIFEST_LOADING__[remote.entry];
+      const preserveContainer =
+        loadedModule &&
+        hasRemoteModuleConsumers(
+          host,
+          new Set([loadedModule.remoteEntryExports, loadedModule.lib]),
+          remoteIns ? [remoteIns] : [],
+        );
+      clearRemoteSnapshotCache(
+        host,
+        remote,
+        loadedModule?.remoteInfo,
+        preserveContainer,
+      );
+      if (preserveContainer) {
+        host.moduleCache.delete(remote.name);
+        return;
       }
 
-      const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
-      if (hostGlobalSnapshot) {
-        const remoteKey =
-          hostGlobalSnapshot &&
-          'remotesInfo' in hostGlobalSnapshot &&
-          hostGlobalSnapshot.remotesInfo &&
-          getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
-        if (remoteKey) {
-          delete hostGlobalSnapshot.remotesInfo[remoteKey];
-        }
-      }
-
-      const loadedModule = host.moduleCache.get(remote.name);
       if (loadedModule) {
         const remoteInfo = loadedModule.remoteInfo;
         const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
 
-        if (CurrentGlobal[key]) {
+        if (
+          CurrentGlobal[key] &&
+          (!remoteInfo.buildVersion ||
+            CurrentGlobal[key] === loadedModule.remoteEntryExports ||
+            CurrentGlobal[key] === loadedModule.lib)
+        ) {
           if (
             Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
           ) {
@@ -1264,21 +1302,11 @@ export class RemoteHandler {
         }
 
         // delete unloaded shared and instance
-        let remoteInsId = remoteInfo.buildVersion
-          ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
-          : remoteInfo.name;
-        const remoteInsIndex =
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
-            if (remoteInfo.buildVersion) {
-              return ins.options.id === remoteInsId;
-            } else {
-              return ins.name === remoteInsId;
-            }
-          });
+        const remoteInsId = sharedOwnership!.id;
+        const remoteInsIndex = remoteIns
+          ? CurrentGlobal.__FEDERATION__.__INSTANCES__.indexOf(remoteIns)
+          : -1;
         if (remoteInsIndex !== -1) {
-          const remoteIns =
-            CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex];
-          remoteInsId = remoteIns.options.id || remoteInsId;
           const globalShareScopeMap = getGlobalShareScope();
 
           let isAllSharedNotUsed = true;
@@ -1297,12 +1325,15 @@ export class RemoteHandler {
                         if (
                           shared &&
                           typeof shared === 'object' &&
-                          shared.from === remoteInfo.name
+                          sharedOwnership!.owns(shared)
                         ) {
+                          if (sharedOwnership!.sharedWithPeer(shared)) {
+                            isAllSharedNotUsed = false;
+                            return;
+                          }
                           if (shared.loaded || shared.loading) {
                             shared.useIn = shared.useIn.filter(
-                              (usedHostName) =>
-                                usedHostName !== remoteInfo.name,
+                              (usedHostName) => usedHostName !== shared.from,
                             );
                             if (shared.useIn.length) {
                               isAllSharedNotUsed = false;
@@ -1328,8 +1359,9 @@ export class RemoteHandler {
               });
           });
 
+          retireShareScope(remoteIns!.shareScopeMap);
           if (isAllSharedNotUsed) {
-            remoteIns.shareScopeMap = {};
+            remoteIns!.shareScopeMap = {};
             delete globalShareScopeMap[remoteInsId];
           }
           needDeleteKeys.forEach(
@@ -1340,6 +1372,7 @@ export class RemoteHandler {
             },
           );
           CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
+          pruneRetiredShareScopes();
         }
 
         host.moduleCache.delete(remote.name);

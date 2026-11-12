@@ -1,9 +1,11 @@
-import { ModuleFederation } from '@module-federation/runtime';
+import { Module, ModuleFederation } from '@module-federation/runtime';
+import helpers from '@module-federation/runtime/helpers';
 import {
   clearCache,
   createClearCacheRuntimePlugin,
   installClearCache,
 } from '../src/clearCache';
+import { init } from '../src/init';
 
 function createWebpackRequire() {
   const instance = {
@@ -51,6 +53,57 @@ function createDeferred() {
 }
 
 describe('clearCache', () => {
+  test('shares one adapter across require facades without accepting another instance', () => {
+    const { webpackRequire } = createWebpackRequire();
+    const facade = () =>
+      new Proxy(() => {}, {
+        get: (_, key) => (webpackRequire as any)[key],
+        set: (_, key, value) => {
+          (webpackRequire as any)[key] = value;
+          return true;
+        },
+      });
+    const first = installClearCache({ webpackRequire: facade() as any });
+    try {
+      expect(installClearCache({ webpackRequire: facade() as any })).toBe(
+        first,
+      );
+      expect(() =>
+        installClearCache({
+          webpackRequire: facade() as any,
+          instance: createWebpackRequire().instance as any,
+        }),
+      ).toThrow('another MF instance');
+    } finally {
+      first!();
+    }
+  });
+
+  test('registers an unresolved replacement without selecting a same-name provider build', () => {
+    const previous = globalThis.__FEDERATION__;
+    const { instance, webpackRequire } = createWebpackRequire();
+    const providers = ['v1', 'v2'].map((buildVersion) => ({
+      name: 'remoteA',
+      options: { id: `remoteA:${buildVersion}` },
+    }));
+    globalThis.__FEDERATION__ = {
+      ...previous,
+      __INSTANCES__: providers as any,
+    };
+    try {
+      installClearCache({ webpackRequire: webpackRequire as any });
+      expect(() =>
+        createClearCacheRuntimePlugin().registerRemote({
+          remote: { name: 'remoteA', entry: 'https://example.test/new.json' },
+          origin: instance,
+        }),
+      ).not.toThrow();
+      expect(globalThis.__FEDERATION__.__INSTANCES__).toEqual(providers);
+    } finally {
+      globalThis.__FEDERATION__ = previous;
+    }
+  });
+
   test('should install clearCache on federation instead of the instance', () => {
     const { instance, webpackRequire } = createWebpackRequire();
 
@@ -323,6 +376,284 @@ describe('clearCache', () => {
       delete globals.__test_resolved_container__;
     }
   });
+
+  test('clears only the resolved provider build and keeps the other build loadable', async () => {
+    const globals = globalThis as any;
+    const previousFederation = globals.__FEDERATION__;
+    const previousLoading = globals.__GLOBAL_LOADING_REMOTE_ENTRY__;
+    globals.__FEDERATION__ = {
+      ...previousFederation,
+      __INSTANCES__: [],
+      __SHARE__: {},
+      moduleInfo: {},
+    };
+    globals.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
+    const providerName = 'clear-cache-provider';
+    const globalName = '__clear_cache_versions__';
+    const entry = 'https://example.test/fixed-entry.js';
+    const builds = ['v1', 'v2'].map((buildVersion) => {
+      const provider = new ModuleFederation({
+        name: providerName,
+        id: `${providerName}:${buildVersion}`,
+      });
+      const shared = {
+        from: providerName,
+        useIn: [],
+        loaded: false,
+        loading: buildVersion === 'v2' ? Promise.resolve() : undefined,
+      };
+      provider.shareScopeMap.default = {
+        library: { '1.0.0': shared as any },
+      };
+      globals.__FEDERATION__.__SHARE__[provider.options.id!] =
+        provider.shareScopeMap;
+      const host = new ModuleFederation({
+        name: `clear-host-${buildVersion}`,
+        remotes: [{ name: 'registered', entry }],
+      });
+      let cleared = false;
+      const container = {
+        init() {},
+        get: jest.fn(async (expose: string) => {
+          if (cleared) throw Error(`Retired container ${buildVersion}`);
+          return () => ({ buildVersion, expose });
+        }),
+        __webpack_clear_cache__: jest.fn(() => {
+          cleared = true;
+        }),
+      };
+      const remoteInfo = {
+        name: 'registered',
+        providerName,
+        entry,
+        entryGlobalName: globalName,
+        buildVersion,
+        type: 'global' as const,
+        shareScope: 'default',
+      };
+      const module = new Module({ host, remoteInfo });
+      module.remoteEntryExports = container;
+      host.moduleCache.set('registered', module);
+      helpers.global.setGlobalFederationInstance(provider);
+      helpers.global.setGlobalFederationInstance(host);
+      const key = helpers.utils.getRemoteEntryUniqueKey(remoteInfo);
+      const loading =
+        buildVersion === 'v2'
+          ? createDeferred().promise
+          : Promise.resolve(container);
+      globals.__GLOBAL_LOADING_REMOTE_ENTRY__[key] = loading;
+      return { provider, host, module, container, shared, key, loading };
+    });
+    const [first, second] = builds;
+    const legacyKey = `registered:${entry}`;
+    const legacyLoading = Promise.resolve('legacy');
+    globals.__GLOBAL_LOADING_REMOTE_ENTRY__[legacyKey] = legacyLoading;
+    globals[globalName] = second.container;
+    const { webpackRequire } = createWebpackRequire();
+    webpackRequire.federation.instance = first.host as any;
+    try {
+      expect(await second.host.loadRemote('registered/Before')).toEqual({
+        buildVersion: 'v2',
+        expose: './Before',
+      });
+      await clearCache({
+        name: 'registered',
+        webpackRequire: webpackRequire as any,
+      });
+      expect(globals.__FEDERATION__.__INSTANCES__).not.toContain(
+        first.provider,
+      );
+      expect(globals.__FEDERATION__.__INSTANCES__).toContain(second.provider);
+      expect(
+        globals.__GLOBAL_LOADING_REMOTE_ENTRY__[first.key],
+      ).toBeUndefined();
+      expect(globals.__GLOBAL_LOADING_REMOTE_ENTRY__[second.key]).toBe(
+        second.loading,
+      );
+      expect(globals.__GLOBAL_LOADING_REMOTE_ENTRY__[legacyKey]).toBe(
+        legacyLoading,
+      );
+      expect(globals[globalName]).toBe(second.container);
+      expect(
+        first.provider.shareScopeMap.default.library['1.0.0'],
+      ).toBeUndefined();
+      expect(second.provider.shareScopeMap.default.library['1.0.0']).toBe(
+        second.shared,
+      );
+      expect(first.container.__webpack_clear_cache__).toHaveBeenCalled();
+      expect(second.container.__webpack_clear_cache__).not.toHaveBeenCalled();
+      expect(first.host.moduleCache.has('registered')).toBe(false);
+      expect(second.host.moduleCache.get('registered')).toBe(second.module);
+      expect(await second.host.loadRemote('registered/After')).toEqual({
+        buildVersion: 'v2',
+        expose: './After',
+      });
+    } finally {
+      globals.__FEDERATION__ = previousFederation;
+      globals.__GLOBAL_LOADING_REMOTE_ENTRY__ = previousLoading;
+      delete globals[globalName];
+    }
+  });
+
+  test('retains a provider and its unused shared records while another host owns its container', async () => {
+    const globals = globalThis as any;
+    const previousFederation = globals.__FEDERATION__;
+    globals.__FEDERATION__ = {
+      ...previousFederation,
+      __INSTANCES__: [],
+      __SHARE__: {},
+      moduleInfo: {},
+    };
+    const provider = new ModuleFederation({
+      name: 'retained-provider',
+      id: 'retained-provider:v1',
+    });
+    const shared = { from: provider.name, useIn: [], loaded: false };
+    provider.shareScopeMap.default = { library: { '1.0.0': shared as any } };
+    globals.__FEDERATION__.__SHARE__[provider.options.id!] =
+      provider.shareScopeMap;
+    helpers.global.setGlobalFederationInstance(provider);
+    let cleared = false;
+    const container = {
+      init() {},
+      get: async () => {
+        if (cleared) throw Error('Cleared active provider');
+        return () => ({ value: 'still live' });
+      },
+      __webpack_clear_cache__: jest.fn(() => {
+        cleared = true;
+      }),
+      __webpack_clear_exposed_cache__: jest.fn(() => {
+        cleared = true;
+      }),
+    };
+    const remoteInfo = {
+      name: 'registered',
+      providerName: provider.name,
+      buildVersion: 'v1',
+      entry: 'https://example.test/retained.js',
+      type: 'global' as const,
+      entryGlobalName: '__retained_container__',
+      shareScope: 'default',
+    };
+    const hosts = ['owner-a', 'owner-b'].map((name) => {
+      const host = new ModuleFederation({
+        name,
+        remotes: [{ name: 'registered', entry: remoteInfo.entry }],
+      });
+      const module = new Module({ host, remoteInfo });
+      module.remoteEntryExports = container;
+      host.moduleCache.set('registered', module);
+      helpers.global.setGlobalFederationInstance(host);
+      return host;
+    });
+    globals[remoteInfo.entryGlobalName] = container;
+    const { webpackRequire } = createWebpackRequire();
+    webpackRequire.federation.instance = hosts[0] as any;
+    try {
+      await clearCache({
+        name: 'registered',
+        webpackRequire: webpackRequire as any,
+      });
+      expect(hosts[0].moduleCache.has('registered')).toBe(false);
+      expect(globals.__FEDERATION__.__INSTANCES__).toContain(provider);
+      expect(provider.shareScopeMap.default.library['1.0.0']).toBe(shared);
+      expect(container.__webpack_clear_cache__).not.toHaveBeenCalled();
+      expect(container.__webpack_clear_exposed_cache__).not.toHaveBeenCalled();
+      expect(await hosts[1].loadRemote('registered/After')).toEqual({
+        value: 'still live',
+      });
+    } finally {
+      globals.__FEDERATION__ = previousFederation;
+      delete globals[remoteInfo.entryGlobalName];
+    }
+  });
+
+  test.each(['entry-hook', 'second-clear'])(
+    'rollback after %s preserves another application publication',
+    async (failure) => {
+      const globals = globalThis as any;
+      const previousFederation = globals.__FEDERATION__;
+      const previousLoading = globals.__GLOBAL_LOADING_REMOTE_ENTRY__;
+      globals.__FEDERATION__ = {
+        ...previousFederation,
+        __INSTANCES__: [],
+        __SHARE__: {},
+        moduleInfo: {},
+      };
+      globals.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
+      const provider = new ModuleFederation({
+        name: 'rollback-provider',
+        id: 'rollback-provider:v1',
+      });
+      const newProvider = new ModuleFederation({
+        name: provider.name,
+        id: 'rollback-provider:v2',
+      });
+      helpers.global.setGlobalFederationInstance(provider);
+      const info = {
+        name: 'registered',
+        providerName: provider.name,
+        buildVersion: 'v1',
+        entry: 'https://example.test/rollback.js',
+        entryGlobalName: '__rollback_container__',
+      };
+      const loadingKey = helpers.utils.getRemoteEntryUniqueKey(info);
+      const oldLoading = Promise.resolve('old');
+      const newLoading = Promise.resolve('new');
+      const newContainer = { get() {} };
+      const publishAndFail = () => {
+        helpers.global.setGlobalFederationInstance(newProvider);
+        globals[info.entryGlobalName] = newContainer;
+        // Even the same loading key must not be overwritten by an old rollback.
+        globals.__GLOBAL_LOADING_REMOTE_ENTRY__[loadingKey] = newLoading;
+        throw Error('clear failed after another publication');
+      };
+      const container = {
+        __webpack_clear_cache__:
+          failure === 'entry-hook' ? publishAndFail : () => {},
+      };
+      globals[info.entryGlobalName] = container;
+      globals.__GLOBAL_LOADING_REMOTE_ENTRY__[loadingKey] = oldLoading;
+      const { instance, webpackRequire } = createWebpackRequire();
+      const module = { remoteInfo: info, remoteEntryExports: container };
+      instance.moduleCache.set('registered', module);
+      let clears = 0;
+      (webpackRequire as any).chunkCacheControls = {
+        node: {
+          clear() {
+            if (++clears === 2 && failure === 'second-clear') publishAndFail();
+          },
+        },
+      };
+      webpackRequire.remotesLoadingData = {
+        remoteKeyToChunkIds: { registered: [10] },
+        remoteKeyToRemoteModuleIds: { registered: [101] },
+      };
+      const cached = { exports: 'old local module' };
+      webpackRequire.c[101] = cached;
+      try {
+        await expect(
+          clearCache({
+            name: 'registered',
+            webpackRequire: webpackRequire as any,
+          }),
+        ).rejects.toThrow('clear failed after another publication');
+        expect(globals.__FEDERATION__.__INSTANCES__).toContain(provider);
+        expect(globals.__FEDERATION__.__INSTANCES__).toContain(newProvider);
+        expect(globals[info.entryGlobalName]).toBe(newContainer);
+        expect(globals.__GLOBAL_LOADING_REMOTE_ENTRY__[loadingKey]).toBe(
+          newLoading,
+        );
+        expect(instance.moduleCache.get('registered')).toBe(module);
+        expect(webpackRequire.c[101]).toBe(cached);
+      } finally {
+        globals.__FEDERATION__ = previousFederation;
+        globals.__GLOBAL_LOADING_REMOTE_ENTRY__ = previousLoading;
+        delete globals[info.entryGlobalName];
+      }
+    },
+  );
 
   test('remove hook retains resolved identity after an earlier hook deletes moduleCache', async () => {
     const { instance, webpackRequire } = createWebpackRequire();
@@ -615,6 +946,83 @@ describe('cache adapter lifecycle', () => {
 });
 
 describe('cache adapter ownership and removal coordination', () => {
+  test('reinitializes one bundler without transferring another binding or retaining the old owner', async () => {
+    const { instance: first, webpackRequire } = createWebpackRequire();
+    const { instance: second } = createWebpackRequire();
+    const { webpackRequire: sibling } = createWebpackRequire();
+    const firstLoadRemote = first.loadRemote;
+    const secondLoadRemote = second.loadRemote;
+    const runtimeInit = jest
+      .fn()
+      .mockReturnValueOnce(first)
+      .mockReturnValueOnce(second);
+    Object.assign(webpackRequire.federation, {
+      initOptions: { name: 'first' },
+      runtime: { init: runtimeInit },
+    });
+    sibling.federation.instance = first;
+    const disposeSibling = installClearCache({
+      webpackRequire: sibling as any,
+    })!;
+    try {
+      webpackRequire.federation.instance = init({
+        webpackRequire: webpackRequire as any,
+      }) as any;
+      const disposeFirst = webpackRequire.federation.disposeClearCache!;
+      const firstClear = webpackRequire.federation.clearCache!;
+      Object.assign(webpackRequire.federation, {
+        instance: undefined,
+        initOptions: { name: 'second' },
+      });
+      webpackRequire.federation.instance = init({
+        webpackRequire: webpackRequire as any,
+      }) as any;
+      const secondClear = webpackRequire.federation.clearCache!;
+      expect(runtimeInit).toHaveBeenCalledTimes(2);
+      expect(webpackRequire.federation.instance).toBe(second);
+      await expect(firstClear({ name: 'remoteA' })).rejects.toThrow('detached');
+      disposeFirst();
+      expect(webpackRequire.federation.clearCache).toBe(secondClear);
+      expect(first.loadRemote).not.toBe(firstLoadRemote);
+      createClearCacheRuntimePlugin().dispose({ origin: first });
+      expect(first.loadRemote).toBe(firstLoadRemote);
+      expect(webpackRequire.federation.instance).toBe(second);
+      expect(webpackRequire.federation.clearCache).toBe(secondClear);
+      await expect(secondClear({ name: 'remoteA' })).resolves.toEqual({
+        name: 'remoteA',
+        cleared: true,
+      });
+    } finally {
+      disposeSibling();
+      webpackRequire.federation.disposeClearCache?.();
+    }
+    expect(second.loadRemote).toBe(secondLoadRemote);
+  });
+
+  test('rejects bundler reinitialization before invoking runtime init during cleanup', async () => {
+    const { instance, webpackRequire } = createWebpackRequire();
+    const runtimeInit = jest.fn(() => instance);
+    Object.assign(webpackRequire.federation, {
+      initOptions: { name: 'container' },
+      runtime: { init: runtimeInit },
+    });
+    init({ webpackRequire: webpackRequire as any });
+    const clear = webpackRequire.federation.clearCache!;
+    const pending = clear({ name: 'remoteA' });
+    expect(() => init({ webpackRequire: webpackRequire as any })).toThrow(
+      'cleanup is pending',
+    );
+    expect(runtimeInit).toHaveBeenCalledTimes(1);
+    expect(webpackRequire.federation.clearCache).toBe(clear);
+    await pending;
+    try {
+      expect(init({ webpackRequire: webpackRequire as any })).toBe(instance);
+      expect(runtimeInit).toHaveBeenCalledTimes(2);
+    } finally {
+      webpackRequire.federation.disposeClearCache?.();
+    }
+  });
+
   test('rejects changing the owner of a live binding', () => {
     const { webpackRequire } = createWebpackRequire();
     const dispose = installClearCache({

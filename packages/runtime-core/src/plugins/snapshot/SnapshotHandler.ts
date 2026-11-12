@@ -23,7 +23,7 @@ import {
   getGlobalSnapshot,
   setGlobalSnapshotInfoByModuleInfo,
   Global,
-  addGlobalSnapshot,
+  getHostSnapshotInfo,
   getGlobalSnapshotInfoByModuleInfo,
   getInfoWithoutType,
 } from '../../global';
@@ -38,10 +38,7 @@ export function getGlobalRemoteInfo(
   globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
   remoteSnapshot: GlobalModuleInfo[string] | undefined;
 } {
-  const hostGlobalSnapshot = getGlobalSnapshotInfoByModuleInfo({
-    name: origin.name,
-    version: origin.options.version,
-  });
+  const hostGlobalSnapshot = getHostSnapshotInfo(origin);
 
   // get remote detail info from global
   const globalRemoteInfo =
@@ -62,12 +59,9 @@ export function getGlobalRemoteInfo(
   }
 
   return {
-    hostGlobalSnapshot: undefined,
+    hostGlobalSnapshot,
     globalSnapshot: getGlobalSnapshot(),
-    remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
-      name: moduleInfo.name,
-      version: 'version' in moduleInfo ? moduleInfo.version : undefined,
-    }),
+    remoteSnapshot: getGlobalSnapshotInfoByModuleInfo(moduleInfo),
   };
 }
 
@@ -174,21 +168,7 @@ export class SnapshotHandler {
       origin: this.HostInstance,
     });
 
-    let hostSnapshot = getGlobalSnapshotInfoByModuleInfo({
-      name: this.HostInstance.options.name,
-      version: this.HostInstance.options.version,
-    });
-
-    if (!hostSnapshot) {
-      hostSnapshot = {
-        version: this.HostInstance.options.version || '',
-        remoteEntry: '',
-        remotesInfo: {},
-      };
-      addGlobalSnapshot({
-        [this.HostInstance.options.name]: hostSnapshot,
-      });
-    }
+    const hostSnapshot = getHostSnapshotInfo(this.HostInstance, true)!;
 
     // In dynamic loadRemote scenarios, incomplete remotesInfo delivery may occur. In such cases, the remotesInfo in the host needs to be completed in the snapshot at runtime.
     // This ensures the snapshot's integrity and helps the chrome plugin correctly identify all producer modules, ensuring that proxyable producer modules will not be missing.

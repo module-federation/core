@@ -1,10 +1,11 @@
+import type { ModuleFederation } from '@module-federation/runtime';
+import helpers from '@module-federation/runtime/helpers';
 import type {
   ClearCacheOptions,
   ClearCacheResult,
   ClearCacheRuntimeOptions,
   IdToExternalAndNameMapping,
   ModuleId,
-  RemoteInfos,
   RemotesLoadingData,
   InstallClearCacheOptions,
   WebpackRequire,
@@ -13,8 +14,15 @@ import type {
 type ClearCacheTarget = {
   name: string;
   remoteKey: string;
-  remoteInfos: NonNullable<RemoteInfos[string]>;
+  remoteInfos: RemoteInfoLike[];
   remoteNames: string[];
+  entryExports: Set<unknown>;
+  providers: Array<{
+    instance: ModuleFederation | undefined;
+    shared: ReturnType<typeof helpers.share.getRemoteSharedOwnership>;
+  }>;
+  loadingEntries: Map<string, unknown>;
+  restoreGlobals: Array<() => void>;
   chunkIds: ModuleId[];
   generations: Array<{ key: string; value: number }>;
   remoteModuleIds: ModuleId[];
@@ -33,6 +41,7 @@ type ChunkCacheControl = {
 
 type RemoteInfoLike = {
   providerName?: string;
+  buildVersion?: string;
   name?: string;
   alias?: string;
   entry?: string;
@@ -215,7 +224,11 @@ const getRemoteEntryLoadingKey = (remoteInfo: RemoteInfoLike) => {
   if (!remoteInfo.name || !remoteInfo.entry) {
     return;
   }
-  return `${remoteInfo.name}:${remoteInfo.entry}`;
+  return helpers.utils.getRemoteEntryUniqueKey({
+    name: remoteInfo.name,
+    entry: remoteInfo.entry,
+    buildVersion: remoteInfo.buildVersion,
+  });
 };
 
 export const getRemoteKeysForChunk = (
@@ -371,6 +384,7 @@ const emptyRemotesLoadingData = {} as RemotesLoadingData;
 
 const getClearTarget = (
   options: ClearCacheRuntimeOptions,
+  captureProviders = true,
 ): ClearCacheTarget => {
   const { webpackRequire } = options;
   const name = options.name;
@@ -411,7 +425,7 @@ const getClearTarget = (
   }
 
   const remoteNames = getRemoteNames(webpackRequire, name, remoteKey);
-  let remoteInfos = [
+  let remoteInfos: RemoteInfoLike[] = [
     ...toList(
       webpackRequire.federation.bundlerRuntimeOptions.remotes?.remoteInfos?.[
         remoteKey
@@ -425,8 +439,11 @@ const getClearTarget = (
     if (remoteNames.includes(remote.name))
       remoteInfos.push(createBundlerRemoteInfo(remote));
   }
+  const entryExports = new Set<unknown>();
   for (const remoteName of remoteNames) {
     const loaded = instance?.moduleCache?.get(remoteName);
+    if (loaded?.remoteEntryExports) entryExports.add(loaded.remoteEntryExports);
+    if (loaded?.lib) entryExports.add(loaded.lib);
     const resolved =
       options.remoteInfo?.name === remoteName
         ? options.remoteInfo
@@ -434,14 +451,51 @@ const getClearTarget = (
     if (resolved) {
       // Resolved manifest metadata supersedes the registration's default global.
       remoteInfos = remoteInfos.filter((info) => info.name !== remoteName);
-      remoteInfos.push(resolved as RemoteInfoLike);
+      remoteInfos.push(resolved);
     }
+  }
+  // Capture actual provider identities before hooks and repeated stale cleanups
+  // remove their registrations. A logical name can identify several builds.
+  const knownInstances = [
+    ...new Set([
+      ...(globalThis.__FEDERATION__?.__INSTANCES__ || []),
+      ...(instance?.retainedProviders || []),
+    ]),
+  ];
+  const providers = (captureProviders ? remoteInfos : []).map((info) => {
+    const remoteInfo = {
+      ...info,
+      name: info.name || name,
+      entryGlobalName: info.entryGlobalName || '',
+    };
+    const provider = helpers.global.getRemoteFederationInstance(
+      remoteInfo,
+      knownInstances,
+    );
+    return {
+      instance: provider,
+      shared: helpers.share.getRemoteSharedOwnership(
+        remoteInfo,
+        provider,
+        knownInstances,
+      ),
+    };
+  });
+  const loadingEntries = new Map<string, unknown>();
+  for (const info of remoteInfos) {
+    const key = getRemoteEntryLoadingKey(info);
+    if (key && hasOwn(globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__ || {}, key))
+      loadingEntries.set(key, globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__[key]);
   }
   return {
     name,
     remoteKey,
     remoteInfos,
     remoteNames,
+    entryExports,
+    providers,
+    loadingEntries,
+    restoreGlobals: [],
     chunkIds: toList(remotesLoadingData.remoteKeyToChunkIds?.[remoteKey]),
     generations: remoteNames.map((remoteName) => ({
       key: remoteName,
@@ -500,20 +554,6 @@ const createClearSnapshot = (
         value,
       }))
     : [];
-  const federationInstances = Array.isArray(
-    (globalThis as any).__FEDERATION__?.__INSTANCES__,
-  )
-    ? (globalThis as any).__FEDERATION__.__INSTANCES__
-    : undefined;
-  const federationInstanceSnapshot = federationInstances
-    ? [...federationInstances]
-    : undefined;
-  const remoteEntryGlobalKeys: string[] = [];
-  const remoteEntryLoadingKeys: string[] = [];
-  for (const remoteInfo of target.remoteInfos) {
-    pushUnique(remoteEntryGlobalKeys, getRemoteEntryGlobalKeys(remoteInfo));
-    pushUnique(remoteEntryLoadingKeys, [getRemoteEntryLoadingKey(remoteInfo)]);
-  }
   const state = getState(webpackRequire);
   const remoteEntryUrlGenerationEntries = target.remoteInfos
     .map((remoteInfo) => getRemoteEntryUrlGenerationKey(remoteInfo))
@@ -526,13 +566,14 @@ const createClearSnapshot = (
       ),
       value: state.remoteEntryUrlGenerations[key],
     }));
-  const globalLoading = globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__ ?? {};
   return {
     restore() {
       restoreEntries(webpackRequire.m, this.moduleFactories);
       restoreEntries(webpackRequire.c, this.moduleCache);
-      restoreEntries(globalThis as any, this.remoteEntryGlobals);
-      restoreEntries(globalLoading, this.remoteEntryLoading);
+      // Roll back only writes made by this clear. Other applications may publish
+      // new instances, entry aliases, or loading promises while hooks run.
+      for (const restore of [...target.restoreGlobals].reverse()) restore();
+      target.restoreGlobals.length = 0;
       for (const entry of remoteLoadingPromises) {
         if (!entry.data) {
           continue;
@@ -570,13 +611,6 @@ const createClearSnapshot = (
           idToRemoteMap[entry.key] = entry.value;
         }
       }
-      if (federationInstances && federationInstanceSnapshot) {
-        federationInstances.splice(
-          0,
-          federationInstances.length,
-          ...federationInstanceSnapshot,
-        );
-      }
       for (const entry of target.generations) {
         state.remoteGenerations[entry.key] = entry.value;
       }
@@ -590,11 +624,6 @@ const createClearSnapshot = (
     },
     moduleFactories: captureEntries(webpackRequire.m, remoteModuleIds),
     moduleCache: captureEntries(webpackRequire.c, moduleIds),
-    remoteEntryGlobals: captureEntries(
-      globalThis as any,
-      remoteEntryGlobalKeys,
-    ),
-    remoteEntryLoading: captureEntries(globalLoading, remoteEntryLoadingKeys),
   };
 };
 
@@ -610,7 +639,7 @@ const cleanupRemoteEntryInternalCache = (
     | null
     | undefined;
   if (preserveShared) {
-    entry?.__webpack_clear_exposed_cache__!();
+    entry?.__webpack_clear_exposed_cache__?.();
     return;
   }
   const clear = entry?.__webpack_clear_cache__;
@@ -619,6 +648,12 @@ const cleanupRemoteEntryInternalCache = (
   }
 };
 
+const ownsRemoteGlobalEntry = (
+  target: ClearCacheTarget,
+  remoteInfo: RemoteInfoLike,
+  entry: unknown,
+) => !remoteInfo.buildVersion || target.entryExports.has(entry);
+
 const cleanupRemoteEntryCache = (
   webpackRequire: WebpackRequire,
   target: ClearCacheTarget,
@@ -626,19 +661,44 @@ const cleanupRemoteEntryCache = (
   const globalLoading = globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__;
   for (const remoteInfo of target.remoteInfos) {
     const loadingKey = getRemoteEntryLoadingKey(remoteInfo);
-    if (loadingKey && globalLoading) {
+    if (
+      loadingKey &&
+      globalLoading &&
+      target.loadingEntries.has(loadingKey) &&
+      globalLoading[loadingKey] === target.loadingEntries.get(loadingKey)
+    ) {
+      const loading = globalLoading[loadingKey];
       delete globalLoading[loadingKey];
+      target.restoreGlobals.push(() => {
+        if (
+          globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__ === globalLoading &&
+          !hasOwn(globalLoading, loadingKey)
+        )
+          globalLoading[loadingKey] = loading;
+      });
     }
     for (const globalKey of getRemoteEntryGlobalKeys(remoteInfo)) {
       if (!Object.prototype.hasOwnProperty.call(globalThis, globalKey)) {
         continue;
       }
-      cleanupRemoteEntryInternalCache((globalThis as any)[globalKey]);
+      const entry = (globalThis as any)[globalKey];
+      if (!ownsRemoteGlobalEntry(target, remoteInfo, entry)) continue;
+      cleanupRemoteEntryInternalCache(entry);
+      // The clear callback can synchronously publish another container.
+      if ((globalThis as any)[globalKey] !== entry) continue;
       const descriptor = Object.getOwnPropertyDescriptor(globalThis, globalKey);
       if (descriptor?.configurable) {
         delete (globalThis as any)[globalKey];
+        target.restoreGlobals.push(() => {
+          if (!hasOwn(globalThis, globalKey))
+            Object.defineProperty(globalThis, globalKey, descriptor);
+        });
       } else {
         (globalThis as any)[globalKey] = undefined;
+        target.restoreGlobals.push(() => {
+          if ((globalThis as any)[globalKey] === undefined)
+            (globalThis as any)[globalKey] = entry;
+        });
       }
     }
   }
@@ -659,45 +719,36 @@ const invalidateRemoteEntryUrlGenerations = (
   }
 };
 
-const getProviderNames = (target: ClearCacheTarget): string[] => {
-  const names = [...target.remoteNames];
-  for (const info of target.remoteInfos) {
-    pushUnique(names, [
-      info.providerName,
-      info.entryGlobalName,
-      info.globalName,
-    ]);
-  }
-  return names;
-};
-
 const cleanupRemoteRuntimeCache = (
   webpackRequire: WebpackRequire,
   target: ClearCacheTarget,
   preserveProvider = false,
+  preserveContainer = false,
 ) => {
   const instance = webpackRequire.federation.instance;
-  const providerNames = getProviderNames(target);
   if (!instance) {
     return;
   }
   for (const remoteName of target.remoteNames) {
-    const module = instance.moduleCache?.get(remoteName) as
-      | Record<string, unknown>
-      | undefined;
-    cleanupRemoteEntryInternalCache(
-      module?.remoteEntryExports,
-      preserveProvider,
-    );
-    cleanupRemoteEntryInternalCache(module?.lib, preserveProvider);
+    const module = instance.moduleCache?.get(remoteName);
+    if (!preserveContainer) {
+      cleanupRemoteEntryInternalCache(
+        module?.remoteEntryExports,
+        preserveProvider,
+      );
+      cleanupRemoteEntryInternalCache(module?.lib, preserveProvider);
+    }
     instance.moduleCache?.delete(remoteName);
   }
   for (const remoteInfo of target.remoteInfos) {
     for (const globalKey of getRemoteEntryGlobalKeys(remoteInfo)) {
-      cleanupRemoteEntryInternalCache(
-        (globalThis as any)[globalKey],
-        preserveProvider,
-      );
+      const entry = (globalThis as any)[globalKey];
+      if (
+        !preserveContainer &&
+        ownsRemoteGlobalEntry(target, remoteInfo, entry)
+      ) {
+        cleanupRemoteEntryInternalCache(entry, preserveProvider);
+      }
     }
   }
   const idToRemoteMap = instance.remoteHandler?.idToRemoteMap;
@@ -720,13 +771,28 @@ const cleanupRemoteRuntimeCache = (
   if (Array.isArray(federationInstances)) {
     for (let i = federationInstances.length - 1; i >= 0; i--) {
       const remoteInstance = federationInstances[i];
-      const instanceNames = [
-        remoteInstance?.name,
-        remoteInstance?.options?.name,
-        remoteInstance?.options?.id,
-      ].filter((name): name is string => typeof name === 'string');
-      if (instanceNames.some((name) => providerNames.includes(name))) {
+      if (
+        target.providers.some(({ instance }) => instance === remoteInstance)
+      ) {
         federationInstances.splice(i, 1);
+        const index = i;
+        target.restoreGlobals.push(() => {
+          if (
+            globalThis.__FEDERATION__?.__INSTANCES__ !== federationInstances ||
+            federationInstances.includes(remoteInstance) ||
+            federationInstances.some(
+              (current: ModuleFederation) =>
+                remoteInstance.options.id &&
+                current.options.id === remoteInstance.options.id,
+            )
+          )
+            return;
+          federationInstances.splice(
+            Math.min(index, federationInstances.length),
+            0,
+            remoteInstance,
+          );
+        });
       }
     }
   }
@@ -736,7 +802,8 @@ const cleanupSharedCache = (
   webpackRequire: WebpackRequire,
   target: ClearCacheTarget,
 ) => {
-  const providerNames = getProviderNames(target);
+  // An existing container can still request an as-yet unused shared module.
+  if (hasExternalRemoteConsumers(webpackRequire, target)) return;
   const shareScopeMap = globalThis.__FEDERATION__?.__SHARE__;
   if (!shareScopeMap) {
     return;
@@ -761,11 +828,17 @@ const cleanupSharedCache = (
           if (
             !shared ||
             typeof shared !== 'object' ||
-            !providerNames.includes(shared.from)
+            !target.providers.some(({ shared: ownership }) =>
+              ownership.owns(shared),
+            )
           ) {
             continue;
           }
           if (
+            target.providers.some(({ shared: ownership }) =>
+              ownership.sharedWithPeer(shared),
+            ) ||
+            shared.useIn?.length ||
             shared.loaded ||
             shared.loading ||
             typeof shared.lib === 'function'
@@ -780,7 +853,6 @@ const cleanupSharedCache = (
 };
 
 const hasActiveSharedConsumers = (target: ClearCacheTarget) => {
-  const providerNames = getProviderNames(target);
   const shareScopeMap = globalThis.__FEDERATION__?.__SHARE__;
   if (!shareScopeMap) {
     return false;
@@ -801,11 +873,18 @@ const hasActiveSharedConsumers = (target: ClearCacheTarget) => {
           if (
             !shared ||
             typeof shared !== 'object' ||
-            !providerNames.includes((shared as any).from)
+            !target.providers.some(({ shared: ownership }) =>
+              ownership.owns(shared as any),
+            )
           ) {
             continue;
           }
-          if ((shared as any).loading) {
+          if (
+            (shared as any).loading ||
+            target.providers.some(({ shared: ownership }) =>
+              ownership.sharedWithPeer(shared as any),
+            )
+          ) {
             return true;
           }
           if (
@@ -823,6 +902,20 @@ const hasActiveSharedConsumers = (target: ClearCacheTarget) => {
     }
   }
   return false;
+};
+
+const hasExternalRemoteConsumers = (
+  webpackRequire: WebpackRequire,
+  target: ClearCacheTarget,
+) => {
+  const providers = target.providers
+    .map(({ instance }) => instance)
+    .filter((instance): instance is ModuleFederation => Boolean(instance));
+  return helpers.global.hasRemoteModuleConsumers(
+    webpackRequire.federation.instance,
+    target.entryExports,
+    providers,
+  );
 };
 
 const getNodeChunkCacheControls = (webpackRequire: WebpackRequire) => {
@@ -968,7 +1061,9 @@ const cleanupStaleRemoteCache = (
   target: ClearCacheTarget,
   consumerModuleIds: ModuleId[],
 ) => {
-  const preserveProvider = hasActiveSharedConsumers(target);
+  const preserveContainer = hasExternalRemoteConsumers(webpackRequire, target);
+  const preserveProvider =
+    preserveContainer || hasActiveSharedConsumers(target);
   const idToExternalAndNameMapping =
     webpackRequire.federation.bundlerRuntimeOptions.remotes
       ?.idToExternalAndNameMapping ?? {};
@@ -995,7 +1090,12 @@ const cleanupStaleRemoteCache = (
   if (!preserveProvider) {
     cleanupRemoteEntryCache(webpackRequire, target);
   }
-  cleanupRemoteRuntimeCache(webpackRequire, target, preserveProvider);
+  cleanupRemoteRuntimeCache(
+    webpackRequire,
+    target,
+    preserveProvider,
+    preserveContainer,
+  );
 };
 
 export const runStaleRemoteCleanups = (
@@ -1356,7 +1456,13 @@ export const installClearCache = ({
   instance ??= webpackRequire.federation.instance;
   if (!instance) return;
   if (state.dispose) {
-    if (!getAdapters(instance)?.bindings.has(webpackRequire))
+    // Rspack can pass different require facades for the same runtime context.
+    // Their shared cache state identifies the binding across those facades.
+    if (
+      ![...(getAdapters(instance)?.bindings || [])].some(
+        (binding) => getState(binding) === state,
+      )
+    )
       throw new Error(
         'Cache adapter is already attached to another MF instance',
       );
@@ -1399,11 +1505,14 @@ export const createClearCacheRuntimePlugin = () => ({
       for (const key of keys.length ? keys : [remote.alias || remote.name]) {
         updateBundlerRemoteInfo(
           binding,
-          getClearTarget({
-            name: remote.name,
-            remoteKey: key,
-            webpackRequire: binding,
-          }),
+          getClearTarget(
+            {
+              name: remote.name,
+              remoteKey: key,
+              webpackRequire: binding,
+            },
+            false,
+          ),
           remote,
         );
       }

@@ -39,6 +39,24 @@ See [https://module-federation.io/guide/build-plugins/plugins.html](https://modu
 
 The name of the container.
 
+### experiments.buildVersion
+
+- Type: `string | (() => string)`
+- Default: unset, preserving the existing environment/package build version
+
+Framework integrations can provide a non-empty build version before compilation. The plugin reads a callback once per compilation and uses that frozen value for both `FEDERATION_BUILD_IDENTIFIER` (`name:version`) and manifest `metaData.buildInfo.buildVersion`. The Rspack and webpack plugins support this option, including watch rebuilds that reuse application modules.
+
+```ts
+let revision = 'development-1';
+const plugin = new ModuleFederationPlugin({
+  name: 'provider',
+  experiments: { buildVersion: () => revision },
+});
+// Before the next build, the framework changes revision and invalidates its compiler.
+```
+
+The integration owns rebuild scheduling. When browser and server compilers publish one release, give them the same revision and rebuild both before publication. Do not derive this value from emitted assets that already contain the identifier, or modify the process environment to coordinate independent compilers. The plugin does not automatically invalidate other compilers or publish completed server resources.
+
 ### exposes
 
 - Type: `Exposes`

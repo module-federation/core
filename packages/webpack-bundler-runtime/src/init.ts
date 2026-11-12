@@ -22,6 +22,11 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
     throw new Error('initOptions is required!');
   }
 
+  // Multiple federation plugins can initialize the same bundler runtime in
+  // sequence. Release its previous binding before choosing the next instance.
+  // The disposer rejects replacement while cache cleanup is still pending.
+  webpackRequire.federation.disposeClearCache?.();
+
   if (USE_SHARED) {
     const treeShakingSharePlugin: () => ModuleFederationRuntimePlugin =
       function () {

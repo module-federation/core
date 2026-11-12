@@ -13,13 +13,12 @@ export function getBuilderId(): string {
 export function getGlobalFederationInstance(
   name: string,
   version: string | undefined,
+  id?: string,
 ): ModuleFederation | undefined {
-  const buildId = getBuilderId();
+  const buildId = id || getBuilderId();
   return CurrentGlobal.__FEDERATION__.__INSTANCES__.find(
     (GMInstance: ModuleFederation) => {
-      if (buildId && GMInstance.options.id === buildId) {
-        return true;
-      }
+      if (buildId) return GMInstance.options.id === buildId;
 
       if (
         GMInstance.options.name === name &&

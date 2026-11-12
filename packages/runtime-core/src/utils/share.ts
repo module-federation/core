@@ -1,6 +1,10 @@
 import { DEFAULT_SCOPE } from '../constant';
-import { TreeShakingStatus } from '@module-federation/sdk';
-import { Global, Federation } from '../global';
+import {
+  TreeShakingStatus,
+  composeKeyWithSeparator,
+} from '@module-federation/sdk';
+import type { ModuleFederation } from '../core';
+import { Global, CurrentGlobal, Federation } from '../global';
 import {
   GlobalShareScopeMap,
   Shared,
@@ -14,11 +18,97 @@ import {
   TreeShakingArgs,
   SharedGetter,
   SharedLoadContext,
+  RemoteInfo,
 } from '../type';
 import { warn, error } from './logger';
 import { satisfy } from './semver';
 import { SyncWaterfallHook } from './hooks';
 import { addUniqueItem, arrayOptions } from './tool';
+
+const sharedRecords = (scopes: ShareScopeMap | undefined): Shared[] =>
+  Object.values(scopes || {}).flatMap((packages) =>
+    Object.values(packages).flatMap((versions) => Object.values(versions)),
+  );
+
+export function getRemoteSharedOwnership(
+  remoteInfo: Pick<
+    RemoteInfo,
+    'name' | 'providerName' | 'entryGlobalName' | 'buildVersion'
+  >,
+  provider: ModuleFederation | undefined,
+  instances: readonly ModuleFederation[] = CurrentGlobal.__FEDERATION__
+    .__INSTANCES__,
+) {
+  const names = new Set(
+    [
+      remoteInfo.providerName,
+      remoteInfo.name,
+      remoteInfo.entryGlobalName,
+    ].filter((name): name is string => Boolean(name)),
+  );
+  if (provider) names.add(provider.name);
+  const id =
+    provider?.options.id ||
+    composeKeyWithSeparator(
+      remoteInfo.providerName || remoteInfo.name,
+      remoteInfo.buildVersion,
+    );
+  const owned = new Set([
+    ...sharedRecords(provider?.shareScopeMap),
+    ...sharedRecords(getGlobalShareScope()[id]),
+  ]);
+  const peers = instances.filter(
+    (instance) => instance !== provider && names.has(instance.name),
+  );
+  const peerRecords = new Set(
+    peers.flatMap((instance) => sharedRecords(instance.shareScopeMap)),
+  );
+  return {
+    id,
+    // Shared.from/useIn remain logical names. The record's object identity ties
+    // that name to a build without changing the sharing protocol.
+    owns: (shared: Shared) =>
+      names.has(shared.from) && (!remoteInfo.buildVersion || owned.has(shared)),
+    sharedWithPeer: (shared: Shared) => peerRecords.has(shared),
+  };
+}
+
+const retiredScopesKey = Symbol.for('module-federation.retired-share-scopes');
+const retiredScopes: WeakSet<ShareScopeMap> = ((CurrentGlobal as any)[
+  retiredScopesKey
+] ||= new WeakSet<ShareScopeMap>());
+
+export function retireShareScope(scope: ShareScopeMap): void {
+  retiredScopes.add(scope);
+}
+
+/** Release only retired scope objects, never another runtime's live scope. */
+export function pruneRetiredShareScopes(): void {
+  const globals = new Set([
+    CurrentGlobal.__FEDERATION__,
+    Global.__FEDERATION__,
+  ]);
+  const liveScopes = new Set(
+    [...globals].flatMap((global) =>
+      global.__INSTANCES__.map((instance) => instance.shareScopeMap),
+    ),
+  );
+  for (const global of globals)
+    for (const [id, scopes] of Object.entries(global.__SHARE__))
+      if (
+        retiredScopes.has(scopes) &&
+        !liveScopes.has(scopes) &&
+        !Object.values(scopes).some((packages) =>
+          Object.values(packages).some((versions) =>
+            Object.values(versions).some(
+              (shared) =>
+                shared.useIn.length || (shared.loading && !shared.loaded),
+            ),
+          ),
+        )
+      )
+        delete global.__SHARE__[id];
+}
 
 function formatShare(
   shareArgs: ShareArgs,

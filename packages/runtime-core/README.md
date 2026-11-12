@@ -37,6 +37,32 @@ bundled application closures or replace references retained by application code.
 behavior. It does not await the new asynchronous cleanup hooks. Applications that
 coordinate SSR invalidation should use and await `updateRemotes`.
 
+`helpers.global.getRemoteFederationInstance(remoteInfo, instances?)` resolves a
+provider using the same build identity as remote removal. A manifest's
+`providerName` takes precedence over its registration name. With `buildVersion`,
+the helper matches the composed provider/build value against `instance.options.id`
+and never falls back to a same-name instance from another build. Without a build
+version it accepts a unique name match. It returns `undefined` when no instance
+matches and throws when multiple distinct instances match. The optional instance
+list defaults to the current federation registry.
+
+Runtime `init` also respects an explicit instance ID or the compiler's build ID.
+Pure runtime consumers without either ID retain name/version-based reuse.
+Shared `from` and `useIn` values remain logical names. Destroying one of several
+same-name instances conservatively retains that shared ownership until the last
+same-name instance is released, while removing the selected instance's roots.
+
+Removing a remote releases only the current host's reference when another host
+still consumes that provider or container. The provider's instance, shared
+factories and execution cache remain available to that host until its last
+consumer releases it. Core and bundler cleanup use the same
+`helpers.global.hasRemoteModuleConsumers` check.
+
+Host snapshot selections belong to the runtime instance. Injected snapshots seed
+independent copies, so loading a remote never changes another same-name host's
+selection or the injected template. A host's runtime-added snapshot is not a
+provider deployment snapshot.
+
 ## License
 
 `@module-federation/runtime` is [MIT licensed](https://github.com/module-federation/core/blob/main/packages/runtime/LICENSE).

@@ -8,7 +8,7 @@ import {
   setGlobalFederationConstructor,
 } from '@module-federation/runtime-core';
 import { runtimeDescMap, RUNTIME_009 } from '@module-federation/error-codes';
-import { getGlobalFederationInstance } from './utils';
+import { getBuilderId, getGlobalFederationInstance } from './utils';
 
 export {
   loadScript,
@@ -46,8 +46,15 @@ function rememberDefault(instance: ModuleFederation) {
 }
 export function init(options: UserOptions): ModuleFederation {
   // Retrieve the same instance with the same name
-  const instance = getGlobalFederationInstance(options.name, options.version);
-  const normalizedOptions = { ...options, id: options.id || '' };
+  const instance = getGlobalFederationInstance(
+    options.name,
+    options.version,
+    options.id,
+  );
+  const normalizedOptions = {
+    ...options,
+    id: options.id || getBuilderId(),
+  };
   if (!instance) {
     const created = createInstance(normalizedOptions);
     rememberDefault(created);

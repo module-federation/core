@@ -25,6 +25,7 @@ export interface IRuntimeUtils {
   matchRemoteWithNameAndExpose: typeof import('@module-federation/runtime-core').matchRemoteWithNameAndExpose;
   preloadAssets: (...args: any[]) => void;
   getRemoteInfo: typeof import('@module-federation/runtime-core').getRemoteInfo;
+  getRemoteEntryUniqueKey: typeof helpers.utils.getRemoteEntryUniqueKey;
 }
 
 export const utils: IRuntimeUtils = helpers.utils;
