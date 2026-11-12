@@ -6,7 +6,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export function createBroker(): ChildProcess {
-  const startBrokerPath = path.resolve(__dirname, './start-broker.js');
+  const startBrokerPath = path.resolve(
+    __dirname,
+    `start-broker${path.extname(__filename) === '.mjs' ? '.mjs' : '.js'}`,
+  );
   const sub = fork(startBrokerPath, [], {
     detached: true,
     stdio: 'ignore',

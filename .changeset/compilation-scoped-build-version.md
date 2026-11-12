@@ -3,6 +3,7 @@
 '@module-federation/manifest': patch
 '@module-federation/rspack': patch
 '@module-federation/enhanced': patch
+'@module-federation/rsbuild-plugin': patch
 ---
 
-Add an experimental compilation-scoped build version source for framework-managed rebuilds. Runtime identifiers and manifests now share the same frozen version when configured, including cached watch rebuilds, without changing the process environment.
+Identify completed builds by emitted asset content so fixed filenames and unchanged package versions still support update detection. Preserve explicit release versions and combine browser and Node identities when merging SSR manifests without mutating retained compiler outputs or requiring peer rebuilds.

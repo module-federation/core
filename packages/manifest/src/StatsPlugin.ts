@@ -52,10 +52,6 @@ export class StatsPlugin implements WebpackPluginInstance {
     compiler.hooks.thisCompilation.tap(
       'generateStats',
       (compilation, { normalModuleFactory }) => {
-        const buildVersion = getCompilationBuildVersion(
-          compilation,
-          this._options.experiments?.buildVersion,
-        );
         const bridgeMetadata = collectBridgeMetadata(
           compilation,
           normalModuleFactory,
@@ -70,6 +66,10 @@ export class StatsPlugin implements WebpackPluginInstance {
           },
           async () => {
             if (this._options.manifest !== false) {
+              const buildVersion = getCompilationBuildVersion(compilation, [
+                this._statsManager.fileName,
+                this._manifestManager.fileName,
+              ]);
               const existedStats = compilation.getAsset(
                 this._statsManager.fileName,
               );
@@ -79,9 +79,7 @@ export class StatsPlugin implements WebpackPluginInstance {
                   JSON.parse(existedStats.source.source().toString()),
                   compiler,
                 );
-                if (buildVersion !== undefined) {
-                  updatedStats.metaData.buildInfo.buildVersion = buildVersion;
-                }
+                updatedStats.metaData.buildInfo.buildVersion = buildVersion;
                 if (
                   typeof this._options.manifest === 'object' &&
                   this._options.manifest.additionalData
@@ -104,9 +102,6 @@ export class StatsPlugin implements WebpackPluginInstance {
                   updatedStats,
                   bridgeMetadata,
                 );
-                if (buildVersion !== undefined) {
-                  updatedStats.metaData.buildInfo.buildVersion = buildVersion;
-                }
                 compilation.updateAsset(
                   this._statsManager.fileName,
                   new compiler.webpack.sources.RawSource(
@@ -133,9 +128,7 @@ export class StatsPlugin implements WebpackPluginInstance {
                 compiler,
                 compilation,
               );
-              if (buildVersion !== undefined) {
-                stats.metaData.buildInfo.buildVersion = buildVersion;
-              }
+              stats.metaData.buildInfo.buildVersion = buildVersion;
               if (
                 typeof this._options.manifest === 'object' &&
                 this._options.manifest.additionalData
@@ -151,9 +144,6 @@ export class StatsPlugin implements WebpackPluginInstance {
               }
 
               stats = annotateBridgeExposes(stats, bridgeMetadata);
-              if (buildVersion !== undefined) {
-                stats.metaData.buildInfo.buildVersion = buildVersion;
-              }
               const manifest = await this._manifestManager.generateManifest({
                 compilation,
                 stats: stats,

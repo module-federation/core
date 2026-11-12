@@ -2,6 +2,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import { type DTSManagerOptions, rpc } from '../core/index';
 import { cloneDeepOptions } from '../core/lib/utils';
+import type { DevBuildConnectionOptions } from '../server/buildProtocol';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,6 +11,7 @@ export interface DevWorkerOptions extends DTSManagerOptions {
   name: string;
   disableLiveReload?: boolean;
   disableHotTypesReload?: boolean;
+  build?: DevBuildConnectionOptions;
 }
 
 export class DevWorker {
@@ -22,7 +24,10 @@ export class DevWorker {
 
     this.removeUnSerializationOptions();
     this._rpcWorker = rpc.createRpcWorker(
-      path.resolve(__dirname, './fork-dev-worker.js'),
+      path.resolve(
+        __dirname,
+        `fork-dev-worker${path.extname(__filename) === '.mjs' ? '.mjs' : '.js'}`,
+      ),
       {},
       undefined,
       false,

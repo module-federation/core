@@ -2,10 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const Module = require('node:module');
-const assert = require('node:assert/strict');
 const { transformSync } = require('@swc/core');
-// Load the changed source without rebuilding shared workspace dist directories.
-const source = path.resolve(__dirname, '../../src/buildVersion.ts');
 Module._extensions['.ts'] = (module, filename) =>
   module._compile(
     transformSync(fs.readFileSync(filename, 'utf8'), {
@@ -15,20 +12,19 @@ Module._extensions['.ts'] = (module, filename) =>
     }).code,
     filename,
   );
-const { BuildVersionPlugin, getCompilationBuildVersion } = require(source);
 const { StatsPlugin } = require(
   path.resolve(__dirname, '../../src/StatsPlugin.ts'),
 );
 const [bundler, directory] = process.argv.slice(2);
 const loaded = require(bundler === 'webpack' ? 'webpack' : '@rspack/core');
 const build = bundler === 'webpack' ? loaded : loaded.rspack;
-let version = 'first';
-let built = 0;
-const snapshots = [];
+delete process.env.MF_BUILD_VERSION;
 fs.writeFileSync(
-  path.join(directory, 'entry.js'),
-  'module.exports = FEDERATION_BUILD_IDENTIFIER;',
+  path.join(directory, 'package.json'),
+  '{"name":"provider","version":"1.0.0"}',
 );
+fs.writeFileSync(path.join(directory, 'entry.js'), 'module.exports = "first";');
+let custom = false;
 const compiler = build({
   mode: 'development',
   context: directory,
@@ -43,34 +39,25 @@ const compiler = build({
     library: { type: 'commonjs2' },
   },
   plugins: [
-    new BuildVersionPlugin('provider', () => version),
     new StatsPlugin(
-      { name: 'provider', experiments: { buildVersion: () => version } },
+      {
+        name: 'provider',
+        manifest: {
+          additionalData({ stats }) {
+            if (custom)
+              stats.metaData.buildInfo.buildVersion = 'custom-release';
+            return stats;
+          },
+        },
+      },
       { bundler, pluginVersion: 'test' },
     ),
-    {
-      apply(compiler) {
-        compiler.hooks.thisCompilation.tap('Observe', (compilation) => {
-          compilation.hooks.buildModule.tap('Observe', () => built++);
-          compilation.hooks.processAssets.tap('Observe', () => {
-            snapshots.push(
-              getCompilationBuildVersion(compilation, () => version),
-            );
-            version = 'later';
-          });
-        });
-      },
-    },
   ],
 });
-const run = () =>
-  new Promise((resolve, reject) =>
-    compiler.run((error, stats) => {
-      if (error || stats.hasErrors())
-        reject(error || Error(stats.toString({ all: false, errors: true })));
-      else resolve();
-    }),
-  );
+const version = () =>
+  JSON.parse(
+    fs.readFileSync(path.join(directory, 'dist/mf-manifest.json'), 'utf8'),
+  ).metaData.buildInfo.buildVersion;
 const output = () => {
   const context = { module: { exports: undefined } };
   vm.runInNewContext(
@@ -80,35 +67,62 @@ const output = () => {
   return context.module.exports;
 };
 (async () => {
+  let watcher;
   try {
-    await run();
-    const first = output();
-    assert.equal(
-      JSON.parse(
-        fs.readFileSync(path.join(directory, 'dist/mf-manifest.json'), 'utf8'),
-      ).metaData.buildInfo.buildVersion,
-      'first',
-    );
-    const firstBuilt = built;
-    version = 'second';
-    await run();
-    const second = output();
-    assert.equal(
-      JSON.parse(
-        fs.readFileSync(path.join(directory, 'dist/mf-manifest.json'), 'utf8'),
-      ).metaData.buildInfo.buildVersion,
-      'second',
-    );
-    assert.equal(first, 'provider:first');
-    assert.equal(second, 'provider:second');
+    const versions = [];
+    const outputs = [];
+    let explicit;
+    await new Promise((resolve, reject) => {
+      let phase = 0;
+      const timer = setTimeout(
+        () => reject(Error('Watch build timed out')),
+        20000,
+      );
+      watcher = compiler.watch(
+        { aggregateTimeout: 10, poll: 50, ignored: /dist/ },
+        (error, stats) => {
+          if (error || stats.hasErrors()) {
+            clearTimeout(timer);
+            reject(
+              error || Error(stats.toString({ all: false, errors: true })),
+            );
+            return;
+          }
+          if (phase < 3) {
+            versions.push(version());
+            outputs.push(output());
+          }
+          switch (phase++) {
+            case 0:
+              watcher.invalidate();
+              break;
+            case 1:
+              fs.writeFileSync(
+                path.join(directory, 'entry.js'),
+                'module.exports = "second";',
+              );
+              break;
+            case 2:
+              process.env.MF_BUILD_VERSION = 'release-42';
+              watcher.invalidate();
+              break;
+            case 3:
+              explicit = version();
+              custom = true;
+              watcher.invalidate();
+              break;
+            default:
+              clearTimeout(timer);
+              resolve();
+          }
+        },
+      );
+    });
     console.log(
-      JSON.stringify({
-        outputs: [first, second],
-        snapshots,
-        rebuilt: built - firstBuilt,
-      }),
+      JSON.stringify({ versions, outputs, explicit, custom: version() }),
     );
   } finally {
+    if (watcher) await new Promise((resolve) => watcher.close(resolve));
     await new Promise((resolve) => compiler.close(resolve));
   }
 })().catch((error) => {

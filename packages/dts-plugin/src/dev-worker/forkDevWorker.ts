@@ -24,6 +24,8 @@ import {
 import { DevWorkerOptions } from './DevWorker';
 import { getIpFromEntry } from './utils';
 import { handleDevWorkerMessage } from './handleWorkerMessage';
+import { BuildConnection } from '../server/BuildConnection';
+import { DEV_BUILD_CHANNEL } from '../server/buildProtocol';
 
 interface Options extends DevWorkerOptions {
   name: string;
@@ -33,6 +35,12 @@ let typesManager: DTSManager,
   serverAddress: string,
   moduleServer: ModuleFederationDevServer,
   cacheOptions: Options;
+let buildConnection: BuildConnection | undefined;
+let buildSequence = 0;
+const buildAcknowledgements = new Map<
+  number,
+  { resolve(): void; reject(error: Error): void }
+>();
 
 function getLocalRemoteNames(
   options?: HostOptions,
@@ -110,6 +118,44 @@ export async function forkDevWorker(
   options: Options,
   action?: string,
 ): Promise<void> {
+  if (options?.build) {
+    buildConnection = new BuildConnection(options.build, {
+      status(remote, status) {
+        process.send?.({
+          type: DEV_BUILD_CHANNEL,
+          kind: 'status',
+          remote,
+          status,
+        });
+      },
+      update(update) {
+        const id = ++buildSequence;
+        return new Promise<void>((resolve, reject) => {
+          const timer = setTimeout(() => {
+            buildAcknowledgements.delete(id);
+            reject(new Error('Development build acknowledgement timed out'));
+          }, 30_000);
+          buildAcknowledgements.set(id, {
+            resolve() {
+              clearTimeout(timer);
+              resolve();
+            },
+            reject(error) {
+              clearTimeout(timer);
+              reject(error);
+            },
+          });
+          process.send?.({
+            type: DEV_BUILD_CHANNEL,
+            kind: 'update',
+            id,
+            update,
+          });
+        });
+      },
+    });
+    return;
+  }
   if (!typesManager) {
     const { name, remote, host, extraOptions } = options;
     const DTSManagerConstructor = getDTSManagerConstructor(
@@ -189,8 +235,26 @@ export async function forkDevWorker(
   }
 }
 
-process.on('message', (message: rpc.RpcMessage) => {
+process.on('message', (message: any) => {
+  if (message?.type === DEV_BUILD_CHANNEL) {
+    if (message.kind === 'publish')
+      buildConnection?.publish(message.publication);
+    else if (message.kind === 'invalidate') buildConnection?.invalidate();
+    else if (message.kind === 'ack') {
+      const pending = buildAcknowledgements.get(message.id);
+      buildAcknowledgements.delete(message.id);
+      if (message.error) pending?.reject(new Error(message.error));
+      else pending?.resolve();
+    }
+    return;
+  }
+  if (message.type === rpc.RpcGMCallTypes.EXIT) buildConnection?.close();
   handleDevWorkerMessage(message, { moduleServer, log: fileLog });
+});
+
+process.on('disconnect', () => {
+  buildConnection?.close();
+  process.exit(0);
 });
 
 rpc.exposeRpc(forkDevWorker);

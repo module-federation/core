@@ -132,15 +132,51 @@ export function setGlobalFederationInstance(
   CurrentGlobal.__FEDERATION__.__INSTANCES__.push(FederationInstance);
 }
 
-/** Resolve the provider build, never a same-name instance from another build. */
+const providerOwnershipKey = Symbol.for('module-federation.provider-ownership');
+type ProviderReference = Pick<
+  RemoteInfo,
+  'name' | 'providerName' | 'entryGlobalName' | 'buildVersion'
+> &
+  Partial<Pick<RemoteInfo, 'entry' | 'version'>>;
+const providerOwnership: {
+  entries: WeakMap<object, ModuleFederation>;
+  references: WeakMap<ModuleFederation, Map<string, ProviderReference>>;
+} = ((CurrentGlobal as any)[providerOwnershipKey] ||= {
+  entries: new WeakMap(),
+  references: new WeakMap(),
+});
+
+/** Called by the container's initialization handshake across runtime copies. */
+export function bindRemoteFederationInstance(
+  entry: object,
+  remoteInfo: RemoteInfo,
+  provider: ModuleFederation,
+): void {
+  providerOwnership.entries.set(entry, provider);
+  let references = providerOwnership.references.get(provider);
+  if (!references) {
+    references = new Map();
+    providerOwnership.references.set(provider, references);
+  }
+  references.set(
+    JSON.stringify([
+      remoteInfo.entry,
+      remoteInfo.version,
+      remoteInfo.buildVersion,
+    ]),
+    { ...remoteInfo },
+  );
+}
+
+/** Resolve actual container ownership, with exact-ID compatibility for old containers. */
 export function getRemoteFederationInstance(
-  remoteInfo: Pick<
-    RemoteInfo,
-    'name' | 'providerName' | 'entryGlobalName' | 'buildVersion'
-  >,
+  remoteInfo: ProviderReference,
   instances: readonly ModuleFederation[] = CurrentGlobal.__FEDERATION__
     .__INSTANCES__,
+  entryExports?: object,
 ): ModuleFederation | undefined {
+  const bound = entryExports && providerOwnership.entries.get(entryExports);
+  if (bound) return instances.includes(bound) ? bound : undefined;
   const names = new Set(
     (remoteInfo.providerName
       ? [remoteInfo.providerName]
@@ -152,11 +188,24 @@ export function getRemoteFederationInstance(
       composeKeyWithSeparator(name, remoteInfo.buildVersion),
     ),
   );
-  const candidates = [...new Set(instances)].filter((instance) =>
-    remoteInfo.buildVersion
+  const candidates = [...new Set(instances)].filter((instance) => {
+    const references = providerOwnership.references.get(instance);
+    if (references) {
+      return [...references.values()].some(
+        (reference) =>
+          names.has(instance.name) &&
+          reference.buildVersion === remoteInfo.buildVersion &&
+          (remoteInfo.entry
+            ? remoteInfo.entry === reference.entry
+            : Boolean(
+                remoteInfo.version && remoteInfo.version === reference.version,
+              )),
+      );
+    }
+    return remoteInfo.buildVersion
       ? Boolean(instance.options.id && ids.has(instance.options.id))
-      : names.has(instance.name),
-  );
+      : names.has(instance.name);
+  });
   if (candidates.length > 1)
     throw new Error(
       `Ambiguous federation provider instance: ${[...ids].join(', ')}`,
@@ -183,7 +232,11 @@ export function hasRemoteModuleConsumers(
         return true;
       return Boolean(
         module.remoteInfo &&
-        getRemoteFederationInstance(module.remoteInfo, providers),
+        getRemoteFederationInstance(
+          module.remoteInfo,
+          providers,
+          module.remoteEntryExports || module.lib,
+        ),
       );
     });
   });

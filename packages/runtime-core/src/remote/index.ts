@@ -1048,10 +1048,14 @@ export class RemoteHandler {
     // Resolve before hooks or destructive changes, so ambiguous providers fail
     // without selecting the first same-name instance in the registry.
     const remoteIns = loadedModule
-      ? getRemoteFederationInstance(loadedModule.remoteInfo, [
-          ...CurrentGlobal.__FEDERATION__.__INSTANCES__,
-          ...host.retainedProviders,
-        ])
+      ? getRemoteFederationInstance(
+          loadedModule.remoteInfo,
+          [
+            ...CurrentGlobal.__FEDERATION__.__INSTANCES__,
+            ...host.retainedProviders,
+          ],
+          loadedModule.remoteEntryExports || loadedModule.lib,
+        )
       : undefined;
     const sharedOwnership = loadedModule
       ? getRemoteSharedOwnership(loadedModule.remoteInfo, remoteIns)
@@ -1245,7 +1249,11 @@ export class RemoteHandler {
       const { name } = remote;
       const loadedModule = host.moduleCache.get(remote.name);
       const remoteIns = loadedModule
-        ? getRemoteFederationInstance(loadedModule.remoteInfo)
+        ? getRemoteFederationInstance(
+            loadedModule.remoteInfo,
+            undefined,
+            loadedModule.remoteEntryExports || loadedModule.lib,
+          )
         : undefined;
       const sharedOwnership = loadedModule
         ? getRemoteSharedOwnership(loadedModule.remoteInfo, remoteIns)

@@ -809,10 +809,16 @@ describe('typeScriptCompiler', () => {
                             name: 'Broker.d.ts',
                           },
                           {
+                            name: 'BuildBroker.d.ts',
+                          },
+                          {
                             name: 'createBroker.d.ts',
                           },
                         ],
                         name: 'broker',
+                      },
+                      {
+                        name: 'buildProtocol.d.ts',
                       },
                       {
                         name: 'constant.d.ts',

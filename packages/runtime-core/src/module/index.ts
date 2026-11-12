@@ -1,3 +1,4 @@
+import { bindRemoteFederationInstance } from '../global';
 import {
   assert,
   error,
@@ -227,6 +228,20 @@ class Module {
       }
 
       try {
+        // Keep ownership out of initOptions and share negotiation. The enhanced
+        // container supplies its actual runtime, including reused peer builds.
+        Object.defineProperty(
+          initContainerOptions.remoteEntryInitOptions,
+          Symbol.for('module-federation.bind-provider'),
+          {
+            value: (provider: ModuleFederation) =>
+              bindRemoteFederationInstance(
+                remoteEntryExports,
+                this.remoteInfo,
+                provider,
+              ),
+          },
+        );
         await remoteEntryExports.init(
           initContainerOptions.shareScope,
           initContainerOptions.initScope,

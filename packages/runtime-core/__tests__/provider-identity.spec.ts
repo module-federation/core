@@ -13,10 +13,10 @@ const info = (buildVersion?: string): RemoteInfo => ({
   shareScope: 'default',
 });
 
-function provider(build: string) {
+function provider(build: string, id = `catalog:${build}`) {
   const instance = new ModuleFederation({
     name: 'catalog',
-    id: `catalog:${build}`,
+    id,
     shared: {
       library: { version: build, lib: () => ({ build }) },
     },
@@ -35,7 +35,7 @@ function consumer(build: string) {
   });
   let cleared = false;
   const container = {
-    init() {},
+    init(_share?: unknown, _scope?: unknown, _options?: any) {},
     get: async () => {
       if (cleared) throw Error(`Cleared ${build} container`);
       return () => ({ build });
@@ -52,6 +52,72 @@ function consumer(build: string) {
 }
 
 describe('provider build identity', () => {
+  it('binds the actual container runtime independently of its release or compilation ID', async () => {
+    const first = provider('same-release', 'catalog:node:1');
+    const second = provider('same-release', 'catalog:node:2');
+    const a = consumer('manifest-a');
+    const b = consumer('manifest-b');
+    for (const [consumer, runtime] of [
+      [a, first],
+      [b, second],
+    ] as const) {
+      consumer.container.init = (_share, _scope, options) => {
+        expect(Object.keys(options)).not.toContain(
+          'module-federation.bind-provider',
+        );
+        options[Symbol.for('module-federation.bind-provider')](runtime);
+      };
+      await consumer.host.loadRemote('registered-catalog/Button');
+      expect(
+        helpers.global.getRemoteFederationInstance(
+          consumer.host.moduleCache.get(info().name)!.remoteInfo,
+          undefined,
+          consumer.container,
+        ),
+      ).toBe(runtime);
+    }
+    const record = second.shareScopeMap.default.library['same-release'];
+    await a.host.removeRemote(info().name);
+    expect(a.container.__webpack_clear_cache__).toHaveBeenCalled();
+    expect(b.container.__webpack_clear_cache__).not.toHaveBeenCalled();
+    expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).toContain(second);
+    expect(second.shareScopeMap.default.library['same-release']).toBe(record);
+    await expect(
+      b.host.loadRemote('registered-catalog/Another'),
+    ).resolves.toEqual({ build: 'manifest-b' });
+    await b.host.removeRemote(info().name);
+  });
+
+  it('uses the manifest URL when adopting a retained provider before loading an expose', async () => {
+    const runtime = provider('release', 'catalog:node:1');
+    const other = provider('release', 'catalog:node:2');
+    const a = consumer('manifest');
+    const remoteInfo = a.host.moduleCache.get(info().name)!.remoteInfo;
+    remoteInfo.version = 'https://one.test/mf-manifest.json';
+    a.container.init = (_share, _scope, options) =>
+      options[Symbol.for('module-federation.bind-provider')](runtime);
+    await a.host.loadRemote('registered-catalog/Button');
+    const selected = {
+      ...info('manifest'),
+      entry: undefined,
+      version: remoteInfo.version,
+    };
+    expect(helpers.global.getRemoteFederationInstance(selected)).toBe(runtime);
+    expect(
+      helpers.global.getRemoteFederationInstance({
+        ...selected,
+        version: 'https://two.test/mf-manifest.json',
+      }),
+    ).toBeUndefined();
+    expect(
+      helpers.global.getRemoteFederationInstance(
+        remoteInfo,
+        [other],
+        a.container,
+      ),
+    ).toBeUndefined();
+  });
+
   it.each(['update', 'force'] as const)(
     '%s retains a provider used by another host until its last consumer removes it',
     async (mode) => {

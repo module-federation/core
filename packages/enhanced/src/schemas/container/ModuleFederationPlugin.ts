@@ -967,19 +967,6 @@ export default {
     experiments: {
       type: 'object',
       properties: {
-        buildVersion: {
-          description:
-            'Framework-managed compilation identity for the runtime and manifest.',
-          anyOf: [
-            {
-              type: 'string',
-              minLength: 1,
-            },
-            {
-              instanceof: 'Function',
-            },
-          ],
-        },
         asyncStartup: {
           description: 'Enable async startup for the container',
           type: 'boolean',

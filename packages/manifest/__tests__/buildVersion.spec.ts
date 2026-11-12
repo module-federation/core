@@ -4,25 +4,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { getCompilationBuildVersion } from '../src/buildVersion';
-
-it('freezes one compilation independently of later provider changes and other compilers', () => {
-  let version = 'first';
-  const read = jest.fn(() => version);
-  const first = {};
-  expect(getCompilationBuildVersion(first, read)).toBe('first');
-  version = 'second';
-  expect(getCompilationBuildVersion(first, read)).toBe('first');
-  expect(getCompilationBuildVersion({}, read)).toBe('second');
-  expect(read).toHaveBeenCalledTimes(2);
-  expect(getCompilationBuildVersion({}, undefined)).toBeUndefined();
-  expect(() => getCompilationBuildVersion({}, () => '')).toThrow(
-    'non-empty string',
-  );
-});
 
 it.each(['webpack', 'rspack'])(
-  '%s updates the runtime identity while reusing cached modules',
+  '%s identifies actual builds with fixed package versions and output names',
   async (bundler) => {
     const directory = fs.mkdtempSync(
       path.join(os.tmpdir(), 'mf-build-version-'),
@@ -33,11 +17,14 @@ it.each(['webpack', 'rspack'])(
         [path.join(__dirname, 'fixtures/buildVersion.cjs'), bundler, directory],
         { timeout: 30000 },
       );
-      expect(JSON.parse(result.stdout)).toEqual({
-        outputs: ['provider:first', 'provider:second'],
-        snapshots: ['first', 'second'],
-        rebuilt: 0,
-      });
+      const { versions, outputs, explicit, custom } = JSON.parse(result.stdout);
+      expect(outputs).toEqual(['first', 'first', 'second']);
+      expect(versions[0]).toBeTruthy();
+      expect(versions[0]).not.toBe('1.0.0');
+      expect(versions[1]).toBe(versions[0]);
+      expect(versions[2]).not.toBe(versions[0]);
+      expect(explicit).toBe('release-42');
+      expect(custom).toBe('custom-release');
     } finally {
       fs.rmSync(directory, { recursive: true, force: true });
     }

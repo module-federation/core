@@ -471,6 +471,7 @@ const getClearTarget = (
     const provider = helpers.global.getRemoteFederationInstance(
       remoteInfo,
       knownInstances,
+      instance?.moduleCache?.get(remoteInfo.name)?.remoteEntryExports,
     );
     return {
       instance: provider,
