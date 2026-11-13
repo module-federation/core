@@ -1,3 +1,4 @@
+import { destroyNodeInstance } from '../lifecycle';
 import { describe, expect, it, rs } from '@rstest/core';
 import { ModuleFederation } from './runtimeTestUtils';
 import { Module, helpers } from '../../../runtime-core/src';
@@ -79,7 +80,7 @@ describe('provider build identity', () => {
       else a.host.registerRemotes([replacement], { force: true });
       expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).toContain(runtime);
       expect(a.container.__webpack_clear_cache__).not.toHaveBeenCalled();
-      await a.host.destroy();
+      await destroyNodeInstance(a.host);
       const lastOwnerProvider = helpers.global.getRemoteFederationInstance(
         b.host.moduleCache.get(info('2').name)!.remoteInfo,
       );
@@ -89,8 +90,8 @@ describe('provider build identity', () => {
       ).resolves.toEqual({ build: '2' });
       await b.host.removeRemote(info('2').name);
       expect(a.container.__webpack_clear_cache__).toHaveBeenCalled();
-      await lastOwnerProvider!.destroy();
-      await b.host.destroy();
+      await destroyNodeInstance(lastOwnerProvider!);
+      await destroyNodeInstance(b.host);
       expect(dispose).toHaveBeenCalledTimes(1);
       expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).not.toContain(runtime);
       expect(
@@ -202,7 +203,7 @@ describe('provider build identity', () => {
     const record = second.shareScopeMap.default.library['2'];
     record.useIn.push('catalog');
     const useIn = [...record.useIn];
-    await first.destroy();
+    await destroyNodeInstance(first);
     expect(first.options.shared).toEqual({});
     expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).not.toContain(first);
     expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).toContain(second);
@@ -211,7 +212,7 @@ describe('provider build identity', () => {
     expect(second.loadShareSync<{ build: string }>('library')()).toEqual({
       build: '2',
     });
-    await second.destroy();
+    await destroyNodeInstance(second);
     expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).not.toContain(second);
     expect(CurrentGlobal.__FEDERATION__.__SHARE__['catalog:1']).toBeUndefined();
     expect(CurrentGlobal.__FEDERATION__.__SHARE__['catalog:2']).toBeUndefined();
@@ -222,7 +223,10 @@ describe('provider build identity', () => {
     const second = provider('2');
     first.shareScopeMap.default.library['1'].useIn.push('catalog');
     second.shareScopeMap.default.library['2'].useIn.push('catalog');
-    await Promise.all([first.destroy(), second.destroy()]);
+    await Promise.all([
+      destroyNodeInstance(first),
+      destroyNodeInstance(second),
+    ]);
     expect(CurrentGlobal.__FEDERATION__.__SHARE__['catalog:1']).toBeUndefined();
     expect(CurrentGlobal.__FEDERATION__.__SHARE__['catalog:2']).toBeUndefined();
   });

@@ -74,36 +74,6 @@ const USE_SHARED =
 
 export class ModuleFederation {
   options: Options;
-  private disposal?: Promise<void>;
-  private closed = false;
-  get disposed(): boolean {
-    return this.closed;
-  }
-  private assertActive(): void {
-    if (this.closed) throw new Error(`MF instance ${this.name} is disposed`);
-  }
-  /** Irreversible instance teardown. The application must drain its own work first. */
-  destroy(): Promise<void> {
-    if (this.disposal) return this.disposal;
-    this.closed = true;
-    this.disposal = (async () => {
-      const results = await Promise.allSettled(
-        [...this.hooks.lifecycle.dispose.listeners].map((listener) =>
-          Promise.resolve().then(() => listener({ origin: this })),
-        ),
-      );
-      const failed = results.filter((result) => result.status === 'rejected');
-      if (failed.length)
-        throw new AggregateError(
-          failed.map((result) => result.reason),
-          'MF disposal failed',
-        );
-    })().catch((error) => {
-      this.disposal = undefined;
-      throw error;
-    });
-    return this.disposal;
-  }
   hooks = new PluginSystem({
     dispose: new AsyncHook<[{ origin: ModuleFederation }]>(),
     beforeInit: new SyncWaterfallHook<{
@@ -373,7 +343,6 @@ export class ModuleFederation {
   }
 
   initOptions(userOptions: UserOptions): Options {
-    this.assertActive();
     if (userOptions.name && userOptions.name !== this.options.name) {
       error(getShortErrorMsg(RUNTIME_010, runtimeDescMap));
     }
@@ -389,7 +358,6 @@ export class ModuleFederation {
     pkgName: string,
     extraOptions?: LoadShareExtraOptions,
   ): Promise<false | (() => T | undefined)> {
-    this.assertActive();
     return this.sharedHandler.loadShare(pkgName, extraOptions);
   }
 
@@ -401,7 +369,6 @@ export class ModuleFederation {
     pkgName: string,
     extraOptions?: LoadShareExtraOptions,
   ): () => T | never {
-    this.assertActive();
     return this.sharedHandler.loadShareSync(pkgName, extraOptions);
   }
 
@@ -431,13 +398,11 @@ export class ModuleFederation {
     id: string,
     options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
-    this.assertActive();
     return this.remoteHandler.loadRemote<T>(id, options);
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
-    this.assertActive();
     return this.remoteHandler.preloadRemote(preloadOptions);
   }
 
@@ -498,22 +463,18 @@ export class ModuleFederation {
   }
 
   registerPlugins(plugins: UserOptions['plugins']) {
-    this.assertActive();
     this.options.plugins = registerPlugins(plugins, this);
   }
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
-    this.assertActive();
     return this.remoteHandler.registerRemotes(remotes, options);
   }
 
   /** Caller coordinates application work; updates are serialized per instance. */
   updateRemotes(remotes: Remote[]): Promise<void> {
-    this.assertActive();
     return this.remoteHandler.updateRemotes(remotes);
   }
 
   removeRemote(remote: Remote | string): Promise<void> {
-    this.assertActive();
     let targetRemote: Remote | undefined =
       typeof remote === 'string' ? undefined : remote;
     if (typeof remote === 'string') {
@@ -528,7 +489,6 @@ export class ModuleFederation {
   }
 
   registerShared(shared: UserOptions['shared']) {
-    this.assertActive();
     this.sharedHandler.registerShared(this.options, {
       ...this.options,
       shared,

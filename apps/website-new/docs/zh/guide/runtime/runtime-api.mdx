@@ -360,7 +360,7 @@ interface RemoteWithVersion {
   </Tab>
 </Tabs>
 
-## 显式远端替换和实例销毁
+## 显式远端替换和 Node 实例销毁
 
 通过 `createInstance` 或 `getInstance` 获取实例后，可以调用：
 
@@ -368,18 +368,32 @@ interface RemoteWithVersion {
 ```ts
 await mf.removeRemote('provider')
 await mf.updateRemotes([{ name: 'provider', entry: nextManifestUrl }])
-await mf.destroy()
 ```
 
 `removeRemote` 等待清理 hook 完成后删除注册。
 `updateRemotes` 按实例串行替换远端，等待旧远端移除后再注册新入口。
-清理失败时保留原注册。`destroy` 关闭实例并等待所有 disposal hook，
-全部结束后统一报告失败。
+清理失败时保留原注册。
 
 SSR 应用需安装 `@module-federation/node/runtimePlugin`，
 由它负责 MF 在途工作，以及容器和共享生产者清理。
+排空应用请求后，可以通过以下 API 退出整个 Node 实例：
+
+{/* prettier-ignore */}
+```ts
+import { destroyNodeInstance } from '@module-federation/node/lifecycle'
+
+await destroyNodeInstance(mf)
+```
+
+Node 插件先拒绝新调用、等待已有 MF 操作完成，再释放远端资源，
+通知并等待全部 `dispose` hook，最后解除剩余实例引用。
+所有监听器结束后统一报告监听器错误。失败时实例保持关闭，允许再次调用重试清理。
+重复调用共享同一个销毁 Promise。没有安装 Node 生命周期插件时调用此 API 会报错。
+Core 实例不提供 `destroy` 和 `disposed` 成员。
+
 编译远端的缓存失效还需要兼容的原生 bundler API。
 框架在替换或销毁前负责停止接收新请求并排空应用工作。
+单个远端的替换不会销毁消费者实例。
 
 `registerRemotes(remotes, { force: true })` 仍是同步 API，
 不会等待异步移除 hook。

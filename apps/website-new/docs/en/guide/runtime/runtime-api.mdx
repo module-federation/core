@@ -360,7 +360,7 @@ When `force: true` is set, the newly registered modules will overwrite already-r
   </Tab>
 </Tabs>
 
-## Explicit remote replacement and disposal
+## Explicit remote replacement and Node disposal
 
 The following methods are available on the instance returned by `createInstance`
 or `getInstance`:
@@ -369,20 +369,34 @@ or `getInstance`:
 ```ts
 await mf.removeRemote('provider')
 await mf.updateRemotes([{ name: 'provider', entry: nextManifestUrl }])
-await mf.destroy()
 ```
 
 `removeRemote` waits for removal hooks before deleting the registration.
 `updateRemotes` serializes replacements for the instance and waits for each
 removal before registering its replacement. A failed removal leaves the existing
-registration available. `destroy` closes the instance and waits for disposal
-hooks, reporting failures after all hooks finish.
+registration available.
 
 For SSR applications, install `@module-federation/node/runtimePlugin`. It tracks
-pending MF work and cleans up containers and shared providers.
-Compiled remote cache invalidation additionally requires a compatible
-native bundler API. The framework must stop admission and drain application work
-before replacement or disposal.
+pending MF work and cleans up containers and shared providers. To retire the
+entire Node instance after draining application requests:
+
+{/* prettier-ignore */}
+```ts
+import { destroyNodeInstance } from '@module-federation/node/lifecycle'
+
+await destroyNodeInstance(mf)
+```
+
+The Node plugin rejects new calls, waits for pending MF operations, releases
+remote resources, and notifies every `dispose` hook before removing remaining
+instance references. Disposal listener failures are reported after all listeners finish.
+The instance stays closed and cleanup can be retried. Repeated calls share the
+same disposal Promise. Calling this API without the Node lifecycle plugin throws.
+Core instances do not have `destroy` or `disposed` members.
+
+Compiled remote cache invalidation additionally requires a compatible native
+bundler API. The framework must stop admission and drain application work before
+replacement or disposal. Replacing a single remote does not dispose its consumer.
 
 `registerRemotes(remotes, { force: true })` remains synchronous. It does not wait
 for asynchronous removal hooks.

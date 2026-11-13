@@ -1,5 +1,6 @@
 /** @jest-environment node */
 import * as runtime from '@module-federation/runtime';
+import helpers from '@module-federation/runtime/helpers';
 import { init } from '../src/init';
 
 function execution(value: string) {
@@ -34,9 +35,7 @@ it('reuses the same provider build across Node evaluations', async () => {
     expect(b.federation.instance.loadShareSync('library')()).toBe('a');
     expect(init({ webpackRequire: a as any })).toBe(a.federation.instance);
   } finally {
-    await Promise.all([
-      a.federation.instance.destroy(),
-      b.federation.instance.destroy(),
-    ]);
+    await helpers.dispose.notifyDispose(a.federation.instance);
+    helpers.global.resetFederationGlobalInfo();
   }
 });

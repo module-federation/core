@@ -6,6 +6,11 @@ import helpers from '@module-federation/runtime/helpers';
 import { clearContainerCache } from '@module-federation/webpack-bundler-runtime/clear-cache';
 import { disposeInstance } from './dispose';
 import {
+  getNodeInstanceLifecycle,
+  nodeLifecycleKey,
+  type NodeInstanceLifecycle,
+} from './lifecycleState';
+import {
   getRemoteSharedOwnership,
   retireShareScope,
   pruneRetiredShareScopes,
@@ -20,10 +25,10 @@ export function nodeRuntimeLifecycle(): ModuleFederationRuntimePlugin {
   return {
     name: 'node-runtime-lifecycle',
     apply(instance) {
+      if (getNodeInstanceLifecycle(instance)) return;
       const host = instance as NodeFederation;
       host.retainedProviders = new Set();
       let closed = false;
-      Object.defineProperty(host, 'disposed', { get: () => closed });
       let disposal: Promise<void> | undefined;
       const pending = new Set<Promise<unknown>>();
       for (const key of [
@@ -61,8 +66,7 @@ export function nodeRuntimeLifecycle(): ModuleFederationRuntimePlugin {
           return original.apply(host, args);
         };
       }
-      const destroy = host.destroy.bind(host);
-      host.destroy = () => {
+      const destroy = () => {
         if (disposal) return disposal;
         closed = true;
         disposal = (async () => {
@@ -80,13 +84,20 @@ export function nodeRuntimeLifecycle(): ModuleFederationRuntimePlugin {
           } finally {
             clearTimeout(timer);
           }
-          await disposeInstance(host, destroy);
+          await disposeInstance(host);
         })().catch((error) => {
           disposal = undefined;
           throw error;
         });
         return disposal;
       };
+      const lifecycle: NodeInstanceLifecycle = {
+        get closed() {
+          return closed;
+        },
+        destroy,
+      };
+      Object.defineProperty(host, nodeLifecycleKey, { value: lifecycle });
       return {
         beforeRemoveRemote({ remote }) {
           const module = host.moduleCache.get(remote.name);

@@ -102,7 +102,6 @@ describe('Node remote entry provenance', () => {
     expect(
       fetch.mock.calls.filter(([url]) => url === remote.entry),
     ).toHaveLength(2);
-    await Promise.all(consumers.map((instance) => instance.destroy()));
   });
 
   it.each(['sequential', 'concurrent'])(

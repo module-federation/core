@@ -92,6 +92,7 @@ For pure-runtime Node hosts, pass the plugin explicitly:
 ```js
 import nodeRuntimePlugin from '@module-federation/node/runtimePlugin'
 import { createInstance } from '@module-federation/runtime'
+import { destroyNodeInstance } from '@module-federation/node/lifecycle'
 
 const host = createInstance({
   name: 'server',
@@ -101,10 +102,19 @@ const host = createInstance({
 ```
 
 After the framework stops admitting requests and drains active work, use
-`await host.updateRemotes(remotes)` for replacement or `await host.destroy()`
-when retiring the application. Shared containers and providers still used by
-another host are retained. `registerRemotes(remotes, { force: true })` remains
+`await host.updateRemotes(remotes)` for replacement or
+`await destroyNodeInstance(host)` when retiring the application. Shared containers
+and providers still used by another host are retained. `registerRemotes(remotes, { force: true })` remains
 synchronous and does not provide the asynchronous replacement contract.
+
+The Node lifecycle API requires the server runtime plugin. It rejects calls on
+unmanaged instances, and does not add `destroy` or `disposed` to the generic MF
+instance. `getNodeInstanceLifecycle(host)` returns the installed lifecycle, or
+`undefined` without the plugin. Its `closed` property becomes true as soon as
+disposal starts. The plugin waits for already-started MF operations, releases
+remote resources, awaits all `dispose` hooks, and removes the instance's remaining
+owned references. New MF work is rejected while closing. Repeated disposal shares
+one promise; a failed attempt keeps the instance closed and can be retried.
 
 With compatible Rspack builds, native code owns module and chunk cache
 invalidation. The Node plugin supplies local or remote chunk source through

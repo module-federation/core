@@ -63,6 +63,16 @@
     "./src/*": {
       "import": "./dist/src/*.mjs",
       "require": "./dist/src/*.js"
+    },
+    "./lifecycle": {
+      "import": {
+        "types": "./dist/src/lifecycle.d.mts",
+        "default": "./dist/src/lifecycle.mjs"
+      },
+      "require": {
+        "types": "./dist/src/lifecycle.d.ts",
+        "default": "./dist/src/lifecycle.js"
+      }
     }
   },
   "typesVersions": {
@@ -81,6 +91,9 @@
       ],
       "universe-entry-chunk-tracker-plugin": [
         "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.d.ts"
+      ],
+      "lifecycle": [
+        "./dist/src/lifecycle.d.ts"
       ]
     }
   },

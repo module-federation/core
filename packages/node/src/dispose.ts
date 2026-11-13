@@ -5,10 +5,7 @@ const CurrentGlobal = globalThis;
 const { Global } = helpers.global;
 
 /** Release instance-owned roots. Shared values used by another host stay alive. */
-export async function disposeInstance(
-  host: NodeFederation,
-  disposeHooks: () => Promise<void>,
-): Promise<void> {
+export async function disposeInstance(host: NodeFederation): Promise<void> {
   const globals = new Set([
     CurrentGlobal.__FEDERATION__,
     Global.__FEDERATION__,
@@ -51,7 +48,7 @@ export async function disposeInstance(
     // Another consumer owns this container too; only drop our local reference.
     if (!usedElsewhere) await host.remoteHandler.removeRemote(remote);
   }
-  await disposeHooks();
+  await helpers.dispose.notifyDispose(host);
   if (
     retainSharedOwner &&
     ![...globals].some((global) =>

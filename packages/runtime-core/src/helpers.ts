@@ -25,6 +25,7 @@ import {
   matchRemoteWithNameAndExpose,
 } from './utils';
 import { preloadAssets } from './utils/preload';
+import { notifyDispose } from './utils/dispose';
 interface IShareUtils {
   getRegisteredShare: typeof getRegisteredShare;
   getGlobalShareScope: typeof getGlobalShareScope;
@@ -79,6 +80,7 @@ const GlobalUtils: IGlobalUtils = {
 export default {
   global: GlobalUtils,
   share: ShareUtils,
+  dispose: { notifyDispose },
   utils: {
     matchRemoteWithNameAndExpose,
     preloadAssets,

@@ -18,10 +18,18 @@ URL also clears its cached snapshot. Cleanup failures reject the returned promis
 The batch is preflighted, but cleanup is not transactional across multiple remotes.
 
 `instance.removeRemote(nameOrAlias)` awaits the same cleanup hooks.
-`instance.destroy()` closes admission to that instance, waits for its tracked
-runtime operations, and releases its owned caches and plugins. Disposal is
-irreversible, even when cleanup fails. Shared factories still used by another
-consumer are retained.
+Whole-instance teardown is optional Node functionality. Install
+`@module-federation/node/runtimePlugin`, then call `destroyNodeInstance(instance)`
+from `@module-federation/node/lifecycle`. The Node plugin closes admission,
+waits for its tracked runtime operations, and releases owned resources. Cleanup
+failure keeps the instance closed and permits a later cleanup retry. Shared
+factories still used by another consumer are retained.
+
+Core exposes a `dispose({ origin })` hook for resource owners. The lifecycle
+owner calls `helpers.dispose.notifyDispose(instance)` after draining work and
+before removing the instance's remaining roots. Notification waits for all
+listeners and reports their failures together. It does not close the instance,
+remove registrations, or perform environment-specific cleanup.
 
 The application must stop admission and drain its SSR requests and producer work
 before updating or destroying a runtime. These APIs do not detect deployments,
@@ -56,8 +64,7 @@ same-name instance is released, while removing the selected instance's roots.
 Removing a remote releases only the current host's reference when another host
 still consumes that provider or container. The provider's instance, shared
 factories and execution cache remain available to that host until its last
-consumer releases it. Core and bundler cleanup use the same
-`helpers.global.hasRemoteModuleConsumers` check.
+consumer releases it. The Node plugin and bundler adapter preserve these ownership relationships.
 
 ## License
 
