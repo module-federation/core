@@ -13,8 +13,9 @@ const webpack = require(
 const ORIGIN = 'https://cdn.test';
 const PAGE_URL = `${ORIGIN}/app/index.html`;
 
-// Run this suite in a fresh process with FEDERATION_WEBPACK_PATH pointing to
-// each installed compiler. These are real builds, not mocked Webpack internals.
+// These are real builds, not mocked Webpack internals. `pnpm run test` runs the
+// suite on the package's Webpack, then `test:webpack-legacy` reruns it in a
+// fresh process with FEDERATION_WEBPACK_PATH pointing to the workspace root's.
 describe(`enhanced integration with Webpack ${webpack.version}`, () => {
   let context: string;
   let outputPath: string;
