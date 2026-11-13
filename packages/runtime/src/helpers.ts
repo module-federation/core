@@ -21,10 +21,13 @@ export const global: RuntimeGlobalUtils = {
 
 export const share: IShareUtils = helpers.share;
 
+export const dispose: typeof helpers.dispose = helpers.dispose;
+
 export interface IRuntimeUtils {
   matchRemoteWithNameAndExpose: typeof import('@module-federation/runtime-core').matchRemoteWithNameAndExpose;
   preloadAssets: (...args: any[]) => void;
   getRemoteInfo: typeof import('@module-federation/runtime-core').getRemoteInfo;
+  getRemoteEntryUniqueKey: typeof helpers.utils.getRemoteEntryUniqueKey;
 }
 
 export const utils: IRuntimeUtils = helpers.utils;
@@ -32,10 +35,12 @@ export const utils: IRuntimeUtils = helpers.utils;
 const runtimeHelpers: {
   global: RuntimeGlobalUtils;
   share: IShareUtils;
+  dispose: typeof dispose;
   utils: IRuntimeUtils;
 } = {
   global,
   share,
+  dispose,
   utils,
 };
 

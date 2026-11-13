@@ -1,212 +1,92 @@
-import { assert, describe, it, expect, rs } from '@rstest/core';
+import { afterEach, describe, it, expect, rs } from '@rstest/core';
 import { ModuleFederation } from '../src/index';
 
-describe('ModuleFederation', () => {
+const entry = (name: string, suffix = '') =>
+  `http://localhost:1111/resources/register-remotes/${name}/federation-remote-entry${suffix}.js`;
+const createHost = () =>
+  new ModuleFederation({
+    name: '@federation/instance',
+    version: '1.0.1',
+    remotes: [{ name: '@register-remotes/app1', entry: entry('app1') }],
+  });
+const load = async (host: ModuleFederation, name = 'app1') => {
+  const say = await host.loadRemote<() => string>(
+    `@register-remotes/${name}/say`,
+  );
+  return say!();
+};
+
+describe('remote registration without Node plugins', () => {
+  afterEach(() => {
+    delete (globalThis as any)['@register-remotes/app1'];
+    delete (globalThis as any)['@register-remotes/app2'];
+  });
   it('registers new remotes and loads them correctly', async () => {
-    const FM = new ModuleFederation({
-      name: '@federation/instance',
-      version: '1.0.1',
-      remotes: [
-        {
-          name: '@register-remotes/app1',
-          entry:
-            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
-        },
-      ],
-    });
-
-    const app1Module = await FM.loadRemote<Promise<() => string>>(
-      '@register-remotes/app1/say',
-    );
-    assert(app1Module);
-    const app1Res = await app1Module();
-    expect(app1Res).toBe('hello app1 entry1');
-    // Register new remotes
-    FM.registerRemotes([
-      {
-        name: '@register-remotes/app2',
-        entry:
-          'http://localhost:1111/resources/register-remotes/app2/federation-remote-entry.js',
-      },
+    const host = createHost();
+    expect(await load(host)).toBe('hello app1 entry1');
+    host.registerRemotes([
+      { name: '@register-remotes/app2', entry: entry('app2') },
     ]);
-    const app2Module = await FM.loadRemote<Promise<() => string>>(
-      '@register-remotes/app2/say',
-    );
-    assert(app2Module);
-    const res = await app2Module();
-    expect(res).toBe('hello app2');
+    expect(await load(host, 'app2')).toBe('hello app2');
   });
-  it('does not merge loaded remote by default', async () => {
-    const FM = new ModuleFederation({
-      name: '@federation/instance',
-      version: '1.0.1',
-      remotes: [
-        {
-          name: '@register-remotes/app1',
-          entry:
-            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
-        },
-      ],
-    });
-    FM.registerRemotes([
-      {
-        name: '@register-remotes/app1',
-        // Entry is different from the registered remote
-        entry:
-          'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
-      },
+  it('does not replace registered remotes by default', async () => {
+    const host = createHost();
+    host.registerRemotes([
+      { name: '@register-remotes/app1', entry: entry('app1', '2') },
     ]);
-
-    const app1Module = await FM.loadRemote<Promise<() => string>>(
-      '@register-remotes/app1/say',
-    );
-    assert(app1Module);
-    const app1Res = await app1Module();
-    expect(app1Res).toBe('hello app1 entry1');
+    expect(await load(host)).toBe('hello app1 entry1');
   });
-  it('merges loaded remote by setting "force: true"', async () => {
-    const FM = new ModuleFederation({
-      name: '@federation/instance',
-      version: '1.0.1',
-      remotes: [
-        {
-          name: '@register-remotes/app1',
-          entry:
-            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
-        },
-      ],
-    });
-    const app1Module = await FM.loadRemote<Promise<() => string>>(
-      '@register-remotes/app1/say',
-    );
-    assert(app1Module);
-    const app1Res = await app1Module();
-    expect(app1Res).toBe('hello app1 entry1');
-
-    FM.registerRemotes(
-      [
-        {
-          name: '@register-remotes/app1',
-          // Entry is different from the registered remote
-          entry:
-            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
-        },
-      ],
+  it('synchronously replaces loaded remotes with force', async () => {
+    const host = createHost();
+    expect(await load(host)).toBe('hello app1 entry1');
+    host.registerRemotes(
+      [{ name: '@register-remotes/app1', entry: entry('app1', '2') }],
       { force: true },
     );
-    const newApp1Module = await FM.loadRemote<Promise<() => string>>(
-      '@register-remotes/app1/say',
-    );
-    assert(newApp1Module);
-    const newApp1Res = await newApp1Module();
-    // Value is different from the registered remote
-    expect(newApp1Res).toBe('hello app1 entry2');
+    expect(await load(host)).toBe('hello app1 entry2');
   });
-  it('reloads manifest snapshots when a manifest remote is force registered with the same entry', async () => {
-    const manifestUrl =
-      'http://localhost:1111/resources/register-remotes/manifest/federation-manifest.json';
-    const manifests = [
-      {
-        id: '@register-remotes/manifest',
-        name: '@register-remotes/manifest',
-        metaData: {
-          name: '@register-remotes/manifest',
-          publicPath: 'http://localhost:1111/',
-          type: 'app',
-          globalName: '@snapshot/remote1',
-          buildInfo: {
-            buildVersion: 'first',
-          },
-          remoteEntry: {
-            name: 'federation-remote-entry.js',
-            path: 'resources/snapshot/remote1',
-          },
-          types: {
-            name: 'index.d.ts',
-            path: './',
-          },
-        },
-        remotes: [],
-        shared: [],
-        exposes: [],
-      },
-      {
-        id: '@register-remotes/manifest',
-        name: '@register-remotes/manifest',
-        metaData: {
-          name: '@register-remotes/manifest',
-          publicPath: 'http://localhost:1111/',
-          type: 'app',
-          globalName: '@snapshot/remote2',
-          buildInfo: {
-            buildVersion: 'second',
-          },
-          remoteEntry: {
-            name: 'federation-remote-entry.js',
-            path: 'resources/snapshot/remote2',
-          },
-          types: {
-            name: 'index.d.ts',
-            path: './',
-          },
-        },
-        remotes: [],
-        shared: [],
-        exposes: [],
-      },
-    ];
-    const manifestFetch = rs.fn((url: string) => {
-      if (url === manifestUrl) {
-        return Promise.resolve(
-          new Response(
-            JSON.stringify(manifests[manifestFetch.mock.calls.length - 1]),
-            {
-              status: 200,
-              statusText: 'OK',
-              headers: { 'Content-Type': 'application/json' },
+  it('reloads a manifest at the same URL after force registration', async () => {
+    const url = 'http://localhost:1111/force-manifest.json';
+    let version = 1;
+    const fetch = rs.fn(async (request: string) => {
+      if (request !== url) return;
+      return new Response(
+        JSON.stringify({
+          id: 'remote',
+          name: 'remote',
+          metaData: {
+            name: 'remote',
+            publicPath: 'http://localhost:1111/',
+            type: 'app',
+            globalName: `@snapshot/remote${version}`,
+            buildInfo: { buildVersion: String(version) },
+            remoteEntry: {
+              name: 'federation-remote-entry.js',
+              path: `resources/snapshot/remote${version}`,
             },
-          ),
-        );
-      }
+            types: { name: 'index.d.ts', path: './' },
+          },
+          remotes: [],
+          shared: [],
+          exposes: [],
+        }),
+        { headers: { 'Content-Type': 'application/json' } },
+      );
     });
-    const FM = new ModuleFederation({
-      name: '@federation/instance',
-      version: '1.0.1',
-      remotes: [
-        {
-          name: '@register-remotes/manifest',
-          entry: manifestUrl,
-        },
-      ],
-      plugins: [
-        {
-          name: 'manifest-fetch',
-          fetch: manifestFetch,
-        },
-      ],
+    const remote = { name: 'remote', entry: url };
+    const host = new ModuleFederation({
+      name: 'force-host',
+      remotes: [remote],
+      plugins: [{ name: 'manifest-fetch', fetch }],
     });
-
-    const appModule = await FM.loadRemote<Promise<() => string>>(
-      '@register-remotes/manifest/say',
+    expect(await (await host.loadRemote<() => string>('remote/say'))!()).toBe(
+      'hello world "@snapshot/remote1"',
     );
-    assert(appModule);
-    expect(await appModule()).toBe('hello world "@snapshot/remote1"');
-
-    FM.registerRemotes(
-      [
-        {
-          name: '@register-remotes/manifest',
-          entry: manifestUrl,
-        },
-      ],
-      { force: true },
+    version = 2;
+    host.registerRemotes([remote], { force: true });
+    expect(await (await host.loadRemote<() => string>('remote/say'))!()).toBe(
+      'hello world "@snapshot/remote2"',
     );
-
-    const nextAppModule = await FM.loadRemote<Promise<() => string>>(
-      '@register-remotes/manifest/say',
-    );
-    assert(nextAppModule);
-    expect(await nextAppModule()).toBe('hello world "@snapshot/remote2"');
-    expect(manifestFetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 });

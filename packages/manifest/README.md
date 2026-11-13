@@ -33,6 +33,21 @@ new StatsPlugin(mfOptions, {
 }).apply(compiler);
 ```
 
+## Build identity
+
+`metaData.buildInfo.buildVersion` identifies the compilation. In development,
+it is a timestamp-based counter that advances on every compilation, including
+empty rebuilds. The container runtime and manifest use the same value.
+Production builds use `MF_BUILD_VERSION`, then the package version in the
+compiler context, then the local fallback.
+
+In development, frameworks with multiple compilation targets can call
+`setCompilationBuildVersion(compilation, buildVersion)` before federation's
+compilation hooks run. Assign one version to both targets before emitting their
+containers, then publish the merged manifest after both targets are ready.
+Changing only the manifest after compilation would leave container IDs stale.
+The merged manifest uses one `buildInfo.buildVersion` for browser and Node.
+
 ## Bridge rendering metadata
 
 Statically identifiable default exports created with `createBridgeComponent` publish

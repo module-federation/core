@@ -7,12 +7,14 @@ import type {
 } from '@rspack/core';
 import {
   bindLoggerToCompiler,
-  composeKeyWithSeparator,
   moduleFederationPlugin,
 } from '@module-federation/sdk';
 
-import { StatsPlugin } from '@module-federation/manifest';
-import { ContainerManager, utils } from '@module-federation/managers';
+import {
+  StatsPlugin,
+  getFederationBuildIdentifier,
+} from '@module-federation/manifest';
+import { ContainerManager } from '@module-federation/managers';
 import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
@@ -113,9 +115,8 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     const { name, experiments, exposes } = this._options;
     const definePluginOptions: Record<string, string | boolean> = {};
     if (name) {
-      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
-        composeKeyWithSeparator(name, utils.getBuildVersion()),
-      );
+      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] =
+        getFederationBuildIdentifier(compiler as any, name);
     }
     // Add FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
     const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;

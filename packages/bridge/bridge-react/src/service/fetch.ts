@@ -71,7 +71,7 @@ export async function fetchBridgeService(
         timeoutMs,
       );
   }
-  void (async () => {
+  const transfer = (async () => {
     try {
       if (settled) return;
       const response = await (options.fetch ?? fetch)(endpoint, {
@@ -120,7 +120,10 @@ export async function fetchBridgeService(
       }
       if (response.status !== 200) {
         void response.body?.cancel().catch(() => {});
-        throw new Error(`Bridge service returned HTTP ${response.status}.`);
+        throw Object.assign(
+          new Error(`Bridge service returned HTTP ${response.status}.`),
+          { status: response.status },
+        );
       }
       if (
         !response.headers.get('content-type')?.startsWith(CONTENT_TYPE) ||
@@ -220,5 +223,6 @@ export async function fetchBridgeService(
       reader?.releaseLock();
     }
   })();
+  info.work?.track(transfer);
   return initial.promise;
 }

@@ -7,12 +7,14 @@ import type {
   BridgeSSRRenderParams,
   BridgeSSRMessage,
   BridgeSSRMessageResult,
+  BridgeSSRRequest,
 } from '../types';
 import { bridgeStreamBootstrap } from './bootstrap';
 import { hostPieces } from './host-stream';
 import { bridgeIdentifierPrefix } from './identity.server';
 import { normalizeBridgeSSR } from './producer.server';
 import { createReactStreamScriptIsolator } from './script-isolation.server';
+import { bridgeErrorFrame } from './protocol';
 import {
   escapeHTMLAttribute,
   serializeBridgeFrame,
@@ -25,6 +27,8 @@ export interface BridgeSSRControllerOptions {
   shellEndMarker: string;
   identifierPrefix: string;
   timeoutMs?: number;
+  /** Retain original producer tasks after cancellation until they settle. */
+  work?: BridgeSSRRequest['work'];
   /** Report the original producer failure on the server without exposing it in HTML. */
   onError?: (error: unknown, instanceId: string) => void;
 }
@@ -106,7 +110,8 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
       signal.addEventListener('abort', abortSession, { once: true });
       const reservation: BridgeSSRReservation = {
         signal,
-        wait: (promise) => withAbort(promise, signal),
+        wait: (promise) =>
+          withAbort(options.work?.track(promise) ?? promise, signal),
         activate(factory, params) {
           if (activated || skipped || signal.aborted) return;
           activated = true;
@@ -137,6 +142,7 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
           headers,
           nonce: options.nonce,
           signal,
+          work: options.work,
         };
         const raw = await provider.renderStream(request);
         const result = await normalizeBridgeSSR(raw, request);
@@ -144,7 +150,7 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
         if (signal.aborted) result.abort(signal.reason);
         return result;
       });
-      const ready = withAbort(render, signal);
+      const ready = withAbort(options.work?.track(render) ?? render, signal);
       void ready.catch(() => {});
       const job: Job = {
         reservation,
@@ -286,10 +292,10 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
               } catch {
                 // Diagnostic callbacks must not prevent the recovery frame.
               }
-              await emit(id, {
-                type: 'error',
-                message: 'Bridge server rendering failed',
-              });
+              await emit(
+                id,
+                bridgeErrorFrame(error, 'Bridge server rendering failed'),
+              );
             }
           } finally {
             if (!complete)
@@ -301,6 +307,7 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
             job.clear();
           }
         })();
+        options.work?.track(job.done);
         void job.done.catch((error: Error) => output.destroy(error));
       };
       for (const [id, job] of jobs) startJob(id, job);

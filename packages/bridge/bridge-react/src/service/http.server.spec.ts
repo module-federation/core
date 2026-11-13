@@ -81,6 +81,46 @@ function fixture(
   return { render, authorize, load, handler, aborts: () => aborts };
 }
 describe('Service producer transport', () => {
+  it('tracks the original HTTP transfer after abort and keeps ownership out of its payload', async () => {
+    const pending = new Set<Promise<unknown>>();
+    const work = {
+      track<T>(promise: Promise<T>) {
+        pending.add(promise);
+        void promise.then(
+          () => pending.delete(promise),
+          () => pending.delete(promise),
+        );
+        return promise;
+      },
+    };
+    let rejectFetch!: (reason: Error) => void;
+    const response = new Promise<Response>((_resolve, reject) => {
+      rejectFetch = reject;
+    });
+    let body: any;
+    const aborter = new AbortController();
+    const result = fetchBridgeService(
+      { ...input(aborter.signal), work },
+      {
+        url: 'https://service.test/render',
+        buildVersion: 'build-1',
+        fetch: (_url, init) => {
+          body = JSON.parse(init!.body as string);
+          return response;
+        },
+      },
+    );
+    expect(body.request).not.toHaveProperty('work');
+    expect(body.request).not.toHaveProperty('signal');
+    aborter.abort(Error('disconnected'));
+    await expect(result).rejects.toThrow('disconnected');
+    expect(pending.size).toBe(1);
+    const transfer = [...pending];
+    rejectFetch(Error('fetch cancellation completed'));
+    await Promise.all(transfer);
+    expect(pending.size).toBe(0);
+  });
+
   it('decodes every UTF-8 byte split and distinguishes JSON separators from HTML newlines', async () => {
     const bytes = encoder.encode(
       messages.map((message) => JSON.stringify(message) + '\n').join(''),
@@ -156,6 +196,158 @@ describe('Service producer transport', () => {
         }
       })(),
     ).rejects.toThrow('Truncated');
+  });
+});
+
+describe('Service producer ownership', () => {
+  const request = (signal: AbortSignal) => {
+    const { signal: _signal, ...info } = input(signal);
+    return new Request('https://service.test/render', {
+      method: 'POST',
+      body: JSON.stringify({
+        protocol: BRIDGE_PRODUCER_PROTOCOL,
+        buildVersion: 'build-1',
+        request: info,
+      }),
+      signal,
+    });
+  };
+  const tracker = () => {
+    const pending = new Set<Promise<unknown>>();
+    return {
+      pending,
+      work: {
+        track<T>(promise: Promise<T>) {
+          pending.add(promise);
+          void promise.then(
+            () => pending.delete(promise),
+            () => pending.delete(promise),
+          );
+          return promise;
+        },
+      },
+    };
+  };
+
+  it.each(
+    (['render', 'snapshot'] as const).flatMap((stage) =>
+      (['resolve', 'reject'] as const).map((settlement) => ({
+        stage,
+        settlement,
+      })),
+    ),
+  )(
+    'retains original $stage work after abort until it can $settlement',
+    async ({ stage, settlement }) => {
+      const { pending, work } = tracker();
+      let resolve!: (value: any) => void;
+      let reject!: (reason: Error) => void;
+      const original = new Promise<any>((yes, no) => {
+        resolve = yes;
+        reject = no;
+      });
+      let entered!: () => void;
+      const started = new Promise<void>((yes) => {
+        entered = yes;
+      });
+      const raw = {
+        stream: new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(encoder.encode('<p>ready</p>'));
+            controller.close();
+          },
+        }),
+        snapshot:
+          stage === 'snapshot' ? original : Promise.resolve({ value: 'ready' }),
+        abort: rstest.fn(),
+      };
+      const handler = createBridgeServiceHandler({
+        buildVersion: 'build-1',
+        render(info) {
+          expect(info.work).toBe(work);
+          entered();
+          return stage === 'render' ? original : Promise.resolve(raw);
+        },
+      });
+      const aborter = new AbortController();
+      const response = handler(request(aborter.signal), { work });
+      await started;
+      const body =
+        stage === 'snapshot'
+          ? (await response).text().catch((error) => error)
+          : undefined;
+      aborter.abort(Error('disconnected'));
+      if (stage === 'render') expect((await response).status).toBe(500);
+      else expect(await body).toBeInstanceOf(Error);
+      expect(pending.has(original)).toBe(true);
+      const tasks = [...pending];
+      if (settlement === 'reject')
+        reject(Error('producer cancellation completed'));
+      else resolve(stage === 'render' ? raw : { value: 'late snapshot' });
+      await Promise.allSettled(tasks);
+      expect(pending.size).toBe(0);
+      if (settlement === 'resolve' || stage === 'snapshot')
+        expect(raw.abort).toHaveBeenCalled();
+    },
+  );
+
+  it('keeps request ownership out of response frames and transcript cache identity', async () => {
+    const f = fixture({ cache: true });
+    const first = await f.handler(request(new AbortController().signal), {
+      work: tracker().work,
+    });
+    const text = await first.text();
+    expect(text).toContain('"type":"done"');
+    expect(text).not.toContain('"work"');
+    expect(text).not.toContain('"track"');
+    const second = await f.handler(request(new AbortController().signal), {
+      work: tracker().work,
+    });
+    expect(second.headers.get('x-mf-bridge-cache')).toBe('hit');
+    expect(await second.text()).toBe(text);
+    expect(f.render).toHaveBeenCalledTimes(1);
+  });
+
+  it('retains a snapshot discovered when an already aborted renderer returns late', async () => {
+    const { pending, work } = tracker();
+    let finishRender!: (value: any) => void;
+    let finishSnapshot!: (reason: Error) => void;
+    const rendering = new Promise<any>((resolve) => {
+      finishRender = resolve;
+    });
+    const snapshot = new Promise<unknown>((_resolve, reject) => {
+      finishSnapshot = reject;
+    });
+    let entered!: () => void;
+    const started = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const handler = createBridgeServiceHandler({
+      buildVersion: 'build-1',
+      render() {
+        entered();
+        return rendering;
+      },
+    });
+    const aborter = new AbortController();
+    const response = handler(request(aborter.signal), { work });
+    await started;
+    aborter.abort(Error('disconnected'));
+    expect((await response).status).toBe(500);
+    finishRender({
+      stream: new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.close();
+        },
+      }),
+      snapshot,
+      abort() {},
+    });
+    await Promise.allSettled([...pending]);
+    expect(pending.has(snapshot)).toBe(true);
+    finishSnapshot(Error('late producer cancellation'));
+    await Promise.allSettled([...pending]);
+    expect(pending.size).toBe(0);
   });
 });
 

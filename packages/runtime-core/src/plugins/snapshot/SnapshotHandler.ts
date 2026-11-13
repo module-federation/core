@@ -62,12 +62,9 @@ export function getGlobalRemoteInfo(
   }
 
   return {
-    hostGlobalSnapshot: undefined,
+    hostGlobalSnapshot,
     globalSnapshot: getGlobalSnapshot(),
-    remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
-      name: moduleInfo.name,
-      version: 'version' in moduleInfo ? moduleInfo.version : undefined,
-    }),
+    remoteSnapshot: getGlobalSnapshotInfoByModuleInfo(moduleInfo),
   };
 }
 
@@ -175,19 +172,16 @@ export class SnapshotHandler {
     });
 
     let hostSnapshot = getGlobalSnapshotInfoByModuleInfo({
-      name: this.HostInstance.options.name,
-      version: this.HostInstance.options.version,
+      name: options.name,
+      version: options.version,
     });
-
     if (!hostSnapshot) {
       hostSnapshot = {
-        version: this.HostInstance.options.version || '',
+        version: options.version || '',
         remoteEntry: '',
         remotesInfo: {},
-      };
-      addGlobalSnapshot({
-        [this.HostInstance.options.name]: hostSnapshot,
-      });
+      } as ModuleInfo;
+      addGlobalSnapshot({ [options.name]: hostSnapshot });
     }
 
     // In dynamic loadRemote scenarios, incomplete remotesInfo delivery may occur. In such cases, the remotesInfo in the host needs to be completed in the snapshot at runtime.

@@ -132,8 +132,8 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
         };
       };
 
-    initOptions.plugins ||= [];
-    initOptions.plugins.push(treeShakingSharePlugin());
+    const plugins = (initOptions.plugins ||= []);
+    plugins.push(treeShakingSharePlugin());
   }
   return runtime!.init(initOptions);
 }

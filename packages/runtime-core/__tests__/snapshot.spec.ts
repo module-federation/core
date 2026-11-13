@@ -1,3 +1,4 @@
+import { assignRemoteInfo } from '../src/plugins/snapshot';
 import { assert, describe, it } from '@rstest/core';
 import { ModuleFederation } from '../src';
 import { getGlobalSnapshot, resetFederationGlobalInfo } from '../src/global';
@@ -46,4 +47,19 @@ describe('snapshot', () => {
       },
     });
   });
+});
+
+it('preserves the producer name and consumer alias when resolving a container global', () => {
+  const remote = { name: 'provider', alias: 'dynamic' } as any;
+  assignRemoteInfo(remote, {
+    remoteEntry: 'entry.js',
+    remoteEntryType: 'global',
+    globalName: '__FEDERATION_custom:custom__',
+    publicPath: 'https://example.com/',
+    version: '1',
+    buildVersion: 'build',
+  } as any);
+  expect(remote.name).toBe('provider');
+  expect(remote.alias).toBe('dynamic');
+  expect(remote.entryGlobalName).toBe('__FEDERATION_custom:custom__');
 });

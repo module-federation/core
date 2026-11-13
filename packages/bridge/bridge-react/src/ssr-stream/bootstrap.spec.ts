@@ -1,10 +1,13 @@
-import { afterEach, describe, expect, it } from '@rstest/core';
+import { afterEach, describe, expect, it, rstest } from '@rstest/core';
 import { JSDOM } from 'jsdom';
 import {
   bridgeStreamBootstrap,
   type BridgeBootstrapOptions,
 } from './bootstrap';
 import type { BridgeStreamBrowserRuntime } from './protocol';
+import { receiveBridgeService } from '../service/browser';
+import { createBridgeServiceHandler } from '../service/http.server';
+import { bridgeErrorFrame } from './protocol';
 
 const documents: JSDOM[] = [];
 function createDocument(
@@ -41,6 +44,119 @@ afterEach(() => {
 });
 
 describe('Bridge early bootstrap', () => {
+  it('preserves an HTTP conflict without generic CSR recovery', async () => {
+    const { dom, runtime } = createDocument('<div id="a"></div>', 1000, {}, [
+      'a',
+    ]);
+    runtime.accept(
+      'a',
+      bridgeErrorFrame(
+        Object.assign(Error('HTTP 409'), { status: 409 }),
+        'Bridge server rendering failed',
+      ),
+    );
+    const failure = await runtime.get('a')!.done.catch((error) => error);
+    expect(failure).toMatchObject({
+      status: 409,
+      message: 'Bridge server rendering failed',
+    });
+    runtime.fallback(failure);
+    expect(
+      dom.window.document.getElementById('mf-bridge-fatal-error'),
+    ).toBeNull();
+    runtime.fallback(Error('ordinary failure'));
+    expect(
+      dom.window.document.getElementById('mf-bridge-fatal-error'),
+    ).not.toBeNull();
+  });
+
+  it.each([undefined, '409', 200, 700])(
+    'keeps generic recovery for invalid HTTP error status %j',
+    async (status) => {
+      const { dom, runtime } = createDocument('<div id="a"></div>', 1000, {}, [
+        'a',
+      ]);
+      runtime.accept('a', {
+        type: 'error',
+        message: 'HTTP 409',
+        status,
+      } as any);
+      const failure = await runtime.get('a')!.done.catch((error) => error);
+      expect(failure).not.toHaveProperty('status');
+      expect(
+        dom.window.document.getElementById('mf-bridge-fatal-error'),
+      ).not.toBeNull();
+    },
+  );
+
+  it('retains a real handler/fetch HTTP conflict through the browser Service receive session without replay', async () => {
+    const { dom } = createDocument('<div id="app"></div>', 1000, {}, []);
+    const render = rstest.fn(async () => {
+      throw Error('Unexpected producer rendering');
+    });
+    const handler = createBridgeServiceHandler({ buildVersion: 'new', render });
+    const transport = rstest.fn(async (url, init) =>
+      handler(new Request(url, init)),
+    );
+    const values = {
+      window: dom.window,
+      document: dom.window.document,
+      location: dom.window.location,
+      fetch: transport,
+    };
+    const previous = new Map(
+      Object.keys(values).map((key) => [
+        key,
+        Object.getOwnPropertyDescriptor(globalThis, key),
+      ]),
+    );
+    for (const [key, value] of Object.entries(values))
+      Object.defineProperty(globalThis, key, {
+        configurable: true,
+        writable: true,
+        value,
+      });
+    let receive: ReturnType<typeof receiveBridgeService> | undefined;
+    try {
+      receive = receiveBridgeService(
+        dom.window.document.getElementById('app')!,
+        'app',
+        {
+          url: dom.window.location.href,
+          props: {},
+          signal: new AbortController().signal,
+        },
+        {
+          moduleName: 'remote/App',
+          url: '/service',
+          buildVersion: 'old',
+        },
+      );
+      const transportError = await receive.done.catch((error) => error);
+      const readinessError = await receive.session.ready!.catch(
+        (error) => error,
+      );
+      const completionError = await receive.session.done.catch(
+        (error) => error,
+      );
+      expect(transportError).toMatchObject({ status: 409 });
+      expect(readinessError).toMatchObject({ status: 409 });
+      expect(completionError).toMatchObject({ status: 409 });
+      receive.runtime.fallback(readinessError);
+      expect(
+        dom.window.document.getElementById('mf-bridge-fatal-error'),
+      ).toBeNull();
+      expect(transport).toHaveBeenCalledTimes(1);
+      expect(render).not.toHaveBeenCalled();
+    } finally {
+      receive?.release();
+      for (const [key, descriptor] of previous) {
+        if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+        else Reflect.deleteProperty(globalThis, key);
+      }
+    }
+  });
+
   it('claims a server-marked container before its first metadata arrives', async () => {
     const { dom, runtime } = createDocument(
       '<div id="late">loading</div>',

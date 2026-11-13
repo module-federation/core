@@ -14,6 +14,7 @@ export default defineConfig([
       entry: {
         'src/index': 'src/index.ts',
         'src/runtimePlugin': 'src/runtimePlugin.ts',
+        'src/lifecycle': 'src/lifecycle.ts',
         'src/recordDynamicRemoteEntryHashPlugin':
           'src/recordDynamicRemoteEntryHashPlugin.ts',
         'src/utils/index': 'src/utils/index.ts',

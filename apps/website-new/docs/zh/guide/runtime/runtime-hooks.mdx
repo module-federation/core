@@ -1086,6 +1086,25 @@ test1; // "test1 value"
 test2; // "test2 value"
 ```
 
+## 生命周期归属 hook
+
+以下 hook 允许可选插件实现特定环境的资源管理：
+
+- `beforeRemoveRemote({ remote, origin })` 在移除 hook 前同步执行。
+  返回 `{ remove() {} }` 可以先记录资源归属，再在异步移除 hook 成功后执行清理。
+  该回调替代默认容器清理，注册和 snapshot 失效仍由 Core 处理。
+  同步强制注册也会使用该回调。
+- `dispose({ origin })` 通知插件实例即将退出，可以返回 Promise。
+  生命周期管理方排空工作后，通过 `@module-federation/runtime/helpers` 中的
+  `helpers.dispose.notifyDispose(instance)` 触发通知。
+  即使某个监听器失败，其余监听器也会执行，全部结束后统一报告错误。
+  通知本身不关闭实例，也不删除缓存或注册。
+  Node 生命周期插件在 `destroyNodeInstance` 中清理远端之后、
+  释放剩余引用之前触发该 hook。单个远端更新不会触发实例退出通知。
+
+`@module-federation/node/runtimePlugin` 使用这些 hook 实现 SSR 生命周期和
+资源归属管理。hook 本身不依赖特定 bundler。
+
 ## bridgeHook
 
 `bridgeHook` 用于观察 React 和 Vue Bridge 的渲染、销毁和路由同步操作。

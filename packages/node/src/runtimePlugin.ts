@@ -2,6 +2,12 @@ import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
 } from '@module-federation/runtime';
+import {
+  createClearCacheRuntimePlugin,
+  installClearCache,
+  installNodeCacheRuntime,
+} from '@module-federation/webpack-bundler-runtime/clear-cache';
+import { nodeRuntimeLifecycle } from './runtimeLifecycle';
 type WebpackRequire = {
   (id: string): any;
   u: (chunkId: string) => string;
@@ -9,6 +15,13 @@ type WebpackRequire = {
   m: { [key: string]: any };
   o: (obj: any, prop: string) => boolean;
   C?: (chunk: any) => void;
+  nodeChunkLoader?: {
+    readFile?: (
+      filename: string,
+      chunkId: string,
+      callback: (error: Error | null, content?: string) => void,
+    ) => void;
+  };
   l: (
     url: string,
     done: (res: any) => void,
@@ -225,28 +238,30 @@ export const loadFromFs = (
 };
 
 // Hoisted utility function to fetch and execute chunks from remote URLs
+const fetchChunkContent = (url: URL, args: any): Promise<string> =>
+  (typeof fetch === 'undefined'
+    ? importNodeModule<typeof import('node-fetch')>('node-fetch').then(
+        (mod) => mod.default,
+      )
+    : Promise.resolve(fetch)
+  ).then((fetchFunction) => {
+    return args.origin.loaderHook.lifecycle.fetch
+      .emit(url.href, {})
+      .then((res: Response | null) => {
+        if (!res || !(res instanceof Response)) {
+          return fetchFunction(url.href).then((response) => response.text());
+        }
+        return res.text();
+      });
+  });
+
 export const fetchAndRun = (
   url: URL,
   chunkName: string,
   callback: (err: Error | null, chunk: any) => void,
   args: any,
 ): void => {
-  (typeof fetch === 'undefined'
-    ? importNodeModule<typeof import('node-fetch')>('node-fetch').then(
-        (mod) => mod.default,
-      )
-    : Promise.resolve(fetch)
-  )
-    .then((fetchFunction) => {
-      return args.origin.loaderHook.lifecycle.fetch
-        .emit(url.href, {})
-        .then((res: Response | null) => {
-          if (!res || !(res instanceof Response)) {
-            return fetchFunction(url.href).then((response) => response.text());
-          }
-          return res.text();
-        });
-    })
+  fetchChunkContent(url, args)
     .then((data) => {
       const chunk = {};
       const hostName = args?.origin?.options?.name || args?.origin?.name;
@@ -473,6 +488,30 @@ export const setupChunkHandler = (
 export const setupWebpackRequirePatching = (
   handle: (chunkId: string, promises: any[]) => void,
 ): void => {
+  if (__webpack_require__.nodeChunkLoader) {
+    // Rspack owns installation, installedChunks and generation fencing.
+    // This plugin supplies only local/remote source transport.
+    __webpack_require__.nodeChunkLoader.readFile = (
+      filename,
+      chunkId,
+      callback,
+    ) => {
+      const fs = __non_webpack_require__('fs') as typeof import('fs');
+      fs.readFile(filename, 'utf-8', (error, content) => {
+        if (!error) return callback(null, content);
+        if (error.code !== 'ENOENT') return callback(error);
+        const url = resolveUrl(
+          __webpack_require__.federation.initOptions.name,
+          __webpack_require__.u(chunkId),
+        );
+        if (!url) return callback(error);
+        fetchChunkContent(url, {
+          origin: __webpack_require__.federation.instance,
+        }).then((content) => callback(null, content), callback);
+      });
+    };
+    return;
+  }
   if (__webpack_require__.f) {
     if (__webpack_require__.f.require) {
       console.warn(
@@ -493,35 +532,52 @@ export default function (): ModuleFederationRuntimePlugin {
   // instance (and its named plugins) is reused, so beforeInit may belong to the
   // first runtime. Install this runtime's chunk handlers when its plugin is
   // constructed as well, resolving the instance only when a chunk is requested.
-  setupScriptLoader();
-  setupWebpackRequirePatching(
-    setupChunkHandler(
-      {},
-      {
-        get origin() {
-          return __webpack_require__.federation.instance;
+  if (
+    typeof __webpack_require__ !== 'undefined' &&
+    __webpack_require__.federation
+  ) {
+    const federation = __webpack_require__.federation as any;
+    installNodeCacheRuntime(
+      federation.bundlerRuntimeOptions?.remotes?.webpackRequire ||
+        __webpack_require__,
+    );
+    setupScriptLoader();
+    setupWebpackRequirePatching(
+      setupChunkHandler(
+        {},
+        {
+          get origin() {
+            return __webpack_require__.federation.instance;
+          },
         },
-      },
-    ),
-  );
+      ),
+    );
+  }
   return {
     name: 'node-federation-plugin',
+    apply(instance) {
+      return {
+        ...createClearCacheRuntimePlugin(),
+        ...(nodeRuntimeLifecycle().apply!(instance) || {}),
+        beforeInit: this.beforeInit,
+      };
+    },
     beforeInit(args) {
-      // Patch webpack chunk loading handlers
-      (() => {
-        // Create the chunk tracking object
-        const installedChunks: { [key: string]: any } = {};
-
-        // Set up webpack script loader
-        setupScriptLoader();
-
-        // Create and set up the chunk handler
-        const handle = setupChunkHandler(installedChunks, args);
-
-        // Patch webpack require
-        setupWebpackRequirePatching(handle);
-      })();
-
+      if (
+        typeof __webpack_require__ === 'undefined' ||
+        !__webpack_require__.federation
+      )
+        return args;
+      const federation = __webpack_require__.federation as any;
+      const runtime =
+        federation.bundlerRuntimeOptions?.remotes?.webpackRequire ||
+        __webpack_require__;
+      if (federation.bundlerRuntime) {
+        installNodeCacheRuntime(runtime);
+        installClearCache({ webpackRequire: runtime, instance: args.origin });
+      }
+      setupScriptLoader();
+      setupWebpackRequirePatching(setupChunkHandler({}, args));
       return args;
     },
   };

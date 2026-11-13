@@ -12,8 +12,11 @@ export type StatsAssetResource = {
 };
 
 function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
+  browserStats = { ...browserStats, metaData: { ...browserStats.metaData } };
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;
-  browserStats.metaData.ssrRemoteEntry = ssrRemoteEntry;
+  browserStats.metaData.ssrRemoteEntry = {
+    ...ssrRemoteEntry,
+  };
   if ('publicPath' in browserStats.metaData) {
     // @ts-ignore nodeStats has the same structure with browserStats
     browserStats.metaData.ssrPublicPath = nodeStats.metaData.publicPath;
@@ -25,8 +28,14 @@ function mergeManifest(
   browserManifest: Manifest,
   nodeManifest: Manifest,
 ): Manifest {
+  browserManifest = {
+    ...browserManifest,
+    metaData: { ...browserManifest.metaData },
+  };
   const ssrRemoteEntry = nodeManifest.metaData.remoteEntry;
-  browserManifest.metaData.ssrRemoteEntry = ssrRemoteEntry;
+  browserManifest.metaData.ssrRemoteEntry = {
+    ...ssrRemoteEntry,
+  };
   if ('publicPath' in browserManifest.metaData) {
     // @ts-ignore nodeStats has the same structure with browserStats
     browserManifest.metaData.ssrPublicPath = nodeManifest.metaData.publicPath;

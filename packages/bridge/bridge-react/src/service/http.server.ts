@@ -24,6 +24,7 @@ import {
   validateServiceRequest,
   type Frame,
 } from './protocol';
+import { getHttpErrorStatus } from '../ssr-stream/protocol';
 export type { BridgeServiceCacheOptions } from './cache.server';
 export interface BridgeServiceHandlerOptions {
   buildVersion: string | ((requested: string) => string | Promise<string>);
@@ -37,10 +38,17 @@ export interface BridgeServiceHandlerOptions {
   render(
     info: BridgeSSRRequest,
   ): Promise<BridgeSSRResult | BridgeSSRMessageResult>;
+  /** Forward HTTP failures from a transparent ingress before a result exists. */
+  forwardHttpErrors?: boolean;
   /** Reuse completed renders for identical inputs within this handler. */
   cache?: BridgeServiceCacheOptions;
   maxFrameBytes?: number;
   maxBufferedBytes?: number;
+}
+
+/** Server-local ownership supplied by the HTTP application, never by the body. */
+export interface BridgeServiceRequestContext {
+  work?: BridgeSSRRequest['work'];
 }
 
 /** Adapter for a service running the same Bridge Node provider as a local Host. */
@@ -51,7 +59,10 @@ export function createBridgeServiceHandler(
   if (!options.buildVersion)
     throw new Error('Bridge service buildVersion is required.');
   const cache = options.cache && createBridgeServiceCache(options.cache);
-  return async (request: Request): Promise<Response> => {
+  return async (
+    request: Request,
+    context: BridgeServiceRequestContext = {},
+  ): Promise<Response> => {
     const denied = await options.authorize?.(request);
     if (denied) return denied;
     request.signal.throwIfAborted();
@@ -119,18 +130,21 @@ export function createBridgeServiceHandler(
       return new Response('Invalid Bridge service request', { status: 400 });
     }
     const invalid = await options.validate?.(
-      { ...input.request, signal: request.signal },
+      { ...input.request, signal: request.signal, work: context.work },
       request,
     );
     if (invalid) return invalid;
+    request.signal.throwIfAborted();
     const buildVersion =
       typeof options.buildVersion === 'function'
         ? await options.buildVersion(input.buildVersion)
         : options.buildVersion;
+    request.signal.throwIfAborted();
     if (!buildVersion) throw Error('Service deployment has no build identity.');
     if (input.buildVersion !== buildVersion)
       return new Response('Bridge service buildVersion mismatch', {
         status: 409,
+        headers: { 'cache-control': 'no-store' },
       });
     // Keep all render inputs, including instance identity, headers and nonce.
     // A cache hit is a replay of this exact render, not a new instance with IDs
@@ -246,16 +260,26 @@ export function createBridgeServiceHandler(
     };
     try {
       if (ended) throw error(request.signal.reason);
-      const rendering = options.render({
+      const info: BridgeSSRRequest = {
         ...input.request,
         signal: aborter.signal,
-      });
-      void rendering.then(
+        work: context.work,
+      };
+      const rendering = options.render(info);
+      const renderedCleanup = rendering.then(
         (value) => {
           if (ended) {
-            if (!('protocol' in value)) void value.snapshot?.catch(() => {});
-            if (!('protocol' in value))
-              void value.hydration?.snapshot.catch(() => {});
+            if (!('protocol' in value)) {
+              for (const snapshot of new Set([
+                value.snapshot,
+                value.hydration?.snapshot,
+              ])) {
+                if (snapshot) {
+                  void snapshot.catch(() => {});
+                  context.work?.track(snapshot);
+                }
+              }
+            }
             try {
               value.abort(aborter.signal.reason);
             } catch {
@@ -265,6 +289,8 @@ export function createBridgeServiceHandler(
         },
         () => {},
       );
+      context.work?.track(rendering);
+      context.work?.track(renderedCleanup);
       result = await Promise.race([rendering, interrupted.promise]);
       if (!('protocol' in result)) void result.snapshot?.catch(() => {});
       if (!('protocol' in result))
@@ -274,17 +300,12 @@ export function createBridgeServiceHandler(
         throw error(aborter.signal.reason);
       }
       validateStylesheets(result.stylesheets);
-      result = await Promise.race([
-        normalizeBridgeSSR(
-          result,
-          { ...input.request, signal: aborter.signal },
-          {
-            maxFrameBytes: Math.min(2 * 1024 * 1024, bound.frame),
-            maxBufferedBytes: bound.buffer,
-          },
-        ),
-        interrupted.promise,
-      ]);
+      const normalizing = normalizeBridgeSSR(result, info, {
+        maxFrameBytes: Math.min(2 * 1024 * 1024, bound.frame),
+        maxBufferedBytes: bound.buffer,
+      });
+      context.work?.track(normalizing);
+      result = await Promise.race([normalizing, interrupted.promise]);
       if (ended) throw error(aborter.signal.reason);
       const progressive = result.hydration === 'progressive';
       send({
@@ -297,7 +318,7 @@ export function createBridgeServiceHandler(
       });
       messageReader = result.messages.getReader();
       const source = result;
-      void (async () => {
+      const pumping = (async () => {
         try {
           let ready = false;
           let data = false;
@@ -355,11 +376,24 @@ export function createBridgeServiceHandler(
           messageReader?.releaseLock();
         }
       })();
+      context.work?.track(pumping);
       return new Response(output.stream, {
         headers: responseHeaders,
       });
     } catch (reason) {
+      const status =
+        options.forwardHttpErrors &&
+        !result &&
+        !ended &&
+        !request.signal.aborted
+          ? getHttpErrorStatus(reason)
+          : undefined;
       abort(reason);
+      if (status)
+        return new Response(`Bridge service returned HTTP ${status}.`, {
+          status,
+          headers: { 'cache-control': 'no-store' },
+        });
       return new Response('Bridge service rendering failed', { status: 500 });
     }
   };

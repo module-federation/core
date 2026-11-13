@@ -235,6 +235,8 @@ export interface BridgeSSRRequest extends BridgeSSRRenderParams {
   headers?: Record<string, string>;
   nonce?: string;
   signal: AbortSignal;
+  /** Server-local producer ownership, never sent in messages or HTTP payloads. */
+  work?: { track<T>(promise: Promise<T>): Promise<T> };
 }
 
 interface BridgeSSRStream {

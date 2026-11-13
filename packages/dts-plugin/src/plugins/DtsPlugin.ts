@@ -87,6 +87,12 @@ export class DtsPlugin implements WebpackPluginInstance {
     );
 
     if (typeof normalizedDtsOptions !== 'object') {
+      new DevPlugin(
+        clonedOptions,
+        {},
+        Promise.resolve(),
+        Promise.resolve(undefined),
+      ).apply(compiler);
       return;
     }
 

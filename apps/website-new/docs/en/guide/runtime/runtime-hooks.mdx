@@ -1132,6 +1132,27 @@ test1; // "test1 value"
 test2; // "test2 value"
 ```
 
+## Lifecycle ownership hooks
+
+These hooks let optional plugins implement environment-specific ownership:
+
+- `beforeRemoveRemote({ remote, origin })` runs synchronously before removal
+  hooks. Return `{ remove() {} }` to capture ownership now and apply custom
+  cleanup after asynchronous removal hooks succeed. The returned callback replaces
+  default container cleanup. Registration and snapshot invalidation remain in Core.
+  Synchronous force registration also uses this callback.
+- `dispose({ origin })` notifies plugins that the lifecycle owner is retiring
+  the instance. It may return a Promise. The owner calls
+  `helpers.dispose.notifyDispose(instance)` from `@module-federation/runtime/helpers`
+  after draining work. All listeners run even if one fails, and their errors
+  are reported together. Notification itself does not close the instance or
+  remove its caches and registrations. The Node lifecycle plugin invokes it
+  during `destroyNodeInstance`, after remote cleanup and before final reference
+  release. Updating one remote does not trigger instance disposal.
+
+`@module-federation/node/runtimePlugin` uses these hooks for SSR lifecycle and
+resource ownership. The hooks do not require a specific bundler.
+
 ## bridgeHook
 
 `bridgeHook` observes React and Vue Bridge render, destroy, and route

@@ -75,6 +75,7 @@ const USE_SHARED =
 export class ModuleFederation {
   options: Options;
   hooks = new PluginSystem({
+    dispose: new AsyncHook<[{ origin: ModuleFederation }]>(),
     beforeInit: new SyncWaterfallHook<{
       userOptions: UserOptions;
       options: Options;
@@ -397,7 +398,7 @@ export class ModuleFederation {
     id: string,
     options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
-    return this.remoteHandler.loadRemote(id, options);
+    return this.remoteHandler.loadRemote<T>(id, options);
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
@@ -466,6 +467,25 @@ export class ModuleFederation {
   }
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
     return this.remoteHandler.registerRemotes(remotes, options);
+  }
+
+  /** Caller coordinates application work; updates are serialized per instance. */
+  updateRemotes(remotes: Remote[]): Promise<void> {
+    return this.remoteHandler.updateRemotes(remotes);
+  }
+
+  removeRemote(remote: Remote | string): Promise<void> {
+    let targetRemote: Remote | undefined =
+      typeof remote === 'string' ? undefined : remote;
+    if (typeof remote === 'string') {
+      targetRemote = this.options.remotes.find(
+        (item) => item.name === remote || item.alias === remote,
+      );
+      targetRemote ||= { name: remote, alias: remote } as Remote;
+    }
+    if (!targetRemote) return Promise.resolve();
+
+    return this.remoteHandler.removeRemote(targetRemote);
   }
 
   registerShared(shared: UserOptions['shared']) {

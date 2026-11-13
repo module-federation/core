@@ -1,5 +1,11 @@
 import { describe, it, rs, expect } from '@rstest/core';
-import { init, loadRemote, loadShare, loadShareSync } from '../src/index';
+import {
+  init,
+  loadRemote,
+  loadShare,
+  loadShareSync,
+  ModuleFederation,
+} from '../src/index';
 import { getInfoWithoutType } from '@module-federation/runtime-core';
 
 type IsAssignable<Actual, Expected> = [Actual] extends [Expected]
@@ -9,7 +15,14 @@ type ExpectFalse<T extends false> = T;
 
 describe('global', () => {
   it('inject mode', () => {
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = rs.fn();
+    const construct = rs.fn();
+    class DebugModuleFederation extends ModuleFederation {
+      constructor(...args: ConstructorParameters<typeof ModuleFederation>) {
+        super(...args);
+        construct(...args);
+      }
+    }
+    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = DebugModuleFederation;
     const injectArgs = {
       name: '@federation/inject-mode',
       remotes: [],
@@ -18,7 +31,7 @@ describe('global', () => {
     expect(GM.constructor).toBe(
       globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__,
     );
-    expect(globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__).toBeCalledWith({
+    expect(construct).toBeCalledWith({
       ...injectArgs,
       id: '',
     });
@@ -88,4 +101,22 @@ describe('global', () => {
       void _rejectsNeverOnlyFactory;
     });
   });
+});
+
+it('releases only the matching default reference when disposal is notified', async () => {
+  const { getInstance, ModuleFederation } = await import('../src/index');
+  const helpers = (await import('../src/helpers')).default;
+  globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = ModuleFederation;
+  const first = init({ name: 'runtime-dispose-default', remotes: [] });
+  expect(getInstance()).toBe(first);
+  await helpers.dispose.notifyDispose(first);
+  expect(getInstance()).toBeNull();
+  // Notification leaves ownership cleanup to its caller.
+  expect(globalThis.__FEDERATION__.__INSTANCES__).toContain(first);
+  const second = init({ name: 'runtime-dispose-next', remotes: [] });
+  expect(getInstance()).toBe(second);
+  await helpers.dispose.notifyDispose(first);
+  expect(getInstance()).toBe(second);
+  await helpers.dispose.notifyDispose(second);
+  expect(getInstance()).toBeNull();
 });

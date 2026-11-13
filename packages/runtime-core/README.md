@@ -8,6 +8,64 @@
 
 See [https://module-federation.io/guide/runtime/index.html](https://module-federation.io/guide/runtime/index.html) for details.
 
+## Explicit SSR remote updates
+
+`instance.updateRemotes(remotes)` asynchronously replaces the named registrations
+and preserves registrations omitted from the batch. It captures and validates
+the input, serializes updates on the instance, and awaits the `removeRemote`
+hooks before registering replacements. An explicit update of the same manifest
+URL also clears its cached snapshot. Cleanup failures reject the returned promise.
+The batch is preflighted, but cleanup is not transactional across multiple remotes.
+
+`instance.removeRemote(nameOrAlias)` awaits the same cleanup hooks.
+Whole-instance teardown is optional Node functionality. Install
+`@module-federation/node/runtimePlugin`, then call `destroyNodeInstance(instance)`
+from `@module-federation/node/lifecycle`. The Node plugin closes admission,
+waits for its tracked runtime operations, and releases owned resources. Cleanup
+failure keeps the instance closed and permits a later cleanup retry. Shared
+factories still used by another consumer are retained.
+
+Core exposes a `dispose({ origin })` hook for resource owners. The lifecycle
+owner calls `helpers.dispose.notifyDispose(instance)` after draining work and
+before removing the instance's remaining roots. Notification waits for all
+listeners and reports their failures together. It does not close the instance,
+remove registrations, or perform environment-specific cleanup.
+
+The application must stop admission and drain its SSR requests and producer work
+before updating or destroying a runtime. These APIs do not detect deployments,
+watch a producer, reload browser sessions, or coordinate independent MF instances.
+Bare `updateRemotes` or bundler `clearCache` calls do not preserve business requests
+that the caller has not drained. Invalidation can reject pending chunk loads as
+stale, preventing old asynchronous work from restoring the retired cache.
+Bundled SSR imports additionally require the bundler cache adapter and compatible
+compiler dependency metadata. Updating registrations alone cannot invalidate
+bundled application closures or replace references retained by application code.
+
+`registerRemotes(remotes, { force: true })` retains its synchronous legacy
+behavior. It does not await the new asynchronous cleanup hooks. Applications that
+coordinate SSR invalidation should use and await `updateRemotes`.
+
+`helpers.global.getRemoteFederationInstance(remoteInfo, instances?)` resolves a
+provider using the same build identity as remote removal. `remoteInfo.name` is
+the producer name, while `alias` is only the consumer's import name. With
+`buildVersion`, the helper matches `name:buildVersion` against `instance.options.id`
+and never falls back to a same-name instance from another build. Without a build
+version it accepts a name match. It returns `undefined` when no instance
+matches. Registering a duplicate name and build ID replaces the older registry
+entry. The optional instance
+list defaults to the current federation registry.
+
+Runtime `init` also respects an explicit instance ID or the compiler's build ID.
+Pure runtime consumers without either ID retain name/version-based reuse.
+Shared `from` and `useIn` values remain logical names. Destroying one of several
+same-name instances conservatively retains that shared ownership until the last
+same-name instance is released, while removing the selected instance's roots.
+
+Removing a remote releases only the current host's reference when another host
+still consumes that provider or container. The provider's instance, shared
+factories and execution cache remain available to that host until its last
+consumer releases it. The Node plugin and bundler adapter preserve these ownership relationships.
+
 ## License
 
 `@module-federation/runtime` is [MIT licensed](https://github.com/module-federation/core/blob/main/packages/runtime/LICENSE).

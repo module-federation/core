@@ -3,6 +3,8 @@ import { UpdateMode } from '../constant';
 import WebSocket from 'isomorphic-ws';
 import { parse } from 'url';
 import { Publisher } from '../Publisher';
+import { BuildBroker } from './BuildBroker';
+import { DEV_BUILD_CHANNEL, type DevBuildMessage } from '../buildProtocol';
 import { getIdentifier, fileLog, error } from '../utils';
 import { ReloadWebClientAPI } from '../message/API';
 import {
@@ -97,6 +99,7 @@ export class Broker {
   private _secureWebSocketServer?: WebSocket.Server;
   private _tmpSubscriberShelter: TmpSubscriberShelter = new Map();
   private _scheduleJob: ScheduledTask | null = null;
+  private _buildBroker = new BuildBroker();
 
   constructor() {
     this._setSchedule();
@@ -106,7 +109,7 @@ export class Broker {
   }
 
   get hasPublishers(): boolean {
-    return Boolean(this._publisherMap.size);
+    return Boolean(this._publisherMap.size) || this._buildBroker.hasClients;
   }
 
   private async _startWsServer(): Promise<void> {
@@ -119,7 +122,14 @@ export class Broker {
         ws.on('message', (message) => {
           try {
             const text = message.toString();
-            const action = JSON.parse(text) as Action;
+            const action = JSON.parse(text) as Action & { type?: string };
+            if (action?.type === DEV_BUILD_CHANNEL) {
+              this._buildBroker.handle(
+                action as unknown as DevBuildMessage,
+                ws,
+              );
+              return;
+            }
             fileLog(`${action?.kind} action received `, 'Broker', 'info');
             this._takeAction(action, ws);
           } catch (error) {
@@ -128,6 +138,13 @@ export class Broker {
         });
         ws.on('error', (e: any) => {
           fileLog(`parse action message error: ${e}`, 'Broker', 'error');
+        });
+        ws.on('close', () => {
+          // Run after build subscriptions have removed their socket ownership.
+          queueMicrotask(() => {
+            if (!this.hasPublishers && !this._webSocketServer?.clients.size)
+              this.exit();
+          });
         });
       } else {
         ws.send('Invalid CONNECT ID.');

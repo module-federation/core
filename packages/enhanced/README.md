@@ -39,6 +39,16 @@ See [https://module-federation.io/guide/build-plugins/plugins.html](https://modu
 
 The name of the container.
 
+### Manifest build versions
+
+The manifest's `metaData.buildInfo.buildVersion` defaults to a digest of the completed build's assets. This detects content changes with fixed filenames and an unchanged package version, including production builds served locally. Transient HMR files and the manifest/stats files themselves are excluded. An unchanged output keeps the same version.
+
+Set `MF_BUILD_VERSION` in the build environment to supply an explicit release version, or assign `stats.metaData.buildInfo.buildVersion` in `manifest.additionalData`. Explicit versions must identify the assets that will be served.
+
+The Rsbuild SSR integration combines the browser and Node build versions when merging their manifests. An unchanged compiler can contribute its previous output. Framework integrations must wait for successful compilation and server resource preparation before advertising the merged manifest.
+
+Manifest versions do not need to match runtime instance IDs. Node execution graphs receive independent runtime instances, and container initialization records the actual provider for cache cleanup and shared ownership.
+
 ### exposes
 
 - Type: `Exposes`

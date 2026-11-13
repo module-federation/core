@@ -63,6 +63,16 @@
     "./src/*": {
       "import": "./dist/src/*.mjs",
       "require": "./dist/src/*.js"
+    },
+    "./lifecycle": {
+      "import": {
+        "types": "./dist/src/lifecycle.d.mts",
+        "default": "./dist/src/lifecycle.mjs"
+      },
+      "require": {
+        "types": "./dist/src/lifecycle.d.ts",
+        "default": "./dist/src/lifecycle.js"
+      }
     }
   },
   "typesVersions": {
@@ -81,6 +91,9 @@
       ],
       "universe-entry-chunk-tracker-plugin": [
         "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.d.ts"
+      ],
+      "lifecycle": [
+        "./dist/src/lifecycle.d.ts"
       ]
     }
   },
@@ -113,7 +126,8 @@
     "tapable": "2.3.0",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "@module-federation/runtime": "workspace:*"
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/webpack-bundler-runtime": "workspace:*"
   },
   "peerDependencies": {
     "webpack": "^5.40.0"
@@ -129,7 +143,7 @@
   "scripts": {
     "build": "tsdown --config tsdown.config.mts",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.js\" \"**/*.ts\"",
-    "test": "pnpm exec jest --config jest.config.js --passWithNoTests",
+    "test": "pnpm exec jest --config jest.config.js --passWithNoTests && pnpm exec rstest",
     "pre-release": "pnpm run test && pnpm run build && rm -f ./dist/package.json"
   }
 }
