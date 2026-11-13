@@ -97,12 +97,18 @@ export type ConsumesLoadingData = WithStatus<{
 export type RemotesLoadingData = WithStatus<{
   chunkMapping?: Record<string, Array<ModuleId>>;
   moduleIdToRemoteDataMapping?: ModuleIdToRemoteDataMapping;
-  remoteKeyToRemoteModuleIds?: Record<string, Array<ModuleId>>;
-  remoteKeyToExternalModuleIds?: Record<string, Array<ModuleId>>;
-  remoteModuleIdToConsumerModuleIds?: Record<ModuleId, Array<ModuleId>>;
-  consumerModuleIdToParentModuleIds?: Record<ModuleId, Array<ModuleId>>;
-  remoteKeyToChunkIds?: Record<string, Array<ModuleId>>;
 }>;
+
+/** Native bundler ownership. The adapter contributes only its loader state. */
+export interface NativeRemoteCache {
+  clear(
+    remoteKeys: string[],
+    loading: { pending: Promise<unknown>[]; reset: () => void },
+  ): Promise<void>;
+  wait(remoteKeys: string[]): Promise<unknown> | undefined;
+  waitForChunk(chunkId: ModuleId): Promise<unknown> | undefined;
+  hasPending(): boolean;
+}
 
 export type InitializeSharingData = WithStatus<{
   scopeToSharingDataMapping: {
@@ -137,18 +143,7 @@ export interface WebpackRequire {
   consumesLoadingData?: ConsumesLoadingData;
   remotesLoadingData?: RemotesLoadingData;
   initializeSharingData?: InitializeSharingData;
-  chunkCacheControls?: Record<
-    string,
-    {
-      clear?: (chunkIds: ModuleId[]) => unknown;
-      invalidate?: (chunkIds: ModuleId[]) => unknown;
-      wait?: (chunkIds: ModuleId[]) => Promise<unknown>;
-      snapshot?: (chunkIds: ModuleId[]) => unknown;
-      restore?: (states: unknown) => void;
-      getGeneration?: (chunkId: ModuleId) => number;
-      restoreGenerations?: (generations: Record<string, number>) => void;
-    }
-  >;
+  remoteCache?: NativeRemoteCache;
 }
 
 interface ShareInfo {
@@ -276,16 +271,10 @@ export interface Federation {
     }: {
       webpackRequire: WebpackRequire;
       libraryType: string;
-    }) => void;
+    }) => runtime.ModuleFederation;
     getSharedFallbackGetter: (
       options: GetSharedFallbackGetterOptions,
     ) => SharedGetter;
-    clearCache: (
-      options: ClearCacheRuntimeOptions,
-    ) => Promise<ClearCacheResult>;
-    installClearCache: (
-      options: InstallClearCacheOptions,
-    ) => (() => void) | undefined;
   };
   clearCache?: (options: ClearCacheOptions) => Promise<ClearCacheResult>;
   /** Detach this bundler after draining application work. Idempotent. */

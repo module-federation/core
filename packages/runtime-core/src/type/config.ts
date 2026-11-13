@@ -177,7 +177,4 @@ export type RemoteEntryExports = {
     initScope?: InitScope,
     remoteEntryInitOPtions?: RemoteEntryInitOptions,
   ) => void | Promise<void>;
-  __webpack_clear_cache__?: () => void;
-  /** Required for shared-preserving cleanup; clears caches outside shared dependency closures. */
-  __webpack_clear_exposed_cache__?: () => void;
 };

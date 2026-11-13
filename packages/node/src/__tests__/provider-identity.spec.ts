@@ -1,13 +1,17 @@
 import { describe, expect, it, rs } from '@rstest/core';
-import { ModuleFederation, Module, helpers } from '../src';
-import { CurrentGlobal, setGlobalFederationInstance } from '../src/global';
-import type { RemoteInfo } from '../src/type';
+import { ModuleFederation } from './runtimeTestUtils';
+import { Module, helpers } from '../../../runtime-core/src';
+import {
+  CurrentGlobal,
+  setGlobalFederationInstance,
+} from '../../../runtime-core/src/global';
+import type { RemoteInfo } from '../../../runtime-core/src/type';
 
 const info = (buildVersion?: string): RemoteInfo => ({
   name: 'registered-catalog',
   providerName: 'catalog',
   buildVersion,
-  entry: `https://example.test/${buildVersion || 'runtime'}/entry.js`,
+  entry: 'https://example.test/fixed/entry.js',
   entryGlobalName: 'catalog-container',
   type: 'global',
   shareScope: 'default',
@@ -118,6 +122,15 @@ describe('provider build identity', () => {
       const second = provider('2');
       const a = consumer('1');
       const b = consumer('2');
+      const loading = CurrentGlobal.__GLOBAL_LOADING_REMOTE_ENTRY__;
+      const firstKey = helpers.utils.getRemoteEntryUniqueKey(info('1'));
+      const secondKey = helpers.utils.getRemoteEntryUniqueKey(info('2'));
+      const legacyKey = `${info('1').name}:${info('1').entry}`;
+      const secondLoad = Promise.resolve(b.container);
+      const legacyLoad = Promise.resolve({});
+      loading[firstKey] = Promise.resolve(a.container);
+      loading[secondKey] = secondLoad;
+      loading[legacyKey] = legacyLoad;
       const shared = second.shareScopeMap.default.library['2'];
       const useIn = [...shared.useIn];
       const snapshot = {
@@ -145,6 +158,9 @@ describe('provider build identity', () => {
         );
         expect((globalThis as any)['catalog-container']).toBe(b.container);
         expect(b.container.__webpack_clear_cache__).not.toHaveBeenCalled();
+        expect(loading[firstKey]).toBeUndefined();
+        expect(loading[secondKey]).toBe(secondLoad);
+        expect(loading[legacyKey]).toBe(legacyLoad);
         await expect(
           b.host.loadRemote('registered-catalog/Button'),
         ).resolves.toEqual({ build: '2' });

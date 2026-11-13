@@ -3,7 +3,6 @@ import {
   resetFederationGlobalInfo,
   setGlobalFederationInstance,
   getRemoteFederationInstance,
-  hasRemoteModuleConsumers,
   getGlobalFederationConstructor,
   setGlobalFederationConstructor,
   getInfoWithoutType,
@@ -19,11 +18,7 @@ import {
   setPreloaded,
   Global,
 } from './global';
-import {
-  getRegisteredShare,
-  getGlobalShareScope,
-  getRemoteSharedOwnership,
-} from './utils/share';
+import { getRegisteredShare, getGlobalShareScope } from './utils/share';
 import {
   getRemoteInfo,
   getRemoteEntryUniqueKey,
@@ -33,12 +28,10 @@ import { preloadAssets } from './utils/preload';
 interface IShareUtils {
   getRegisteredShare: typeof getRegisteredShare;
   getGlobalShareScope: typeof getGlobalShareScope;
-  getRemoteSharedOwnership: typeof getRemoteSharedOwnership;
 }
 const ShareUtils: IShareUtils = {
   getRegisteredShare,
   getGlobalShareScope,
-  getRemoteSharedOwnership,
 };
 
 interface IGlobalUtils {
@@ -47,7 +40,6 @@ interface IGlobalUtils {
   resetFederationGlobalInfo: typeof resetFederationGlobalInfo;
   setGlobalFederationInstance: typeof setGlobalFederationInstance;
   getRemoteFederationInstance: typeof getRemoteFederationInstance;
-  hasRemoteModuleConsumers: typeof hasRemoteModuleConsumers;
   getGlobalFederationConstructor: typeof getGlobalFederationConstructor;
   setGlobalFederationConstructor: typeof setGlobalFederationConstructor;
   getInfoWithoutType: typeof getInfoWithoutType;
@@ -69,7 +61,6 @@ const GlobalUtils: IGlobalUtils = {
   resetFederationGlobalInfo,
   setGlobalFederationInstance,
   getRemoteFederationInstance,
-  hasRemoteModuleConsumers,
   getGlobalFederationConstructor,
   setGlobalFederationConstructor,
   getInfoWithoutType,

@@ -5,7 +5,6 @@ import {
 } from '@module-federation/runtime';
 import { ShareArgs } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
-import { createClearCacheRuntimePlugin, installClearCache } from './clearCache';
 
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
 
@@ -21,11 +20,6 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
   if (!initOptions) {
     throw new Error('initOptions is required!');
   }
-
-  // Multiple federation plugins can initialize the same bundler runtime in
-  // sequence. Release its previous binding before choosing the next instance.
-  // The disposer rejects replacement while cache cleanup is still pending.
-  webpackRequire.federation.disposeClearCache?.();
 
   if (USE_SHARED) {
     const treeShakingSharePlugin: () => ModuleFederationRuntimePlugin =
@@ -141,10 +135,5 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
     const plugins = (initOptions.plugins ||= []);
     plugins.push(treeShakingSharePlugin());
   }
-  const plugins = (initOptions.plugins ||= []);
-  plugins.push(createClearCacheRuntimePlugin());
-
-  const instance = runtime!.init(initOptions);
-  installClearCache({ webpackRequire, instance });
-  return instance;
+  return runtime!.init(initOptions);
 }

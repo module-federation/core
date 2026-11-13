@@ -46,7 +46,6 @@ import { DisabledSharedHandler } from './shared/disabled';
 import { RemoteHandler } from './remote';
 import { DisabledRemoteHandler } from './remote/disabled';
 import { formatShareConfigs } from './utils/share';
-import { disposeInstance } from './utils/dispose';
 
 // Declare the global constant that will be defined by DefinePlugin
 // Default to true if not defined (e.g., when runtime-core is used outside of webpack)
@@ -77,43 +76,28 @@ export class ModuleFederation {
   options: Options;
   private disposal?: Promise<void>;
   private closed = false;
-  private pending = new Set<Promise<unknown>>();
   get disposed(): boolean {
     return this.closed;
   }
   private assertActive(): void {
     if (this.closed) throw new Error(`MF instance ${this.name} is disposed`);
   }
-  private track<T>(operation: () => Promise<T>): Promise<T> {
-    this.assertActive();
-    const promise = operation();
-    this.pending.add(promise);
-    void promise.then(
-      () => this.pending.delete(promise),
-      () => this.pending.delete(promise),
-    );
-    return promise;
-  }
   /** Irreversible instance teardown. The application must drain its own work first. */
   destroy(): Promise<void> {
     if (this.disposal) return this.disposal;
     this.closed = true;
     this.disposal = (async () => {
-      let timer: ReturnType<typeof setTimeout> | undefined;
-      try {
-        await Promise.race([
-          Promise.allSettled([...this.pending]),
-          new Promise<never>((_, reject) => {
-            timer = setTimeout(
-              () => reject(new Error('MF instance disposal timed out')),
-              15000,
-            );
-          }),
-        ]);
-      } finally {
-        clearTimeout(timer);
-      }
-      await disposeInstance(this);
+      const results = await Promise.allSettled(
+        [...this.hooks.lifecycle.dispose.listeners].map((listener) =>
+          Promise.resolve().then(() => listener({ origin: this })),
+        ),
+      );
+      const failed = results.filter((result) => result.status === 'rejected');
+      if (failed.length)
+        throw new AggregateError(
+          failed.map((result) => result.reason),
+          'MF disposal failed',
+        );
     })().catch((error) => {
       this.disposal = undefined;
       throw error;
@@ -163,8 +147,6 @@ export class ModuleFederation {
   version: string = __VERSION__;
   name: string;
   moduleCache: Map<string, Module> = new Map();
-  /** Removed providers whose shared factories still belong to this consumer. */
-  retainedProviders = new Set<ModuleFederation>();
   snapshotHandler: SnapshotHandler;
   sharedHandler: SharedHandler;
   remoteHandler: RemoteHandler;
@@ -407,9 +389,8 @@ export class ModuleFederation {
     pkgName: string,
     extraOptions?: LoadShareExtraOptions,
   ): Promise<false | (() => T | undefined)> {
-    return this.track(() =>
-      this.sharedHandler.loadShare(pkgName, extraOptions),
-    );
+    this.assertActive();
+    return this.sharedHandler.loadShare(pkgName, extraOptions);
   }
 
   // The lib function will only be available if the shared set by eager or runtime init is set or the shared is successfully loaded.
@@ -450,12 +431,14 @@ export class ModuleFederation {
     id: string,
     options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
-    return this.track(() => this.remoteHandler.loadRemote<T>(id, options));
+    this.assertActive();
+    return this.remoteHandler.loadRemote<T>(id, options);
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
-    return this.track(() => this.remoteHandler.preloadRemote(preloadOptions));
+    this.assertActive();
+    return this.remoteHandler.preloadRemote(preloadOptions);
   }
 
   initShareScopeMap(
@@ -525,7 +508,8 @@ export class ModuleFederation {
 
   /** Caller coordinates application work; updates are serialized per instance. */
   updateRemotes(remotes: Remote[]): Promise<void> {
-    return this.track(() => this.remoteHandler.updateRemotes(remotes));
+    this.assertActive();
+    return this.remoteHandler.updateRemotes(remotes);
   }
 
   removeRemote(remote: Remote | string): Promise<void> {
@@ -540,7 +524,7 @@ export class ModuleFederation {
     }
     if (!targetRemote) return Promise.resolve();
 
-    return this.track(() => this.remoteHandler.removeRemote(targetRemote!));
+    return this.remoteHandler.removeRemote(targetRemote);
   }
 
   registerShared(shared: UserOptions['shared']) {

@@ -12,9 +12,8 @@ Module._extensions['.ts'] = (module, filename) =>
     }).code,
     filename,
   );
-const { StatsPlugin } = require(
-  path.resolve(__dirname, '../../src/StatsPlugin.ts'),
-);
+const { StatsPlugin } = require('../../src/StatsPlugin.ts');
+const { getFederationBuildIdentifier } = require('../../src/buildVersion.ts');
 const [bundler, directory] = process.argv.slice(2);
 const loaded = require(bundler === 'webpack' ? 'webpack' : '@rspack/core');
 const build = bundler === 'webpack' ? loaded : loaded.rspack;
@@ -23,9 +22,14 @@ fs.writeFileSync(
   path.join(directory, 'package.json'),
   '{"name":"provider","version":"1.0.0"}',
 );
-fs.writeFileSync(path.join(directory, 'entry.js'), 'module.exports = "first";');
+const writeEntry = (value) =>
+  fs.writeFileSync(
+    path.join(directory, 'entry.js'),
+    `module.exports = { value: ${JSON.stringify(value)}, id: FEDERATION_BUILD_IDENTIFIER };`,
+  );
+writeEntry('first');
 let custom = false;
-const compilerOptions = {
+const options = {
   mode: 'development',
   context: directory,
   target: 'node',
@@ -39,6 +43,16 @@ const compilerOptions = {
     library: { type: 'commonjs2' },
   },
   plugins: [
+    {
+      apply(compiler) {
+        new compiler.webpack.DefinePlugin({
+          FEDERATION_BUILD_IDENTIFIER: getFederationBuildIdentifier(
+            compiler,
+            'provider',
+          ),
+        }).apply(compiler);
+      },
+    },
     new StatsPlugin(
       {
         name: 'provider',
@@ -54,12 +68,10 @@ const compilerOptions = {
     ),
   ],
 };
-const compiler = build(compilerOptions);
 const buildInfo = () =>
   JSON.parse(
     fs.readFileSync(path.join(directory, 'dist/mf-manifest.json'), 'utf8'),
   ).metaData.buildInfo;
-const version = () => buildInfo().buildVersion;
 const output = () => {
   const context = { module: { exports: undefined } };
   vm.runInNewContext(
@@ -68,13 +80,31 @@ const output = () => {
   );
   return context.module.exports;
 };
-(async () => {
-  let watcher;
+async function productionBuild() {
+  const compiler = build({ ...options, mode: 'production' });
   try {
-    const versions = [];
-    const revisions = [];
-    const outputs = [];
-    let explicit;
+    await new Promise((resolve, reject) =>
+      compiler.run((error, stats) =>
+        error || stats.hasErrors()
+          ? reject(error || Error(stats.toString({ all: false, errors: true })))
+          : resolve(),
+      ),
+    );
+    const info = buildInfo();
+    if (!custom && output().id !== `provider:${info.buildVersion}`)
+      throw Error('Production manifest and container identity differ');
+    return info;
+  } finally {
+    await new Promise((resolve) => compiler.close(resolve));
+  }
+}
+(async () => {
+  const compiler = build(options);
+  let watcher;
+  const versions = [];
+  const identities = [];
+  const outputs = [];
+  try {
     await new Promise((resolve, reject) => {
       let phase = 0;
       const timer = setTimeout(
@@ -91,79 +121,38 @@ const output = () => {
             );
             return;
           }
-          if (phase < 3) {
-            versions.push(version());
-            revisions.push(buildInfo().devRevision);
-            outputs.push(output());
-          }
-          switch (phase++) {
-            case 0:
-              watcher.invalidate();
-              break;
-            case 1:
-              fs.writeFileSync(
-                path.join(directory, 'entry.js'),
-                'module.exports = "second";',
-              );
-              break;
-            case 2:
-              process.env.MF_BUILD_VERSION = 'release-42';
-              watcher.invalidate();
-              break;
-            case 3:
-              explicit = version();
-              custom = true;
-              watcher.invalidate();
-              break;
-            default:
-              clearTimeout(timer);
-              resolve();
+          versions.push(buildInfo().buildVersion);
+          const result = output();
+          identities.push(result.id);
+          outputs.push(result.value);
+          if (phase++ === 0) watcher.invalidate();
+          else if (phase === 2) writeEntry('second');
+          else {
+            clearTimeout(timer);
+            resolve();
           }
         },
       );
     });
-    const customVersion = version();
-    await new Promise((resolve) => watcher.close(resolve));
-    watcher = undefined;
-    custom = false;
-    delete process.env.MF_BUILD_VERSION;
-    const productionCompiler = build({
-      ...compilerOptions,
-      mode: 'production',
-      plugins: [
-        new StatsPlugin(
-          { name: 'provider' },
-          { bundler, pluginVersion: 'test' },
-        ),
-      ],
-    });
-    try {
-      await new Promise((resolve, reject) =>
-        productionCompiler.run((error, stats) =>
-          error || stats.hasErrors()
-            ? reject(
-                error || Error(stats.toString({ all: false, errors: true })),
-              )
-            : resolve(),
-        ),
-      );
-      console.log(
-        JSON.stringify({
-          versions,
-          revisions,
-          outputs,
-          explicit,
-          custom: customVersion,
-          production: buildInfo(),
-        }),
-      );
-    } finally {
-      await new Promise((resolve) => productionCompiler.close(resolve));
-    }
   } finally {
     if (watcher) await new Promise((resolve) => watcher.close(resolve));
     await new Promise((resolve) => compiler.close(resolve));
   }
+  const production = await productionBuild();
+  process.env.MF_BUILD_VERSION = 'release-42';
+  const explicit = (await productionBuild()).buildVersion;
+  custom = true;
+  const customVersion = (await productionBuild()).buildVersion;
+  console.log(
+    JSON.stringify({
+      versions,
+      identities,
+      outputs,
+      production,
+      explicit,
+      custom: customVersion,
+    }),
+  );
 })().catch((error) => {
   console.error(error);
   process.exitCode = 1;

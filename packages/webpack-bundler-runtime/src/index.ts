@@ -8,7 +8,6 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 import { init } from './init';
 import { getSharedFallbackGetter } from './getSharedFallbackGetter';
-import { clearCache, installClearCache } from './clearCache';
 
 declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
@@ -36,8 +35,6 @@ const bundlerRuntime = {
   initContainerEntry: USE_EXPOSES ? initContainerEntry : undefined,
   init,
   getSharedFallbackGetter: USE_SHARED ? getSharedFallbackGetter : undefined,
-  clearCache,
-  installClearCache,
 } as NonNullable<Federation['bundlerRuntime']>;
 
 const federation: Federation = {

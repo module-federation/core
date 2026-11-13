@@ -360,6 +360,30 @@ interface RemoteWithVersion {
   </Tab>
 </Tabs>
 
+## 显式远端替换和实例销毁
+
+通过 `createInstance` 或 `getInstance` 获取实例后，可以调用：
+
+{/* prettier-ignore */}
+```ts
+await mf.removeRemote('provider')
+await mf.updateRemotes([{ name: 'provider', entry: nextManifestUrl }])
+await mf.destroy()
+```
+
+`removeRemote` 等待清理 hook 完成后删除注册。
+`updateRemotes` 按实例串行替换远端，等待旧远端移除后再注册新入口。
+清理失败时保留原注册。`destroy` 关闭实例并等待所有 disposal hook，
+全部结束后统一报告失败。
+
+SSR 应用需安装 `@module-federation/node/runtimePlugin`，
+由它负责 MF 在途工作、容器和共享生产者清理，以及 host snapshot 隔离。
+编译远端的缓存失效还需要兼容的原生 bundler API。
+框架在替换或销毁前负责停止接收新请求并排空应用工作。
+
+`registerRemotes(remotes, { force: true })` 仍是同步 API，
+不会等待异步移除 hook。
+
 ## registerPlugins
 
 ```typescript

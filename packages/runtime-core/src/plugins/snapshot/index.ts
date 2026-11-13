@@ -35,7 +35,11 @@ export function assignRemoteInfo(
   remoteInfo.entryGlobalName = remoteEntryInfo.globalName;
   remoteInfo.entry = entryUrl;
   remoteInfo.version = remoteSnapshot.version;
-  remoteInfo.buildVersion = remoteSnapshot.buildVersion;
+  remoteInfo.buildVersion =
+    (!isBrowserEnvValue &&
+      'ssrBuildVersion' in remoteSnapshot &&
+      remoteSnapshot.ssrBuildVersion) ||
+    remoteSnapshot.buildVersion;
 }
 
 export function snapshotPlugin(): ModuleFederationRuntimePlugin {

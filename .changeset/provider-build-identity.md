@@ -2,16 +2,15 @@
 '@module-federation/runtime-core': patch
 '@module-federation/runtime': patch
 '@module-federation/webpack-bundler-runtime': patch
+'@module-federation/node': patch
 ---
 
 Resolve compiled federation instances by their build identity and keep other same-name builds alive during removal or disposal. Expose the shared provider resolver through the existing runtime helpers. Pure runtime initialization continues to support name and version reuse when no build or explicit instance ID is supplied.
 
 Reuse the runtime identified by the provider name and build version, and remove duplicate registry entries for that identity.
 
-Share the provider ownership calculation between Core remote removal and bundler cache cleanup through the runtime helpers, preserving shared records still owned by another build.
+Keep SSR provider ownership in the Node runtime plugin, preserving shared records, runtimes and containers still used by another host.
 
-Retain provider runtimes and containers while another host consumes them, sharing the live consumer check between Core and bundler cleanup.
-
-Keep mutable host snapshot selections on their owning runtime instance. Explicit build IDs use exact snapshot keys, and injected snapshots are cloned as initial templates so another same-name host cannot inherit runtime-added remote selections.
+The Node plugin keeps mutable host snapshot selections on their owning runtime instance. Explicit build IDs use exact snapshot keys, and injected snapshots are cloned as initial templates so another same-name host cannot inherit runtime-added remote selections. The default snapshot plugin still publishes global snapshots.
 
 Detach the previous cache adapter when multiple federation plugins reinitialize one bundler, preserving other live bindings and rejecting replacement during pending cleanup.

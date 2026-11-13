@@ -360,6 +360,33 @@ When `force: true` is set, the newly registered modules will overwrite already-r
   </Tab>
 </Tabs>
 
+## Explicit remote replacement and disposal
+
+The following methods are available on the instance returned by `createInstance`
+or `getInstance`:
+
+{/* prettier-ignore */}
+```ts
+await mf.removeRemote('provider')
+await mf.updateRemotes([{ name: 'provider', entry: nextManifestUrl }])
+await mf.destroy()
+```
+
+`removeRemote` waits for removal hooks before deleting the registration.
+`updateRemotes` serializes replacements for the instance and waits for each
+removal before registering its replacement. A failed removal leaves the existing
+registration available. `destroy` closes the instance and waits for disposal
+hooks, reporting failures after all hooks finish.
+
+For SSR applications, install `@module-federation/node/runtimePlugin`. It owns
+pending MF work, container and shared-provider cleanup, and per-host snapshot
+isolation. Compiled remote cache invalidation additionally requires a compatible
+native bundler API. The framework must stop admission and drain application work
+before replacement or disposal.
+
+`registerRemotes(remotes, { force: true })` remains synchronous. It does not wait
+for asynchronous removal hooks.
+
 ## registerPlugins
 
 ```typescript

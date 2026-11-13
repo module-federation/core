@@ -22,15 +22,23 @@ __webpack_require__.f.consumes = __webpack_require__.federation.remotes(options)
 
 ## SSR cache invalidation
 
-The initialized federation runtime exposes `clearCache({ name })` on
-`__webpack_require__.federation`. Its cache adapter connects asynchronous runtime
-remote removal to each attached bundler. Detach an application generation with
-`disposeClearCache()` only after its work and cache cleanup have finished.
+`@module-federation/node/runtimePlugin` opts into the separate `clear-cache`
+entry. The default bundler runtime does not import this adapter. On initialization,
+the adapter exposes `clearCache({ name })` on `__webpack_require__.federation`
+and connects asynchronous MF remote removal to every attached bundler.
+Detach an application generation with `disposeClearCache()` after its work and
+cache cleanup have finished.
 
-The compiler must provide reverse remote-consumer and parent-module metadata,
-Node chunk cache controls, and reloadable entry exports. Compatible Rspack builds
-provide the native graph. Framework entry ownership and resource publication
-remain responsibilities of the framework integration.
+The adapter translates MF remote names and aliases, passes pending loader promises,
+and resets its own loading records. Rspack's native `remoteCache` owns reverse
+dependency traversal, module factories, module caches, chunk state, generations,
+and rollback. MF instance, container, shared-provider and snapshot ownership
+belong to the Node runtime plugin. Framework request draining and resource
+publication belong to the framework integration.
+
+Compiled remote invalidation requires native `remoteCache` support. Unsupported
+bundlers reject the request. Pure-runtime Node hosts without compiled remotes
+can use the Node lifecycle plugin without this native API.
 
 Applications must stop admission and drain business requests and producer work
 before invalidation. A bare `clearCache` call invalidates pending chunk generations

@@ -29,8 +29,6 @@ export interface ResourceInfo {
 
 export interface StatsBuildInfo {
   buildVersion: string;
-  /** Monotonic development compilation marker, independent of release identity. */
-  devRevision?: string;
   buildName: string;
   hash?: string;
 
@@ -52,7 +50,7 @@ export interface BasicStatsMetaData {
   globalName: string;
   buildInfo: StatsBuildInfo;
   remoteEntry: ResourceInfo;
-  ssrRemoteEntry?: ResourceInfo;
+  ssrRemoteEntry?: ResourceInfo & { buildVersion?: string };
   /** Absolute HTTP service base, independent of the static asset publicPath. */
   serviceBaseUrl?: string;
   types?: MetaDataTypes;

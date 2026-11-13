@@ -1,9 +1,14 @@
-import type { ModuleFederation } from '../core';
-import { CurrentGlobal, Global, releaseHostSnapshotInfo } from '../global';
+import helpers from '@module-federation/runtime/helpers';
+import type { NodeFederation } from './runtimeLifecycle';
 import { pruneRetiredShareScopes, retireShareScope } from './share';
+const CurrentGlobal = globalThis;
+const { Global } = helpers.global;
 
 /** Release instance-owned roots. Shared values used by another host stay alive. */
-export async function disposeInstance(host: ModuleFederation): Promise<void> {
+export async function disposeInstance(
+  host: NodeFederation,
+  disposeHooks: () => Promise<void>,
+): Promise<void> {
   const globals = new Set([
     CurrentGlobal.__FEDERATION__,
     Global.__FEDERATION__,
@@ -46,18 +51,7 @@ export async function disposeInstance(host: ModuleFederation): Promise<void> {
     // Another consumer owns this container too; only drop our local reference.
     if (!usedElsewhere) await host.remoteHandler.removeRemote(remote);
   }
-  // Every listener must run; a false result must not skip another owner's cleanup.
-  const results = await Promise.allSettled(
-    [...host.hooks.lifecycle.dispose.listeners].map((listener) =>
-      Promise.resolve().then(() => listener({ origin: host })),
-    ),
-  );
-  const failed = results.filter((result) => result.status === 'rejected');
-  if (failed.length)
-    throw new AggregateError(
-      failed.map((result) => result.reason),
-      'MF disposal failed',
-    );
+  await disposeHooks();
   if (
     retainSharedOwner &&
     ![...globals].some((global) =>
@@ -110,7 +104,7 @@ export async function disposeInstance(host: ModuleFederation): Promise<void> {
   host.options.remotes = [];
   host.options.shared = {};
   host.options.plugins = [];
-  releaseHostSnapshotInfo(host);
+  host.moduleInfo = undefined;
   for (const system of [
     host.hooks,
     host.remoteHandler.hooks,

@@ -23,11 +23,16 @@ import {
   getGlobalSnapshot,
   setGlobalSnapshotInfoByModuleInfo,
   Global,
-  getHostSnapshotInfo,
+  addGlobalSnapshot,
   getGlobalSnapshotInfoByModuleInfo,
   getInfoWithoutType,
 } from '../../global';
-import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
+import {
+  PluginSystem,
+  AsyncHook,
+  AsyncWaterfallHook,
+  SyncHook,
+} from '../../utils/hooks';
 import { ModuleFederation } from '../../core';
 
 export function getGlobalRemoteInfo(
@@ -38,7 +43,7 @@ export function getGlobalRemoteInfo(
   globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
   remoteSnapshot: GlobalModuleInfo[string] | undefined;
 } {
-  const hostGlobalSnapshot = getHostSnapshotInfo(origin);
+  const hostGlobalSnapshot = origin.snapshotHandler.getHostSnapshot();
 
   // get remote detail info from global
   const globalRemoteInfo =
@@ -70,6 +75,10 @@ export class SnapshotHandler {
   HostInstance: ModuleFederation;
   manifestCache: Map<string, Manifest> = new Map();
   hooks = new PluginSystem({
+    resolveHostSnapshot: new SyncHook<
+      [{ origin: ModuleFederation }],
+      { snapshot: ModuleInfo } | void
+    >('resolveHostSnapshot'),
     beforeLoadRemoteSnapshot: new AsyncHook<
       [
         {
@@ -145,6 +154,19 @@ export class SnapshotHandler {
     this.loaderHook = HostInstance.loaderHook;
   }
 
+  getHostSnapshot(): ModuleInfo | undefined {
+    const origin = this.HostInstance;
+    const resolved = this.hooks.lifecycle.resolveHostSnapshot.emit({
+      origin,
+    }) as { snapshot: ModuleInfo } | undefined;
+    return resolved
+      ? resolved.snapshot
+      : (getGlobalSnapshotInfoByModuleInfo({
+          name: origin.name,
+          version: origin.options.version,
+        }) as ModuleInfo | undefined);
+  }
+
   // eslint-disable-next-line max-lines-per-function
   async loadRemoteSnapshotInfo({
     moduleInfo,
@@ -168,7 +190,15 @@ export class SnapshotHandler {
       origin: this.HostInstance,
     });
 
-    const hostSnapshot = getHostSnapshotInfo(this.HostInstance, true)!;
+    let hostSnapshot = this.getHostSnapshot();
+    if (!hostSnapshot) {
+      hostSnapshot = {
+        version: options.version || '',
+        remoteEntry: '',
+        remotesInfo: {},
+      } as ModuleInfo;
+      addGlobalSnapshot({ [options.name]: hostSnapshot });
+    }
 
     // In dynamic loadRemote scenarios, incomplete remotesInfo delivery may occur. In such cases, the remotesInfo in the host needs to be completed in the snapshot at runtime.
     // This ensures the snapshot's integrity and helps the chrome plugin correctly identify all producer modules, ensuring that proxyable producer modules will not be missing.

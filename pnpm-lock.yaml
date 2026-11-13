@@ -3994,6 +3994,9 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
+      '@module-federation/webpack-bundler-runtime':
+        specifier: workspace:*
+        version: link:../webpack-bundler-runtime
       encoding:
         specifier: 0.1.13
         version: 0.1.13

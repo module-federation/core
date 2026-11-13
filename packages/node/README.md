@@ -79,6 +79,39 @@ new UniversalFederationPlugin({
 });
 ```
 
+### SSR lifecycle and cache ownership
+
+Install `@module-federation/node/runtimePlugin` only in the server runtime.
+It supplies container and shared-provider ownership, pending-work tracking,
+instance disposal, and per-host snapshot isolation. The generic MF runtime
+provides lifecycle hooks and keeps its default global snapshot behavior.
+
+For pure-runtime Node hosts, pass the plugin explicitly:
+
+<!-- prettier-ignore -->
+```js
+import nodeRuntimePlugin from '@module-federation/node/runtimePlugin'
+import { createInstance } from '@module-federation/runtime'
+
+const host = createInstance({
+  name: 'server',
+  remotes: [],
+  plugins: [nodeRuntimePlugin()],
+})
+```
+
+After the framework stops admitting requests and drains active work, use
+`await host.updateRemotes(remotes)` for replacement or `await host.destroy()`
+when retiring the application. Shared containers and providers still used by
+another host are retained. `registerRemotes(remotes, { force: true })` remains
+synchronous and does not provide the asynchronous replacement contract.
+
+With compatible Rspack builds, native code owns module and chunk cache
+invalidation. The Node plugin supplies local or remote chunk source through
+`nodeChunkLoader.readFile` and preserves native chunk handlers, including their
+generation checks. The optional MF bundler adapter translates remote identities
+and loading records into that native API.
+
 ### UniversalFederationPlugin
 
 This plugin is an abstraction over both `NodeFederationPlugin` and `ModuleFederationPlugin`. It will alternate between which it uses based on where the build is intended to be used.

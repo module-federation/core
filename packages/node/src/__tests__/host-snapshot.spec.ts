@@ -1,10 +1,11 @@
 import { describe, expect, it, rs } from '@rstest/core';
-import { ModuleFederation } from '../src';
+import { ModuleFederation } from './runtimeTestUtils';
 import {
   addGlobalSnapshot,
   getGlobalSnapshot,
-  getHostSnapshotInfo,
-} from '../src/global';
+} from '../../../runtime-core/src/global';
+const getHostSnapshotInfo = (host: ModuleFederation) =>
+  host.snapshotHandler.getHostSnapshot();
 
 const entry = (version: string) =>
   `https://catalog.test/${version}/mf-manifest.json`;
@@ -105,9 +106,9 @@ describe('instance-owned host snapshots', () => {
       const bSnapshot = b.instance.moduleInfo;
       await a.instance.destroy();
       expect(getHostSnapshotInfo(b.instance)).toBe(bSnapshot);
-      expect(getGlobalSnapshot()[withId ? 'same-host:b' : 'same-host']).toBe(
-        bSnapshot,
-      );
+      expect(
+        getGlobalSnapshot()[withId ? 'same-host:b' : 'same-host'],
+      ).toBeUndefined();
       expect(await resolve(b.instance)).toMatchObject({ buildVersion: 'v2' });
       await b.instance.destroy();
       expect(
@@ -196,8 +197,6 @@ describe('instance-owned host snapshots', () => {
     expect(await resolve(instance)).toMatchObject({ buildVersion: 'v1' });
     expect(instance.moduleInfo).not.toBe(template);
     expect(getGlobalSnapshot()['same-host:release']).toBe(template);
-    expect(getGlobalSnapshot()['same-host:compiled-build']).toBe(
-      instance.moduleInfo,
-    );
+    expect(getGlobalSnapshot()['same-host:compiled-build']).toBeUndefined();
   });
 });

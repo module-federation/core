@@ -15,6 +15,7 @@ export default defineConfig([
         index: 'src/index.ts',
         constant: 'src/constant.ts',
         bundler: 'src/bundler.ts',
+        'clear-cache': 'src/clearCache.ts',
       },
       external: ['@module-federation/*', 'webpack'],
       noExternal: ['@module-federation/error-codes'],

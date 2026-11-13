@@ -4,6 +4,7 @@
 '@module-federation/sdk': patch
 '@module-federation/webpack-bundler-runtime': minor
 '@module-federation/bridge-react': patch
+'@module-federation/node': minor
 ---
 
 Add explicit asynchronous remote replacement, instance disposal and bundler cache
@@ -11,3 +12,9 @@ invalidation for SSR applications that coordinate request draining. Preserve the
 existing synchronous force-registration behavior and shared provider factories
 that remain in use. Carry server-local Bridge producer work through cancellation
 without serializing ownership into Service App requests.
+
+Keep the generic runtime limited to lifecycle hooks. Install SSR ownership,
+pending-work tracking and disposal through the Node runtime plugin. Load the
+bundler cache adapter from a separate opt-in entry and delegate native module,
+chunk and generation invalidation to Rspack. Supply Node chunk source without
+replacing Rspack's native chunk handlers.

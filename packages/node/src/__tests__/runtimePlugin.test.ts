@@ -918,6 +918,57 @@ describe('runtimePlugin', () => {
         expect.stringContaining('CAUTION'),
       );
     });
+
+    it.each(['local', 'remote', 'denied'])(
+      'supplies %s source transport while preserving native chunk handlers',
+      async (source) => {
+        const runtime = (global as any).__webpack_require__;
+        const handlers = { ...runtime.f };
+        const native: any = (runtime.nodeChunkLoader = {});
+        const error = Object.assign(new Error('read failed'), {
+          code: source === 'remote' ? 'ENOENT' : 'EACCES',
+        });
+        const fs = require('fs');
+        fs.readFile.mockImplementationOnce(
+          (
+            _file: string,
+            _encoding: string,
+            callback: (error: Error | null, content?: string) => void,
+          ) =>
+            source === 'local'
+              ? callback(null, 'local source')
+              : callback(error),
+        );
+        runtime.federation = {
+          ...runtime.federation,
+          instance: {
+            loaderHook: {
+              lifecycle: { fetch: { emit: jest.fn(async () => undefined) } },
+            },
+          },
+        };
+        if (source === 'remote')
+          (global.fetch as jest.Mock).mockResolvedValueOnce({
+            text: async () => 'remote source',
+          });
+        setupWebpackRequirePatching(jest.fn());
+        expect(runtime.f).toEqual(handlers);
+        const loaded = new Promise((resolve, reject) =>
+          native.readFile(
+            '/chunk.js',
+            'chunk',
+            (error: Error | null, content: string) =>
+              error ? reject(error) : resolve(content),
+          ),
+        );
+        if (source === 'denied') {
+          await expect(loaded).rejects.toBe(error);
+          expect(global.fetch).not.toHaveBeenCalled();
+        } else {
+          await expect(loaded).resolves.toBe(`${source} source`);
+        }
+      },
+    );
   });
 
   // Original tests

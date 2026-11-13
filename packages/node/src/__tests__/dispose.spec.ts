@@ -1,6 +1,9 @@
 import { describe, it, expect, rs } from '@rstest/core';
-import { ModuleFederation } from '../src/core';
-import { CurrentGlobal, setGlobalFederationInstance } from '../src/global';
+import { ModuleFederation } from './runtimeTestUtils';
+import {
+  CurrentGlobal,
+  setGlobalFederationInstance,
+} from '../../../runtime-core/src/global';
 
 describe('instance disposal', () => {
   it('drains loads, rejects new work and removes owned roots once', async () => {

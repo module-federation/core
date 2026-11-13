@@ -12,9 +12,12 @@ export type StatsAssetResource = {
 };
 
 function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
-  browserStats = withMergedDevRevision(browserStats, nodeStats);
+  browserStats = { ...browserStats, metaData: { ...browserStats.metaData } };
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;
-  browserStats.metaData.ssrRemoteEntry = ssrRemoteEntry;
+  browserStats.metaData.ssrRemoteEntry = {
+    ...ssrRemoteEntry,
+    buildVersion: nodeStats.metaData.buildInfo.buildVersion,
+  };
   if ('publicPath' in browserStats.metaData) {
     // @ts-ignore nodeStats has the same structure with browserStats
     browserStats.metaData.ssrPublicPath = nodeStats.metaData.publicPath;
@@ -26,36 +29,20 @@ function mergeManifest(
   browserManifest: Manifest,
   nodeManifest: Manifest,
 ): Manifest {
-  browserManifest = withMergedDevRevision(browserManifest, nodeManifest);
+  browserManifest = {
+    ...browserManifest,
+    metaData: { ...browserManifest.metaData },
+  };
   const ssrRemoteEntry = nodeManifest.metaData.remoteEntry;
-  browserManifest.metaData.ssrRemoteEntry = ssrRemoteEntry;
+  browserManifest.metaData.ssrRemoteEntry = {
+    ...ssrRemoteEntry,
+    buildVersion: nodeManifest.metaData.buildInfo.buildVersion,
+  };
   if ('publicPath' in browserManifest.metaData) {
     // @ts-ignore nodeStats has the same structure with browserStats
     browserManifest.metaData.ssrPublicPath = nodeManifest.metaData.publicPath;
   }
   return browserManifest;
-}
-
-function withMergedDevRevision<T extends Stats | Manifest>(
-  browser: T,
-  node: T,
-): T {
-  const browserRevision = browser.metaData.buildInfo.devRevision;
-  const nodeRevision = node.metaData.buildInfo.devRevision;
-  // Either compiler can rebuild independently. Preserve the release version
-  // and avoid feeding the merged marker back into retained watch outputs.
-  return {
-    ...browser,
-    metaData: {
-      ...browser.metaData,
-      buildInfo: {
-        ...browser.metaData.buildInfo,
-        ...((browserRevision || nodeRevision) && {
-          devRevision: JSON.stringify([browserRevision, nodeRevision]),
-        }),
-      },
-    },
-  };
 }
 
 function mergeStatsAndManifest(

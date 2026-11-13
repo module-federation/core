@@ -35,15 +35,17 @@ new StatsPlugin(mfOptions, {
 
 ## Build identity
 
-`metaData.buildInfo.buildVersion` uses `MF_BUILD_VERSION`, then the package
-version in the compiler context, then the local fallback. Development builds
-also emit `devRevision`, a timestamp-based counter that advances on every
-compilation, including empty rebuilds. It detects development updates without
-reading emitted asset contents or changing the release identity.
+`metaData.buildInfo.buildVersion` identifies the compilation. In development,
+it is a timestamp-based counter that advances on every compilation, including
+empty rebuilds. The container runtime and manifest use the same value.
+Production builds use `MF_BUILD_VERSION`, then the package version in the
+compiler context, then the local fallback.
 
-Merged browser and Node manifests retain `buildVersion` and combine both
-development revisions, so rebuilding either compiler changes the marker.
-Production manifests do not add a development revision.
+Merged manifests keep the browser build version in `buildInfo.buildVersion`
+and the Node version in `ssrRemoteEntry.buildVersion`. The SDK exposes the latter
+as `ssrBuildVersion`. Node consumers select the Node version, so rebuilding one
+target does not relabel the other target's container. There is no separate
+development revision field.
 
 ## Bridge rendering metadata
 

@@ -129,7 +129,7 @@ export function generateSnapshotFromManifest(
       type: remoteEntryType,
     },
     types: remoteTypes = { path: '', name: '', zip: '', api: '' },
-    buildInfo: { buildVersion, devRevision },
+    buildInfo: { buildVersion },
     globalName,
     ssrRemoteEntry,
     serviceBaseUrl,
@@ -140,7 +140,6 @@ export function generateSnapshotFromManifest(
     providerName: manifest.name,
     version: version ? version : '',
     buildVersion,
-    ...(devRevision !== undefined && { devRevision }),
     globalName,
     ...(serviceBaseUrl !== undefined && { serviceBaseUrl }),
     remoteEntry: simpleJoinRemoteEntry(remoteEntryPath, remoteEntryName),
@@ -183,6 +182,9 @@ export function generateSnapshotFromManifest(
   }
 
   if (ssrRemoteEntry) {
+    if (ssrRemoteEntry.buildVersion !== undefined) {
+      remoteSnapshot.ssrBuildVersion = ssrRemoteEntry.buildVersion;
+    }
     const fullSSRRemoteEntry = simpleJoinRemoteEntry(
       ssrRemoteEntry.path,
       ssrRemoteEntry.name,

@@ -167,31 +167,6 @@ export function getRemoteFederationInstance(
   );
 }
 
-/** A live consumer may still load new exposes or shared factories. */
-export function hasRemoteModuleConsumers(
-  owner: ModuleFederation | undefined,
-  entryExports: ReadonlySet<unknown>,
-  providers: readonly ModuleFederation[],
-  instances: readonly ModuleFederation[] = CurrentGlobal.__FEDERATION__
-    .__INSTANCES__,
-): boolean {
-  return instances.some((instance) => {
-    if (instance === owner) return false;
-    return [...(instance.moduleCache?.values() || [])].some((module) => {
-      if (
-        (module.remoteEntryExports &&
-          entryExports.has(module.remoteEntryExports)) ||
-        (module.lib && entryExports.has(module.lib))
-      )
-        return true;
-      return Boolean(
-        module.remoteInfo &&
-        getRemoteFederationInstance(module.remoteInfo, providers),
-      );
-    });
-  });
-}
-
 export function getGlobalFederationConstructor():
   | typeof ModuleFederation
   | undefined {
@@ -253,9 +228,7 @@ export const getTargetSnapshotInfoByModuleInfo = (
 ): GlobalModuleInfo[string] | undefined => {
   // Check if the remote is included in the hostSnapshot
   const moduleKey = getFMId(moduleInfo);
-  const getModuleInfo = getSnapshotTemplate(
-    getInfoWithoutType(snapshot, moduleKey).value,
-  );
+  const getModuleInfo = getInfoWithoutType(snapshot, moduleKey).value;
 
   // The remoteSnapshot might not include a version
   if (
@@ -275,9 +248,10 @@ export const getTargetSnapshotInfoByModuleInfo = (
   if ('version' in moduleInfo && moduleInfo['version']) {
     const { version, ...resModuleInfo } = moduleInfo;
     const moduleKeyWithoutVersion = getFMId(resModuleInfo);
-    const getModuleInfoWithoutVersion = getSnapshotTemplate(
-      getInfoWithoutType(snapshot, moduleKeyWithoutVersion).value,
-    );
+    const getModuleInfoWithoutVersion = getInfoWithoutType(
+      snapshot,
+      moduleKeyWithoutVersion,
+    ).value;
 
     if (getModuleInfoWithoutVersion?.version === version) {
       return getModuleInfoWithoutVersion;
@@ -294,87 +268,6 @@ export const getGlobalSnapshotInfoByModuleInfo = (
     moduleInfo,
     nativeGlobal.__FEDERATION__.moduleInfo,
   );
-
-const hostSnapshotTemplatesKey = Symbol.for(
-  'module-federation.host-snapshot-templates',
-);
-// Global snapshots cross runtime package copies. Track their provenance weakly
-// so a runtime-written remotesInfo is never another instance's initial policy.
-const hostSnapshotTemplates: WeakMap<object, ModuleInfo | undefined> = ((
-  CurrentGlobal as any
-)[hostSnapshotTemplatesKey] ||= new WeakMap());
-
-function getSnapshotTemplate(
-  snapshot: GlobalModuleInfo[string] | undefined,
-): GlobalModuleInfo[string] | undefined {
-  return snapshot && hostSnapshotTemplates.has(snapshot)
-    ? hostSnapshotTemplates.get(snapshot)
-    : snapshot;
-}
-
-/** Instance-owned mutable host state, seeded only from an explicit snapshot. */
-export function getHostSnapshotInfo(
-  host: ModuleFederation,
-  create = false,
-): ModuleInfo | undefined {
-  if (host.moduleInfo && 'remotesInfo' in host.moduleInfo)
-    return host.moduleInfo;
-  const globalSnapshot = getGlobalSnapshot();
-  const exact = host.options.id
-    ? getInfoWithoutType(globalSnapshot, host.options.id)
-    : undefined;
-  const candidate =
-    exact?.value ||
-    getGlobalSnapshotInfoByModuleInfo({
-      name: host.name,
-      version: host.options.version,
-    });
-  const template =
-    candidate && hostSnapshotTemplates.has(candidate)
-      ? hostSnapshotTemplates.get(candidate)
-      : candidate;
-  if (!template && !create) return undefined;
-  // Snapshots are serializable manifest data. Keep both the explicit template
-  // and every runtime's writable copy independent without requiring browser
-  // structuredClone support.
-  const initial: ModuleInfo | undefined = template
-    ? JSON.parse(JSON.stringify(template))
-    : undefined;
-  const snapshot: ModuleInfo = initial
-    ? JSON.parse(JSON.stringify(initial))
-    : ({
-        version: host.options.version || '',
-        remoteEntry: '',
-        remotesInfo: {},
-      } as ModuleInfo);
-  snapshot.remotesInfo ||= {};
-  hostSnapshotTemplates.set(snapshot, initial);
-  host.moduleInfo = snapshot;
-  // A legacy name/version deployment template may seed a compiled host too.
-  // Publish its mutable copy under the exact build ID, leaving that template
-  // untouched for other builds. Pure runtime hosts retain the old tooling key.
-  const key =
-    exact?.key ||
-    (candidate &&
-      Object.keys(globalSnapshot).find(
-        (key) => globalSnapshot[key] === candidate,
-      )) ||
-    host.name;
-  globalSnapshot[key] = snapshot;
-  return snapshot;
-}
-
-export function releaseHostSnapshotInfo(host: ModuleFederation): void {
-  const snapshot = host.moduleInfo;
-  if (!snapshot) return;
-  for (const global of new Set([
-    CurrentGlobal.__FEDERATION__,
-    Global.__FEDERATION__,
-  ]))
-    for (const [key, value] of Object.entries(global.moduleInfo))
-      if (value === snapshot) delete global.moduleInfo[key];
-  host.moduleInfo = undefined;
-}
 
 export const setGlobalSnapshotInfoByModuleInfo = (
   remoteInfo: Remote,
