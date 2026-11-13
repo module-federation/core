@@ -42,8 +42,6 @@ export interface SharedLoadContext {
 }
 
 export interface RemoteInfo {
-  /** Resolved manifest provider identity, separate from the registration name. */
-  providerName?: string;
   alias?: string;
   name: string;
   version?: string;

@@ -318,7 +318,25 @@ export const createClearCacheRuntimePlugin = () => ({
 /** Opt in from a Node runtime plugin before bundler init runs. */
 export function installNodeCacheRuntime(runtime: WebpackRequire): void {
   const original = runtime.federation.bundlerRuntime;
-  if (!original || (original as any)[nodeRuntimeKey]) return;
+  if (!original) {
+    // Rspack evaluates plugin factories before assigning its bundler runtime.
+    // Each entry must opt in even when MF reuses an instance and its plugins.
+    Object.defineProperty(runtime.federation, 'bundlerRuntime', {
+      configurable: true,
+      enumerable: true,
+      set(value) {
+        Object.defineProperty(runtime.federation, 'bundlerRuntime', {
+          configurable: true,
+          enumerable: true,
+          writable: true,
+          value,
+        });
+        installNodeCacheRuntime(runtime);
+      },
+    });
+    return;
+  }
+  if ((original as any)[nodeRuntimeKey]) return;
   const wrapped: typeof original = {
     ...original,
     init(options) {

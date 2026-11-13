@@ -7,11 +7,11 @@ const entry = 'https://example.test/remote.js';
 function createHost() {
   const host = new ModuleFederation({
     name: 'node-cache-host',
-    remotes: [{ name: 'registered', entry }],
+    remotes: [{ name: 'provider', alias: 'registered', entry }],
   });
   const remoteInfo = {
-    name: 'registered',
-    providerName: 'provider',
+    name: 'provider',
+    alias: 'registered',
     buildVersion: '1',
     entry,
     type: 'global' as const,
@@ -25,7 +25,7 @@ function createHost() {
   };
   const module = new Module({ host, remoteInfo });
   module.remoteEntryExports = container;
-  host.moduleCache.set('registered', module);
+  host.moduleCache.set('provider', module);
   const runtime: any = {
     remoteCache: {
       clear: rs.fn(async () => {}),
@@ -64,7 +64,7 @@ describe('Node runtime and bundler lifecycle integration', () => {
     globals[remoteInfo.entryGlobalName] = container;
     try {
       await host.removeRemote('registered');
-      expect(host.moduleCache.has('registered')).toBe(false);
+      expect(host.moduleCache.has('provider')).toBe(false);
       expect(host.options.remotes).toHaveLength(0);
       expect(runtime.remoteCache.clear).toHaveBeenCalledWith(
         expect.arrayContaining(['registered']),
@@ -117,15 +117,15 @@ describe('Node runtime and bundler lifecycle integration', () => {
         await expect(host.removeRemote('registered')).rejects.toThrow(
           'clear failed after publication',
         );
-        expect(host.options.remotes[0].name).toBe('registered');
-        expect(host.moduleCache.get('registered')).toBe(module);
+        expect(host.options.remotes[0].name).toBe('provider');
+        expect(host.moduleCache.get('provider')).toBe(module);
         expect(globals.__FEDERATION__.__INSTANCES__).toContain(first);
         expect(globals.__FEDERATION__.__INSTANCES__).toContain(second);
         expect(globals[remoteInfo.entryGlobalName]).toBe(newContainer);
         expect(loading[key]).toBe(newLoading);
         container.__webpack_clear_cache__.mockReset();
         await host.removeRemote('registered');
-        expect(host.moduleCache.has('registered')).toBe(false);
+        expect(host.moduleCache.has('provider')).toBe(false);
         expect(globals[remoteInfo.entryGlobalName]).toBe(newContainer);
       } finally {
         dispose();

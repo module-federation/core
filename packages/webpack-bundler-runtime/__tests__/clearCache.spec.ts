@@ -217,6 +217,44 @@ describe('optional bundler cache runtime', () => {
 });
 
 describe('cache adapter lifecycle', () => {
+  test('binds every Node entry when plugin factories run before bootstrap and reuse one instance', async () => {
+    const remote = { name: 'remoteA', entry: 'https://example.test/old.js' };
+    const instance = new ModuleFederation({
+      name: 'multi-entry-bootstrap',
+      remotes: [remote],
+      plugins: [plugin()],
+    });
+    const runtimes = [fixture(instance).runtime, fixture(instance).runtime];
+    for (const runtime of runtimes) {
+      const bundlerRuntime = runtime.federation.bundlerRuntime;
+      delete (runtime.federation as any).bundlerRuntime;
+      installNodeCacheRuntime(runtime);
+      // Rspack assigns the imported runtime after evaluating plugin factories.
+      runtime.federation.bundlerRuntime = bundlerRuntime;
+      runtime.federation.initOptions = { name: instance.name };
+      runtime.federation.runtime = { init: () => instance } as any;
+      runtime.federation.instance = runtime.federation.bundlerRuntime.init({
+        webpackRequire: runtime,
+      });
+      expect(
+        Object.getOwnPropertyDescriptor(runtime.federation, 'bundlerRuntime'),
+      ).toMatchObject({ writable: true, value: expect.any(Object) });
+    }
+    try {
+      const next = { ...remote, entry: 'https://example.test/new.js' };
+      await instance.updateRemotes([next]);
+      for (const runtime of runtimes) {
+        expect(runtime.remoteCache!.clear).toHaveBeenCalledTimes(1);
+        expect(
+          runtime.federation.bundlerRuntimeOptions.remotes!.remoteInfos!
+            .remoteA[0].entry,
+        ).toBe(next.entry);
+      }
+    } finally {
+      plugin().dispose({ origin: instance });
+    }
+  });
+
   test('shares one adapter through get/set require facades and rejects another owner', () => {
     const { runtime } = fixture();
     const facade = () =>

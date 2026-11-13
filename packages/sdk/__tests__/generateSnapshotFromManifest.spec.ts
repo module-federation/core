@@ -2,7 +2,7 @@ import { manifest, snapshot } from './resources/manifestSnapshotMap';
 import { generateSnapshotFromManifest } from '../src/generateSnapshotFromManifest';
 
 describe('generateSnapshotFromManifest', () => {
-  it('preserves each target container build version', () => {
+  it('preserves the application build version with an SSR entry', () => {
     const source = manifest.devAppManifest;
     const result = generateSnapshotFromManifest({
       ...source,
@@ -12,11 +12,10 @@ describe('generateSnapshotFromManifest', () => {
           name: 'server.js',
           path: '',
           type: 'commonjs-module',
-          buildVersion: '123',
         },
       },
     });
-    expect(result.ssrBuildVersion).toBe('123');
+    expect(result.ssrRemoteEntry).toBe('server.js');
     expect(result.buildVersion).toBe(source.metaData.buildInfo.buildVersion);
   });
   it('preserves per-expose rendering metadata without changing legacy modules', () => {

@@ -49,10 +49,9 @@ describe('snapshot', () => {
   });
 });
 
-it('keeps manifest provider identity separate from the host registration and container global', () => {
-  const remote = { name: 'dynamic' } as any;
+it('preserves the producer name and consumer alias when resolving a container global', () => {
+  const remote = { name: 'provider', alias: 'dynamic' } as any;
   assignRemoteInfo(remote, {
-    providerName: 'provider',
     remoteEntry: 'entry.js',
     remoteEntryType: 'global',
     globalName: '__FEDERATION_custom:custom__',
@@ -60,7 +59,7 @@ it('keeps manifest provider identity separate from the host registration and con
     version: '1',
     buildVersion: 'build',
   } as any);
-  expect(remote.name).toBe('dynamic');
-  expect(remote.providerName).toBe('provider');
+  expect(remote.name).toBe('provider');
+  expect(remote.alias).toBe('dynamic');
   expect(remote.entryGlobalName).toBe('__FEDERATION_custom:custom__');
 });

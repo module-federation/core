@@ -41,11 +41,12 @@ empty rebuilds. The container runtime and manifest use the same value.
 Production builds use `MF_BUILD_VERSION`, then the package version in the
 compiler context, then the local fallback.
 
-Merged manifests keep the browser build version in `buildInfo.buildVersion`
-and the Node version in `ssrRemoteEntry.buildVersion`. The SDK exposes the latter
-as `ssrBuildVersion`. Node consumers select the Node version, so rebuilding one
-target does not relabel the other target's container. There is no separate
-development revision field.
+In development, frameworks with multiple compilation targets can call
+`setCompilationBuildVersion(compilation, buildVersion)` before federation's
+compilation hooks run. Assign one version to both targets before emitting their
+containers, then publish the merged manifest after both targets are ready.
+Changing only the manifest after compilation would leave container IDs stale.
+The merged manifest uses one `buildInfo.buildVersion` for browser and Node.
 
 ## Bridge rendering metadata
 

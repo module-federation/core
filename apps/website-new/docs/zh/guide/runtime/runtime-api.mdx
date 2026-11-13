@@ -377,7 +377,7 @@ await mf.destroy()
 全部结束后统一报告失败。
 
 SSR 应用需安装 `@module-federation/node/runtimePlugin`，
-由它负责 MF 在途工作、容器和共享生产者清理，以及 host snapshot 隔离。
+由它负责 MF 在途工作，以及容器和共享生产者清理。
 编译远端的缓存失效还需要兼容的原生 bundler API。
 框架在替换或销毁前负责停止接收新请求并排空应用工作。
 

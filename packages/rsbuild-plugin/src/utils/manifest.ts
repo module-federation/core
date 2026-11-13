@@ -16,7 +16,6 @@ function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;
   browserStats.metaData.ssrRemoteEntry = {
     ...ssrRemoteEntry,
-    buildVersion: nodeStats.metaData.buildInfo.buildVersion,
   };
   if ('publicPath' in browserStats.metaData) {
     // @ts-ignore nodeStats has the same structure with browserStats
@@ -36,7 +35,6 @@ function mergeManifest(
   const ssrRemoteEntry = nodeManifest.metaData.remoteEntry;
   browserManifest.metaData.ssrRemoteEntry = {
     ...ssrRemoteEntry,
-    buildVersion: nodeManifest.metaData.buildInfo.buildVersion,
   };
   if ('publicPath' in browserManifest.metaData) {
     // @ts-ignore nodeStats has the same structure with browserStats

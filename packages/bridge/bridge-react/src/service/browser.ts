@@ -4,7 +4,7 @@ import { bridgeIdentifierPrefix } from '../ssr-stream/identity';
 import type { BridgeSSRRequest } from '../types';
 import type { BrowserServiceRequest } from './config';
 import { fetchBridgeService } from './fetch';
-import { bridgeServiceErrorFrame } from './version-mismatch';
+import { bridgeErrorFrame } from '../ssr-stream/protocol';
 
 let sequence = 0;
 
@@ -64,7 +64,7 @@ export function receiveBridgeService(
   // Observe independently of hydration. Late failures still recover the document.
   void done.catch((error) => {
     if (!request.signal.aborted)
-      runtime.accept(sessionId, bridgeServiceErrorFrame(error, String(error)));
+      runtime.accept(sessionId, bridgeErrorFrame(error, String(error)));
   });
   return {
     runtime,

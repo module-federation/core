@@ -50,7 +50,7 @@ export interface BasicStatsMetaData {
   globalName: string;
   buildInfo: StatsBuildInfo;
   remoteEntry: ResourceInfo;
-  ssrRemoteEntry?: ResourceInfo & { buildVersion?: string };
+  ssrRemoteEntry?: ResourceInfo;
   /** Absolute HTTP service base, independent of the static asset publicPath. */
   serviceBaseUrl?: string;
   types?: MetaDataTypes;

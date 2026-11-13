@@ -106,10 +106,7 @@ const clearRemoteSnapshotCache = (
     const snapshot = globalModuleInfo[moduleKey];
     const snapshotBuildVersion =
       snapshot && 'buildVersion' in snapshot
-        ? (!isBrowserEnvValue &&
-            'ssrBuildVersion' in snapshot &&
-            snapshot.ssrBuildVersion) ||
-          snapshot.buildVersion
+        ? snapshot.buildVersion
         : undefined;
     // Another build can already occupy the same registration/manifest URL.
     if (

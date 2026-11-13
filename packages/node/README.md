@@ -83,7 +83,7 @@ new UniversalFederationPlugin({
 
 Install `@module-federation/node/runtimePlugin` only in the server runtime.
 It supplies container and shared-provider ownership, pending-work tracking,
-instance disposal, and per-host snapshot isolation. The generic MF runtime
+and instance disposal. The generic MF runtime
 provides lifecycle hooks and keeps its default global snapshot behavior.
 
 For pure-runtime Node hosts, pass the plugin explicitly:

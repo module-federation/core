@@ -24,10 +24,7 @@ import {
   validateServiceRequest,
   type Frame,
 } from './protocol';
-import {
-  isBridgeServiceVersionMismatchError,
-  versionMismatchResponse,
-} from './version-mismatch';
+import { getHttpErrorStatus } from '../ssr-stream/protocol';
 export type { BridgeServiceCacheOptions } from './cache.server';
 export interface BridgeServiceHandlerOptions {
   buildVersion: string | ((requested: string) => string | Promise<string>);
@@ -41,12 +38,8 @@ export interface BridgeServiceHandlerOptions {
   render(
     info: BridgeSSRRequest,
   ): Promise<BridgeSSRResult | BridgeSSRMessageResult>;
-  /**
-   * Forward a typed upstream mismatch before a render result exists. Only a
-   * transparent ingress may enable this; local rendering can have side effects.
-   * Defaults to false. Never retries the request or changes an active stream.
-   */
-  forwardVersionMismatch?: boolean;
+  /** Forward HTTP failures from a transparent ingress before a result exists. */
+  forwardHttpErrors?: boolean;
   /** Reuse completed renders for identical inputs within this handler. */
   cache?: BridgeServiceCacheOptions;
   maxFrameBytes?: number;
@@ -149,9 +142,9 @@ export function createBridgeServiceHandler(
     request.signal.throwIfAborted();
     if (!buildVersion) throw Error('Service deployment has no build identity.');
     if (input.buildVersion !== buildVersion)
-      return versionMismatchResponse({
-        expectedBuildVersion: input.buildVersion,
-        actualBuildVersion: buildVersion,
+      return new Response('Bridge service buildVersion mismatch', {
+        status: 409,
+        headers: { 'cache-control': 'no-store' },
       });
     // Keep all render inputs, including instance identity, headers and nonce.
     // A cache hit is a replay of this exact render, not a new instance with IDs
@@ -388,15 +381,19 @@ export function createBridgeServiceHandler(
         headers: responseHeaders,
       });
     } catch (reason) {
-      const forwardMismatch =
-        options.forwardVersionMismatch &&
+      const status =
+        options.forwardHttpErrors &&
         !result &&
         !ended &&
-        !request.signal.aborted &&
-        isBridgeServiceVersionMismatchError(reason) &&
-        reason.expectedBuildVersion === input.buildVersion;
+        !request.signal.aborted
+          ? getHttpErrorStatus(reason)
+          : undefined;
       abort(reason);
-      if (forwardMismatch) return versionMismatchResponse(reason);
+      if (status)
+        return new Response(`Bridge service returned HTTP ${status}.`, {
+          status,
+          headers: { 'cache-control': 'no-store' },
+        });
       return new Response('Bridge service rendering failed', { status: 500 });
     }
   };

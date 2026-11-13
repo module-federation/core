@@ -1,12 +1,26 @@
-import type { BridgeServiceVersionMismatchMetadata } from '../service/version-mismatch';
-
 export type BridgeStreamErrorFrame = {
   type: 'error';
   message: string;
-  versionMismatch?: BridgeServiceVersionMismatchMetadata & {
-    code: 'BRIDGE_SERVICE_VERSION_MISMATCH';
-  };
+  status?: number;
 };
+
+export function getHttpErrorStatus(error: unknown): number | undefined {
+  const status = (error as { status?: unknown } | null)?.status;
+  return typeof status === 'number' &&
+    Number.isInteger(status) &&
+    status >= 400 &&
+    status <= 599
+    ? status
+    : undefined;
+}
+
+export function bridgeErrorFrame(
+  error: unknown,
+  message: string,
+): BridgeStreamErrorFrame {
+  const status = getHttpErrorStatus(error);
+  return { type: 'error', message, ...(status && { status }) };
+}
 
 /** Private transport shared by the Host SSR adapter and its early bootstrap. */
 export type BridgeStreamFrame =

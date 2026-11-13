@@ -16,12 +16,6 @@ import {
   validateServiceRequest,
   type Meta,
 } from './protocol';
-import {
-  isBridgeServiceVersionMismatchError,
-  readVersionMismatch,
-  VERSION_MISMATCH_CONTENT_TYPE,
-  type BridgeServiceVersionMismatchError,
-} from './version-mismatch';
 export interface BridgeServiceFetchOptions {
   url: string;
   buildVersion: string;
@@ -78,7 +72,6 @@ export async function fetchBridgeService(
       );
   }
   const transfer = (async () => {
-    let versionMismatch: BridgeServiceVersionMismatchError | undefined;
     try {
       if (settled) return;
       const response = await (options.fetch ?? fetch)(endpoint, {
@@ -126,23 +119,11 @@ export async function fetchBridgeService(
         return;
       }
       if (response.status !== 200) {
-        if (
-          response.status === 409 &&
-          response.headers.get('content-type')?.split(';', 1)[0].trim() ===
-            VERSION_MISMATCH_CONTENT_TYPE &&
-          response.body
-        ) {
-          reader = response.body.getReader();
-          versionMismatch = await readVersionMismatch(
-            reader,
-            bound.frame,
-            options.buildVersion,
-          );
-          if (settled) return;
-          if (versionMismatch) throw versionMismatch;
-        }
         void response.body?.cancel().catch(() => {});
-        throw new Error(`Bridge service returned HTTP ${response.status}.`);
+        throw Object.assign(
+          new Error(`Bridge service returned HTTP ${response.status}.`),
+          { status: response.status },
+        );
       }
       if (
         !response.headers.get('content-type')?.startsWith(CONTENT_TYPE) ||
@@ -237,16 +218,7 @@ export async function fetchBridgeService(
       messages.close();
       settled = true;
     } catch (reason) {
-      // Only a validated pre-render 409 can signal a deployment mismatch.
-      // A custom transport or an already-started body can fail with any Error.
-      abort(
-        isBridgeServiceVersionMismatchError(reason) &&
-          reason !== versionMismatch
-          ? new Error('Bridge service failed outside its version check.', {
-              cause: reason,
-            })
-          : reason,
-      );
+      abort(reason);
     } finally {
       reader?.releaseLock();
     }

@@ -38,9 +38,9 @@ behavior. It does not await the new asynchronous cleanup hooks. Applications tha
 coordinate SSR invalidation should use and await `updateRemotes`.
 
 `helpers.global.getRemoteFederationInstance(remoteInfo, instances?)` resolves a
-provider using the same build identity as remote removal. A manifest's
-`providerName` takes precedence over its registration name. With `buildVersion`,
-the helper matches the composed provider/build value against `instance.options.id`
+provider using the same build identity as remote removal. `remoteInfo.name` is
+the producer name, while `alias` is only the consumer's import name. With
+`buildVersion`, the helper matches `name:buildVersion` against `instance.options.id`
 and never falls back to a same-name instance from another build. Without a build
 version it accepts a name match. It returns `undefined` when no instance
 matches. Registering a duplicate name and build ID replaces the older registry
@@ -58,11 +58,6 @@ still consumes that provider or container. The provider's instance, shared
 factories and execution cache remain available to that host until its last
 consumer releases it. Core and bundler cleanup use the same
 `helpers.global.hasRemoteModuleConsumers` check.
-
-Host snapshot selections belong to the runtime instance. Injected snapshots seed
-independent copies, so loading a remote never changes another same-name host's
-selection or the injected template. A host's runtime-added snapshot is not a
-provider deployment snapshot.
 
 ## License
 

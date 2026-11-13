@@ -1096,12 +1096,9 @@ test2; // "test2 value"
   同步强制注册也会使用该回调。
 - `dispose({ origin })` 在实例销毁时执行，可以返回 Promise。
   销毁会等待所有已注册的 disposal hook。
-- `resolveHostSnapshot({ origin })` 在解析 host snapshot 时同步执行。
-  返回 `{ snapshot }` 可提供插件管理的 host 状态。
-  不返回结果时保留默认的全局 snapshot 查找和发布行为。
 
 `@module-federation/node/runtimePlugin` 使用这些 hook 实现 SSR 生命周期和
-snapshot 隔离。hook 本身不依赖特定 bundler。
+资源归属管理。hook 本身不依赖特定 bundler。
 
 ## bridgeHook
 

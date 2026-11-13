@@ -11,14 +11,12 @@ export interface DevBuildRemote {
 
 export interface DevBuildSource extends DevBuildRemote {
   buildVersion: string;
-  ssrBuildVersion?: string;
   /** Browser artifacts have a live HMR transport. Missing means reload. */
   hot?: boolean;
 }
 
 export interface DevBuildPublication {
   buildVersion: string;
-  ssrBuildVersion?: string;
   /** Browser artifacts and applied dependencies support live HMR. */
   hot?: boolean;
   /** Retain original identities when forwarding an applied dependency update. */

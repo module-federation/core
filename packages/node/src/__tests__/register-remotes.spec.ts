@@ -518,14 +518,12 @@ describe('ModuleFederation', () => {
     expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
     expect((globalThis as any).app1).toBeUndefined();
     expect(
-      FM.snapshotHandler.getHostSnapshot().remotesInfo?.[
-        '@register-remotes/app1'
-      ],
+      Global.__FEDERATION__.moduleInfo['@federation/instance:1.0.1']
+        .remotesInfo?.['@register-remotes/app1'],
     ).toBeUndefined();
     expect(
-      FM.snapshotHandler.getHostSnapshot().remotesInfo?.[
-        '@register-remotes/app2'
-      ],
+      Global.__FEDERATION__.moduleInfo['@federation/instance:1.0.1']
+        .remotesInfo?.['@register-remotes/app2'],
     ).toEqual({
       matchedVersion: 'http://localhost:1111/app2/mf-manifest.json',
     });
@@ -536,124 +534,111 @@ describe('ModuleFederation', () => {
     expect(FM.snapshotHandler.manifestCache.has(entry)).toBe(false);
   });
 
-  it.each(
-    [
-      { registered: true, loading: false },
-      { registered: false, loading: false },
-      { registered: true, loading: true },
-      { registered: false, loading: true },
-    ].flatMap((flags) =>
-      ['@register-remotes/app1', 'app1', 'manifest-provider'].map(
-        (providerName) => ({
-          ...flags,
-          providerName,
-        }),
-      ),
-    ),
-  )(
-    'keeps shared provider caches: %j',
-    async ({ registered, loading, providerName }) => {
-      const entry =
-        'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
-      const remoteEntryClear = rs.fn();
-      const selectiveClear = rs.fn();
-      const shared: any = {
-        version: '1.0.0',
-        from: providerName,
-        get: rs.fn(),
-        shareConfig: { requiredVersion: false },
-        scope: ['default'],
-        useIn: loading ? [providerName] : [providerName, 'another-remote'],
-        deps: [],
-        lib: loading ? undefined : () => ({ value: 'shared from app1' }),
-        loaded: !loading,
-        loading: loading
-          ? Promise.resolve(() => ({ value: 'shared from app1' }))
-          : undefined,
-        strategy: 'version-first' as const,
-      };
-      const FM = new ModuleFederation({
-        name: '@federation/instance',
-        version: '1.0.1',
-        remotes: [
-          {
-            name: '@register-remotes/app1',
-            alias: 'app1',
-            entry,
-          },
-        ],
-      });
-      const previousInstances = [...Global.__FEDERATION__.__INSTANCES__];
-      const previousShareScope = Global.__FEDERATION__.__SHARE__;
-
-      FM.moduleCache.set('@register-remotes/app1', {
-        remoteInfo: {
+  it.each([
+    { registered: true, loading: false },
+    { registered: false, loading: false },
+    { registered: true, loading: true },
+    { registered: false, loading: true },
+  ])('keeps shared provider caches: %j', async ({ registered, loading }) => {
+    const providerName = '@register-remotes/app1';
+    const entry =
+      'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
+    const remoteEntryClear = rs.fn();
+    const selectiveClear = rs.fn();
+    const shared: any = {
+      version: '1.0.0',
+      from: providerName,
+      get: rs.fn(),
+      shareConfig: { requiredVersion: false },
+      scope: ['default'],
+      useIn: loading ? [providerName] : [providerName, 'another-remote'],
+      deps: [],
+      lib: loading ? undefined : () => ({ value: 'shared from app1' }),
+      loaded: !loading,
+      loading: loading
+        ? Promise.resolve(() => ({ value: 'shared from app1' }))
+        : undefined,
+      strategy: 'version-first' as const,
+    };
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
           name: '@register-remotes/app1',
-          providerName,
           alias: 'app1',
           entry,
-          type: 'global',
-          entryGlobalName: 'app1',
-          shareScope: 'default',
         },
-        remoteEntryExports: {
-          get: rs.fn(),
-          init: rs.fn(),
-          __webpack_clear_cache__: remoteEntryClear,
-          __webpack_clear_exposed_cache__: selectiveClear,
-        },
-      } as any);
-      (globalThis as any).app1 = {
+      ],
+    });
+    const previousInstances = [...Global.__FEDERATION__.__INSTANCES__];
+    const previousShareScope = Global.__FEDERATION__.__SHARE__;
+
+    FM.moduleCache.set('@register-remotes/app1', {
+      remoteInfo: {
+        name: '@register-remotes/app1',
+        alias: 'app1',
+        entry,
+        type: 'global',
+        entryGlobalName: 'app1',
+        shareScope: 'default',
+      },
+      remoteEntryExports: {
+        get: rs.fn(),
+        init: rs.fn(),
         __webpack_clear_cache__: remoteEntryClear,
         __webpack_clear_exposed_cache__: selectiveClear,
-      };
-      if (registered)
-        Global.__FEDERATION__.__INSTANCES__.push({
-          name: providerName,
-          options: { id: providerName },
-          moduleCache: new Map(),
-          shareScopeMap: {},
-        } as any);
-      Global.__FEDERATION__.__SHARE__ = {
-        [providerName]: {
-          default: {
-            'shared-from-app1': {
-              '1.0.0': shared,
-            },
+      },
+    } as any);
+    (globalThis as any).app1 = {
+      __webpack_clear_cache__: remoteEntryClear,
+      __webpack_clear_exposed_cache__: selectiveClear,
+    };
+    if (registered)
+      Global.__FEDERATION__.__INSTANCES__.push({
+        name: providerName,
+        options: { id: providerName },
+        moduleCache: new Map(),
+        shareScopeMap: {},
+      } as any);
+    Global.__FEDERATION__.__SHARE__ = {
+      [providerName]: {
+        default: {
+          'shared-from-app1': {
+            '1.0.0': shared,
           },
         },
-      };
+      },
+    };
 
-      const loadingKey = '@register-remotes/app1:' + entry;
-      const loadingEntries = (globalThis as any)
-        .__GLOBAL_LOADING_REMOTE_ENTRY__;
-      loadingEntries[loadingKey] = Promise.resolve((globalThis as any).app1);
-      const sharedFactory = shared.lib || shared.loading;
-      try {
-        await FM.removeRemote('app1');
+    const loadingKey = '@register-remotes/app1:' + entry;
+    const loadingEntries = (globalThis as any).__GLOBAL_LOADING_REMOTE_ENTRY__;
+    loadingEntries[loadingKey] = Promise.resolve((globalThis as any).app1);
+    const sharedFactory = shared.lib || shared.loading;
+    try {
+      await FM.removeRemote('app1');
 
-        expect(FM.options.remotes).toHaveLength(0);
-        expect(remoteEntryClear).not.toHaveBeenCalled();
-        expect(selectiveClear).toHaveBeenCalledTimes(2);
-        expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
-        expect((globalThis as any).app1).toBeUndefined();
-        expect(loadingEntries[loadingKey]).toBeUndefined();
-        expect(shared.lib || shared.loading).toBe(sharedFactory);
-        expect(shared.from).toBe(providerName);
-        expect(shared.providerState).toBe(1);
-        expect(shared.useIn).toEqual(loading ? [] : ['another-remote']);
-      } finally {
-        Global.__FEDERATION__.__INSTANCES__.splice(
-          0,
-          Global.__FEDERATION__.__INSTANCES__.length,
-          ...previousInstances,
-        );
-        Global.__FEDERATION__.__SHARE__ = previousShareScope;
-        delete (globalThis as any).app1;
-        delete loadingEntries[loadingKey];
-      }
-    },
-  );
+      expect(FM.options.remotes).toHaveLength(0);
+      expect(remoteEntryClear).not.toHaveBeenCalled();
+      expect(selectiveClear).toHaveBeenCalledTimes(2);
+      expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
+      expect((globalThis as any).app1).toBeUndefined();
+      expect(loadingEntries[loadingKey]).toBeUndefined();
+      expect(shared.lib || shared.loading).toBe(sharedFactory);
+      expect(shared.from).toBe(providerName);
+      expect(shared.providerState).toBe(1);
+      expect(shared.useIn).toEqual(loading ? [] : ['another-remote']);
+    } finally {
+      Global.__FEDERATION__.__INSTANCES__.splice(
+        0,
+        Global.__FEDERATION__.__INSTANCES__.length,
+        ...previousInstances,
+      );
+      Global.__FEDERATION__.__SHARE__ = previousShareScope;
+      delete (globalThis as any).app1;
+      delete loadingEntries[loadingKey];
+    }
+  });
 
   it('keeps loaded remote cleanup context when removeRemote hook clears moduleCache first', async () => {
     const entry =
@@ -751,9 +736,8 @@ describe('ModuleFederation', () => {
     expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
     expect((globalThis as any).app1).toBeUndefined();
     expect(
-      FM.snapshotHandler.getHostSnapshot().remotesInfo?.[
-        '@register-remotes/app1'
-      ],
+      Global.__FEDERATION__.moduleInfo['@federation/instance:1.0.1']
+        .remotesInfo?.['@register-remotes/app1'],
     ).toBeUndefined();
     expect(
       Global.__FEDERATION__.moduleInfo[`@register-remotes/app1:${entry}`],

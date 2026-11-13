@@ -104,7 +104,6 @@ export async function disposeInstance(
   host.options.remotes = [];
   host.options.shared = {};
   host.options.plugins = [];
-  host.moduleInfo = undefined;
   for (const system of [
     host.hooks,
     host.remoteHandler.hooks,

@@ -17,13 +17,29 @@ it.each(['webpack', 'rspack'])(
         [path.join(__dirname, 'fixtures/buildVersion.cjs'), bundler, directory],
         { timeout: 30000 },
       );
-      const { versions, identities, outputs, explicit, custom, production } =
-        JSON.parse(result.stdout);
+      const {
+        versions,
+        identities,
+        outputs,
+        coordinated,
+        explicit,
+        custom,
+        production,
+      } = JSON.parse(result.stdout);
       expect(outputs).toEqual(['first', 'first', 'second']);
       expect(Number(versions[1])).toBeGreaterThan(Number(versions[0]));
       expect(Number(versions[2])).toBeGreaterThan(Number(versions[1]));
       expect(identities).toEqual(
         versions.map((version) => `provider:${version}`),
+      );
+      expect(coordinated).toEqual(
+        ['shared-round-1', 'shared-round-2'].flatMap((buildVersion) =>
+          ['web', 'node'].map((target) => ({
+            target,
+            buildVersion,
+            identity: `provider:${buildVersion}`,
+          })),
+        ),
       );
       expect(explicit).toBe('release-42');
       expect(custom).toBe('custom-release');

@@ -8,8 +8,8 @@ import {
 import type { RemoteInfo } from '../../../runtime-core/src/type';
 
 const info = (buildVersion?: string): RemoteInfo => ({
-  name: 'registered-catalog',
-  providerName: 'catalog',
+  name: 'catalog',
+  alias: 'registered-catalog',
   buildVersion,
   entry: 'https://example.test/fixed/entry.js',
   entryGlobalName: 'catalog-container',
@@ -35,7 +35,13 @@ function consumer(build: string) {
   const remoteInfo = info(build);
   const host = new ModuleFederation({
     name: `consumer-${build}`,
-    remotes: [{ name: remoteInfo.name, entry: remoteInfo.entry }],
+    remotes: [
+      {
+        name: remoteInfo.name,
+        alias: remoteInfo.alias,
+        entry: remoteInfo.entry,
+      },
+    ],
   });
   let cleared = false;
   const container = {
@@ -104,6 +110,11 @@ describe('provider build identity', () => {
       id: 'registered-catalog:1',
     });
     expect(resolve(info('1'), [alias])).toBeUndefined();
+    const containerGlobal = new ModuleFederation({
+      name: 'catalog-container',
+      id: 'catalog-container:1',
+    });
+    expect(resolve(info('1'), [containerGlobal])).toBeUndefined();
     expect(
       resolve({ ...info('1'), entry: 'https://mirror.test/entry.js' }),
     ).toBe(first);

@@ -14,7 +14,7 @@ import { hostPieces } from './host-stream';
 import { bridgeIdentifierPrefix } from './identity.server';
 import { normalizeBridgeSSR } from './producer.server';
 import { createReactStreamScriptIsolator } from './script-isolation.server';
-import { bridgeServiceErrorFrame } from '../service/version-mismatch';
+import { bridgeErrorFrame } from './protocol';
 import {
   escapeHTMLAttribute,
   serializeBridgeFrame,
@@ -294,10 +294,7 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
               }
               await emit(
                 id,
-                bridgeServiceErrorFrame(
-                  error,
-                  'Bridge server rendering failed',
-                ),
+                bridgeErrorFrame(error, 'Bridge server rendering failed'),
               );
             }
           } finally {

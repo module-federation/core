@@ -3,7 +3,21 @@ import { utils } from '@module-federation/managers';
 import { composeKeyWithSeparator } from '@module-federation/sdk';
 
 let version = 0;
-const versions = new WeakMap<Compilation, string>();
+const versions = new WeakMap<object, string>();
+
+/** Frameworks assign a shared build identity before federation compilation hooks run. */
+export function setCompilationBuildVersion(
+  compilation: object,
+  buildVersion: string,
+): void {
+  const previous = versions.get(compilation);
+  if (previous && previous !== buildVersion) {
+    throw new Error(
+      'A compilation build version cannot change after assignment.',
+    );
+  }
+  versions.set(compilation, buildVersion);
+}
 
 /** One identity per compilation, shared by the container and its manifest. */
 export function getCompilationBuildVersion(compilation: Compilation): string {

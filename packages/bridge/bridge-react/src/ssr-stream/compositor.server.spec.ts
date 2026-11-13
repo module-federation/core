@@ -10,7 +10,6 @@ import type {
   BridgeSSRMessage,
   BridgeSSRRequest,
 } from '../types';
-import { BridgeServiceVersionMismatchError } from '../service/version-mismatch';
 
 const marker = '<template id="host-shell"></template>';
 function setup(
@@ -267,11 +266,8 @@ describe('request-scoped Bridge composition', () => {
     expect(live.html).not.toContain('"type":"done"');
   });
 
-  it('retains only public Service mismatch metadata in the Host error frame', async () => {
-    const error = new BridgeServiceVersionMismatchError({
-      expectedBuildVersion: 'old',
-      actualBuildVersion: 'new',
-    });
+  it('retains only HTTP status in the sanitized Host error frame', async () => {
+    const error = Object.assign(Error('Service failure'), { status: 409 });
     error.message += ' Private upstream authentication details.';
     const onError = rstest.fn();
     const controller = setup(1000, undefined, onError);
@@ -289,9 +285,7 @@ describe('request-scoped Bridge composition', () => {
     live.input.end('<div id="service"></div>' + marker);
     await live.done;
     expect(onError).toHaveBeenCalledWith(error, 'service');
-    expect(live.html).toContain(
-      '"versionMismatch":{"code":"BRIDGE_SERVICE_VERSION_MISMATCH","expectedBuildVersion":"old","actualBuildVersion":"new"}',
-    );
+    expect(live.html).toContain('"status":409');
     expect(live.html).not.toContain('Private upstream authentication');
     expect(live.html).not.toContain('"type":"done"');
   });

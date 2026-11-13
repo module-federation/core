@@ -1,10 +1,4 @@
 export { createBridgeServiceHandler } from './service/http.server';
-export {
-  BRIDGE_SERVICE_VERSION_MISMATCH,
-  BridgeServiceVersionMismatchError,
-  isBridgeServiceVersionMismatchError,
-} from './service/version-mismatch';
-export type { BridgeServiceVersionMismatchMetadata } from './service/version-mismatch';
 export type {
   BridgeServiceHandlerOptions,
   BridgeServiceCacheOptions,

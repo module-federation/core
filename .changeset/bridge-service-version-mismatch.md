@@ -2,11 +2,8 @@
 '@module-federation/bridge-react': patch
 ---
 
-Expose typed Bridge Service build-version mismatches and preserve dedicated
-pre-render 409 responses through explicitly configured transparent ingresses.
-Keep authorization conflicts, cancelled requests and active streams outside
-this protocol and never automatically replay Service requests.
-
-Preserve mismatch metadata through SSR and browser error frames. Surface these
-errors without a generic CSR redirect, because CSR still uses the same Service
-protocol. Other errors retain their existing recovery behavior.
+Preserve ordinary HTTP error status through explicitly configured Service
+ingresses and sanitized Host/browser error frames. Keep the pre-render build
+version check and reject stale requests with HTTP 409 without replaying them.
+HTTP conflicts do not trigger generic CSR recovery. Development update and reload
+remain coordinated by the framework after its Node runtime is ready.

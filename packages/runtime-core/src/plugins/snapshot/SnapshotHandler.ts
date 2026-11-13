@@ -27,12 +27,7 @@ import {
   getGlobalSnapshotInfoByModuleInfo,
   getInfoWithoutType,
 } from '../../global';
-import {
-  PluginSystem,
-  AsyncHook,
-  AsyncWaterfallHook,
-  SyncHook,
-} from '../../utils/hooks';
+import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
 import { ModuleFederation } from '../../core';
 
 export function getGlobalRemoteInfo(
@@ -43,7 +38,10 @@ export function getGlobalRemoteInfo(
   globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
   remoteSnapshot: GlobalModuleInfo[string] | undefined;
 } {
-  const hostGlobalSnapshot = origin.snapshotHandler.getHostSnapshot();
+  const hostGlobalSnapshot = getGlobalSnapshotInfoByModuleInfo({
+    name: origin.name,
+    version: origin.options.version,
+  });
 
   // get remote detail info from global
   const globalRemoteInfo =
@@ -75,10 +73,6 @@ export class SnapshotHandler {
   HostInstance: ModuleFederation;
   manifestCache: Map<string, Manifest> = new Map();
   hooks = new PluginSystem({
-    resolveHostSnapshot: new SyncHook<
-      [{ origin: ModuleFederation }],
-      { snapshot: ModuleInfo } | void
-    >('resolveHostSnapshot'),
     beforeLoadRemoteSnapshot: new AsyncHook<
       [
         {
@@ -154,19 +148,6 @@ export class SnapshotHandler {
     this.loaderHook = HostInstance.loaderHook;
   }
 
-  getHostSnapshot(): ModuleInfo | undefined {
-    const origin = this.HostInstance;
-    const resolved = this.hooks.lifecycle.resolveHostSnapshot.emit({
-      origin,
-    }) as { snapshot: ModuleInfo } | undefined;
-    return resolved
-      ? resolved.snapshot
-      : (getGlobalSnapshotInfoByModuleInfo({
-          name: origin.name,
-          version: origin.options.version,
-        }) as ModuleInfo | undefined);
-  }
-
   // eslint-disable-next-line max-lines-per-function
   async loadRemoteSnapshotInfo({
     moduleInfo,
@@ -190,7 +171,10 @@ export class SnapshotHandler {
       origin: this.HostInstance,
     });
 
-    let hostSnapshot = this.getHostSnapshot();
+    let hostSnapshot = getGlobalSnapshotInfoByModuleInfo({
+      name: options.name,
+      version: options.version,
+    });
     if (!hostSnapshot) {
       hostSnapshot = {
         version: options.version || '',

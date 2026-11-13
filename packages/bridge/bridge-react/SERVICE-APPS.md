@@ -61,45 +61,24 @@ must also register through `info.work`. This optional context stays on the serve
 and does not enter the request body, transcript cache key or response frames.
 The producer supplies its own request owner when it runs in a separate process.
 
-`authorize` executes before every cache lookup. `validate` optionally checks deployment-specific module and page constraints. A framework adapter loads the producer's real Node expose and supplies its existing manifest build identity. Configure a unique `MF_BUILD_VERSION` once for each paired browser/Node build. Core otherwise falls back to package version, which does not distinguish rebuilding the same package version. Deploy the manifest, provider artifacts and service together. A mismatched expected build returns a dedicated 409 before rendering. Unsupported protocol or response build metadata fails consumption.
+`authorize` executes before every cache lookup. `validate` optionally checks deployment-specific module and page constraints. A framework adapter loads the producer's real Node expose and supplies its existing manifest build identity. Configure a unique `MF_BUILD_VERSION` once for each paired browser/Node build. Core otherwise falls back to package version, which does not distinguish rebuilding the same package version. Deploy the manifest, provider artifacts and service together. A mismatched expected build returns HTTP 409 before rendering. Unsupported protocol or response build metadata fails consumption.
 
-`fetchBridgeService` recognizes that dedicated response as
-`BridgeServiceVersionMismatchError`, with code
-`BRIDGE_SERVICE_VERSION_MISMATCH`, `expectedBuildVersion` and
-`actualBuildVersion`. The class, code, metadata type and
-`isBridgeServiceVersionMismatchError` guard are exported from both `/service`
-and `/service-node`. The response uses the reserved content type
-`application/vnd.module-federation.bridge-service-error+json` and a JSON body
-containing the producer protocol, code and both versions. Authentication and
-validation run first. Their ordinary 409 responses remain generic HTTP errors
-and do not reveal the deployment version. Malformed, oversized or unrelated
-error payloads are not classified as version mismatches.
+`fetchBridgeService` rejects non-success responses with an ordinary Error carrying
+an HTTP `status`. Error bodies and deployment version details are not forwarded.
+Authorization and validation run before the build check. Service requests are
+never automatically replayed.
 
-A transparent ingress whose `render` only calls `fetchBridgeService` may set
-`forwardVersionMismatch: true` to preserve an upstream typed mismatch as 409.
-The default is `false`, because an ordinary producer can already have started
-business rendering before its render promise rejects. Forwarding is allowed
-only before a render result exists, before response output and while the
-request remains active. Errors during normalization or an active stream remain
-rendering failures. No path automatically resends a POST, changes the expected
-version, updates the runtime or reloads a document.
+A transparent ingress may set `forwardHttpErrors: true` to preserve an upstream
+HTTP failure before a render result exists. This defaults to `false`, so normal
+producer render failures remain HTTP 500. An active stream is terminated through
+its existing error path rather than replaced with a new HTTP response.
 
-The typed error is a signal for an application-controlled update or reload
-policy. Keep one version selection for an SSR response. Do not await an update
-that drains the current request from inside that same request. After response
-output begins, terminate or recover through the existing Bridge error policy
-instead of replaying rendered work. A browser holding an old document needs a
-new document to use a newly selected release. Core leaves production update
-and reload decisions to the application.
-
-The browser receive session and Host error frames retain the dedicated mismatch
-metadata. They reject their pending hydration promises with an error recognized
-by `isBridgeServiceVersionMismatchError`. This error does not trigger the generic
-`csr=1` document recovery, which would repeat the same Service version selection.
-It remains visible to the consumer's error UI and application policy. A framework
-development watcher may reload after it successfully installs the new release.
-Ordinary transport, rendering and authentication failures keep their existing
-recovery behavior.
+Host and browser error frames preserve the HTTP status alongside a sanitized
+message. HTTP 409 does not trigger the generic `csr=1` recovery because that would
+repeat the conflicting Service request. Development subscriptions or manifest
+checks update the runtime and refresh the page after Node is ready. Production
+updates remain application-controlled. A version conflict itself does not trigger
+an update, reload or retry.
 
 The wire protocol remains `module-federation/bridge-ssr/producer/v1`. The first NDJSON message is `meta` with build identity, identifier prefix, hydration mode and CSS URLs, followed by the producer's complete `html`, `ready`, `update` and `done` messages. Generic complete providers retain their existing `data` mode. Modern only uses initial snapshots plus updates.
 

@@ -31,42 +31,22 @@ const assets = (buildVersion = 'release-42') =>
     },
   }) as StatsAssetResource;
 
-it('tracks one-sided builds without mutating retained compiler outputs', () => {
+it('merges both entries with the shared application version without mutating compiler outputs', () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-merge-'));
   directories.push(directory);
-  const browser = assets('browser-1');
-  const node = assets('node-1');
-  const merge = (server = node, client = browser) => {
-    updateStatsAndManifest(server, client, directory);
-    const manifest = JSON.parse(
-      fs.readFileSync(path.join(directory, 'mf-manifest.json'), 'utf8'),
+  const browser = assets();
+  const node = assets();
+  node.manifest!.data.metaData.remoteEntry.name = 'server.js';
+  node.stats!.data.metaData.remoteEntry.name = 'server.js';
+  updateStatsAndManifest(node, browser, directory);
+  for (const filename of ['mf-manifest.json', 'mf-stats.json']) {
+    const merged = JSON.parse(
+      fs.readFileSync(path.join(directory, filename), 'utf8'),
     );
-    const stats = JSON.parse(
-      fs.readFileSync(path.join(directory, 'mf-stats.json'), 'utf8'),
-    );
-    expect(stats.metaData.buildInfo).toEqual(manifest.metaData.buildInfo);
-    expect(manifest.metaData.buildInfo.buildVersion).toBe(
-      client.manifest!.data.metaData.buildInfo.buildVersion,
-    );
-    expect(manifest.metaData.ssrRemoteEntry.buildVersion).toBe(
-      server.manifest!.data.metaData.buildInfo.buildVersion,
-    );
-    return JSON.stringify([
-      manifest.metaData.buildInfo.buildVersion,
-      manifest.metaData.ssrRemoteEntry.buildVersion,
-    ]);
-  };
-  const first = merge();
-  expect(merge()).toBe(first);
-  const second = merge(assets('node-2'));
-  expect(second).not.toBe(first);
-  expect(merge(assets('node-2'))).toBe(second);
-  expect(merge(node, assets('browser-2'))).not.toBe(first);
-  expect(browser.manifest!.data.metaData.buildInfo.buildVersion).toBe(
-    'browser-1',
-  );
+    expect(merged.metaData.buildInfo.buildVersion).toBe('release-42');
+    expect(merged.metaData.remoteEntry.name).toBe('entry.js');
+    expect(merged.metaData.ssrRemoteEntry).toEqual({ name: 'server.js' });
+  }
   expect(browser.manifest!.data.metaData.ssrRemoteEntry).toBeUndefined();
-  expect(merge(assets(), assets())).toBe(
-    JSON.stringify(['release-42', 'release-42']),
-  );
+  expect(browser.stats!.data.metaData.ssrRemoteEntry).toBeUndefined();
 });

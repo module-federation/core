@@ -13,7 +13,10 @@ Module._extensions['.ts'] = (module, filename) =>
     filename,
   );
 const { StatsPlugin } = require('../../src/StatsPlugin.ts');
-const { getFederationBuildIdentifier } = require('../../src/buildVersion.ts');
+const {
+  getFederationBuildIdentifier,
+  setCompilationBuildVersion,
+} = require('../../src/buildVersion.ts');
 const [bundler, directory] = process.argv.slice(2);
 const loaded = require(bundler === 'webpack' ? 'webpack' : '@rspack/core');
 const build = bundler === 'webpack' ? loaded : loaded.rspack;
@@ -29,6 +32,7 @@ const writeEntry = (value) =>
   );
 writeEntry('first');
 let custom = false;
+let coordinatedVersion;
 const options = {
   mode: 'development',
   context: directory,
@@ -45,6 +49,13 @@ const options = {
   plugins: [
     {
       apply(compiler) {
+        compiler.hooks.thisCompilation.tap(
+          { name: 'FrameworkBuildVersion', stage: -Infinity },
+          (compilation) => {
+            if (coordinatedVersion)
+              setCompilationBuildVersion(compilation, coordinatedVersion);
+          },
+        );
         new compiler.webpack.DefinePlugin({
           FEDERATION_BUILD_IDENTIFIER: getFederationBuildIdentifier(
             compiler,
@@ -80,8 +91,8 @@ const output = () => {
   );
   return context.module.exports;
 };
-async function productionBuild() {
-  const compiler = build({ ...options, mode: 'production' });
+async function runBuild(mode = 'production', target = 'node') {
+  const compiler = build({ ...options, mode, target });
   try {
     await new Promise((resolve, reject) =>
       compiler.run((error, stats) =>
@@ -92,7 +103,7 @@ async function productionBuild() {
     );
     const info = buildInfo();
     if (!custom && output().id !== `provider:${info.buildVersion}`)
-      throw Error('Production manifest and container identity differ');
+      throw Error('Manifest and container identity differ');
     return info;
   } finally {
     await new Promise((resolve) => compiler.close(resolve));
@@ -138,16 +149,30 @@ async function productionBuild() {
     if (watcher) await new Promise((resolve) => watcher.close(resolve));
     await new Promise((resolve) => compiler.close(resolve));
   }
-  const production = await productionBuild();
+  const coordinated = [];
+  for (const version of ['shared-round-1', 'shared-round-2']) {
+    coordinatedVersion = version;
+    for (const target of ['web', 'node']) {
+      const info = await runBuild('development', target);
+      coordinated.push({
+        target,
+        buildVersion: info.buildVersion,
+        identity: output().id,
+      });
+    }
+  }
+  coordinatedVersion = undefined;
+  const production = await runBuild();
   process.env.MF_BUILD_VERSION = 'release-42';
-  const explicit = (await productionBuild()).buildVersion;
+  const explicit = (await runBuild()).buildVersion;
   custom = true;
-  const customVersion = (await productionBuild()).buildVersion;
+  const customVersion = (await runBuild()).buildVersion;
   console.log(
     JSON.stringify({
       versions,
       identities,
       outputs,
+      coordinated,
       production,
       explicit,
       custom: customVersion,

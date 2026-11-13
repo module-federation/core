@@ -141,10 +141,7 @@ export function setGlobalFederationInstance(
   instances.push(FederationInstance);
 }
 
-type ProviderReference = Pick<
-  RemoteInfo,
-  'name' | 'providerName' | 'entryGlobalName' | 'buildVersion'
-> &
+type ProviderReference = Pick<RemoteInfo, 'name' | 'buildVersion'> &
   Partial<Pick<RemoteInfo, 'entry' | 'version'>>;
 /** A provider name and build version identify one container runtime. */
 export function getRemoteFederationInstance(
@@ -152,18 +149,11 @@ export function getRemoteFederationInstance(
   instances: readonly ModuleFederation[] = CurrentGlobal.__FEDERATION__
     .__INSTANCES__,
 ): ModuleFederation | undefined {
-  const names = remoteInfo.providerName
-    ? [remoteInfo.providerName]
-    : [remoteInfo.name, remoteInfo.entryGlobalName];
   return instances.find((instance) =>
-    names.some(
-      (name) =>
-        name &&
-        (remoteInfo.buildVersion
-          ? instance.options.id ===
-            composeKeyWithSeparator(name, remoteInfo.buildVersion)
-          : instance.name === name),
-    ),
+    remoteInfo.buildVersion
+      ? instance.options.id ===
+        composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
+      : instance.name === remoteInfo.name,
   );
 }
 

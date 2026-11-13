@@ -1,12 +1,5 @@
 import { expect, it, rs } from '@rstest/core';
-import { ModuleFederation, helpers } from '../src';
-
-it('preserves global snapshot publication without a snapshot policy plugin', async () => {
-  const host = new ModuleFederation({ name: 'default-host' });
-  const snapshot = { version: '', remoteEntry: '', remotesInfo: {} };
-  helpers.global.addGlobalSnapshot({ 'default-host': snapshot });
-  expect(host.snapshotHandler.getHostSnapshot()).toBe(snapshot);
-});
+import { ModuleFederation } from '../src';
 
 it('uses a plugin cleanup without knowing the container implementation', async () => {
   const remove = rs.fn();

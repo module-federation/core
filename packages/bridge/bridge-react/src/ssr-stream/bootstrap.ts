@@ -117,30 +117,16 @@ export function bridgeStreamBootstrap(
   };
   const timeout = options.timeoutMs || 30000;
   const limit = options.maxQueuedBytes || 8 * 1024 * 1024;
-  // This bootstrap is serialized into HTML, so the protocol guard must remain
-  // self-contained. Never classify an ordinary 409 or message text as a signal.
-  const versionMismatch = (value: any) =>
-    value &&
-    typeof value === 'object' &&
-    value.code === 'BRIDGE_SERVICE_VERSION_MISMATCH' &&
-    typeof value.expectedBuildVersion === 'string' &&
-    Boolean(value.expectedBuildVersion) &&
-    typeof value.actualBuildVersion === 'string' &&
-    Boolean(value.actualBuildVersion) &&
-    value.expectedBuildVersion !== value.actualBuildVersion;
+  // This bootstrap is serialized into HTML and must remain self-contained.
   const frameError = (frame: Extract<BridgeStreamFrame, { type: 'error' }>) =>
-    versionMismatch(frame.versionMismatch)
-      ? Object.assign(
-          Error('Bridge service returned HTTP 409: buildVersion mismatch.'),
-          {
-            name: 'BridgeServiceVersionMismatchError',
-            status: 409,
-            code: 'BRIDGE_SERVICE_VERSION_MISMATCH',
-            expectedBuildVersion: frame.versionMismatch!.expectedBuildVersion,
-            actualBuildVersion: frame.versionMismatch!.actualBuildVersion,
-          },
-        )
-      : Error(frame.message);
+    Object.assign(
+      Error(frame.message),
+      Number.isInteger(frame.status) &&
+        frame.status! >= 400 &&
+        frame.status! <= 599
+        ? { status: frame.status }
+        : {},
+    );
   let redirecting = false;
   let leaving = false;
   const showError = () => {
@@ -154,14 +140,8 @@ export function bridgeStreamBootstrap(
   };
   const fallback = (error?: unknown) => {
     if (leaving || redirecting) return;
-    // CSR would repeat the same Service version selection. Expose the terminal
-    // error to its consumer and leave update/reload policy to the application.
-    if (
-      versionMismatch(error) &&
-      (error as any).name === 'BridgeServiceVersionMismatchError' &&
-      (error as any).status === 409
-    )
-      return;
+    // Switching to CSR would replay the same conflicting Service request.
+    if ((error as { status?: number } | undefined)?.status === 409) return;
     const url = new URL(window.location.href);
     let csr = '';
     url.searchParams.forEach((value, name) => {

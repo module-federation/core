@@ -16,26 +16,15 @@ export function getRemoteSharedOwnership(
   remoteInfo: RemoteInfo,
   provider: ModuleFederation | undefined,
 ) {
-  const names = new Set(
-    [
-      remoteInfo.providerName,
-      remoteInfo.name,
-      remoteInfo.entryGlobalName,
-    ].filter((name): name is string => Boolean(name)),
-  );
-  if (provider) names.add(provider.name);
   const id =
     provider?.options.id ||
-    composeKeyWithSeparator(
-      remoteInfo.providerName || remoteInfo.name,
-      remoteInfo.buildVersion,
-    );
+    composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion);
   const owned = new Set([
     ...sharedRecords(provider?.shareScopeMap),
     ...sharedRecords(helpers.share.getGlobalShareScope()[id]),
   ]);
   const peers = globalThis.__FEDERATION__.__INSTANCES__.filter(
-    (instance) => instance !== provider && names.has(instance.name),
+    (instance) => instance !== provider && instance.name === remoteInfo.name,
   );
   const peerRecords = new Set(
     peers.flatMap((instance) => sharedRecords(instance.shareScopeMap)),
@@ -43,7 +32,8 @@ export function getRemoteSharedOwnership(
   return {
     id,
     owns: (shared: Shared) =>
-      names.has(shared.from) && (!remoteInfo.buildVersion || owned.has(shared)),
+      shared.from === remoteInfo.name &&
+      (!remoteInfo.buildVersion || owned.has(shared)),
     sharedWithPeer: (shared: Shared) => peerRecords.has(shared),
   };
 }

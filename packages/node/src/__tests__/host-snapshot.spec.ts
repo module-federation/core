@@ -1,12 +1,9 @@
-import { describe, expect, it, rs } from '@rstest/core';
+import { describe, expect, it } from '@rstest/core';
 import { ModuleFederation } from './runtimeTestUtils';
 import {
   addGlobalSnapshot,
   getGlobalSnapshot,
 } from '../../../runtime-core/src/global';
-const getHostSnapshotInfo = (host: ModuleFederation) =>
-  host.snapshotHandler.getHostSnapshot();
-
 const entry = (version: string) =>
   `https://catalog.test/${version}/mf-manifest.json`;
 const manifest = (version: string) => ({
@@ -20,19 +17,6 @@ const manifest = (version: string) => ({
   exposes: [],
   shared: [],
 });
-function host(version: string, id = '') {
-  const fetch = rs.fn(
-    async (url: string) =>
-      new Response(JSON.stringify(manifest(url.split('/')[3]))),
-  );
-  const instance = new ModuleFederation({
-    name: 'same-host',
-    id,
-    remotes: [{ name: 'catalog', entry: entry(version) }],
-    plugins: [{ name: 'local-manifest', fetch }],
-  });
-  return { instance, fetch };
-}
 const resolve = async (instance: ModuleFederation) =>
   (
     await instance.remoteHandler.getRemoteModuleAndOptions({
@@ -40,7 +24,56 @@ const resolve = async (instance: ModuleFederation) =>
     })
   ).remoteMatchInfo.remoteInfo;
 
-describe('instance-owned host snapshots', () => {
+describe('Node global host snapshots', () => {
+  it('publishes global selections and replaces only the updated remote', async () => {
+    const instance = new ModuleFederation({
+      name: 'node-host',
+      remotes: [
+        { name: 'catalog', entry: entry('v1') },
+        { name: 'account', entry: entry('account') },
+      ],
+      plugins: [
+        {
+          name: 'local-manifest',
+          fetch: async (url: string) => {
+            const version = url.split('/')[3];
+            const name = version === 'account' ? 'account' : 'catalog';
+            return new Response(
+              JSON.stringify({
+                ...manifest(version),
+                name,
+                metaData: { ...manifest(version).metaData, globalName: name },
+              }),
+            );
+          },
+          loadEntry: ({ remoteInfo }) => ({
+            init() {},
+            get: () => () => remoteInfo.buildVersion,
+          }),
+        },
+      ],
+    });
+    expect(await instance.loadRemote('catalog/Button')).toBe('v1');
+    expect(await instance.loadRemote('account/Button')).toBe('account');
+    expect(getGlobalSnapshot()['node-host']).toMatchObject({
+      remotesInfo: {
+        catalog: { matchedVersion: entry('v1') },
+        account: { matchedVersion: entry('account') },
+      },
+    });
+
+    await instance.updateRemotes([{ name: 'catalog', entry: entry('v2') }]);
+    expect(getGlobalSnapshot()['node-host'].remotesInfo).toEqual({
+      account: { matchedVersion: entry('account') },
+    });
+    expect(await instance.loadRemote('catalog/Button')).toBe('v2');
+    expect(await instance.loadRemote('account/Button')).toBe('account');
+    expect(getGlobalSnapshot()['node-host'].remotesInfo).toEqual({
+      catalog: { matchedVersion: entry('v2') },
+      account: { matchedVersion: entry('account') },
+    });
+  });
+
   it('does not shadow a provider version snapshot with its consumer state', async () => {
     const provider = new ModuleFederation({
       name: 'catalog',
@@ -72,93 +105,6 @@ describe('instance-owned host snapshots', () => {
       buildVersion: 'v1',
       entry: 'https://catalog.test/v1/entry.js',
     });
-  });
-
-  it.each([true, false])(
-    'keeps sequential same-name hosts separate with explicit build ID: %s',
-    async (withId) => {
-      const a = host('v1', withId ? 'same-host:a' : '');
-      expect(await resolve(a.instance)).toMatchObject({
-        buildVersion: 'v1',
-        version: entry('v1'),
-        entry: 'https://catalog.test/v1/entry.js',
-      });
-      // Construct B only after A has written its mutable global host record.
-      const b = host('v2', withId ? 'same-host:b' : '');
-      expect(await resolve(b.instance)).toMatchObject({
-        buildVersion: 'v2',
-        version: entry('v2'),
-        entry: 'https://catalog.test/v2/entry.js',
-      });
-      expect(b.fetch).toHaveBeenCalledWith(
-        entry('v2'),
-        {},
-        expect.anything(),
-        expect.anything(),
-      );
-      expect(a.instance.moduleInfo).not.toBe(b.instance.moduleInfo);
-      expect(
-        getHostSnapshotInfo(a.instance)?.remotesInfo.catalog.matchedVersion,
-      ).toBe(entry('v1'));
-      expect(
-        getHostSnapshotInfo(b.instance)?.remotesInfo.catalog.matchedVersion,
-      ).toBe(entry('v2'));
-      const bSnapshot = b.instance.moduleInfo;
-      await a.instance.destroy();
-      expect(getHostSnapshotInfo(b.instance)).toBe(bSnapshot);
-      expect(
-        getGlobalSnapshot()[withId ? 'same-host:b' : 'same-host'],
-      ).toBeUndefined();
-      expect(await resolve(b.instance)).toMatchObject({ buildVersion: 'v2' });
-      await b.instance.destroy();
-      expect(
-        getGlobalSnapshot()[withId ? 'same-host:b' : 'same-host'],
-      ).toBeUndefined();
-    },
-  );
-
-  it('clones explicit templates without sharing runtime-added remote selections', async () => {
-    const template = {
-      version: '',
-      remoteEntry: '',
-      remotesInfo: { preconfigured: { matchedVersion: 'preset' } },
-    };
-    addGlobalSnapshot({ 'same-host': template });
-    const a = host('v1');
-    await resolve(a.instance);
-    expect(template.remotesInfo).toEqual({
-      preconfigured: { matchedVersion: 'preset' },
-    });
-    const b = host('v2');
-    await resolve(b.instance);
-    expect(getHostSnapshotInfo(b.instance)?.remotesInfo).toEqual({
-      preconfigured: { matchedVersion: 'preset' },
-      catalog: { matchedVersion: entry('v2') },
-    });
-    expect(
-      getHostSnapshotInfo(a.instance)?.remotesInfo.catalog.matchedVersion,
-    ).toBe(entry('v1'));
-  });
-
-  it('uses only the exact build template and leaves injected objects unchanged', async () => {
-    const unrelated = {
-      version: '',
-      remoteEntry: '',
-      remotesInfo: { catalog: { matchedVersion: entry('v1') } },
-    };
-    const exact = {
-      version: '',
-      remoteEntry: '',
-      remotesInfo: { preconfigured: { matchedVersion: 'preset' } },
-    };
-    addGlobalSnapshot({ 'same-host': unrelated, 'same-host:b': exact });
-    const b = host('v2', 'same-host:b');
-    expect(await resolve(b.instance)).toMatchObject({ buildVersion: 'v2' });
-    expect(b.instance.moduleInfo).not.toBe(exact);
-    expect(exact.remotesInfo).toEqual({
-      preconfigured: { matchedVersion: 'preset' },
-    });
-    expect(getGlobalSnapshot()['same-host']).toBe(unrelated);
   });
 
   it('keeps legacy name/version deployment templates for compiled hosts', async () => {
@@ -195,7 +141,6 @@ describe('instance-owned host snapshots', () => {
       } as any,
     });
     expect(await resolve(instance)).toMatchObject({ buildVersion: 'v1' });
-    expect(instance.moduleInfo).not.toBe(template);
     expect(getGlobalSnapshot()['same-host:release']).toBe(template);
     expect(getGlobalSnapshot()['same-host:compiled-build']).toBeUndefined();
   });

@@ -537,12 +537,10 @@ export default function (): ModuleFederationRuntimePlugin {
     __webpack_require__.federation
   ) {
     const federation = __webpack_require__.federation as any;
-    if (federation.bundlerRuntime) {
-      installNodeCacheRuntime(
-        federation.bundlerRuntimeOptions?.remotes?.webpackRequire ||
-          __webpack_require__,
-      );
-    }
+    installNodeCacheRuntime(
+      federation.bundlerRuntimeOptions?.remotes?.webpackRequire ||
+        __webpack_require__,
+    );
     setupScriptLoader();
     setupWebpackRequirePatching(
       setupChunkHandler(

@@ -1143,12 +1143,9 @@ These hooks let optional plugins implement environment-specific ownership:
   Synchronous force registration also uses this callback.
 - `dispose({ origin })` runs when the instance is destroyed. It may return a
   Promise. Destruction waits for every registered disposal hook.
-- `resolveHostSnapshot({ origin })` runs synchronously when resolving the host
-  snapshot. Return `{ snapshot }` to supply plugin-owned host state. Returning
-  nothing preserves the default global snapshot lookup and publication.
 
 `@module-federation/node/runtimePlugin` uses these hooks for SSR lifecycle and
-snapshot isolation. The hooks do not require a specific bundler.
+resource ownership. The hooks do not require a specific bundler.
 
 ## bridgeHook
 

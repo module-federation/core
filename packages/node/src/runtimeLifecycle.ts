@@ -2,7 +2,6 @@ import type {
   ModuleFederation,
   ModuleFederationRuntimePlugin,
 } from '@module-federation/runtime';
-import type { ModuleInfo } from '@module-federation/sdk';
 import helpers from '@module-federation/runtime/helpers';
 import { clearContainerCache } from '@module-federation/webpack-bundler-runtime/clear-cache';
 import { disposeInstance } from './dispose';
@@ -89,28 +88,6 @@ export function nodeRuntimeLifecycle(): ModuleFederationRuntimePlugin {
         return disposal;
       };
       return {
-        resolveHostSnapshot() {
-          if (!host.moduleInfo) {
-            const { getGlobalSnapshot, getGlobalSnapshotInfoByModuleInfo } =
-              helpers.global;
-            const template =
-              (host.options.id && getGlobalSnapshot()[host.options.id]) ||
-              getGlobalSnapshotInfoByModuleInfo({
-                name: host.name,
-                version: host.options.version,
-              });
-            const snapshot: ModuleInfo = template
-              ? JSON.parse(JSON.stringify(template))
-              : ({
-                  version: host.options.version || '',
-                  remoteEntry: '',
-                  remotesInfo: {},
-                } as ModuleInfo);
-            snapshot.remotesInfo ||= {};
-            host.moduleInfo = snapshot;
-          }
-          return { snapshot: host.moduleInfo as ModuleInfo };
-        },
         beforeRemoveRemote({ remote }) {
           const module = host.moduleCache.get(remote.name);
           if (!module) return { remove() {} };

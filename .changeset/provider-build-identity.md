@@ -11,6 +11,6 @@ Reuse the runtime identified by the provider name and build version, and remove 
 
 Keep SSR provider ownership in the Node runtime plugin, preserving shared records, runtimes and containers still used by another host.
 
-The Node plugin keeps mutable host snapshot selections on their owning runtime instance. Explicit build IDs use exact snapshot keys, and injected snapshots are cloned as initial templates so another same-name host cannot inherit runtime-added remote selections. The default snapshot plugin still publishes global snapshots.
-
 Detach the previous cache adapter when multiple federation plugins reinitialize one bundler, preserving other live bindings and rejecting replacement during pending cleanup.
+
+Bind each Node entry's cache adapter after bundler bootstrap, including entries that reuse an existing federation instance.

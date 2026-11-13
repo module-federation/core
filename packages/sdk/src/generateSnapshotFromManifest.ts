@@ -137,7 +137,6 @@ export function generateSnapshotFromManifest(
   const { exposes } = manifest;
 
   let basicRemoteSnapshot: BasicProviderModuleInfo = {
-    providerName: manifest.name,
     version: version ? version : '',
     buildVersion,
     globalName,
@@ -182,9 +181,6 @@ export function generateSnapshotFromManifest(
   }
 
   if (ssrRemoteEntry) {
-    if (ssrRemoteEntry.buildVersion !== undefined) {
-      remoteSnapshot.ssrBuildVersion = ssrRemoteEntry.buildVersion;
-    }
     const fullSSRRemoteEntry = simpleJoinRemoteEntry(
       ssrRemoteEntry.path,
       ssrRemoteEntry.name,
