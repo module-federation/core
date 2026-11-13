@@ -10,17 +10,15 @@ import { createMockCompilation, createWebpackMock } from './utils';
 
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 const mocks = rs.hoisted(() => ({
-  mockNormalizeWebpackPath: rs.fn((path: string) => path),
+  mockNormalizeWebpackPath: rs.fn(
+    rs.requireActual<
+      typeof import('@module-federation/sdk/normalize-webpack-path')
+    >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
+  ),
 }));
 
 // Mock webpack
 rs.mock('webpack', () => createWebpackMock());
-
-// Get the webpack mock
-const webpack = require('webpack');
-
-// Add mock to make Module.serialize work
-webpack.Module.prototype.serialize = rs.fn();
 
 // Mock dependencies
 rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
@@ -223,37 +221,8 @@ describe('ContainerEntryModule', () => {
       expect(serializeContext.write).toHaveBeenCalledWith(shareScope);
       expect(serializeContext.write).toHaveBeenCalledWith(injectRuntimeEntry);
 
-      // Reset the serialized data for deserialization
-      // The deserialize order is:
-      // 1. ContainerEntryModule.deserialize (static) reads: _name, _exposes, _shareScope, _injectRuntimeEntry
-      // 2. Then calls obj.deserialize(context) which is Module.deserialize reading:
-      //    type, layer, context, resolveOptions, factoryMeta, useSourceMap, useSimpleSourceMap, hot,
-      //    _warnings, _errors, buildMeta, buildInfo, presentationalDependencies, codeGenerationDependencies
-      // 3. Then Module calls super.deserialize() -> DependenciesBlock reads: dependencies, blocks
-      const deserializedData = [
-        name, // _name (ContainerEntryModule)
-        exposesFormatted, // _exposes (ContainerEntryModule)
-        shareScope, // _shareScope (ContainerEntryModule)
-        injectRuntimeEntry, // _injectRuntimeEntry (ContainerEntryModule)
-        // Module.deserialize reads:
-        'javascript/dynamic', // type
-        null, // layer
-        null, // context
-        undefined, // resolveOptions
-        undefined, // factoryMeta
-        false, // useSourceMap
-        false, // useSimpleSourceMap
-        false, // hot
-        undefined, // _warnings
-        undefined, // _errors
-        {}, // buildMeta
-        {}, // buildInfo
-        undefined, // presentationalDependencies
-        undefined, // codeGenerationDependencies
-        // DependenciesBlock.deserialize reads:
-        [], // dependencies
-        [], // blocks
-      ];
+      // Replay the installed webpack version's serialization layout.
+      const deserializedData = serializedData;
 
       let index = 0;
       const deserializeContext: ObjectDeserializerContext = {
@@ -311,32 +280,8 @@ describe('ContainerEntryModule', () => {
       expect(serializeContext.write).toHaveBeenCalledWith(shareScope);
       expect(serializeContext.write).toHaveBeenCalledWith(injectRuntimeEntry);
 
-      // Reset the serialized data for deserialization
-      // Same order as string shareScope test
-      const deserializedData = [
-        name, // _name (ContainerEntryModule)
-        exposesFormatted, // _exposes (ContainerEntryModule)
-        shareScope, // _shareScope (ContainerEntryModule)
-        injectRuntimeEntry, // _injectRuntimeEntry (ContainerEntryModule)
-        // Module.deserialize reads:
-        'javascript/dynamic', // type
-        null, // layer
-        null, // context
-        undefined, // resolveOptions
-        undefined, // factoryMeta
-        false, // useSourceMap
-        false, // useSimpleSourceMap
-        false, // hot
-        undefined, // _warnings
-        undefined, // _errors
-        {}, // buildMeta
-        {}, // buildInfo
-        undefined, // presentationalDependencies
-        undefined, // codeGenerationDependencies
-        // DependenciesBlock.deserialize reads:
-        [], // dependencies
-        [], // blocks
-      ];
+      // Replay the installed webpack version's serialization layout.
+      const deserializedData = serializedData;
 
       let index = 0;
       const deserializeContext: ObjectDeserializerContext = {
@@ -365,31 +310,18 @@ describe('ContainerEntryModule', () => {
       const shareScope = 'default';
       const injectRuntimeEntry = '';
 
-      // Include all required fields for proper deserialization
-      const deserializedData = [
-        name, // _name (ContainerEntryModule)
-        exposesFormatted, // _exposes (ContainerEntryModule)
-        shareScope, // _shareScope (ContainerEntryModule)
-        injectRuntimeEntry, // _injectRuntimeEntry (ContainerEntryModule)
-        // Module.deserialize reads:
-        'javascript/dynamic', // type
-        null, // layer
-        null, // context
-        undefined, // resolveOptions
-        undefined, // factoryMeta
-        false, // useSourceMap
-        false, // useSimpleSourceMap
-        false, // hot
-        undefined, // _warnings
-        undefined, // _errors
-        {}, // buildMeta
-        {}, // buildInfo
-        undefined, // presentationalDependencies
-        undefined, // codeGenerationDependencies
-        // DependenciesBlock.deserialize reads:
-        [], // dependencies
-        [], // blocks
-      ];
+      // Obtain required base fields without depending on webpack's field order.
+      const deserializedData: any[] = [];
+      const module = new ContainerEntryModule(
+        name,
+        exposesFormatted,
+        shareScope,
+        injectRuntimeEntry,
+      );
+      module.serialize({
+        write: (value: any) => deserializedData.push(value),
+        setCircularReference: rs.fn(),
+      } as unknown as ObjectSerializerContext);
 
       let index = 0;
       const deserializeContext: any = {

@@ -1,6 +1,15 @@
 const { ProvideSharedPlugin } = require('../../../../dist/src');
 
 module.exports = {
+  resolve: {
+    // Keep the fixture package ahead of webpack's inferred tsconfig aliases.
+    alias: {
+      package$: require('path').join(
+        __dirname,
+        'node_modules/package/index.js',
+      ),
+    },
+  },
   plugins: [
     new ProvideSharedPlugin({
       shareScope: 'test-scope',

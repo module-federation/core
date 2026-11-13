@@ -20,6 +20,7 @@ class InvertedContainerPlugin {
     compiler.hooks.thisCompilation.tap(
       'EmbeddedContainerPlugin',
       (compilation: Compilation) => {
+        // @ts-ignore webpack version is not the same as the one used in the plugin
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
         const containers = new Set();
         hooks.addContainerEntryDependency.tap(

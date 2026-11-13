@@ -86,7 +86,11 @@ const mocks = rs.hoisted(() => {
       addFederationRuntimeDependency: { tap: rs.fn() },
       addRemoteDependency: { tap: rs.fn() },
     })),
-    mockNormalizeWebpackPath: rs.fn((path: string) => path),
+    mockNormalizeWebpackPath: rs.fn(
+      rs.requireActual<
+        typeof import('@module-federation/sdk/normalize-webpack-path')
+      >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
+    ),
     mockGetWebpackPath: rs.fn(() => 'mocked-webpack-path'),
   };
 });
