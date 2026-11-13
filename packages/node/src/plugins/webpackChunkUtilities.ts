@@ -2,7 +2,49 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-import type { Chunk, ChunkGraph } from 'webpack';
+const { getUndoPath } = require(
+  normalizeWebpackPath('webpack/lib/util/identifier'),
+) as typeof import('webpack/lib/util/identifier');
+import type { Chunk, ChunkGraph, Compilation } from 'webpack';
+
+const HASH_PLACEHOLDER = /\[(?:full|chunk|content)?hash(?::[^\]]+)?\]/g;
+
+type ChunkFilenameTemplate = ReturnType<
+  typeof import('webpack').javascript.JavascriptModulesPlugin.getChunkFilenameTemplate
+>;
+
+/**
+ * Path from a chunk's output file back to the output root.
+ * Webpack generates runtime modules for hashing before chunk hashes exist, so
+ * resolving the filename with its hash placeholders intact throws.
+ * @param {Compilation} compilation - The compilation.
+ * @param {Chunk} chunk - The chunk the runtime module belongs to.
+ * @param {ChunkFilenameTemplate} filenameTemplate - The chunk's filename template.
+ * @returns {string} - The undo path, empty when the chunk is at the output root.
+ */
+export function getChunkRootOutputDir(
+  compilation: Compilation,
+  chunk: Chunk,
+  filenameTemplate: ChunkFilenameTemplate,
+): string {
+  const runtimeTemplate =
+    compilation.runtimeTemplate as typeof compilation.runtimeTemplate & {
+      chunkRootOutputDir?: (chunk: Chunk, enforceRelative: boolean) => string;
+    };
+  if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
+    return runtimeTemplate.chunkRootOutputDir(chunk, false);
+  }
+  // Older Webpack has no chunkRootOutputDir. A hash does not change the
+  // directory depth of a string template, so neutralize it like Webpack does.
+  const outputName = compilation.getPath(
+    typeof filenameTemplate === 'function'
+      ? (...args: Parameters<typeof filenameTemplate>) =>
+          filenameTemplate(...args).replace(HASH_PLACEHOLDER, 'x')
+      : filenameTemplate.replace(HASH_PLACEHOLDER, 'x'),
+    { chunk, contentHashType: 'javascript' },
+  );
+  return getUndoPath(outputName, compilation.outputOptions.path || '', false);
+}
 
 /**
  * Generates the hot module replacement (HMR) code.

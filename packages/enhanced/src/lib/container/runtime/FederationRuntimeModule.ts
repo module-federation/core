@@ -69,8 +69,8 @@ class FederationRuntimeModule extends RuntimeModule {
         if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
           rootOutputDir = runtimeTemplate.chunkRootOutputDir(this.chunk, false);
         } else {
-          // Webpack < 5.110 has no chunkRootOutputDir. Hashes never affect the
-          // output depth, so neutralize them like Webpack does.
+          // Older Webpack has no chunkRootOutputDir. A hash does not change the
+          // directory depth of a string template, so neutralize it like Webpack does.
           const template = jsModulePlugin.getChunkFilenameTemplate(
             this.chunk,
             this.compilation.outputOptions,

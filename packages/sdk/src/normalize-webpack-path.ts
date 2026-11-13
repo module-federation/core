@@ -1,6 +1,7 @@
 import type webpack from 'webpack';
+import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { isAbsolute, resolve } from 'node:path';
+import { isAbsolute, join, resolve, sep } from 'node:path';
 
 // Webpack 5.112 reorganized internals without retaining every old location.
 // Keep the old layout preferred for older installations and patched copies.
@@ -91,7 +92,20 @@ export function getWebpackPath(
       }
       return '';
     }
-    return webpackPath ? createRequire(webpackPath).resolve('webpack') : '';
+    if (!webpackPath) {
+      return '';
+    }
+    try {
+      const entry = createRequire(webpackPath).resolve('webpack');
+      // A bundled compiler resolves to an unrelated installation, or to none.
+      // Only report the package that contains the active compiler.
+      return webpackPath.startsWith(resolve(entry, '../..') + sep) ? entry : '';
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'MODULE_NOT_FOUND') {
+        throw error;
+      }
+      return '';
+    }
   }
 }
 
@@ -114,18 +128,38 @@ export const normalizeWebpackPath = (fullPath: string): string => {
   }
 
   const requestWebpack = getWebpackRequire();
-  try {
-    // Resolve only: never execute a module while choosing its layout.
-    requestWebpack.resolve(candidate);
-    return candidate;
-  } catch (error) {
-    const missing = error as NodeJS.ErrnoException;
-    if (
-      missing.code !== 'MODULE_NOT_FOUND' ||
-      !missing.message.startsWith(`Cannot find module '${candidate}'`)
-    ) {
-      throw error;
+  const exists = (request: string): boolean => {
+    try {
+      // Resolve only: never execute a module while choosing its layout.
+      requestWebpack.resolve(request);
+      return true;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'MODULE_NOT_FOUND') {
+        throw error;
+      }
+      return false;
     }
+  };
+
+  if (!process.env['FEDERATION_WEBPACK_PATH']) {
+    // A bare request keeps walking up node_modules when the nearest Webpack
+    // lacks the file, which would mix internals from two Webpack copies.
+    // Choose the layout inside the copy the caller resolves instead.
+    const nearest = requestWebpack.resolve
+      .paths('webpack')
+      ?.find((directory) => existsSync(join(directory, 'webpack')));
+    if (nearest) {
+      if (exists(join(nearest, fullPath))) {
+        return fullPath;
+      }
+      // A missing fallback must propagate instead of returning an unusable path.
+      requestWebpack.resolve(join(nearest, relocatedPath));
+      return relocatedPath;
+    }
+  }
+
+  if (exists(candidate)) {
+    return candidate;
   }
   const fallback = normalize(relocatedPath);
   // A missing fallback, package exports restriction, or other resolution error

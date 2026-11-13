@@ -4,6 +4,7 @@ import {
   copyFileSync,
   mkdtempSync,
   mkdirSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -86,32 +87,78 @@ describe('Webpack internal layout compatibility (real module resolution)', () =>
     expect(require(normalized)).toBeInstanceOf(Function);
   });
 
-  it('does not require Webpack to be resolvable from the SDK', () => {
-    delete process.env['FEDERATION_WEBPACK_PATH'];
-    const isolatedRoot = path.join(root, 'isolated');
-    mkdirSync(isolatedRoot, { recursive: true });
-    const isolatedSdk = path.join(isolatedRoot, 'sdk.cjs');
+  const isolatedCaller = (
+    name: string,
+    webpackFiles: Record<string, string>,
+    script: string,
+  ) => {
+    // The SDK copy lives beside no Webpack at all, so only caller-relative
+    // resolution can find the caller's installation.
+    const sdkRoot = path.join(root, name, 'sdk');
+    const callerRoot = path.join(root, name, 'app');
+    mkdirSync(sdkRoot, { recursive: true });
     copyFileSync(
       require.resolve('@module-federation/sdk/normalize-webpack-path'),
-      isolatedSdk,
+      path.join(sdkRoot, 'sdk.cjs'),
     );
-    const callerWebpack = path.join(isolatedRoot, 'node_modules', oldPath);
-    mkdirSync(path.dirname(callerWebpack), { recursive: true });
-    writeFileSync(callerWebpack + '.js', 'module.exports = "caller";');
-    const caller = path.join(isolatedRoot, 'caller.cjs');
+    for (const [request, source] of Object.entries(webpackFiles)) {
+      const file = path.join(callerRoot, request) + '.js';
+      mkdirSync(path.dirname(file), { recursive: true });
+      writeFileSync(file, source);
+    }
+    const caller = path.join(callerRoot, 'packages/plugin/caller.cjs');
+    mkdirSync(path.dirname(caller), { recursive: true });
     writeFileSync(
       caller,
-      `const { normalizeWebpackPath } = require('./sdk.cjs');
-       Error.stackTraceLimit = 0;
-       const request = ${JSON.stringify(oldPath)};
-       const normalized = normalizeWebpackPath(request);
-       console.log(JSON.stringify([normalized, require(normalized)]));`,
+      `const sdk = require(${JSON.stringify(path.join(sdkRoot, 'sdk.cjs'))});
+       ${script}`,
     );
-    const result = execFileSync(process.execPath, [caller], {
-      encoding: 'utf8',
-      env: process.env,
-    });
-    expect(JSON.parse(result)).toEqual([oldPath, 'caller']);
+    const env = { ...process.env };
+    delete env['FEDERATION_WEBPACK_PATH'];
+    return JSON.parse(
+      execFileSync(process.execPath, [caller], { encoding: 'utf8', env }),
+    );
+  };
+  const resolveScript = `Error.stackTraceLimit = 0;
+    const normalized = sdk.normalizeWebpackPath(${JSON.stringify(oldPath)});
+    console.log(JSON.stringify([normalized, require(normalized)]));`;
+
+  it('does not require Webpack to be resolvable from the SDK', () => {
+    expect(
+      isolatedCaller(
+        'isolated',
+        { [`node_modules/${oldPath}`]: 'module.exports = "caller";' },
+        resolveScript,
+      ),
+    ).toEqual([oldPath, 'caller']);
+  });
+
+  it('does not mix in an old layout hoisted above the nearest Webpack', () => {
+    expect(
+      isolatedCaller(
+        'hoisted',
+        {
+          [`node_modules/${oldPath}`]: 'module.exports = "hoisted old";',
+          [`packages/plugin/node_modules/${newPath}`]:
+            'module.exports = "nearest new";',
+        },
+        resolveScript,
+      ),
+    ).toEqual([newPath, 'nearest new']);
+  });
+
+  it('reports no compiler path for a bundled compiler', () => {
+    expect(
+      isolatedCaller(
+        'bundled',
+        {
+          'packages/plugin/bundle':
+            'exports.webpack = function webpack() { throw new Error("bundled"); };',
+        },
+        `const { webpack } = require('./bundle.js');
+         console.log(JSON.stringify(sdk.getWebpackPath({ webpack })));`,
+      ),
+    ).toBe('');
   });
 
   it('falls back with Jest-style module resolution errors', () => {
@@ -210,6 +257,53 @@ describe('Webpack internal layout compatibility (real module resolution)', () =>
       check(oldFile);
     },
   );
+});
+
+describe('Webpack internal layout compatibility (installed Webpack)', () => {
+  const sdkSource = readFileSync(
+    path.join(
+      path.dirname(
+        require.resolve('@module-federation/sdk/normalize-webpack-path'),
+      ),
+      '../src/normalize-webpack-path.ts',
+    ),
+    'utf8',
+  );
+  const aliases = [
+    ...sdkSource
+      .slice(
+        sdkSource.indexOf('const webpackInternalPaths'),
+        sdkSource.indexOf('};'),
+      )
+      .matchAll(/'(webpack\/[^']+)':\s*'(webpack\/[^']+)'/g),
+  ].map(([, from, to]) => [from, to]);
+  let previousWebpackPath: string | undefined;
+
+  beforeEach(() => {
+    previousWebpackPath = process.env['FEDERATION_WEBPACK_PATH'];
+    delete process.env['FEDERATION_WEBPACK_PATH'];
+  });
+
+  afterEach(() => {
+    if (previousWebpackPath !== undefined) {
+      process.env['FEDERATION_WEBPACK_PATH'] = previousWebpackPath;
+    }
+  });
+
+  it('finds the alias map', () => {
+    expect(aliases.length).toBeGreaterThanOrEqual(16);
+  });
+
+  it('resolves every mapped internal inside the installed Webpack', () => {
+    const webpackRoot = path.dirname(require.resolve('webpack/package.json'));
+    for (const [from, to] of aliases) {
+      const normalized = normalizeWebpackPath(from);
+      expect([from, to]).toContain(normalized);
+      expect(
+        require.resolve(normalized).startsWith(webpackRoot + path.sep),
+      ).toBe(true);
+    }
+  });
 });
 
 describe('SDK browser entry isolation', () => {
