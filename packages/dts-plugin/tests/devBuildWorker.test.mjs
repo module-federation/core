@@ -5,9 +5,24 @@ import { once } from 'node:events';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { createConnection } from 'node:net';
+import { createConnection, createServer } from 'node:net';
 
-// Run after the package build, with the default development broker port free.
+// Run after the package build with a broker port reserved for this test run.
+async function availablePort() {
+  const probe = createServer();
+  probe.listen(0);
+  await once(probe, 'listening');
+  const port = probe.address().port;
+  await new Promise((resolve) => probe.close(resolve));
+  return port;
+}
+const brokerPort = process.env.JO_PORT_BROKER
+  ? Number(process.env.JO_PORT_BROKER)
+  : await availablePort();
+assert.ok(
+  Number.isInteger(brokerPort) && brokerPort > 0 && brokerPort < 65536,
+  'JO_PORT_BROKER must be a valid reserved port',
+);
 test('CJS producer and ESM consumer use the packaged build worker', async () => {
   const dist = new URL('../dist/', import.meta.url);
   const require = createRequire(import.meta.url);
@@ -19,6 +34,7 @@ test('CJS producer and ESM consumer use the packaged build worker', async () => 
   const remote = {
     name: 'js-only-provider',
     entry: 'http://127.0.0.1:39001/mf-manifest.json',
+    brokerUrl: `ws://127.0.0.1:${brokerPort}`,
   };
   const waitFor = async (check) => {
     const deadline = Date.now() + 15000;
@@ -28,14 +44,12 @@ test('CJS producer and ESM consumer use the packaged build worker', async () => 
       await delay(10);
     }
   };
-  if (process.env.JO_PORT_BROKER)
-    assert.equal(Number(process.env.JO_PORT_BROKER), 16322);
   const broker = fork(new URL('start-broker.js', dist), [], {
     stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
   });
   try {
     const ready = once(broker, 'message');
-    broker.send('start');
+    broker.send({ kind: 'start', port: brokerPort });
     assert.equal((await ready)[0], 'ready');
     const publisher = cjs.createDevBuildConnection(
       { publisher: remote, autoStartBroker: false },
@@ -83,6 +97,7 @@ test('CJS producer and ESM consumer use the packaged build worker', async () => 
     assert.equal(consumer.isSynchronized(remote), false);
     await waitFor(() => diagnostics.length === 2);
     assert.equal(diagnostics[0].url, diagnostics[1].url);
+    assert.equal(new URL(diagnostics[0].url).port, String(brokerPort));
     const initialLogs = await fetch(diagnostics[0].url).then((response) =>
       response.json(),
     );
@@ -155,10 +170,11 @@ test('an ESM worker starts the local broker without a types worker', async () =>
   const remote = {
     name: 'esm-auto-start',
     entry: 'http://localhost:39001/mf-manifest.json',
+    brokerUrl: `ws://localhost:${brokerPort}`,
   };
   const errors = [];
   const publisher = esm.createDevBuildConnection(
-    { publisher: remote },
+    { publisher: remote, autoStartBroker: true },
     { async onUpdate() {}, onError: (error) => errors.push(error) },
   );
   const consumer = esm.createDevBuildConnection(
@@ -179,7 +195,7 @@ test('an ESM worker starts the local broker without a types worker', async () =>
   const deadline = Date.now() + 5000;
   while (
     await new Promise((resolve) => {
-      const socket = createConnection({ host: 'localhost', port: 16322 });
+      const socket = createConnection({ host: 'localhost', port: brokerPort });
       socket.once('connect', () => {
         socket.destroy();
         resolve(true);

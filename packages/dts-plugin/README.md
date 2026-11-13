@@ -42,7 +42,7 @@ Publications and their sources may include `hot: true` when their browser artifa
 
 Subscriptions use the provider name and complete manifest URL. Different ports and paths remain separate providers. `onStatus` reports `disconnected`, `unsupported`, `waiting`, `updating` or `ready`. An unavailable producer, an older broker, a failed update or a lost connection must keep the framework's request-time fallback enabled. These notifications do not discover builds served without a compatible development producer.
 
-The default broker uses WebSocket port 16322 on the provider's host. `brokerUrl` on a publisher or remote overrides that address. Local brokers start automatically unless `autoStartBroker: false` is set. Call and await `connection.close()` when the owning service stops to unsubscribe, abort the callback signal and release the worker.
+The default broker uses WebSocket port 16322 on the provider's host. `brokerUrl` on a publisher or remote overrides that address. Local default-port brokers start automatically unless `autoStartBroker: false` is set. Automatic startup only supports `ws:` URLs with the root path `/`. To start a broker on a custom local port, explicitly set `autoStartBroker: true`, for example with `brokerUrl: 'ws://127.0.0.1:29622/'`. Remote hosts, secure `wss:` endpoints and proxy paths must already be running. This allows separate development sessions to use their own brokers. Call and await `connection.close()` when the owning service stops to unsubscribe, abort the callback signal and release the worker.
 
 ## Development diagnostics
 

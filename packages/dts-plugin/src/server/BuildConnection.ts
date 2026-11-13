@@ -213,10 +213,13 @@ export class BuildConnection {
         !this.closed &&
         this.options.autoStartBroker !== false &&
         error.code === 'ECONNREFUSED' &&
+        address.protocol === 'ws:' &&
+        address.pathname === '/' &&
         ['localhost', '127.0.0.1', '[::1]'].includes(address.hostname) &&
-        address.port === String(DEFAULT_WEB_SOCKET_PORT)
+        (address.port === String(DEFAULT_WEB_SOCKET_PORT) ||
+          this.options.autoStartBroker === true)
       )
-        createBroker();
+        createBroker(Number(address.port || 80));
     });
     socket.on('close', () => {
       if (link.heartbeat) clearInterval(link.heartbeat);

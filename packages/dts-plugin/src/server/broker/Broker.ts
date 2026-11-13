@@ -102,12 +102,17 @@ export class Broker {
   private _tmpSubscriberShelter: TmpSubscriberShelter = new Map();
   private _scheduleJob: ScheduledTask | null = null;
   private _diagnostics = new BrokerDiagnostics();
-  private _stopDiagnostics = observeFileLogs((entry) =>
-    this._diagnostics.record(entry),
-  );
+  private _stopDiagnostics: () => void;
   private _buildBroker = new BuildBroker(this._diagnostics.info);
 
-  constructor() {
+  constructor(private readonly port: number = Broker.DEFAULT_WEB_SOCKET_PORT) {
+    if (!Number.isInteger(port) || port < 1 || port > 65535)
+      throw new RangeError(
+        'Development broker port must be between 1 and 65535',
+      );
+    this._stopDiagnostics = observeFileLogs((entry) =>
+      this._diagnostics.record(entry),
+    );
     fileLog('Development broker started', 'Broker', 'info');
     this._setSchedule();
     this._startWsServer();
@@ -173,7 +178,7 @@ export class Broker {
     });
     this._webSocketServer.on('listening', () => {
       fileLog(
-        `WebSocket server is listening on port ${Broker.DEFAULT_WEB_SOCKET_PORT}`,
+        `WebSocket server is listening on port ${this.port}`,
         'Broker',
         'info',
       );
@@ -196,7 +201,7 @@ export class Broker {
         }
       }
     });
-    server.listen(Broker.DEFAULT_WEB_SOCKET_PORT);
+    server.listen(this.port);
 
     // const httpServer = createServer();
 

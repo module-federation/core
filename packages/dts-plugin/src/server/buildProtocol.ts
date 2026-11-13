@@ -40,7 +40,7 @@ export interface DevBuildConnectionOptions {
   consumer?: string;
   publisher?: DevBuildRemote;
   remotes?: DevBuildRemote[];
-  /** Only local brokers are started automatically. */
+  /** Local root-path ws: brokers on the default port start automatically. Explicit true also allows custom local ports. */
   autoStartBroker?: boolean;
 }
 
