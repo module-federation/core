@@ -52,72 +52,6 @@ function consumer(build: string) {
 }
 
 describe('provider build identity', () => {
-  it('binds the actual container runtime independently of its release or compilation ID', async () => {
-    const first = provider('same-release', 'catalog:node:1');
-    const second = provider('same-release', 'catalog:node:2');
-    const a = consumer('manifest-a');
-    const b = consumer('manifest-b');
-    for (const [consumer, runtime] of [
-      [a, first],
-      [b, second],
-    ] as const) {
-      consumer.container.init = (_share, _scope, options) => {
-        expect(Object.keys(options)).not.toContain(
-          'module-federation.bind-provider',
-        );
-        options[Symbol.for('module-federation.bind-provider')](runtime);
-      };
-      await consumer.host.loadRemote('registered-catalog/Button');
-      expect(
-        helpers.global.getRemoteFederationInstance(
-          consumer.host.moduleCache.get(info().name)!.remoteInfo,
-          undefined,
-          consumer.container,
-        ),
-      ).toBe(runtime);
-    }
-    const record = second.shareScopeMap.default.library['same-release'];
-    await a.host.removeRemote(info().name);
-    expect(a.container.__webpack_clear_cache__).toHaveBeenCalled();
-    expect(b.container.__webpack_clear_cache__).not.toHaveBeenCalled();
-    expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).toContain(second);
-    expect(second.shareScopeMap.default.library['same-release']).toBe(record);
-    await expect(
-      b.host.loadRemote('registered-catalog/Another'),
-    ).resolves.toEqual({ build: 'manifest-b' });
-    await b.host.removeRemote(info().name);
-  });
-
-  it('uses the manifest URL when adopting a retained provider before loading an expose', async () => {
-    const runtime = provider('release', 'catalog:node:1');
-    const other = provider('release', 'catalog:node:2');
-    const a = consumer('manifest');
-    const remoteInfo = a.host.moduleCache.get(info().name)!.remoteInfo;
-    remoteInfo.version = 'https://one.test/mf-manifest.json';
-    a.container.init = (_share, _scope, options) =>
-      options[Symbol.for('module-federation.bind-provider')](runtime);
-    await a.host.loadRemote('registered-catalog/Button');
-    const selected = {
-      ...info('manifest'),
-      entry: undefined,
-      version: remoteInfo.version,
-    };
-    expect(helpers.global.getRemoteFederationInstance(selected)).toBe(runtime);
-    expect(
-      helpers.global.getRemoteFederationInstance({
-        ...selected,
-        version: 'https://two.test/mf-manifest.json',
-      }),
-    ).toBeUndefined();
-    expect(
-      helpers.global.getRemoteFederationInstance(
-        remoteInfo,
-        [other],
-        a.container,
-      ),
-    ).toBeUndefined();
-  });
-
   it.each(['update', 'force'] as const)(
     '%s retains a provider used by another host until its last consumer removes it',
     async (mode) => {
@@ -155,7 +89,7 @@ describe('provider build identity', () => {
     },
   );
 
-  it('resolves the manifest provider build and rejects ambiguous instances', () => {
+  it('resolves the exact provider build independently of registration and manifest URLs', () => {
     const first = provider('1');
     const second = provider('2');
     const resolve = helpers.global.getRemoteFederationInstance;
@@ -166,9 +100,13 @@ describe('provider build identity', () => {
       id: 'registered-catalog:1',
     });
     expect(resolve(info('1'), [alias])).toBeUndefined();
-    expect(() => resolve(info(), [first, second])).toThrow('Ambiguous');
+    expect(
+      resolve({ ...info('1'), entry: 'https://mirror.test/entry.js' }),
+    ).toBe(first);
     const duplicate = provider('1');
-    expect(() => resolve(info('1'), [first, duplicate])).toThrow('Ambiguous');
+    expect(resolve(info('1'))).toBe(duplicate);
+    expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).not.toContain(first);
+    expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).toContain(second);
     const runtime = new ModuleFederation({ name: 'catalog', id: '' });
     expect(resolve(info(), [runtime])).toBe(runtime);
   });
@@ -219,16 +157,16 @@ describe('provider build identity', () => {
     },
   );
 
-  it('rejects ambiguous removal before changing registrations or containers', async () => {
-    provider('1');
-    provider('1');
+  it('removes a duplicated build without leaving another registry entry', async () => {
+    const first = provider('1');
+    const duplicate = provider('1');
     const { host, container } = consumer('1');
-    await expect(host.removeRemote(info('1').name)).rejects.toThrow(
-      'Ambiguous',
-    );
-    expect(host.options.remotes).toHaveLength(1);
-    expect(host.moduleCache.has(info('1').name)).toBe(true);
-    expect(container.__webpack_clear_cache__).not.toHaveBeenCalled();
+    await host.removeRemote(info('1').name);
+    expect(host.options.remotes).toHaveLength(0);
+    expect(host.moduleCache.has(info('1').name)).toBe(false);
+    expect(container.__webpack_clear_cache__).toHaveBeenCalled();
+    expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).not.toContain(first);
+    expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).not.toContain(duplicate);
   });
 
   it('destroys one same-name build without removing the peer shared owner', async () => {

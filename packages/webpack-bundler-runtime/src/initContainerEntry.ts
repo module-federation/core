@@ -19,9 +19,6 @@ export function initContainerEntry(
     return;
 
   const federationInstance = webpackRequire.federation.instance;
-  (remoteEntryInitOptions as any)?.[
-    Symbol.for('module-federation.bind-provider')
-  ]?.(federationInstance);
 
   federationInstance.initOptions({
     name: webpackRequire.federation.initOptions.name,

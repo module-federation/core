@@ -25,7 +25,7 @@ fs.writeFileSync(
 );
 fs.writeFileSync(path.join(directory, 'entry.js'), 'module.exports = "first";');
 let custom = false;
-const compiler = build({
+const compilerOptions = {
   mode: 'development',
   context: directory,
   target: 'node',
@@ -53,11 +53,13 @@ const compiler = build({
       { bundler, pluginVersion: 'test' },
     ),
   ],
-});
-const version = () =>
+};
+const compiler = build(compilerOptions);
+const buildInfo = () =>
   JSON.parse(
     fs.readFileSync(path.join(directory, 'dist/mf-manifest.json'), 'utf8'),
-  ).metaData.buildInfo.buildVersion;
+  ).metaData.buildInfo;
+const version = () => buildInfo().buildVersion;
 const output = () => {
   const context = { module: { exports: undefined } };
   vm.runInNewContext(
@@ -70,6 +72,7 @@ const output = () => {
   let watcher;
   try {
     const versions = [];
+    const revisions = [];
     const outputs = [];
     let explicit;
     await new Promise((resolve, reject) => {
@@ -90,6 +93,7 @@ const output = () => {
           }
           if (phase < 3) {
             versions.push(version());
+            revisions.push(buildInfo().devRevision);
             outputs.push(output());
           }
           switch (phase++) {
@@ -118,9 +122,44 @@ const output = () => {
         },
       );
     });
-    console.log(
-      JSON.stringify({ versions, outputs, explicit, custom: version() }),
-    );
+    const customVersion = version();
+    await new Promise((resolve) => watcher.close(resolve));
+    watcher = undefined;
+    custom = false;
+    delete process.env.MF_BUILD_VERSION;
+    const productionCompiler = build({
+      ...compilerOptions,
+      mode: 'production',
+      plugins: [
+        new StatsPlugin(
+          { name: 'provider' },
+          { bundler, pluginVersion: 'test' },
+        ),
+      ],
+    });
+    try {
+      await new Promise((resolve, reject) =>
+        productionCompiler.run((error, stats) =>
+          error || stats.hasErrors()
+            ? reject(
+                error || Error(stats.toString({ all: false, errors: true })),
+              )
+            : resolve(),
+        ),
+      );
+      console.log(
+        JSON.stringify({
+          versions,
+          revisions,
+          outputs,
+          explicit,
+          custom: customVersion,
+          production: buildInfo(),
+        }),
+      );
+    } finally {
+      await new Promise((resolve) => productionCompiler.close(resolve));
+    }
   } finally {
     if (watcher) await new Promise((resolve) => watcher.close(resolve));
     await new Promise((resolve) => compiler.close(resolve));

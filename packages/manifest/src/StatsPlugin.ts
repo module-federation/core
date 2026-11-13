@@ -7,7 +7,7 @@ import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
-import { getCompilationBuildVersion } from './buildVersion';
+import { getCompilationDevRevision } from './buildVersion';
 import { annotateBridgeExposes, collectBridgeMetadata } from './bridgeMetadata';
 
 export class StatsPlugin implements WebpackPluginInstance {
@@ -66,10 +66,7 @@ export class StatsPlugin implements WebpackPluginInstance {
           },
           async () => {
             if (this._options.manifest !== false) {
-              const buildVersion = getCompilationBuildVersion(compilation, [
-                this._statsManager.fileName,
-                this._manifestManager.fileName,
-              ]);
+              const devRevision = getCompilationDevRevision(compilation);
               const existedStats = compilation.getAsset(
                 this._statsManager.fileName,
               );
@@ -79,7 +76,8 @@ export class StatsPlugin implements WebpackPluginInstance {
                   JSON.parse(existedStats.source.source().toString()),
                   compiler,
                 );
-                updatedStats.metaData.buildInfo.buildVersion = buildVersion;
+                if (devRevision)
+                  updatedStats.metaData.buildInfo.devRevision = devRevision;
                 if (
                   typeof this._options.manifest === 'object' &&
                   this._options.manifest.additionalData
@@ -128,7 +126,8 @@ export class StatsPlugin implements WebpackPluginInstance {
                 compiler,
                 compilation,
               );
-              stats.metaData.buildInfo.buildVersion = buildVersion;
+              if (devRevision)
+                stats.metaData.buildInfo.devRevision = devRevision;
               if (
                 typeof this._options.manifest === 'object' &&
                 this._options.manifest.additionalData

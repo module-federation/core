@@ -33,6 +33,18 @@ new StatsPlugin(mfOptions, {
 }).apply(compiler);
 ```
 
+## Build identity
+
+`metaData.buildInfo.buildVersion` uses `MF_BUILD_VERSION`, then the package
+version in the compiler context, then the local fallback. Development builds
+also emit `devRevision`, a timestamp-based counter that advances on every
+compilation, including empty rebuilds. It detects development updates without
+reading emitted asset contents or changing the release identity.
+
+Merged browser and Node manifests retain `buildVersion` and combine both
+development revisions, so rebuilding either compiler changes the marker.
+Production manifests do not add a development revision.
+
 ## Bridge rendering metadata
 
 Statically identifiable default exports created with `createBridgeComponent` publish

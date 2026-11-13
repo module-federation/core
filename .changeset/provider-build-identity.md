@@ -6,7 +6,7 @@
 
 Resolve compiled federation instances by their build identity and keep other same-name builds alive during removal or disposal. Expose the shared provider resolver through the existing runtime helpers. Pure runtime initialization continues to support name and version reuse when no build or explicit instance ID is supplied.
 
-Give independent Node executions their own runtime IDs and record the actual provider during container initialization. Cleanup follows this ownership even when manifest versions differ from the compiled release ID, while exact-ID lookup remains available for older containers.
+Reuse the runtime identified by the provider name and build version, and remove duplicate registry entries for that identity.
 
 Share the provider ownership calculation between Core remote removal and bundler cache cleanup through the runtime helpers, preserving shared records still owned by another build.
 

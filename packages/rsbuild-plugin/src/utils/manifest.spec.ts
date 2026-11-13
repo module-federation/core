@@ -9,13 +9,13 @@ afterEach(() => {
   for (const directory of directories.splice(0))
     fs.rmSync(directory, { recursive: true, force: true });
 });
-const assets = (version: string) =>
+const assets = (revision?: string) =>
   ({
     stats: {
       filename: 'mf-stats.json',
       data: {
         metaData: {
-          buildInfo: { buildVersion: version },
+          buildInfo: { buildVersion: 'release-42', devRevision: revision },
           remoteEntry: { name: 'entry.js' },
         },
       },
@@ -24,7 +24,7 @@ const assets = (version: string) =>
       filename: 'mf-manifest.json',
       data: {
         metaData: {
-          buildInfo: { buildVersion: version },
+          buildInfo: { buildVersion: 'release-42', devRevision: revision },
           remoteEntry: { name: 'entry.js' },
         },
       },
@@ -45,7 +45,8 @@ it('tracks one-sided builds without mutating retained compiler outputs', () => {
       fs.readFileSync(path.join(directory, 'mf-stats.json'), 'utf8'),
     );
     expect(stats.metaData.buildInfo).toEqual(manifest.metaData.buildInfo);
-    return manifest.metaData.buildInfo.buildVersion;
+    expect(manifest.metaData.buildInfo.buildVersion).toBe('release-42');
+    return manifest.metaData.buildInfo.devRevision;
   };
   const first = merge();
   expect(merge()).toBe(first);
@@ -53,9 +54,9 @@ it('tracks one-sided builds without mutating retained compiler outputs', () => {
   expect(second).not.toBe(first);
   expect(merge(assets('node-2'))).toBe(second);
   expect(merge(node, assets('browser-2'))).not.toBe(first);
-  expect(browser.manifest!.data.metaData.buildInfo.buildVersion).toBe(
+  expect(browser.manifest!.data.metaData.buildInfo.devRevision).toBe(
     'browser-1',
   );
   expect(browser.manifest!.data.metaData.ssrRemoteEntry).toBeUndefined();
-  expect(merge(assets('release-42'), assets('release-42'))).toBe('release-42');
+  expect(merge(assets(), assets())).toBeUndefined();
 });

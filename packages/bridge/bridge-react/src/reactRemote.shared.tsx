@@ -286,7 +286,9 @@ function createConsumer<P extends object>(
                   metadata.servicePath!,
                 );
                 const binding = getBridgeService(instance, id);
-                const buildVersion = match?.remoteSnapshot?.buildVersion;
+                const buildVersion =
+                  match?.remoteSnapshot?.devRevision ||
+                  match?.remoteSnapshot?.buildVersion;
                 const ingressUrl = getBridgeServiceIngress(
                   instance,
                   binding.moduleName,

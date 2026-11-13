@@ -36,7 +36,7 @@ const connection = createDevBuildConnection(
 
 `prepareRemoteGeneration` is the framework's asynchronous update operation. Complete it only after the replacement Node generation is ready. Until it completes successfully, `connection.isSynchronized(remote)` returns `false`. An initial subscription and every reconnection replay the provider's latest ready publication through this same callback.
 
-Call `connection.invalidate()` when compilation starts. After publishing the manifest, assets and framework resources, call `connection.publish({ buildVersion })` with the manifest's build version. A framework that forwards dependency changes can include `sources`, an array of `{ name, entry, buildVersion }`, preserving the original nested provider's identity even when its own build version is unchanged.
+Call `connection.invalidate()` when compilation starts. After publishing the manifest, assets and framework resources, call `connection.publish({ buildVersion, devRevision })` with the manifest's build information. A framework that forwards dependency changes can include `sources`, an array of `{ name, entry, buildVersion, devRevision }`, preserving the original nested provider's revision even when its own build version is unchanged. `devRevision` is optional for compatibility with production manifests and older publishers.
 
 Publications and their sources may include `hot: true` when their browser artifacts have a live HMR transport. An omitted or false value gives no HMR guarantee. A forwarding framework should advertise this capability only if its own artifacts and every applied dependency support it. The framework still coordinates browser data revalidation or reload after its Node update completes.
 

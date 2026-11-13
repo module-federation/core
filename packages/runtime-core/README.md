@@ -42,8 +42,9 @@ provider using the same build identity as remote removal. A manifest's
 `providerName` takes precedence over its registration name. With `buildVersion`,
 the helper matches the composed provider/build value against `instance.options.id`
 and never falls back to a same-name instance from another build. Without a build
-version it accepts a unique name match. It returns `undefined` when no instance
-matches and throws when multiple distinct instances match. The optional instance
+version it accepts a name match. It returns `undefined` when no instance
+matches. Registering a duplicate name and build ID replaces the older registry
+entry. The optional instance
 list defaults to the current federation registry.
 
 Runtime `init` also respects an explicit instance ID or the compiler's build ID.

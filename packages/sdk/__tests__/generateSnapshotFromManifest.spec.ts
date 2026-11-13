@@ -2,6 +2,18 @@ import { manifest, snapshot } from './resources/manifestSnapshotMap';
 import { generateSnapshotFromManifest } from '../src/generateSnapshotFromManifest';
 
 describe('generateSnapshotFromManifest', () => {
+  it('preserves the dev revision separately from the release build version', () => {
+    const source = manifest.devAppManifest;
+    const result = generateSnapshotFromManifest({
+      ...source,
+      metaData: {
+        ...source.metaData,
+        buildInfo: { ...source.metaData.buildInfo, devRevision: '123' },
+      },
+    });
+    expect(result.devRevision).toBe('123');
+    expect(result.buildVersion).toBe(source.metaData.buildInfo.buildVersion);
+  });
   it('preserves per-expose rendering metadata without changing legacy modules', () => {
     const input = {
       ...manifest.devAppManifest,

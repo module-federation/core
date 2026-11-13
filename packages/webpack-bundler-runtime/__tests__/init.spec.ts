@@ -1,7 +1,6 @@
 /** @jest-environment node */
 import * as runtime from '@module-federation/runtime';
 import { init } from '../src/init';
-import { initContainerEntry } from '../src/initContainerEntry';
 
 function execution(value: string) {
   return {
@@ -23,39 +22,17 @@ function execution(value: string) {
   };
 }
 
-it('isolates Node executions of one release and binds consumers to the container instance', async () => {
+it('reuses the same provider build across Node evaluations', async () => {
   const a = execution('a');
-  const b = execution('b');
+  const b = execution('a');
   a.federation.instance = init({ webpackRequire: a as any });
   b.federation.instance = init({ webpackRequire: b as any });
   try {
-    expect(a.federation.instance).not.toBe(b.federation.instance);
-    expect(a.federation.instance.options.id).not.toBe(
-      b.federation.instance.options.id,
-    );
+    expect(a.federation.instance).toBe(b.federation.instance);
+    expect(a.federation.instance.options.id).toBe('same-provider:release-1');
     expect(a.federation.instance.loadShareSync('library')()).toBe('a');
-    expect(b.federation.instance.loadShareSync('library')()).toBe('b');
+    expect(b.federation.instance.loadShareSync('library')()).toBe('a');
     expect(init({ webpackRequire: a as any })).toBe(a.federation.instance);
-    const bind = jest.fn();
-    const options = {};
-    Object.defineProperty(
-      options,
-      Symbol.for('module-federation.bind-provider'),
-      { value: bind },
-    );
-    initContainerEntry({
-      webpackRequire: b as any,
-      shareScope: {},
-      initScope: [],
-      shareScopeKey: 'default',
-      remoteEntryInitOptions: options,
-    });
-    expect(bind).toHaveBeenCalledWith(b.federation.instance);
-    expect(
-      (b.federation.instance.options as any)[
-        Symbol.for('module-federation.bind-provider')
-      ],
-    ).toBeUndefined();
   } finally {
     await Promise.all([
       a.federation.instance.destroy(),

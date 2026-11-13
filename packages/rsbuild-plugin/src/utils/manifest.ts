@@ -1,7 +1,6 @@
 import path from 'path';
 import { Stats, Manifest } from '@module-federation/sdk';
 import fs from 'fs';
-import { createHash } from 'node:crypto';
 type AssetResource<T> = {
   data: T;
   filename: string;
@@ -13,7 +12,7 @@ export type StatsAssetResource = {
 };
 
 function mergeStats(browserStats: Stats, nodeStats: Stats): Stats {
-  browserStats = withMergedBuildVersion(browserStats, nodeStats);
+  browserStats = withMergedDevRevision(browserStats, nodeStats);
   const ssrRemoteEntry = nodeStats.metaData.remoteEntry;
   browserStats.metaData.ssrRemoteEntry = ssrRemoteEntry;
   if ('publicPath' in browserStats.metaData) {
@@ -27,7 +26,7 @@ function mergeManifest(
   browserManifest: Manifest,
   nodeManifest: Manifest,
 ): Manifest {
-  browserManifest = withMergedBuildVersion(browserManifest, nodeManifest);
+  browserManifest = withMergedDevRevision(browserManifest, nodeManifest);
   const ssrRemoteEntry = nodeManifest.metaData.remoteEntry;
   browserManifest.metaData.ssrRemoteEntry = ssrRemoteEntry;
   if ('publicPath' in browserManifest.metaData) {
@@ -37,27 +36,24 @@ function mergeManifest(
   return browserManifest;
 }
 
-function withMergedBuildVersion<T extends Stats | Manifest>(
+function withMergedDevRevision<T extends Stats | Manifest>(
   browser: T,
   node: T,
 ): T {
-  const browserVersion = browser.metaData.buildInfo.buildVersion;
-  const nodeVersion = node.metaData.buildInfo.buildVersion;
-  // Equal explicit release versions stay intact. A one-sided rebuild changes
-  // the merged identity without rebuilding the untouched compiler.
-  const buildVersion =
-    browserVersion === nodeVersion
-      ? browserVersion
-      : createHash('sha256')
-          .update(JSON.stringify([browserVersion, nodeVersion]))
-          .digest('hex');
-  // Asset resources are retained across watch builds. Do not feed the merged
-  // identity back into the next merge.
+  const browserRevision = browser.metaData.buildInfo.devRevision;
+  const nodeRevision = node.metaData.buildInfo.devRevision;
+  // Either compiler can rebuild independently. Preserve the release version
+  // and avoid feeding the merged marker back into retained watch outputs.
   return {
     ...browser,
     metaData: {
       ...browser.metaData,
-      buildInfo: { ...browser.metaData.buildInfo, buildVersion },
+      buildInfo: {
+        ...browser.metaData.buildInfo,
+        ...((browserRevision || nodeRevision) && {
+          devRevision: JSON.stringify([browserRevision, nodeRevision]),
+        }),
+      },
     },
   };
 }

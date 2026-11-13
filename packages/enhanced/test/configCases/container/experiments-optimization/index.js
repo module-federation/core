@@ -56,25 +56,26 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
   it('should eliminate snapshot plugins from the web optimized CJS bundle', () => {
     expect(webRemoteEntry).not.toContain('snapshot-plugin');
     expect(webRemoteEntry).not.toContain('generate-preload-assets-plugin');
-    expect(webRemoteEntry).not.toContain('attrs:{name');
+    expect(webRemoteEntry).not.toContain('Failed to load Node.js entry');
   });
 
   it('should preserve node loading and snapshot plugins in the node CJS bundle', () => {
     expect(nodeRemoteEntry).toContain('snapshot-plugin');
     expect(nodeRemoteEntry).toContain('generate-preload-assets-plugin');
-    expect(nodeRemoteEntry).toContain('attrs:{name');
+    // This diagnostic belongs to Core's Node entry loader.
+    expect(nodeRemoteEntry).toContain('Failed to load Node.js entry');
   });
 
   it('should eliminate snapshot plugins from the web optimized ESM bundle', () => {
     expect(webRemoteEntryEsm).not.toContain('snapshot-plugin');
     expect(webRemoteEntryEsm).not.toContain('generate-preload-assets-plugin');
-    expect(webRemoteEntryEsm).not.toContain('attrs:{name');
+    expect(webRemoteEntryEsm).not.toContain('Failed to load Node.js entry');
   });
 
   it('should preserve node loading and snapshot plugins in the node ESM bundle', () => {
     expect(nodeRemoteEntryEsm).toContain('snapshot-plugin');
     expect(nodeRemoteEntryEsm).toContain('generate-preload-assets-plugin');
-    expect(nodeRemoteEntryEsm).toContain('attrs:{name');
+    expect(nodeRemoteEntryEsm).toContain('Failed to load Node.js entry');
   });
 
   it('should eliminate the complete remote consumption path', () => {

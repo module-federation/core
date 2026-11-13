@@ -14,7 +14,10 @@ import {
   getRemoteEntryUniqueKey,
   getRemoteInfo,
 } from '../src/utils/load';
-import { resetFederationGlobalInfo } from '../src/global';
+import {
+  resetFederationGlobalInfo,
+  setGlobalFederationInstance,
+} from '../src/global';
 import type { RemoteEntryExports } from '../src/type';
 
 // The shared suite uses jsdom. Select the Node target explicitly for this file,
@@ -56,6 +59,52 @@ afterEach(() => {
 });
 
 describe('Node remote entry provenance', () => {
+  it('refreshes a shared manifest URL while another host keeps the old container', async () => {
+    let version = 'v1';
+    const remote = {
+      name: 'catalog',
+      entry: 'https://entry.example/mf-manifest.json',
+    };
+    const fetch = rs.fn(async (url: string) =>
+      url.endsWith('.json')
+        ? new Response(
+            JSON.stringify({
+              name: 'catalog',
+              metaData: {
+                buildInfo: { buildVersion: version, buildName: 'catalog' },
+                remoteEntry: {
+                  name: 'fixed.js',
+                  path: '',
+                  type: 'commonjs-module',
+                },
+                globalName,
+                publicPath: 'https://entry.example/',
+              },
+              exposes: [],
+              shared: [],
+            }),
+          )
+        : new Response(container(version)),
+    );
+    globalThis.fetch = fetch as any;
+    const consumers = ['a', 'b'].map((name) => {
+      const instance = new ModuleFederation({ name, remotes: [{ ...remote }] });
+      setGlobalFederationInstance(instance);
+      return instance;
+    });
+    const [a, b] = consumers;
+    expect(await a.loadRemote('catalog/first')).toBe('v1');
+    expect(await b.loadRemote('catalog/first')).toBe('v1');
+    version = 'v2';
+    await a.updateRemotes([{ ...remote }]);
+    expect(await a.loadRemote('catalog/first')).toBe('v2');
+    expect(await b.loadRemote('catalog/another')).toBe('v1');
+    expect(
+      fetch.mock.calls.filter(([url]) => url === remote.entry),
+    ).toHaveLength(2);
+    await Promise.all(consumers.map((instance) => instance.destroy()));
+  });
+
   it.each(['sequential', 'concurrent'])(
     'loads distinct factories for %s same-name containers at different URLs',
     async (mode) => {

@@ -10,6 +10,7 @@ interface BasicModuleInfo {
   };
   version: string;
   buildVersion: string;
+  devRevision?: string;
   remoteTypes: string;
   remoteTypesZip: string;
   remoteTypesAPI?: string;

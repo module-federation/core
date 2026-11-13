@@ -107,7 +107,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
 
     if (name && MFPluginNum < 2) {
       definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
-        composeKeyWithSeparator(name, utils.getBuildVersion()),
+        composeKeyWithSeparator(name, utils.getBuildVersion(compiler.context)),
       );
     }
 

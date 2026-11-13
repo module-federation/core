@@ -6,7 +6,6 @@ import {
 import { ShareArgs } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
 import { createClearCacheRuntimePlugin, installClearCache } from './clearCache';
-import { isBrowserEnvValue } from '@module-federation/sdk';
 
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
 
@@ -145,24 +144,7 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
   const plugins = (initOptions.plugins ||= []);
   plugins.push(createClearCacheRuntimePlugin());
 
-  // Node may evaluate the same build in several independent execution graphs.
-  // A compiled release ID must not make those graphs share a runtime instance.
-  // Preserve the existing binding when several plugins initialize one graph.
-  let options = initOptions;
-  if (!isBrowserEnvValue) {
-    const previous = webpackRequire.federation.instance;
-    const key = Symbol.for('module-federation.node-execution-id');
-    const next = ((globalThis as any)[key] =
-      ((globalThis as any)[key] || 0) + 1);
-    options = {
-      ...initOptions,
-      id:
-        previous?.name === initOptions.name && !previous.disposed
-          ? previous.options.id
-          : `${initOptions.id || initOptions.name}:node:${next}`,
-    };
-  }
-  const instance = runtime!.init(options);
+  const instance = runtime!.init(initOptions);
   installClearCache({ webpackRequire, instance });
   return instance;
 }

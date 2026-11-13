@@ -114,7 +114,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     const definePluginOptions: Record<string, string | boolean> = {};
     if (name) {
       definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
-        composeKeyWithSeparator(name, utils.getBuildVersion()),
+        composeKeyWithSeparator(name, utils.getBuildVersion(compiler.context)),
       );
     }
     // Add FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN

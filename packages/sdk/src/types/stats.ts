@@ -29,6 +29,8 @@ export interface ResourceInfo {
 
 export interface StatsBuildInfo {
   buildVersion: string;
+  /** Monotonic development compilation marker, independent of release identity. */
+  devRevision?: string;
   buildName: string;
   hash?: string;
 
