@@ -15,6 +15,7 @@ test('CJS producer and ESM consumer use the packaged build worker', async () => 
   const esm = await import(new URL('esm/index.mjs', dist));
   const connections = [];
   const errors = [];
+  const diagnostics = [];
   const remote = {
     name: 'js-only-provider',
     entry: 'http://127.0.0.1:39001/mf-manifest.json',
@@ -38,7 +39,11 @@ test('CJS producer and ESM consumer use the packaged build worker', async () => 
     assert.equal((await ready)[0], 'ready');
     const publisher = cjs.createDevBuildConnection(
       { publisher: remote, autoStartBroker: false },
-      { async onUpdate() {}, onError: (error) => errors.push(error) },
+      {
+        async onUpdate() {},
+        onError: (error) => errors.push(error),
+        onDiagnostics: (value) => diagnostics.push(value),
+      },
     );
     connections.push(publisher);
     publisher.publish({ buildVersion: 'js-build-one' });
@@ -48,7 +53,11 @@ test('CJS producer and ESM consumer use the packaged build worker', async () => 
       release = resolve;
     });
     const consumer = esm.createDevBuildConnection(
-      { remotes: [remote], autoStartBroker: false },
+      {
+        consumer: 'worker-consumer',
+        remotes: [remote],
+        autoStartBroker: false,
+      },
       {
         async onUpdate(update, { signal }) {
           updates.push(update);
@@ -59,15 +68,51 @@ test('CJS producer and ESM consumer use the packaged build worker', async () => 
                 signal.addEventListener('abort', resolve, { once: true }),
               ),
             ]);
+          consumer.reportResult(update.remote, {
+            outcome: 'applied',
+            trigger: 'notification',
+            buildVersion: update.publication.buildVersion,
+          });
         },
         onError: (error) => errors.push(error),
+        onDiagnostics: (value) => diagnostics.push(value),
       },
     );
     connections.push(consumer);
     await waitFor(() => updates.length === 1);
     assert.equal(consumer.isSynchronized(remote), false);
+    await waitFor(() => diagnostics.length === 2);
+    assert.equal(diagnostics[0].url, diagnostics[1].url);
+    const initialLogs = await fetch(diagnostics[0].url).then((response) =>
+      response.json(),
+    );
+    assert.ok(
+      !initialLogs.entries.some(
+        (entry) =>
+          entry.context?.consumer === 'worker-consumer' &&
+          entry.context?.buildVersion === 'js-build-one' &&
+          entry.message.includes('applied'),
+      ),
+    );
     release();
     await waitFor(() => consumer.isSynchronized(remote));
+    let applied;
+    for (let attempt = 0; attempt < 100; attempt++) {
+      const logs = await fetch(
+        diagnostics[0].url + '?consumer=worker-consumer',
+      ).then((response) => response.json());
+      applied = logs.entries.find(
+        (entry) =>
+          entry.context?.buildVersion === 'js-build-one' &&
+          entry.message.includes('applied'),
+      );
+      if (applied) break;
+      await delay(10);
+    }
+    assert.ok(
+      applied,
+      'framework result reaches the broker through IPC and WS',
+    );
     publisher.invalidate();
     await waitFor(() => !consumer.isSynchronized(remote));
     publisher.publish({

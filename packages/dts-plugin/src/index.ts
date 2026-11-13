@@ -17,4 +17,6 @@ export {
   type DevBuildSource,
   type DevBuildStatus,
   type DevBuildUpdate,
+  type DevBuildResult,
+  type DevBuildDiagnostics,
 } from './dev-worker/DevBuildConnection';

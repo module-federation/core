@@ -14,11 +14,30 @@ import {
   type DevBuildRemote,
   type DevBuildStatus,
   type DevBuildUpdate,
+  type DevBuildResult,
+  type DevBuildDiagnostics,
 } from './buildProtocol';
 
 interface Callbacks {
   update(update: DevBuildUpdate): Promise<void>;
   status(remote: DevBuildRemote, status: DevBuildStatus): void;
+  diagnostics?(diagnostics: DevBuildDiagnostics): void | Promise<void>;
+}
+
+function brokerAddress(remote: DevBuildRemote): string {
+  const url = new URL(remote.brokerUrl || remote.entry);
+  if (!remote.brokerUrl) {
+    url.protocol = 'ws:';
+    url.port = String(DEFAULT_WEB_SOCKET_PORT);
+    url.pathname = '/';
+    url.search = '';
+    url.hash = '';
+  }
+  url.searchParams.set(
+    'WEB_SOCKET_CONNECT_MAGIC_ID',
+    WEB_SOCKET_CONNECT_MAGIC_ID,
+  );
+  return url.href;
 }
 
 /** Runs in the dev worker. No process-wide handlers or type generation here. */
@@ -32,6 +51,7 @@ export class BuildConnection {
       timer?: ReturnType<typeof setTimeout>;
       heartbeat?: ReturnType<typeof setInterval>;
       capable: boolean;
+      diagnostics: boolean;
       alive: boolean;
       remotes: DevBuildRemote[];
       publisher?: DevBuildRemote;
@@ -39,6 +59,7 @@ export class BuildConnection {
   >();
   private revisions = new Map<string, string | undefined>();
   private queues = new Map<string, Promise<void>>();
+  private diagnosticBrokers = new Map<string, string>();
 
   constructor(
     private options: DevBuildConnectionOptions,
@@ -46,22 +67,15 @@ export class BuildConnection {
   ) {
     const add = (remote: DevBuildRemote, publish: boolean) => {
       devBuildKey(remote);
-      const url = new URL(remote.brokerUrl || remote.entry);
-      if (!remote.brokerUrl) {
-        url.protocol = 'ws:';
-        url.port = String(DEFAULT_WEB_SOCKET_PORT);
-        url.pathname = '/';
-        url.search = '';
-        url.hash = '';
-      }
-      url.searchParams.set(
-        'WEB_SOCKET_CONNECT_MAGIC_ID',
-        WEB_SOCKET_CONNECT_MAGIC_ID,
-      );
-      const key = url.href;
+      const key = brokerAddress(remote);
       let link = this.links.get(key);
       if (!link) {
-        link = { capable: false, alive: false, remotes: [] };
+        link = {
+          capable: false,
+          diagnostics: false,
+          alive: false,
+          remotes: [],
+        };
         this.links.set(key, link);
       }
       if (publish) link.publisher = remote;
@@ -77,6 +91,7 @@ export class BuildConnection {
     const link = this.links.get(url)!;
     const socket = (link.socket = new WebSocket(url));
     link.capable = false;
+    link.diagnostics = false;
     link.alive = true;
     const status = (value: DevBuildStatus) => {
       for (const remote of link.remotes) {
@@ -87,7 +102,12 @@ export class BuildConnection {
     status('disconnected');
     socket.on('open', () => {
       if (link.publisher) {
-        socket.send(buildMessage('register', { remote: link.publisher }));
+        socket.send(
+          buildMessage('register', {
+            remote: link.publisher,
+            consumer: this.options.consumer || link.publisher.name,
+          }),
+        );
         if (this.publication)
           socket.send(
             buildMessage('publish', {
@@ -97,7 +117,12 @@ export class BuildConnection {
           );
       }
       for (const remote of link.remotes)
-        socket.send(buildMessage('subscribe', { remote }));
+        socket.send(
+          buildMessage('subscribe', {
+            remote,
+            consumer: this.options.consumer || this.options.publisher?.name,
+          }),
+        );
       link.heartbeat = setInterval(() => {
         if (!link.capable) status('unsupported');
         if (!link.alive) {
@@ -119,6 +144,39 @@ export class BuildConnection {
       if (message?.type !== DEV_BUILD_CHANNEL) return;
       link.capable = true;
       link.alive = true;
+      if (message.kind === 'hello' && message.diagnostics) {
+        // Only advertise the known route on this connection's broker. A peer
+        // cannot redirect diagnostics to a different origin via its handshake.
+        if (
+          message.diagnostics.path === '/__mf/logs' &&
+          typeof message.diagnostics.brokerId === 'string'
+        ) {
+          link.diagnostics = true;
+          const endpoint = new URL(url);
+          endpoint.protocol = endpoint.protocol === 'wss:' ? 'https:' : 'http:';
+          endpoint.pathname = message.diagnostics.path;
+          endpoint.search = '';
+          endpoint.hash = '';
+          endpoint.username = '';
+          endpoint.password = '';
+          const address = endpoint.href;
+          if (
+            this.diagnosticBrokers.get(address) !== message.diagnostics.brokerId
+          ) {
+            this.diagnosticBrokers.set(address, message.diagnostics.brokerId);
+            try {
+              void Promise.resolve(
+                this.callbacks.diagnostics?.({
+                  brokerId: message.diagnostics.brokerId,
+                  url: address,
+                }),
+              ).catch(() => {});
+            } catch {
+              // Diagnostics must never interfere with build subscriptions.
+            }
+          }
+        }
+      }
       if (message.kind !== 'state' || !message.remote) return;
       const remote = link.remotes.find(
         (value) => devBuildKey(value) === devBuildKey(message.remote!),
@@ -173,6 +231,25 @@ export class BuildConnection {
   publish(publication: DevBuildPublication) {
     this.publication = publication;
     this.sendPublication('publish');
+  }
+
+  reportResult(remote: DevBuildRemote, result: DevBuildResult) {
+    if (this.closed) return;
+    try {
+      const key = devBuildKey(remote);
+      const link = this.links.get(brokerAddress(remote));
+      if (link) {
+        if (
+          !link.diagnostics ||
+          link.socket?.readyState !== WebSocket.OPEN ||
+          !link.remotes.some((value) => devBuildKey(value) === key)
+        )
+          return;
+        link.socket.send(buildMessage('result', { remote, result }), () => {});
+      }
+    } catch {
+      // Best effort, with no retries or effect on the update acknowledgement.
+    }
   }
 
   invalidate() {

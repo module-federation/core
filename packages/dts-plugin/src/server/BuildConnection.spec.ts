@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from '@rstest/core';
+import { afterEach, beforeEach, describe, expect, it, rs } from '@rstest/core';
 import { once } from 'events';
 import WebSocket from 'isomorphic-ws';
 import { BuildBroker } from './broker/BuildBroker';
@@ -8,23 +8,31 @@ import {
   type DevBuildRemote,
   type DevBuildStatus,
   type DevBuildUpdate,
+  type DevBuildMessage,
 } from './buildProtocol';
 
 describe('development build subscriptions', () => {
   let server: WebSocket.Server;
   let brokerUrl: string;
   const connections: BuildConnection[] = [];
+  let messages: DevBuildMessage[];
 
   beforeEach(async () => {
-    const broker = new BuildBroker();
+    const broker = new BuildBroker({
+      brokerId: 'test-broker',
+      path: '/__mf/logs',
+    });
+    messages = [];
     server = new WebSocket.Server({
       port: Number(process.env.JO_PORT_BROKER || 0),
       host: '127.0.0.1',
     });
     server.on('connection', (socket) => {
-      socket.on('message', (data) =>
-        broker.handle(JSON.parse(data.toString()), socket),
-      );
+      socket.on('message', (data) => {
+        const message = JSON.parse(data.toString());
+        messages.push(message);
+        broker.handle(message, socket);
+      });
     });
     await once(server, 'listening');
     const address = server.address() as { port: number };
@@ -206,5 +214,107 @@ describe('development build subscriptions', () => {
       .poll(() => consumer.status, { timeout: 7000 })
       .toBe('unsupported');
     expect(consumer.updates).toEqual([]);
+  });
+
+  it('discovers the connected broker once and reports actual results without changing readiness', async () => {
+    const diagnostics = rs.fn();
+    const target = remote();
+    const consumer = new BuildConnection(
+      { consumer: 'checkout', remotes: [target], autoStartBroker: false },
+      { async update() {}, status() {}, diagnostics },
+    );
+    connections.push(consumer);
+    await expect.poll(() => diagnostics.mock.calls.length).toBe(1);
+    expect(diagnostics.mock.calls[0][0]).toEqual({
+      brokerId: 'test-broker',
+      url: brokerUrl.replace('ws:', 'http:') + '/__mf/logs',
+    });
+    expect(
+      messages.find((message) => message.kind === 'subscribe')?.consumer,
+    ).toBe('checkout');
+    consumer.reportResult(target, {
+      outcome: 'applied',
+      trigger: 'manifest',
+      operationId: 'op-1',
+    });
+    await expect
+      .poll(
+        () => messages.filter((message) => message.kind === 'result').length,
+      )
+      .toBe(1);
+    expect(
+      messages.find((message) => message.kind === 'result')?.result
+        ?.operationId,
+    ).toBe('op-1');
+    for (const socket of server.clients) socket.terminate();
+    await expect
+      .poll(
+        () => messages.filter((message) => message.kind === 'subscribe').length,
+        { timeout: 5000 },
+      )
+      .toBe(2);
+    expect(diagnostics).toHaveBeenCalledTimes(1);
+    consumer.close();
+    expect(() =>
+      consumer.reportResult(target, {
+        outcome: 'failed',
+        trigger: 'notification',
+      }),
+    ).not.toThrow();
+  });
+
+  it('keeps updates working when an asynchronous diagnostic observer rejects', async () => {
+    const diagnostics = rs.fn(async () => {
+      throw new Error('observer unavailable');
+    });
+    const updates: DevBuildUpdate[] = [];
+    const consumer = new BuildConnection(
+      { remotes: [remote()], autoStartBroker: false },
+      {
+        async update(update) {
+          updates.push(update);
+        },
+        status() {},
+        diagnostics,
+      },
+    );
+    connections.push(consumer);
+    publisher().publish({ buildVersion: 'diagnostics-independent' });
+    await expect.poll(() => updates.length).toBe(1);
+    expect(diagnostics).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not advertise diagnostics or send results to an older build broker', async () => {
+    server.removeAllListeners('connection');
+    const broker = new BuildBroker();
+    server.on('connection', (socket) =>
+      socket.on('message', (data) => {
+        const message = JSON.parse(data.toString());
+        messages.push(message);
+        broker.handle(message, socket);
+      }),
+    );
+    const diagnostics = rs.fn();
+    const updates: DevBuildUpdate[] = [];
+    const consumer = new BuildConnection(
+      { remotes: [remote()], autoStartBroker: false },
+      {
+        async update(update) {
+          updates.push(update);
+        },
+        status() {},
+        diagnostics,
+      },
+    );
+    connections.push(consumer);
+    publisher().publish({ buildVersion: 'old-broker' });
+    await expect.poll(() => updates.length).toBe(1);
+    consumer.reportResult(remote(), {
+      outcome: 'applied',
+      trigger: 'notification',
+    });
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(diagnostics).not.toHaveBeenCalled();
+    expect(messages.some((message) => message.kind === 'result')).toBe(false);
   });
 });

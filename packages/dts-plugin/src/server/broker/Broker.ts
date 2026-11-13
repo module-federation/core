@@ -4,6 +4,8 @@ import WebSocket from 'isomorphic-ws';
 import { parse } from 'url';
 import { Publisher } from '../Publisher';
 import { BuildBroker } from './BuildBroker';
+import { BrokerDiagnostics } from './BrokerDiagnostics';
+import { observeFileLogs } from '../utils/log';
 import { DEV_BUILD_CHANNEL, type DevBuildMessage } from '../buildProtocol';
 import { getIdentifier, fileLog, error } from '../utils';
 import { ReloadWebClientAPI } from '../message/API';
@@ -99,9 +101,14 @@ export class Broker {
   private _secureWebSocketServer?: WebSocket.Server;
   private _tmpSubscriberShelter: TmpSubscriberShelter = new Map();
   private _scheduleJob: ScheduledTask | null = null;
-  private _buildBroker = new BuildBroker();
+  private _diagnostics = new BrokerDiagnostics();
+  private _stopDiagnostics = observeFileLogs((entry) =>
+    this._diagnostics.record(entry),
+  );
+  private _buildBroker = new BuildBroker(this._diagnostics.info);
 
   constructor() {
+    fileLog('Development broker started', 'Broker', 'info');
     this._setSchedule();
     this._startWsServer();
     this._stopWhenSIGTERMOrSIGINT();
@@ -153,7 +160,12 @@ export class Broker {
       }
     };
 
-    const server = createServer();
+    const server = createServer((req, res) => {
+      if (!this._diagnostics.handleRequest(req, res)) {
+        res.statusCode = 404;
+        res.end();
+      }
+    });
 
     this._webSocketServer = new WebSocket.Server({ noServer: true });
     this._webSocketServer.on('error', (err) => {
@@ -813,6 +825,7 @@ export class Broker {
   }
 
   exit(): void {
+    fileLog('Development broker stopped', 'Broker', 'info');
     const brokerExitLog = new BrokerExitLog();
     this.broadcast(JSON.stringify(brokerExitLog));
     this._disconnect();
@@ -820,6 +833,7 @@ export class Broker {
     this._clearTmpSubScriberRelations();
     this._webSocketServer && this._webSocketServer.close();
     this._secureWebSocketServer && this._secureWebSocketServer.close();
+    this._stopDiagnostics();
 
     process.exit(0);
   }
