@@ -126,6 +126,53 @@ describe('getRemoteEntry - script load error discrimination', () => {
     );
   });
 
+  it('passes loadEntryTimeout to the entry script loader', async () => {
+    const entry = `${BASE}/success.js`;
+    const origin = new ModuleFederation({
+      name: 'test-host',
+      remotes: [],
+      loadEntryTimeout: 45000,
+    });
+    const remoteInfo = getRemoteInfo({ name: 'remote', entry });
+    const setTimeoutSpy = rs.spyOn(globalThis, 'setTimeout');
+
+    try {
+      await getRemoteEntry({ origin, remoteInfo });
+      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 45000);
+      expect(setTimeoutSpy).not.toHaveBeenCalledWith(
+        expect.any(Function),
+        20000,
+      );
+    } finally {
+      setTimeoutSpy.mockRestore();
+    }
+  });
+
+  it('does not arm the entry timer when loadEntryTimeout is Infinity', async () => {
+    const entry = `${BASE}/success.js`;
+    const origin = new ModuleFederation({
+      name: 'test-host',
+      remotes: [],
+      loadEntryTimeout: Infinity,
+    });
+    const remoteInfo = getRemoteInfo({ name: 'remote', entry });
+    const setTimeoutSpy = rs.spyOn(globalThis, 'setTimeout');
+
+    try {
+      await getRemoteEntry({ origin, remoteInfo });
+      expect(setTimeoutSpy).not.toHaveBeenCalledWith(
+        expect.any(Function),
+        20000,
+      );
+      expect(setTimeoutSpy).not.toHaveBeenCalledWith(
+        expect.any(Function),
+        Infinity,
+      );
+    } finally {
+      setTimeoutSpy.mockRestore();
+    }
+  });
+
   it('module entry load failure can recover through loadEntryError with getEntryUrl', async () => {
     const entry = createDataUrlEntry(
       `throw new TypeError('Failed to fetch dynamically imported module: http://localhost:4999/remoteEntry.js');`,

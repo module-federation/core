@@ -233,6 +233,7 @@ function waitForScriptPreload({
         );
       },
       attrs,
+      timeout: host.options.loadEntryTimeout,
       createScriptHook: (hookUrl: string, hookAttrs: any) => {
         const res = host.loaderHook.lifecycle.createScript.emit({
           url: hookUrl,

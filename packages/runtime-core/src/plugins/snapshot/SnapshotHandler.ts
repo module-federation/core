@@ -356,10 +356,32 @@ export class SnapshotHandler {
       let loadError: unknown;
       let recovered = false;
 
+      // `loadEntryTimeout` bounds the manifest fetch the same way it bounds the entry script:
+      // a stalled manifest response would otherwise hold `loadRemote` open indefinitely.
+      const timeout = this.HostInstance.options.loadEntryTimeout;
+      const controller =
+        typeof AbortController === 'function' &&
+        typeof timeout === 'number' &&
+        Number.isFinite(timeout) &&
+        timeout > 0
+          ? new AbortController()
+          : undefined;
+      const fetchInit: RequestInit = controller
+        ? { signal: controller.signal }
+        : {};
+      const timer = controller
+        ? setTimeout(() => controller.abort(), timeout)
+        : undefined;
+      const clearTimer = () => {
+        if (timer !== undefined) {
+          clearTimeout(timer);
+        }
+      };
+
       try {
         let res = await this.loaderHook.lifecycle.fetch.emit(
           manifestUrl,
-          {},
+          fetchInit,
           remoteInfo,
           resourceOptions
             ? {
@@ -370,11 +392,13 @@ export class SnapshotHandler {
             : undefined,
         );
         if (!res || !(res instanceof Response)) {
-          res = await fetch(manifestUrl, {});
+          res = await fetch(manifestUrl, fetchInit);
         }
         response = res;
         manifestJson = (await res.json()) as Manifest;
+        clearTimer();
       } catch (err) {
+        clearTimer();
         loadError = err;
         manifestJson =
           (await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
