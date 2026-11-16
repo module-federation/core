@@ -29,6 +29,7 @@ import {
   RSPRESS_SSG_MD_ENV_NAME,
 } from '../constant';
 import { patchNodeConfig, patchToolsTspack } from '../utils/ssr';
+import { createSharedBuildVersionPlugin } from '../utils/buildVersion';
 
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -184,6 +185,8 @@ export const pluginModuleFederation = (
     const isRstest = callerName === 'rstest';
     const isRstestCompanionActive = () => isRstest && hasNodeTargetConfigOwner;
     const isSSR = target === 'dual';
+    const sharedBuildVersionPlugin =
+      isRslib && isSSR ? createSharedBuildVersionPlugin() : undefined;
     const environment =
       configuredEnvironment ??
       resolveDefaultEnvironmentName({
@@ -442,6 +445,15 @@ export const pluginModuleFederation = (
         const shouldUseSSRPluginConfig =
           isSSRConfig(bundlerConfig.name) ||
           (isNodeTargetEnvironmentConfig && !isRstestCompanionActive());
+
+        if (
+          sharedBuildVersionPlugin &&
+          bundlerConfig.mode === 'development' &&
+          (isConfiguredEnvironmentConfig || shouldUseSSRPluginConfig)
+        ) {
+          bundlerConfig.plugins ||= [];
+          bundlerConfig.plugins.push(sharedBuildVersionPlugin);
+        }
 
         if (
           target === 'node' &&
