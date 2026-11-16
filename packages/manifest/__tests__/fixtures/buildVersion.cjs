@@ -17,6 +17,9 @@ const {
   getFederationBuildIdentifier,
   setCompilationBuildVersion,
 } = require('../../src/buildVersion.ts');
+const {
+  createBuildVersionCoordinator,
+} = require('../../src/buildVersionCoordinator.ts');
 const [bundler, directory] = process.argv.slice(2);
 const loaded = require(bundler === 'webpack' ? 'webpack' : '@rspack/core');
 const build = bundler === 'webpack' ? loaded : loaded.rspack;
@@ -162,6 +165,70 @@ async function runBuild(mode = 'production', target = 'node') {
     }
   }
   coordinatedVersion = undefined;
+  const sharedBuilds = createBuildVersionCoordinator();
+  const sharedCompiler = build(
+    ['web', 'node'].map((target) => ({
+      ...options,
+      name: target,
+      target,
+      output: {
+        ...options.output,
+        path: path.join(directory, 'shared', target),
+      },
+      plugins: [sharedBuilds, ...options.plugins],
+    })),
+  );
+  const shared = [];
+  let sharedWatcher;
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(
+        () => reject(Error('Shared watch build timed out')),
+        20000,
+      );
+      sharedWatcher = sharedCompiler.watch(
+        { aggregateTimeout: 10, poll: 50, ignored: /dist|shared/ },
+        (error, stats) => {
+          if (error || stats.hasErrors()) {
+            clearTimeout(timer);
+            reject(
+              error || Error(stats.toString({ all: false, errors: true })),
+            );
+            return;
+          }
+          if (!sharedBuilds.isCurrent(stats)) return;
+          const round = ['web', 'node'].map((target) => {
+            const dir = path.join(directory, 'shared', target);
+            const manifest = JSON.parse(
+              fs.readFileSync(path.join(dir, 'mf-manifest.json'), 'utf8'),
+            );
+            const context = { module: { exports: undefined } };
+            vm.runInNewContext(
+              fs.readFileSync(path.join(dir, 'main.cjs'), 'utf8'),
+              context,
+            );
+            return {
+              target,
+              buildVersion: manifest.metaData.buildInfo.buildVersion,
+              ...context.module.exports,
+            };
+          });
+          shared.push(round);
+          // An empty rebuild preserves parsed modules while the shared runtime version changes.
+          if (shared.length === 1)
+            sharedCompiler.compilers[0].watching.invalidate();
+          else {
+            clearTimeout(timer);
+            resolve();
+          }
+        },
+      );
+    });
+  } finally {
+    if (sharedWatcher)
+      await new Promise((resolve) => sharedWatcher.close(resolve));
+    await new Promise((resolve) => sharedCompiler.close(resolve));
+  }
   const production = await runBuild();
   process.env.MF_BUILD_VERSION = 'release-42';
   const explicit = (await runBuild()).buildVersion;
@@ -173,6 +240,7 @@ async function runBuild(mode = 'production', target = 'node') {
       identities,
       outputs,
       coordinated,
+      shared,
       production,
       explicit,
       custom: customVersion,

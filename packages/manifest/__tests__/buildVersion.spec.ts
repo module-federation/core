@@ -22,6 +22,7 @@ it.each(['webpack', 'rspack'])(
         identities,
         outputs,
         coordinated,
+        shared,
         explicit,
         custom,
         production,
@@ -41,6 +42,19 @@ it.each(['webpack', 'rspack'])(
           })),
         ),
       );
+      expect(shared).toHaveLength(2);
+      for (const round of shared) {
+        expect(round.map((output: any) => output.target)).toEqual([
+          'web',
+          'node',
+        ]);
+        expect(round[0].buildVersion).toBe(round[1].buildVersion);
+        for (const output of round) {
+          expect(output.id).toBe(`provider:${output.buildVersion}`);
+          expect(output.value).toBe('second');
+        }
+      }
+      expect(shared[0][0].buildVersion).not.toBe(shared[1][0].buildVersion);
       expect(explicit).toBe('release-42');
       expect(custom).toBe('custom-release');
       expect(production).toMatchObject({ buildVersion: '1.0.0' });

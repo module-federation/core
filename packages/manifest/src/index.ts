@@ -6,3 +6,4 @@ export {
   setCompilationBuildVersion,
 } from './buildVersion';
 export * from './types';
+export { createBuildVersionCoordinator } from './buildVersionCoordinator';

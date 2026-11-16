@@ -41,12 +41,19 @@ empty rebuilds. The container runtime and manifest use the same value.
 Production builds use `MF_BUILD_VERSION`, then the package version in the
 compiler context, then the local fallback.
 
-In development, frameworks with multiple compilation targets can call
-`setCompilationBuildVersion(compilation, buildVersion)` before federation's
-compilation hooks run. Assign one version to both targets before emitting their
-containers, then publish the merged manifest after both targets are ready.
-Changing only the manifest after compilation would leave container IDs stale.
-The merged manifest uses one `buildInfo.buildVersion` for browser and Node.
+In development, create one `createBuildVersionCoordinator({ onInvalidate })`
+per application and apply that same coordinator to its Browser and Node
+compilers. It assigns one version before federation's compilation hooks run,
+invalidates peer targets when either changes, and identifies the latest complete
+build through `isCurrent(stats)`. Publish a merged manifest only when compilation
+succeeded and `isCurrent(stats)` is true. Recheck after asynchronous preparation
+because another edit can supersede that result. Frameworks own resource readiness,
+HTTP availability and subscriber notification. Modern and Rslib share this
+coordinator, exported by `@module-federation/enhanced/rspack`.
+
+The lower-level `setCompilationBuildVersion(compilation, buildVersion)` remains
+available for custom integrations. Changing only the manifest after compilation
+would leave container IDs stale. Production version precedence is unchanged.
 
 ## Bridge rendering metadata
 

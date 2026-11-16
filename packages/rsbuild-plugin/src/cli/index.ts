@@ -3,6 +3,7 @@ import {
   ModuleFederationPlugin,
   TreeShakingSharedPlugin,
   PLUGIN_NAME,
+  createBuildVersionCoordinator,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
 import logger from '../logger';
@@ -29,7 +30,6 @@ import {
   RSPRESS_SSG_MD_ENV_NAME,
 } from '../constant';
 import { patchNodeConfig, patchToolsTspack } from '../utils/ssr';
-import { createSharedBuildVersionPlugin } from '../utils/buildVersion';
 
 type ModuleFederationOptions =
   moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -185,8 +185,8 @@ export const pluginModuleFederation = (
     const isRstest = callerName === 'rstest';
     const isRstestCompanionActive = () => isRstest && hasNodeTargetConfigOwner;
     const isSSR = target === 'dual';
-    const sharedBuildVersionPlugin =
-      isRslib && isSSR ? createSharedBuildVersionPlugin() : undefined;
+    const buildVersions =
+      isRslib && isSSR ? createBuildVersionCoordinator() : undefined;
     const environment =
       configuredEnvironment ??
       resolveDefaultEnvironmentName({
@@ -447,12 +447,12 @@ export const pluginModuleFederation = (
           (isNodeTargetEnvironmentConfig && !isRstestCompanionActive());
 
         if (
-          sharedBuildVersionPlugin &&
+          buildVersions &&
           bundlerConfig.mode === 'development' &&
           (isConfiguredEnvironmentConfig || shouldUseSSRPluginConfig)
         ) {
           bundlerConfig.plugins ||= [];
-          bundlerConfig.plugins.push(sharedBuildVersionPlugin);
+          bundlerConfig.plugins.push(buildVersions);
         }
 
         if (
@@ -668,7 +668,14 @@ export const pluginModuleFederation = (
       }
     };
 
-    api.onDevCompileDone(generateMergedStatsAndManifest);
+    api.onDevCompileDone(({ stats }) => {
+      if (
+        stats.hasErrors() ||
+        (buildVersions && !buildVersions.isCurrent(stats))
+      )
+        return;
+      generateMergedStatsAndManifest();
+    });
     api.onAfterBuild(generateMergedStatsAndManifest);
   },
 });
