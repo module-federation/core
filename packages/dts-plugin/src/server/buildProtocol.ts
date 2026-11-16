@@ -36,10 +36,29 @@ export type DevBuildStatus =
   | 'ready';
 
 export interface DevBuildConnectionOptions {
+  /** Name of the consuming application, for development diagnostics only. */
+  consumer?: string;
   publisher?: DevBuildRemote;
   remotes?: DevBuildRemote[];
-  /** Only local brokers are started automatically. */
+  /** Local root-path ws: brokers on the default port start automatically. Explicit true also allows custom local ports. */
   autoStartBroker?: boolean;
+}
+
+/** An actual framework result, independent of transport acknowledgements. */
+export interface DevBuildResult {
+  outcome: 'applied' | 'failed';
+  trigger: 'notification' | 'manifest';
+  buildVersion?: string;
+  operationId?: string;
+  stage?: string;
+  timingsMs?: Record<string, number>;
+  error?: string;
+}
+
+export interface DevBuildDiagnostics {
+  brokerId: string;
+  /** HTTP endpoint on the connected broker, which may be on another machine. */
+  url: string;
 }
 
 export interface DevBuildMessage {
@@ -49,6 +68,7 @@ export interface DevBuildMessage {
     | 'subscribe'
     | 'unsubscribe'
     | 'publish'
+    | 'result'
     | 'invalidate'
     | 'hello'
     | 'state'
@@ -57,6 +77,9 @@ export interface DevBuildMessage {
   remote?: DevBuildRemote;
   publication?: DevBuildPublication;
   revision?: string;
+  consumer?: string;
+  result?: DevBuildResult;
+  diagnostics?: { brokerId: string; path: string };
 }
 
 export function devBuildKey(remote: DevBuildRemote): string {

@@ -120,6 +120,17 @@ export async function forkDevWorker(
 ): Promise<void> {
   if (options?.build) {
     buildConnection = new BuildConnection(options.build, {
+      diagnostics(diagnostics) {
+        if (!process.connected) return;
+        try {
+          process.send?.(
+            { type: DEV_BUILD_CHANNEL, kind: 'diagnostics', diagnostics },
+            () => {},
+          );
+        } catch {
+          // Diagnostic discovery is independent of build delivery.
+        }
+      },
       status(remote, status) {
         process.send?.({
           type: DEV_BUILD_CHANNEL,
@@ -240,6 +251,8 @@ process.on('message', (message: any) => {
     if (message.kind === 'publish')
       buildConnection?.publish(message.publication);
     else if (message.kind === 'invalidate') buildConnection?.invalidate();
+    else if (message.kind === 'result')
+      buildConnection?.reportResult(message.remote, message.result);
     else if (message.kind === 'ack') {
       const pending = buildAcknowledgements.get(message.id);
       buildAcknowledgements.delete(message.id);

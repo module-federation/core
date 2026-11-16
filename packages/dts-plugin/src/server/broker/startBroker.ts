@@ -6,11 +6,11 @@ export function getBroker(): Broker | undefined {
   return broker;
 }
 
-async function startBroker(): Promise<void> {
+async function startBroker(port?: number): Promise<void> {
   if (getBroker()) {
     return;
   }
-  broker = new Broker();
+  broker = new Broker(port);
 
   await broker.start();
 
@@ -20,8 +20,9 @@ async function startBroker(): Promise<void> {
 // * Broker won't start until this process receives a 'start'
 // * signal, or an error will occur in a ProxyService.
 process.on('message', (message) => {
-  if (message === 'start') {
+  const request = message as { kind?: string; port?: number } | null;
+  if (message === 'start' || request?.kind === 'start') {
     fileLog(`startBroker... ${process.pid}`, 'StartBroker', 'info');
-    startBroker();
+    startBroker(message === 'start' ? undefined : request?.port);
   }
 });

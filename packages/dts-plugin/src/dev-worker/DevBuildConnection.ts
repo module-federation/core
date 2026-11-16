@@ -10,6 +10,8 @@ import {
   type DevBuildRemote,
   type DevBuildStatus,
   type DevBuildUpdate,
+  type DevBuildResult,
+  type DevBuildDiagnostics,
 } from '../server/buildProtocol';
 
 export type {
@@ -19,6 +21,8 @@ export type {
   DevBuildSource,
   DevBuildStatus,
   DevBuildUpdate,
+  DevBuildResult,
+  DevBuildDiagnostics,
 } from '../server/buildProtocol';
 
 export interface DevBuildCallbacks {
@@ -28,6 +32,7 @@ export interface DevBuildCallbacks {
   ): Promise<void>;
   onStatus?(remote: DevBuildRemote, status: DevBuildStatus): void;
   onError?(error: unknown): void;
+  onDiagnostics?(diagnostics: DevBuildDiagnostics): void | Promise<void>;
 }
 
 /** Framework-owned build readiness, independent of dts and browser reload. */
@@ -70,6 +75,14 @@ export function createDevBuildConnection(
     if (message?.type !== DEV_BUILD_CHANNEL || lifetime.signal.aborted) return;
     if (message.kind === 'status') {
       setStatus(message.remote, message.status);
+    } else if (message.kind === 'diagnostics') {
+      try {
+        void Promise.resolve(
+          callbacks.onDiagnostics?.(message.diagnostics),
+        ).catch(() => {});
+      } catch {
+        // A diagnostic observer must not interrupt updates or IPC processing.
+      }
     } else if (message.kind === 'update') {
       const operation = Promise.resolve()
         .then(() =>
@@ -94,6 +107,17 @@ export function createDevBuildConnection(
     if (!lifetime.signal.aborted) callbacks.onError?.(error);
   });
   return {
+    reportResult(remote: DevBuildRemote, result: DevBuildResult) {
+      if (!process.connected || lifetime.signal.aborted) return;
+      try {
+        process.send(
+          { type: DEV_BUILD_CHANNEL, kind: 'result', remote, result },
+          () => {},
+        );
+      } catch {
+        // Reporting is optional and must not turn an applied update into failure.
+      }
+    },
     publish(publication: DevBuildPublication) {
       if (!publication.buildVersion)
         throw new TypeError('A ready build requires a buildVersion');
