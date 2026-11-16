@@ -5,12 +5,14 @@ import {
   __ENABLE_FAST_REFRESH__,
   __FEDERATION_DEVTOOLS__,
 } from '../src/template/constant';
+import { getUnpkgUrl } from '../src/utils/sdk';
 
 const resetWindowState = () => {
   localStorage.clear();
 
   const testWindow = window as Record<string, any>;
 
+  delete testWindow.__REACT_DEVTOOLS_GLOBAL_HOOK__;
   delete testWindow.React;
   delete testWindow.ReactDOM;
   delete testWindow.scope_react;
@@ -33,6 +35,7 @@ const stubUmdRequest = ({
   reactScript?: string;
   reactDomScript?: string;
 } = {}) => {
+  const requests: Array<{ url: string; async: boolean }> = [];
   class MockXMLHttpRequest {
     status = 200;
     responseText = '';
@@ -42,6 +45,7 @@ const stubUmdRequest = ({
     onerror: null | (() => void) = null;
 
     open(_method: string, url: string, async = true) {
+      requests.push({ url, async });
       this.url = url;
       this.isAsync = async;
     }
@@ -68,6 +72,7 @@ const stubUmdRequest = ({
   }
 
   rs.stubGlobal('XMLHttpRequest', MockXMLHttpRequest as typeof XMLHttpRequest);
+  return requests;
 };
 
 const getPlugin = async () => {
@@ -87,7 +92,7 @@ describe('fast refresh shared scope globals', () => {
       __FEDERATION_DEVTOOLS__,
       JSON.stringify({
         [__ENABLE_FAST_REFRESH__]: true,
-        [__EAGER_SHARE__]: ['react', '19.2.0', ['scope']],
+        [__EAGER_SHARE__]: ['react', '18.3.1', ['scope']],
       }),
     );
     stubUmdRequest();
@@ -107,7 +112,7 @@ describe('fast refresh shared scope globals', () => {
       __FEDERATION_DEVTOOLS__,
       JSON.stringify({
         [__ENABLE_FAST_REFRESH__]: true,
-        [__EAGER_SHARE__]: ['react', '19.2.0', ['scope-a', 'scope-b']],
+        [__EAGER_SHARE__]: ['react', '18.3.1', ['scope-a', 'scope-b']],
       }),
     );
     stubUmdRequest();
@@ -131,7 +136,7 @@ describe('fast refresh shared scope globals', () => {
       __FEDERATION_DEVTOOLS__,
       JSON.stringify({
         [__ENABLE_FAST_REFRESH__]: true,
-        [__EAGER_SHARE__]: ['react', '19.2.0', ['scope']],
+        [__EAGER_SHARE__]: ['react', '18.3.1', ['scope']],
       }),
     );
     stubUmdRequest();
@@ -144,7 +149,7 @@ describe('fast refresh shared scope globals', () => {
     (window as any).scope_react_dom = { source: 'scope-react-dom' };
 
     const reactShared = {
-      version: '19.2.0',
+      version: '18.3.1',
       scope: ['scope'],
       shareConfig: {
         eager: true,
@@ -158,7 +163,7 @@ describe('fast refresh shared scope globals', () => {
     });
 
     const reactDomShared = {
-      version: '19.2.0',
+      version: '18.3.1',
       scope: ['scope'],
       shareConfig: {
         eager: true,
@@ -191,7 +196,7 @@ describe('fast refresh shared scope globals', () => {
     const plugin = await getPlugin();
 
     const reactShared: Record<string, any> = {
-      version: '19.2.0',
+      version: '18.3.1',
       scope: ['scope'],
       shareConfig: {
         eager: false,
@@ -204,7 +209,7 @@ describe('fast refresh shared scope globals', () => {
     });
 
     const reactDomShared: Record<string, any> = {
-      version: '19.2.0',
+      version: '18.3.1',
       scope: ['scope'],
       shareConfig: {
         eager: false,
@@ -228,5 +233,154 @@ describe('fast refresh shared scope globals', () => {
     });
     expect((window as any).ReactDOM).toBeUndefined();
     expect(reactDomFactory()).toBe((window as any).scope_react_dom);
+  });
+});
+
+describe('pinned React 19 development provider', () => {
+  beforeEach(() => {
+    rs.resetModules();
+    rs.unstubAllGlobals();
+    resetWindowState();
+    localStorage.setItem(
+      __FEDERATION_DEVTOOLS__,
+      JSON.stringify({ [__ENABLE_FAST_REFRESH__]: true }),
+    );
+  });
+
+  const scripts = {
+    reactScript:
+      'window.React = { version: "19.2.4", createElement: () => Object.freeze({}), source: "dev-react" };',
+    reactDomScript:
+      'window.ReactDOM = { version: "19.2.4", createRoot() {}, react: window.React };',
+  };
+
+  it('maps every 19.x request to the pinned development pair, preserving React 18 URLs', () => {
+    for (const version of ['19.0.0', '19.1.1', '19.2.0', '19.9.0-canary']) {
+      expect(getUnpkgUrl('react', version)).toBe(
+        'https://unpkg.com/umd-react@19.2.4/dist/react.development.js',
+      );
+      for (const pkg of ['react-dom', 'react-dom/client'])
+        expect(getUnpkgUrl(pkg, version)).toBe(
+          'https://unpkg.com/umd-react@19.2.4/dist/react-dom.development.js',
+        );
+    }
+    expect(getUnpkgUrl('react', '18.3.1')).toBe(
+      'https://unpkg.com/react@18.3.1/umd/react.development.js',
+    );
+    expect(getUnpkgUrl('react-dom', '18.3.1')).toBe(
+      'https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js',
+    );
+  });
+
+  it('loads React before client-only async requests and shares the same DOM instance', async () => {
+    const requests = stubUmdRequest(scripts);
+    const plugin = await getPlugin();
+    const client: any = {
+      version: '19.0.0',
+      scope: ['scope'],
+      shareConfig: {},
+    };
+    const dom: any = { version: '19.1.1', scope: ['scope'], shareConfig: {} };
+    const react: any = { version: '19.2.0', scope: ['scope'], shareConfig: {} };
+    for (const [pkgName, shared] of [
+      ['react-dom/client', client],
+      ['react-dom', dom],
+      ['react', react],
+    ])
+      plugin.beforeRegisterShare({ pkgName, shared, origin: {} });
+    const [clientFactory, domFactory] = await Promise.all([
+      client.get(),
+      dom.get(),
+    ]);
+    const reactFactory = await react.get();
+    expect(clientFactory()).toBe(domFactory());
+    expect(clientFactory().react).toBe(reactFactory());
+    expect(client.version).toBe('19.2.4');
+    expect(dom.version).toBe('19.2.4');
+    expect(react.version).toBe('19.2.4');
+    expect(requests).toEqual([
+      {
+        url: 'https://unpkg.com/umd-react@19.2.4/dist/react.development.js',
+        async: true,
+      },
+      {
+        url: 'https://unpkg.com/umd-react@19.2.4/dist/react-dom.development.js',
+        async: true,
+      },
+    ]);
+  });
+
+  it('loads eager client shares synchronously and saves the pinned version for the next navigation', async () => {
+    const requests = stubUmdRequest(scripts);
+    const plugin = await getPlugin();
+    const client: any = {
+      version: '19.1.1',
+      scope: ['scope'],
+      shareConfig: { eager: true },
+    };
+    plugin.beforeRegisterShare({
+      pkgName: 'react-dom/client',
+      shared: client,
+      origin: {},
+    });
+    expect(client.lib().version).toBe('19.2.4');
+    expect(client.lib().react).toBe((window as any).scope_react);
+    expect(requests.every((request) => !request.async)).toBe(true);
+    expect(requests).toHaveLength(2);
+    expect(
+      JSON.parse(localStorage.getItem(__FEDERATION_DEVTOOLS__)!)[
+        __EAGER_SHARE__
+      ][1],
+    ).toBe('19.2.4');
+    expect((await client.get())()).toBe(client.lib());
+  });
+
+  it('hydrates old React 19 eager caches with pinned URLs', async () => {
+    localStorage.setItem(
+      __FEDERATION_DEVTOOLS__,
+      JSON.stringify({
+        [__ENABLE_FAST_REFRESH__]: true,
+        [__EAGER_SHARE__]: ['react', '19.0.0', ['scope']],
+      }),
+    );
+    const requests = stubUmdRequest(scripts);
+    await getPlugin();
+    expect(requests.map((request) => request.url)).toEqual([
+      'https://unpkg.com/umd-react@19.2.4/dist/react.development.js',
+      'https://unpkg.com/umd-react@19.2.4/dist/react-dom.development.js',
+    ]);
+    expect((window as any).scope_react_dom.version).toBe('19.2.4');
+  });
+
+  it('preserves an installed DevTools hook and leaves disabled shares untouched', async () => {
+    const hook = { inject: rs.fn() };
+    (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ = hook;
+    localStorage.clear();
+    const requests = stubUmdRequest(scripts);
+    const plugin = await getPlugin();
+    const originalGet = rs.fn();
+    const shared: any = { version: '19.1.1', get: originalGet };
+    plugin.beforeRegisterShare({
+      pkgName: 'react-dom/client',
+      shared,
+      origin: {},
+    });
+    expect(shared.get).toBe(originalGet);
+    expect(shared.version).toBe('19.1.1');
+    expect((window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__).toBe(hook);
+    expect(requests).toHaveLength(0);
+  });
+
+  it('rejects an incorrect version or production React instead of returning it', async () => {
+    stubUmdRequest({ reactScript: 'window.React = { version: "19.0.0" };' });
+    const plugin = await getPlugin();
+    const shared: any = { version: '19.1.1' };
+    plugin.beforeRegisterShare({ pkgName: 'react', shared, origin: {} });
+    await expect(shared.get()).rejects.toThrow('19.2.4');
+    stubUmdRequest({
+      reactScript:
+        'window.React = { version: "19.2.4", createElement: () => ({}) };',
+    });
+    await expect(shared.get()).rejects.toThrow('not a development build');
   });
 });

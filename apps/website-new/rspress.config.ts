@@ -41,6 +41,12 @@ export default defineConfig({
       description: 'Arquiteture o micro-frontend da sua aplicação web',
       label: 'Português (Brasil)',
     },
+    {
+      lang: 'es',
+      title: 'Module federation',
+      description: 'Arquitectura de micro-frontends para tu aplicación web',
+      label: 'Español',
+    },
   ],
   logo: {
     light: '/module-federation.svg',
@@ -127,12 +133,35 @@ gtag('config', '${googleAnalyticsMeasurementId}');
       writeToDisk: true,
       lazyCompilation: false,
     },
+    server: {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+    },
     performance: {
       buildCache: false,
     },
     tools: {
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);
+      },
+      rspack: (config, { environment }) => {
+        if (
+          environment.name === 'web' &&
+          config.optimization?.splitChunks &&
+          typeof config.optimization.splitChunks === 'object'
+        ) {
+          const splitChunks = config.optimization.splitChunks;
+          splitChunks.cacheGroups ??= {};
+          splitChunks.cacheGroups.reactSharedFallback = {
+            test: /[\\/]node_modules[\\/]\.pnpm[\\/](?:cookie|react(?:-dom|-router(?:-dom)?)?|scheduler|set-cookie-parser)@/,
+            name: 'react-shared-fallback',
+            chunks: 'async',
+            enforce: true,
+            priority: 50,
+            reuseExistingChunk: true,
+          };
+        }
       },
       // rspack: {
       //   optimization: {

@@ -24,10 +24,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DEBUG: 'zephyr*'
   SITE_ORIGIN: https://module-federation.io
   ZE_FAIL_BUILD: true
   ZE_SECRET_TOKEN: ${{ secrets.ZE_SECRET_TOKEN }}
+  ZE_WAIT_FOR_DEPLOYMENTS: true
 
 jobs:
   deploy:
@@ -67,6 +67,10 @@ jobs:
 
       - name: Build and deploy website with Zephyr
         if: ${{ env.ZE_SECRET_TOKEN != '' && github.event.action != 'closed' }}
+        env:
+          # Zephyr's debug output includes account details, so only print it
+          # when a run is re-run with debug logging.
+          DEBUG: ${{ runner.debug == '1' && 'zephyr*' || '' }}
         run: pnpm run build:website
 
       - name: Update Zephyr preview environment

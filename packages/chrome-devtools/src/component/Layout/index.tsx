@@ -214,7 +214,8 @@ const Layout = (
           if (hadPreviousEffective) {
             await removeStorage(MODULE_DEVTOOL_IDENTIFIER);
             await removeStorage(BROWSER_ENV_KEY);
-            await removeStorageKey(__FEDERATION_DEVTOOLS__, 'overrides');
+            await mergeStorage(__FEDERATION_DEVTOOLS__, 'overrides', {});
+            await mergeStorage(__FEDERATION_DEVTOOLS__, 'proxyRules', rawRules);
             await injectScript(reloadPage, false);
             setCondition(statusInfo.noProxy);
             lastEffectiveRulesRef.current = '';
@@ -266,6 +267,8 @@ const Layout = (
         await setStorage(BROWSER_ENV_KEY);
 
         await mergeStorage(__FEDERATION_DEVTOOLS__, 'overrides', overrides);
+        await mergeStorage(__FEDERATION_DEVTOOLS__, 'proxyRules', rawRules);
+        await mergeStorage(__FEDERATION_DEVTOOLS__, ENABLE_CLIP, enableClip);
 
         await injectScript(reloadPage, false);
         window.__FEDERATION__.moduleInfo = moduleInfo;
@@ -312,6 +315,10 @@ const Layout = (
         if (typeof overridesState === 'string' && overridesState) {
           const parsedState = JSON.parse(overridesState);
           const overrides = parsedState?.overrides;
+          setEnableClip(Boolean(parsedState?.[ENABLE_CLIP]));
+          setEnalbeHMR(
+            parsedState?.[__ENABLE_FAST_REFRESH__] ? 'enable' : 'disable',
+          );
           if (isObject(overrides)) {
             const overrideRules = Object.entries(overrides)
               .map(([key, value]) => ({
@@ -326,13 +333,13 @@ const Layout = (
             const filteredRules = producer.length
               ? overrideRules.filter((rule) => producer.includes(rule.key))
               : overrideRules;
-            if (filteredRules.length) {
-              storeData = {
-                ...storeData,
-                [proxyFormField]: filteredRules,
-              };
-              overridesApplied = true;
-            }
+            storeData = {
+              ...storeData,
+              [proxyFormField]: Array.isArray(parsedState.proxyRules)
+                ? parsedState.proxyRules
+                : filteredRules,
+            };
+            overridesApplied = true;
           }
         }
       } catch (error) {
@@ -375,16 +382,27 @@ const Layout = (
     return () => {
       cancelled = true;
     };
-  }, [moduleInfo, producerKey, form]);
+  }, [moduleInfo, producerKey, form, tabId]);
 
   useEffect(() => {
-    chrome.storage.sync.get([ENABLEHMR]).then((data) => {
-      const enable = data[ENABLEHMR];
-      if (typeof enable === 'boolean') {
-        onHMRChange(enable);
+    let cancelled = false;
+    getStorageValue(__FEDERATION_DEVTOOLS__).then((raw) => {
+      try {
+        const config = typeof raw === 'string' ? JSON.parse(raw) : {};
+        if (!cancelled) {
+          setEnalbeHMR(
+            config?.[__ENABLE_FAST_REFRESH__] ? 'enable' : 'disable',
+          );
+          setEnableClip(Boolean(config?.[ENABLE_CLIP]));
+        }
+      } catch {
+        /* Keep disabled defaults for malformed page storage. */
       }
     });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [tabId]);
 
   useEffect(() => {
     validateForm(form);
@@ -433,21 +451,23 @@ const Layout = (
     run(formData);
   };
 
-  const onHMRChange = (on: boolean) => {
+  const onHMRChange = async (on: boolean) => {
     setEnalbeHMR(on ? 'enable' : 'disable');
-    chrome.storage.sync.set({
+    await chrome.storage.sync.set({
       [ENABLEHMR]: on,
     });
     if (on) {
-      mergeStorage(__FEDERATION_DEVTOOLS__, __ENABLE_FAST_REFRESH__, on);
+      await mergeStorage(__FEDERATION_DEVTOOLS__, __ENABLE_FAST_REFRESH__, on);
     } else {
-      removeStorageKey(__FEDERATION_DEVTOOLS__, __ENABLE_FAST_REFRESH__);
-      removeStorageKey(__FEDERATION_DEVTOOLS__, __EAGER_SHARE__);
+      await removeStorageKey(__FEDERATION_DEVTOOLS__, __ENABLE_FAST_REFRESH__);
+      await removeStorageKey(__FEDERATION_DEVTOOLS__, __EAGER_SHARE__);
     }
     injectScript(reloadPage, false);
   };
 
-  const onClipChange = (on: boolean) => {
+  const onClipChange = async (on: boolean) => {
+    await mergeStorage(__FEDERATION_DEVTOOLS__, ENABLE_CLIP, on);
+    lastFormSignatureRef.current = '';
     setEnableClip(on);
     try {
       if (tabId) {

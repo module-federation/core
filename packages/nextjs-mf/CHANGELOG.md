@@ -1,5 +1,57 @@
 # @module-federation/nextjs-mf
 
+## 8.9.0
+
+### Minor Changes
+
+- 8a9677f: Add a `scriptTimeout` extra option to configure the remote entry script load timeout, previously hard-coded to 8 seconds.
+
+### Patch Changes
+
+- Updated dependencies [9135b23]
+- Updated dependencies [ee32a0d]
+- Updated dependencies [caafd8d]
+- Updated dependencies [edf1219]
+- Updated dependencies [b4b5477]
+- Updated dependencies [543eba3]
+- Updated dependencies [fdaeb75]
+- Updated dependencies [020fa27]
+- Updated dependencies [06cb964]
+  - @module-federation/runtime@2.9.3
+  - @module-federation/runtime-core@2.9.3
+  - @module-federation/webpack-bundler-runtime@2.9.3
+  - @module-federation/sdk@2.9.3
+  - @module-federation/enhanced@2.9.3
+  - @module-federation/node@2.7.53
+
+## 8.8.76
+
+### Patch Changes
+
+- Updated dependencies [412f62e]
+- Updated dependencies [c130946]
+- Updated dependencies [47d9b46]
+- Updated dependencies [923b55d]
+  - @module-federation/enhanced@2.9.2
+  - @module-federation/runtime-core@2.9.2
+  - @module-federation/node@2.7.52
+  - @module-federation/runtime@2.9.2
+  - @module-federation/webpack-bundler-runtime@2.9.2
+  - @module-federation/sdk@2.9.2
+
+## 8.8.75
+
+### Patch Changes
+
+- 85d78e2: Fix server-side onLoad crash when async remote module factories are used during the webpack build/SSR path. Await async factory results before proxy-wrapping, return a wrapper factory for exposeModuleFactory, and preserve class constructor semantics via Proxy apply/construct traps.
+- Updated dependencies [92afef1]
+  - @module-federation/runtime-core@2.9.1
+  - @module-federation/enhanced@2.9.1
+  - @module-federation/runtime@2.9.1
+  - @module-federation/node@2.7.51
+  - @module-federation/webpack-bundler-runtime@2.9.1
+  - @module-federation/sdk@2.9.1
+
 ## 8.8.74
 
 ### Patch Changes

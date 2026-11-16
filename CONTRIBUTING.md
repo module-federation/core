@@ -156,15 +156,22 @@ Repository maintainers can publish a new version of changed packages to npm.
 5. Select `latest` as the release version.
 6. Wait reviewers to approve. 
 7. Merge the release pull request to `main`.
-7. Generate the [release notes](https://github.com/module-federation/core/releases) via GitHub, see [Automatically generated release notes](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes)
+8. Open the GitHub Release **draft** linked in the workflow summary. Review the generated notes and the Browser extension ZIP, then click **Publish release**. The optional `previous_tag` workflow input selects the baseline for GitHub's generated notes; leave it empty for automatic selection.
+
+The workflow builds `module-federation-devtools-browser.zip` before publishing npm packages, then creates the draft only after npm publishing succeeds. The ZIP has `manifest.json` at its root and is attached to the draft's Assets. Notes use `.github/release.yml` and include an installation-guide link and archive checksum. Release tags use `v` plus the published runtime version and target the actual checked-out release commit.
+
+The separate `Prepare GitHub Release draft` job uses the automatically issued `GITHUB_TOKEN` with `contents: write`; no personal token is required. If that job fails after npm publishing, rerun **failed jobs only** within the artifact's 30-day retention period. Matching drafts and attachments are reused, manual notes are preserved, and published releases or mismatching commits/assets are not overwritten. Inspect conflicting drafts rather than deleting or moving published tags.
+
+Merge changes to `.github/workflows/` into the default branch before cutting a release branch. GitHub may require `Workflows: write` when creating a release whose target commit changes workflow files relative to the default branch; `GITHUB_TOKEN` cannot hold that permission. If a separate workflow change is unavoidable, use an appropriately scoped GitHub App installation token instead of a personal token. See [GitHub's release API permissions](https://docs.github.com/en/rest/releases/releases#create-a-release).
 
 ## Release preview version
 
 1. Make sure your branch has added changeset files before releasing the preview version.
 2. Run the [release action](https://github.com/module-federation/core/actions/workflows/release.yml) to publish packages to npm.
 3. Select `next` as the release version.
-4. Wait reviewers to approve. 
+4. Wait reviewers to approve.
 
+Preview releases publish packages to the npm `next` channel only. They do not create GitHub Release drafts or Browser extension assets.
 
 ## Release the official version
 
@@ -180,6 +187,6 @@ Repository maintainers can publish a new version of changed packages to npm.
 ![image](https://github.com/module-federation/core/assets/27547179/5c66e9e5-7bd7-4466-a1aa-38420f1dac82)
 
 
-4. Generate a release note based on the original tag after the release is complete
+4. Review the automatically prepared Release draft after npm publication. You can regenerate notes with a different previous tag in GitHub; the Browser ZIP remains in Assets. Publish the draft when ready.
 
 ![image](https://github.com/module-federation/core/assets/27547179/accc9626-9ffd-4074-8d47-14372ae77400)

@@ -146,7 +146,7 @@ const reloadPage = () => {
   globalThis.location?.reload();
 };
 
-const readSnapshotFromPage = (
+export const readSnapshotFromPage = (
   storageKey: string,
   context?: {
     chromeScope?: string;

@@ -7,7 +7,7 @@ export const test = base.extend<{
 }>({
   // eslint-disable-next-line no-empty-pattern
   context: async ({}, use) => {
-    const pathToExtension = path.resolve(__dirname, '../dist');
+    const pathToExtension = path.resolve(__dirname, '../dist/chrome');
     const context = await chromium.launchPersistentContext('', {
       headless: false,
       devtools: false,

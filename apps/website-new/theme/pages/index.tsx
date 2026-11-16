@@ -12,7 +12,7 @@ export function HomeLayout() {
   return (
     <div>
       {/* Landing Page */}
-      <div
+      <main
         className="relative dark:border-dark-50"
         style={{
           background: 'var(--rp-home-bg)',
@@ -29,7 +29,7 @@ export function HomeLayout() {
           </NoSSR>
           <HomeFeature features={frontmatter.features as Feature[]} />
         </div>
-      </div>
+      </main>
       {/* Benchmark Page */}
       {/* <NoSSR>
         <Benchmark />
