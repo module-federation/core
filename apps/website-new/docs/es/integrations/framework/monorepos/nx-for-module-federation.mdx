@@ -1,0 +1,102 @@
+# Nx y Module Federation
+
+Nx es un potente sistema de build de código abierto que funciona especialmente bien con monorepos e incluye soporte integrado de Module Federation para proyectos Angular y React.
+
+Si todavía no has leído las ventajas de usar un monorepo con Module Federation, asegúrate de leer primero [Ventajas de Module Federation en un monorepo](/integrations/framework/monorepos/index.html).
+
+## ¿Qué es Nx?
+
+Nx es un potente sistema de build de código abierto que ofrece herramientas y técnicas para mejorar la productividad de los desarrolladores, optimizar el rendimiento de CI y mantener la calidad del código.
+Es la mejor herramienta tanto para construir y mantener monorepos como para gestionar proyectos de Module Federation.
+
+### Funcionalidades principales de Nx
+
+- Ejecución eficiente de tareas: Nx [ejecuta las tareas en paralelo](https://nx.dev/features/run-tasks) y las ordena según las dependencias entre ellas.
+- Distribución de tareas en CI: Nx escala tu CI [distribuyendo las tareas](https://nx.dev/ci/features/distribute-task-execution) entre muchas VM. Tu CI es rápido sin importar el tamaño de tu repositorio.
+- Caché local y remota: con la caché [local](https://nx.dev/features/cache-task-results) y [remota](https://nx.dev/ci/features/remote-cache), Nx evita volver a ejecutar tareas innecesariamente, lo que te ahorra un valioso tiempo de desarrollo y reduce los tiempos de CI.
+- División de tests E2E y reejecución de tests inestables: Nx [divide automáticamente](https://nx.dev/ci/features/split-e2e-tasks) los tests e2e grandes para distribuirlos entre VM. Nx también puede [identificar y volver a ejecutar automáticamente los tests e2e inestables](https://nx.dev/ci/features/flaky-tasks).
+- Automatización de la actualización de dependencias: si aprovechas los [plugins de Nx](https://nx.dev/concepts/nx-plugins), obtienes funcionalidades adicionales como la [generación de código](https://nx.dev/features/generate-code) y herramientas para [actualizar automáticamente](https://nx.dev/features/automate-updating-dependencies) tu código y tus dependencias.
+- Adáptalo a tu medida: Nx es muy personalizable y extensible. Ajústalo [creando un plugin para tu organización](https://nx.dev/extending-nx/tutorials/organization-specific-plugin) o [creando un plugin de herramientas](https://nx.dev/extending-nx/tutorials/tooling-plugin).
+
+## Funcionalidades de Module Federation en Nx
+
+Nx ofrece soporte de Module Federation listo para usar en proyectos Angular y React, incluidos los proyectos con renderizado en el servidor (SSR).
+
+### Generadores para crear proyectos de Module Federation
+
+Los generadores de Nx ofrecen un método coherente y cómodo para crear la estructura de los proyectos. Los plugins de Nx para [Angular (`@nx/angular`)](https://nx.dev/nx-api/angular) y [React (`@nx/react`)](https://nx.dev/nx-api/react) incluyen generadores para crear rápidamente proyectos de Module Federation y te permiten añadir fácilmente consumers (hosts) y producers (remotes) a tu sistema.
+
+A continuación puedes ver un ejemplo del generador `consumer` de Nx:
+```bash
+# Generate an Angular Consumer application with three Producers
+nx g @nx/angular:consumer shell --producers=products,cart,checkout
+
+# Generate a React Consumer application with three Producers
+nx g @nx/react:consumer shell --producers=products,cart,checkout
+```
+
+Puedes obtener más información sobre cómo configurar Module Federation con Nx en las guías de [Angular](/integrations/framework/angular/using-nx-for-angular.html) y [React](/integrations/practice/react/using-nx-for-react.html).
+
+### Executors
+
+Nx ofrece executors para hacer el build y servir tus aplicaciones de Module Federation. El más importante es el executor `module-federation-dev-server`, que se usa para servir tu aplicación en local. Este executor ofrece las siguientes funcionalidades:
+
+- Soporte para servir el proyecto consumer (host) junto con todos sus producers (remotes) con un solo comando, con la mejor gestión de recursos y DX.
+- Soporte para servir de forma individual los producers (remotes) en los que estás trabajando, con HMR y vigilancia de archivos para un desarrollo local más rápido.
+
+Más abajo puedes ver cómo [escalamos la experiencia de desarrollo](/integrations/framework/monorepos/nx-for-module-federation.html#scaling-developer-experience-dx) de Module Federation en Nx.
+
+Nx sirve el proyecto consumer (host) junto con todos sus producers (remotes) con un solo comando, lo que te garantiza feedback inmediato sobre cualquier cambio que hagas en los proyectos producer (remote), incluido si afecta a otros proyectos del sistema.
+También te permite [desarrollar como un usuario](/integrations/framework/monorepos/nx-for-module-federation.html#develop-as-a-user), de modo que sigas el mismo flujo que seguiría un usuario con la aplicación desplegada.
+
+Para saber más sobre cómo lo consigue Nx con el executor `module-federation-dev-server`, consulta [Nx Module Federation Technical Overview](https://nx.dev/concepts/module-federation/nx-module-federation-technical-overview).
+
+### Escalar la experiencia de desarrollo (DX) {#scaling-developer-experience-dx}
+
+Para garantizar ciclos de desarrollo rápidos con el executor `module-federation-dev-server`, Nx consigue tiempos de arranque del dev server cortos de las siguientes maneras:
+
+- Ofrece una [caché local](https://nx.dev/features/cache-task-results) de los artefactos de build de cada proyecto del sistema de Module Federation.
+- Ofrece una [caché remota](https://nx.dev/ci/features/remote-cache) de los artefactos de build de cada proyecto del sistema de Module Federation, lo que significa que cada equipo puede aprovechar la caché generada por otros equipos. Esto es especialmente importante cuando un equipo no trabaja en determinados producers (remotes).
+- Ejecuta en paralelo los builds de los producers (remotes) para acelerar el proceso de build. _(Se usarán los artefactos cacheados si están disponibles)_.
+- Ejecuta con el dev-server solo los producers (remotes) especificados para limitar el número de archivos que hay que vigilar.
+- Divide los builds monolíticos en chunks más pequeños y usa el comando `affected` para ejecutar tareas solo en los proyectos afectados por los cambios.
+
+_Nota: la caché remota la proporciona [Nx Cloud](https://nx.dev/nx-cloud)._
+
+### Desarrollar como un usuario {#develop-as-a-user}
+
+Para obtener la mejor DX (experiencia de desarrollo) y el desarrollo más fiel de una arquitectura de Module Federation, Nx recomienda verla como una sola aplicación. Es decir, el consumer (host) y todos los producers (remotes) se combinan para formar una única aplicación.
+
+El consumer (host) es el punto de entrada y los producers (remotes) son módulos que usa la aplicación. Simplemente, los producers (remotes) se obtienen por red en runtime en lugar de incluirse en el bundle de la aplicación.
+
+Para que esto sea posible y para garantizar una buena DX en local, el soporte de Module Federation de Nx está diseñado de forma que, al desarrollar en local, siempre ejecutes serve en tu aplicación consumer (host). Esto arranca toda tu arquitectura de Module Federation: sirve tu consumer (host) con webpack-dev-server y cada producer (remote) mediante un único http-server. Puedes obtener más información en [Nx Module Federation Technical Overview](https://nx.dev/concepts/module-federation/nx-module-federation-technical-overview).
+
+Cuando trabajes en una aplicación producer (remote) concreta, usa la opción `--devProducers` para especificar el producer (remote) que estás desarrollando; por ejemplo, `nx serve shell --devProducers=checkout`. Así, el producer (remote) se sirve mediante webpack-dev-server, lo que permite HMR y recarga en vivo.
+
+## Casos de uso soportados por Nx
+
+### Arquitectura micro-frontend
+
+Nx recomienda las arquitecturas micro-frontend para equipos que necesitan desplegar aplicaciones de forma independiente. El despliegue independiente es el concepto según el cual cada equipo de una organización despliega su trabajo con su propio ritmo de lanzamientos, independientemente de los demás equipos, lo que les da más autonomía. Esto se puede conseguir con Module Federation y resulta cada vez más atractivo a medida que crecen la organización y la aplicación.
+
+Con Module Federation, cada equipo puede ser dueño de un producer (remote) que se despliega cuando hace falta y que la aplicación consumer (host) consume según lo previsto, lo que permite actualizar ese producer (remote) sin tener que volver a desplegarlo todo.
+Esto se presta más a un enfoque micro-frontend.
+
+Consulta [Micro Frontend Architecture](https://nx.dev/concepts/module-federation/micro-frontend-architecture) en la documentación de Nx para más información.
+
+### Builds más rápidos
+
+Como Module Federation te permite dividir tu aplicación en chunks desplegables más pequeños que solo se necesitan en runtime, puedes aprovecharlo para reducir los tiempos de build de tu aplicación.
+
+Puedes ejecutar en paralelo los builds de varias aplicaciones más pequeñas y desplegarlas todas juntas, manteniendo un único ritmo de lanzamientos y la coordinación entre equipos, pero beneficiándote de tiempos de build reducidos tanto en local para los desarrolladores como en CI.
+
+Si añades [Nx Cloud](https://nx.dev/nx-cloud) a tu Nx Workspace, incluso puedes obtener aciertos de caché de algunos builds de otros miembros del equipo y de CI, lo que reduce todavía más el tiempo de build.
+
+Consulta [Faster Builds](https://nx.dev/concepts/module-federation/faster-builds-with-module-federation) en la documentación de Nx.
+
+## Recursos
+
+- [Nx](https://nx.dev)
+- [Nx Module Federation](https://nx.dev/concepts/module-federation)
+- [[GUÍA]: Uso de Nx CLI para React](/integrations/practice/react/using-nx-for-react.html)
+- [[GUÍA]: Uso de Nx CLI para Angular](/integrations/framework/angular/using-nx-for-angular.html)

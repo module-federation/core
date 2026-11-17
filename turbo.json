@@ -25,7 +25,8 @@
         "SITE_ORIGIN",
         "ZE_ENV",
         "ZE_FAIL_BUILD",
-        "ZE_SECRET_TOKEN"
+        "ZE_SECRET_TOKEN",
+        "ZE_WAIT_FOR_DEPLOYMENTS"
       ]
     },
     "@module-federation/metro-plugin-rnc-cli#build": {

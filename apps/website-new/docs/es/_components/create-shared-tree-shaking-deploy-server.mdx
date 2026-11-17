@@ -1,0 +1,44 @@
+## Deploy Server (implementación de referencia)
+
+Si planeas construir tu propio Deploy Server, puedes usar el siguiente flujo general para implementar `server-calc`.
+
+### 1. Agregar los `usedExports` durante el despliegue
+
+En tu pipeline de despliegue de CI/CD, tu servicio debe:
+
+- recopilar los metadatos de build de todas las aplicaciones que están a punto de publicarse (normalmente `mf-stats.json` o archivos similares);
+- para una misma dependencia shared (p. ej., `antd@6.1.0`), agregar los `usedExports` declarados por cada aplicación.
+
+### 2. Calcular la unión mínima global
+
+Combina y deduplica todas las listas de `usedExports` recopiladas para obtener el conjunto global mínimo (la unión) que necesita el sistema.
+
+### 3. Ejecutar un build secundario para producir el bundle shared optimizado
+
+Invoca tu herramienta de build (p. ej., la CLI de Rspack) como un build aislado y pásale:
+
+- el nombre y la versión de la dependencia shared objetivo (p. ej., `antd@6.1.0`);
+- la unión global de `usedExports` del paso anterior.
+  El resultado es un bundle shared independiente que contiene solo los módulos necesarios.
+
+### 4. Actualizar y publicar el Snapshot
+
+Sube el bundle optimizado a tu servidor de recursos estáticos (CDN). Después, actualiza el archivo Snapshot de Module Federation (normalmente la versión remota de `mf-manifest.json`) con campos como:
+
+- `secondarySharedTreeShakingEntry`: URL del bundle optimizado,
+- `secondarySharedTreeShakingName`: nombre único del bundle,
+- `treeShakingStatus`: márcalo como disponible.
+
+Por último, distribuye el Snapshot actualizado a todos los consumers.
+
+### 5. Carga bajo demanda en runtime
+
+Cuando un usuario visita la aplicación, el MF Runtime lee el Snapshot. Si `treeShakingStatus` está disponible y el entorno cumple las condiciones de carga, carga el bundle optimizado mediante `secondarySharedTreeShakingEntry` en lugar del bundle completo.
+
+:::tip Versionado, caché y compatibilidad
+
+- El **versionado estricto** es la base. Asegúrate de que los builds secundarios y la carga en runtime se basen exactamente en la misma versión (p. ej., `antd@6.1.0`) para evitar discrepancias.
+- Usa una **estrategia de caché razonable** para los artefactos del build secundario. Como el contenido cambia con los `usedExports` globales, es preferible usar nombres de archivo basados en el hash del contenido para el almacenamiento en caché a largo plazo.
+- Este flujo es **compatible hacia adelante**: cuando no está habilitado o no se cumplen las condiciones, los consumers recurren al bundle completo sin afectar la funcionalidad existente.
+
+:::
