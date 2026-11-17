@@ -36,4 +36,4 @@ export type CreateScriptHook = (
 
 export type FetchHook = (
   args: [string, RequestInit],
-) => Promise<Response> | void | false;
+) => Promise<Response | void | false> | void | false;

@@ -91,6 +91,20 @@ describe('Retry Plugin', () => {
         url: 'https://example.com/remoteEntry.js',
       });
     });
+
+    it('does not handle remote entry requests', async () => {
+      const plugin = RetryPlugin({ retryTimes: 1, retryDelay: 0 });
+
+      const result = await plugin.fetch!(
+        'https://example.com/remoteEntry',
+        {},
+        undefined,
+        { initiator: 'loadRemote', id: 'remote', resourceType: 'remoteEntry' },
+      );
+
+      expect(result).toBeUndefined();
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
   });
 
   describe('fetchRetry', () => {

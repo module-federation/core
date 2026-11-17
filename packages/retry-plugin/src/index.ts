@@ -37,7 +37,10 @@ const RetryPlugin = (
 
   return {
     name: 'retry-plugin',
-    async fetch(manifestUrl: string, options: RequestInit) {
+    fetch(manifestUrl, options, _remoteInfo, resourceContext) {
+      // Not retried here: the abandoned-request error (RUNTIME-008) would also
+      // trigger loadEntryError and multiply the retries.
+      if (resourceContext?.resourceType === 'remoteEntry') return;
       return fetchRetry({
         url: manifestUrl,
         fetchOptions: {

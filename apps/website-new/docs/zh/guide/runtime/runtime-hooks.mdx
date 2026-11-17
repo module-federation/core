@@ -792,7 +792,7 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
 
 `AsyncHook`
 
-`fetch` 函数允许自定义获取清单（manifest）JSON 的请求。成功的 `Response` 必须返回一个有效的 JSON。
+`fetch` 函数允许自定义获取清单（manifest）JSON 的请求。成功的 `Response` 必须返回一个有效的 JSON。在 Node.js 环境中，加载远程入口（remoteEntry）脚本及其导入的 ES 模块时也会调用该 hook，此时 `Response` 的内容应为 JavaScript。
 
 ```typescript
 function fetch(
