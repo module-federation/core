@@ -3,7 +3,7 @@
 ---
 
 Preserve ordinary HTTP error status through explicitly configured Service
-ingresses and sanitized Host/browser error frames. Keep the pre-render build
-version check and reject stale requests with HTTP 409 without replaying them.
-HTTP conflicts do not trigger generic CSR recovery. Development update and reload
-remain coordinated by the framework after its Node runtime is ready.
+ingresses and sanitized Host/browser error frames. Service deployment selection
+comes from the producer response, without a Host build-version equality check.
+Business HTTP conflicts do not replay requests or trigger generic CSR recovery.
+Node updates never initiate browser reload or router revalidation.

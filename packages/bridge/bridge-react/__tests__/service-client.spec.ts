@@ -79,7 +79,7 @@ it('releases mount snapshots, plugins and entry promises after the last user unm
   ).toEqual([]);
 });
 
-it('selects a dependency added after the initial client description', async () => {
+it('selects a late dependency even when its producer registers an older configured URL', async () => {
   const parent = createInstance({ name: 'parent', shared: {} });
   const client: BridgeServiceClient = {
     name,
@@ -101,8 +101,10 @@ it('selects a dependency added after the initial client description', async () =
   try {
     const selected = snapshot('nested-v3');
     client.dependencies = [{ name: 'dynamic', snapshot: selected }];
+    const configuredEntry = snapshot('nested-v1').version;
+    producer.registerRemotes([{ name: 'dynamic', entry: configuredEntry }]);
     const result = await producer.snapshotHandler.loadRemoteSnapshotInfo({
-      moduleInfo: { name: 'dynamic', entry: selected.version },
+      moduleInfo: { name: 'dynamic', entry: configuredEntry },
     });
     expect(result.remoteSnapshot.buildVersion).toBe('nested-v3');
     expect(result.remoteSnapshot.version).toBe(selected.version);

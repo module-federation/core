@@ -75,22 +75,16 @@ export async function loadServiceClient(
       return { cssAssets: [], jsAssetsWithoutEntry: [], entryAssets: [] };
     },
     loadSnapshot(args) {
+      // Within this mount the response selects the dependency deployment. A
+      // producer's compiled/dynamic registration can still contain its old URL.
       const selected = snapshots().find(
-        (item) =>
-          item.name === args.moduleInfo.name &&
-          (!('entry' in args.moduleInfo) ||
-            !item.snapshot.version ||
-            args.moduleInfo.entry === item.snapshot.version),
+        (item) => item.name === args.moduleInfo.name,
       );
       return selected ? { ...args, remoteSnapshot: selected.snapshot } : args;
     },
     loadRemoteSnapshot(args) {
       const selected = snapshots().find(
-        (item) =>
-          item.name === args.moduleInfo.name &&
-          (!('entry' in args.moduleInfo) ||
-            !item.snapshot.version ||
-            args.moduleInfo.entry === item.snapshot.version),
+        (item) => item.name === args.moduleInfo.name,
       );
       return selected ? { ...args, remoteSnapshot: selected.snapshot } : args;
     },
