@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import ts from 'typescript';
+import { execFileSync } from 'node:child_process';
 
 test('inferred React declaration imports resolve outside the package source tree', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-react-declarations-'));
@@ -35,13 +35,17 @@ export const root = (container: Element) => createRoot(container);`,
 export const wrap = () => component();
 export const hydrate = (container: Element) => root(container);`,
     );
-    const config = ts.readConfigFile(
-      path.resolve(__dirname, '../tsconfig.json'),
-      ts.sys.readFile,
+    const { compilerOptions } = JSON.parse(
+      fs.readFileSync(path.resolve(__dirname, '../tsconfig.json'), 'utf8'),
     );
-    expect(config.error).toBeUndefined();
-    const { options, errors } = ts.parseJsonConfigFileContent(
-      {
+    const compiler = path.join(
+      path.dirname(require.resolve('typescript/package.json')),
+      'bin/tsc',
+    );
+    const configPath = path.join(sourceDir, 'tsconfig.json');
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
         compilerOptions: {
           declaration: true,
           emitDeclarationOnly: true,
@@ -49,18 +53,16 @@ export const hydrate = (container: Element) => root(container);`,
           skipLibCheck: true,
           types: [],
           module: 'commonjs',
-          target: 'es2015',
-          paths: config.config.compilerOptions.paths,
+          target: 'es2020',
+          paths: compilerOptions.paths,
         },
         files: ['wrapper.ts'],
-      },
-      ts.sys,
-      sourceDir,
+      }),
     );
-    expect(errors).toEqual([]);
-    const program = ts.createProgram([wrapper], options);
-    expect(ts.getPreEmitDiagnostics(program)).toEqual([]);
-    expect(program.emit().emitSkipped).toBe(false);
+    execFileSync(process.execPath, [compiler, '--project', configPath], {
+      timeout: 20_000,
+      stdio: 'pipe',
+    });
     const declaration = fs.readFileSync(
       path.join(sourceDir, 'wrapper.d.ts'),
       'utf8',
@@ -78,15 +80,30 @@ const element: import('react').ReactElement = wrap();
 const root: import('react-dom/client').Root = hydrate(document.body);
 export { element, root };`,
     );
-    const consumerProgram = ts.createProgram([consumer], {
-      strict: true,
-      noEmit: true,
-      types: [],
-      target: ts.ScriptTarget.ES2015,
-      module: ts.ModuleKind.CommonJS,
-    });
-    expect(ts.getPreEmitDiagnostics(consumerProgram)).toEqual([]);
+    const consumerConfigPath = path.join(consumerDir, 'tsconfig.json');
+    fs.writeFileSync(
+      consumerConfigPath,
+      JSON.stringify({
+        compilerOptions: {
+          strict: true,
+          skipLibCheck: false,
+          noEmit: true,
+          types: [],
+          target: 'es2020',
+          module: 'commonjs',
+        },
+        files: ['index.ts'],
+      }),
+    );
+    execFileSync(
+      process.execPath,
+      [compiler, '--project', consumerConfigPath],
+      {
+        timeout: 20_000,
+        stdio: 'pipe',
+      },
+    );
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
-});
+}, 45_000);
