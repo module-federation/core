@@ -11,7 +11,7 @@ import FederationRuntimeModule from '../../../container/runtime/FederationRuntim
 
 const EntryDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
-) as typeof import('webpack/lib/dependencies/EntryDependency');
+) as typeof import('webpack/lib/entry/EntryDependency');
 
 export const PLUGIN_NAME = 'SharedContainerPlugin';
 const HOT_UPDATE_SUFFIX = '.hot-update';
