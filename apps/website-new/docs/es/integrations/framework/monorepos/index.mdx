@@ -1,0 +1,99 @@
+# Ventajas de Module Federation en un monorepo
+
+Module Federation es una herramienta potente que te permite compartir código entre aplicaciones. Te permite construir aplicaciones más modulares, mantenibles y escalables. En esta guía exploraremos las ventajas de usar Module Federation en un monorepo.
+
+Los polyrepos (varios repositorios) han sido durante mucho tiempo la opción de facto para desarrollar micro-frontends y combatir problemas organizativos; sin embargo, introducen más desafíos organizativos en torno a la compartición de código, la gestión de dependencias, el versionado y la autonomía de los equipos.
+
+Fomentar la autonomía de los equipos mediante micro-frontends empujó, sin pretenderlo, a los equipos hacia una estructura de polyrepo. Cada equipo tenía su propio repositorio y era responsable de mantener su propio código. Este enfoque provocó, entre otros problemas, falta de colaboración y de transparencia.
+
+Si eliges un monorepo, puedes obtener todas las ventajas de Module Federation sin la complicación de gestionar varios repositorios, además de algunas ventajas adicionales en cuanto a compartición de código y gestión de dependencias.
+Esta guía te ayudará a entender las ventajas de usar Module Federation en un monorepo y cómo resuelven los desafíos organizativos.
+
+## Posibles inconvenientes del enfoque polyrepo
+
+El aislamiento total puede ser muy deseable para los equipos, pero tiene sus propias salvedades y problemas, especialmente con Module Federation. Es fácil olvidar que, al trabajar con un sistema de Module Federation, el resultado final que experimenta el usuario es una única aplicación.
+Por ello, el aislamiento total y la autonomía en las decisiones técnicas de los polyrepos que componen partes de esa única aplicación pueden acabar provocando incoherencias en la experiencia final del usuario.
+
+Veamos algunos de los otros desafíos que surgen con el enfoque polyrepo.
+
+### Ciclos de feedback
+
+El enfoque polyrepo puede provocar falta de transparencia y de ciclos de feedback. Esto puede ser especialmente problemático al trabajar con un sistema de Module Federation.
+
+Cuando un equipo hace un cambio en su parte de la aplicación, puede ser difícil entender cómo afectará a las demás partes. Los problemas de runtime y los breaking changes no se detectan hasta después de un despliegue.
+
+Incluso si existe un proceso de control de calidad para asegurar que los cambios son seguros antes de llegar a producción, el ciclo de feedback es lento y puede resultar disruptivo, obligando a los equipos a revertir cambios o a corregir rápidamente los problemas que surgen en lugar de añadir nuevas funcionalidades.
+
+### Estrategias de código compartido
+
+Compartir código entre polyrepos es difícil. Suele implicar crear y mantener algún tipo de registro privado de paquetes. El código compartido se compila y se publica en ese registro, y los demás polyrepos lo consumen. Si se hace un cambio en el código compartido, hay que publicarlo en el registro.
+
+¡Esto puede llevar mucho tiempo y ser propenso a errores! Introduce el riesgo de bloquear el desarrollo de funcionalidades si alguno de los equipos depende de que se publique en el registro la PR del código compartido.
+
+También nos devuelve al problema de los ciclos de feedback, ya que los equipos deben esperar a que se actualice el registro para ver el impacto de sus cambios, si es que llegan a verlo, debido al aislamiento de los equipos. Podrían estar introduciendo sin darse cuenta breaking changes que afectan a otros equipos.
+
+Los equipos que consumen el código compartido también deben actualizar activamente las versiones de los paquetes compartidos que usan para garantizar la compatibilidad en todo el sistema federado, o se arriesgan a sufrir breaking changes en runtime.
+
+### Gestión de dependencias
+
+Los polyrepos también pueden provocar problemas en la gestión de dependencias. Cuando los equipos trabajan aislados en su propio repositorio, pueden tener dependencias distintas o versiones distintas de las mismas dependencias. Esto puede provocar conflictos, problemas de versionado o, peor aún, bundles más grandes debido a dependencias duplicadas.
+
+Por ejemplo, si un equipo usa React 18 y otro decide que quiere usar React 19 y actualiza su dependencia, una vez que los cambios se despliegan en producción existe un alto riesgo de código incompatible y errores de runtime, especialmente si otras partes de la aplicación no son compatibles con React 19.
+
+En una configuración polyrepo, la actualización a React 19 no informa de inmediato al equipo de que, al hacerla, va a romper a los demás equipos. Esto puede generar mucha frustración y muchos cambios revertidos.
+
+### Estrategias de testing
+
+Cuando los equipos trabajan de forma aislada, puede que no tengan las mismas estrategias ni herramientas de testing. Esto puede provocar un testing incoherente en todo el sistema, lo que puede ser un problema para la calidad general de la aplicación.
+
+También complica el proceso de QA. O se prueba cada micro-frontend por separado o se prueban todos juntos.
+
+Probar micro-frontends individuales no ofrece el mismo nivel de confianza en la calidad general de la aplicación, porque no prueba los puntos de integración ni el contexto compartido entre ellos.
+
+Además, implica tener que construir algún tipo de framework de testing capaz de simular ciertas capas de la aplicación completa, lo que introduce un costo de mantenimiento que hay que asumir para que ese framework se mantenga al día con las demás partes de la aplicación.
+
+Probar la aplicación completa ofrece en general un mayor nivel de confianza; sin embargo, en una configuración polyrepo requiere montar entornos de prueba configurables que puedan desplegar las últimas versiones de cada micro-frontend.
+Esto lleva tiempo, cuesta dinero en recursos de la nube y hace que el feedback sobre los problemas detectados durante las pruebas se retrase, lo que reduce la velocidad de iteración general.
+
+## ¿Cómo resuelve un monorepo estos inconvenientes?
+
+Un monorepo es un único repositorio que contiene todo el código de un proyecto. Es la única fuente de verdad de todo el proyecto.
+Veamos con más detalle cada uno de los desafíos anteriores y cómo puede resolverlos un monorepo.
+
+### Ciclos de feedback
+
+En un monorepo, el ciclo de feedback se simplifica porque todo el código está en el mismo repositorio. Esto significa que los cambios que hacen los equipos individuales ofrecen feedback inmediato sobre cómo afectan a los demás equipos y micro-frontends. Esto elimina la necesidad de publicaciones manuales y reduce el riesgo de breaking changes.
+
+Informa al desarrollador del impacto de su cambio en el momento de hacerlo, lo que le permite realizar los ajustes necesarios para que el impacto sea mínimo.
+
+### Estrategias de código compartido
+
+Con herramientas de monorepo como [Nx](https://nx.dev), los equipos pueden compartir código sin necesidad de un registro central de paquetes. Esto elimina la necesidad de que los equipos publiquen manualmente los cambios en el registro y reduce el riesgo de conflictos y problemas de versionado.
+
+También mejora mucho la velocidad de desarrollo, ya que elimina el proceso de actualizar un repositorio aparte de código compartido, esperar una nueva publicación en el registro central y luego instalar la nueva versión en los consumers.
+
+Cualquier cambio en el código compartido puede hacerse en el mismo repositorio que el código que lo consume. Esto aumenta la colaboración y la transparencia entre equipos, a la vez que mejora la calidad (los cambios ofrecen feedback inmediato) y reduce el riesgo de breaking changes.
+
+La visibilidad sobre qué está usando el código compartido también aumenta gracias a los grafos de dependencias y al soporte del IDE. Esto ayuda a los desarrolladores a tomar decisiones informadas sobre el impacto que tendrán sus cambios.
+
+### Gestión de dependencias
+
+En un monorepo, una única actualización de versión de dependencias principales como React o Angular se aplica a todos los consumers. Esto garantiza la máxima compatibilidad en todo el sistema y reduce el riesgo de breaking changes.
+
+Esto _sí_ exige que los equipos colaboren y se pongan de acuerdo sobre cuándo hacer estas actualizaciones, pero se traduce en más confianza y compatibilidad para el usuario final.
+
+Los equipos pueden seguir usando sus propias versiones de otras dependencias menores como `date-fns` o `lodash` si así lo desean, definiéndolas en su propio `package.json` o creando alias para ellas en el `package.json` raíz.
+
+### Estrategias de testing
+
+Las estrategias de testing también se simplifican en un monorepo. Como todas las partes del sistema están en el mismo repositorio, las pruebas son más sencillas y coherentes. Coordinar servidores locales para ejecutar pruebas e2e y de integración automatizadas contra el sistema es más fácil, porque el repositorio tiene en todo momento lo último de cada micro-frontend.
+
+Estas pruebas automatizadas pueden ejecutarse en un pipeline de CI/CD que se active con los cambios en el monorepo. Así se garantiza que el sistema completo se prueba siempre y que cualquier problema que antes era difícil de identificar (los puntos de integración entre micro-frontends) se detecta pronto.
+
+Las suites de pruebas también pueden escribirse de forma más cercana a como el usuario usaría realmente la aplicación final desplegada, lo que mejora la calidad del producto final.
+
+## ¿Dónde encaja Nx?
+
+Nx es un potente sistema de build de código abierto que ofrece herramientas y técnicas para mejorar la productividad de los desarrolladores, optimizar el rendimiento de la CI y mantener la calidad del código. Funciona especialmente bien con monorepos e incluye soporte integrado para Module Federation en proyectos de Angular y React.
+
+[Descubre por qué Nx es la mejor opción como herramienta para Module Federation](/integrations/framework/monorepos/nx-for-module-federation.html)
