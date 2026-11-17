@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import type { Stats } from 'webpack';
+import type { Configuration, Stats } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import StreamingTargetPlugin from '../plugins/StreamingTargetPlugin';
 
@@ -32,48 +32,21 @@ describe(`hashed output filenames with Webpack ${webpack.version}`, () => {
     fs.rmSync(context, { recursive: true, force: true });
   });
 
-  const build = async (filename: string) => {
-    const generated = new Map<string, string[]>();
-    const generationErrors: unknown[] = [];
+  const build = async (output: Configuration['output']) => {
+    const emitted = new Map<string, string>();
     const compiler = webpack({
       mode: 'production',
       devtool: false,
       context,
       target: 'async-node',
       entry: { main: './main.js' },
-      output: { path: path.join(context, 'dist'), filename },
-      optimization: { minimize: false },
-      plugins: [
-        new StreamingTargetPlugin({ name: 'host', remotes: {} }),
-        {
-          apply(compiler) {
-            compiler.hooks.thisCompilation.tap('HashedOutputTest', (c) => {
-              c.hooks.runtimeModule.tap('HashedOutputTest', (module) => {
-                // Skip Webpack's own runtime modules. Before 5.112 its node
-                // chunk loading throws for hashes during the hash pass.
-                const name = module.constructor.name;
-                if (!OWN_RUNTIME_MODULES.includes(name)) return;
-                // Webpack before 5.112 swallows a failing hash-pass generate,
-                // so record it to catch the regression on every compiler.
-                const generate = module.generate.bind(module);
-                module.generate = () => {
-                  try {
-                    const code = generate();
-                    const all = generated.get(name) || [];
-                    all.push(code || '');
-                    generated.set(name, all);
-                    return code;
-                  } catch (error) {
-                    generationErrors.push(error);
-                    throw error;
-                  }
-                };
-              });
-            });
-          },
-        },
-      ],
+      output: { path: path.join(context, 'dist'), ...output },
+      // Keep [contenthash] as computed during the build, so the asset name
+      // matches the name the runtime modules saw.
+      optimization: { minimize: false, realContentHash: false },
+      plugins: [new StreamingTargetPlugin({ name: 'host', remotes: {} })],
     });
+    let mainFile: string;
     try {
       const stats = await new Promise<Stats>((resolve, reject) => {
         compiler.run((error, stats) => {
@@ -85,14 +58,28 @@ describe(`hashed output filenames with Webpack ${webpack.version}`, () => {
       if (stats.hasErrors()) {
         throw new Error(stats.toString({ all: false, errors: true }));
       }
+      const { chunks, chunkGraph } = stats.compilation;
+      for (const chunk of chunks) {
+        for (const module of chunkGraph.getChunkRuntimeModulesIterable(chunk)) {
+          const name = module.constructor.name;
+          if (OWN_RUNTIME_MODULES.includes(name)) {
+            emitted.set(name, module.getGeneratedCode() || '');
+          }
+        }
+      }
+      const main = [...chunks].find((chunk) => chunk.name === 'main');
+      [mainFile] = main ? [...main.files] : [];
     } finally {
       await new Promise<void>((resolve, reject) => {
         compiler.close((error) => (error ? reject(error) : resolve()));
       });
     }
-    expect(generationErrors).toEqual([]);
-    return generated;
+    return { emitted, mainFile };
   };
+
+  // The path back to the output root from the emitted entry file.
+  const undoPath = (file: string) =>
+    path.relative(path.dirname(path.join('dist', file)), 'dist') + '/';
 
   it.each([
     'static/js/[name].[contenthash:8].js',
@@ -101,17 +88,36 @@ describe(`hashed output filenames with Webpack ${webpack.version}`, () => {
   ])(
     'generates the chunk loading and public path runtime for %s',
     async (filename) => {
-      const generated = await build(filename);
+      const { emitted, mainFile } = await build({ filename });
 
-      const chunkLoading = generated.get(OWN_RUNTIME_MODULES[0]);
-      expect(chunkLoading?.length).toBeGreaterThan(0);
-
-      const publicPath = generated.get(OWN_RUNTIME_MODULES[1]);
-      expect(publicPath?.length).toBeGreaterThan(0);
-      for (const code of publicPath || []) {
-        // The entry is two directories below the output root.
-        expect(code).toContain('scriptUrl + "../../"');
-      }
+      expect(emitted.get(OWN_RUNTIME_MODULES[0])).toBeTruthy();
+      expect(undoPath(mainFile)).toBe('../../');
+      expect(emitted.get(OWN_RUNTIME_MODULES[1])).toContain(
+        'scriptUrl + "../../"',
+      );
     },
   );
+
+  const [major, minor] = webpack.version.split('.').map(Number);
+  // From 5.110, webpack's own chunkRootOutputDir replaces hashes before
+  // measuring the depth, so a digest containing `/` is off there too.
+  if (major === 5 && minor < 110) {
+    it('resolves a base64 hash that contains a slash', async () => {
+      for (let seed = 0; seed < 50; seed++) {
+        fs.writeFileSync(
+          path.join(context, 'main.js'),
+          `export const lazy = () => import('./lazy.js'); export default ${seed};`,
+        );
+        const { emitted, mainFile } = await build({
+          filename: 'static/[name].[contenthash].js',
+          hashDigest: 'base64',
+        });
+        expect(emitted.get(OWN_RUNTIME_MODULES[1])).toContain(
+          `scriptUrl + ${JSON.stringify(undoPath(mainFile))}`,
+        );
+        if (mainFile.split('/').length > 2) return;
+      }
+      throw new Error('No seed produced a base64 hash containing "/"');
+    });
+  }
 });

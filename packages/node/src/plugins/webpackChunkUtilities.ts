@@ -7,16 +7,16 @@ const { getUndoPath } = require(
 ) as typeof import('webpack/lib/util/identifier');
 import type { Chunk, ChunkGraph, Compilation } from 'webpack';
 
-const HASH_PLACEHOLDER = /\[(?:full|chunk|content)?hash(?::[^\]]+)?\]/g;
-
 type ChunkFilenameTemplate = ReturnType<
   typeof import('webpack').javascript.JavascriptModulesPlugin.getChunkFilenameTemplate
 >;
 
 /**
  * Path from a chunk's output file back to the output root.
- * Webpack generates runtime modules for hashing before chunk hashes exist, so
- * resolving the filename with its hash placeholders intact throws.
+ * Webpack generates runtime modules for hashing before chunk hashes exist.
+ * From 5.110, chunkRootOutputDir avoids resolving the hash. Older webpack
+ * ignores an error in that first pass and generates again once hashes exist,
+ * so the real filename gives the real depth, even for a digest with `/`.
  * @param {Compilation} compilation - The compilation.
  * @param {Chunk} chunk - The chunk the runtime module belongs to.
  * @param {ChunkFilenameTemplate} filenameTemplate - The chunk's filename template.
@@ -31,15 +31,10 @@ export function getChunkRootOutputDir(
   if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
     return runtimeTemplate.chunkRootOutputDir(chunk, false);
   }
-  // Older Webpack has no chunkRootOutputDir. A hash does not change the
-  // directory depth of a string template, so neutralize it like Webpack does.
-  const outputName = compilation.getPath(
-    typeof filenameTemplate === 'function'
-      ? (...args: Parameters<typeof filenameTemplate>) =>
-          filenameTemplate(...args).replace(HASH_PLACEHOLDER, 'x')
-      : filenameTemplate.replace(HASH_PLACEHOLDER, 'x'),
-    { chunk, contentHashType: 'javascript' },
-  );
+  const outputName = compilation.getPath(filenameTemplate, {
+    chunk,
+    contentHashType: 'javascript',
+  });
   return getUndoPath(outputName, compilation.outputOptions.path || '', false);
 }
 

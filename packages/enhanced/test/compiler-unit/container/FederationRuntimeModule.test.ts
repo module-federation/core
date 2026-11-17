@@ -19,7 +19,7 @@ interface BuildOptions {
   entryName?: string;
   placement?: 'initial' | 'async';
   runtimeChunk?: 'single';
-  withoutChunkRootOutputDir?: boolean;
+  hashDigest?: Output['hashDigest'];
 }
 
 describe('FederationRuntimeModule output paths', () => {
@@ -47,30 +47,30 @@ describe('FederationRuntimeModule output paths', () => {
     entryName = 'main',
     placement = 'initial',
     runtimeChunk,
-    withoutChunkRootOutputDir = false,
+    hashDigest,
   }: BuildOptions) => {
     const outputPath = path.join(context, 'dist');
-    const generationErrors: unknown[] = [];
     const compiler = webpack({
       mode: 'production',
       devtool: false,
       context,
       entry: { [entryName]: './main.js' },
-      output: { path: outputPath, filename, chunkFilename, publicPath },
-      optimization: { minimize: false, runtimeChunk },
+      output: {
+        path: outputPath,
+        filename,
+        chunkFilename,
+        publicPath,
+        hashDigest,
+      },
+      // Keep [contenthash] as computed during the build, so the asset name
+      // matches the name the runtime module saw.
+      optimization: { minimize: false, runtimeChunk, realContentHash: false },
       plugins: [
         {
           apply(compiler) {
             compiler.hooks.thisCompilation.tap(
               'FederationRuntimeModuleTest',
               (compilation) => {
-                if (withoutChunkRootOutputDir) {
-                  Object.defineProperty(
-                    compilation.runtimeTemplate,
-                    'chunkRootOutputDir',
-                    { value: undefined },
-                  );
-                }
                 const attach = (chunk: Chunk, requirements: Set<string>) => {
                   requirements.add(webpack.RuntimeGlobals.ensureChunkHandlers);
                   const runtimeModule = new FederationRuntimeModule(
@@ -78,17 +78,6 @@ describe('FederationRuntimeModule output paths', () => {
                     'host',
                     { name: 'host', remotes: [] },
                   );
-                  // Webpack < 5.111 hides a failure during the hash pass, so
-                  // record it to catch the regression on every compiler.
-                  const generate = runtimeModule.generate.bind(runtimeModule);
-                  runtimeModule.generate = () => {
-                    try {
-                      return generate();
-                    } catch (error) {
-                      generationErrors.push(error);
-                      throw error;
-                    }
-                  };
                   compilation.addRuntimeModule(chunk, runtimeModule);
                 };
                 if (placement === 'async') {
@@ -127,8 +116,6 @@ describe('FederationRuntimeModule output paths', () => {
     if (stats.hasErrors()) {
       throw new Error(stats.toString({ all: false, errors: true }));
     }
-    expect(generationErrors).toEqual([]);
-
     const { compilation } = stats;
     const owners = [...compilation.chunks].filter((chunk) =>
       [...compilation.chunkGraph.getChunkRuntimeModulesIterable(chunk)].some(
@@ -256,45 +243,25 @@ describe('FederationRuntimeModule output paths', () => {
     expect(result.file).toMatch(/^static\/js\/main\.[a-f0-9]{8}\.js$/);
   });
 
-  describe('without chunkRootOutputDir', () => {
-    for (const hash of hashes) {
-      it(`neutralizes ${hash} in a filename`, async () => {
+  const [major, minor] = webpack.version.split('.').map(Number);
+  // From 5.110, webpack's own chunkRootOutputDir replaces hashes before
+  // measuring the depth, so a digest containing `/` is off there too.
+  if (major === 5 && minor < 110) {
+    it('resolves a base64 hash that contains a slash', async () => {
+      for (let seed = 0; seed < 50; seed++) {
+        fs.writeFileSync(
+          path.join(context, 'main.js'),
+          `import('./lazy.js'); export default ${seed};`,
+        );
+        // build() checks that rootOutputDir leads from the asset to output.path.
         const result = await build({
-          filename: `static/js/[name].${hash}.js`,
-          chunkFilename: `static/js/chunks/[name].${hash}.js`,
-          withoutChunkRootOutputDir: true,
+          filename: 'static/[name].[contenthash].js',
+          chunkFilename: 'static/[name].[contenthash].js',
+          hashDigest: 'base64',
         });
-        expect(result.rootOutputDir).toBe('../../');
-      });
-    }
-
-    it('neutralizes hashes in an async chunkFilename', async () => {
-      const result = await build({
-        filename: 'static/js/[name].js',
-        chunkFilename: 'static/js/chunks/[name].[contenthash:8].js',
-        placement: 'async',
-        withoutChunkRootOutputDir: true,
-      });
-      expect(result.rootOutputDir).toBe('../../../');
+        if (result.file.split('/').length > 2) return;
+      }
+      throw new Error('No seed produced a base64 hash containing "/"');
     });
-
-    it('neutralizes hashes returned by a filename function', async () => {
-      const result = await build({
-        filename: ({ chunk }) => `static/js/${chunk?.name}.[contenthash:8].js`,
-        chunkFilename: 'static/js/chunks/[name].[contenthash:8].js',
-        withoutChunkRootOutputDir: true,
-      });
-      expect(result.rootOutputDir).toBe('../../');
-    });
-
-    it('preserves unhashed filenames', async () => {
-      const result = await build({
-        filename: 'static/js/[name].js',
-        chunkFilename: 'static/js/chunks/[name].js',
-        withoutChunkRootOutputDir: true,
-      });
-      expect(result.rootOutputDir).toBe('../../');
-      expect(result.file).toBe('static/js/main.js');
-    });
-  });
+  }
 });

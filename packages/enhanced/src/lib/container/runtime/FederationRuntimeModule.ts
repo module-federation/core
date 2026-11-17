@@ -13,8 +13,6 @@ const { RuntimeModule, RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
-const HASH_PLACEHOLDER = /\[(?:full|chunk|content)?hash(?::[^\]]+)?\]/g;
-
 class FederationRuntimeModule extends RuntimeModule {
   runtimeRequirements: ReadonlySet<string>;
   containerName: string;
@@ -59,21 +57,19 @@ class FederationRuntimeModule extends RuntimeModule {
           matcher = hasJsMatcher('chunkId');
         }
         const { runtimeTemplate } = this.compilation;
-        // Runtime modules are generated for hashing before chunk hashes exist.
+        // Webpack generates runtime modules for hashing before chunk hashes
+        // exist. From 5.110, chunkRootOutputDir avoids resolving the hash.
         if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
           rootOutputDir = runtimeTemplate.chunkRootOutputDir(this.chunk, false);
         } else {
-          // Older Webpack has no chunkRootOutputDir. A hash does not change the
-          // directory depth of a string template, so neutralize it like Webpack does.
-          const template = jsModulePlugin.getChunkFilenameTemplate(
-            this.chunk,
-            this.compilation.outputOptions,
-          );
+          // Older webpack ignores an error in that first pass and generates
+          // again once hashes exist, so the real filename gives the real depth,
+          // even for a hash digest that contains `/`.
           const outputName = this.compilation.getPath(
-            typeof template === 'function'
-              ? (...args: Parameters<typeof template>) =>
-                  template(...args).replace(HASH_PLACEHOLDER, 'x')
-              : template.replace(HASH_PLACEHOLDER, 'x'),
+            jsModulePlugin.getChunkFilenameTemplate(
+              this.chunk,
+              this.compilation.outputOptions,
+            ),
             { chunk: this.chunk, contentHashType: 'javascript' },
           );
           rootOutputDir = getUndoPath(
