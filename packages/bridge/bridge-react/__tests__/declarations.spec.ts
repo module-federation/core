@@ -40,17 +40,21 @@ export const hydrate = (container: Element) => root(container);`,
       ts.sys.readFile,
     );
     expect(config.error).toBeUndefined();
-    const { options, errors } = ts.convertCompilerOptionsFromJson(
+    const { options, errors } = ts.parseJsonConfigFileContent(
       {
-        declaration: true,
-        emitDeclarationOnly: true,
-        strict: true,
-        skipLibCheck: true,
-        types: [],
-        module: 'commonjs',
-        target: 'es2015',
-        paths: config.config.compilerOptions.paths,
+        compilerOptions: {
+          declaration: true,
+          emitDeclarationOnly: true,
+          strict: true,
+          skipLibCheck: true,
+          types: [],
+          module: 'commonjs',
+          target: 'es2015',
+          paths: config.config.compilerOptions.paths,
+        },
+        files: ['wrapper.ts'],
       },
+      ts.sys,
       sourceDir,
     );
     expect(errors).toEqual([]);
