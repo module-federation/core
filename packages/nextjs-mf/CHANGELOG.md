@@ -1,5 +1,29 @@
 # @module-federation/nextjs-mf
 
+## 8.9.0
+
+### Minor Changes
+
+- 8a9677f: Add a `scriptTimeout` extra option to configure the remote entry script load timeout, previously hard-coded to 8 seconds.
+
+### Patch Changes
+
+- Updated dependencies [9135b23]
+- Updated dependencies [ee32a0d]
+- Updated dependencies [caafd8d]
+- Updated dependencies [edf1219]
+- Updated dependencies [b4b5477]
+- Updated dependencies [543eba3]
+- Updated dependencies [fdaeb75]
+- Updated dependencies [020fa27]
+- Updated dependencies [06cb964]
+  - @module-federation/runtime@2.9.3
+  - @module-federation/runtime-core@2.9.3
+  - @module-federation/webpack-bundler-runtime@2.9.3
+  - @module-federation/sdk@2.9.3
+  - @module-federation/enhanced@2.9.3
+  - @module-federation/node@2.7.53
+
 ## 8.8.76
 
 ### Patch Changes
