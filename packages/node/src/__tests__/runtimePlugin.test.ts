@@ -988,6 +988,38 @@ describe('runtimePlugin', () => {
         );
       }
     });
+
+    it('should report chunks loaded by the patched handler as ready for deferred startup', () => {
+      const webpackRequire = (global as any).__webpack_require__;
+      webpackRequire.f = { readFileVm: jest.fn() };
+      // Stands in for the bundler's predicate, which only knows its own chunks
+      webpackRequire.O = {
+        readFileVm: (chunkId: string) => chunkId === 'main',
+      };
+      require('fs').existsSync.mockReturnValue(true);
+      require('fs').readFile.mockImplementationOnce(
+        (
+          path: string,
+          encoding: string,
+          cb: (err: Error | null, content?: string) => void,
+        ) => {
+          cb(null, '');
+        },
+      );
+      require('vm').Script.mockImplementationOnce(() => ({
+        runInThisContext: () => (chunk: any) => {
+          chunk.ids = ['vendor'];
+          chunk.modules = {};
+        },
+      }));
+
+      plugin.beforeInit?.({ origin: {} } as any);
+
+      expect(webpackRequire.O.readFileVm('vendor')).toBe(false);
+      webpackRequire.f.readFileVm('vendor', []);
+      expect(webpackRequire.O.readFileVm('vendor')).toBe(true);
+      expect(webpackRequire.O.readFileVm('main')).toBe(true);
+    });
   });
 
   describe('webpack chunk loading', () => {

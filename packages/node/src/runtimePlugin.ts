@@ -9,6 +9,9 @@ type WebpackRequire = {
   m: { [key: string]: any };
   o: (obj: any, prop: string) => boolean;
   C?: (chunk: any) => void;
+  O?: {
+    readFileVm?: (chunkId: string) => boolean;
+  };
   l: (
     url: string,
     done: (res: any) => void,
@@ -472,6 +475,7 @@ export const setupChunkHandler = (
 // Hoisted function to set up webpack require patching
 export const setupWebpackRequirePatching = (
   handle: (chunkId: string, promises: any[]) => void,
+  installedChunks?: { [key: string]: any },
 ): void => {
   if (__webpack_require__.f) {
     if (__webpack_require__.f.require) {
@@ -484,6 +488,15 @@ export const setupWebpackRequirePatching = (
 
     if (__webpack_require__.f.readFileVm) {
       __webpack_require__.f.readFileVm = handle;
+
+      // Deferred entry startup asks the bundler's own chunk table, which the
+      // replaced handler never updates.
+      const onChunksLoaded = __webpack_require__.O;
+      const isLoaded = onChunksLoaded?.readFileVm;
+      if (installedChunks && onChunksLoaded && isLoaded) {
+        onChunksLoaded.readFileVm = (chunkId) =>
+          installedChunks[chunkId] === 0 || isLoaded(chunkId);
+      }
     }
   }
 };
@@ -504,7 +517,7 @@ export default function (): ModuleFederationRuntimePlugin {
         const handle = setupChunkHandler(installedChunks, args);
 
         // Patch webpack require
-        setupWebpackRequirePatching(handle);
+        setupWebpackRequirePatching(handle, installedChunks);
       })();
 
       return args;
