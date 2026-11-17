@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { createRequire } from 'module';
 import path from 'path';
 import { isWebTarget, skipByTarget } from './utils';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
@@ -19,6 +20,8 @@ import type {
   CliPlugin,
 } from '@modern-js/app-tools';
 import type { BundlerChainConfig } from '../interfaces/bundler';
+
+const require = createRequire(import.meta.url);
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 
