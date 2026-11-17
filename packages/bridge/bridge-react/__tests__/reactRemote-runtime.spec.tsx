@@ -7,6 +7,8 @@ import { BRIDGE_PRODUCER_PROTOCOL } from '../src/service/protocol';
 import { ReadableStream } from 'node:stream/web';
 global.ReadableStream = ReadableStream as typeof global.ReadableStream;
 import { snapshotRuntime } from './reactRemote-runtime-utils';
+import { loadServiceClient } from '../src/service/client';
+jest.mock('../src/service/client', () => ({ loadServiceClient: jest.fn() }));
 
 const provider = () => ({
   default: () => ({
@@ -288,6 +290,15 @@ it.each([
     runtime.instance.registerPlugins([
       bridgeServicePlugin({ ingressPath: '/_modern/mf/service/' }),
     ]);
+    const client = {
+      name: runtime.name,
+      expose: './Card',
+      snapshot: { ...runtime.snapshot, buildVersion: 'response-build' },
+    };
+    jest.mocked(loadServiceClient).mockResolvedValue({
+      factory: () => ({ hydrate, destroy, render: localRender }),
+      release: jest.fn(),
+    });
     const originalFetch = global.fetch;
     const fetcher = jest.fn(async (url, init) => {
       expect(String(url)).toBe(
@@ -300,7 +311,8 @@ it.each([
         {
           type: 'meta',
           protocol: BRIDGE_PRODUCER_PROTOCOL,
-          buildVersion: 'build-1',
+          buildVersion: 'response-build',
+          client,
           identifierPrefix: body.request.identifierPrefix,
           hydration: 'progressive',
         },
@@ -340,7 +352,11 @@ it.each([
       await screen.findByText('service HTML');
       await waitFor(() => expect(hydrate).toHaveBeenCalledTimes(1));
       expect(localRender).not.toHaveBeenCalled();
-      expect(runtime.loadEntry).toHaveBeenCalledTimes(1); // The real browser provider still loads.
+      expect(runtime.loadEntry).not.toHaveBeenCalled();
+      expect(loadServiceClient).toHaveBeenLastCalledWith(
+        client,
+        runtime.instance,
+      );
       expect(fetcher).toHaveBeenCalledTimes(1);
       await act(async () => view.unmount());
       await waitFor(() => expect(destroy).toHaveBeenCalledTimes(1));

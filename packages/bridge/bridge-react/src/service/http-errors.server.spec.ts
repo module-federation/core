@@ -11,15 +11,6 @@ const info = (): BridgeSSRRequest => ({
   props: {},
   signal: new AbortController().signal,
 });
-const request = () =>
-  new Request('https://service.test/render', {
-    method: 'POST',
-    body: JSON.stringify({
-      protocol: BRIDGE_PRODUCER_PROTOCOL,
-      buildVersion: 'old',
-      request: info(),
-    }),
-  });
 const fetcher = (handler: (request: Request) => Promise<Response>) =>
   rstest.fn(async (url, init) =>
     handler(new Request(url, init)),
@@ -36,26 +27,33 @@ const unexpectedRender = () =>
   });
 
 describe('Bridge Service HTTP errors', () => {
-  it('rejects a stale build before rendering or reading the render cache', async () => {
-    const render = unexpectedRender();
-    const handler = createBridgeServiceHandler({
-      buildVersion: 'new',
-      render,
-      cache: { maxAgeMs: 1000 },
-    });
-    const response = await handler(request());
-    expect(response.status).toBe(409);
-    expect(response.headers.get('cache-control')).toBe('no-store');
-    expect(await response.text()).toBe('Bridge service buildVersion mismatch');
+  it('accepts a stale caller build and returns the producer selected response without replay', async () => {
+    const render = rstest.fn(async () => ({
+      protocol: BRIDGE_PRODUCER_PROTOCOL as typeof BRIDGE_PRODUCER_PROTOCOL,
+      hydration: 'complete' as const,
+      messages: new ReadableStream({
+        start(controller) {
+          controller.enqueue({ type: 'html', html: '<h1>new release</h1>' });
+          controller.enqueue({ type: 'data', snapshot: {} });
+          controller.enqueue({ type: 'done' });
+          controller.close();
+        },
+      }),
+      abort() {},
+    }));
+    const handler = createBridgeServiceHandler({ buildVersion: 'new', render });
     const transport = fetcher(handler);
-    const failure = await load(transport).catch((error) => error);
-    expect(failure).toMatchObject({
-      message: 'Bridge service returned HTTP 409.',
-      status: 409,
-    });
-    expect(failure).not.toHaveProperty('actualBuildVersion');
+    const result = await load(transport);
+    const reader = result.messages.getReader();
+    const frames = [];
+    while (true) {
+      const frame = await reader.read();
+      if (frame.done) break;
+      frames.push(frame.value);
+    }
+    expect(frames[0]).toEqual({ type: 'html', html: '<h1>new release</h1>' });
     expect(transport).toHaveBeenCalledTimes(1);
-    expect(render).not.toHaveBeenCalled();
+    expect(render).toHaveBeenCalledTimes(1);
   });
 
   it.each([401, 409, 503])(
@@ -98,7 +96,11 @@ describe('Bridge Service HTTP errors', () => {
   it('forwards upstream HTTP status through transparent ingresses without replay', async () => {
     const render = unexpectedRender();
     const producer = fetcher(
-      createBridgeServiceHandler({ buildVersion: 'new', render }),
+      createBridgeServiceHandler({
+        buildVersion: 'new',
+        render,
+        authorize: () => new Response('Business conflict', { status: 409 }),
+      }),
     );
     const ingress = (upstream: typeof fetch) =>
       fetcher(

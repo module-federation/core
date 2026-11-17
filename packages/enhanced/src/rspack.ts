@@ -9,13 +9,3 @@ export {
   setCompilationBuildVersion,
   createBuildVersionCoordinator,
 } from '@module-federation/manifest';
-export {
-  createDevBuildConnection,
-  type DevBuildCallbacks,
-  type DevBuildConnectionOptions,
-  type DevBuildPublication,
-  type DevBuildRemote,
-  type DevBuildSource,
-  type DevBuildStatus,
-  type DevBuildUpdate,
-} from '@module-federation/dts-plugin';

@@ -240,6 +240,7 @@ export interface BridgeSSRRequest extends BridgeSSRRenderParams {
 }
 
 interface BridgeSSRStream {
+  client?: import('./service/protocol').BridgeServiceClient;
   stylesheets?: string[];
   stream: ReadableStream<Uint8Array>;
   abort(reason?: unknown): void;
@@ -259,6 +260,7 @@ export type BridgeSSRResult = BridgeSSRStream &
   );
 
 export type BridgeSSRMessage =
+  | { type: 'client'; client: import('./service/protocol').BridgeServiceClient }
   | { type: 'html'; html: string }
   | { type: 'ready'; snapshot: unknown }
   | { type: 'update'; value: unknown }
@@ -267,6 +269,7 @@ export type BridgeSSRMessage =
 
 /** Complete producer-owned messages. Consumers preserve their order. */
 export interface BridgeSSRMessageResult {
+  client?: import('./service/protocol').BridgeServiceClient;
   protocol: 'module-federation/bridge-ssr/producer/v1';
   stylesheets?: string[];
   hydration: 'progressive' | 'complete';

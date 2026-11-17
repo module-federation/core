@@ -26,9 +26,14 @@ export function bridgeErrorFrame(
 export type BridgeStreamFrame =
   | {
       type: 'meta';
+      client?: import('../service/protocol').BridgeServiceClient;
       identifierPrefix: string;
       stylesheets?: string[];
       hydration?: 'progressive';
+    }
+  | {
+      type: 'client';
+      client: import('../service/protocol').BridgeServiceClient;
     }
   | { type: 'html'; html: string }
   | { type: 'ready'; snapshot: unknown }
@@ -38,6 +43,7 @@ export type BridgeStreamFrame =
   | BridgeStreamErrorFrame;
 
 export interface BridgeBrowserSnapshot {
+  client?: import('../service/protocol').BridgeServiceClient;
   updates?: ReadableStream<unknown>;
   snapshot: unknown;
   identifierPrefix: string;

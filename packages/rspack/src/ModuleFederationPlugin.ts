@@ -1,3 +1,4 @@
+import { DevHMRSignalPlugin } from './DevHMRSignalPlugin';
 import type {
   Compiler,
   Falsy,
@@ -178,6 +179,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
     this._checkSingleton(compiler);
     this._patchBundlerConfig(compiler);
+    new DevHMRSignalPlugin().apply(compiler);
     const containerManager = new ContainerManager();
     containerManager.init(options);
 

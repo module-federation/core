@@ -11,3 +11,5 @@ export type {
   BridgeServicePolicy,
   BridgeServices,
 } from './service/config';
+
+export type { BridgeServiceClient } from './service/protocol';

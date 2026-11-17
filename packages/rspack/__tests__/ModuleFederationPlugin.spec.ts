@@ -28,6 +28,8 @@ function getOptimizationDefines(
   });
 
   (plugin as any)._patchBundlerConfig({
+    options: { mode: 'production' },
+    context: process.cwd(),
     webpack: { DefinePlugin },
   });
 

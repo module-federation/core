@@ -46,6 +46,7 @@ export function receiveBridgeService(
       runtime.accept(sessionId, {
         type: 'meta',
         identifierPrefix,
+        client: result.client,
         stylesheets: result.stylesheets,
         ...(result.hydration === 'progressive'
           ? { hydration: 'progressive' as const }

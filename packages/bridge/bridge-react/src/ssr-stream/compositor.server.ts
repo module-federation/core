@@ -267,6 +267,7 @@ export function createBridgeSSRController(options: BridgeSSRControllerOptions) {
               stylesheets: [
                 ...new Set([...job.stylesheets, ...(result.stylesheets || [])]),
               ],
+              client: result.client,
               ...(result.hydration === 'progressive'
                 ? { hydration: 'progressive' as const }
                 : {}),

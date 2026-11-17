@@ -44,6 +44,39 @@ afterEach(() => {
 });
 
 describe('Bridge early bootstrap', () => {
+  it('keeps late Service dependencies visible to the ready hydration scope', async () => {
+    const { dom, runtime } = createDocument('<div id="a"></div>', 1000, {}, [
+      'a',
+    ]);
+    const client = {
+      name: 'service',
+      expose: './App',
+      snapshot: { buildVersion: 'service-v1' },
+      dependencies: [],
+    } as unknown as import('../service/protocol').BridgeServiceClient;
+    runtime.accept('a', {
+      ...meta('prefix'),
+      hydration: 'progressive',
+      client,
+    });
+    runtime.accept('a', { type: 'html', html: '<p>Service shell</p>' });
+    const session = runtime.claim(
+      'a',
+      dom.window.document.getElementById('a')!,
+    )!;
+    runtime.accept('a', { type: 'ready', snapshot: {} });
+    const ready = await session.ready;
+    const nested = { name: 'nested', snapshot: { buildVersion: 'nested-v2' } };
+    runtime.accept('a', {
+      type: 'client',
+      client: { ...client, dependencies: [nested] } as typeof client,
+    });
+    expect(ready!.client).toBe(client);
+    expect(ready!.client?.dependencies).toEqual([nested]);
+    runtime.accept('a', { type: 'done' });
+    await session.done;
+  });
+
   it('preserves an HTTP conflict without generic CSR recovery', async () => {
     const { dom, runtime } = createDocument('<div id="a"></div>', 1000, {}, [
       'a',
@@ -94,7 +127,11 @@ describe('Bridge early bootstrap', () => {
     const render = rstest.fn(async () => {
       throw Error('Unexpected producer rendering');
     });
-    const handler = createBridgeServiceHandler({ buildVersion: 'new', render });
+    const handler = createBridgeServiceHandler({
+      buildVersion: 'new',
+      render,
+      authorize: () => new Response('Business conflict', { status: 409 }),
+    });
     const transport = rstest.fn(async (url, init) =>
       handler(new Request(url, init)),
     );

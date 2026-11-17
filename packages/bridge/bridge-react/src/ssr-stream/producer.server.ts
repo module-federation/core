@@ -209,6 +209,7 @@ export async function normalizeBridgeSSR(
   return {
     protocol: BRIDGE_PRODUCER_PROTOCOL,
     stylesheets: raw.stylesheets,
+    client: raw.client,
     hydration: hydration ? 'progressive' : 'complete',
     messages: output.stream,
     abort,

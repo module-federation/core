@@ -21,6 +21,7 @@ import {
   deferred,
   limits,
   validateStylesheets,
+  validateServiceClient,
   validateServiceRequest,
   type Frame,
 } from './protocol';
@@ -114,8 +115,6 @@ export function createBridgeServiceHandler(
       }
       if (
         input?.protocol !== BRIDGE_PRODUCER_PROTOCOL ||
-        typeof input.buildVersion !== 'string' ||
-        !input.buildVersion ||
         typeof input.request?.instanceId !== 'string' ||
         typeof input.request?.identifierPrefix !== 'string' ||
         typeof input.request?.url !== 'string' ||
@@ -137,15 +136,10 @@ export function createBridgeServiceHandler(
     request.signal.throwIfAborted();
     const buildVersion =
       typeof options.buildVersion === 'function'
-        ? await options.buildVersion(input.buildVersion)
+        ? await options.buildVersion('')
         : options.buildVersion;
     request.signal.throwIfAborted();
     if (!buildVersion) throw Error('Service deployment has no build identity.');
-    if (input.buildVersion !== buildVersion)
-      return new Response('Bridge service buildVersion mismatch', {
-        status: 409,
-        headers: { 'cache-control': 'no-store' },
-      });
     // Keep all render inputs, including instance identity, headers and nonce.
     // A cache hit is a replay of this exact render, not a new instance with IDs
     // rewritten in its opaque HTML or hydration data.
@@ -311,7 +305,8 @@ export function createBridgeServiceHandler(
       send({
         type: 'meta',
         protocol: BRIDGE_PRODUCER_PROTOCOL,
-        buildVersion,
+        buildVersion: result.client?.snapshot.buildVersion || buildVersion,
+        client: result.client,
         identifierPrefix: input.request.identifierPrefix,
         hydration: progressive ? 'progressive' : 'complete',
         stylesheets: result.stylesheets,
@@ -332,7 +327,17 @@ export function createBridgeServiceHandler(
             if (next.done) break;
             if (done) throw Error('Bridge producer message after done');
             const message = next.value;
-            if (message.type === 'html') {
+            if (message.type === 'client') {
+              validateServiceClient(message.client);
+              if (
+                !message.client ||
+                message.client.name !== source.client?.name ||
+                message.client.snapshot.buildVersion !==
+                  (source.client?.snapshot.buildVersion || buildVersion)
+              )
+                throw Error('Invalid Bridge producer client update');
+              send(message);
+            } else if (message.type === 'html') {
               if (data || typeof message.html !== 'string' || !message.html)
                 throw Error('Invalid Bridge producer HTML message');
               htmlReceived = true;

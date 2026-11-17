@@ -299,6 +299,7 @@ export function bridgeStreamBootstrap(
     releaseStyles(state);
     const value = {
       snapshot: state.snapshot,
+      client: state.client,
       identifierPrefix: state.identifierPrefix,
     };
     state.resolve(value);
@@ -333,6 +334,7 @@ export function bridgeStreamBootstrap(
           )
             throw Error('Unsupported Bridge hydration mode');
           state.progressive = frame.hydration === 'progressive';
+          state.client = frame.client;
           state.meta = true;
           state.identifierPrefix = frame.identifierPrefix;
           if (
@@ -362,7 +364,18 @@ export function bridgeStreamBootstrap(
             );
           }
         } else if (!state.meta) throw Error('Missing Bridge stream metadata');
-        else if (frame.type === 'html') {
+        else if (frame.type === 'client') {
+          if (
+            !state.client ||
+            frame.client.name !== state.client.name ||
+            frame.client.snapshot.buildVersion !==
+              state.client.snapshot.buildVersion
+          )
+            throw Error('Invalid Bridge client update');
+          // Keep the reference already returned with readiness. Late nested
+          // dependencies become visible to the same mounted client scope.
+          state.client.dependencies = frame.client.dependencies;
+        } else if (frame.type === 'html') {
           if (state.hasData || typeof frame.html !== 'string')
             throw Error('Invalid Bridge HTML frame');
           insert(container!, frame.html, state);
@@ -392,6 +405,7 @@ export function bridgeStreamBootstrap(
           );
           state.resolveReady({
             snapshot: frame.snapshot,
+            client: state.client,
             identifierPrefix: state.identifierPrefix,
             updates,
           });

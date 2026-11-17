@@ -32,12 +32,18 @@ const collect = async <T>(stream: ReadableStream<T>) => {
   }
 };
 function fixture(
-  options: { cache?: boolean; delay?: number; invalid?: boolean } = {},
+  options: {
+    cache?: boolean;
+    delay?: number;
+    invalid?: boolean;
+    client?: import('./protocol').BridgeServiceClient;
+  } = {},
 ) {
   let aborts = 0;
   const render = rstest.fn(async (info: BridgeSSRRequest) => ({
     protocol: BRIDGE_PRODUCER_PROTOCOL as typeof BRIDGE_PRODUCER_PROTOCOL,
     hydration: 'progressive' as const,
+    client: options.client,
     messages: new ReadableStream<BridgeSSRMessage>({
       async start(controller) {
         controller.enqueue(messages[0]);
@@ -159,11 +165,44 @@ describe('Service producer transport', () => {
     await collect((await f.load()).messages);
     expect(f.render).toHaveBeenCalledTimes(3);
   });
-  it('rejects mismatched builds before rendering', async () => {
+  it('renders the current producer even when the caller retains an older build identity', async () => {
     const f = fixture();
-    await expect(f.load(input(), 'build-2')).rejects.toThrow('409');
-    expect(f.render).not.toHaveBeenCalled();
+    const result = await f.load(input(), 'build-2');
+    await collect(result.messages);
+    expect(f.render).toHaveBeenCalledTimes(1);
   });
+  it('forwards the producer selected client snapshot without sending a caller version', async () => {
+    const client = {
+      name: 'remote',
+      expose: './App',
+      snapshot: {
+        buildVersion: 'new',
+        version: 'https://service.test/mf-manifest.json',
+        remoteTypes: '',
+        remoteTypesZip: '',
+        remotesInfo: {},
+        shared: [],
+        remoteEntry: 'remoteEntry.hash.js',
+        remoteEntryType: 'global',
+        globalName: 'remote',
+        publicPath: 'https://service.test/',
+        modules: [],
+      },
+    } as import('./protocol').BridgeServiceClient;
+    const f = fixture({ client });
+    let payload: any;
+    const result = await fetchBridgeService(input(), {
+      url: 'https://service.test/render',
+      fetch: async (url, init) => {
+        payload = JSON.parse(String(init?.body));
+        return f.handler(new Request(url, init));
+      },
+    });
+    expect(payload).not.toHaveProperty('buildVersion');
+    expect(result.client).toEqual(client);
+    await collect(result.messages);
+  });
+
   it('keeps its timeout through the delayed body and cancels the renderer', async () => {
     const f = fixture({ delay: 100 });
     const result = await fetchBridgeService(input(), {
