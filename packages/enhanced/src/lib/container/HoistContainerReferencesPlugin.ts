@@ -235,6 +235,12 @@ export function getAllReferencedModules(
         continue;
       }
 
+      // Connections webpack pruned (an unused import of a sideEffects:false
+      // package) stay out of the runtime chunk. undefined means any runtime.
+      if (connection.getActiveState(undefined) === false) {
+        continue;
+      }
+
       // Handle 'initial' type (skipping async blocks)
       if (type === 'initial') {
         const parentBlock = compilation.moduleGraph.getParentBlock(

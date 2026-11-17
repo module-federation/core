@@ -1,5 +1,26 @@
 # @module-federation/runtime
 
+## 2.9.3
+
+### Patch Changes
+
+- 9135b23: Emit CommonJS declarations as `.d.cts` and point the `require` types
+  condition at them. The CJS and ESM builds previously wrote the same `.d.ts`
+  path at the same time, which could leave a torn declaration file.
+- Updated dependencies [9135b23]
+  - @module-federation/sdk@2.9.3
+  - @module-federation/error-codes@2.9.3
+
+## 2.9.2
+
+### Patch Changes
+
+- 47d9b46: Import `ResourceLoadContext` in the remote handler so the published
+  `remote/index.d.ts` declares it. Consumers that type-check dependencies with
+  `skipLibCheck: false` no longer get TS2304.
+  - @module-federation/sdk@2.9.2
+  - @module-federation/error-codes@2.9.2
+
 ## 2.9.1
 
 ### Patch Changes
