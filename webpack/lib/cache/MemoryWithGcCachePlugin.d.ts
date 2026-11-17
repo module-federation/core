@@ -1,23 +1,26 @@
 export = MemoryWithGcCachePlugin;
 declare class MemoryWithGcCachePlugin {
     /**
+     * Creates an instance of MemoryWithGcCachePlugin.
      * @param {MemoryWithGcCachePluginOptions} options options
      */
     constructor({ maxGenerations }: MemoryWithGcCachePluginOptions);
+    /** @type {number} */
     _maxGenerations: number;
     /**
-     * Apply the plugin
+     * Applies the plugin by registering its hooks on the compiler.
      * @param {Compiler} compiler the compiler instance
      * @returns {void}
      */
     apply(compiler: Compiler): void;
 }
 declare namespace MemoryWithGcCachePlugin {
-    export { Data, Etag, Compiler, MemoryWithGcCachePluginOptions };
+    export { MemoryWithGcCachePluginOptions };
 }
-type Data = import("../Cache").Data;
-type Etag = import("../Cache").Etag;
-type Compiler = import("../Compiler");
+import type Compiler from "../Compiler";
+/**
+ * Defines the memory with gc cache plugin options type used by this module.
+ */
 type MemoryWithGcCachePluginOptions = {
     /**
      * max generations

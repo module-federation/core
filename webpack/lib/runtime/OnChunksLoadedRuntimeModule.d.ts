@@ -1,10 +1,13 @@
 export = OnChunksLoadedRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Compilation from "../Compilation" */
+/** @import { ReadOnlyRuntimeRequirements } from "../module/Module" */
 declare class OnChunksLoadedRuntimeModule extends RuntimeModule {
-  constructor();
+    /**
+     * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
+     */
+    constructor(runtimeRequirements: ReadOnlyRuntimeRequirements);
+    /** @type {ReadOnlyRuntimeRequirements} */
+    runtimeRequirements: ReadOnlyRuntimeRequirements;
 }
-declare namespace OnChunksLoadedRuntimeModule {
-  export { Compilation };
-}
-import RuntimeModule = require('../RuntimeModule');
-type Compilation = import('../Compilation');
+import RuntimeModule = require("./RuntimeModule");
+import type { ReadOnlyRuntimeRequirements } from "../module/Module";

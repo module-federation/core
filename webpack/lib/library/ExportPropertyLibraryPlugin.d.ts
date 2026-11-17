@@ -1,69 +1,69 @@
 export = ExportPropertyLibraryPlugin;
-/** @typedef {import("webpack-sources").Source} Source */
-/** @typedef {import("../../declarations/WebpackOptions").LibraryOptions} LibraryOptions */
-/** @typedef {import("../../declarations/WebpackOptions").LibraryType} LibraryType */
-/** @typedef {import("../../declarations/WebpackOptions").LibraryExport} LibraryExport */
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../Module")} Module */
-/** @typedef {import("../Module").RuntimeRequirements} RuntimeRequirements */
-/** @typedef {import("../javascript/JavascriptModulesPlugin").StartupRenderContext} StartupRenderContext */
+/** @import { Source } from "webpack-sources" */
 /**
+ * @import {
+ * 	LibraryOptions,
+ * 	LibraryType,
+ * 	LibraryExport
+ * } from "../../declarations/WebpackOptions"
+ */
+/** @import Chunk from "../graph/Chunk" */
+/** @import Module, { RuntimeRequirements } from "../module/Module" */
+/**
+ * @import {
+ * 	StartupRenderContext
+ * } from "../javascript/JavascriptModulesPlugin"
+ */
+/**
+ * Defines the shared type used by this module.
  * @template T
  * @typedef {import("./AbstractLibraryPlugin").LibraryContext<T>} LibraryContext<T>
  */
 /**
+ * Defines the export property library plugin parsed type used by this module.
  * @typedef {object} ExportPropertyLibraryPluginParsed
  * @property {LibraryExport=} export
  */
 /**
+ * Defines the export property library plugin options type used by this module.
  * @typedef {object} ExportPropertyLibraryPluginOptions
  * @property {LibraryType} type
  */
 /**
+ * Represents the export property library plugin runtime component.
  * @typedef {ExportPropertyLibraryPluginParsed} T
  * @extends {AbstractLibraryPlugin<ExportPropertyLibraryPluginParsed>}
  */
 declare class ExportPropertyLibraryPlugin extends AbstractLibraryPlugin<ExportPropertyLibraryPluginParsed> {
-  /**
-   * @param {ExportPropertyLibraryPluginOptions} options options
-   */
-  constructor({ type }: ExportPropertyLibraryPluginOptions);
+    /**
+     * Creates an instance of ExportPropertyLibraryPlugin.
+     * @param {ExportPropertyLibraryPluginOptions} options options
+     */
+    constructor({ type }: ExportPropertyLibraryPluginOptions);
 }
 declare namespace ExportPropertyLibraryPlugin {
-  export {
-    Source,
-    LibraryOptions,
-    LibraryType,
-    LibraryExport,
-    Chunk,
-    Module,
-    RuntimeRequirements,
-    StartupRenderContext,
-    LibraryContext,
-    ExportPropertyLibraryPluginParsed,
-    ExportPropertyLibraryPluginOptions,
-    T,
-  };
+    export { LibraryContext, ExportPropertyLibraryPluginParsed, ExportPropertyLibraryPluginOptions, T };
 }
-import AbstractLibraryPlugin = require('./AbstractLibraryPlugin');
-type Source = import('webpack-sources').Source;
-type LibraryOptions =
-  import('../../declarations/WebpackOptions').LibraryOptions;
-type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
-type LibraryExport = import('../../declarations/WebpackOptions').LibraryExport;
-type Chunk = import('../Chunk');
-type Module = import('../Module');
-type RuntimeRequirements = import('../Module').RuntimeRequirements;
-type StartupRenderContext =
-  import('../javascript/JavascriptModulesPlugin').StartupRenderContext;
+import AbstractLibraryPlugin = require("./AbstractLibraryPlugin");
 /**
  * <T>
  */
-type LibraryContext<T> = import('./AbstractLibraryPlugin').LibraryContext<T>;
+type LibraryContext<T> = import("./AbstractLibraryPlugin").LibraryContext<T>;
+/**
+ * Defines the export property library plugin parsed type used by this module.
+ */
 type ExportPropertyLibraryPluginParsed = {
-  export?: LibraryExport | undefined;
+    export?: LibraryExport | undefined;
 };
+/**
+ * Defines the export property library plugin options type used by this module.
+ */
 type ExportPropertyLibraryPluginOptions = {
-  type: LibraryType;
+    type: LibraryType;
 };
+/**
+ * Represents the export property library plugin runtime component.
+ */
 type T = ExportPropertyLibraryPluginParsed;
+import type { LibraryExport } from "../../declarations/WebpackOptions";
+import type { LibraryType } from "../../declarations/WebpackOptions";

@@ -1,8 +1,9 @@
 export = FallbackItemDependency;
 declare class FallbackItemDependency extends ModuleDependency {
-  /**
-   * @param {string} request request
-   */
-  constructor(request: string);
+    /**
+     * Creates an instance of FallbackItemDependency.
+     * @param {string} request request
+     */
+    constructor(request: string);
 }
-import ModuleDependency = require('../dependencies/ModuleDependency');
+import ModuleDependency = require("../dependencies/core/ModuleDependency");

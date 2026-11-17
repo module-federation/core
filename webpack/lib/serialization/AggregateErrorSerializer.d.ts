@@ -1,27 +1,29 @@
 export = AggregateErrorSerializer;
-/** @typedef {import("./ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("./ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {Error & { cause?: unknown, errors: EXPECTED_ANY[] }} AggregateError */
+/** @import { ComplexSerializableType } from "./types" */
+/** @typedef {import("./ObjectMiddleware").ObjectDeserializerContext<ComplexSerializableType[]>} ObjectDeserializerContext */
+/** @typedef {import("./ObjectMiddleware").ObjectSerializerContext<ComplexSerializableType[]>} ObjectSerializerContext */
+/** @typedef {Error & { cause?: ComplexSerializableType, errors: ComplexSerializableType[] }} AggregateError */
 declare class AggregateErrorSerializer {
-  /**
-   * @param {AggregateError} obj error
-   * @param {ObjectSerializerContext} context context
-   */
-  serialize(obj: AggregateError, context: ObjectSerializerContext): void;
-  /**
-   * @param {ObjectDeserializerContext} context context
-   * @returns {AggregateError} error
-   */
-  deserialize(context: ObjectDeserializerContext): AggregateError;
+    /**
+     * Serializes this instance into the provided serializer context.
+     * @param {AggregateError} obj error
+     * @param {ObjectSerializerContext} context context
+     */
+    serialize(obj: AggregateError, context: ObjectSerializerContext): void;
+    /**
+     * Restores this instance from the provided deserializer context.
+     * @param {ObjectDeserializerContext} context context
+     * @returns {AggregateError} error
+     */
+    deserialize(context: ObjectDeserializerContext): AggregateError;
 }
 declare namespace AggregateErrorSerializer {
-  export { ObjectDeserializerContext, ObjectSerializerContext, AggregateError };
+    export { ObjectDeserializerContext, ObjectSerializerContext, AggregateError };
 }
-type ObjectDeserializerContext =
-  import('./ObjectMiddleware').ObjectDeserializerContext;
-type ObjectSerializerContext =
-  import('./ObjectMiddleware').ObjectSerializerContext;
+type ObjectDeserializerContext = import("./ObjectMiddleware").ObjectDeserializerContext<ComplexSerializableType[]>;
+type ObjectSerializerContext = import("./ObjectMiddleware").ObjectSerializerContext<ComplexSerializableType[]>;
 type AggregateError = Error & {
-  cause?: unknown;
-  errors: EXPECTED_ANY[];
+    cause?: ComplexSerializableType;
+    errors: ComplexSerializableType[];
 };
+import type { ComplexSerializableType } from "./types";

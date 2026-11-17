@@ -1,4 +1,5 @@
 /**
+ * Returns combined set, may be identical to a or b.
  * @template T
  * @param {Set<T>} a first
  * @param {Set<T>} b second
@@ -6,6 +7,7 @@
  */
 export function combine<T>(a: Set<T>, b: Set<T>): Set<T>;
 /**
+ * Returns found item.
  * @template T
  * @param {Set<T>} set a set
  * @param {(set: T) => boolean} fn selector function
@@ -13,6 +15,7 @@ export function combine<T>(a: Set<T>, b: Set<T>): Set<T>;
  */
 export function find<T>(set: Set<T>, fn: (set: T) => boolean): T | undefined;
 /**
+ * Returns first item.
  * @template T
  * @param {Set<T> | ReadonlySet<T>} set a set
  * @returns {T | undefined} first item
@@ -30,6 +33,6 @@ export function intersect<T>(sets: Set<T>[]): Set<T>;
  * @template T
  * @param {Set<T>} bigSet a Set which contains the original elements to compare against
  * @param {Set<T>} smallSet the set whose elements might be contained inside of bigSet
- * @returns {boolean} returns true if smallSet contains all elements inside of the bigSet
+ * @returns {boolean} returns true if bigSet contains all elements inside of smallSet
  */
 export function isSubset<T>(bigSet: Set<T>, smallSet: Set<T>): boolean;

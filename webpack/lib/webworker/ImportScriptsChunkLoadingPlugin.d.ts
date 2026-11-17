@@ -1,15 +1,15 @@
 export = ImportScriptsChunkLoadingPlugin;
+/**
+ * Enables worker-side chunk loading via `importScripts` and wires in the
+ * runtime helpers needed for startup, loading, and hot updates.
+ */
 declare class ImportScriptsChunkLoadingPlugin {
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Registers compilation hooks that attach the `importScripts` chunk-loading
+     * runtime and its supporting globals to chunks using that backend.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
-declare namespace ImportScriptsChunkLoadingPlugin {
-  export { Chunk, Compiler, RuntimeRequirements };
-}
-type Chunk = import('../Chunk');
-type Compiler = import('../Compiler');
-type RuntimeRequirements = import('../Module').RuntimeRequirements;
+import type Compiler from "../Compiler";
