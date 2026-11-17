@@ -159,8 +159,7 @@ export function setGlobalFederationInstance(
 }
 
 export function getGlobalFederationConstructor():
-  | typeof ModuleFederation
-  | undefined {
+  typeof ModuleFederation | undefined {
   return CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
 }
 
