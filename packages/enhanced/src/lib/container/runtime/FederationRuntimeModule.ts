@@ -58,13 +58,7 @@ class FederationRuntimeModule extends RuntimeModule {
         } else {
           matcher = hasJsMatcher('chunkId');
         }
-        const runtimeTemplate = this.compilation
-          .runtimeTemplate as typeof this.compilation.runtimeTemplate & {
-          chunkRootOutputDir?: (
-            chunk: import('webpack').Chunk,
-            enforceRelative: boolean,
-          ) => string;
-        };
+        const { runtimeTemplate } = this.compilation;
         // Runtime modules are generated for hashing before chunk hashes exist.
         if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
           rootOutputDir = runtimeTemplate.chunkRootOutputDir(this.chunk, false);

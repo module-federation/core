@@ -27,10 +27,7 @@ export function getChunkRootOutputDir(
   chunk: Chunk,
   filenameTemplate: ChunkFilenameTemplate,
 ): string {
-  const runtimeTemplate =
-    compilation.runtimeTemplate as typeof compilation.runtimeTemplate & {
-      chunkRootOutputDir?: (chunk: Chunk, enforceRelative: boolean) => string;
-    };
+  const { runtimeTemplate } = compilation;
   if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
     return runtimeTemplate.chunkRootOutputDir(chunk, false);
   }

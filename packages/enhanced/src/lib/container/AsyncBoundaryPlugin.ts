@@ -339,7 +339,9 @@ class AsyncEntryStartupPlugin {
         : null;
     const hasTopLevelAwait =
       !!experimentsRecord && !!experimentsRecord['topLevelAwait'];
-    if (hasTopLevelAwait && compiler.options?.experiments?.outputModule) {
+    // Webpack 5.112 ignores experiments.outputModule. Older webpack derives
+    // output.module from it, so output.module is correct on every version.
+    if (hasTopLevelAwait && compiler.options?.output?.module) {
       return Template.asString([
         'var promiseTrack = [];',
         Template.asString(initialEntryModules),
