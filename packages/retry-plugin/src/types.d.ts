@@ -30,8 +30,7 @@ export type CommonRetryOptions = {
    * add query parameter
    */
   addQuery?:
-    | boolean
-    | ((context: { times: number; originalQuery: string }) => string);
+    boolean | ((context: { times: number; originalQuery: string }) => string);
   /**
    * retry domains
    */
