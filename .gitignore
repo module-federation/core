@@ -71,6 +71,8 @@ packages/enhanced/test/js
 **/dist-test
 **/cache
 **/cache/**
+!webpack/lib/cache/
+!webpack/lib/cache/**
 **/dist-test/**
 **/cypress/downloads
 /packages/data-prefetch/jest/cache/

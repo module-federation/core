@@ -4665,12 +4665,36 @@ importers:
 
   webpack:
     dependencies:
+      '@types/estree':
+        specifier: ^1.0.8
+        version: 1.0.9
+      '@types/json-schema':
+        specifier: ^7.0.15
+        version: 7.0.15
+      '@webassemblyjs/ast':
+        specifier: ^1.14.1
+        version: 1.14.1
+      chrome-trace-event:
+        specifier: ^1.0.2
+        version: 1.0.4
       enhanced-resolve:
-        specifier: ^5.17.1
-        version: 5.20.1
+        specifier: ^5.26.0
+        version: 5.27.0
+      minimizer-webpack-plugin:
+        specifier: ^5.13.0
+        version: 5.14.0(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack@5.112.2(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
+      schema-utils:
+        specifier: ^4.8.1
+        version: 4.8.3(webpack@5.112.2(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       tapable:
-        specifier: ^2.1.1
+        specifier: ^2.3.0
         version: 2.3.0
+      watchpack:
+        specifier: ^2.6.3
+        version: 2.6.4
+      webpack-sources:
+        specifier: ^3.6.0
+        version: 3.6.0
 
 packages:
 
@@ -26534,10 +26558,6 @@ packages:
     resolution: {integrity: sha512-pN/yOAvcC+5rQ5nERGuwrjLlYvLTbCibnZ1I7B1LaiAz9BRBlE9GMgE/eqV30P7aJQUf7Ddimy/RsbYO/GrVGg==}
     engines: {node: '>= 10.13.0'}
 
-  schema-utils@4.3.0:
-    resolution: {integrity: sha512-Gf9qqc58SpCA/xdziiHz35F4GNIWYWZrEshUc/G/r5BnLph6xpKuLeoJoQuj5WfBIx/eQLf+hmVPYHaxJu7V2g==}
-    engines: {node: '>= 10.13.0'}
-
   schema-utils@4.3.3:
     resolution: {integrity: sha512-eflK8wEtyOE6+hsaRVPxvUKYCpRgzLqDTb8krvAsRIwOGlHoSgYLgBXoubGgLd2fT41/OUYdb48v4k4WWHQurA==}
     engines: {node: '>= 10.13.0'}
@@ -27549,11 +27569,6 @@ packages:
 
   terser@5.46.1:
     resolution: {integrity: sha512-vzCjQO/rgUuK9sf8VJZvjqiqiHFaZLnOiimmUuOKODxWL8mm/xua7viT7aqX7dgPY60otQjUotzFMmCB4VdmqQ==}
-    engines: {node: '>=10'}
-    hasBin: true
-
-  terser@5.48.0:
-    resolution: {integrity: sha512-J/9An6vs9Us6wKRriSFXBWdRZapREHqFzdNUKk0pmu804EMR6dr6winwo7e5JDxN4xahxQsuysyYFwlwj4XN/Q==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -36254,7 +36269,7 @@ snapshots:
       '@module-federation/runtime-tools': 0.21.6
       '@module-federation/sdk': 0.21.6
       btoa: 1.2.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       upath: 2.0.1
     optionalDependencies:
       typescript: 7.0.2
@@ -36284,7 +36299,7 @@ snapshots:
       '@module-federation/sdk': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@module-federation/webpack-bundler-runtime': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       btoa: 1.2.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       tapable: 2.3.0
       upath: 2.0.1
     optionalDependencies:
@@ -37617,7 +37632,7 @@ snapshots:
       html-entities: 2.6.0
       loader-utils: 2.0.4
       react-refresh: 0.14.2
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       source-map: 0.7.6
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
@@ -37633,7 +37648,7 @@ snapshots:
       html-entities: 2.6.0
       loader-utils: 2.0.4
       react-refresh: 0.14.2
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       source-map: 0.7.6
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
@@ -40388,7 +40403,7 @@ snapshots:
 
   '@rollup/pluginutils@5.3.0(rollup@4.59.0)':
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       estree-walker: 2.0.2
       picomatch: 4.0.3
     optionalDependencies:
@@ -40396,7 +40411,7 @@ snapshots:
 
   '@rollup/pluginutils@5.3.0(rollup@4.63.5)':
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       estree-walker: 2.0.2
       picomatch: 4.0.3
     optionalDependencies:
@@ -41063,14 +41078,14 @@ snapshots:
   '@rsbuild/plugin-rem@1.0.5(@rsbuild/core@1.7.3)':
     dependencies:
       deepmerge: 4.3.1
-      terser: 5.48.0
+      terser: 5.51.2
     optionalDependencies:
       '@rsbuild/core': 1.7.3
 
   '@rsbuild/plugin-rem@1.0.6(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.3)(core-js@3.49.0))':
     dependencies:
       deepmerge: 4.3.1
-      terser: 5.48.0
+      terser: 5.51.2
     optionalDependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.3)(core-js@3.49.0)
 
@@ -42890,7 +42905,7 @@ snapshots:
       ts-dedent: 2.2.0
       util: 0.12.5
       util-deprecate: 1.0.2
-      watchpack: 2.5.1
+      watchpack: 2.6.4
       ws: 8.21.3
     transitivePeerDependencies:
       - bufferutil
@@ -44140,11 +44155,11 @@ snapshots:
   '@types/eslint-scope@3.7.7':
     dependencies:
       '@types/eslint': 9.6.1
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
 
   '@types/eslint@9.6.1':
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
 
   '@types/esquery@1.5.4':
@@ -46883,28 +46898,28 @@ snapshots:
     dependencies:
       '@babel/core': 7.29.0
       find-cache-dir: 4.0.0
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.104.1)
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
 
   babel-loader@9.2.1(@babel/core@7.29.0)(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)):
     dependencies:
       '@babel/core': 7.29.0
       find-cache-dir: 4.0.0
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
   babel-loader@9.2.1(@babel/core@7.29.0)(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)):
     dependencies:
       '@babel/core': 7.29.0
       find-cache-dir: 4.0.0
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
   babel-loader@9.2.1(@babel/core@7.29.7)(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)):
     dependencies:
       '@babel/core': 7.29.7
       find-cache-dir: 4.0.0
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
   babel-plugin-apply-mdx-type-prop@1.6.22(@babel/core@7.12.9):
@@ -48224,7 +48239,7 @@ snapshots:
       glob-parent: 6.0.2
       globby: 12.2.0
       normalize-path: 3.0.0
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 6.0.2
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
@@ -48234,7 +48249,7 @@ snapshots:
       glob-parent: 6.0.2
       globby: 13.2.2
       normalize-path: 3.0.0
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.104.1)
       serialize-javascript: 6.0.2
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
 
@@ -48244,7 +48259,7 @@ snapshots:
       glob-parent: 6.0.2
       globby: 13.2.2
       normalize-path: 3.0.0
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 6.0.2
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
@@ -48254,7 +48269,7 @@ snapshots:
       glob-parent: 6.0.2
       globby: 13.2.2
       normalize-path: 3.0.0
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 6.0.2
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
@@ -48513,7 +48528,7 @@ snapshots:
       cssnano: 6.1.2(postcss@8.5.23)
       jest-worker: 29.7.0
       postcss: 8.5.23
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 6.0.2
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
@@ -48525,7 +48540,7 @@ snapshots:
       cssnano: 7.1.3(postcss@8.5.23)
       jest-worker: 29.7.0
       postcss: 8.5.23
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 6.0.2
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
@@ -48537,7 +48552,7 @@ snapshots:
       cssnano: 7.1.3(postcss@8.5.23)
       jest-worker: 29.7.0
       postcss: 8.5.23
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 6.0.2
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
@@ -48549,7 +48564,7 @@ snapshots:
       cssnano: 7.1.3(postcss@8.5.23)
       jest-worker: 29.7.0
       postcss: 8.5.23
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 6.0.2
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
@@ -48561,7 +48576,7 @@ snapshots:
       cssnano: 7.1.3(postcss@8.5.23)
       jest-worker: 30.4.1
       postcss: 8.5.23
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 7.0.7
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
@@ -48573,7 +48588,7 @@ snapshots:
       cssnano: 7.1.3(postcss@8.5.23)
       jest-worker: 30.4.1
       postcss: 8.5.23
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       serialize-javascript: 7.0.7
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1))
     optionalDependencies:
@@ -50501,7 +50516,7 @@ snapshots:
       '@humanwhocodes/module-importer': 1.0.1
       '@humanwhocodes/retry': 0.4.3
       '@modelcontextprotocol/sdk': 1.27.1(zod@3.25.76)
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
       ajv: 6.14.0
       chalk: 4.1.2
@@ -52146,7 +52161,7 @@ snapshots:
       he: 1.2.0
       param-case: 3.0.4
       relateurl: 0.2.7
-      terser: 5.48.0
+      terser: 5.51.2
 
   html-minifier-terser@7.2.0:
     dependencies:
@@ -52156,7 +52171,7 @@ snapshots:
       entities: 4.5.0
       param-case: 3.0.4
       relateurl: 0.2.7
-      terser: 5.48.0
+      terser: 5.51.2
 
   html-parse-stringify@3.0.1:
     dependencies:
@@ -54650,12 +54665,12 @@ snapshots:
   metro-minify-terser@0.82.5:
     dependencies:
       flow-enums-runtime: 0.0.6
-      terser: 5.48.0
+      terser: 5.51.2
 
   metro-minify-terser@0.83.5:
     dependencies:
       flow-enums-runtime: 0.0.6
-      terser: 5.48.0
+      terser: 5.51.2
 
   metro-resolver@0.82.5:
     dependencies:
@@ -55255,18 +55270,18 @@ snapshots:
 
   mini-css-extract-plugin@2.4.7(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)):
     dependencies:
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
   mini-css-extract-plugin@2.9.4(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)):
     dependencies:
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       tapable: 2.3.0
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
   mini-css-extract-plugin@2.9.4(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)):
     dependencies:
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       tapable: 2.3.0
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
@@ -60792,13 +60807,6 @@ snapshots:
       ajv: 6.14.0
       ajv-keywords: 3.5.2(ajv@6.14.0)
 
-  schema-utils@4.3.0:
-    dependencies:
-      '@types/json-schema': 7.0.15
-      ajv: 8.18.0
-      ajv-formats: 2.1.1(ajv@8.18.0)
-      ajv-keywords: 5.1.0(ajv@8.18.0)
-
   schema-utils@4.3.3:
     dependencies:
       '@types/json-schema': 7.0.15
@@ -60812,6 +60820,24 @@ snapshots:
       ajv: 8.18.0
       ajv-formats: 3.0.1(ajv@8.18.0)
       ajv-keywords: 5.1.0(ajv@8.18.0)
+
+  schema-utils@4.8.3(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+    dependencies:
+      '@types/json-schema': 7.0.15
+      ajv: 8.18.0
+      ajv-formats: 3.0.1(ajv@8.18.0)
+      ajv-keywords: 5.1.0(ajv@8.18.0)
+    optionalDependencies:
+      webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)
+
+  schema-utils@4.8.3(webpack@5.104.1):
+    dependencies:
+      '@types/json-schema': 7.0.15
+      ajv: 8.18.0
+      ajv-formats: 3.0.1(ajv@8.18.0)
+      ajv-keywords: 5.1.0(ajv@8.18.0)
+    optionalDependencies:
+      webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
 
   schema-utils@4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)):
     dependencies:
@@ -62317,9 +62343,9 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 6.0.2
-      terser: 5.48.0
+      terser: 5.51.2
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
       '@swc/core': 1.15.8(@swc/helpers@0.5.17)
@@ -62329,9 +62355,9 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 6.0.2
-      terser: 5.48.0
+      terser: 5.51.2
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
       '@swc/core': 1.15.8(@swc/helpers@0.5.17)
@@ -62341,9 +62367,9 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       serialize-javascript: 6.0.2
-      terser: 5.48.0
+      terser: 5.51.2
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
       '@swc/core': 1.15.8(@swc/helpers@0.5.17)
@@ -62353,7 +62379,7 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       terser: 5.46.1
       webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)
     optionalDependencies:
@@ -62364,7 +62390,7 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       terser: 5.46.1
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
@@ -62375,7 +62401,7 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.104.1)
       terser: 5.46.1
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
     optionalDependencies:
@@ -62386,7 +62412,7 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.104.1)
       terser: 5.46.1
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
     optionalDependencies:
@@ -62397,7 +62423,7 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
-      schema-utils: 4.3.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(postcss@8.5.23)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       terser: 5.46.1
       webpack: 5.112.2(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(postcss@8.5.23)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optionalDependencies:
@@ -62408,13 +62434,6 @@ snapshots:
     dependencies:
       '@jridgewell/source-map': 0.3.11
       acorn: 8.16.0
-      commander: 2.20.3
-      source-map-support: 0.5.21
-
-  terser@5.48.0:
-    dependencies:
-      '@jridgewell/source-map': 0.3.11
-      acorn: 8.19.0
       commander: 2.20.3
       source-map-support: 0.5.21
 
@@ -62697,7 +62716,7 @@ snapshots:
   ts-loader@9.4.4(typescript@7.0.2)(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)):
     dependencies:
       chalk: 4.1.2
-      enhanced-resolve: 5.20.1
+      enhanced-resolve: 5.27.0
       micromatch: 4.0.8
       semver: 7.8.5
       typescript: 7.0.2
@@ -62706,7 +62725,7 @@ snapshots:
   ts-loader@9.4.4(typescript@7.0.2)(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)):
     dependencies:
       chalk: 4.1.2
-      enhanced-resolve: 5.20.1
+      enhanced-resolve: 5.27.0
       micromatch: 4.0.8
       semver: 7.8.5
       typescript: 7.0.2
@@ -62715,7 +62734,7 @@ snapshots:
   ts-loader@9.5.4(typescript@7.0.2)(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)):
     dependencies:
       chalk: 4.1.2
-      enhanced-resolve: 5.20.1
+      enhanced-resolve: 5.27.0
       micromatch: 4.0.8
       semver: 7.8.5
       source-map: 0.7.6
@@ -62923,13 +62942,13 @@ snapshots:
   tsconfig-paths-webpack-plugin@4.1.0:
     dependencies:
       chalk: 4.1.2
-      enhanced-resolve: 5.20.1
+      enhanced-resolve: 5.27.0
       tsconfig-paths: 4.2.0
 
   tsconfig-paths-webpack-plugin@4.2.0:
     dependencies:
       chalk: 4.1.2
-      enhanced-resolve: 5.20.1
+      enhanced-resolve: 5.27.0
       tapable: 2.3.0
       tsconfig-paths: 4.2.0
 
@@ -64103,7 +64122,7 @@ snapshots:
       memfs: 3.5.3
       mime-types: 2.1.35
       range-parser: 1.3.0
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(postcss@8.5.23)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
     optionalDependencies:
       webpack: 5.112.2(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(postcss@8.5.23)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
@@ -64114,7 +64133,7 @@ snapshots:
       mime-types: 3.0.2
       on-finished: 2.4.2
       range-parser: 1.3.0
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.104.1)
     optionalDependencies:
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
     optional: true
@@ -64126,7 +64145,7 @@ snapshots:
       mime-types: 3.0.2
       on-finished: 2.4.2
       range-parser: 1.3.0
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
     optionalDependencies:
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optional: true
@@ -64138,7 +64157,7 @@ snapshots:
       mime-types: 3.0.2
       on-finished: 2.4.2
       range-parser: 1.3.0
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
     optionalDependencies:
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optional: true
@@ -64150,7 +64169,7 @@ snapshots:
       mime-types: 3.0.2
       on-finished: 2.4.2
       range-parser: 1.3.0
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
     optionalDependencies:
       webpack: 5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
 
@@ -64161,7 +64180,7 @@ snapshots:
       mime-types: 3.0.2
       on-finished: 2.4.2
       range-parser: 1.3.0
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
     optionalDependencies:
       webpack: 5.112.2(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4)
     optional: true
@@ -64189,7 +64208,7 @@ snapshots:
       launch-editor: 2.13.1
       open: 10.2.0
       p-retry: 6.2.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.104.1)
       selfsigned: 5.5.0
       serve-index: 1.9.2
       sockjs: 0.3.24
@@ -64229,7 +64248,7 @@ snapshots:
       launch-editor: 2.13.1
       open: 10.2.0
       p-retry: 6.2.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       selfsigned: 5.5.0
       serve-index: 1.9.2
       sockjs: 0.3.24
@@ -64269,7 +64288,7 @@ snapshots:
       launch-editor: 2.13.1
       open: 10.2.0
       p-retry: 6.2.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(postcss@8.5.8)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       selfsigned: 5.5.0
       serve-index: 1.9.2
       sockjs: 0.3.24
@@ -64309,7 +64328,7 @@ snapshots:
       launch-editor: 2.13.1
       open: 10.2.0
       p-retry: 6.2.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(postcss@8.4.49)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       selfsigned: 5.5.0
       serve-index: 1.9.2
       sockjs: 0.3.24
@@ -64348,7 +64367,7 @@ snapshots:
       launch-editor: 2.13.1
       open: 10.2.0
       p-retry: 6.2.1
-      schema-utils: 4.5.0
+      schema-utils: 4.8.3(webpack@5.112.2(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(postcss@8.5.28)(sharp@0.35.5(@types/node@20.19.5))(webpack-cli@5.1.4))
       selfsigned: 5.5.0
       serve-index: 1.9.2
       sockjs: 0.3.24

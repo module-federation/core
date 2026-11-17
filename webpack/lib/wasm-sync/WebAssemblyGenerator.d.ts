@@ -1,71 +1,59 @@
 export = WebAssemblyGenerator;
 /**
+ * Represents the web assembly generator runtime component.
  * @typedef {object} WebAssemblyGeneratorOptions
  * @property {boolean=} mangleImports mangle imports
  */
-declare class WebAssemblyGenerator extends Generator {
-  /**
-   * @param {WebAssemblyGeneratorOptions} options options
-   */
-  constructor(options: WebAssemblyGeneratorOptions);
-  options: WebAssemblyGeneratorOptions;
-  /**
-   * @param {Error} error the error
-   * @param {NormalModule} module module for which the code should be generated
-   * @param {GenerateContext} generateContext context for generate
-   * @returns {Source | null} generated code
-   */
-  generateError(
-    error: Error,
-    module: NormalModule,
-    generateContext: GenerateContext,
-  ): Source | null;
+/**
+ * The module type the JSDoc inherited from `Generator` names.
+ * @typedef {SyncWasmNormalModule} TModule
+ */
+/**
+ * @extends {Generator<TModule>}
+ */
+declare class WebAssemblyGenerator extends Generator<SyncWasmNormalModule> {
+    /**
+     * Creates an instance of WebAssemblyGenerator.
+     * @param {WebAssemblyGeneratorOptions} options options
+     */
+    constructor(options: WebAssemblyGeneratorOptions);
+    /** @type {WebAssemblyGeneratorOptions} */
+    options: WebAssemblyGeneratorOptions;
+    /**
+     * Generates fallback output for the provided error condition.
+     * @param {Error} error the error
+     * @param {TModule} module module for which the code should be generated
+     * @param {GenerateContext} generateContext context for generate
+     * @returns {Source | null} generated code
+     */
+    generateError(error: Error, module: TModule, generateContext: Generator.GenerateContext): Source | null;
 }
 declare namespace WebAssemblyGenerator {
-  export {
-    Source,
-    GenerateContext,
-    Module,
-    SourceType,
-    SourceTypes,
-    ModuleGraph,
-    NormalModule,
-    RuntimeSpec,
-    UsedWasmDependency,
-    Instruction,
-    ModuleImport,
-    ModuleExport,
-    Global,
-    AST,
-    GlobalType,
-    NodePath,
-    ArrayBufferTransform,
-    Mapping,
-    WebAssemblyGeneratorOptions,
-  };
+    export { NodePath, ArrayBufferTransform, Mapping, WebAssemblyGeneratorOptions, TModule };
 }
-import Generator = require('../Generator');
-type Source = import('webpack-sources').Source;
-type GenerateContext = import('../Generator').GenerateContext;
-type Module = import('../Module');
-type SourceType = import('../Module').SourceType;
-type SourceTypes = import('../Module').SourceTypes;
-type ModuleGraph = import('../ModuleGraph');
-type NormalModule = import('../NormalModule');
-type RuntimeSpec = import('../util/runtime').RuntimeSpec;
-type UsedWasmDependency = import('./WebAssemblyUtils').UsedWasmDependency;
-type Instruction = any;
-type ModuleImport = any;
-type ModuleExport = any;
-type Global = any;
-type AST = any;
-type GlobalType = any;
+import type { SyncWasmNormalModule } from "./SyncWasmModule";
+import Generator = require("../module/Generator");
+import type { Source } from "webpack-sources";
+/**
+ * Defines the node path type used by this module.
+ */
 type NodePath<T> = any;
+/**
+ * Defines the array buffer transform type used by this module.
+ */
 type ArrayBufferTransform = (buf: ArrayBuffer) => ArrayBuffer;
-type Mapping = Map<string, UsedWasmDependency>;
+type Mapping = Map<string, WebAssemblyUtils.UsedWasmDependency>;
+/**
+ * Represents the web assembly generator runtime component.
+ */
 type WebAssemblyGeneratorOptions = {
-  /**
-   * mangle imports
-   */
-  mangleImports?: boolean | undefined;
+    /**
+     * mangle imports
+     */
+    mangleImports?: boolean | undefined;
 };
+/**
+ * The module type the JSDoc inherited from `Generator` names.
+ */
+type TModule = SyncWasmNormalModule;
+import WebAssemblyUtils = require("./WebAssemblyUtils");

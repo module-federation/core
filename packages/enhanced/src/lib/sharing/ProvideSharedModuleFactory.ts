@@ -8,12 +8,12 @@ import ProvideSharedModule from './ProvideSharedModule';
 import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
-} from 'webpack/lib/ModuleFactory';
+} from 'webpack/lib/module/ModuleFactory';
 import ProvideSharedDependency from './ProvideSharedDependency';
 
 const ModuleFactory = require(
   normalizeWebpackPath('webpack/lib/ModuleFactory'),
-) as typeof import('webpack/lib/ModuleFactory');
+) as typeof import('webpack/lib/module/ModuleFactory');
 
 class ProvideSharedModuleFactory extends ModuleFactory {
   /**

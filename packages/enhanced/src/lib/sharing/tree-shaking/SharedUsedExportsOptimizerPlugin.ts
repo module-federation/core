@@ -1,9 +1,5 @@
-import type {
-  WebpackPluginInstance,
-  Compiler,
-  Dependency,
-  dependencies,
-} from 'webpack';
+import type { WebpackPluginInstance, Compiler, Dependency } from 'webpack';
+import type ESMImportSpecifierDependency from 'webpack/lib/dependencies/esm/ESMImportSpecifierDependency';
 import {
   moduleFederationPlugin,
   type Stats,
@@ -21,7 +17,7 @@ export type CustomReferencedExports = { [sharedName: string]: string[] };
 
 function isHarmonyImportSpecifierDependency(
   dependency: Dependency,
-): dependency is dependencies.HarmonyImportSpecifierDependency {
+): dependency is ESMImportSpecifierDependency {
   return dependency.type === 'harmony import specifier';
 }
 

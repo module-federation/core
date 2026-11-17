@@ -8,7 +8,7 @@ import type {
   RequestShortener,
   ResolverWithOptions,
   WebpackOptions,
-} from 'webpack/lib/Module';
+} from 'webpack/lib/module/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
 declare const Module: typeof import('webpack').Module;
 export type ExposeOptions = {
