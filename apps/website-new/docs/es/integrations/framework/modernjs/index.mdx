@@ -1,0 +1,202 @@
+# Descripción general de la integración con Modern.js
+
+import { Badge } from '@theme';
+
+[Modern.js](https://modernjs.dev/guides/get-started/introduction.html) es un framework de desarrollo web progresivo basado en React. Dentro de ByteDance, Modern.js da soporte al desarrollo de miles de aplicaciones web.
+
+El equipo de Module Federation trabaja estrechamente con el equipo de Modern.js y ofrece tanto `@module-federation/modern-js-v3` como `@module-federation/modern-js` para ayudarte a usar Module Federation en Modern.js.
+
+Te recomendamos actualizar a Modern.js v3 y usar preferentemente `@module-federation/modern-js-v3`.
+
+## Compatibilidad
+
+- Modern.js v3: usa `@module-federation/modern-js-v3` (recomendado)
+- Modern.js v2.56.1 y posteriores: usa `@module-federation/modern-js`
+- Incluye renderizado del lado del servidor (SSR)
+
+Te recomendamos encarecidamente tomar como referencia estas aplicaciones, que muestran las buenas prácticas para integrar Modern.js con Module Federation:
+
+* [Renderizado del lado del servidor (SSR)](https://github.com/module-federation/core/tree/main/apps/modernjs-ssr)
+* [Obtención de datos a nivel de componente](https://github.com/module-federation/core/tree/main/apps/modern-component-data-fetch)
+
+## Inicio rápido
+
+### Instalación
+
+Para Modern.js v3, instala `@module-federation/modern-js-v3`:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/modern-js-v3 --save',
+    yarn: 'yarn add @module-federation/modern-js-v3 --save',
+    pnpm: 'pnpm add @module-federation/modern-js-v3 --save',
+    bun: 'bun add @module-federation/modern-js-v3 --save',
+  }}
+/>
+
+Si todavía usas Modern.js v2, instala `@module-federation/modern-js`:
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/modern-js --save',
+    yarn: 'yarn add @module-federation/modern-js --save',
+    pnpm: 'pnpm add @module-federation/modern-js --save',
+    bun: 'bun add @module-federation/modern-js --save',
+  }}
+/>
+
+### Aplicar el plugin
+
+El siguiente ejemplo usa Modern.js v3. Si todavía usas Modern.js v2, sustituye `@module-federation/modern-js-v3` por `@module-federation/modern-js`.
+
+Aplica este plugin en la sección `plugins` de `modern.config.ts`:
+
+```ts title="modern.config.ts"
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
+
+export default defineConfig({
+  // moduleFederationPlugin is a plugin for modern.js that can make certain modifications to the build/runtime
+  plugins: [appTools(), moduleFederationPlugin()],
+});
+```
+
+A continuación, crea el archivo `module-federation.config.ts` y añade la configuración necesaria:
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
+export default createModuleFederationConfig({
+  name: 'host',
+  remotes: {
+    remote: 'remote@http://localhost:3006/mf-manifest.json',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+```
+
+## Renderizado del lado del servidor (SSR)
+
+:::info Nota
+Para ofrecer un mejor rendimiento, Module Federation y el SSR de Modern.js solo admiten SSR en streaming.
+:::
+
+Usar Module Federation en escenarios SSR no difiere de hacerlo en escenarios CSR; puedes seguir trabajando con tus prácticas de desarrollo habituales.
+
+## Obtención de datos a nivel de componente
+
+Consulta [Obtención de datos](/guide/data/data-fetch.html).
+
+En Modern.js v3, la obtención de datos a nivel de componente está integrada en el plugin `@module-federation/modern-js-v3`, por lo que ya no necesitas instalar `@module-federation/bridge-react` por separado para usarla.
+
+Todas las APIs de obtención de datos se encuentran en `@module-federation/modern-js-v3/data-fetch`. Puedes importarlas y usarlas desde esta subruta.
+
+## Bridge API
+
+Consulta [React Bridge](/guide/bridge/react/getting-started.html).
+
+En Modern.js v3, las Bridge APIs están integradas en el plugin `@module-federation/modern-js-v3`, por lo que ya no necesitas instalar `@module-federation/bridge-react` por separado para usarlas.
+
+Todas las Bridge APIs se encuentran en `@module-federation/modern-js-v3/react`. Puedes importarlas y usarlas desde esta subruta. Si necesitas distinguir explícitamente las llamadas a `createBridgeComponent` para React 18 o React 19, el plugin de Modern.js v3 usa rutas de exportación ligeramente distintas:
+
+```ts
+// @module-federation/modern-js-v3
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react'; // React 16/17
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v18'; // React 18
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v19'; // React 19
+```
+
+## Runtime API
+
+Todas las Runtime APIs de Module Federation se encuentran en `@module-federation/modern-js-v3/runtime`. Puedes importarlas y usarlas desde esta subruta.
+
+
+### createRemoteComponent <Badge type="danger">Obsoleto</Badge>
+
+::: danger
+Esta API está obsoleta. Usa [createLazyComponent](/guide/bridge/react/load-component.html#what-is-createlazycomponent) en su lugar.
+:::
+
+Los parámetros de `createRemoteComponent` y `createLazyComponent` son idénticos. La única diferencia es que `createLazyComponent` debe llamarse a través de una instancia después de registrar el plugin.
+
+```diff
+- import { createRemoteComponent } from '@module-federation/modern-js-v3/runtime';
++ import { getInstance } from '@module-federation/modern-js-v3/runtime';
++ import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/data-fetch';
+
+const instance = getInstance();
+// After registering the lazyLoadComponentPlugin, the instance will automatically add the createLazyComponent API
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+- const LazyComponent = createRemoteComponent({
++ const LazyComponent = instance.createLazyComponent({
+  loader: () => import('remote/Image'),
+  loading: <div>loading...</div>,
+  fallback: ({ error }) => {
+    console.error(error)
+    return <div>fallback</div>;
+  },
+});
+
+const App: FC = () => {
+  return <>
+    <LazyComponent />
+  </>;
+};
+export default App;
+```
+
+### createRemoteSSRComponent <Badge type="danger">Obsoleto</Badge>
+
+::: danger
+Esta API está obsoleta. Usa [createLazyComponent](/guide/bridge/react/load-component.html#createlazycomponent-vs-createremoteappcomponent) en su lugar.
+:::
+
+La migración es igual que la de [createRemoteComponent](#createremotecomponent).
+
+## Configuración
+
+### ssr
+
+- Tipo: `false`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+
+`@module-federation/modern-js-v3` añadirá automáticamente presets de build relacionados con SSR en función de `server.ssr` en la configuración de modern.js.
+
+Si el proyecto actual solo necesita cargar MF en CSR, puedes establecer `ssr: false` para facilitar una migración progresiva.
+
+```ts title='modern.config.ts'
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+  },
+  plugins: [
+    appTools(),
+    moduleFederationPlugin({ ssr: false })
+  ],
+});
+```
+
+### fetchServerQuery
+
+- Tipo: `Record<string, unknown>`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+
+Si se produce una degradación, se enviará una solicitud HTTP al servidor. Esta configuración permite añadir parámetros de consulta a esa solicitud.
+
+## Modern.js v2
+
+Te recomendamos usar Modern.js v3, ya que ofrece un mejor rendimiento y funcionalidades más completas. No obstante, también ofrecemos el plugin [@module-federation/modern-js](https://www.npmjs.com/package/@module-federation/modern-js) para usar Module Federation en proyectos de Modern.js v2.

@@ -1,0 +1,199 @@
+import { PackageManagerTabs } from '@theme';
+
+# Vinext
+
+[Vinext](https://github.com/cloudflare/vinext) 在 Vite 上运行 Next.js 应用，因此 Vinext 应用使用 [`@module-federation/vite`](/integrations/build-tool/vite.html)，而不是 `@module-federation/nextjs-mf`。该方案适用于 App Router：Vinext 宿主应用会在服务端渲染远程组件，并在浏览器中进行水合。
+
+:::info
+远程组件的服务端渲染由 `@module-federation/vite` 提供，而不是 Vinext。Vinext 自带的 [Module Federation 桥接](https://github.com/cloudflare/vinext#module-federation-client-side)仅在浏览器中运行，只负责为远程客户端组件提供 React Hooks，详见[编写远程组件](#write-remote-components)。
+:::
+
+## 支持
+
+- 使用 Next.js App Router 并开启服务端渲染的 Vinext 宿主应用
+- 使用 Vite 构建、与宿主应用共享 React 的远程应用
+- 为自带 React 版本的远程应用提供隔离的 React 岛（island）
+
+## 安装
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/vite',
+    yarn: 'yarn add @module-federation/vite',
+    pnpm: 'pnpm add @module-federation/vite',
+    bun: 'bun add @module-federation/vite',
+  }}
+/>
+
+## 配置远程应用
+
+远程应用是一个 Vite React 应用。需要同时构建 client 和 SSR 两个环境，以便宿主应用能够在服务端渲染导出的组件：
+
+```ts title="remote/vite.config.ts"
+import { federation } from '@module-federation/vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  builder: {},
+  plugins: [
+    federation({
+      name: 'remote',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Widget': './src/widget.tsx',
+      },
+      shared: {
+        react: { singleton: true },
+        'react/': { singleton: true },
+        'react-dom': { singleton: true },
+        'react-dom/': { singleton: true },
+      },
+    }),
+    react(),
+  ],
+  environments: {
+    client: {
+      build: { outDir: 'dist/client' },
+    },
+    ssr: {
+      build: {
+        outDir: 'dist/server',
+        ssr: './src/widget.tsx',
+      },
+    },
+  },
+  build: {
+    target: 'chrome89',
+  },
+  server: {
+    cors: true,
+    origin: 'http://localhost:4174',
+  },
+  preview: {
+    cors: true,
+    port: 4174,
+  },
+});
+```
+
+`react/` 和 `react-dom/` 这两个键用于在宿主应用和远程应用之间共享 `react/jsx-runtime`、`react-dom/client` 等子路径导入。
+
+### 编写远程组件 {#write-remote-components}
+
+仅共享 React 包并不足以让 Hooks 正常工作。远程客户端组件必须通过 `vinext/client` 中的 `getVinextReact()` 读取 Hooks，使其来自宿主应用的 React 实例。在远程应用的依赖中添加 `vinext`，然后：
+
+```tsx title="remote/src/widget.tsx"
+'use client';
+
+import * as React from 'react';
+import { getVinextReact } from 'vinext/client';
+
+const { useState } = getVinextReact(React);
+
+export default function Widget() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount((value) => value + 1)}>{count}</button>;
+}
+```
+
+否则，直接导入 `useState` 或 `useContext` 的组件可能会使用另一个 React 实例，并因无效的 Hook 调用而失败。`getVinextReact()` 不会改写远程应用打包的第三方包中的 React 导入。
+
+## 配置 Vinext 宿主应用
+
+在 `vinext()` 之前添加 `federation()`：
+
+```ts title="host/vite.config.ts"
+import { federation } from '@module-federation/vite';
+import vinext from 'vinext';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    federation({
+      name: 'host',
+      hostInitInjectLocation: 'entry',
+      remotes: {
+        remote: {
+          type: 'module',
+          name: 'remote',
+          entry: 'http://localhost:4174/remoteEntry.js',
+          entryGlobalName: 'remote',
+          shareScope: 'default',
+        },
+      },
+      shared: {
+        react: { singleton: true },
+        'react/': { singleton: true },
+        'react-dom': { singleton: true },
+        'react-dom/': { singleton: true },
+      },
+    }),
+    vinext(),
+  ],
+});
+```
+
+`hostInitInjectLocation: 'entry'` 会将宿主应用的初始化代码注入入口脚本，因为 App Router 应用没有可供插件修改的 `index.html`。
+
+## 加载远程组件
+
+在客户端组件中使用 `React.lazy` 和 `Suspense` 加载远程模块。请使用 `React.lazy` 而不是 `next/dynamic`，这样可以避免联邦组件出现水合错误：
+
+```tsx title="host/app/remote-widget.tsx"
+'use client';
+
+import { lazy, Suspense } from 'react';
+
+const LazyRemoteWidget = lazy(() => import('remote/Widget'));
+
+export function RemoteWidget() {
+  return (
+    <Suspense fallback={<div>Loading remote widget...</div>}>
+      <LazyRemoteWidget />
+    </Suspense>
+  );
+}
+```
+
+然后在任意页面或布局中渲染它：
+
+```tsx title="host/app/page.tsx"
+import { RemoteWidget } from './remote-widget';
+
+export default function Home() {
+  return <RemoteWidget />;
+}
+```
+
+## 隔离的 React 岛
+
+无法与宿主应用共享 React 的远程应用（例如 React 19 宿主应用中的 React 18 远程应用）可以启用岛模式（island mode）。像上文的远程应用一样配置其 client 和 SSR 构建，不要将 `react` 放入 `shared`，并启用 `experiments.ssrMode`：
+
+```ts title="island/vite.config.ts"
+federation({
+  name: 'island',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './Counter': './src/counter.tsx',
+  },
+  experiments: { ssrMode: 'ISLAND' },
+  shared: {},
+});
+```
+
+宿主应用通过带 `?mf-island` 查询参数的方式导入该导出模块，以使用插件提供的 React 适配器。它会在服务端渲染岛的 HTML，并在宿主应用的 React 树之外，使用远程应用自身的 React 进行水合：
+
+```tsx title="host/app/page.tsx"
+import RemoteIsland from 'island/Counter?mf-island';
+
+export default function Home() {
+  return <RemoteIsland />;
+}
+```
+
+不带查询参数导入 `island/Counter` 时，仍会返回原始组件。
+
+## 示例
+
+- [Vinext 宿主应用、共享远程应用与岛](https://github.com/gioboa/module-federation-vite-examples/tree/main/vinext)：Vinext + Next.js 16 + React 19 宿主应用，搭配一个共享远程应用和一个 React 18 岛

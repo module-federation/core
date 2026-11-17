@@ -1,0 +1,70 @@
+## Generar un artefacto shared secundario con tree shaking
+
+:::warning Nota
+Si tu objetivo es "aplicar tree shaking a una dependencia shared para una sola aplicación", normalmente basta con [usedExports](/configure/shared.html#usedexports).
+
+Esta sección trata sobre cómo generar un artefacto secundario independiente que puede cargarse bajo demanda en runtime y que puede distribuirse o reutilizarse desde el lado del despliegue.
+:::
+
+Este proceso solo construye las dependencias shared; los remotes no tendrán efecto. La entrada original del proyecto se ignora automáticamente durante el build y solo se empaquetan los módulos shared.
+
+### Proyectos que no son Modern.js
+
+Usa `TreeShakingSharedPlugin` en tu configuración de build, establece `secondary: true` y reutiliza tu `mfConfig` existente.
+
+import { Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="@module-federation/enhanced">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/enhanced';
+  // import { TreeShakingSharedPlugin } from '@module-federation/enhanced/rspack';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="@module-federation/rsbuild-plugin">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/rsbuild-plugin';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="Integrado en Rspack">
+  ```ts
+  import { sharing } from '@rspack/core';
+  const { TreeShakingSharedPlugin } = sharing;
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+</Tab>
+</Tabs>
+
+### Proyectos Modern.js
+
+Cuando uses `@module-federation/modern-js-v3`, habilita `secondarySharedTreeShaking: true` en las opciones del plugin para generar el artefacto secundario.
+
+```ts title="modern.config.ts"
+import mfPlugin from '@module-federation/modern-js-v3';
+// ...
+plugins: [
+  mfPlugin({
+    secondarySharedTreeShaking: true,
+  }),
+];
+```

@@ -24,9 +24,7 @@ import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { getFederationGlobalScope } from './runtime/utils';
 
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
+import makeSerializable from '../makeSerializable';
 const {
   sources: webpackSources,
   AsyncDependenciesBlock,
