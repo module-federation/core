@@ -141,9 +141,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       'target' in experiments.optimization
     ) {
       const manualTarget = experiments.optimization.target as
-        | 'web'
-        | 'node'
-        | undefined;
+        'web' | 'node' | undefined;
       // Ensure the target is one of the expected values before setting
       if (manualTarget === 'web' || manualTarget === 'node') {
         definePluginOptions['ENV_TARGET'] = JSON.stringify(manualTarget);
