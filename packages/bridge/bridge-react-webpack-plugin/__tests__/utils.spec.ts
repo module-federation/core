@@ -26,6 +26,10 @@ const resolveRouterV7_PkgPath = path.resolve(
   __dirname,
   '../__tests__/mockRouterDir/router-v7/react-router/package.json',
 );
+const resolveRouterV8 = path.resolve(
+  __dirname,
+  '../__tests__/mockRouterDir/router-v8/react-router',
+);
 
 describe('test checkVersion: should return the correct major version for react-router-dom', () => {
   it('should return 5', () => {
@@ -107,5 +111,23 @@ describe('test getBridgeRouterAlias: should return the correct alias for react-r
       'react-router/dist/production/index.js': resolveRouterV7,
       'react-router-dom/dist/index.js': resolveRouterV7,
     });
+  });
+
+  it('should alias the entry file for router v8, which has no main field', () => {
+    const v7Proxy = '@module-federation/bridge-react/dist/router-v7.es.js';
+    const aliasFor = (entry: string) => ({
+      'react-router$': v7Proxy,
+      'react-router-dom$': v7Proxy,
+      'react-router/dist/development/index.js': entry,
+      'react-router/dist/production/index.js': entry,
+      'react-router-dom/dist/index.js': entry,
+    });
+
+    expect(getBridgeRouterAlias(resolveRouterV8)).toEqual(
+      aliasFor(path.join(resolveRouterV8, 'dist/production/index.js')),
+    );
+    expect(getBridgeRouterAlias(resolveRouterV8, 'development')).toEqual(
+      aliasFor(path.join(resolveRouterV8, 'dist/development/index.js')),
+    );
   });
 });
