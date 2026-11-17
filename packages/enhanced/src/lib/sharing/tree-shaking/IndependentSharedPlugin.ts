@@ -192,7 +192,9 @@ export default class IndependentSharedPlugin {
   private createEntry(context: string) {
     const { sharedOptions } = this;
     const entryContent = sharedOptions.reduce((acc, cur, index) => {
-      return `${acc}import shared_${index} from '${cur[0]}';\n`;
+      // A namespace import pulls the package in without assuming it has a
+      // default export, which webpack 5.112 reports as missing.
+      return `${acc}import * as shared_${index} from '${cur[0]}';\n`;
     }, '');
     const entryPath = path.resolve(
       context,
