@@ -102,7 +102,9 @@ describe('Webpack internal layout compatibility (real module resolution)', () =>
       path.join(sdkRoot, 'sdk.cjs'),
     );
     for (const [request, source] of Object.entries(webpackFiles)) {
-      const file = path.join(callerRoot, request) + '.js';
+      const file =
+        path.join(callerRoot, request) +
+        (request.endsWith('.json') ? '' : '.js');
       mkdirSync(path.dirname(file), { recursive: true });
       writeFileSync(file, source);
     }
@@ -119,6 +121,15 @@ describe('Webpack internal layout compatibility (real module resolution)', () =>
       execFileSync(process.execPath, [caller], { encoding: 'utf8', env }),
     );
   };
+  // A webpack package at `dir`: a manifest and an entry, as installed.
+  const webpackPackage = (dir: string, exports?: Record<string, string>) => ({
+    [`${dir}/package.json`]: JSON.stringify({
+      name: 'webpack',
+      main: './lib/index.js',
+      ...(exports && { exports }),
+    }),
+    [`${dir}/lib/index`]: 'module.exports = {};',
+  });
   const resolveScript = `Error.stackTraceLimit = 0;
     const normalized = sdk.normalizeWebpackPath(${JSON.stringify(oldPath)});
     console.log(JSON.stringify([normalized, require(normalized)]));`;
@@ -138,13 +149,37 @@ describe('Webpack internal layout compatibility (real module resolution)', () =>
       isolatedCaller(
         'hoisted',
         {
+          ...webpackPackage('node_modules/webpack'),
           [`node_modules/${oldPath}`]: 'module.exports = "hoisted old";',
+          ...webpackPackage('packages/plugin/node_modules/webpack'),
           [`packages/plugin/node_modules/${newPath}`]:
             'module.exports = "nearest new";',
         },
         resolveScript,
       ),
     ).toEqual([newPath, 'nearest new']);
+  });
+
+  it('keeps an old path that the nearest Webpack exports', () => {
+    // The package maps the old path to its relocated file, so no file exists
+    // at the old location, and an older copy is hoisted above it.
+    expect(
+      isolatedCaller(
+        'exports-map',
+        {
+          ...webpackPackage('node_modules/webpack'),
+          [`node_modules/${oldPath}`]: 'module.exports = "hoisted old";',
+          ...webpackPackage('packages/plugin/node_modules/webpack', {
+            '.': './lib/index.js',
+            './lib/util/extractUrlAndGlobal':
+              './lib/externals/extractUrlAndGlobal.js',
+          }),
+          [`packages/plugin/node_modules/${newPath}`]:
+            'module.exports = "nearest exported";',
+        },
+        resolveScript,
+      ),
+    ).toEqual([oldPath, 'nearest exported']);
   });
 
   it('reports no compiler path for a bundled compiler', () => {
