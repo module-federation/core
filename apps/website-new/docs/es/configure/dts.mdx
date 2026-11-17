@@ -1,0 +1,394 @@
+# dts
+
+- Tipo: `boolean | PluginDtsOptions`
+- Obligatorio: No
+- Valor por defecto: `true`
+- Escenario de uso: se usa para controlar el comportamiento de generación/consumo de tipos de <code>{props.brandName || props.name || 'Module Federation'}</code>
+
+Una vez configurado, el producer genera automáticamente durante el build un archivo comprimido de tipos `@mf-types.zip` (nombre por defecto), y el consumer descarga automáticamente el archivo de tipos de los `remotes` y lo descomprime en `@mf-types` (nombre por defecto).
+
+Los tipos de `PluginDtsOptions` son los siguientes:
+
+```ts
+interface PluginDtsOptions {
+  generateTypes?: boolean | DtsRemoteOptions;
+  consumeTypes?: boolean | DtsHostOptions;
+  tsConfigPath?: string;
+  cwd?: string;
+}
+```
+
+## generateTypes
+
+- Tipo: `boolean | DtsRemoteOptions`
+- Obligatorio: No
+- Valor por defecto: `true`
+- Escenario de uso: se usa para controlar el comportamiento de generación de tipos de `Module Federation`
+
+Los tipos de `DtsRemoteOptions` son los siguientes:
+
+```ts
+interface DtsRemoteOptions {
+  tsConfigPath?: string;
+  typesFolder?: string;
+  outputDir?: string;
+  deleteTypesFolder?: boolean;
+  additionalFilesToCompile?: string[];
+  compilerInstance?: 'tsc' | 'vue-tsc';
+  compileInChildProcess?: boolean;
+  generateAPITypes?: boolean;
+  extractThirdParty?: boolean;
+  extractRemoteTypes?: boolean;
+  abortOnError?: boolean;
+  deleteTsConfig?: boolean;
+  afterGenerate?: (
+    options: DtsGenerateTypesHookOptions,
+  ) => Promise<void> | void;
+}
+
+interface DtsGenerateTypesHookOptions {
+  zipTypesPath: string;
+  apiTypesPath: string;
+  zipName: string;
+  apiFileName: string;
+}
+```
+
+Al establecer `generateTypes` en `true`, se genera por defecto la siguiente configuración:
+
+```json
+{
+  "generateAPITypes": true,
+  "abortOnError": false,
+  "extractThirdParty": false,
+  "extractRemoteTypes": false,
+  "compileInChildProcess": true,
+  "deleteTsConfig": true
+}
+```
+
+### extractRemoteTypes
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+- Escenario de uso: cuando el contenido de `exposes` del producer tiene su propio módulo de `remotes` que se reexporta a sí mismo, `extractRemoteTypes: true` garantiza que el consumer pueda obtener correctamente el tipo de los módulos de `exposes` del producer
+- Ejemplo: [Reexportación de tipos anidados](/guide/basic/type-prompt.html#nested-type-re-export)
+
+Indica si se extraen los tipos de `remotes`.
+
+### extractThirdParty
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+- Escenario de uso: cuando el contenido de `exposes` del producer incluye un módulo que contiene `antd` y el consumer no tiene `antd` instalado, `extractThirdParty: true` garantiza que el consumer pueda obtener correctamente el tipo de los módulos de `exposes` del producer
+- Ejemplo: [Extracción de tipos de paquetes de terceros](/guide/basic/type-prompt.html#third-party-package-type-extraction)
+
+Indica si se extraen los tipos de paquetes de terceros.
+
+### generateAPITypes
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+- Ejemplo: [Sugerencias de tipos de la API de Federation Runtime](/guide/basic/type-prompt.html#federation-runtime-api-type-prompt)
+
+Indica si se genera el tipo de `loadRemote` en `Federation Runtime`
+
+### compileInChildProcess
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+
+Indica si los tipos se generan en un proceso hijo
+
+### abortOnError
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Indica si se lanza un error cuando surge un problema durante la generación de tipos
+
+### afterGenerate
+
+- Tipo: `(options: DtsGenerateTypesHookOptions) => Promise<void> | void`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+
+Se ejecuta después de generar los tipos federados y antes de emitir los archivos generados.
+
+```ts title="module-federation.config.ts"
+new ModuleFederationPlugin({
+  dts: {
+    generateTypes: {
+      afterGenerate({ zipTypesPath, apiTypesPath }) {
+        console.log('zip types:', zipTypesPath);
+        console.log('api types:', apiTypesPath);
+      },
+    },
+  },
+});
+```
+
+### tsConfigPath
+
+- Tipo: `string`
+- Obligatorio: No
+- Valor por defecto: `path.join(process.cwd(),'./tsconfig.json')`
+> prioridad: dts.generateTypes.tsConfigPath > dts.tsConfigPath
+Ruta del archivo de configuración tsconfig
+
+### outputDir
+
+- Tipo: `string`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+
+Directorio base de salida personalizado para los artefactos de tipos generados.
+
+Si no se define esta opción, Module Federation emite `@mf-types.zip` y
+`@mf-types.d.ts` en relación con el directorio de salida del bundler. Si tu remote entry
+se emite en un subdirectorio anidado como `production/remoteEntry.js`, establece
+`dts.generateTypes.outputDir` en ese mismo directorio de salida anidado para que los
+artefactos de tipos se emitan junto al archivo de entrada.
+
+Así, las URL de tipos inferidas por defecto se mantienen alineadas con la ruta del remote entry, de modo que
+los consumers normalmente no necesitan `remoteTypeUrls` solo porque el remote entry se
+sirva desde un subdirectorio.
+
+```ts title="module-federation.config.ts"
+new ModuleFederationPlugin({
+  filename: 'production/remoteEntry.js',
+  dts: {
+    generateTypes: {
+      outputDir: `dist/react/${process.env.DEPLOY_ENVIRONMENT || 'production'}`,
+    },
+  },
+});
+```
+
+Con la configuración anterior, los archivos generados se emiten en
+`dist/react/production/@mf-types.zip` y
+`dist/react/production/@mf-types.d.ts`.
+
+### typesFolder
+
+- Tipo: `string`
+- Obligatorio: No
+- Valor por defecto: `'@mf-types'`
+
+Nombre del archivo comprimido de tipos generado. Por ejemplo, si typesFolder se establece en `custom`, el archivo comprimido de tipos generado se llamará: `custom.zip`
+
+### deleteTypesFolder
+
+- Tipo: `boolean`
+- Obligatorio: No
+  -Valor por defecto: `true`
+
+Indica si se elimina la carpeta de tipos generada
+
+### compilerInstance
+
+- Tipo: `'tsc' | 'tsgo' | 'vue-tsc' | 'tspc' | string`
+- Obligatorio: No
+- Valor por defecto: `'tsc'`
+
+Instancia del compilador de tipos
+
+### deleteTsConfig
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `true`
+
+Indica si se elimina el archivo de configuración tsconfig temporal.
+
+## consumeTypes
+
+- Tipo: `boolean | DtsHostOptions`
+- Obligatorio: No
+- Valor por defecto: `true`
+- Escenario de uso: se usa para controlar el comportamiento de consumo (carga) de tipos de `Module Federation`
+
+Los tipos de `DtsHostOptions` son los siguientes:
+
+```ts
+interface DtsHostOptions {
+  typesFolder?: string;
+  abortOnError?: boolean;
+  remoteTypesFolder?: string;
+  deleteTypesFolder?: boolean;
+  maxRetries?: number;
+  consumeAPITypes?: boolean;
+  family?: 0 | 4 | 6;
+}
+```
+
+Al establecer `consumeTypes` en `true`, se genera por defecto la siguiente configuración:
+
+```json
+{
+  "abortOnError": false,
+  "consumeAPITypes": true
+}
+```
+
+### consumeAPITypes
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `true`
+- Ejemplo: [Sugerencias de tipos de la API de Federation Runtime](/guide/basic/type-prompt.html#federation-runtime-api-type-prompt)
+
+Indica si se genera el tipo de la API `loadRemote` del runtime
+
+### maxRetries
+
+- Tipo: `number`
+- Obligatorio: No
+- Valor por defecto: `3`
+
+Número máximo de reintentos cuando falla la carga
+
+### abortOnError
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Indica si se lanza un error cuando surge un problema durante la carga de tipos
+
+### typesFolder
+
+- Tipo: `string`
+- Obligatorio: No
+- Valor por defecto: `'@mf-types'`
+
+Directorio donde se almacenan los tipos tras una carga correcta
+
+### deleteTypesFolder
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `true`
+
+Indica si, antes de cargar los archivos de tipos, se elimina el directorio `typesFolder` cargado previamente
+
+### remoteTypesFolder
+
+- Tipo: `string`
+- Obligatorio: No
+- Valor por defecto: `'@mf-types'`
+
+Configuración del directorio `typesFolder` correspondiente a los `remotes`
+
+### remoteTypeUrls
+
+- Tipo: `(() => Promise<RemoteTypeUrls>) | RemoteTypeUrls`
+- Obligatorio: No
+- Valor por defecto:`undefined`
+
+Se usa para obtener la dirección del archivo de tipos del `remote`.
+
+Escenarios de aplicación:
+
+* Solo se usa la API de runtime para cargar el producer, sin ningún plugin de build. Para indicar la dirección del archivo de tipos de MF, crea un archivo de configuración `module-federation.config.ts` y define esta opción.
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig, type moduleFederationPlugin } from '@module-federation/enhanced';
+
+export default createModuleFederationConfig({
+  // ...
+  remotes: {
+    'remote1-alias': 'remote1@http://localhost:80801/remoteEntry.js'
+  },
+  dts:{
+    consumeTypes:{
+      remoteTypeUrls: async()=>{
+        // Simulate the request interface to obtain the type file address
+        const data = await new Promise<moduleFederationPlugin.RemoteTypeUrls>(resolve=>{
+          setTimeout(()=>{
+            resolve({
+              remote1:{
+                alias: 'remote1-alias',
+                api:'http://localhost:8081/custom-dir/@mf-types.d.ts',
+                zip:'http://localhost:8081/custom-dir/@mf-types.zip'
+              }
+            } )
+          },1000)
+        });
+
+        return data;
+      }
+    }
+  }
+});
+```
+
+
+* Cuando el remote es `remoteEntry.js`, la dirección del archivo de tipos suele obtenerse sustituyendo directamente el archivo js por el archivo de tipos correspondiente, como `@mf-types.zip`. Si la dirección real del archivo de tipos subido no es esa, puedes indicarle a MF la dirección real mediante esta opción.
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/enhanced';
+
+export default createModuleFederationConfig({
+  // ...
+  remotes: {
+    'remote1-alias': 'remote1@http://localhost:80801/remoteEntry.js'
+  },
+  dts:{
+    consumeTypes:{
+      remoteTypeUrls: {
+        // remote name
+        remote1:{
+          alias: 'remote1-alias',
+          api:'http://localhost:8081/custom-dir/@mf-types.d.ts',
+          zip:'http://localhost:8081/custom-dir/@mf-types.zip'
+        }
+      }
+    }
+  }
+});
+```
+
+### family
+
+- Tipo: `0 | 4 | 6`
+- Obligatorio: No
+- Valor por defecto: `0`
+
+Configura la familia de versiones de IP que se usará en las operaciones de red.
+
+### typesOnBuild
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Por defecto, Module Federation no carga archivos de tipos en producción ( process.env.NODE_ENV === 'production' ). Para habilitar la carga de tipos en los builds de producción, establece typesOnBuild en true .
+
+## tsConfigPath
+
+- Tipo: `string`
+- Obligatorio: No
+- Valor por defecto: `path.join(process.cwd(),'./tsconfig.json')`
+
+Ruta del archivo de configuración tsconfig
+
+## cwd
+
+- Tipo: `string`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+
+Directorio de trabajo en el que se ejecuta el compilador
+
+## displayErrorInTerminal
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `true`
+
+Indica si se imprime el log de errores en la terminal

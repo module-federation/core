@@ -37,6 +37,7 @@ import ProvideForSharedDependency from './ProvideForSharedDependency';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
+import type { InputFileSystem } from 'webpack/lib/util/fs';
 import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
 import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
 import type { ConsumeOptions } from '@module-federation/sdk';
@@ -79,6 +80,25 @@ const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
   dependencyType: 'esm',
 };
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
+
+function getPackageVersion(
+  fs: InputFileSystem,
+  resource: string,
+  packageName: string,
+): Promise<string | undefined> {
+  return new Promise((resolve) => {
+    getDescriptionFile(
+      fs,
+      path.dirname(resource),
+      ['package.json'],
+      (err, result) => resolve(err ? undefined : result?.data['version']),
+      (result) =>
+        !!result &&
+        typeof result.data['version'] === 'string' &&
+        result.data['name'] === packageName,
+    );
+  });
+}
 
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
@@ -170,7 +190,7 @@ class ConsumeSharedPlugin {
     context: string,
     request: string,
     config: ConsumeOptions,
-  ): Promise<ConsumeSharedModule> {
+  ): Promise<ConsumeSharedModule | undefined> {
     const requiredVersionWarning = (details: string) => {
       const error = new WebpackError(
         `No required version specified and unable to automatically determine one. ${details}`,
@@ -180,6 +200,11 @@ class ConsumeSharedPlugin {
     };
     const directFallback =
       config.import && DIRECT_FALLBACK_REGEX.test(config.import);
+    const packageName =
+      config.packageName ??
+      (ABSOLUTE_PATH_REGEX.test(request)
+        ? undefined
+        : PACKAGE_NAME_REGEX.exec(request)?.[0]);
 
     const resolver: ResolverWithOptions = compilation.resolverFactory.get(
       'normal',
@@ -226,21 +251,13 @@ class ConsumeSharedPlugin {
         if (config.requiredVersion !== undefined) {
           return resolve(config.requiredVersion);
         }
-        let packageName = config.packageName;
         if (packageName === undefined) {
-          if (ABSOLUTE_PATH_REGEX.test(request)) {
-            // For relative or absolute requests we don't automatically use a packageName.
-            // If wished one can specify one with the packageName option.
-            return resolve(undefined);
-          }
-          const match = PACKAGE_NAME_REGEX.exec(request);
-          if (!match) {
+          if (!ABSOLUTE_PATH_REGEX.test(request)) {
             requiredVersionWarning(
               'Unable to extract the package name from request.',
             );
-            return resolve(undefined);
           }
-          packageName = match[0];
+          return resolve(undefined);
         }
 
         getDescriptionFile(
@@ -308,145 +325,84 @@ class ConsumeSharedPlugin {
         currentConfig,
       );
 
-      // Check for include version first
-      if (config.include && typeof config.include.version === 'string') {
-        if (!importResolved) {
+      const { include, exclude } = config;
+      if (include && typeof include.version === 'string') {
+        if (!importResolved || packageName === undefined) {
           return consumedModule;
         }
-
-        return new Promise((resolveFilter) => {
-          getDescriptionFile(
-            compilation.inputFileSystem,
-            path.dirname(importResolved as string),
-            ['package.json'],
-            (err, result) => {
-              if (err) {
-                return resolveFilter(consumedModule);
-              }
-              const { data } = result || {};
-              if (!data || !data['version'] || data['name'] !== request) {
-                return resolveFilter(consumedModule);
-              }
-
-              // Only include if version satisfies the include constraint
-              if (
-                config.include &&
-                satisfy(
-                  parseRange(config.include.version as string),
-                  data['version'],
-                )
-              ) {
-                // Validate singleton usage with include.version
-                if (
-                  config.include &&
-                  config.include.version &&
-                  config.singleton
-                ) {
-                  addSingletonFilterWarning(
-                    compilation,
-                    config.shareKey || request,
-                    'include',
-                    'version',
-                    config.include.version,
-                    request, // moduleRequest
-                    importResolved, // moduleResource (might be undefined)
-                  );
-                }
-
-                return resolveFilter(consumedModule);
-              }
-
-              // Check fallback version
-              if (
-                config.include &&
-                typeof config.include.fallbackVersion === 'string' &&
-                config.include.fallbackVersion
-              ) {
-                if (
-                  satisfy(
-                    parseRange(config.include.version as string),
-                    config.include.fallbackVersion,
-                  )
-                ) {
-                  return resolveFilter(consumedModule);
-                }
-                return resolveFilter(
-                  undefined as unknown as ConsumeSharedModule,
-                );
-              }
-
-              return resolveFilter(undefined as unknown as ConsumeSharedModule);
-            },
-          );
+        const includeVersion = include.version;
+        return getPackageVersion(
+          compilation.inputFileSystem,
+          importResolved,
+          packageName,
+        ).then((version) => {
+          if (!version) {
+            return consumedModule;
+          }
+          if (satisfy(parseRange(includeVersion), version)) {
+            if (config.singleton) {
+              addSingletonFilterWarning(
+                compilation,
+                config.shareKey || request,
+                'include',
+                'version',
+                includeVersion,
+                request,
+                importResolved,
+              );
+            }
+            return consumedModule;
+          }
+          if (
+            typeof include.fallbackVersion === 'string' &&
+            include.fallbackVersion &&
+            satisfy(parseRange(includeVersion), include.fallbackVersion)
+          ) {
+            return consumedModule;
+          }
+          return undefined;
         });
       }
 
-      // Check for exclude version (existing logic)
-      if (config.exclude && typeof config.exclude.version === 'string') {
+      if (exclude && typeof exclude.version === 'string') {
         if (!importResolved) {
           return consumedModule;
         }
-
+        const excludeVersion = exclude.version;
         if (
-          config.exclude &&
-          typeof config.exclude.fallbackVersion === 'string' &&
-          config.exclude.fallbackVersion
+          typeof exclude.fallbackVersion === 'string' &&
+          exclude.fallbackVersion
         ) {
-          if (
-            satisfy(
-              parseRange(config.exclude.version),
-              config.exclude.fallbackVersion,
-            )
-          ) {
-            return undefined as unknown as ConsumeSharedModule;
-          }
+          return satisfy(parseRange(excludeVersion), exclude.fallbackVersion)
+            ? undefined
+            : consumedModule;
+        }
+        if (packageName === undefined) {
           return consumedModule;
         }
-
-        return new Promise((resolveFilter) => {
-          getDescriptionFile(
-            compilation.inputFileSystem,
-            path.dirname(importResolved as string),
-            ['package.json'],
-            (err, result) => {
-              if (err) {
-                return resolveFilter(consumedModule);
-              }
-              const { data } = result || {};
-              if (!data || !data['version'] || data['name'] !== request) {
-                return resolveFilter(consumedModule);
-              }
-
-              if (
-                config.exclude &&
-                typeof config.exclude.version === 'string' &&
-                satisfy(parseRange(config.exclude.version), data['version'])
-              ) {
-                return resolveFilter(
-                  undefined as unknown as ConsumeSharedModule,
-                );
-              }
-
-              // Validate singleton usage with exclude.version
-              if (
-                config.exclude &&
-                config.exclude.version &&
-                config.singleton
-              ) {
-                addSingletonFilterWarning(
-                  compilation,
-                  config.shareKey || request,
-                  'exclude',
-                  'version',
-                  config.exclude.version,
-                  request, // moduleRequest
-                  importResolved, // moduleResource (might be undefined)
-                );
-              }
-
-              return resolveFilter(consumedModule);
-            },
-          );
+        return getPackageVersion(
+          compilation.inputFileSystem,
+          importResolved,
+          packageName,
+        ).then((version) => {
+          if (!version) {
+            return consumedModule;
+          }
+          if (satisfy(parseRange(excludeVersion), version)) {
+            return undefined;
+          }
+          if (config.singleton) {
+            addSingletonFilterWarning(
+              compilation,
+              config.shareKey || request,
+              'exclude',
+              'version',
+              excludeVersion,
+              request,
+              importResolved,
+            );
+          }
+          return consumedModule;
         });
       }
 
