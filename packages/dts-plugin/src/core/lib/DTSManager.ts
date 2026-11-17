@@ -305,10 +305,26 @@ class DTSManager {
     }
     try {
       const url = apiTypeUrl;
-      const res = await nativeFetch(url, {
-        timeout: hostOptions.timeout,
-        family: hostOptions.family,
-      });
+      let res: Awaited<ReturnType<typeof nativeFetch>>;
+      for (let attempt = 1; ; attempt++) {
+        try {
+          res = await nativeFetch(url, {
+            timeout: hostOptions.timeout,
+            family: hostOptions.family,
+          });
+          break;
+        } catch (err) {
+          if (attempt < hostOptions.maxRetries) {
+            fileLog(
+              `Retrying "${remoteInfo.name}" api types download, ${err}`,
+              'downloadAPITypes',
+              'error',
+            );
+            continue;
+          }
+          throw err;
+        }
+      }
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
         REMOTE_ALIAS_IDENTIFIER,

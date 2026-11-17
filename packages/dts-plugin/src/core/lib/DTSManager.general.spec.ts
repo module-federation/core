@@ -440,6 +440,58 @@ describe('DTSManager General Tests', () => {
       expect(dtsManager.loadedRemoteAPIAlias.has('test-alias')).toBe(true);
     });
 
+    it('should retry a failed download', async () => {
+      const remoteInfo: Required<RemoteInfo> = {
+        name: 'test',
+        url: 'http://example.com/remote',
+        alias: 'test-alias',
+        zipUrl: 'http://example.com/types.zip',
+        apiTypeUrl: 'http://example.com/api.d.ts',
+      };
+
+      const fetchSpy = rs
+        .spyOn(utils, 'nativeFetch')
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockResolvedValueOnce({
+          data: "export type RemoteKeys = 'REMOTE_ALIAS_IDENTIFIER/Component';",
+          status: 200,
+          headers: {},
+        } as any);
+
+      // @ts-expect-error only need maxRetries
+      await dtsManager.downloadAPITypes(remoteInfo, '/tmp/types', {
+        maxRetries: 3,
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      const content = rs.mocked(fs.writeFileSync).mock.calls[0][1] as string;
+      expect(content).toContain('test-alias/Component');
+    });
+
+    it('should stop retrying after maxRetries attempts', async () => {
+      const remoteInfo: Required<RemoteInfo> = {
+        name: 'test',
+        url: 'http://example.com/remote',
+        alias: 'test-alias',
+        zipUrl: 'http://example.com/types.zip',
+        apiTypeUrl: 'http://example.com/api.d.ts',
+      };
+
+      const fetchSpy = rs
+        .spyOn(utils, 'nativeFetch')
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockRejectedValueOnce(new Error('Network error'));
+
+      // @ts-expect-error only need maxRetries
+      await dtsManager.downloadAPITypes(remoteInfo, '/tmp/types', {
+        maxRetries: 3,
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
+      expect(fs.writeFileSync).not.toHaveBeenCalled();
+    });
+
     it('should handle missing apiTypeUrl', async () => {
       const remoteInfo: Required<RemoteInfo> = {
         name: 'test',
