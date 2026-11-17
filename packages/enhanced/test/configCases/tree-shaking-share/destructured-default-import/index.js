@@ -3,16 +3,21 @@ const path = __non_webpack_require__('path');
 
 __webpack_require__.p = 'PUBLIC_PATH';
 
+// Webpack before 5.80 does not record the properties a destructuring reads,
+// so it reports only the default export, which keeps it whole.
+const expectedUsedExports = supportsWebpackFeature('destructuredImportTracking')
+  ? ['Button', 'default']
+  : ['default'];
+
 it('reads a destructured property of a shared default import', async () => {
   const app = await import('./App.js');
   expect(app.default()).toEqual('Button');
 });
 
 it('records destructured properties as used export names', () => {
-  expect(__webpack_require__.federation.usedExports['ui-lib'].sort()).toEqual([
-    'Button',
-    'default',
-  ]);
+  expect(__webpack_require__.federation.usedExports['ui-lib'].sort()).toEqual(
+    expectedUsedExports,
+  );
 });
 
 it('writes the destructured export names to the stats manifest', () => {
@@ -20,5 +25,5 @@ it('writes the destructured export names to the stats manifest', () => {
   const statsContent = JSON.parse(fs.readFileSync(statsPath, 'utf-8'));
   expect(
     statsContent.shared.find((s) => s.name === 'ui-lib').usedExports.sort(),
-  ).toEqual(['Button', 'default']);
+  ).toEqual(expectedUsedExports);
 });
