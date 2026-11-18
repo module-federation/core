@@ -5,6 +5,7 @@ import {
   isManifestProvider,
   getResourceUrl,
   isBrowserEnvValue,
+  disambiguateSharedScopes,
 } from '@module-federation/sdk';
 import {
   EntryAssets,
@@ -276,7 +277,7 @@ export function generatePreloadAssets(
         });
       }
     };
-    remoteSnapshot.shared.forEach((shared) => {
+    disambiguateSharedScopes(remoteSnapshot.shared).forEach((shared) => {
       const shareInfos = options.shared?.[shared.sharedName];
       if (!shareInfos) {
         return;
@@ -290,11 +291,7 @@ export function generatePreloadAssets(
             s.scope.some((scope) => snapshotScopes.includes(scope))),
       );
 
-      if (!sharedOptions) {
-        return;
-      }
-      const arrayShareInfo = arrayOptions(sharedOptions);
-      arrayShareInfo.forEach((s) => {
+      sharedOptions.forEach((s) => {
         collectSharedAssets(s, shared);
       });
     });

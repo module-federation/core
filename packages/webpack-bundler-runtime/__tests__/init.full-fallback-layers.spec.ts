@@ -95,6 +95,45 @@ it('keeps legacy unlayered fallback tuples executable', async () => {
   expect(factory()).toBe('legacy');
 });
 
+it.each([false, true])(
+  'preserves scalar and ordered fallback identities (reverse=%s)',
+  async (reverse) => {
+    const variants: NonNullable<Federation['sharedFallback']>[string] = [
+      ['scalar.js', '1.0.0', 'scalar', { shareScope: 'default' }],
+      ['ordered.js', '1.0.0', 'ordered', { shareScope: ['default'] }],
+    ];
+    const webpackRequire = {
+      p: '/',
+      federation: {
+        sharedFallback: { pkg: reverse ? variants.reverse() : variants },
+        runtime: {
+          getRemoteEntry: async ({
+            remoteInfo,
+          }: {
+            remoteInfo: { entry: string };
+          }) => ({
+            init: async () => undefined,
+            get: () => () => remoteInfo.entry,
+          }),
+        },
+      },
+    } as unknown as WebpackRequire;
+    for (const [scope, expected] of [
+      ['default', '/scalar.js'],
+      [['default'], '/ordered.js'],
+    ] as [string | string[], string][]) {
+      const get = getSharedFallbackGetter({
+        shareKey: 'pkg',
+        version: '1.0.0',
+        scope,
+        factory: () => () => 'local',
+        webpackRequire,
+      });
+      expect((await get())()).toBe(expected);
+    }
+  },
+);
+
 it('keeps a local provider when only another identity has a full fallback', () => {
   const webpackRequire = {
     federation: {

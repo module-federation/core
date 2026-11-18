@@ -224,6 +224,7 @@ export interface Federation {
   initOptions?: InitOptions;
   installInitialConsumes?: (options: InstallInitialConsumesOptions) => any;
   bundlerRuntime?: {
+    supportsSharedIdentity?: boolean;
     remotes: (options: RemotesOptions) => void;
     consumes: (options: ConsumesOptions) => void;
     I: typeof initializeSharing;
