@@ -441,8 +441,13 @@ function createConsumer<P extends object>(
               delayLoading={options.delayLoading}
               remoteProps={props}
             />
-          ) : resource.Hydrate ? (
-            React.createElement(resource.Hydrate, props)
+          ) : environment.target === 'browser' ? (
+            <environment.BrowserRemote
+              resource={resource}
+              loading={options.loading ?? null}
+              delayLoading={options.delayLoading}
+              remoteProps={props}
+            />
           ) : (
             React.createElement(
               resource.Lazy,
@@ -488,6 +493,7 @@ export function createReactRemoteComponentFactory(
 
 interface BrowserEnvironment {
   target: 'browser';
+  BrowserRemote: React.ComponentType<any>;
   instanceId?: string;
   serverBridge?: {
     moduleName: string;

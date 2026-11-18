@@ -215,3 +215,68 @@ it.each([false, true])(
     }
   },
 );
+
+it('hydrates ordinary remote DOM and state instead of replacing it with client loading', async () => {
+  function Counter() {
+    const [count, setCount] = React.useState(0);
+    return <button onClick={() => setCount(count + 1)}>count: {count}</button>;
+  }
+  const server = remoteRuntime({ default: Counter }, 'component');
+  const Server = createServerReactRemote({
+    instance: server.instance,
+    remote: server.remote,
+  });
+  const input = new PassThrough();
+  let html = '';
+  input.on('data', (chunk) => (html += chunk.toString()));
+  const ended = new Promise<void>((resolve) => input.on('end', resolve));
+  const stream = renderToPipeableStream(<Server />, {
+    onAllReady: () => stream.pipe(input),
+  });
+  await ended;
+  const dom = new JSDOM(`<div id="host">${html}</div>`, {
+    url: 'https://host.test/',
+  });
+  Object.assign(globalThis, {
+    window: dom.window,
+    document: dom.window.document,
+    location: dom.window.location,
+  });
+  let root: Root | undefined;
+  try {
+    const container = document.getElementById('host')!;
+    const button = container.querySelector('button')!;
+    const client = remoteRuntime({ default: Counter }, 'component');
+    let release!: () => void;
+    const pending = new Promise<void>((resolve) => (release = resolve));
+    const Client = createReactRemote({
+      instance: client.instance,
+      remote: async () => {
+        await pending;
+        return client.remote();
+      },
+      loading: <p>loading</p>,
+    });
+    const errors = jest.fn();
+    root = hydrateRoot(container, <Client />, { onRecoverableError: errors });
+    await tick();
+    expect(container.querySelector('button')).toBe(button);
+    release();
+    for (let i = 0; i < 20 && !client.loadRemote.mock.calls.length; i++)
+      await tick();
+    await tick();
+    button.click();
+    for (let i = 0; i < 20 && button.textContent !== 'count: 1'; i++)
+      await tick();
+    expect(errors).not.toHaveBeenCalled();
+    expect(container.querySelector('button')).toBe(button);
+    expect(button.textContent).toBe('count: 1');
+  } finally {
+    root?.unmount();
+    await tick();
+    dom.window.close();
+    delete (globalThis as any).window;
+    delete (globalThis as any).document;
+    delete (globalThis as any).location;
+  }
+});
