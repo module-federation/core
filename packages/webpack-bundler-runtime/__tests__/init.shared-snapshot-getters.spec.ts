@@ -28,6 +28,7 @@ describe('unlayered snapshot fallback execution', () => {
     ['matching identity', '1.0.0', 'custom', true],
     ['different version', '2.0.0', 'custom', false],
     ['different scope', '1.0.0', 'other', false],
+    ['legacy snapshot without scopes', '1.0.0', undefined, true],
   ] as const)('%s', async (_name, version, shareScope, matches) => {
     const localValue = { from: 'local' };
     const fullValue = { from: 'full fallback entry' };
@@ -55,6 +56,15 @@ describe('unlayered snapshot fallback execution', () => {
       .mocked(helpers.global.getGlobalSnapshotInfoByModuleInfo)
       .mockReturnValue({
         shared: [
+          ...(shareScope
+            ? [
+                {
+                  sharedName: 'pkg',
+                  version,
+                  treeShakingStatus: TreeShakingStatus.NO_USE,
+                },
+              ]
+            : []),
           {
             sharedName: 'pkg',
             version,

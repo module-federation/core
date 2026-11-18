@@ -269,10 +269,17 @@ describe('shared layer selection', () => {
 
   it('only suppresses preload assets belonging to the loaded shared layer', () => {
     const mf = host([
-      provider('server', 'server'),
+      { ...provider('server', 'server'), scope: 'tenant' },
       provider('client', 'client'),
     ]);
-    expect(mf.loadShareSync('pkg', consume('server'))()).toBe('server');
+    expect(
+      mf.loadShareSync('pkg', {
+        customShareInfo: {
+          ...consume('server').customShareInfo,
+          scope: ['tenant'],
+        },
+      })(),
+    ).toBe('server');
     const asset = (layer: string) => `${layer}.js`;
     const assets = (sync: string[]) => ({
       js: { sync, async: [] },
@@ -288,17 +295,27 @@ describe('shared layer selection', () => {
       remoteTypes: '',
       remoteTypesZip: '',
       remotesInfo: {},
-      shared: ['server', 'client'].map((layer) => ({
+      shared: (
+        [
+          ['server', undefined, 'default-server'],
+          ['server', 'tenant', 'server'],
+          ['client', 'default', 'client'],
+        ] as const
+      ).map(([layer, shareScope, file]) => ({
         sharedName: 'pkg',
         version: '1.0.0',
         layer,
-        shareScope: 'default',
-        assets: assets([asset(layer)]),
+        shareScope,
+        assets: assets([asset(file)]),
       })),
       modules: [
         {
           moduleName: 'view',
-          assets: assets([asset('server'), asset('client')]),
+          assets: assets([
+            asset('server'),
+            asset('default-server'),
+            asset('client'),
+          ]),
         },
       ],
     };
@@ -323,6 +340,7 @@ describe('shared layer selection', () => {
       snapshot,
     );
     expect(result.jsAssetsWithoutEntry).toEqual([
+      'https://remote.test/default-server.js',
       'https://remote.test/client.js',
     ]);
   });

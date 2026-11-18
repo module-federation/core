@@ -33,9 +33,19 @@ export const getSharedFallbackGetter = ({
     }),
   );
   if (!candidates.length) return factory;
-  const fallbackItem = version
-    ? candidates.find((item) => item[1] === version)
-    : candidates[0];
+  const versionMatches = version
+    ? candidates.filter((item) => item[1] === version)
+    : candidates;
+  const fallbackItem =
+    versionMatches.find((item) => {
+      const itemScope = item[3]?.shareScope;
+      return Array.isArray(scope) && Array.isArray(itemScope)
+        ? scope.length === itemScope.length &&
+            scope.every((value, index) => value === itemScope[index])
+        : scope === itemScope;
+    }) ??
+    versionMatches.find((item) => item[3]) ??
+    versionMatches[0];
   if (!fallbackItem) {
     throw new Error(
       `No fallback item found for shareKey: ${shareKey} and version: ${version}`,
