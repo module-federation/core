@@ -5,7 +5,10 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
 import RemoteModule from './RemoteModule';
-import { getFederationGlobalScope } from './runtime/utils';
+import {
+  FEDERATION_RUNTIME_MODULE_NAME,
+  getFederationGlobalScope,
+} from './runtime/utils';
 import type ExternalModule from 'webpack/lib/ExternalModule';
 import type FallbackModule from './FallbackModule';
 import type {
@@ -17,7 +20,7 @@ const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
 ) as typeof import('webpack/lib/util/extractUrlAndGlobal');
 
-const { Template, RuntimeModule, RuntimeGlobals } = require(
+const { Template, RuntimeModule, RuntimeGlobals, WebpackError } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const { compareModulesByIdentifier } = require(
@@ -32,8 +35,39 @@ class RemoteRuntimeModule extends RuntimeModule {
   /**
    * @returns {string | null} runtime code
    */
+  /**
+   * The emitted code reads `__webpack_require__.federation`, which only the federation runtime module
+   * defines. If this runtime lacks it (e.g. a compilation the federation runtime was not injected
+   * into), the bundle would throw "Cannot read properties of undefined (reading
+   * 'bundlerRuntimeOptions')" at startup, so report it at build time instead.
+   */
+  private reportMissingFederationRuntime(compilation: Compilation): void {
+    const { chunk, chunkGraph } = this;
+    if (!chunk || !chunkGraph) return;
+    for (const runtimeModule of chunkGraph.getChunkRuntimeModulesIterable(
+      chunk,
+    )) {
+      if (
+        (runtimeModule as InstanceType<typeof RuntimeModule>).name ===
+        FEDERATION_RUNTIME_MODULE_NAME
+      ) {
+        return;
+      }
+    }
+    const error = new WebpackError(
+      `[Module Federation] The remotes runtime was emitted into chunk "${chunk.name ?? chunk.id}" without the federation runtime. ` +
+        'The bundle will throw "Cannot read properties of undefined (reading \'bundlerRuntimeOptions\')" when it starts. ' +
+        'This usually means a federation plugin ran in a compilation that the federation runtime was not injected into.',
+    );
+    error.chunk = chunk;
+    compilation.warnings.push(error);
+  }
+
   override generate(): string | null {
     const { compilation, chunkGraph } = this;
+    if (compilation) {
+      this.reportMissingFederationRuntime(compilation as Compilation);
+    }
     const { runtimeTemplate, moduleGraph } = compilation as Compilation;
     const chunkToRemotesMapping: Record<string, any> = {};
     const idToExternalAndNameMapping: Record<string | number, any> = {};

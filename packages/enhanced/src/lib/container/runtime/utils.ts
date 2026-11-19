@@ -6,6 +6,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import crypto from 'crypto';
 import { parseOptions } from '../options';
 import type webpack from 'webpack';
+import type { Compiler, Compilation } from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { init } from '@module-federation/runtime-tools';
@@ -136,6 +137,28 @@ export function modifyEntry(options: ModifyEntryOptions): void {
 
 export function createHash(contents: string): string {
   return crypto.createHash('md5').update(contents).digest('hex');
+}
+
+/** Name of the runtime module that defines `__webpack_require__.federation`. */
+export const FEDERATION_RUNTIME_MODULE_NAME = 'federation runtime';
+
+/**
+ * Module Federation applies only to the compiler its plugins were applied to.
+ *
+ * `compilation.createChildCompiler` copies the parent's taps for every compiler hook except
+ * `thisCompilation`, `make`, `compile`, `emit`, `afterEmit`, `invalid` and `done`. Child compilers
+ * (worker-loader, html-webpack-plugin, workbox, ...) therefore run any federation tap on an
+ * inheritable hook such as `compilation` or `finishMake`, while the federation runtime itself
+ * (`FederationRuntimePlugin`, tapped on `thisCompilation`) never reaches them. Emitting remotes or
+ * sharing code there produces bundles that read an undefined `__webpack_require__.federation`.
+ *
+ * Every federation tap on an inheritable compiler hook must bail out when this returns true.
+ */
+export function isInheritedChildCompilation(
+  compiler: Compiler,
+  compilation: Compilation,
+): boolean {
+  return compilation.compiler !== compiler;
 }
 
 export { normalizeToPosixPath } from './normalizeToPosixPath';

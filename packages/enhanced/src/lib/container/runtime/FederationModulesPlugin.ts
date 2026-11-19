@@ -7,6 +7,7 @@ const Compilation = require(
 import { SyncHook } from 'tapable';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+import { isInheritedChildCompilation } from './utils';
 
 /** @type {WeakMap<import("webpack").Compilation, CompilationHooks>} */
 const compilationHooksMap = new WeakMap<CompilationType, CompilationHooks>();
@@ -65,6 +66,7 @@ class FederationModulesPlugin {
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
       (compilation: CompilationType, { normalModuleFactory }) => {
+        if (isInheritedChildCompilation(compiler, compilation)) return;
         //@ts-ignore
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
       },

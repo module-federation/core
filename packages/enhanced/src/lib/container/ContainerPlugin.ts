@@ -18,6 +18,7 @@ import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
+import { isInheritedChildCompilation } from './runtime/utils';
 import type { OptimizationSplitChunksCacheGroup } from 'webpack/lib/optimize/SplitChunksPlugin';
 import type { Falsy } from 'webpack/declarations/WebpackOptions';
 
@@ -236,15 +237,12 @@ class ContainerPlugin {
       },
     );
 
-    // this will still be copied into child compiler, so it needs a check to avoid running hook on child
+    // finishMake is copied into child compilers, so skip inherited child compilations (see isInheritedChildCompilation)
     // we have to use finishMake in order to check the entries created and see if there are multiple runtime chunks
     compiler.hooks.finishMake.tapAsync(
       PLUGIN_NAME,
       (compilation: Compilation, callback) => {
-        if (
-          compilation.compiler.parentCompilation &&
-          compilation.compiler.parentCompilation !== compilation
-        ) {
+        if (isInheritedChildCompilation(compiler, compilation)) {
           return callback();
         }
 
