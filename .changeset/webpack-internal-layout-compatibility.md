@@ -4,7 +4,7 @@
 "@module-federation/node": patch
 ---
 
-Support webpack 5.112's relocated internals while preserving older layouts. Resolve each candidate through the caller's resolver and accept it only inside the caller's webpack package. Cache that package location per caller directory without caching `FEDERATION_WEBPACK_PATH`.
+Support webpack 5.112's relocated internals while preserving older layouts. Resolve each candidate through the caller's resolver and accept it only inside the caller's webpack package.
 
 Resolve the active compiler in CommonJS and ES modules. `getWebpackPath` returns the entry of the webpack package that contains the compiler, or an empty string for a bundled compiler. Keep the SDK browser entry free of Node-only resolver dependencies.
 
