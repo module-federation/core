@@ -36,6 +36,12 @@ and rollback. MF instance, container, shared-provider and snapshot ownership
 belong to the Node runtime plugin. Framework request draining and resource
 publication belong to the framework integration.
 
+For Node producers, Rspack supplies the module cache and shared dependency IDs
+through `federation.containerCache`. The adapter installs
+`federation.clearContainerCache` and locates it by the loaded container's getter.
+Selective cleanup keeps the shared dependency closure. Full cleanup discards that
+container's execution cache.
+
 Compiled remote invalidation requires native `remoteCache` support. Unsupported
 bundlers reject the request. Pure-runtime Node hosts without compiled remotes
 can use the Node lifecycle plugin without this native API.

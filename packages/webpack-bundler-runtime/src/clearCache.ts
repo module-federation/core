@@ -13,6 +13,19 @@ type Adapters = { bindings: Set<WebpackRequire>; restore: () => void };
 const stateKey = Symbol.for('module-federation.clear-cache.state');
 const adaptersKey = Symbol.for('module-federation.clear-cache.adapters');
 const nodeRuntimeKey = Symbol.for('module-federation.clear-cache.runtime');
+const containerCacheKey = Symbol.for(
+  'module-federation.clear-cache.containers',
+);
+type ContainerCacheClearer = NonNullable<
+  WebpackRequire['federation']['clearContainerCache']
+>;
+type GetContainer = NonNullable<WebpackRequire['getContainer']>;
+function containerCacheClearers(): WeakMap<
+  GetContainer,
+  ContainerCacheClearer
+> {
+  return ((globalThis as any)[containerCacheKey] ||= new WeakMap());
+}
 const getAdapters = (instance: any): Adapters | undefined =>
   instance?.[adaptersKey];
 const unique = <T>(values: T[]) => [...new Set(values)];
@@ -80,17 +93,40 @@ const targetFor = (runtime: WebpackRequire, name: string, key = name) => {
   };
 };
 
-/** Container-specific callbacks stay in the bundler adapter. */
+// An MF instance can be shared by multiple physical container runtimes.
+// Match the same getter function exported by the loaded container.
+function installContainerCache(runtime: WebpackRequire) {
+  const get = runtime.getContainer;
+  if (!get) return;
+  const clear = (preserveShared: boolean) => {
+    const cache = runtime.federation.containerCache;
+    if (!cache) return false;
+    const { retainedModuleIds, modules } = cache;
+    const retain = preserveShared
+      ? new Set(retainedModuleIds.map(String))
+      : undefined;
+    for (const id of Object.keys(modules)) {
+      if (!retain?.has(id)) delete modules[id];
+    }
+    return true;
+  };
+  runtime.federation.clearContainerCache = clear;
+  containerCacheClearers().set(get, clear);
+}
+
 export function clearContainerCache(
   value: unknown,
   preserveShared = false,
 ): void {
   const entry = value as
     | {
+        get?: GetContainer;
         __webpack_clear_cache__?: () => void;
         __webpack_clear_exposed_cache__?: () => void;
       }
     | undefined;
+  const clear = entry?.get && containerCacheClearers().get(entry.get);
+  if (clear?.(preserveShared)) return;
   if (preserveShared) entry?.__webpack_clear_exposed_cache__?.();
   else entry?.__webpack_clear_cache__?.();
 }
@@ -342,6 +378,7 @@ export function installNodeCacheRuntime(runtime: WebpackRequire): void {
     init(options) {
       runtime.federation.disposeClearCache?.();
       const instance = original.init(options);
+      installContainerCache(runtime);
       installClearCache({ webpackRequire: runtime, instance });
       return instance;
     },

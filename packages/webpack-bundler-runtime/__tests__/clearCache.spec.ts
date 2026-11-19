@@ -1,6 +1,7 @@
 import { ModuleFederation } from '@module-federation/runtime';
 import {
   clearCache,
+  clearContainerCache,
   createClearCacheRuntimePlugin,
   installClearCache,
   installNodeCacheRuntime,
@@ -66,6 +67,33 @@ function deferred() {
 const plugin = createClearCacheRuntimePlugin;
 
 describe('optional bundler cache runtime', () => {
+  test('clears only the runtime of the loaded container and can retain shared modules', () => {
+    const { instance, runtime } = fixture();
+    const sibling = fixture(instance).runtime;
+    for (const entry of [runtime, sibling]) {
+      entry.getContainer = jest.fn(async () => () => ({}));
+      entry.federation.bundlerRuntime!.init = () => instance;
+      installNodeCacheRuntime(entry);
+      entry.federation.bundlerRuntime!.init({
+        webpackRequire: entry,
+        libraryType: 'commonjs-module',
+      });
+      // The compiler emits these IDs when the container module evaluates.
+      entry.federation.containerCache = {
+        retainedModuleIds: [101, '201'],
+        modules: entry.c,
+      };
+    }
+    const container = { get: runtime.getContainer };
+    clearContainerCache(container, true);
+    expect(Object.keys(runtime.c)).toEqual(['101', '201']);
+    runtime.federation.disposeClearCache?.();
+    clearContainerCache(container);
+    expect(Object.keys(runtime.c)).toEqual([]);
+    expect(Object.keys(sibling.c)).toEqual(['101', '201', '301', '401', '999']);
+    sibling.federation.disposeClearCache?.();
+  });
+
   test('default init does not install Node cache policy', () => {
     const { instance, runtime } = fixture();
     const load = instance.loadRemote;

@@ -133,6 +133,7 @@ export interface WebpackRequire {
   m: Record<string, (mod: any) => any>;
   j?: string;
   c: Record<string, any>;
+  getContainer?: (request: string, getScope?: unknown) => Promise<unknown>;
   I: (
     // v1 use string , v2 support string[]
     scopeName: string | string[],
@@ -277,6 +278,12 @@ export interface Federation {
     ) => SharedGetter;
   };
   clearCache?: (options: ClearCacheOptions) => Promise<ClearCacheResult>;
+  /** Node producer metadata emitted by the bundler. */
+  containerCache?: {
+    retainedModuleIds: (string | number)[];
+    modules: WebpackRequire['c'];
+  };
+  clearContainerCache?: (preserveShared: boolean) => boolean;
   /** Detach this bundler after draining application work. Idempotent. */
   disposeClearCache?: () => void;
   bundlerRuntimeOptions: {
