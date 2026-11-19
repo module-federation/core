@@ -40,6 +40,15 @@ type WebpackRequire = {
     require?: (chunkId: string, promises: any[]) => void;
     readFileVm?: (chunkId: string, promises: any[]) => void;
   };
+  O?: ((
+    result?: any,
+    chunkIds?: any[],
+    fn?: () => any,
+    priority?: number,
+  ) => any) & {
+    require?: (chunkId: string) => boolean;
+    readFileVm?: (chunkId: string) => boolean;
+  };
 };
 
 declare const __webpack_require__: WebpackRequire;
@@ -370,6 +379,9 @@ export const installChunk = (
     if (installedChunks[chunkId]) installedChunks[chunkId][0]();
     installedChunks[chunkId] = 0;
   }
+  if (typeof __webpack_require__.O === 'function') {
+    __webpack_require__.O();
+  }
 };
 
 // Hoisted utility function to remove a chunk on fail
@@ -510,6 +522,7 @@ export const setupChunkHandler = (
 // Hoisted function to set up webpack require patching
 export const setupWebpackRequirePatching = (
   handle: (chunkId: string, promises: any[]) => void,
+  installedChunks?: { [key: string]: any },
 ): void => {
   if (__webpack_require__.f) {
     if (__webpack_require__.f.require) {
@@ -518,10 +531,20 @@ export const setupWebpackRequirePatching = (
         'CAUTION: build target is not set to "async-node", attempting to patch additional chunk handlers. This may not work',
       );
       __webpack_require__.f.require = handle;
+      if (installedChunks && __webpack_require__.O?.require) {
+        const prevRequireCheck = __webpack_require__.O.require;
+        __webpack_require__.O.require = (chunkId: string) =>
+          installedChunks[chunkId] === 0 || prevRequireCheck(chunkId);
+      }
     }
 
     if (__webpack_require__.f.readFileVm) {
       __webpack_require__.f.readFileVm = handle;
+      if (installedChunks && __webpack_require__.O?.readFileVm) {
+        const prevReadFileCheck = __webpack_require__.O.readFileVm;
+        __webpack_require__.O.readFileVm = (chunkId: string) =>
+          installedChunks[chunkId] === 0 || prevReadFileCheck(chunkId);
+      }
     }
   }
 };
@@ -604,7 +627,10 @@ function attachRuntimeChunkState(args?: any): void {
       currentState.remoteChunkIds.clear();
     };
   }
-  setupWebpackRequirePatching(currentState.handle);
+  setupWebpackRequirePatching(
+    currentState.handle,
+    currentState.installedChunks,
+  );
 }
 
 export default function (): ModuleFederationRuntimePlugin {
