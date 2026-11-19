@@ -111,7 +111,8 @@ export function updateConsumeOptions(
             strictVersion,
           } = stage;
           const shareConfig: SharedConfig = {
-            requiredVersion: `^${version}`,
+            // no version means we can't guess a range, accept anything
+            requiredVersion: version ? `^${version}` : '*',
           };
           const isValidValue = function (
             val: unknown,

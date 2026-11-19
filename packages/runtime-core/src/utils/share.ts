@@ -54,7 +54,8 @@ function formatShare(
     loading: null,
     ...shareArgs,
     shareConfig: {
-      requiredVersion: `^${shareArgs.version}`,
+      // no version means we can't guess a range, accept anything
+      requiredVersion: shareArgs.version ? `^${shareArgs.version}` : '*',
       singleton: false,
       eager: false,
       strictVersion: false,
