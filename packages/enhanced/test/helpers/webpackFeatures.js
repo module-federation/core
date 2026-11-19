@@ -6,6 +6,7 @@ const {
 } = require('@module-federation/sdk/normalize-webpack-path');
 
 const FIRST_RELEASE = {
+  chunkRootOutputDir: '5.110.0',
   // Records the properties that a destructuring of an import reads.
   destructuredImportTracking: '5.80.0',
   outputIgnoreBrowserWarnings: '5.81.0',

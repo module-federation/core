@@ -1,3 +1,4 @@
+const { supportsWebpackFeature } = require('../../helpers/webpackFeatures');
 import FederationRuntimeModule from '../../../src/lib/container/runtime/FederationRuntimeModule';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import fs from 'fs';
@@ -243,10 +244,9 @@ describe('FederationRuntimeModule output paths', () => {
     expect(result.file).toMatch(/^static\/js\/main\.[a-f0-9]{8}\.js$/);
   });
 
-  const [major, minor] = webpack.version.split('.').map(Number);
   // From 5.110, webpack's own chunkRootOutputDir replaces hashes before
   // measuring the depth, so a digest containing `/` is off there too.
-  if (major === 5 && minor < 110) {
+  if (!supportsWebpackFeature('chunkRootOutputDir')) {
     it('resolves a base64 hash that contains a slash', async () => {
       for (let seed = 0; seed < 50; seed++) {
         fs.writeFileSync(

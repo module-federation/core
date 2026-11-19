@@ -47,6 +47,7 @@ describe(`hashed output filenames with Webpack ${webpack.version}`, () => {
       plugins: [new StreamingTargetPlugin({ name: 'host', remotes: {} })],
     });
     let mainFile: string;
+    let supportsChunkRootOutputDir = false;
     try {
       const stats = await new Promise<Stats>((resolve, reject) => {
         compiler.run((error, stats) => {
@@ -58,6 +59,9 @@ describe(`hashed output filenames with Webpack ${webpack.version}`, () => {
       if (stats.hasErrors()) {
         throw new Error(stats.toString({ all: false, errors: true }));
       }
+      supportsChunkRootOutputDir =
+        typeof stats.compilation.runtimeTemplate.chunkRootOutputDir ===
+        'function';
       const { chunks, chunkGraph } = stats.compilation;
       for (const chunk of chunks) {
         for (const module of chunkGraph.getChunkRuntimeModulesIterable(chunk)) {
@@ -74,7 +78,7 @@ describe(`hashed output filenames with Webpack ${webpack.version}`, () => {
         compiler.close((error) => (error ? reject(error) : resolve()));
       });
     }
-    return { emitted, mainFile };
+    return { emitted, mainFile, supportsChunkRootOutputDir };
   };
 
   // The path back to the output root from the emitted entry file.
@@ -98,26 +102,24 @@ describe(`hashed output filenames with Webpack ${webpack.version}`, () => {
     },
   );
 
-  const [major, minor] = webpack.version.split('.').map(Number);
   // From 5.110, webpack's own chunkRootOutputDir replaces hashes before
   // measuring the depth, so a digest containing `/` is off there too.
-  if (major === 5 && minor < 110) {
-    it('resolves a base64 hash that contains a slash', async () => {
-      for (let seed = 0; seed < 50; seed++) {
-        fs.writeFileSync(
-          path.join(context, 'main.js'),
-          `export const lazy = () => import('./lazy.js'); export default ${seed};`,
-        );
-        const { emitted, mainFile } = await build({
-          filename: 'static/[name].[contenthash].js',
-          hashDigest: 'base64',
-        });
-        expect(emitted.get(OWN_RUNTIME_MODULES[1])).toContain(
-          `scriptUrl + ${JSON.stringify(undoPath(mainFile))}`,
-        );
-        if (mainFile.split('/').length > 2) return;
-      }
-      throw new Error('No seed produced a base64 hash containing "/"');
-    });
-  }
+  it('resolves a base64 hash that contains a slash', async () => {
+    for (let seed = 0; seed < 50; seed++) {
+      fs.writeFileSync(
+        path.join(context, 'main.js'),
+        `export const lazy = () => import('./lazy.js'); export default ${seed};`,
+      );
+      const { emitted, mainFile, supportsChunkRootOutputDir } = await build({
+        filename: 'static/[name].[contenthash].js',
+        hashDigest: 'base64',
+      });
+      if (supportsChunkRootOutputDir) return;
+      expect(emitted.get(OWN_RUNTIME_MODULES[1])).toContain(
+        `scriptUrl + ${JSON.stringify(undoPath(mainFile))}`,
+      );
+      if (mainFile.split('/').length > 2) return;
+    }
+    throw new Error('No seed produced a base64 hash containing "/"');
+  });
 });
