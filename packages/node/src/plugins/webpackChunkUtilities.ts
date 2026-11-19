@@ -11,17 +11,9 @@ type ChunkFilenameTemplate = ReturnType<
   typeof import('webpack').javascript.JavascriptModulesPlugin.getChunkFilenameTemplate
 >;
 
-/**
- * Path from a chunk's output file back to the output root.
- * Webpack generates runtime modules for hashing before chunk hashes exist.
- * From 5.110, chunkRootOutputDir avoids resolving the hash. Older webpack
- * ignores an error in that first pass and generates again once hashes exist,
- * so the real filename gives the real depth, even for a digest with `/`.
- * @param {Compilation} compilation - The compilation.
- * @param {Chunk} chunk - The chunk the runtime module belongs to.
- * @param {ChunkFilenameTemplate} filenameTemplate - The chunk's filename template.
- * @returns {string} - The undo path, empty when the chunk is at the output root.
- */
+// Runtime generation runs before chunk hashes exist. Webpack 5.110's helper
+// avoids resolving hashes. Older webpack retries generation after hashing,
+// when the real filename gives the correct depth for digests containing `/`.
 export function getChunkRootOutputDir(
   compilation: Compilation,
   chunk: Chunk,

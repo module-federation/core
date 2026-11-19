@@ -4,4 +4,10 @@
 "@module-federation/node": patch
 ---
 
-Support relocated Webpack 5.112 internals while preserving older Webpack layouts, and handle hashed output filenames during runtime generation in the federation runtime and the Node chunk loading and public path runtime modules. Choose the internal layout inside the Webpack copy the calling package resolves, so internals never come from an older Webpack hoisted above it. Resolve the active compiler in CommonJS and ES modules. `getWebpackPath` now returns the entry of the Webpack package that contains the compiler, and an empty string for a bundled compiler. Keep the SDK browser entry free of Node-only resolver dependencies. With top-level await and ESM output, async startup now checks `output.module` instead of `experiments.outputModule`, which webpack 5.112 ignores.
+Support webpack 5.112's relocated internals while preserving older layouts. Resolve each candidate through the caller's resolver and accept it only inside the caller's webpack package. Cache that package location per caller directory without caching `FEDERATION_WEBPACK_PATH`.
+
+Resolve the active compiler in CommonJS and ES modules. `getWebpackPath` returns the entry of the webpack package that contains the compiler, or an empty string for a bundled compiler. Keep the SDK browser entry free of Node-only resolver dependencies.
+
+Generate output paths with webpack's `chunkRootOutputDir` on 5.110 and later. On older webpack, use the real chunk filename so hashes containing `/` have the correct depth. This applies to the federation runtime and the Node chunk loading and public path runtime modules.
+
+With top-level await and ESM output, check `output.module` for async startup instead of `experiments.outputModule`, which webpack 5.112 ignores. Use namespace imports in independent shared builds so packages without a default export compile.
