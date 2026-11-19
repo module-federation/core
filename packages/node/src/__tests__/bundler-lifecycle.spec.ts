@@ -45,9 +45,7 @@ function createHost() {
       101: { remoteName: 'registered', externalModuleId: 201 },
     },
     cache: {
-      remoteKeyToRemoteModuleIds: { registered: [101] },
-      remoteModuleIdToConsumerModuleIds: { 101: [] },
-      consumerModuleIdToParentModuleIds: {},
+      moduleIdToParentModuleIds: {},
       modules: runtime.c,
       factories: runtime.m,
     },

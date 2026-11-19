@@ -2,6 +2,7 @@ import { ModuleFederation } from '@module-federation/runtime';
 import {
   clearCache,
   clearContainerCache,
+  ensureRemoteChunks,
   planRemoteCache,
   createClearCacheRuntimePlugin,
   installClearCache,
@@ -44,9 +45,7 @@ function fixture(
     ...runtime.remotesLoadingData!,
     chunkMapping: { 10: [101] },
     cache: {
-      remoteKeyToRemoteModuleIds: { remoteA: [101] },
-      remoteModuleIdToConsumerModuleIds: { 101: [301] },
-      consumerModuleIdToParentModuleIds: { 301: [401], 401: [301] },
+      moduleIdToParentModuleIds: { 101: [301], 301: [401], 401: [301] },
       modules: runtime.c,
       factories: runtime.m,
     },
@@ -63,9 +62,11 @@ function deferred() {
 const plugin = createClearCacheRuntimePlugin;
 
 describe('optional bundler cache runtime', () => {
-  test('clears only the runtime of the loaded container and can retain shared modules', () => {
+  test('clears only the runtime of the loaded container and preserves retiring shared providers', () => {
     const { instance, runtime } = fixture();
     const sibling = fixture(instance).runtime;
+    const clearChunks = jest.fn(async () => {});
+    runtime.federation.clearNodeChunks = clearChunks;
     for (const entry of [runtime, sibling]) {
       entry.getContainer = jest.fn(async () => () => ({}));
       entry.federation.bundlerRuntime!.init = () => instance;
@@ -74,20 +75,78 @@ describe('optional bundler cache runtime', () => {
         webpackRequire: entry,
         libraryType: 'commonjs-module',
       });
-      // The compiler emits these IDs when the container module evaluates.
-      entry.federation.containerCache = {
-        retainedModuleIds: [101, '201'],
-        modules: entry.c,
-      };
     }
-    const container = { get: runtime.getContainer };
+    const selectiveHook = jest.fn();
+    const container = {
+      get: runtime.getContainer,
+      __webpack_clear_exposed_cache__: selectiveHook,
+    };
     clearContainerCache(container, true);
-    expect(Object.keys(runtime.c)).toEqual(['101', '201']);
-    runtime.federation.disposeClearCache?.();
-    clearContainerCache(container);
+    expect(selectiveHook).toHaveBeenCalledTimes(1);
+    expect(Object.keys(runtime.c)).toEqual(['101', '201', '301', '401', '999']);
+    clearContainerCache(container, false);
     expect(Object.keys(runtime.c)).toEqual([]);
+    expect(clearChunks).toHaveBeenCalledWith({ remoteOnly: false });
     expect(Object.keys(sibling.c)).toEqual(['101', '201', '301', '401', '999']);
+    runtime.federation.disposeClearCache?.();
     sibling.federation.disposeClearCache?.();
+  });
+
+  test('re-installs evicted startup remote factories when mfAsyncStartup or ensureRemoteChunks runs', async () => {
+    const { runtime } = fixture();
+    let version = 'v1';
+    runtime.f = {
+      remotes: (chunkId, promises) => {
+        if (String(chunkId) === '10') {
+          promises.push(
+            Promise.resolve().then(() => {
+              const current = version;
+              runtime.m[101] = (mod) => {
+                mod.exports = current;
+              };
+            }),
+          );
+        }
+      },
+    };
+    runtime.mfAsyncStartup = (() => {
+      let ran = false;
+      let cached: Promise<unknown> | undefined;
+      return () => {
+        if (ran) return cached;
+        ran = true;
+        const promises: unknown[] = [];
+        runtime.f!.remotes(10, promises);
+        cached = Promise.all(promises);
+        return cached;
+      };
+    })();
+    const dispose = installClearCache({ webpackRequire: runtime })!;
+    try {
+      await runtime.mfAsyncStartup();
+      const firstMod = { exports: undefined };
+      runtime.m[101](firstMod);
+      expect(firstMod.exports).toBe('v1');
+
+      version = 'v2';
+      await runtime.federation.clearCache!({ name: 'remoteA' });
+      expect(runtime.m[101]).toBeUndefined();
+
+      await runtime.mfAsyncStartup();
+      expect(runtime.m[101]).toBeDefined();
+      const secondMod = { exports: undefined };
+      runtime.m[101](secondMod);
+      expect(secondMod.exports).toBe('v2');
+
+      version = 'v3';
+      await runtime.federation.clearCache!({ name: 'remoteA' });
+      await ensureRemoteChunks(runtime, [10]);
+      const thirdMod = { exports: undefined };
+      runtime.m[101](thirdMod);
+      expect(thirdMod.exports).toBe('v3');
+    } finally {
+      dispose();
+    }
   });
 
   test('default init does not install Node cache policy', () => {

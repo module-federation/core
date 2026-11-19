@@ -29,17 +29,19 @@ and connects asynchronous MF remote removal to every attached bundler.
 Detach an application generation with `disposeClearCache()` after its work and
 cache cleanup have finished.
 
-Rspack emits the compiled remote dependency graph and module tables under
-`federation.remotesLoadingData.cache`. The Node adapter uses one eviction plan
-to clear remote factories, affected module exports and MF loading records.
-Frameworks can reuse the same plan to select which entries to rebuild.
-The MF Node plugin retains ownership of remote chunk loading and provider state.
+Rspack emits the compiled remote reverse dependency map and module table handles
+under `federation.remotesLoadingData.cache` when `@module-federation/node` is
+enabled. The Node adapter uses one eviction plan to clear remote factories,
+affected module exports and MF loading records, and re-runs remote installation
+when startup chunks are re-evaluated. Frameworks can reuse the same plan to
+select which entries to rebuild. `@module-federation/node` retains ownership of
+remote chunk loading and provider lifecycle.
 
-For Node producers, Rspack supplies the module cache and shared dependency IDs
-through `federation.containerCache`. The adapter installs
-`federation.clearContainerCache` and locates it by the loaded container's getter.
-Selective cleanup keeps the shared dependency closure. Full cleanup discards that
-container's execution cache.
+For Node producers, the adapter installs `federation.clearContainerCache` and
+locates it by the loaded container's getter. When a retiring container is still
+serving shared singletons, its module cache stays intact until the retired
+provider is released; full cleanup clears that container's execution and chunk
+caches.
 
 Compiled remote invalidation needs complete dependency metadata and writable
 module tables. The Node adapter waits for in-flight loads before eviction,
