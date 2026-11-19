@@ -1,5 +1,6 @@
 import { describe, it, expect } from '@rstest/core';
-import { formatShareConfigs } from '../src/utils/share';
+import { formatShareConfigs, getRegisteredShare } from '../src/utils/share';
+import { SyncWaterfallHook } from '../src/utils/hooks';
 import type { Options } from '../src/type';
 
 const prevOptions = {
@@ -36,6 +37,27 @@ describe('formatShareConfigs', () => {
     });
     // used to produce the string "^undefined"
     expect(newShareInfos['react'][0].shareConfig.requiredVersion).toBe('*');
+  });
+
+  it('resolves an unversioned strict singleton without throwing', () => {
+    const { newShareInfos } = formatShareConfigs(prevOptions, {
+      name: 'host',
+      shared: {
+        react: {
+          shareConfig: { singleton: true, strictVersion: true },
+          get: () => Promise.resolve(() => ({})),
+        },
+      },
+    });
+    const shared = newShareInfos['react'][0];
+    const scopeMap = { default: { react: { [shared.version]: shared } } };
+    const res = getRegisteredShare(
+      scopeMap,
+      'react',
+      shared,
+      new SyncWaterfallHook('resolveShare'),
+    );
+    expect(res?.shared.version).toBe('0');
   });
 
   it('does not touch an explicit requiredVersion', () => {

@@ -112,7 +112,8 @@ export function updateConsumeOptions(
           } = stage;
           const shareConfig: SharedConfig = {
             // no version means we can't guess a range, accept anything
-            requiredVersion: version ? `^${version}` : '*',
+            // webpack writes '0' when the version is unknown
+            requiredVersion: version && version !== '0' ? `^${version}` : '*',
           };
           const isValidValue = function (
             val: unknown,

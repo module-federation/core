@@ -396,6 +396,7 @@ export function getRegisteredShare(
         if (shareConfig.singleton) {
           if (
             typeof requiredVersion === 'string' &&
+            requiredVersion !== '*' &&
             !satisfy(maxOrSingletonVersion, requiredVersion)
           ) {
             const msg = `Version ${maxOrSingletonVersion} from ${
