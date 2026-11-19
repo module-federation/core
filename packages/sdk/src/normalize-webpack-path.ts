@@ -2,6 +2,7 @@ import type webpack from 'webpack';
 import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, isAbsolute, join, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // Webpack 5.112 reorganized internals without retaining every old location.
 // Keep the old layout preferred for older installations and patched copies.
@@ -29,6 +30,10 @@ const webpackInternalPaths: Record<string, string> = {
 };
 
 let webpackRequire: NodeRequire | undefined;
+const callerWebpack = new Map<
+  string,
+  { request: NodeRequire; root: string | undefined }
+>();
 
 const createSdkWebpackRequire = (): NodeRequire =>
   createRequire(
@@ -37,14 +42,16 @@ const createSdkWebpackRequire = (): NodeRequire =>
     process.env.IS_ESM_BUILD === 'true' ? import.meta.url : __filename,
   );
 
-const getWebpackRequire = (): NodeRequire => {
+const getWebpackRequire = (): {
+  request: NodeRequire;
+  root: string | undefined;
+} => {
   if (process.env['FEDERATION_WEBPACK_PATH']) {
     webpackRequire ??= createSdkWebpackRequire();
-    return webpackRequire;
+    return { request: webpackRequire, root: undefined };
   }
 
-  // Resolve undeclared peer internals from the package calling this helper,
-  // rather than from the SDK (which does not depend on Webpack at runtime).
+  // The SDK has no runtime webpack dependency. Use the calling package's resolver.
   const prepareStackTrace = Error.prepareStackTrace;
   const stackTraceLimit = Error.stackTraceLimit;
   try {
@@ -60,7 +67,21 @@ const getWebpackRequire = (): NodeRequire => {
         (fileName): fileName is string =>
           !!fileName && (isAbsolute(fileName) || fileName.startsWith('file:')),
       );
-    return createRequire(caller || resolve(process.cwd(), 'package.json'));
+    const callerFile = caller?.startsWith('file:')
+      ? fileURLToPath(caller)
+      : caller || resolve(process.cwd(), 'package.json');
+    const callerDir = dirname(callerFile);
+    let located = callerWebpack.get(callerDir);
+    if (!located) {
+      const request = createRequire(callerFile);
+      const webpackRoot = findWebpackRoot(request);
+      located = {
+        request,
+        root: webpackRoot ? realpathSync(webpackRoot) + sep : undefined,
+      };
+      callerWebpack.set(callerDir, located);
+    }
+    return located;
   } finally {
     Error.prepareStackTrace = prepareStackTrace;
     Error.stackTraceLimit = stackTraceLimit;
@@ -109,8 +130,6 @@ export function getWebpackPath(
   }
 }
 
-// The directory of the webpack package that `request` resolves, or undefined
-// when webpack is not resolvable from there.
 const findWebpackRoot = (request: NodeRequire): string | undefined => {
   let entry: string;
   try {
@@ -151,53 +170,35 @@ export const normalizeWebpackPath = (fullPath: string): string => {
     return candidate;
   }
 
-  const requestWebpack = getWebpackRequire();
-  const exists = (request: string): boolean => {
+  const { request: requestWebpack, root } = getWebpackRequire();
+  const resolves = (request: string, inside?: string): boolean => {
     try {
-      // Resolve only: never execute a module while choosing its layout.
-      requestWebpack.resolve(request);
-      return true;
+      // Resolve candidates without executing them.
+      const resolved = requestWebpack.resolve(request);
+      return !inside || realpathSync(resolved).startsWith(inside);
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'MODULE_NOT_FOUND') {
-        throw error;
+      const { code } = error as NodeJS.ErrnoException;
+      if (
+        code === 'MODULE_NOT_FOUND' ||
+        (inside && code === 'ERR_PACKAGE_PATH_NOT_EXPORTED')
+      ) {
+        return false;
       }
-      return false;
+      throw error;
     }
   };
 
-  if (!process.env['FEDERATION_WEBPACK_PATH']) {
-    // A bare request keeps walking up node_modules when the nearest Webpack
-    // lacks the file, which would mix internals from two Webpack copies.
-    // Choose the layout inside the copy the caller resolves instead, found
-    // through the caller's own resolver so Yarn PnP and exports maps apply.
-    const webpackRoot = findWebpackRoot(requestWebpack);
-    if (webpackRoot) {
-      const root = realpathSync(webpackRoot) + sep;
-      const resolvesInside = (request: string): boolean => {
-        try {
-          return realpathSync(requestWebpack.resolve(request)).startsWith(root);
-        } catch (error) {
-          const { code } = error as NodeJS.ErrnoException;
-          if (
-            code === 'MODULE_NOT_FOUND' ||
-            code === 'ERR_PACKAGE_PATH_NOT_EXPORTED'
-          ) {
-            return false;
-          }
-          throw error;
-        }
-      };
-      if (resolvesInside(fullPath)) return fullPath;
-      if (resolvesInside(relocatedPath)) return relocatedPath;
-    }
+  if (root) {
+    // Bare requests can find an ancestor webpack's internals. Accept only
+    // candidates inside the caller's webpack, including PnP and exports maps.
+    if (resolves(fullPath, root)) return fullPath;
+    if (resolves(relocatedPath, root)) return relocatedPath;
   }
 
-  if (exists(candidate)) {
+  if (resolves(candidate)) {
     return candidate;
   }
   const fallback = normalize(relocatedPath);
-  // A missing fallback, package exports restriction, or other resolution error
-  // must propagate instead of returning an unusable path.
   requestWebpack.resolve(fallback);
   return fallback;
 };

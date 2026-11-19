@@ -160,6 +160,36 @@ describe('Webpack internal layout compatibility (real module resolution)', () =>
     ).toEqual([newPath, 'nearest new']);
   });
 
+  it('locates the caller webpack once and honors later compiler paths', () => {
+    expect(
+      isolatedCaller(
+        'cached-root',
+        {
+          ...webpackPackage('packages/plugin/node_modules/webpack'),
+          [`packages/plugin/node_modules/${newPath}`]:
+            'module.exports = "caller";',
+          ...webpackPackage('override'),
+          [`override/${oldPath.replace('webpack/', '')}`]:
+            'module.exports = "override";',
+        },
+        `const fs = require('node:fs');
+         const original = fs.readFileSync;
+         let manifests = 0;
+         fs.readFileSync = function (file, ...args) {
+           if (String(file).endsWith('webpack/package.json')) manifests++;
+           return original.call(this, file, ...args);
+         };
+         const first = sdk.normalizeWebpackPath(${JSON.stringify(oldPath)});
+         const second = sdk.normalizeWebpackPath(${JSON.stringify(oldPath)});
+         process.env.FEDERATION_WEBPACK_PATH = require('node:path').resolve(__dirname, '../../override/lib/index.js');
+         const overridden = require(sdk.normalizeWebpackPath(${JSON.stringify(oldPath)}));
+         delete process.env.FEDERATION_WEBPACK_PATH;
+         const restored = sdk.normalizeWebpackPath(${JSON.stringify(oldPath)});
+         console.log(JSON.stringify([first, second, overridden, restored, manifests]));`,
+      ),
+    ).toEqual([newPath, newPath, 'override', newPath, 1]);
+  });
+
   it('keeps an old path that the nearest Webpack exports', () => {
     // The package maps the old path to its relocated file, so no file exists
     // at the old location, and an older copy is hoisted above it.
