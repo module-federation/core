@@ -15,13 +15,6 @@ type WebpackRequire = {
   m: { [key: string]: any };
   o: (obj: any, prop: string) => boolean;
   C?: (chunk: any) => void;
-  nodeChunkLoader?: {
-    readFile?: (
-      filename: string,
-      chunkId: string,
-      callback: (error: Error | null, content?: string) => void,
-    ) => void;
-  };
   l: (
     url: string,
     done: (res: any) => void,
@@ -488,30 +481,6 @@ export const setupChunkHandler = (
 export const setupWebpackRequirePatching = (
   handle: (chunkId: string, promises: any[]) => void,
 ): void => {
-  if (__webpack_require__.nodeChunkLoader) {
-    // Rspack owns installation, installedChunks and generation fencing.
-    // This plugin supplies only local/remote source transport.
-    __webpack_require__.nodeChunkLoader.readFile = (
-      filename,
-      chunkId,
-      callback,
-    ) => {
-      const fs = __non_webpack_require__('fs') as typeof import('fs');
-      fs.readFile(filename, 'utf-8', (error, content) => {
-        if (!error) return callback(null, content);
-        if (error.code !== 'ENOENT') return callback(error);
-        const url = resolveUrl(
-          __webpack_require__.federation.initOptions.name,
-          __webpack_require__.u(chunkId),
-        );
-        if (!url) return callback(error);
-        fetchChunkContent(url, {
-          origin: __webpack_require__.federation.instance,
-        }).then((content) => callback(null, content), callback);
-      });
-    };
-    return;
-  }
   if (__webpack_require__.f) {
     if (__webpack_require__.f.require) {
       console.warn(

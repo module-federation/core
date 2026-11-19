@@ -27,12 +27,6 @@ function createHost() {
   module.remoteEntryExports = container;
   host.moduleCache.set('provider', module);
   const runtime: any = {
-    remoteCache: {
-      clear: rs.fn(async () => {}),
-      wait() {},
-      waitForChunk() {},
-      hasPending: () => false,
-    },
     federation: {
       instance: host,
       bundlerRuntimeOptions: {
@@ -43,20 +37,27 @@ function createHost() {
         },
       },
     },
-    remotesLoadingData: {
-      remoteKeyToRemoteModuleIds: { registered: [101] },
-      remoteKeyToExternalModuleIds: { registered: [201] },
-      remoteKeyToChunkIds: { registered: [10] },
-    },
     m: { 101: () => {} },
     c: { 101: { exports: 'cached' }, 201: { exports: container } },
+  };
+  runtime.federation.remotesLoadingData = {
+    moduleIdToRemoteDataMapping: {
+      101: { remoteName: 'registered', externalModuleId: 201 },
+    },
+    cache: {
+      remoteKeyToRemoteModuleIds: { registered: [101] },
+      remoteModuleIdToConsumerModuleIds: { 101: [] },
+      consumerModuleIdToParentModuleIds: {},
+      modules: runtime.c,
+      factories: runtime.m,
+    },
   };
   const dispose = installClearCache({ webpackRequire: runtime })!;
   return { host, remoteInfo, container, module, runtime, dispose };
 }
 
 describe('Node runtime and bundler lifecycle integration', () => {
-  it('removes resolved container state and invokes native invalidation without deleting a registration-named business global', async () => {
+  it('removes resolved container state and clears compiled modules without deleting a registration-named business global', async () => {
     const { host, remoteInfo, container, runtime, dispose } = createHost();
     const globals = globalThis as any;
     const business = {};
@@ -66,10 +67,9 @@ describe('Node runtime and bundler lifecycle integration', () => {
       await host.removeRemote('registered');
       expect(host.moduleCache.has('provider')).toBe(false);
       expect(host.options.remotes).toHaveLength(0);
-      expect(runtime.remoteCache.clear).toHaveBeenCalledWith(
-        expect.arrayContaining(['registered']),
-        expect.objectContaining({ reset: expect.any(Function) }),
-      );
+      expect(runtime.c[101]).toBeUndefined();
+      expect(runtime.c[201]).toBeUndefined();
+      expect(runtime.m[101]).toBeUndefined();
       expect(globals.registered).toBe(business);
       expect(globals[remoteInfo.entryGlobalName]).toBeUndefined();
       expect(container.__webpack_clear_cache__).toHaveBeenCalledTimes(1);
@@ -80,7 +80,7 @@ describe('Node runtime and bundler lifecycle integration', () => {
     }
   });
 
-  it.each(['entry-hook', 'native-clear'])(
+  it.each(['entry-hook', 'bundler-clear'])(
     'a failed %s leaves the remote registered and preserves another publication',
     async (failure) => {
       const { host, remoteInfo, module, container, runtime, dispose } =
@@ -110,8 +110,8 @@ describe('Node runtime and bundler lifecycle integration', () => {
       if (failure === 'entry-hook')
         container.__webpack_clear_cache__.mockImplementation(publishAndFail);
       else
-        runtime.remoteCache.clear.mockImplementationOnce(async () =>
-          publishAndFail(),
+        rs.spyOn(runtime.federation, 'clearCache').mockImplementationOnce(
+          async () => publishAndFail(),
         );
       try {
         await expect(host.removeRemote('registered')).rejects.toThrow(

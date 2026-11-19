@@ -99,15 +99,19 @@ export type RemotesLoadingData = WithStatus<{
   moduleIdToRemoteDataMapping?: ModuleIdToRemoteDataMapping;
 }>;
 
-/** Native bundler ownership. The adapter contributes only its loader state. */
-export interface NativeRemoteCache {
-  clear(
-    remoteKeys: string[],
-    loading: { pending: Promise<unknown>[]; reset: () => void },
-  ): Promise<void>;
-  wait(remoteKeys: string[]): Promise<unknown> | undefined;
-  waitForChunk(chunkId: ModuleId): Promise<unknown> | undefined;
-  hasPending(): boolean;
+/** Compiled dependency graph and handles to this Node bundler's module tables. */
+export interface RemoteCacheData {
+  remoteKeyToRemoteModuleIds: Record<string, ModuleId[]>;
+  remoteModuleIdToConsumerModuleIds: Record<ModuleId, ModuleId[]>;
+  consumerModuleIdToParentModuleIds: Record<ModuleId, ModuleId[]>;
+  modules: WebpackRequire['c'];
+  factories: WebpackRequire['m'];
+}
+
+export interface RemoteCachePlan {
+  remoteModuleIds: string[];
+  externalModuleIds: string[];
+  consumerModuleIds: string[];
 }
 
 export type InitializeSharingData = WithStatus<{
@@ -144,7 +148,6 @@ export interface WebpackRequire {
   consumesLoadingData?: ConsumesLoadingData;
   remotesLoadingData?: RemotesLoadingData;
   initializeSharingData?: InitializeSharingData;
-  remoteCache?: NativeRemoteCache;
 }
 
 interface ShareInfo {
@@ -278,6 +281,7 @@ export interface Federation {
     ) => SharedGetter;
   };
   clearCache?: (options: ClearCacheOptions) => Promise<ClearCacheResult>;
+  remotesLoadingData?: RemotesLoadingData & { cache?: RemoteCacheData };
   /** Node producer metadata emitted by the bundler. */
   containerCache?: {
     retainedModuleIds: (string | number)[];

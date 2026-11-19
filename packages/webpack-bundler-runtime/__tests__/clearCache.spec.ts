@@ -2,6 +2,7 @@ import { ModuleFederation } from '@module-federation/runtime';
 import {
   clearCache,
   clearContainerCache,
+  planRemoteCache,
   createClearCacheRuntimePlugin,
   installClearCache,
   installNodeCacheRuntime,
@@ -17,23 +18,7 @@ function fixture(
     loadRemote: jest.fn(async (id) => ({ id })),
   },
 ) {
-  let clearing = 0;
   const runtime = {
-    remoteCache: {
-      clear: jest.fn(async (_keys, { pending, reset }) => {
-        clearing++;
-        try {
-          reset();
-          await Promise.allSettled(pending);
-          reset();
-        } finally {
-          clearing--;
-        }
-      }),
-      wait: jest.fn(),
-      waitForChunk: jest.fn(),
-      hasPending: () => clearing > 0,
-    },
     federation: {
       instance,
       bundlerRuntime: { init, remotes },
@@ -55,6 +40,17 @@ function fixture(
       [101, 201, 301, 401, 999].map((id) => [id, { exports: id }]),
     ),
   } as unknown as WebpackRequire;
+  runtime.federation.remotesLoadingData = {
+    ...runtime.remotesLoadingData!,
+    chunkMapping: { 10: [101] },
+    cache: {
+      remoteKeyToRemoteModuleIds: { remoteA: [101] },
+      remoteModuleIdToConsumerModuleIds: { 101: [301] },
+      consumerModuleIdToParentModuleIds: { 301: [401], 401: [301] },
+      modules: runtime.c,
+      factories: runtime.m,
+    },
+  };
   return { instance, runtime };
 }
 function deferred() {
@@ -105,37 +101,22 @@ describe('optional bundler cache runtime', () => {
   });
 
   test.each(['remoteA', 'aliasA'])(
-    'translates %s to native cache keys without editing native or MF-owned tables',
+    'clears the compiled graph for %s while leaving producer and unrelated caches intact',
     async (name) => {
       const { instance, runtime } = fixture();
-      const container = { __webpack_clear_cache__: jest.fn() };
-      const module = { remoteEntryExports: container };
-      instance.moduleCache.set('remoteA', module);
-      (globalThis as any).remoteA = container;
-      try {
-        await expect(
-          clearCache({ webpackRequire: runtime, name }),
-        ).resolves.toEqual({ name, cleared: true });
-        expect(runtime.remoteCache!.clear).toHaveBeenCalledWith(
-          expect.arrayContaining(['remoteA', 'aliasA']),
-          { pending: [], reset: expect.any(Function) },
-        );
-        expect(Object.keys(runtime.c)).toEqual([
-          '101',
-          '201',
-          '301',
-          '401',
-          '999',
-        ]);
-        expect(runtime.m[101]).toBeDefined();
-        expect(runtime.m[201]).toBeDefined();
-        expect(runtime.m[999]).toBeDefined();
-        expect(instance.moduleCache.get('remoteA')).toBe(module);
-        expect((globalThis as any).remoteA).toBe(container);
-        expect(container.__webpack_clear_cache__).not.toHaveBeenCalled();
-      } finally {
-        delete (globalThis as any).remoteA;
-      }
+      const oldModule = { remoteEntryExports: {} };
+      instance.moduleCache.set('remoteA', oldModule);
+      expect(planRemoteCache({ webpackRequire: runtime, name })).toEqual({
+        remoteModuleIds: ['101'],
+        externalModuleIds: ['201'],
+        consumerModuleIds: ['301', '401'],
+      });
+      await expect(
+        clearCache({ webpackRequire: runtime, name }),
+      ).resolves.toEqual({ name, cleared: true });
+      expect(Object.keys(runtime.c)).toEqual(['999']);
+      expect(Object.keys(runtime.m)).toEqual(['201', '999']);
+      expect(instance.moduleCache.get('remoteA')).toBe(oldModule);
     },
   );
 
@@ -146,101 +127,104 @@ describe('optional bundler cache runtime', () => {
     ).rejects.toThrow('requires a remote name');
   });
 
-  test('passes bridge loading promises to native and resets only bridge records', async () => {
+  test('waits for a late factory write before evicting the old remote', async () => {
     const { runtime } = fixture();
-    const pending = deferred();
+    const gate = deferred();
     const mapping =
       runtime.federation.bundlerRuntimeOptions.remotes!
         .idToExternalAndNameMapping[101];
-    mapping.p = pending.promise;
-    const clear = clearCache({ webpackRequire: runtime, name: 'remoteA' });
-    expect(runtime.remoteCache!.clear).toHaveBeenCalledWith(
-      expect.arrayContaining(['remoteA']),
-      { pending: [pending.promise], reset: expect.any(Function) },
-    );
-    expect(mapping.p).toBeUndefined();
-    let settled = false;
-    void clear.then(() => {
-      settled = true;
-    });
-    await Promise.resolve();
-    expect(settled).toBe(false);
-    pending.promise.then(() => {
+    mapping.p = gate.promise.then(() => {
+      runtime.m[101] = () => 'old';
       mapping.p = 1;
     });
-    pending.resolve();
+    const clear = clearCache({ webpackRequire: runtime, name: 'remoteA' });
+    await Promise.resolve();
+    expect(runtime.c[301]).toBeDefined();
+    expect(runtime.m[101]).toBeDefined();
+    gate.resolve();
     await clear;
     expect(mapping.p).toBeUndefined();
+    expect(runtime.m[101]).toBeUndefined();
+    expect(runtime.c[301]).toBeUndefined();
   });
 
-  test('gates loadRemote and bundled remote loads while clearing', async () => {
+  test('admits direct and compiled loads after the replacement registration', async () => {
     const { instance, runtime } = fixture();
+    const oldChunk = deferred();
+    const cleared = deferred();
+    const register = deferred();
+    let version = 'v1';
+    instance.loadRemote = jest.fn(async () => version);
+    instance.updateRemotes = async () => {
+      await runtime.federation.clearCache!({ name: 'remoteA' });
+      cleared.resolve();
+      await register.promise;
+      version = 'v2';
+    };
     const originalLoad = instance.loadRemote;
-    const bundledLoad = jest.fn();
-    runtime.federation.bundlerRuntime.remotes = bundledLoad;
-    runtime.remotesLoadingData!.chunkMapping = { 10: [101] };
-    const pending = deferred();
-    runtime.federation.bundlerRuntimeOptions.remotes!.idToExternalAndNameMapping[101].p =
-      pending.promise;
-    (runtime.remoteCache!.wait as jest.Mock).mockReturnValue(pending.promise);
-    (runtime.remoteCache!.waitForChunk as jest.Mock).mockReturnValue(
-      pending.promise,
-    );
+    const bundled = jest.fn(({ promises }) => {
+      promises.push(
+        oldChunk.promise.then(() => instance.loadRemote('aliasA/Button')),
+      );
+    });
+    runtime.federation.bundlerRuntime!.remotes = bundled;
     installNodeCacheRuntime(runtime);
     const dispose = installClearCache({ webpackRequire: runtime })!;
-    const clear = runtime.federation.clearCache!({ name: 'remoteA' });
-    const load = instance.loadRemote('aliasA/Button');
-    const promises: Promise<unknown>[] = [];
-    runtime.federation.bundlerRuntime.remotes({
-      webpackRequire: runtime,
-      chunkId: 10,
-      promises,
-    } as any);
-    expect(originalLoad).not.toHaveBeenCalled();
-    expect(bundledLoad).not.toHaveBeenCalled();
-    expect(runtime.remoteCache!.wait).toHaveBeenCalledWith(
-      expect.arrayContaining(['remoteA', 'aliasA']),
-    );
-    expect(runtime.remoteCache!.waitForChunk).toHaveBeenCalledWith(10);
-    pending.resolve();
-    await clear;
-    await load;
-    await Promise.all(promises);
-    expect(originalLoad).toHaveBeenCalledTimes(1);
-    expect(bundledLoad).toHaveBeenCalledTimes(1);
-    dispose();
+    const compiledLoad = () => {
+      const promises: Promise<unknown>[] = [];
+      runtime.federation.bundlerRuntime!.remotes({
+        webpackRequire: runtime,
+        chunkId: 10,
+        chunkMapping: { 10: [101] },
+        promises,
+      } as any);
+      return Promise.all(promises);
+    };
+    const old = compiledLoad();
+    const update = instance.updateRemotes();
+    const direct = instance.loadRemote('aliasA/Button');
+    const fresh = compiledLoad();
+    try {
+      expect(bundled).toHaveBeenCalledTimes(1);
+      expect(runtime.m[101]).toBeDefined();
+      oldChunk.resolve();
+      await old;
+      await cleared.promise;
+      expect(runtime.m[101]).toBeUndefined();
+      expect(originalLoad).toHaveBeenCalledTimes(1);
+      expect(bundled).toHaveBeenCalledTimes(1);
+      register.resolve();
+      await update;
+      await expect(direct).resolves.toBe('v2');
+      await fresh;
+      expect(bundled).toHaveBeenCalledTimes(2);
+      expect(originalLoad).toHaveBeenCalledTimes(3);
+    } finally {
+      oldChunk.resolve();
+      register.resolve();
+      await Promise.allSettled([old, update, direct, fresh]);
+      dispose();
+    }
   });
 
-  test('rejects unsupported compiled remotes but supports pure-runtime hosts', async () => {
+  test('rejects unsupported compiled remotes before changing caches or loading records', async () => {
     const { runtime } = fixture();
-    delete runtime.remoteCache;
+    const options = runtime.federation.bundlerRuntimeOptions.remotes!;
+    const record = options.idToExternalAndNameMapping[101];
+    record.p = 1;
+    delete runtime.federation.remotesLoadingData!.cache;
     await expect(
       clearCache({ webpackRequire: runtime, name: 'remoteA' }),
-    ).rejects.toThrow('native bundler remoteCache support');
+    ).rejects.toThrow('compiled dependency graph and module tables');
+    expect(record.p).toBe(1);
+    expect(runtime.c[101]).toBeDefined();
+    expect(runtime.m[101]).toBeDefined();
+    delete runtime.federation.remotesLoadingData;
     delete runtime.remotesLoadingData;
-    runtime.federation.bundlerRuntimeOptions.remotes!.idToRemoteMap = {};
+    options.idToRemoteMap = {};
     await expect(
       clearCache({ webpackRequire: runtime, name: 'remoteA' }),
     ).resolves.toEqual({ name: 'remoteA', cleared: true });
-  });
-
-  test('restores bridge loading records when native cleanup rejects', async () => {
-    const { runtime } = fixture();
-    const mapping =
-      runtime.federation.bundlerRuntimeOptions.remotes!
-        .idToExternalAndNameMapping[101];
-    mapping.p = Promise.resolve() as any;
-    const promise = mapping.p;
-    (runtime.remoteCache!.clear as jest.Mock).mockImplementation(
-      async (_keys, loading) => {
-        loading.reset();
-        throw Error('chunk cleanup failed');
-      },
-    );
-    await expect(
-      clearCache({ webpackRequire: runtime, name: 'remoteA' }),
-    ).rejects.toThrow('chunk cleanup failed');
-    expect(mapping.p).toBe(promise);
   });
 });
 
@@ -272,7 +256,7 @@ describe('cache adapter lifecycle', () => {
       const next = { ...remote, entry: 'https://example.test/new.js' };
       await instance.updateRemotes([next]);
       for (const runtime of runtimes) {
-        expect(runtime.remoteCache!.clear).toHaveBeenCalledTimes(1);
+        expect(runtime.m[101]).toBeUndefined();
         expect(
           runtime.federation.bundlerRuntimeOptions.remotes!.remoteInfos!
             .remoteA[0].entry,
