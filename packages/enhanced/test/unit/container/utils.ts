@@ -36,6 +36,10 @@ export const createMockCompilation = () => {
     getOrderedChunkModulesIterableBySourceType: rstest.fn(),
     getModuleId: rstest.fn().mockReturnValue('mockModuleId'),
     getTreeRuntimeRequirements: rstest.fn().mockReturnValue(new Set()),
+    // A federated runtime chunk carries the federation runtime module.
+    getChunkRuntimeModulesIterable: rstest
+      .fn()
+      .mockReturnValue([{ name: 'federation runtime' }]),
   };
 
   const mockModuleGraph = {

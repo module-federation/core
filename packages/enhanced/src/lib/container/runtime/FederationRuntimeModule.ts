@@ -7,6 +7,7 @@ const { getUndoPath } = require(
 ) as typeof import('webpack/lib/util/identifier');
 // inspired by react-refresh-webpack-plugin
 import getFederationGlobal from './getFederationGlobal';
+import { FEDERATION_RUNTIME_MODULE_NAME } from './utils';
 import type { NormalizedRuntimeInitOptionsWithOutShared } from './utils';
 
 const { RuntimeModule, RuntimeGlobals, Template } = require(
@@ -23,7 +24,7 @@ class FederationRuntimeModule extends RuntimeModule {
     containerName: string,
     initOptionsWithoutShared: NormalizedRuntimeInitOptionsWithOutShared,
   ) {
-    super('federation runtime', RuntimeModule.STAGE_NORMAL - 1);
+    super(FEDERATION_RUNTIME_MODULE_NAME, RuntimeModule.STAGE_NORMAL - 1);
     this.runtimeRequirements = runtimeRequirements;
     this.containerName = containerName;
     this.initOptionsWithoutShared = initOptionsWithoutShared;

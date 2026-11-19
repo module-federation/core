@@ -3,6 +3,7 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 import type { Compiler } from 'webpack';
+import { isInheritedChildCompilation } from './runtime/utils';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 // import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
@@ -80,6 +81,7 @@ class ContainerReferencePlugin {
     compiler.hooks.compilation.tap(
       'ContainerReferencePlugin',
       (compilation, { normalModuleFactory }) => {
+        if (isInheritedChildCompilation(compiler, compilation)) return;
         compilation.dependencyFactories.set(
           RemoteToExternalDependency,
           normalModuleFactory,
