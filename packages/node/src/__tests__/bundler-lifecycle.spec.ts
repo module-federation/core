@@ -18,11 +18,18 @@ function createHost() {
     shareScope: 'default',
     entryGlobalName: '__resolved_container__',
   };
+  const clearContainer = rs.fn(() => true);
   const container = {
     init() {},
     get: async () => () => 'loaded',
-    __webpack_clear_cache__: rs.fn(),
   };
+  const containerClearers: WeakMap<
+    object,
+    (preserveShared: boolean) => boolean
+  > = ((globalThis as any)[
+    Symbol.for('module-federation.clear-cache.containers')
+  ] ||= new WeakMap());
+  containerClearers.set(container.get, clearContainer);
   const module = new Module({ host, remoteInfo });
   module.remoteEntryExports = container;
   host.moduleCache.set('provider', module);
@@ -51,12 +58,21 @@ function createHost() {
     },
   };
   const dispose = installClearCache({ webpackRequire: runtime })!;
-  return { host, remoteInfo, container, module, runtime, dispose };
+  return {
+    host,
+    remoteInfo,
+    container,
+    clearContainer,
+    module,
+    runtime,
+    dispose,
+  };
 }
 
 describe('Node runtime and bundler lifecycle integration', () => {
   it('removes resolved container state and clears compiled modules without deleting a registration-named business global', async () => {
-    const { host, remoteInfo, container, runtime, dispose } = createHost();
+    const { host, remoteInfo, container, clearContainer, runtime, dispose } =
+      createHost();
     const globals = globalThis as any;
     const business = {};
     globals.registered = business;
@@ -70,7 +86,7 @@ describe('Node runtime and bundler lifecycle integration', () => {
       expect(runtime.m[101]).toBeUndefined();
       expect(globals.registered).toBe(business);
       expect(globals[remoteInfo.entryGlobalName]).toBeUndefined();
-      expect(container.__webpack_clear_cache__).toHaveBeenCalledTimes(1);
+      expect(clearContainer).toHaveBeenCalledWith(false);
     } finally {
       dispose();
       delete globals.registered;
@@ -81,8 +97,15 @@ describe('Node runtime and bundler lifecycle integration', () => {
   it.each(['entry-hook', 'bundler-clear'])(
     'a failed %s leaves the remote registered and preserves another publication',
     async (failure) => {
-      const { host, remoteInfo, module, container, runtime, dispose } =
-        createHost();
+      const {
+        host,
+        remoteInfo,
+        module,
+        container,
+        clearContainer,
+        runtime,
+        dispose,
+      } = createHost();
       const globals = globalThis as any;
       const first = new ModuleFederation({
         name: 'provider',
@@ -106,7 +129,7 @@ describe('Node runtime and bundler lifecycle integration', () => {
         throw Error('clear failed after publication');
       };
       if (failure === 'entry-hook')
-        container.__webpack_clear_cache__.mockImplementation(publishAndFail);
+        clearContainer.mockImplementation(publishAndFail);
       else
         rs.spyOn(runtime.federation, 'clearCache').mockImplementationOnce(
           async () => publishAndFail(),
@@ -121,7 +144,7 @@ describe('Node runtime and bundler lifecycle integration', () => {
         expect(globals.__FEDERATION__.__INSTANCES__).toContain(second);
         expect(globals[remoteInfo.entryGlobalName]).toBe(newContainer);
         expect(loading[key]).toBe(newLoading);
-        container.__webpack_clear_cache__.mockReset();
+        clearContainer.mockReset();
         await host.removeRemote('registered');
         expect(host.moduleCache.has('provider')).toBe(false);
         expect(globals[remoteInfo.entryGlobalName]).toBe(newContainer);

@@ -45,21 +45,29 @@ function consumer(build: string) {
     ],
   });
   let cleared = false;
+  const clearCache = rs.fn((preserveShared: boolean) => {
+    if (!preserveShared) cleared = true;
+    return !preserveShared;
+  });
   const container = {
     init(_share?: unknown, _scope?: unknown, _options?: any) {},
     get: async () => {
       if (cleared) throw Error(`Cleared ${build} container`);
       return () => ({ build });
     },
-    __webpack_clear_cache__: rs.fn(() => {
-      cleared = true;
-    }),
   };
+  const containerClearers: WeakMap<
+    object,
+    (preserveShared: boolean) => boolean
+  > = ((globalThis as any)[
+    Symbol.for('module-federation.clear-cache.containers')
+  ] ||= new WeakMap());
+  containerClearers.set(container.get, clearCache);
   const module = new Module({ host, remoteInfo });
   module.remoteEntryExports = container;
   host.moduleCache.set(remoteInfo.name, module);
   setGlobalFederationInstance(host);
-  return { host, container };
+  return { host, container, clearCache };
 }
 
 describe('provider build identity', () => {
@@ -79,7 +87,7 @@ describe('provider build identity', () => {
       if (mode === 'update') await a.host.updateRemotes([replacement]);
       else a.host.registerRemotes([replacement], { force: true });
       expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).toContain(runtime);
-      expect(a.container.__webpack_clear_cache__).not.toHaveBeenCalled();
+      expect(a.clearCache).not.toHaveBeenCalled();
       await destroyNodeInstance(a.host);
       const lastOwnerProvider = helpers.global.getRemoteFederationInstance(
         b.host.moduleCache.get(info('2').name)!.remoteInfo,
@@ -89,7 +97,7 @@ describe('provider build identity', () => {
         b.host.loadRemote('registered-catalog/Another'),
       ).resolves.toEqual({ build: '2' });
       await b.host.removeRemote(info('2').name);
-      expect(a.container.__webpack_clear_cache__).toHaveBeenCalled();
+      expect(a.clearCache).toHaveBeenCalledWith(false);
       await destroyNodeInstance(lastOwnerProvider!);
       await destroyNodeInstance(b.host);
       expect(dispose).toHaveBeenCalledTimes(1);
@@ -169,7 +177,7 @@ describe('provider build identity', () => {
           snapshot,
         );
         expect((globalThis as any)['catalog-container']).toBe(b.container);
-        expect(b.container.__webpack_clear_cache__).not.toHaveBeenCalled();
+        expect(b.clearCache).not.toHaveBeenCalled();
         expect(loading[firstKey]).toBeUndefined();
         expect(loading[secondKey]).toBe(secondLoad);
         expect(loading[legacyKey]).toBe(legacyLoad);
@@ -188,11 +196,11 @@ describe('provider build identity', () => {
   it('removes a duplicated build without leaving another registry entry', async () => {
     const first = provider('1');
     const duplicate = provider('1');
-    const { host, container } = consumer('1');
+    const { host, clearCache } = consumer('1');
     await host.removeRemote(info('1').name);
     expect(host.options.remotes).toHaveLength(0);
     expect(host.moduleCache.has(info('1').name)).toBe(false);
-    expect(container.__webpack_clear_cache__).toHaveBeenCalled();
+    expect(clearCache).toHaveBeenCalledWith(false);
     expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).not.toContain(first);
     expect(CurrentGlobal.__FEDERATION__.__INSTANCES__).not.toContain(duplicate);
   });

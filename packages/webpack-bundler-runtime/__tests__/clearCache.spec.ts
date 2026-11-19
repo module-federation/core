@@ -76,13 +76,8 @@ describe('optional bundler cache runtime', () => {
         libraryType: 'commonjs-module',
       });
     }
-    const selectiveHook = jest.fn();
-    const container = {
-      get: runtime.getContainer,
-      __webpack_clear_exposed_cache__: selectiveHook,
-    };
+    const container = { get: runtime.getContainer };
     clearContainerCache(container, true);
-    expect(selectiveHook).toHaveBeenCalledTimes(1);
     expect(Object.keys(runtime.c)).toEqual(['101', '201', '301', '401', '999']);
     clearContainerCache(container, false);
     expect(Object.keys(runtime.c)).toEqual([]);

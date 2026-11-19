@@ -1425,5 +1425,66 @@ describe('runtimePlugin', () => {
         global.fetch = originalFetch;
       }
     });
+
+    it('bridges __webpack_require__.O (onChunksLoaded) when patched chunk handlers install split initial chunks', async () => {
+      const fsMock = require('fs');
+      const vmMock = require('vm');
+      fsMock.existsSync.mockReset();
+      fsMock.readFile.mockReset();
+
+      const onChunksLoaded = jest.fn() as any;
+      const nativeInstalled: Record<string, number> = { selfChunk: 0 };
+      onChunksLoaded.readFileVm = (chunkId: string) =>
+        nativeInstalled[chunkId] === 0;
+
+      (global as any).__webpack_require__ = {
+        ...mockWebpackRequire,
+        m: {},
+        O: onChunksLoaded,
+        federation: {
+          ...mockWebpackRequire.federation,
+          runtime: {
+            loadScriptNode: jest.fn().mockResolvedValue({}),
+          },
+          instance: {
+            loaderHook: {
+              lifecycle: {
+                fetch: { emit: jest.fn().mockResolvedValue(null) },
+              },
+            },
+          },
+        },
+        f: {
+          readFileVm: jest.fn(),
+        },
+      };
+
+      const instancePlugin = runtimePlugin();
+      instancePlugin.beforeInit?.({
+        origin: (global as any).__webpack_require__.federation.instance,
+      } as any);
+
+      // Native self-chunk remains recognized via prevReadFileCheck
+      expect(onChunksLoaded.readFileVm('selfChunk')).toBe(true);
+      expect(onChunksLoaded.readFileVm('splitChunk')).toBe(false);
+
+      vmMock.Script.mockImplementationOnce(() => ({
+        runInThisContext: () => (chunk: any) => {
+          chunk.ids = ['splitChunk'];
+          chunk.modules = { m1: () => {} };
+        },
+      }));
+      fsMock.existsSync.mockReturnValue(true);
+      fsMock.readFile.mockImplementationOnce(
+        (_file: string, _enc: string, cb: any) => cb(null, '// split'),
+      );
+
+      const promises: Promise<any>[] = [];
+      (global as any).__webpack_require__.f.readFileVm('splitChunk', promises);
+      await Promise.all(promises);
+
+      expect(onChunksLoaded.readFileVm('splitChunk')).toBe(true);
+      expect(onChunksLoaded).toHaveBeenCalledTimes(1);
+    });
   });
 });

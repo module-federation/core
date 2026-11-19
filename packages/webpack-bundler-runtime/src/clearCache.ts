@@ -201,17 +201,9 @@ export function clearContainerCache(
   value: unknown,
   preserveShared = false,
 ): void {
-  const entry = value as
-    | {
-        get?: GetContainer;
-        __webpack_clear_cache__?: () => void;
-        __webpack_clear_exposed_cache__?: () => void;
-      }
-    | undefined;
+  const entry = value as { get?: GetContainer } | undefined;
   const clear = entry?.get && containerCacheClearers().get(entry.get);
-  if (clear?.(preserveShared)) return;
-  if (preserveShared) entry?.__webpack_clear_exposed_cache__?.();
-  else entry?.__webpack_clear_cache__?.();
+  clear?.(preserveShared);
 }
 
 async function drainLoads(drain: () => Promise<unknown>) {

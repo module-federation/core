@@ -458,22 +458,34 @@ describe('ModuleFederation', () => {
         entryGlobalName: 'app1',
         shareScope: 'default',
       },
-      remoteEntryExports: {
-        get: rs.fn(),
-        init: rs.fn(),
-        __webpack_clear_cache__: remoteEntryClear,
-      },
-      lib: {
-        get: rs.fn(),
-        init: rs.fn(),
-        __webpack_clear_cache__: libClear,
-      },
+      remoteEntryExports: (() => {
+        const get = rs.fn();
+        const clearers: WeakMap<object, (preserveShared: boolean) => boolean> =
+          ((globalThis as any)[
+            Symbol.for('module-federation.clear-cache.containers')
+          ] ||= new WeakMap());
+        clearers.set(get, remoteEntryClear);
+        return { get, init: rs.fn() };
+      })(),
+      lib: (() => {
+        const get = rs.fn();
+        const clearers: WeakMap<object, (preserveShared: boolean) => boolean> =
+          ((globalThis as any)[
+            Symbol.for('module-federation.clear-cache.containers')
+          ] ||= new WeakMap());
+        clearers.set(get, libClear);
+        return { get, init: rs.fn() };
+      })(),
     } as any);
-    (globalThis as any).app1 = {
-      get: rs.fn(),
-      init: rs.fn(),
-      __webpack_clear_cache__: globalClear,
-    };
+    (globalThis as any).app1 = (() => {
+      const get = rs.fn();
+      const clearers: WeakMap<object, (preserveShared: boolean) => boolean> = ((
+        globalThis as any
+      )[Symbol.for('module-federation.clear-cache.containers')] ||=
+        new WeakMap());
+      clearers.set(get, globalClear);
+      return { get, init: rs.fn() };
+    })();
     Global.__FEDERATION__.moduleInfo = {
       '@federation/instance:1.0.1': {
         version: '1.0.1',
@@ -583,17 +595,33 @@ describe('ModuleFederation', () => {
         entryGlobalName: 'app1',
         shareScope: 'default',
       },
-      remoteEntryExports: {
-        get: rs.fn(),
-        init: rs.fn(),
-        __webpack_clear_cache__: remoteEntryClear,
-        __webpack_clear_exposed_cache__: selectiveClear,
-      },
+      remoteEntryExports: (() => {
+        const get = rs.fn();
+        const clearers: WeakMap<object, (preserveShared: boolean) => boolean> =
+          ((globalThis as any)[
+            Symbol.for('module-federation.clear-cache.containers')
+          ] ||= new WeakMap());
+        clearers.set(get, (preserveShared: boolean) => {
+          if (preserveShared) selectiveClear();
+          else remoteEntryClear();
+          return !preserveShared;
+        });
+        return { get, init: rs.fn() };
+      })(),
     } as any);
-    (globalThis as any).app1 = {
-      __webpack_clear_cache__: remoteEntryClear,
-      __webpack_clear_exposed_cache__: selectiveClear,
-    };
+    (globalThis as any).app1 = (() => {
+      const get = rs.fn();
+      const clearers: WeakMap<object, (preserveShared: boolean) => boolean> = ((
+        globalThis as any
+      )[Symbol.for('module-federation.clear-cache.containers')] ||=
+        new WeakMap());
+      clearers.set(get, (preserveShared: boolean) => {
+        if (preserveShared) selectiveClear();
+        else remoteEntryClear();
+        return !preserveShared;
+      });
+      return { get, init: rs.fn() };
+    })();
     if (registered)
       Global.__FEDERATION__.__INSTANCES__.push({
         name: providerName,
@@ -685,22 +713,34 @@ describe('ModuleFederation', () => {
         entryGlobalName: 'app1',
         shareScope: 'default',
       },
-      remoteEntryExports: {
-        get: rs.fn(),
-        init: rs.fn(),
-        __webpack_clear_cache__: remoteEntryClear,
-      },
-      lib: {
-        get: rs.fn(),
-        init: rs.fn(),
-        __webpack_clear_cache__: libClear,
-      },
+      remoteEntryExports: (() => {
+        const get = rs.fn();
+        const clearers: WeakMap<object, (preserveShared: boolean) => boolean> =
+          ((globalThis as any)[
+            Symbol.for('module-federation.clear-cache.containers')
+          ] ||= new WeakMap());
+        clearers.set(get, remoteEntryClear);
+        return { get, init: rs.fn() };
+      })(),
+      lib: (() => {
+        const get = rs.fn();
+        const clearers: WeakMap<object, (preserveShared: boolean) => boolean> =
+          ((globalThis as any)[
+            Symbol.for('module-federation.clear-cache.containers')
+          ] ||= new WeakMap());
+        clearers.set(get, libClear);
+        return { get, init: rs.fn() };
+      })(),
     } as any);
-    (globalThis as any).app1 = {
-      get: rs.fn(),
-      init: rs.fn(),
-      __webpack_clear_cache__: globalClear,
-    };
+    (globalThis as any).app1 = (() => {
+      const get = rs.fn();
+      const clearers: WeakMap<object, (preserveShared: boolean) => boolean> = ((
+        globalThis as any
+      )[Symbol.for('module-federation.clear-cache.containers')] ||=
+        new WeakMap());
+      clearers.set(get, globalClear);
+      return { get, init: rs.fn() };
+    })();
     Global.__FEDERATION__.moduleInfo = {
       '@federation/instance:1.0.1': {
         version: '1.0.1',
