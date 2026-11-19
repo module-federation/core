@@ -14,6 +14,9 @@ const OWN_RUNTIME_MODULES = [
   'AutoPublicPathRuntimeModule',
 ];
 
+// A cold webpack build can take longer than jest's 5 second default on CI.
+jest.setTimeout(60000);
+
 // These are real builds. Webpack generates each runtime module once for
 // hashing, before chunk hashes exist, and once more for the emitted code.
 describe(`hashed output filenames with Webpack ${webpack.version}`, () => {
