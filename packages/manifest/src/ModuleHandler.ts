@@ -346,8 +346,8 @@ class ModuleHandler {
             ([request, options]) =>
               (options.shareKey ?? request) === pkgName &&
               options.layer === identity.layer &&
-              JSON.stringify([options.shareScope ?? 'default'].flat()) ===
-                JSON.stringify([identity.shareScope].flat()),
+              JSON.stringify(options.shareScope ?? 'default') ===
+                JSON.stringify(identity.shareScope),
           )?.[1] ?? sharedManagerNormalizedOptions[pkgName],
         hostName: this._options.name,
       });

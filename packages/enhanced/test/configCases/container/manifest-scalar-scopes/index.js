@@ -9,11 +9,11 @@ it('retains and selects both same-version singletons in scalar scopes', async ()
 
   // A consumer without local fallbacks verifies that both providers registered.
   const consumer = new __webpack_require__.federation.instance.constructor({
-    name: `scalar_scopes_consumer_${TEST_LAYER ?? 'unlayered'}`,
+    name: `scalar_scopes_${TEST_PREFIX}consumer`,
     remotes: [],
   });
   const registered = [];
-  for (const scope of ['a', 'b']) {
+  for (const scope of ['a', 'default']) {
     consumer.initShareScopeMap(scope, __webpack_share_scopes__[scope]);
     const factory = await consumer.loadShare('react', {
       customShareInfo: {
@@ -39,7 +39,10 @@ it('retains and selects both same-version singletons in scalar scopes', async ()
         singleton: item.singleton,
         requiredVersion: item.requiredVersion,
         assets: item.assets.js.sync,
-      }));
+      }))
+      .sort((first, second) =>
+        String(first.scope).localeCompare(String(second.scope)),
+      );
   });
   const expectedRows = [
     {
@@ -48,15 +51,15 @@ it('retains and selects both same-version singletons in scalar scopes', async ()
       version: '1.0.0',
       singleton: true,
       requiredVersion: false,
-      assets: [TEST_LAYER ? 'common-_common_a_js.js' : 'a_js.js'],
+      assets: [`${TEST_PREFIX}${TEST_LAYER ? '_common_' : ''}a_js.js`],
     },
     {
-      scope: 'b',
+      scope: 'default',
       layer: TEST_LAYER,
       version: '1.0.0',
       singleton: true,
       requiredVersion: '1.0.0',
-      assets: [TEST_LAYER ? 'common-_common_b_js.js' : 'b_js.js'],
+      assets: [`${TEST_PREFIX}${TEST_LAYER ? '_common_' : ''}b_js.js`],
     },
   ];
   for (const row of expectedRows) {

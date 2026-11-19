@@ -126,8 +126,10 @@ export function collectGraph(
         JSON.stringify(value.shareScope ?? 'default') === JSON.stringify(scope)
       );
     });
-    const normalized = (configured.find(([, value]) => value.layer === layer) ??
-      configured.find(([, value]) => value.layer === undefined))?.[1];
+    const [request, normalized] =
+      configured.find(([, value]) => value.layer === layer) ??
+      configured.find(([, value]) => value.layer === undefined) ??
+      [];
     const version =
       'version' in data
         ? JSON.parse(data.version)
@@ -135,11 +137,14 @@ export function collectGraph(
     if (!name || !version) continue;
     sharedKeys.set(module, key);
     if (!sharedMap[key]) {
+      const exactShareKey = (normalized?.shareKey || request) === name;
       const row = getShareItem({
         pkgName: name,
         pkgVersion: version,
         normalizedShareOptions:
-          layered || scope !== 'default' ? normalized : shared[name],
+          layered || scope !== 'default' || exactShareKey
+            ? normalized
+            : undefined,
         hostName,
       });
       if (layered) {
