@@ -10,4 +10,4 @@ Resolve the active compiler in CommonJS and ES modules. `getWebpackPath` returns
 
 Generate output paths with webpack's `chunkRootOutputDir` on 5.110 and later. On older webpack, use the real chunk filename so hashes containing `/` have the correct depth. This applies to the federation runtime and the Node chunk loading and public path runtime modules.
 
-With top-level await and ESM output, check `output.module` for async startup instead of `experiments.outputModule`, which webpack 5.112 ignores. Use namespace imports in independent shared builds so packages without a default export compile.
+For async startup with ESM output, check `output.module` instead of `experiments.outputModule`, which webpack 5.112 ignores. Detect top-level await from `output.environment.topLevelAwait` on webpack 5.111 and later, and treat it as available on 5.102 to 5.110, where webpack removed `experiments.topLevelAwait`. Use namespace imports in independent shared builds so packages without a default export compile.

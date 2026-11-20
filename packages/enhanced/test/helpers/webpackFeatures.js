@@ -12,6 +12,8 @@ const FIRST_RELEASE = {
   outputIgnoreBrowserWarnings: '5.81.0',
   // A RegExp in optimization.splitChunks.cacheGroups[].chunks.
   splitChunksRegExpChunks: '5.86.0',
+  // Top-level await needs no experiments.topLevelAwait setting.
+  topLevelAwaitWithoutExperiment: '5.102.0',
   // Tree-shakes a dynamic import that is only read by property.
   dynamicImportPropertyTreeShaking: '5.102.0',
 };
