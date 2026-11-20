@@ -135,6 +135,7 @@ export type PreparedRemote<P extends object> = {
   Component: React.ComponentType<P>;
   loadClient?: () => Promise<React.ComponentType<P>>;
   loadProvider?: RemoteAppWrapperProps['loadProvider'];
+  service?: BrowserServiceRequest;
 };
 export type RemoteResource<P extends object> = {
   prepare: () => Promise<PreparedRemote<P>>;
@@ -160,6 +161,7 @@ function createConsumer<P extends object>(
           loadProvider: NonNullable<RemoteAppWrapperProps['loadProvider']>,
           serverProvider?: BridgeProviderInstance,
           service?: BrowserServiceRequest,
+          loadService?: RemoteAppWrapperProps['loadService'],
         ) =>
         (businessProps: P) => (
           <RemoteApp
@@ -169,6 +171,7 @@ function createConsumer<P extends object>(
             ssrInstanceId={instanceId}
             ssrProvider={serverProvider}
             service={service}
+            loadService={loadService}
             loading={getOptions().loading}
             remoteProps={businessProps as Record<string, unknown>}
             routing={{
@@ -286,20 +289,16 @@ function createConsumer<P extends object>(
                   metadata.servicePath!,
                 );
                 const binding = getBridgeService(instance, id);
-                const buildVersion = match?.remoteSnapshot?.buildVersion;
                 const ingressUrl = getBridgeServiceIngress(
                   instance,
                   binding.moduleName,
                 );
-                if (!ingressUrl || !buildVersion)
-                  throw Error(
-                    `Service '${id}' requires an ingress binding and build identity.`,
-                  );
+                if (!ingressUrl)
+                  throw Error(`Service '${id}' requires an ingress binding.`);
                 service = {
                   moduleName: binding.moduleName,
                   url: ingressUrl,
                   timeoutMs: binding.timeoutMs,
-                  buildVersion,
                 };
               }
               if (options.exportName && options.exportName !== 'default')
@@ -326,6 +325,7 @@ function createConsumer<P extends object>(
                   service,
                 ),
                 loadProvider,
+                service,
               };
             }
             const resolvedRemoteInfo = match?.remoteInfo && {
@@ -393,14 +393,20 @@ function createConsumer<P extends object>(
         // unresolved classification Suspense boundary and discard remote DOM.
         Hydrate:
           serverBridge?.remote === options.remote && attempt === 0
-            ? bridgeComponent(serverBridge.moduleName, async () => {
-                const selected = await prepare();
-                if (!selected.loadProvider)
-                  throw new Error(
-                    'The hydrated remote must retain its Bridge rendering protocol.',
-                  );
-                return selected.loadProvider();
-              })
+            ? bridgeComponent(
+                serverBridge.moduleName,
+                async () => {
+                  const selected = await prepare();
+                  if (!selected.loadProvider)
+                    throw new Error(
+                      'The hydrated remote must retain its Bridge rendering protocol.',
+                    );
+                  return selected.loadProvider();
+                },
+                undefined,
+                undefined,
+                async () => (await prepare()).service,
+              )
             : undefined,
         Lazy: React.lazy(async () => ({
           default: (await prepare()).Component,
@@ -435,8 +441,13 @@ function createConsumer<P extends object>(
               delayLoading={options.delayLoading}
               remoteProps={props}
             />
-          ) : resource.Hydrate ? (
-            React.createElement(resource.Hydrate, props)
+          ) : environment.target === 'browser' ? (
+            <environment.BrowserRemote
+              resource={resource}
+              loading={options.loading ?? null}
+              delayLoading={options.delayLoading}
+              remoteProps={props}
+            />
           ) : (
             React.createElement(
               resource.Lazy,
@@ -482,6 +493,7 @@ export function createReactRemoteComponentFactory(
 
 interface BrowserEnvironment {
   target: 'browser';
+  BrowserRemote: React.ComponentType<any>;
   instanceId?: string;
   serverBridge?: {
     moduleName: string;

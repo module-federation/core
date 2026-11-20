@@ -52,6 +52,16 @@
       }
     },
     "./bundler": "./dist/bundler.js",
+    "./clear-cache": {
+      "import": {
+        "types": "./dist/clear-cache.d.ts",
+        "default": "./dist/clear-cache.js"
+      },
+      "require": {
+        "types": "./dist/clear-cache.d.cts",
+        "default": "./dist/clear-cache.cjs"
+      }
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -61,6 +71,9 @@
       ],
       "constant": [
         "./dist/constant.d.ts"
+      ],
+      "clear-cache": [
+        "./dist/clear-cache.d.ts"
       ],
       "bundler": [
         "./dist/bundler.d.ts"

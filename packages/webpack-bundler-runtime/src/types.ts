@@ -1,6 +1,7 @@
 import * as runtime from '@module-federation/runtime';
 import type {
   Remote,
+  RemoteInfo,
   RemoteEntryInitOptions,
   SharedConfig,
   SharedGetter,
@@ -74,6 +75,7 @@ export type RemoteDataItem = {
   name: string;
   externalModuleId: ModuleId;
   remoteName: string;
+  p?: Promise<any> | number;
 };
 export type ModuleIdToRemoteDataMapping = Record<ModuleId, RemoteDataItem>;
 
@@ -95,7 +97,21 @@ export type ConsumesLoadingData = WithStatus<{
 export type RemotesLoadingData = WithStatus<{
   chunkMapping?: Record<string, Array<ModuleId>>;
   moduleIdToRemoteDataMapping?: ModuleIdToRemoteDataMapping;
+  cache?: RemoteCacheData;
 }>;
+
+/** Compiled dependency graph and handles to this Node bundler's module tables. */
+export interface RemoteCacheData {
+  moduleIdToParentModuleIds: Record<ModuleId, ModuleId[]>;
+  modules: WebpackRequire['c'];
+  factories: WebpackRequire['m'];
+}
+
+export interface RemoteCachePlan {
+  remoteModuleIds: string[];
+  externalModuleIds: string[];
+  consumerModuleIds: string[];
+}
 
 export type InitializeSharingData = WithStatus<{
   scopeToSharingDataMapping: {
@@ -120,6 +136,9 @@ export interface WebpackRequire {
   m: Record<string, (mod: any) => any>;
   j?: string;
   c: Record<string, any>;
+  f?: Record<string, (chunkId: string | number, promises: unknown[]) => void>;
+  mfAsyncStartup?: () => unknown;
+  getContainer?: (request: string, getScope?: unknown) => Promise<unknown>;
   I: (
     // v1 use string , v2 support string[]
     scopeName: string | string[],
@@ -159,11 +178,35 @@ export type RemoteInfos = Record<
     IdToRemoteMapItem & {
       alias: string;
       entry?: string;
+      type?: string;
+      globalName?: string;
+      entryGlobalName?: string;
       shareScope: string;
     }
   >
 >;
 export type RemoteChunkMapping = Record<string, Array<ModuleId>>;
+
+export type ClearCacheOptions = {
+  name: string;
+  remoteKey?: string;
+  /** @internal Identity captured before the removeRemote hook chain. */
+  remoteInfo?: RemoteInfo;
+};
+
+export type ClearCacheRuntimeOptions = ClearCacheOptions & {
+  webpackRequire: WebpackRequire;
+};
+
+export type ClearCacheResult = {
+  name: string;
+  cleared: true;
+};
+
+export interface InstallClearCacheOptions {
+  webpackRequire: WebpackRequire;
+  instance?: runtime.ModuleFederation;
+}
 
 export type CoreRemotesOptions = {
   idToRemoteMap: IdToRemoteMap;
@@ -233,11 +276,20 @@ export interface Federation {
     }: {
       webpackRequire: WebpackRequire;
       libraryType: string;
-    }) => void;
+    }) => runtime.ModuleFederation;
     getSharedFallbackGetter: (
       options: GetSharedFallbackGetterOptions,
     ) => SharedGetter;
   };
+  clearCache?: (options: ClearCacheOptions) => Promise<ClearCacheResult>;
+  clearContainerCache?: (preserveShared: boolean) => boolean;
+  ensureRemoteChunks?: (
+    chunkIds?: Array<string | number>,
+  ) => Promise<void> | undefined;
+  trackLoad?: <T>(run: () => Promise<T>) => Promise<T>;
+  clearNodeChunks?: (options?: { remoteOnly?: boolean }) => Promise<void>;
+  /** Detach this bundler after draining application work. Idempotent. */
+  disposeClearCache?: () => void;
   bundlerRuntimeOptions: {
     remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'> & {
       remoteInfos?: RemoteInfos;

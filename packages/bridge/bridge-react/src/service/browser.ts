@@ -4,6 +4,7 @@ import { bridgeIdentifierPrefix } from '../ssr-stream/identity';
 import type { BridgeSSRRequest } from '../types';
 import type { BrowserServiceRequest } from './config';
 import { fetchBridgeService } from './fetch';
+import { bridgeErrorFrame } from '../ssr-stream/protocol';
 
 let sequence = 0;
 
@@ -45,6 +46,7 @@ export function receiveBridgeService(
       runtime.accept(sessionId, {
         type: 'meta',
         identifierPrefix,
+        client: result.client,
         stylesheets: result.stylesheets,
         ...(result.hydration === 'progressive'
           ? { hydration: 'progressive' as const }
@@ -63,7 +65,7 @@ export function receiveBridgeService(
   // Observe independently of hydration. Late failures still recover the document.
   void done.catch((error) => {
     if (!request.signal.aborted)
-      runtime.accept(sessionId, { type: 'error', message: String(error) });
+      runtime.accept(sessionId, bridgeErrorFrame(error, String(error)));
   });
   return {
     runtime,

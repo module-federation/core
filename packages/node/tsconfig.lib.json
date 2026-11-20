@@ -8,6 +8,7 @@
   "include": ["**/*.ts", "**/*.js"],
   "exclude": [
     "jest.config.ts",
+    "**/__tests__/**",
     "**/*.spec.ts",
     "**/*.test.ts",
     "**/*.spec.js",

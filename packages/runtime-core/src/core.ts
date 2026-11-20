@@ -75,6 +75,7 @@ const USE_SHARED =
 export class ModuleFederation {
   options: Options;
   hooks = new PluginSystem({
+    dispose: new AsyncHook<[{ origin: ModuleFederation }]>(),
     beforeInit: new SyncWaterfallHook<{
       userOptions: UserOptions;
       options: Options;
@@ -397,7 +398,7 @@ export class ModuleFederation {
     id: string,
     options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
-    return this.remoteHandler.loadRemote(id, options);
+    return this.remoteHandler.loadRemote<T>(id, options);
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering

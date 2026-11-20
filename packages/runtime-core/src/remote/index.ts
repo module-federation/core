@@ -1,7 +1,6 @@
 import {
   isBrowserEnvValue,
   warn,
-  composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
@@ -11,6 +10,7 @@ import {
   getInfoWithoutType,
   globalLoading,
   CurrentGlobal,
+  getRemoteFederationInstance,
 } from '../global';
 import {
   Options,
@@ -36,9 +36,9 @@ import {
 import {
   assert,
   error,
+  getFMId,
   getRemoteInfo,
   getRemoteEntryUniqueKey,
-  getFMId,
   composeRemoteRequestId,
   matchRemoteWithNameAndExpose,
   optionsToMFContext,
@@ -88,6 +88,16 @@ export class RemoteHandler {
       remote: Remote;
       origin: ModuleFederation;
     }>('registerRemote'),
+    removeRemote: new AsyncHook<
+      [
+        {
+          remote: Remote;
+          origin: ModuleFederation;
+          remoteInfo?: RemoteInfo;
+        },
+      ],
+      void
+    >('removeRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
@@ -359,7 +369,10 @@ export class RemoteHandler {
     const userRemotes = userOptions.remotes || [];
 
     return userRemotes.reduce((res, remote) => {
-      this.registerRemote(remote, res, { force: false });
+      // Rebuilt bundlers may repeat their original bootstrap configuration.
+      // The persistent runtime registration remains authoritative.
+      if (!res.some((item) => item.name === remote.name))
+        this.registerRemote(remote, res);
       return res;
     }, globalOptions.remotes);
   }
@@ -889,12 +902,15 @@ export class RemoteHandler {
       }
 
       const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
-      if (hostGlobalSnapshot) {
-        const remoteKey =
-          hostGlobalSnapshot &&
-          'remotesInfo' in hostGlobalSnapshot &&
-          hostGlobalSnapshot.remotesInfo &&
-          getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
+      if (
+        hostGlobalSnapshot &&
+        'remotesInfo' in hostGlobalSnapshot &&
+        hostGlobalSnapshot.remotesInfo
+      ) {
+        const remoteKey = getInfoWithoutType(
+          hostGlobalSnapshot.remotesInfo,
+          remote.name,
+        ).key;
         if (remoteKey) {
           delete hostGlobalSnapshot.remotesInfo[remoteKey];
         }
@@ -903,8 +919,8 @@ export class RemoteHandler {
       const loadedModule = host.moduleCache.get(remote.name);
       if (loadedModule) {
         const remoteInfo = loadedModule.remoteInfo;
+        const remoteIns = getRemoteFederationInstance(remoteInfo);
         const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
-
         if (CurrentGlobal[key]) {
           if (
             Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
@@ -915,93 +931,34 @@ export class RemoteHandler {
             CurrentGlobal[key] = undefined;
           }
         }
-        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
-          loadedModule.remoteInfo,
-        );
-
+        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(remoteInfo);
         if (globalLoading[remoteEntryUniqueKey]) {
           delete globalLoading[remoteEntryUniqueKey];
         }
-
-        // delete unloaded shared and instance
-        let remoteInsId = remoteInfo.buildVersion
-          ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
-          : remoteInfo.name;
-        const remoteInsIndex =
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
-            if (remoteInfo.buildVersion) {
-              return ins.options.id === remoteInsId;
-            } else {
-              return ins.name === remoteInsId;
-            }
-          });
-        if (remoteInsIndex !== -1) {
-          const remoteIns =
-            CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex];
-          remoteInsId = remoteIns.options.id || remoteInsId;
-          const globalShareScopeMap = getGlobalShareScope();
-
-          let isAllSharedNotUsed = true;
-          const needDeleteKeys: Array<[string, string, string, string]> = [];
-          Object.keys(globalShareScopeMap).forEach((instId) => {
-            const shareScopeMap = globalShareScopeMap[instId];
-            shareScopeMap &&
-              Object.keys(shareScopeMap).forEach((shareScope) => {
-                const shareScopeVal = shareScopeMap[shareScope];
-                shareScopeVal &&
-                  Object.keys(shareScopeVal).forEach((shareName) => {
-                    const sharedPkgs = shareScopeVal[shareName];
-                    sharedPkgs &&
-                      Object.keys(sharedPkgs).forEach((shareVersion) => {
-                        const shared = sharedPkgs[shareVersion];
-                        if (
-                          shared &&
-                          typeof shared === 'object' &&
-                          shared.from === remoteInfo.name
-                        ) {
-                          if (shared.loaded || shared.loading) {
-                            shared.useIn = shared.useIn.filter(
-                              (usedHostName) =>
-                                usedHostName !== remoteInfo.name,
-                            );
-                            if (shared.useIn.length) {
-                              isAllSharedNotUsed = false;
-                            } else {
-                              needDeleteKeys.push([
-                                instId,
-                                shareScope,
-                                shareName,
-                                shareVersion,
-                              ]);
-                            }
-                          } else {
-                            needDeleteKeys.push([
-                              instId,
-                              shareScope,
-                              shareName,
-                              shareVersion,
-                            ]);
-                          }
-                        }
-                      });
-                  });
-              });
-          });
-
-          if (isAllSharedNotUsed) {
+        if (remoteIns) {
+          const scopes = getGlobalShareScope();
+          let used = false;
+          for (const scopeMap of Object.values(scopes))
+            for (const packages of Object.values(scopeMap))
+              for (const versions of Object.values(packages))
+                for (const [version, shared] of Object.entries(versions)) {
+                  if (shared.from !== remoteInfo.name) continue;
+                  if (shared.loaded || shared.loading)
+                    shared.useIn = shared.useIn.filter(
+                      (usedName) => usedName !== remoteInfo.name,
+                    );
+                  if ((shared.loaded || shared.loading) && shared.useIn.length)
+                    used = true;
+                  else delete versions[version];
+                }
+          if (!used) {
             remoteIns.shareScopeMap = {};
-            delete globalShareScopeMap[remoteInsId];
+            delete scopes[remoteIns.options.id || remoteIns.name];
           }
-          needDeleteKeys.forEach(
-            ([insId, shareScope, shareName, shareVersion]) => {
-              delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
-                shareVersion
-              ];
-            },
-          );
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
+          const instances = CurrentGlobal.__FEDERATION__.__INSTANCES__;
+          const index = instances.indexOf(remoteIns);
+          if (index !== -1) instances.splice(index, 1);
         }
-
         host.moduleCache.delete(remote.name);
       }
     } catch (err) {

@@ -4,12 +4,14 @@ import {
   GlobalShareScopeMap,
   Remote,
   Optional,
+  RemoteInfo,
 } from './type';
 import { getFMId } from './utils/tool';
 import {
   GlobalModuleInfo,
   ModuleInfo,
   isDebugMode,
+  composeKeyWithSeparator,
 } from '@module-federation/sdk';
 import { warn, error } from './utils/logger';
 import { ModuleFederationRuntimePlugin } from './type/plugin';
@@ -127,7 +129,32 @@ export function resetFederationGlobalInfo(): void {
 export function setGlobalFederationInstance(
   FederationInstance: ModuleFederation,
 ): void {
-  CurrentGlobal.__FEDERATION__.__INSTANCES__.push(FederationInstance);
+  const instances = CurrentGlobal.__FEDERATION__.__INSTANCES__;
+  const { id } = FederationInstance.options;
+  if (id)
+    for (let i = instances.length - 1; i >= 0; i--)
+      if (
+        instances[i].name === FederationInstance.name &&
+        instances[i].options.id === id
+      )
+        instances.splice(i, 1);
+  instances.push(FederationInstance);
+}
+
+type ProviderReference = Pick<RemoteInfo, 'name' | 'buildVersion'> &
+  Partial<Pick<RemoteInfo, 'entry' | 'version'>>;
+/** A provider name and build version identify one container runtime. */
+export function getRemoteFederationInstance(
+  remoteInfo: ProviderReference,
+  instances: readonly ModuleFederation[] = CurrentGlobal.__FEDERATION__
+    .__INSTANCES__,
+): ModuleFederation | undefined {
+  return instances.find((instance) =>
+    remoteInfo.buildVersion
+      ? instance.options.id ===
+        composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
+      : instance.name === remoteInfo.name,
+  );
 }
 
 export function getGlobalFederationConstructor():
@@ -212,7 +239,7 @@ export const getTargetSnapshotInfoByModuleInfo = (
     const { version, ...resModuleInfo } = moduleInfo;
     const moduleKeyWithoutVersion = getFMId(resModuleInfo);
     const getModuleInfoWithoutVersion = getInfoWithoutType(
-      nativeGlobal.__FEDERATION__.moduleInfo,
+      snapshot,
       moduleKeyWithoutVersion,
     ).value;
 

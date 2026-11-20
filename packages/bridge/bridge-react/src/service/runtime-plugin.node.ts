@@ -74,13 +74,10 @@ export default function bridgeServicePlugin(
           : undefined,
         metadata.servicePath!,
       );
-      const buildVersion = snapshot?.buildVersion;
-      if (!buildVersion) throw Error(`Service '${id}' has no build identity.`);
       const key = JSON.stringify([
         match.remote.name,
         expose,
         match.remoteInfo.entry,
-        buildVersion,
         url,
         binding,
       ]);
@@ -100,7 +97,7 @@ export default function bridgeServicePlugin(
               }
               return fetchBridgeService(
                 { ...info, moduleName: binding.moduleName, headers },
-                { ...binding, url, buildVersion },
+                { ...binding, url },
               );
             },
           }),

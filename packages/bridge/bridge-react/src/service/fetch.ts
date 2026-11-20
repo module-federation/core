@@ -13,12 +13,14 @@ import {
   limits,
   frames,
   validateStylesheets,
+  validateServiceClient,
   validateServiceRequest,
   type Meta,
 } from './protocol';
 export interface BridgeServiceFetchOptions {
   url: string;
-  buildVersion: string;
+  /** @deprecated The producer selects its current deployment per response. */
+  buildVersion?: string;
   timeoutMs?: number;
   fetch?: typeof fetch;
   serviceHeaders?: Record<string, string>;
@@ -34,8 +36,6 @@ export async function fetchBridgeService(
   const endpoint = new URL(options.url);
   if (!['http:', 'https:'].includes(endpoint.protocol))
     throw new Error('Bridge service URL must use HTTP or HTTPS.');
-  if (!options.buildVersion)
-    throw new Error('Bridge service buildVersion is required.');
   const bound = limits(options);
   const aborter = new AbortController();
   const initial = deferred<BridgeSSRMessageResult>();
@@ -71,7 +71,7 @@ export async function fetchBridgeService(
         timeoutMs,
       );
   }
-  void (async () => {
+  const transfer = (async () => {
     try {
       if (settled) return;
       const response = await (options.fetch ?? fetch)(endpoint, {
@@ -89,7 +89,6 @@ export async function fetchBridgeService(
         body: JSON.stringify(
           {
             protocol: BRIDGE_PRODUCER_PROTOCOL,
-            buildVersion: options.buildVersion,
             request: {
               instanceId: info.instanceId,
               identifierPrefix: info.identifierPrefix,
@@ -120,7 +119,10 @@ export async function fetchBridgeService(
       }
       if (response.status !== 200) {
         void response.body?.cancel().catch(() => {});
-        throw new Error(`Bridge service returned HTTP ${response.status}.`);
+        throw Object.assign(
+          new Error(`Bridge service returned HTTP ${response.status}.`),
+          { status: response.status },
+        );
       }
       if (
         !response.headers.get('content-type')?.startsWith(CONTENT_TYPE) ||
@@ -141,20 +143,35 @@ export async function fetchBridgeService(
           if (
             frame.type !== 'meta' ||
             frame.protocol !== BRIDGE_PRODUCER_PROTOCOL ||
-            frame.buildVersion !== options.buildVersion ||
+            typeof frame.buildVersion !== 'string' ||
+            !frame.buildVersion ||
             frame.identifierPrefix !== info.identifierPrefix ||
             !['progressive', 'complete'].includes(frame.hydration)
           )
             throw new Error('Bridge service metadata/buildVersion mismatch.');
           validateStylesheets(frame.stylesheets);
+          validateServiceClient(frame.client);
           meta = frame;
           initial.resolve({
             protocol: BRIDGE_PRODUCER_PROTOCOL,
             stylesheets: meta.stylesheets,
+            client: meta.client,
             hydration: meta.hydration,
             messages: messages.stream,
             abort,
           });
+        } else if (frame.type === 'client') {
+          validateServiceClient(frame.client);
+          if (
+            !frame.client ||
+            frame.client.name !== meta.client?.name ||
+            frame.client.snapshot.buildVersion !== meta.buildVersion
+          )
+            throw new Error('Invalid Bridge service client update.');
+          messages.push(
+            frame,
+            new TextEncoder().encode(JSON.stringify(frame)).byteLength,
+          );
         } else if (frame.type === 'html') {
           if (data || typeof frame.html !== 'string' || !frame.html)
             throw new Error('Invalid Bridge service HTML frame.');
@@ -220,5 +237,6 @@ export async function fetchBridgeService(
       reader?.releaseLock();
     }
   })();
+  info.work?.track(transfer);
   return initial.promise;
 }

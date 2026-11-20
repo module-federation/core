@@ -351,7 +351,7 @@ describe('unified React remote consumption', () => {
       'bridge' as const,
       true,
       undefined,
-      /requires an ingress binding and build identity/,
+      /requires an ingress binding/,
     ],
   ])(
     'reports %s after loading without invoking the export',

@@ -65,6 +65,53 @@ function ClientOnlyRemote<P extends object>({
   return <Component {...remoteProps} />;
 }
 
+const subscribe = () => () => {};
+// This is a per-mount decision, not an external "hydration finished" signal.
+// Seed the snapshot when React hydrates and keep it stable afterwards: changing
+// it at commit would interrupt nested Suspense boundaries still hydrating.
+const useClientMount = React.useSyncExternalStore
+  ? () => {
+      const [store] = useState(() => {
+        let clientMount = true;
+        return {
+          getSnapshot: () => clientMount,
+          getServerSnapshot: () => (clientMount = false),
+        };
+      });
+      return React.useSyncExternalStore(
+        subscribe,
+        store.getSnapshot,
+        store.getServerSnapshot,
+      );
+    }
+  : () => true;
+
+function BrowserRemote<P extends object>({
+  resource,
+  remoteProps,
+  ...loadingProps
+}: {
+  resource: RemoteResource<P> & {
+    Hydrate?: React.ComponentType<P>;
+    Lazy: React.ComponentType<P>;
+  };
+  remoteProps: P;
+  loading: React.ReactNode;
+  delayLoading?: number;
+}) {
+  const clientMount = useClientMount();
+  if (clientMount)
+    return (
+      <ClientOnlyRemote
+        resource={resource}
+        remoteProps={remoteProps}
+        {...loadingProps}
+      />
+    );
+  const Component = resource.Hydrate || resource.Lazy;
+  return <Component {...remoteProps} />;
+}
+
 // Select once per React runtime, never from props or SSR context. React 16/17
 // retain CSR without invoking a hook they do not provide. Modern SSR hydration
 // requires useId; a broken modern runtime must fail instead of losing identity.
@@ -93,6 +140,7 @@ export const useBrowserEnvironment: UseRemoteEnvironment = (
   return useMemo(
     () => ({
       target: 'browser' as const,
+      BrowserRemote,
       instanceId,
       serverBridge,
       ClientOnlyRemote,

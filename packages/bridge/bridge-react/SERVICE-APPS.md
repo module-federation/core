@@ -52,9 +52,37 @@ const handler = createBridgeServiceHandler({
 })
 ```
 
-`authorize` executes before every cache lookup. `validate` optionally checks deployment-specific module and page constraints. A framework adapter loads the producer's real Node expose and supplies its existing manifest build identity. Configure a unique `MF_BUILD_VERSION` once for each paired browser/Node build. Core otherwise falls back to package version, which does not distinguish rebuilding the same package version. Deploy the manifest, provider artifacts and service together. A mismatched expected build returns 409 before rendering. Unsupported protocol or response build metadata fails consumption.
+A framework coordinating SSR updates can call `handler(request, { work })`, where
+`work.track(promise)` registers original producer work with that HTTP request and
+returns the same promise. Both successful and rejected settlement release its
+ownership. Rendering, snapshots, normalization and message pumping remain owned
+after an abort race has ended the response. Framework-specific background work
+must also register through `info.work`. This optional context stays on the server
+and does not enter the request body, transcript cache key or response frames.
+The producer supplies its own request owner when it runs in a separate process.
 
-The wire protocol remains `module-federation/bridge-ssr/producer/v1`. The first NDJSON message is `meta` with build identity, identifier prefix, hydration mode and CSS URLs, followed by the producer's complete `html`, `ready`, `update` and `done` messages. Generic complete providers retain their existing `data` mode. Modern only uses initial snapshots plus updates.
+`authorize` executes before every cache lookup. `validate` optionally checks deployment-specific module and page constraints. A framework adapter loads the producer's real Node expose and supplies its existing manifest build identity. Configure a unique `MF_BUILD_VERSION` once for each paired browser/Node build. Core otherwise falls back to package version, which does not distinguish rebuilding the same package version. Deploy the manifest, provider artifacts and service together. The Host does not send an expected build or require equality with its discovery snapshot. A stable endpoint may switch deployment without notifying the Host.
+
+Framework adapters attach `client: { name, expose, snapshot, dependencies }` to the render result. The response forwards this selected browser snapshot, and hydration loads that provider in a mount-owned consumer scope instead of evaluating the Host's stale client provider. Optional `client` messages supplement dependencies discovered while rendering the stream, before the affected HTML or data messages. The ready scope retains the live description. Within that scope the selected dependency snapshot also takes precedence over a producer's older configured or dynamically registered manifest URL. Keep versioned entries and chunks available while older responses can still reference them. Modern emits a content-addressed Service client entry for production builds.
+
+`fetchBridgeService` rejects non-success responses with an ordinary Error carrying
+an HTTP `status`. Error bodies and deployment version details are not forwarded.
+Authorization and validation run before rendering and cache lookup. Service requests are
+never automatically replayed.
+
+A transparent ingress may set `forwardHttpErrors: true` to preserve an upstream
+HTTP failure before a render result exists. This defaults to `false`, so normal
+producer render failures remain HTTP 500. An active stream is terminated through
+its existing error path rather than replaced with a new HTTP response.
+
+Host and browser error frames preserve the HTTP status alongside a sanitized
+message. A business HTTP 409 does not trigger generic `csr=1` recovery or replay.
+It no longer represents an internal expected-build conflict. Service-internal SSR
+dependencies use their owning application's update queue and request drain.
+Development checks and production update APIs share this cache lifecycle, and
+Node readiness never forces a browser reload or route revalidation.
+
+The wire protocol remains `module-federation/bridge-ssr/producer/v1`. The first NDJSON message is `meta` with the selected client description, build identity, identifier prefix, hydration mode and CSS URLs, followed by `html`, `ready`, `update`, optional `client` updates and `done`. Generic complete providers retain their existing `data` mode. Modern only uses initial snapshots plus updates.
 
 The producer alone frames HTML, isolates React scripts and determines readiness. React 19.2+ independent streams use its native queued Suspense marker so document completion does not abandon pending boundaries. React 18 output stays unchanged. Consumers decode and validate JSON messages without reparsing producer HTML. A JSON newline is the record separator, while newlines inside HTML remain escaped JSON content.
 

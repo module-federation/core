@@ -29,6 +29,7 @@ export const BridgeSSRContext =
   React.createContext<BridgeSSRContextValue | null>(null);
 
 export interface BridgeSSRBrowserSnapshot {
+  client?: import('./service/protocol').BridgeServiceClient;
   updates?: ReadableStream<unknown>;
   snapshot: unknown;
   identifierPrefix: string;

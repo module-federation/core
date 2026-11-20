@@ -1309,5 +1309,182 @@ describe('runtimePlugin', () => {
         }),
       );
     });
+
+    it('shares one installedChunks state across plugin construction and beforeInit and clears remote chunks selectively', async () => {
+      const fsMock = require('fs');
+      fsMock.existsSync.mockReset();
+      fsMock.readFile.mockReset();
+      const originalFetch = global.fetch;
+      const fetchMock = jest.fn();
+      global.fetch = fetchMock as any;
+      try {
+        (global as any).__webpack_require__ = {
+          ...mockWebpackRequire,
+          m: {},
+          federation: {
+            ...mockWebpackRequire.federation,
+            runtime: {
+              loadScriptNode: jest.fn().mockResolvedValue({}),
+            },
+            instance: {
+              loaderHook: {
+                lifecycle: {
+                  fetch: { emit: jest.fn().mockResolvedValue(null) },
+                },
+              },
+            },
+          },
+          f: {
+            readFileVm: jest.fn(),
+          },
+        };
+
+        const instancePlugin = runtimePlugin();
+        const preInitHandler = (global as any).__webpack_require__.f.readFileVm;
+        instancePlugin.beforeInit?.({
+          origin: (global as any).__webpack_require__.federation.instance,
+        } as any);
+        expect((global as any).__webpack_require__.f.readFileVm).toBe(
+          preInitHandler,
+        );
+
+        // Load a local filesystem chunk first
+        const vmMock = require('vm');
+        vmMock.Script.mockImplementationOnce(() => ({
+          runInThisContext: () => (chunk: any) => {
+            chunk.ids = ['local-chunk'];
+            chunk.modules = {};
+          },
+        }));
+        fsMock.existsSync.mockReturnValue(true);
+        fsMock.readFile.mockImplementationOnce(
+          (_file: string, _enc: string, cb: any) => cb(null, '// local'),
+        );
+        const localPromises: Promise<any>[] = [];
+        preInitHandler('local-chunk', localPromises);
+        await Promise.all(localPromises);
+
+        // Load a remote HTTP chunk next
+        fsMock.existsSync.mockReturnValue(false);
+        fetchMock.mockResolvedValueOnce({
+          text: jest
+            .fn()
+            .mockResolvedValue(
+              'exports.ids = ["remote-chunk"]; exports.modules = { r: function() {} };',
+            ),
+        });
+        const remotePromises: Promise<any>[] = [];
+        preInitHandler('remote-chunk', remotePromises);
+        await Promise.all(remotePromises);
+
+        // Both chunks are cached before clearing
+        const cachedCheck: Promise<any>[] = [];
+        preInitHandler('local-chunk', cachedCheck);
+        preInitHandler('remote-chunk', cachedCheck);
+        expect(cachedCheck).toHaveLength(0);
+
+        // Selective clear evicts remote chunk while preserving Host's local chunk
+        await (global as any).__webpack_require__.federation.clearNodeChunks({
+          remoteOnly: true,
+        });
+        const afterRemoteClear: Promise<any>[] = [];
+        preInitHandler('local-chunk', afterRemoteClear);
+        expect(afterRemoteClear).toHaveLength(0);
+
+        fsMock.existsSync.mockReturnValueOnce(false);
+        fetchMock.mockResolvedValueOnce({
+          text: jest
+            .fn()
+            .mockResolvedValue(
+              'exports.ids = ["remote-chunk"]; exports.modules = {};',
+            ),
+        });
+        preInitHandler('remote-chunk', afterRemoteClear);
+        expect(afterRemoteClear).toHaveLength(1);
+        await Promise.all(afterRemoteClear);
+
+        // Full clear evicts local chunks too (for in-place container reset)
+        await (global as any).__webpack_require__.federation.clearNodeChunks({
+          remoteOnly: false,
+        });
+        vmMock.Script.mockImplementationOnce(() => ({
+          runInThisContext: () => (chunk: any) => {
+            chunk.ids = ['local-chunk'];
+            chunk.modules = {};
+          },
+        }));
+        fsMock.existsSync.mockReturnValue(true);
+        fsMock.readFile.mockImplementationOnce(
+          (_file: string, _enc: string, cb: any) => cb(null, '// local'),
+        );
+        const afterFullClear: Promise<any>[] = [];
+        preInitHandler('local-chunk', afterFullClear);
+        expect(afterFullClear).toHaveLength(1);
+        await Promise.all(afterFullClear);
+      } finally {
+        global.fetch = originalFetch;
+      }
+    });
+
+    it('bridges __webpack_require__.O (onChunksLoaded) when patched chunk handlers install split initial chunks', async () => {
+      const fsMock = require('fs');
+      const vmMock = require('vm');
+      fsMock.existsSync.mockReset();
+      fsMock.readFile.mockReset();
+
+      const onChunksLoaded = jest.fn() as any;
+      const nativeInstalled: Record<string, number> = { selfChunk: 0 };
+      onChunksLoaded.readFileVm = (chunkId: string) =>
+        nativeInstalled[chunkId] === 0;
+
+      (global as any).__webpack_require__ = {
+        ...mockWebpackRequire,
+        m: {},
+        O: onChunksLoaded,
+        federation: {
+          ...mockWebpackRequire.federation,
+          runtime: {
+            loadScriptNode: jest.fn().mockResolvedValue({}),
+          },
+          instance: {
+            loaderHook: {
+              lifecycle: {
+                fetch: { emit: jest.fn().mockResolvedValue(null) },
+              },
+            },
+          },
+        },
+        f: {
+          readFileVm: jest.fn(),
+        },
+      };
+
+      const instancePlugin = runtimePlugin();
+      instancePlugin.beforeInit?.({
+        origin: (global as any).__webpack_require__.federation.instance,
+      } as any);
+
+      // Native self-chunk remains recognized via prevReadFileCheck
+      expect(onChunksLoaded.readFileVm('selfChunk')).toBe(true);
+      expect(onChunksLoaded.readFileVm('splitChunk')).toBe(false);
+
+      vmMock.Script.mockImplementationOnce(() => ({
+        runInThisContext: () => (chunk: any) => {
+          chunk.ids = ['splitChunk'];
+          chunk.modules = { m1: () => {} };
+        },
+      }));
+      fsMock.existsSync.mockReturnValue(true);
+      fsMock.readFile.mockImplementationOnce(
+        (_file: string, _enc: string, cb: any) => cb(null, '// split'),
+      );
+
+      const promises: Promise<any>[] = [];
+      (global as any).__webpack_require__.f.readFileVm('splitChunk', promises);
+      await Promise.all(promises);
+
+      expect(onChunksLoaded.readFileVm('splitChunk')).toBe(true);
+      expect(onChunksLoaded).toHaveBeenCalledTimes(1);
+    });
   });
 });

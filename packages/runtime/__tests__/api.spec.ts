@@ -1,8 +1,34 @@
-import { describe, it, expect } from '@rstest/core';
+import { describe, it, expect, rs } from '@rstest/core';
 import { createInstance, getInstance, init } from '../src';
 
 // eslint-disable-next-line max-lines-per-function
 describe('api', () => {
+  it('keeps compiled same-name builds distinct and reuses only the exact build', () => {
+    try {
+      rs.stubGlobal('FEDERATION_BUILD_IDENTIFIER', 'same-build-host:first');
+      const first = init({ name: 'same-build-host' });
+      expect(first.options.id).toBe('same-build-host:first');
+      rs.stubGlobal('FEDERATION_BUILD_IDENTIFIER', 'same-build-host:second');
+      const second = init({ name: 'same-build-host' });
+      expect(second).not.toBe(first);
+      expect(second.options.id).toBe('same-build-host:second');
+      expect(init({ name: 'same-build-host' })).toBe(second);
+      rs.stubGlobal('FEDERATION_BUILD_IDENTIFIER', 'same-build-host:first');
+      expect(init({ name: 'same-build-host' })).toBe(first);
+    } finally {
+      rs.unstubAllGlobals();
+    }
+  });
+
+  it('honors explicit runtime IDs without changing the name/version fallback', () => {
+    const first = init({ name: 'explicit-host', id: 'first' });
+    const second = init({ name: 'explicit-host', id: 'second' });
+    expect(second).not.toBe(first);
+    expect(init({ name: 'explicit-host', id: 'first' })).toBe(first);
+    const pure = init({ name: 'pure-runtime-host', id: '' });
+    expect(pure.options.id).toBe('');
+    expect(init({ name: 'pure-runtime-host' })).toBe(pure);
+  });
   it('initializes and validates API structure', () => {
     const FM = init({
       name: '@federation/name',
