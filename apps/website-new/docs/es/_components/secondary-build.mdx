@@ -3,7 +3,7 @@
 :::warning Nota
 Si tu objetivo es "aplicar tree shaking a una dependencia shared para una sola aplicación", normalmente basta con [usedExports](/configure/shared.html#usedexports).
 
-Esta sección trata sobre cómo generar un artefacto secundario independiente que puede cargarse bajo demanda en runtime y que puede distribuirse o reutilizarse desde el lado del despliegue.
+Aquí verás cómo generar un bundle independiente que se carga bajo demanda en runtime. Puedes distribuirlo o reutilizarlo durante el despliegue.
 :::
 
 Este proceso solo construye las dependencias shared; los remotes no tendrán efecto. La entrada original del proyecto se ignora automáticamente durante el build y solo se empaquetan los módulos shared.
