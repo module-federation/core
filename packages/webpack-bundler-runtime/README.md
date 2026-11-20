@@ -30,7 +30,7 @@ Detach an application generation with `disposeClearCache()` after its work and
 cache cleanup have finished.
 
 Rspack emits the compiled remote reverse dependency map and module table handles
-under `federation.remotesLoadingData.cache` when `@module-federation/node` is
+under `remotesLoadingData.cache` when `@module-federation/node` is
 enabled. The Node adapter uses one eviction plan to clear remote factories,
 affected module exports and MF loading records, and re-runs remote installation
 when startup chunks are re-evaluated. Frameworks can reuse the same plan to

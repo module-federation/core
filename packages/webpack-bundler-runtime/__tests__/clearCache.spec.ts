@@ -41,7 +41,7 @@ function fixture(
       [101, 201, 301, 401, 999].map((id) => [id, { exports: id }]),
     ),
   } as unknown as WebpackRequire;
-  runtime.federation.remotesLoadingData = {
+  runtime.remotesLoadingData = {
     ...runtime.remotesLoadingData!,
     chunkMapping: { 10: [101] },
     cache: {
@@ -233,14 +233,13 @@ describe('optional bundler cache runtime', () => {
     const options = runtime.federation.bundlerRuntimeOptions.remotes!;
     const record = options.idToExternalAndNameMapping[101];
     record.p = 1;
-    delete runtime.federation.remotesLoadingData!.cache;
+    delete runtime.remotesLoadingData!.cache;
     await expect(
       clearCache({ webpackRequire: runtime, name: 'remoteA' }),
     ).rejects.toThrow('compiled dependency graph and module tables');
     expect(record.p).toBe(1);
     expect(runtime.c[101]).toBeDefined();
     expect(runtime.m[101]).toBeDefined();
-    delete runtime.federation.remotesLoadingData;
     delete runtime.remotesLoadingData;
     options.idToRemoteMap = {};
     await expect(

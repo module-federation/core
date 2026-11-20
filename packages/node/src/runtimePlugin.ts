@@ -4,7 +4,7 @@ import {
   installClearCache,
   installNodeCacheRuntime,
 } from '@module-federation/webpack-bundler-runtime/clear-cache';
-import { nodeRuntimeLifecycle } from './lifecycle/runtimeLifecycle';
+import { nodeRuntimeLifecycle } from './lifecycle/plugin';
 import {
   attachRuntimeChunkState,
   deleteChunk,

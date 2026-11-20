@@ -97,6 +97,7 @@ export type ConsumesLoadingData = WithStatus<{
 export type RemotesLoadingData = WithStatus<{
   chunkMapping?: Record<string, Array<ModuleId>>;
   moduleIdToRemoteDataMapping?: ModuleIdToRemoteDataMapping;
+  cache?: RemoteCacheData;
 }>;
 
 /** Compiled dependency graph and handles to this Node bundler's module tables. */
@@ -281,7 +282,6 @@ export interface Federation {
     ) => SharedGetter;
   };
   clearCache?: (options: ClearCacheOptions) => Promise<ClearCacheResult>;
-  remotesLoadingData?: RemotesLoadingData & { cache?: RemoteCacheData };
   clearContainerCache?: (preserveShared: boolean) => boolean;
   ensureRemoteChunks?: (
     chunkIds?: Array<string | number>,

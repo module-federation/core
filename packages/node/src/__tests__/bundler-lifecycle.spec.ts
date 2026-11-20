@@ -50,7 +50,7 @@ function createHost() {
     m: { 101: () => {} },
     c: { 101: { exports: 'cached' }, 201: { exports: container } },
   };
-  runtime.federation.remotesLoadingData = {
+  runtime.remotesLoadingData = {
     moduleIdToRemoteDataMapping: {
       101: { remoteName: 'registered', externalModuleId: 201 },
     },

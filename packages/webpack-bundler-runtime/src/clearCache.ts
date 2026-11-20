@@ -75,8 +75,7 @@ function targetFor(runtime: WebpackRequire, name: string, key = name) {
     name,
   ]);
   const options = runtime.federation.bundlerRuntimeOptions.remotes;
-  const loading =
-    runtime.federation.remotesLoadingData || runtime.remotesLoadingData;
+  const loading = runtime.remotesLoadingData;
   const remoteIds = new Set<string>();
   for (const [id, infos] of Object.entries(options?.idToRemoteMap || {}))
     if (infos.some((info) => names.includes(info.name))) remoteIds.add(id);
@@ -93,11 +92,9 @@ export function planRemoteCache({
   name,
   remoteKey,
 }: ClearCacheRuntimeOptions): RemoteCachePlan | undefined {
-  const loading = runtime.federation.remotesLoadingData;
+  const loading = runtime.remotesLoadingData;
   const cache = loading?.cache;
-  const remoteData =
-    loading?.moduleIdToRemoteDataMapping ||
-    runtime.remotesLoadingData?.moduleIdToRemoteDataMapping;
+  const remoteData = loading?.moduleIdToRemoteDataMapping;
   if (
     !cache?.modules ||
     !cache.factories ||
@@ -139,11 +136,9 @@ export function ensureRemoteChunks(
   chunkIds?: Array<string | number>,
 ): Promise<void> | undefined {
   const remotesHandler = runtime.f?.remotes;
-  const loading =
-    runtime.federation.remotesLoadingData || runtime.remotesLoadingData;
+  const loading = runtime.remotesLoadingData;
   if (typeof remotesHandler !== 'function' || !loading?.chunkMapping) return;
-  const factories =
-    runtime.federation.remotesLoadingData?.cache?.factories || runtime.m;
+  const factories = loading.cache?.factories || runtime.m;
   const state = getState(runtime);
   const candidates = chunkIds
     ? chunkIds.map(String)
@@ -166,7 +161,7 @@ function installContainerCache(runtime: WebpackRequire) {
   if (!get) return;
   const clear = (preserveShared: boolean) => {
     if (preserveShared) return false;
-    const modules = runtime.c;
+    const modules = runtime.remotesLoadingData?.cache?.modules || runtime.c;
     if (modules) for (const id of Object.keys(modules)) delete modules[id];
     void runtime.federation.clearNodeChunks?.({ remoteOnly: false });
     return Boolean(modules);
@@ -219,12 +214,11 @@ export async function clearCache(
     );
   if (!plan?.remoteModuleIds.length)
     return { name: options.name, cleared: true };
-  const loading = runtime.federation.remotesLoadingData!;
+  const loading = runtime.remotesLoadingData!;
   const records = plan.remoteModuleIds.flatMap((id) => [
     runtime.federation.bundlerRuntimeOptions.remotes
       ?.idToExternalAndNameMapping[id],
     loading.moduleIdToRemoteDataMapping?.[id],
-    runtime.remotesLoadingData?.moduleIdToRemoteDataMapping?.[id],
   ]);
   const pending = records.filter(
     (r) => r?.p && typeof r.p === 'object' && 'then' in r.p,
@@ -239,8 +233,7 @@ export async function clearCache(
     );
 
   const { factories, modules } = loading.cache!;
-  const chunkMapping =
-    loading.chunkMapping || runtime.remotesLoadingData?.chunkMapping || {};
+  const chunkMapping = loading.chunkMapping || {};
   const evictedIds = new Set(
     plan.remoteModuleIds.filter((id) => Boolean(factories[id])),
   );
