@@ -198,64 +198,73 @@ class StatsManager {
     }
     const assets: Record<string, StatsAssets> = {};
 
+    const matchExpose = (name?: string | null) =>
+      typeof name !== 'string'
+        ? undefined
+        : exposeKeysByChunk.has(name)
+          ? name
+          : // Split chunks retain the expose name followed by a hash suffix.
+            [...exposeKeysByChunk.keys()].find((key) =>
+              name.startsWith(key + '-'),
+            );
+
     chunks.forEach((chunk) => {
       // Optimizers can merge equal expose chunks under just one chunk name.
       // Their named groups still identify every expose that loads those assets.
-      const names = new Set([
-        chunk.name,
-        ...[...chunk.groupsIterable].map((group) => group.name),
-      ]);
-      const assetKeys = new Set<string>();
-      for (const name of names) {
-        if (typeof name !== 'string') continue;
-        // Split chunks retain the expose name followed by a hash suffix.
-        const matchedKey = exposeKeysByChunk.has(name)
-          ? name
-          : [...exposeKeysByChunk.keys()].find((key) =>
-              name.startsWith(key + '-'),
-            );
-        if (matchedKey) {
-          for (const key of exposeKeysByChunk.get(matchedKey)!)
-            assetKeys.add(key);
-        }
-      }
-      if (!assetKeys.size) return;
-      const chunkAssets = getAssetsByChunk(chunk, entryPointNames);
+      const ownName = matchExpose(chunk.name);
+      const exposeNames = new Set(
+        [
+          ownName,
+          ...[...chunk.groupsIterable].map((g) => matchExpose(g.name)),
+        ].filter((name): name is string => name !== undefined),
+      );
+      for (const exposeName of exposeNames) {
+        // A split chunk can sit in the groups of several exposes. Give each
+        // expose the files of its own group, not the files of the others.
+        const chunkAssets = getAssetsByChunk(
+          chunk,
+          entryPointNames,
+          exposeName === ownName
+            ? undefined
+            : (group) => matchExpose(group.name) === exposeName,
+        );
+        const assetKeys = exposeKeysByChunk.get(exposeName)!;
 
-      for (const assetKey of assetKeys) {
-        if (!assets[assetKey]) {
-          assets[assetKey] = chunkAssets;
-        } else {
-          assets[assetKey] = {
-            js: {
-              sync: [
-                ...new Set([
-                  ...assets[assetKey].js.sync,
-                  ...chunkAssets.js.sync,
-                ]),
-              ],
-              async: [
-                ...new Set([
-                  ...assets[assetKey].js.async,
-                  ...chunkAssets.js.async,
-                ]),
-              ],
-            },
-            css: {
-              sync: [
-                ...new Set([
-                  ...assets[assetKey].css.sync,
-                  ...chunkAssets.css.sync,
-                ]),
-              ],
-              async: [
-                ...new Set([
-                  ...assets[assetKey].css.async,
-                  ...chunkAssets.css.async,
-                ]),
-              ],
-            },
-          };
+        for (const assetKey of assetKeys) {
+          if (!assets[assetKey]) {
+            assets[assetKey] = chunkAssets;
+          } else {
+            assets[assetKey] = {
+              js: {
+                sync: [
+                  ...new Set([
+                    ...assets[assetKey].js.sync,
+                    ...chunkAssets.js.sync,
+                  ]),
+                ],
+                async: [
+                  ...new Set([
+                    ...assets[assetKey].js.async,
+                    ...chunkAssets.js.async,
+                  ]),
+                ],
+              },
+              css: {
+                sync: [
+                  ...new Set([
+                    ...assets[assetKey].css.sync,
+                    ...chunkAssets.css.sync,
+                  ]),
+                ],
+                async: [
+                  ...new Set([
+                    ...assets[assetKey].css.async,
+                    ...chunkAssets.css.async,
+                  ]),
+                ],
+              },
+            };
+          }
         }
       }
     });
@@ -343,11 +352,7 @@ class StatsManager {
     extraOptions?: object,
   ): Promise<Stats> {
     try {
-      const {
-        name,
-        manifest: manifestOptions = {},
-        exposes = {},
-      } = this._options;
+      const { name, manifest: manifestOptions = {} } = this._options;
 
       const metaData = this._getMetaData(compiler, compilation, extraOptions);
 
@@ -367,16 +372,11 @@ class StatsManager {
         const remotes: StatsRemote[] =
           this._remoteManager.statsRemoteWithEmptyUsedIn;
         stats.remotes = remotes;
-        stats.exposes = Object.keys(exposes).map((exposeKey) => {
-          return getExposeItem({
-            exposeKey,
-            name: name!,
-            file: {
-              import: exposes[exposeKey].import,
-              layer: exposes[exposeKey].layer,
-            },
-          });
-        });
+        stats.exposes = Object.entries(
+          this._containerManager.containerPluginExposesOptions,
+        ).map(([exposeKey, file]) =>
+          getExposeItem({ exposeKey, name: name!, file }),
+        );
         stats.shared = Object.entries(
           this._sharedManager.normalizedOptions,
         ).reduce<StatsShared[]>((sum, cur) => {
@@ -395,12 +395,12 @@ class StatsManager {
       }
 
       const graph =
-        this._bundler === 'webpack' &&
-        !(typeof manifestOptions === 'object' && manifestOptions.useLegacyStats)
+        this._bundler === 'webpack'
           ? collectGraph(compilation, {
               name: name!,
               exposes: this._containerManager.containerPluginExposesOptions,
               shared: this._sharedManager.normalizedOptions,
+              shareScope: this._options.shareScope,
               remotes: this._remoteManager.normalizedOptions,
             })
           : undefined;

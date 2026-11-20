@@ -1,15 +1,12 @@
 const { ModuleFederationPlugin } = require('../../../../dist/src');
 const { DefinePlugin } = require('webpack');
 
-const cases = [undefined, 'common'].flatMap((layer) =>
-  [false, true].map((useLegacyStats) => ({
-    layer,
-    useLegacyStats,
-    prefix: `${useLegacyStats ? 'legacy-' : ''}${layer ? 'common-' : ''}`,
-  })),
-);
+const cases = [undefined, 'common'].map((layer) => ({
+  layer,
+  prefix: layer ? 'common-' : '',
+}));
 
-module.exports = cases.map(({ layer, useLegacyStats, prefix }) => ({
+module.exports = cases.map(({ layer, prefix }) => ({
   experiments: { layers: true },
   module: { rules: layer ? [{ test: /bootstrap\.js$/, layer }] : [] },
   optimization: { chunkIds: 'named', moduleIds: 'named' },
@@ -24,7 +21,7 @@ module.exports = cases.map(({ layer, useLegacyStats, prefix }) => ({
     }),
     new ModuleFederationPlugin({
       name: `scalar_scopes_${prefix.replace(/-/g, '_')}fixture`,
-      manifest: { fileName: `${prefix}mf.json`, useLegacyStats },
+      manifest: { fileName: `${prefix}mf.json` },
       dts: false,
       shared: {
         'react-a': {
