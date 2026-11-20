@@ -33,13 +33,6 @@ new StatsPlugin(mfOptions, {
 }).apply(compiler);
 ```
 
-For Webpack, manifest generation uses the module graph when the compiler
-provides the required federation metadata, falling back to the existing stats
-reader otherwise. Set
-`manifest: { useLegacyStats: true }` in the federation options to use the legacy
-JavaScript stats reader as a rollback. The option defaults to `false` and does
-not affect stats emitted natively by Rspack.
-
-TODO: Remove the rollback option and legacy Webpack reader once supported
-Webpack versions have verified graph parity and reported migration regressions
-are resolved.
+For Webpack, the plugin collects manifest data from the compilation graph. It
+reads `stats.toJson()` only when the compiler does not provide the federation
+metadata, for example with Webpack's built-in `ModuleFederationPlugin`.

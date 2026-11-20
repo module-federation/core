@@ -1,7 +1,6 @@
-import type { Compilation, Module, Chunk } from 'webpack';
+import type { Compilation, Module } from 'webpack';
 import type DependenciesBlock from 'webpack/lib/DependenciesBlock';
 import type {
-  StatsAssets,
   StatsExpose,
   StatsRemote,
   StatsShared,
@@ -15,7 +14,7 @@ import type {
 import path from 'path';
 import { getExposeItem, getShareItem } from './ModuleHandler';
 import {
-  getAssetsByChunk,
+  getAssetsByChunkGroup,
   getAssetsByChunkIDs,
   getSharedIdentityKey,
 } from './utils';
@@ -74,16 +73,6 @@ export function collectGraph(
   const sharedKeys = new Map<Module, string>();
   const entryNames = [...compilation.entrypoints.keys()];
 
-  const addAssets = (target: StatsAssets, chunks: Iterable<Chunk>) => {
-    for (const chunk of chunks) {
-      const assets = getAssetsByChunk(chunk, entryNames, true);
-      for (const type of ['js', 'css'] as const)
-        for (const loading of ['sync', 'async'] as const)
-          target[type][loading] = [
-            ...new Set([...target[type][loading], ...assets[type][loading]]),
-          ];
-    }
-  };
   const dependencies = function* (block: DependenciesBlock): Generator<Module> {
     for (const dependency of block.dependencies) {
       const module = moduleGraph.getModule(dependency);
@@ -216,7 +205,17 @@ export function collectGraph(
       const expose = exposesMap[key];
       if (!expose) continue;
       const group = chunkGraph.getBlockChunkGroup(block);
-      if (group) addAssets(expose.assets, group.chunks);
+      if (group) {
+        const assets = getAssetsByChunkGroup(group);
+        for (const type of ['js', 'css'] as const)
+          for (const loading of ['sync', 'async'] as const)
+            expose.assets[type][loading] = [
+              ...new Set([
+                ...expose.assets[type][loading],
+                ...assets[type][loading],
+              ]),
+            ];
+      }
       for (const exposed of dependencies(block)) {
         for (const target of [exposed, ...dependencies(exposed)]) {
           const sharedKey = sharedKeys.get(target);

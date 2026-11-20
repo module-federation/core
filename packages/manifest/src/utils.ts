@@ -1,4 +1,4 @@
-import { Chunk, Compilation } from 'webpack';
+import { Chunk, ChunkGroup, Compilation } from 'webpack';
 import type {
   StatsCompilation,
   StatsModule,
@@ -85,7 +85,9 @@ export function getSharedIdentity(
   const webpackConsume = identifier.startsWith('consume-shared-module|')
     ? identifier.split('|')
     : undefined;
-  const webpackLayer = webpackConsume?.[8];
+  // The layer is the last field. A `||` range or an array scope adds fields
+  // before it.
+  const webpackLayer = webpackConsume?.at(-1);
   const layer = webpackConsume
     ? (moduleLayer ??
       (webpackLayer === 'undefined' || webpackLayer === 'null'
@@ -287,7 +289,8 @@ export function getSharedModules(
 export function getAssetsByChunk(
   chunk: Chunk,
   entryPointNames: Array<string>,
-  includeUnnamedGroups = false,
+  // Limits which groups of `chunk` add sync files.
+  includeGroup?: (group: ChunkGroup) => boolean,
 ): StatsAssets {
   const assesSet = {
     js: {
@@ -306,9 +309,9 @@ export function getAssetsByChunk(
   ): void => {
     [...targetChunk.groupsIterable].forEach((chunkGroup) => {
       if (
-        chunkGroup.name
-          ? !entryPointNames.includes(chunkGroup.name)
-          : includeUnnamedGroups
+        chunkGroup.name &&
+        !entryPointNames.includes(chunkGroup.name) &&
+        (type === 'async' || !includeGroup || includeGroup(chunkGroup))
       ) {
         collectAssets(
           chunkGroup.getFiles(),
@@ -341,6 +344,32 @@ export function getAssetsByChunk(
   };
 
   return assets;
+}
+
+// The container loads one chunk group for an expose. Sync assets are that
+// group's files. Async assets are the files of the groups it can load later.
+export function getAssetsByChunkGroup(group: ChunkGroup): StatsAssets {
+  const sync = { js: new Set<string>(), css: new Set<string>() };
+  const async = { js: new Set<string>(), css: new Set<string>() };
+  collectAssets(group.getFiles(), sync.js, sync.css);
+  const seen = new Set<ChunkGroup>([group]);
+  const queue = [...group.childrenIterable];
+  for (const child of queue) {
+    if (seen.has(child)) continue;
+    seen.add(child);
+    collectAssets(child.getFiles(), async.js, async.css);
+    queue.push(...child.childrenIterable);
+  }
+  return {
+    js: {
+      sync: [...sync.js],
+      async: [...async.js].filter((file) => !sync.js.has(file)),
+    },
+    css: {
+      sync: [...sync.css],
+      async: [...async.css].filter((file) => !sync.css.has(file)),
+    },
+  };
 }
 
 export function assert(condition: any, msg: string): asserts condition {
