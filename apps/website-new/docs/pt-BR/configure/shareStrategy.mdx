@@ -10,6 +10,8 @@ Control o carregamento estratégia de dependências compartilhadas:
 
 - `'loaded-first'`: Prioritize reuse de já carregado dependências compartilhadas. Remotes são carregado on-demand rather than during initialization. Este estratégia é recomendado quando você quiser reuse carregado dependências for performance.
 
+Quando vários contêineres registram a mesma versão de uma dependência compartilhada, um único registro a fornece a todos os consumidores. Um registro eager tem prioridade sobre um que não é; caso contrário, quem a fornece é o contêiner cujo nome fica por último na ordenação. Assim que um consumidor começa a carregar essa versão, o provedor dela não muda mais, e todos os consumidores recebem a mesma instância. Uma versão registrada com `'loaded-first'` mantém seu primeiro provedor.
+
 :::warning Offline Remote Considerations
 
 O `'version-first'` estratégia automatically carrega remote arquivo de entradas during aplicação startup para initialize dependências compartilhadas. Se any remote é offline ou unreachable, este vai trigger o `errorLoadRemote` hook com `lifecycle: 'beforeLoadShare'` during startup. Sem proper tratamento de erros, este pode cause aplicação initialization falhas.
