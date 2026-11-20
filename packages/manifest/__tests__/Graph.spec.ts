@@ -4,6 +4,20 @@ import path from 'node:path';
 import type { Stats } from 'webpack';
 import { StatsPlugin } from '../src/StatsPlugin';
 
+// The graph collector has no public switch. Wrap it so a build can run the
+// stats reader instead.
+jest.mock('../src/collectGraph', () => {
+  const actual = jest.requireActual('../src/collectGraph');
+  return { ...actual, collectGraph: jest.fn(actual.collectGraph) };
+});
+const { collectGraph: actualCollectGraph } = jest.requireActual(
+  '../src/collectGraph',
+);
+const collectGraph: jest.Mock = jest.requireMock(
+  '../src/collectGraph',
+).collectGraph;
+afterAll(() => collectGraph.mockImplementation(actualCollectGraph));
+
 const nodeRequire = process
   .getBuiltinModule('module')
   .createRequire(__filename);
@@ -22,7 +36,7 @@ it.each([
   'enhanced-exact',
   'remotes',
 ])(
-  'collects %s with multiple runtimes and supports explicit rollback',
+  'collects %s with multiple runtimes like the stats reader',
   async (mode) => {
     const directory = await mkdtemp(path.join(__dirname, 'mf-graph-'));
     const prefix = mode === 'enhanced-prefix';
@@ -49,7 +63,12 @@ it.each([
         JSON.stringify({ name: 'fixture', version: '1.0.0' }),
       );
       const artifacts = [];
-      for (const useLegacyStats of [undefined, false, true]) {
+      // The second graph build reads modules from the filesystem cache.
+      for (const [build, reader] of ['graph', 'graph', 'stats'].entries()) {
+        const useStatsReader = reader === 'stats';
+        collectGraph.mockImplementation(
+          useStatsReader ? () => undefined : actualCollectGraph,
+        );
         const additionalData = jest.fn(async ({ stats }) => stats);
         const options = {
           name: 'fixture',
@@ -88,7 +107,7 @@ it.each([
                     },
                   }
                 : {},
-          manifest: { useLegacyStats, additionalData },
+          manifest: { additionalData },
         };
         const compiler = webpack({
           context: directory,
@@ -125,7 +144,7 @@ it.each([
           .mockImplementation(async function (compiler, compilation) {
             const getStats = jest.spyOn(compilation, 'getStats');
             const identifiers =
-              !native && !useLegacyStats
+              !native && !useStatsReader
                 ? [...compilation.modules].flatMap((module) => [
                     jest.spyOn(module, 'identifier').mockImplementation(() => {
                       throw new Error('identifier parsing');
@@ -160,7 +179,7 @@ it.each([
               }),
             );
           });
-          if (useLegacyStats === false) {
+          if (build === 1) {
             const modules =
               result.toJson({ all: false, modules: true, cachedModules: true })
                 .modules || [];
@@ -174,7 +193,7 @@ it.each([
         } finally {
           collect.mockRestore();
         }
-        expect(readerCalls).toBe(native || useLegacyStats ? 1 : 0);
+        expect(readerCalls).toBe(native || useStatsReader ? 1 : 0);
         expect(additionalData).toHaveBeenCalledTimes(1);
         const stats = JSON.parse(
           await readFile(path.join(directory, 'mf-stats.json'), 'utf8'),
@@ -211,77 +230,3 @@ it.each([
   },
   60000,
 );
-
-it('keeps unnamed import groups out of rollback expose assets', async () => {
-  const directory = await mkdtemp(path.join(__dirname, 'mf-unnamed-group-'));
-  try {
-    await writeFile(path.join(directory, 'package.json'), '{}');
-    await writeFile(path.join(directory, 'entry.js'), 'import("./other.js");');
-    await writeFile(
-      path.join(directory, 'other.js'),
-      'import value from "./component.js"; console.log(value);',
-    );
-    await writeFile(
-      path.join(directory, 'component.js'),
-      'export default "component";',
-    );
-    for (const useLegacyStats of [true, false]) {
-      const options = {
-        name: 'fixture',
-        filename: 'remoteEntry.js',
-        dts: false as const,
-        exposes: {
-          './Component': { import: './component.js', name: 'exposed' },
-        },
-        manifest: { useLegacyStats },
-      };
-      const compiler = webpack({
-        context: directory,
-        mode: 'development',
-        devtool: false,
-        entry: './entry.js',
-        output: { path: directory, filename: '[name].js', publicPath: '/' },
-        optimization: { splitChunks: { chunks: 'all', minSize: 0 } },
-        plugins: [new EnhancedPlugin({ ...options, manifest: false })],
-      });
-      new StatsPlugin(options, {
-        pluginVersion: 'test',
-        bundler: 'webpack',
-      }).apply(compiler);
-      const result = await new Promise<Stats>((resolve, reject) => {
-        compiler.run((error, stats) =>
-          compiler.close((closeError) => {
-            if (error || closeError) reject(error || closeError);
-            else if (stats.hasErrors()) reject(new Error(stats.toString()));
-            else resolve(stats);
-          }),
-        );
-      });
-      const exposedChunk = [...result.compilation.chunks].find(
-        (chunk) => chunk.name === 'exposed',
-      );
-      expect(
-        [...exposedChunk.groupsIterable].some(
-          (group) => !group.name && group.getFiles().includes('other_js.js'),
-        ),
-      ).toBe(true);
-      for (const file of ['mf-stats.json', 'mf-manifest.json']) {
-        const artifact = JSON.parse(
-          await readFile(path.join(directory, file), 'utf8'),
-        );
-        expect(artifact.exposes[0].assets).toEqual({
-          js: {
-            // The pre-graph reader excludes the unnamed sibling chunk.
-            sync: useLegacyStats
-              ? ['exposed.js']
-              : ['exposed.js', 'other_js.js'],
-            async: [],
-          },
-          css: { sync: [], async: [] },
-        });
-      }
-    }
-  } finally {
-    await rm(directory, { recursive: true, force: true });
-  }
-});

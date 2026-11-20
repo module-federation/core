@@ -508,7 +508,6 @@ const t = {
             properties: {
               filePath: { type: 'string' },
               disableAssetsAnalyze: { type: 'boolean' },
-              useLegacyStats: { type: 'boolean' },
               fileName: { type: 'string' },
               additionalData: { instanceof: 'Function' },
             },
@@ -3328,13 +3327,13 @@ function D(
                                                                               ),
                                                                             c++);
                                                                         }
-                                                                        var S =
+                                                                        var k =
                                                                           o ===
                                                                           c;
                                                                         if (
                                                                           ((s =
                                                                             s ||
-                                                                            S),
+                                                                            k),
                                                                           !s)
                                                                         ) {
                                                                           const t =
@@ -3437,13 +3436,13 @@ function D(
                                                                                             ),
                                                                                           c++);
                                                                                       }
-                                                                                      var k =
+                                                                                      var S =
                                                                                         i ===
                                                                                         c;
                                                                                       if (
                                                                                         ((o =
                                                                                           o ||
-                                                                                          k),
+                                                                                          S),
                                                                                         !o)
                                                                                       ) {
                                                                                         const t =
@@ -3470,12 +3469,12 @@ function D(
                                                                                               ),
                                                                                             c++);
                                                                                         }
-                                                                                        ((k =
+                                                                                        ((S =
                                                                                           t ===
                                                                                           c),
                                                                                           (o =
                                                                                             o ||
-                                                                                            k));
+                                                                                            S));
                                                                                       }
                                                                                       if (
                                                                                         o
@@ -3551,12 +3550,12 @@ function D(
                                                                                   ),
                                                                                 c++);
                                                                             }
-                                                                          ((S =
+                                                                          ((k =
                                                                             t ===
                                                                             c),
                                                                             (s =
                                                                               s ||
-                                                                              S));
+                                                                              k));
                                                                         }
                                                                         if (s)
                                                                           ((c =
@@ -3731,9 +3730,9 @@ function D(
                                                     : u.push(e),
                                                     c++);
                                                 }
-                                                var L = r === c;
-                                              } else L = !0;
-                                              if (L) {
+                                                var T = r === c;
+                                              } else T = !0;
+                                              if (T) {
                                                 if (void 0 !== e.consumeTypes) {
                                                   let r = e.consumeTypes;
                                                   const n = c,
@@ -3751,8 +3750,8 @@ function D(
                                                       : u.push(e),
                                                       c++);
                                                   }
-                                                  var T = i === c;
-                                                  if (((o = o || T), !o)) {
+                                                  var L = i === c;
+                                                  if (((o = o || L), !o)) {
                                                     const e = c;
                                                     if (c === e)
                                                       if (
@@ -4458,8 +4457,8 @@ function D(
                                                           : u.push(e),
                                                           c++);
                                                       }
-                                                    ((T = e === c),
-                                                      (o = o || T));
+                                                    ((L = e === c),
+                                                      (o = o || L));
                                                   }
                                                   if (o)
                                                     ((c = s),
@@ -4474,9 +4473,9 @@ function D(
                                                       : u.push(e),
                                                       c++);
                                                   }
-                                                  L = n === c;
-                                                } else L = !0;
-                                                if (L) {
+                                                  T = n === c;
+                                                } else T = !0;
+                                                if (T) {
                                                   if (
                                                     void 0 !== e.tsConfigPath
                                                   ) {
@@ -4495,9 +4494,9 @@ function D(
                                                         : u.push(e),
                                                         c++);
                                                     }
-                                                    L = t === c;
-                                                  } else L = !0;
-                                                  if (L) {
+                                                    T = t === c;
+                                                  } else T = !0;
+                                                  if (T) {
                                                     if (
                                                       void 0 !== e.extraOptions
                                                     ) {
@@ -4518,9 +4517,9 @@ function D(
                                                           : u.push(e),
                                                           c++);
                                                       }
-                                                      L = r === c;
-                                                    } else L = !0;
-                                                    if (L) {
+                                                      T = r === c;
+                                                    } else T = !0;
+                                                    if (T) {
                                                       if (
                                                         void 0 !==
                                                         e.implementation
@@ -4540,9 +4539,9 @@ function D(
                                                             : u.push(e),
                                                             c++);
                                                         }
-                                                        L = t === c;
-                                                      } else L = !0;
-                                                      if (L) {
+                                                        T = t === c;
+                                                      } else T = !0;
+                                                      if (T) {
                                                         if (void 0 !== e.cwd) {
                                                           const t = c;
                                                           if (
@@ -4559,9 +4558,9 @@ function D(
                                                               : u.push(e),
                                                               c++);
                                                           }
-                                                          L = t === c;
-                                                        } else L = !0;
-                                                        if (L)
+                                                          T = t === c;
+                                                        } else T = !0;
+                                                        if (T)
                                                           if (
                                                             void 0 !==
                                                             e.displayErrorInTerminal
@@ -4581,8 +4580,8 @@ function D(
                                                                 : u.push(e),
                                                                 c++);
                                                             }
-                                                            L = t === c;
-                                                          } else L = !0;
+                                                            T = t === c;
+                                                          } else T = !0;
                                                       }
                                                     }
                                                   }
@@ -5139,8 +5138,6 @@ function D(
                                                             'filePath' !== t &&
                                                             'disableAssetsAnalyze' !==
                                                               t &&
-                                                            'useLegacyStats' !==
-                                                              t &&
                                                             'fileName' !== t &&
                                                             'additionalData' !==
                                                               t
@@ -5204,16 +5201,16 @@ function D(
                                                             if (N) {
                                                               if (
                                                                 void 0 !==
-                                                                e.useLegacyStats
+                                                                e.fileName
                                                               ) {
                                                                 const t = c;
                                                                 if (
-                                                                  'boolean' !=
-                                                                  typeof e.useLegacyStats
+                                                                  'string' !=
+                                                                  typeof e.fileName
                                                                 ) {
                                                                   const e = {
                                                                     params: {
-                                                                      type: 'boolean',
+                                                                      type: 'string',
                                                                     },
                                                                   };
                                                                   (null === u
@@ -5223,20 +5220,21 @@ function D(
                                                                 }
                                                                 N = t === c;
                                                               } else N = !0;
-                                                              if (N) {
+                                                              if (N)
                                                                 if (
                                                                   void 0 !==
-                                                                  e.fileName
+                                                                  e.additionalData
                                                                 ) {
                                                                   const t = c;
                                                                   if (
-                                                                    'string' !=
-                                                                    typeof e.fileName
+                                                                    !(
+                                                                      e.additionalData instanceof
+                                                                      Function
+                                                                    )
                                                                   ) {
                                                                     const e = {
-                                                                      params: {
-                                                                        type: 'string',
-                                                                      },
+                                                                      params:
+                                                                        {},
                                                                     };
                                                                     (null === u
                                                                       ? (u = [
@@ -5249,36 +5247,6 @@ function D(
                                                                   }
                                                                   N = t === c;
                                                                 } else N = !0;
-                                                                if (N)
-                                                                  if (
-                                                                    void 0 !==
-                                                                    e.additionalData
-                                                                  ) {
-                                                                    const t = c;
-                                                                    if (
-                                                                      !(
-                                                                        e.additionalData instanceof
-                                                                        Function
-                                                                      )
-                                                                    ) {
-                                                                      const e =
-                                                                        {
-                                                                          params:
-                                                                            {},
-                                                                        };
-                                                                      (null ===
-                                                                      u
-                                                                        ? (u = [
-                                                                            e,
-                                                                          ])
-                                                                        : u.push(
-                                                                            e,
-                                                                          ),
-                                                                        c++);
-                                                                    }
-                                                                    N = t === c;
-                                                                  } else N = !0;
-                                                              }
                                                             }
                                                           }
                                                         }

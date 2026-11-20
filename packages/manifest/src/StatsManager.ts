@@ -350,11 +350,7 @@ class StatsManager {
     extraOptions?: object,
   ): Promise<Stats> {
     try {
-      const {
-        name,
-        manifest: manifestOptions = {},
-        exposes = {},
-      } = this._options;
+      const { name, manifest: manifestOptions = {} } = this._options;
 
       const metaData = this._getMetaData(compiler, compilation, extraOptions);
 
@@ -374,15 +370,11 @@ class StatsManager {
         const remotes: StatsRemote[] =
           this._remoteManager.statsRemoteWithEmptyUsedIn;
         stats.remotes = remotes;
-        stats.exposes = Object.keys(exposes).map((exposeKey) => {
-          return getExposeItem({
-            exposeKey,
-            name: name!,
-            file: {
-              import: exposes[exposeKey].import,
-            },
-          });
-        });
+        stats.exposes = Object.entries(
+          this._containerManager.containerPluginExposesOptions,
+        ).map(([exposeKey, file]) =>
+          getExposeItem({ exposeKey, name: name!, file }),
+        );
         stats.shared = Object.entries(
           this._sharedManager.normalizedOptions,
         ).reduce<StatsShared[]>((sum, cur) => {
@@ -401,8 +393,7 @@ class StatsManager {
       }
 
       const graph =
-        this._bundler === 'webpack' &&
-        !(typeof manifestOptions === 'object' && manifestOptions.useLegacyStats)
+        this._bundler === 'webpack'
           ? collectGraph(compilation, {
               name: name!,
               exposes: this._containerManager.containerPluginExposesOptions,
