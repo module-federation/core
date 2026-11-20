@@ -1,25 +1,21 @@
 export = JsonpTemplatePlugin;
-/** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../Compiler")} Compiler */
+/** @import Compilation from "../Compilation" */
+/** @import Compiler from "../Compiler" */
 declare class JsonpTemplatePlugin {
-  /**
-   * @deprecated use JsonpChunkLoadingRuntimeModule.getCompilationHooks instead
-   * @param {Compilation} compilation the compilation
-   * @returns {JsonpChunkLoadingRuntimeModule.JsonpCompilationPluginHooks} hooks
-   */
-  static getCompilationHooks(
-    compilation: Compilation,
-  ): JsonpChunkLoadingRuntimeModule.JsonpCompilationPluginHooks;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Returns hooks.
+     * @deprecated use JsonpChunkLoadingRuntimeModule.getCompilationHooks instead
+     * @param {Compilation} compilation the compilation
+     * @returns {JsonpChunkLoadingRuntimeModule.JsonpCompilationPluginHooks} hooks
+     */
+    static getCompilationHooks(compilation: Compilation): JsonpChunkLoadingRuntimeModule.JsonpCompilationPluginHooks;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
-declare namespace JsonpTemplatePlugin {
-  export { Compilation, Compiler };
-}
-import JsonpChunkLoadingRuntimeModule = require('./JsonpChunkLoadingRuntimeModule');
-type Compilation = import('../Compilation');
-type Compiler = import('../Compiler');
+import type Compiler from "../Compiler";
+import type Compilation from "../Compilation";
+import JsonpChunkLoadingRuntimeModule = require("./JsonpChunkLoadingRuntimeModule");

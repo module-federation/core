@@ -87,11 +87,7 @@ class AsyncEntryStartupPlugin {
       compilation,
     ).renderStartup.tap(
       'AsyncEntryStartupPlugin',
-      (
-        source: sources.Source,
-        _renderContext: Module,
-        upperContext: StartupRenderContext,
-      ) => {
+      (source, _renderContext, upperContext) => {
         const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
         if (upperContext?.chunk.id && isSingleRuntime) {
           if (upperContext?.chunk.hasRuntime()) {

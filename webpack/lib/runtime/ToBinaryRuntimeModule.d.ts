@@ -1,10 +1,6 @@
 export = ToBinaryRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Compilation from "../Compilation" */
 declare class ToBinaryRuntimeModule extends RuntimeModule {
-  constructor();
+    constructor();
 }
-declare namespace ToBinaryRuntimeModule {
-  export { Compilation };
-}
-import RuntimeModule = require('../RuntimeModule');
-type Compilation = import('../Compilation');
+import RuntimeModule = require("./RuntimeModule");

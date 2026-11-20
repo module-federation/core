@@ -7,11 +7,11 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import { getFederationGlobalScope } from '../../../src/lib/container/runtime/utils';
 import { createMockCompilation, MockModuleDependency } from './utils';
 import type Chunk from 'webpack/lib/Chunk';
-import type ChunkGraph from 'webpack/lib/ChunkGraph';
-import type Module from 'webpack/lib/Module';
-import type ModuleGraph from 'webpack/lib/ModuleGraph';
+import type ChunkGraph from 'webpack/lib/graph/ChunkGraph';
+import type Module from 'webpack/lib/module/Module';
+import type ModuleGraph from 'webpack/lib/graph/ModuleGraph';
 import type Dependency from 'webpack/lib/Dependency';
-import type ExternalModule from 'webpack/lib/ExternalModule';
+import type ExternalModule from 'webpack/lib/externals/ExternalModule';
 import type FallbackModule from '../../../src/lib/container/FallbackModule';
 
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()

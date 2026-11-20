@@ -4,10 +4,10 @@
 
 import ConsumeSharedPlugin from '../../../../src/lib/sharing/ConsumeSharedPlugin';
 import ConsumeSharedModule from '../../../../src/lib/sharing/ConsumeSharedModule';
-import type AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
+import type AsyncDependenciesBlock from 'webpack/lib/graph/AsyncDependenciesBlock';
 import type Dependency from 'webpack/lib/Dependency';
-import type Module from 'webpack/lib/Module';
-import type { SemVerRange } from 'webpack/lib/util/semver';
+import type Module from 'webpack/lib/module/Module';
+import type { SemVerRange } from 'webpack/lib/sharing/semver';
 import { createSharingTestEnvironment, shareScopes } from '../utils';
 import { resetAllMocks } from '../plugin-test-utils';
 

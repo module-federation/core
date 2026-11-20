@@ -1,43 +1,51 @@
 export = AggressiveSplittingPlugin;
 declare class AggressiveSplittingPlugin {
-  /**
-   * @param {Chunk} chunk the chunk to test
-   * @returns {boolean} true if the chunk was recorded
-   */
-  static wasChunkRecorded(chunk: Chunk): boolean;
-  /**
-   * @param {AggressiveSplittingPluginOptions=} options options object
-   */
-  constructor(options?: AggressiveSplittingPluginOptions | undefined);
-  options: import('../../declarations/plugins/optimize/AggressiveSplittingPlugin').AggressiveSplittingPluginOptions;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Was chunk recorded.
+     * @param {Chunk} chunk the chunk to test
+     * @returns {boolean} true if the chunk was recorded
+     */
+    static wasChunkRecorded(chunk: Chunk): boolean;
+    /**
+     * Creates an instance of AggressiveSplittingPlugin.
+     * @param {AggressiveSplittingPluginOptions=} options options object
+     */
+    constructor(options?: AggressiveSplittingPluginOptions | undefined);
+    /** @type {AggressiveSplittingPluginOptions} */
+    options: AggressiveSplittingPluginOptions;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace AggressiveSplittingPlugin {
-  export {
-    AggressiveSplittingPluginOptions,
-    Chunk,
-    ChunkId,
-    ChunkGraph,
-    Compiler,
-    Module,
-    SplitData,
-  };
+    export { AggressiveSplittingPluginOptions, SplitData };
 }
-type AggressiveSplittingPluginOptions =
-  import('../../declarations/plugins/optimize/AggressiveSplittingPlugin').AggressiveSplittingPluginOptions;
-type Chunk = import('../Chunk');
-type ChunkId = import('../Chunk').ChunkId;
-type ChunkGraph = import('../ChunkGraph');
-type Compiler = import('../Compiler');
-type Module = import('../Module');
+import type Compiler from "../Compiler";
+import type Chunk from "../graph/Chunk";
+type AggressiveSplittingPluginOptions = {
+    /**
+     * Extra cost for each chunk (Default: 9.8kiB).
+     */
+    chunkOverhead?: number | undefined;
+    /**
+     * Extra cost multiplicator for entry chunks (Default: 10).
+     */
+    entryChunkMultiplicator?: number | undefined;
+    /**
+     * Byte, max size of per file (Default: 50kiB).
+     */
+    maxSize?: number | undefined;
+    /**
+     * Byte, split point. (Default: 30kiB).
+     */
+    minSize?: number | undefined;
+};
 type SplitData = {
-  id?: NonNullable<Chunk['id']>;
-  hash?: NonNullable<Chunk['hash']>;
-  modules: Module[];
-  size: number;
+    id?: NonNullable<Chunk["id"]>;
+    hash?: NonNullable<Chunk["hash"]>;
+    modules: string[];
+    size: number;
 };
