@@ -440,6 +440,28 @@ const fixtures: Fixture[] = [
   ...prefixSingletonFixtures,
   ...requiredVersionFixtures,
   {
+    // The share is not installed, so its version comes from the exact range.
+    name: 'consume-only share in the plugin share scope',
+    files: {
+      'package.json': pkg('consume-only', '1.0.0'),
+      'index.js': 'import("./module.js");',
+      'module.js': 'export { default } from "missing-exact";',
+    },
+    federation: {
+      name: 'container',
+      filename: 'container.js',
+      shareScope: 'custom',
+      exposes: { './module': { import: './module.js', name: 'exposed' } },
+      shared: {
+        'missing-exact': { import: false, requiredVersion: '=1.2.3' },
+      },
+    },
+    check: (manifest) =>
+      expect(manifest.shared).toMatchObject([
+        { name: 'missing-exact', version: '1.2.3', requiredVersion: '=1.2.3' },
+      ]),
+  },
+  {
     name: 'manifest-disable-assets-analyze',
     files: {
       'package.json': pkg('disable-assets-analyze', '1.0.0', {

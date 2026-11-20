@@ -40,9 +40,11 @@ export function collectGraph(
     name: hostName,
     exposes,
     shared,
+    shareScope: defaultScope = 'default',
     remotes: configuredRemotes,
   }: {
     name: string;
+    shareScope?: string | string[];
     exposes: ContainerManager['containerPluginExposesOptions'];
     shared: SharedManager['normalizedOptions'];
     remotes: RemoteManager['normalizedOptions'];
@@ -106,10 +108,13 @@ export function collectGraph(
     const key = layered ? getSharedIdentityKey(name, scope, layer) : name;
     const configured = configuredShared.filter(([key, value]) => {
       const shareKey = value.shareKey || key;
+      // A share without its own scope is in the plugin's `shareScope`.
+      const scopes = [value.shareScope ?? 'default'];
+      if (scopes[0] === 'default') scopes.push(defaultScope);
       return (
         (shareKey === name ||
           (shareKey.endsWith('/') && name.startsWith(shareKey))) &&
-        JSON.stringify(value.shareScope ?? 'default') === JSON.stringify(scope)
+        scopes.some((item) => JSON.stringify(item) === JSON.stringify(scope))
       );
     });
     const normalized = (configured.find(([, value]) => value.layer === layer) ??
