@@ -13,18 +13,24 @@ import type {
 } from '@module-federation/managers';
 import path from 'path';
 import { getExposeItem, getShareItem } from './ModuleHandler';
-import { getAssetsByChunkGroup, getAssetsByChunkIDs } from './utils';
+import {
+  getAssetsByChunkGroup,
+  getAssetsByChunkIDs,
+  getSharedIdentityKey,
+} from './utils';
 
 type ProvideData = {
   name: string;
   version: string;
   shareScope: string | string[];
+  shareConfig: { layer?: string };
 };
 type SharedData =
   | ProvideData
   | {
       shareKey: string;
       shareScope: string | string[];
+      shareConfig: { layer?: string };
     };
 type RemoteModule = Module & { request: string; internalRequest: string };
 
@@ -97,8 +103,10 @@ export function collectGraph(
     const consume = module.type === 'consume-shared-module';
     const name = 'shareKey' in data ? data.shareKey : data.name;
     const scope = data.shareScope;
-    const key = name;
-    const normalized = configuredShared.find(([key, value]) => {
+    const layer = data.shareConfig.layer ?? undefined;
+    const layered = layer !== undefined || Array.isArray(scope);
+    const key = layered ? getSharedIdentityKey(name, scope, layer) : name;
+    const configured = configuredShared.filter(([key, value]) => {
       const shareKey = value.shareKey || key;
       // A share without its own scope is in the plugin's `shareScope`.
       const scopes = [value.shareScope ?? 'default'];
@@ -108,7 +116,9 @@ export function collectGraph(
           (shareKey.endsWith('/') && name.startsWith(shareKey))) &&
         scopes.some((item) => JSON.stringify(item) === JSON.stringify(scope))
       );
-    })?.[1];
+    });
+    const normalized = (configured.find(([, value]) => value.layer === layer) ??
+      configured.find(([, value]) => value.layer === undefined))?.[1];
     // A consume-only share that is not installed has no package version.
     // Like the legacy reader, take the version from `requiredVersion: '=1.2.3'`.
     const required = consume ? normalized?.requiredVersion : undefined;
@@ -126,9 +136,14 @@ export function collectGraph(
       const row = getShareItem({
         pkgName: name,
         pkgVersion: version,
-        normalizedShareOptions: shared[name],
+        normalizedShareOptions: layered ? normalized : shared[name],
         hostName,
       });
+      if (layered) {
+        row.id = `${hostName}:shared:${key}`;
+        if (layer !== undefined) row.layer = layer;
+        if (scope !== 'default') row.shareScope = scope;
+      }
       sharedMap[key] = row;
     }
     if (consume) {

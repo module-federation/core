@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import type {
@@ -7,7 +8,7 @@ import type {
   WebpackOptionsNormalized,
 } from 'webpack';
 import type { moduleFederationPlugin, Stats } from '@module-federation/sdk';
-import { encodeName, StatsFileName } from '@module-federation/sdk';
+import { encodeName, getManifestFileName } from '@module-federation/sdk';
 import CollectSharedEntryPlugin, {
   type ShareRequestsMap,
 } from './CollectSharedEntryPlugin';
@@ -24,8 +25,10 @@ import IndependentSharedRuntimeModule from './IndependentSharedRuntimeModule';
 
 const IGNORED_ENTRY = 'ignored-entry';
 
-// { react: [  [ react/19.0.0/index.js , 19.0.0, react_global_name ]  ] }
-export type ShareFallback = Record<string, [string, string, string][]>;
+export type ShareFallback = Record<
+  string,
+  [string, string, string, { shareScope: string | string[]; layer?: string }?][]
+>;
 
 export type MakeRequired<T, K extends keyof T> = Required<Pick<T, K>> &
   Omit<T, K>;
@@ -58,6 +61,7 @@ const resolveOutputDir = (outputDir: string, shareName?: string) => {
 export interface IndependentSharePluginOptions {
   name: string;
   shared: moduleFederationPlugin.Shared;
+  shareScope?: string | string[];
   library?: moduleFederationPlugin.LibraryOptions;
   outputDir?: string;
   plugins?: WebpackPluginInstance[];
@@ -102,7 +106,13 @@ export default class IndependentSharedPlugin {
     this.manifest = manifest;
     this.injectTreeShakingUsedExports = injectTreeShakingUsedExports ?? true;
     this.library = library;
-    this.sharedOptions = normalizeSharedOptions(shared);
+    this.sharedOptions = normalizeSharedOptions(shared).map(([key, config]) => [
+      key,
+      {
+        ...config,
+        shareScope: config.shareScope || options.shareScope || 'default',
+      },
+    ]);
   }
 
   static IndependentShareBuildAssetsFilename =
@@ -155,34 +165,46 @@ export default class IndependentSharedPlugin {
                 .PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
           },
           async () => {
-            const stats = compilation.getAsset(StatsFileName);
-            if (!stats) {
-              return;
-            }
-            const statsContent = JSON.parse(
-              stats.source.source().toString(),
-            ) as Stats;
-
-            const { shared } = statsContent;
-            Object.entries(this.buildAssets).forEach(([key, item]) => {
-              const targetShared = shared.find((s) => s.name === key);
-              if (!targetShared) {
-                return;
+            const { statsFileName, manifestFileName } =
+              getManifestFileName(manifest);
+            for (const filename of [statsFileName, manifestFileName]) {
+              const stats = compilation.getAsset(filename);
+              if (!stats) {
+                continue;
               }
-              item.forEach(([entry, version, globalName]) => {
-                if (version === targetShared.version) {
-                  targetShared.fallback = entry;
-                  targetShared.fallbackName = globalName;
-                }
-              });
-            });
+              const statsContent = JSON.parse(
+                stats.source.source().toString(),
+              ) as Stats;
 
-            compilation.updateAsset(
-              StatsFileName,
-              new compiler.webpack.sources.RawSource(
-                JSON.stringify(statsContent),
-              ),
-            );
+              const { shared } = statsContent;
+              Object.entries(this.buildAssets).forEach(([key, item]) => {
+                item.forEach(([entry, version, globalName, identity]) => {
+                  for (const targetShared of shared) {
+                    if (
+                      targetShared.name === key &&
+                      targetShared.version === version &&
+                      targetShared.layer === identity?.layer &&
+                      JSON.stringify(
+                        [targetShared.shareScope || 'default'].flat(),
+                      ) ===
+                        JSON.stringify(
+                          [identity?.shareScope || 'default'].flat(),
+                        )
+                    ) {
+                      targetShared.fallback = entry;
+                      targetShared.fallbackName = globalName;
+                    }
+                  }
+                });
+              });
+
+              compilation.updateAsset(
+                filename,
+                new compiler.webpack.sources.RawSource(
+                  JSON.stringify(statsContent),
+                ),
+              );
+            }
           },
         );
       },
@@ -191,8 +213,10 @@ export default class IndependentSharedPlugin {
 
   private createEntry(context: string) {
     const { sharedOptions } = this;
-    const entryContent = sharedOptions.reduce((acc, cur, index) => {
-      return `${acc}import shared_${index} from '${cur[0]}';\n`;
+    const entryContent = sharedOptions.reduce((acc, cur) => {
+      if (cur[1].import === false) return acc;
+      const request = cur[1].import || cur[0];
+      return `${acc}import ${JSON.stringify(request.startsWith('.') ? path.resolve(context, request) : request)};\n`;
     }, '');
     const entryPath = path.resolve(
       context,
@@ -226,17 +250,46 @@ export default class IndependentSharedPlugin {
 
     console.log('Start building shared fallback resources ...');
 
-    await Promise.all(
-      sharedOptions.map(async ([shareName, shareConfig]) => {
+    const assets = await Promise.all(
+      sharedOptions.map(async ([configKey, shareConfig], optionIndex) => {
+        const shareName = shareConfig.shareKey || configKey;
+        const entries: ShareFallback[string] = [];
         if (!shareConfig.treeShaking) {
-          return;
+          return [shareName, entries] as const;
         }
-        const shareRequests = shareRequestsMap[shareName]?.requests ?? [];
+        const shareRequests = (
+          shareRequestsMap[configKey]?.requests ?? []
+        ).filter(
+          ([, , collectedIndex]) =>
+            collectedIndex === undefined || collectedIndex === optionIndex,
+        );
         for (let index = 0; index < shareRequests.length; index++) {
           const [request, version] = shareRequests[index];
-          const sharedConfig = sharedOptions.find(
-            ([name]) => name === shareName,
-          )?.[1];
+          const identity = {
+            shareScope: shareConfig.shareScope || 'default',
+            layer: shareConfig.layer,
+          };
+          const artifactIdentity =
+            sharedOptions.filter(
+              ([key, config]) => (config.shareKey || key) === shareName,
+            ).length > 1 ||
+            shareRequests.filter(
+              ([, candidateVersion]) => candidateVersion === version,
+            ).length > 1
+              ? createHash('sha256')
+                  .update(
+                    JSON.stringify([
+                      [identity.shareScope].flat(),
+                      identity.layer,
+                      path.isAbsolute(request)
+                        ? path.relative(parentCompiler.context, request)
+                        : request,
+                      version,
+                    ]),
+                  )
+                  .digest('hex')
+                  .slice(0, 12)
+              : undefined;
           const [shareFileName, globalName, sharedVersion] =
             await this.createIndependentCompiler(parentCompiler, {
               cleanOutput: index === 0,
@@ -244,20 +297,34 @@ export default class IndependentSharedPlugin {
                 shareName,
                 version,
                 request,
-                independentShareFileName: sharedConfig?.treeShaking?.filename,
+                layer: shareConfig.layer,
+                artifactIdentity,
+                independentShareFileName:
+                  typeof shareConfig.treeShaking === 'object'
+                    ? shareConfig.treeShaking.filename
+                    : undefined,
               },
             });
           if (typeof shareFileName === 'string') {
-            this.buildAssets[shareName] ||= [];
-            this.buildAssets[shareName].push([
-              path.join(resolveOutputDir(outputDir, shareName), shareFileName),
+            entries.push([
+              path.join(
+                resolveOutputDir(outputDir, shareName),
+                artifactIdentity ? `variant-${artifactIdentity}` : '',
+                shareFileName,
+              ),
               sharedVersion,
               globalName,
+              identity,
             ]);
           }
         }
+        return [shareName, entries] as const;
       }),
     );
+    for (const [shareName, entries] of assets) {
+      if (!entries.length) continue;
+      (this.buildAssets[shareName] ||= []).push(...entries);
+    }
 
     console.log('All shared fallback have been compiled successfully');
   }
@@ -278,9 +345,11 @@ export default class IndependentSharedPlugin {
       library,
       treeShakingSharedExcludePlugins,
     } = this;
-    const outputDirWithShareName = resolveOutputDir(
-      outputDir,
-      extraOptions.currentShare.shareName,
+    const outputDirWithShareName = path.join(
+      resolveOutputDir(outputDir, extraOptions.currentShare.shareName),
+      extraOptions.currentShare.artifactIdentity
+        ? `variant-${extraOptions.currentShare.artifactIdentity}`
+        : '',
     );
 
     const parentConfig = parentCompiler.options;
@@ -320,6 +389,9 @@ export default class IndependentSharedPlugin {
               singleton: options.singleton,
               packageName: options.packageName,
               eager: options.eager,
+              layer: options.layer,
+              issuerLayer: options.issuerLayer,
+              request: options.request,
             },
           })),
       }),
@@ -342,7 +414,7 @@ export default class IndependentSharedPlugin {
     );
     const { currentShare } = extraOptions;
     const parentCache = parentConfig.cache;
-    const cacheSuffix = `__shared_${encodeName(currentShare.shareName)}_${currentShare.version}__`;
+    const cacheSuffix = `__shared_${encodeName(currentShare.shareName)}_${currentShare.version}${currentShare.artifactIdentity ? `_${currentShare.artifactIdentity}` : ''}__`;
     // @ts-ignore webpack version is not the same as the one used in the plugin
     const compilerConfig: Configuration = {
       ...parentConfig,
