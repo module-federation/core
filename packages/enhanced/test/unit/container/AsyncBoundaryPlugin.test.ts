@@ -35,4 +35,34 @@ describe('AsyncEntryStartupPlugin startup with top-level await', () => {
     expect(code).not.toContain('await Promise.all');
     expect(code).toContain('Promise.all(promiseTrack).then(');
   });
+
+  // The shapes webpack normalizes its options to: an output capability from
+  // 5.111, an experiment before 5.102, and neither setting in between.
+  it.each([
+    ['the output capability', { environment: { topLevelAwait: true } }, {}],
+    ['neither setting', {}, {}],
+    ['the experiment', {}, { topLevelAwait: true }],
+  ])('awaits federation init with %s', (_name, output, experiments) => {
+    const code = startup({
+      experiments,
+      output: { module: true, ...output },
+    } as Compiler['options']);
+    expect(code).toContain('await Promise.all(promiseTrack)');
+  });
+
+  it.each([
+    [
+      'the output capability off',
+      { environment: { topLevelAwait: false } },
+      { topLevelAwait: true },
+    ],
+    ['the experiment off', {}, { topLevelAwait: false }],
+  ])('wraps startup in a promise with %s', (_name, output, experiments) => {
+    const code = startup({
+      experiments,
+      output: { module: true, ...output },
+    } as Compiler['options']);
+    expect(code).not.toContain('await Promise.all');
+    expect(code).toContain('Promise.all(promiseTrack).then(');
+  });
 });
