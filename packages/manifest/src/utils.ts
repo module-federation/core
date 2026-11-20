@@ -45,9 +45,35 @@ const collectAssets = (
   });
 };
 
-function getSharedModuleName(name: string): string {
-  const [_type, _shared, _module, _shareScope, sharedInfo] = name.split(' ');
-  return sharedInfo.split('@').slice(0, -1).join('@');
+// Identifiers write an array share scope as "a|b" (rspack, webpack consume) or
+// "a,b" (webpack provide), with or without surrounding parentheses.
+export function parseShareScope(raw: string): string | string[] {
+  const scopes = raw
+    .replace(/^\(|\)$/g, '')
+    .split(/[|,]/)
+    .filter(Boolean);
+  if (scopes.length === 0) {
+    return 'default';
+  }
+  return scopes.length === 1 ? scopes[0] : scopes;
+}
+
+// The same package can be shared in several scopes, so shared entries are keyed
+// by scope and name.
+export function composeSharedKey(
+  shareScope: string | string[],
+  name: string,
+): string {
+  const scope = Array.isArray(shareScope) ? shareScope.join('|') : shareScope;
+  return `(${scope}) ${name}`;
+}
+
+function getSharedModuleKey(name: string): string {
+  const [_type, _shared, _module, shareScope, sharedInfo] = name.split(' ');
+  return composeSharedKey(
+    parseShareScope(shareScope),
+    sharedInfo.split('@').slice(0, -1).join('@'),
+  );
 }
 
 export function getAssetsByChunkIDs(
@@ -107,7 +133,7 @@ export function getSharedModules(
         for (const sharedModule of sharedModules) {
           if (sharedModule.name === module.issuerName) {
             entryContentModuleNames.push(sharedModule.name!);
-            sum.push([getSharedModuleName(module.issuerName!), module]);
+            sum.push([getSharedModuleKey(module.issuerName!), module]);
             return sum;
           }
         }
@@ -134,7 +160,7 @@ export function getSharedModules(
               for (const issueModule of module.reasons) {
                 if (issueModule.moduleName === entryReExportModule.name) {
                   sum.push([
-                    getSharedModuleName(entryReExportModule.name!),
+                    getSharedModuleKey(entryReExportModule.name!),
                     module,
                   ]);
                   flag = true;

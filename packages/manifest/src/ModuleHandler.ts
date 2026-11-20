@@ -14,7 +14,11 @@ import {
   SharedManager,
 } from '@module-federation/managers';
 import type managerTypes from '@module-federation/managers';
-import { getFileNameWithOutExt } from './utils';
+import {
+  composeSharedKey,
+  getFileNameWithOutExt,
+  parseShareScope,
+} from './utils';
 
 type ShareMap = { [sharedKey: string]: StatsShared };
 type ExposeMap = { [exposeImportValue: string]: StatsExpose };
@@ -176,17 +180,21 @@ export const getShareItem = ({
   normalizedShareOptions,
   pkgVersion,
   hostName,
+  shareScope,
 }: {
   pkgName: string;
   hostName?: string;
   normalizedShareOptions: managerTypes.types.NormalizedSharedOptions[string];
   pkgVersion: string;
+  // The scope the bundler registered the module in, when known.
+  shareScope?: string | string[];
 }): StatsShared => {
   return {
     ...normalizedShareOptions,
     id: `${hostName}:${pkgName}`,
     requiredVersion:
       normalizedShareOptions?.requiredVersion || `^${pkgVersion}`,
+    shareScope: shareScope || normalizedShareOptions?.shareScope || 'default',
     name: pkgName,
     version: pkgVersion,
     assets: {
@@ -248,19 +256,30 @@ class ModuleHandler {
     const sharedManagerNormalizedOptions =
       this._sharedManager.normalizedOptions;
 
-    const initShared = (pkgName: string, pkgVersion: string) => {
-      if (sharedMap[pkgName]) {
-        return;
+    const initShared = (
+      pkgName: string,
+      pkgVersion: string,
+      shareScope: string | string[],
+    ): string => {
+      const sharedKey = composeSharedKey(shareScope, pkgName);
+      if (sharedMap[sharedKey]) {
+        return sharedKey;
       }
-      sharedMap[pkgName] = getShareItem({
+      sharedMap[sharedKey] = getShareItem({
         pkgName,
         pkgVersion,
         normalizedShareOptions: sharedManagerNormalizedOptions[pkgName],
         hostName: this._options.name,
+        shareScope,
       });
+      return sharedKey;
     };
 
-    const collectRelationshipMap = (mod: StatsModule, pkgName: string) => {
+    const collectRelationshipMap = (
+      mod: StatsModule,
+      pkgName: string,
+      sharedKey: string,
+    ) => {
       const { issuerName, reasons } = mod;
 
       if (issuerName) {
@@ -269,7 +288,7 @@ class ModuleHandler {
           // @ts-ignore use Set to deduplicate
           expose.requires.push(pkgName);
           // @ts-ignore use Set to deduplicate
-          sharedMap[pkgName].usedIn.add(expose.path);
+          sharedMap[sharedKey].usedIn.add(expose.path);
         }
       }
       if (reasons) {
@@ -282,11 +301,28 @@ class ModuleHandler {
               // @ts-ignore to deduplicate
               expose.requires.push(pkgName);
               // @ts-ignore to deduplicate
-              sharedMap[pkgName].usedIn.add(expose.path);
+              sharedMap[sharedKey].usedIn.add(expose.path);
             }
           }
         });
       }
+    };
+
+    // Webpack consume identifiers join their fields with '|', but a requiredVersion
+    // OR range ('^17 || ^18') contains '||', which splits into an empty token.
+    // Share scope names are never empty, so rejoin each empty token with its
+    // neighbours to keep the range in one field.
+    const splitWebpackConsumeIdentifier = (value: string) => {
+      const tokens = value.split('|');
+      const fields: string[] = [];
+      for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i] === '' && fields.length > 0 && i + 1 < tokens.length) {
+          fields[fields.length - 1] += `||${tokens[++i]}`;
+        } else {
+          fields.push(tokens[i]);
+        }
+      }
+      return fields;
     };
 
     const parseResolvedIdentifier = (nameAndVersion: string) => {
@@ -314,35 +350,44 @@ class ModuleHandler {
       // identifier(webpack) = provide module (default) react@18.2.0 = /temp/node_modules/.pnpm/react@18.2.0/node_modules/react/index.js
       const data = identifier.split(' ');
       const nameAndVersion = this.isRspack ? data[4] : data[3];
+      const shareScope = parseShareScope(this.isRspack ? data[3] : data[2]);
 
       const { name, version } = parseResolvedIdentifier(nameAndVersion);
 
       if (name && version) {
-        initShared(name, version);
-        collectRelationshipMap(mod, name);
+        const sharedKey = initShared(name, version, shareScope);
+        collectRelationshipMap(mod, name, sharedKey);
       }
     }
 
     if (moduleType === 'consume-shared-module') {
       // identifier(rspack) = consume shared module (default) lodash/get@^4.17.21 (strict) (fallback: /temp/node_modules/.pnpm/lodash@4.17.21/node_modules/lodash/get.js)
       // identifier(webpack) = consume-shared-module|default|react-dom|!=1.8...2...0|false|/temp/node_modules/.pnpm/react-dom@18.2.0_react@18.2.0/node_modules/react-dom/index.js|true|false
-      const SEPARATOR = this.isRspack ? ' ' : '|';
-      const data = identifier.split(SEPARATOR);
+      const data = this.isRspack
+        ? identifier.split(' ')
+        : splitWebpackConsumeIdentifier(identifier);
 
       let pkgName = '';
       let pkgVersion = '';
+      let shareScope: string | string[] = 'default';
 
       if (this.isRspack) {
         const nameAndVersion = data[4];
         const res = parseResolvedIdentifier(nameAndVersion);
         pkgName = res.name;
         pkgVersion = res.version;
+        shareScope = parseShareScope(data[3]);
       } else {
-        pkgName = data[2];
-        const pkgVersionRange = data[3];
+        // An array share scope is joined with the same '|' separator, so the
+        // scope is everything between the module type and the seven trailing
+        // fields (shareKey|requiredVersion|strictVersion|importResolved|singleton|eager|layer).
+        const shareKeyIndex = Math.max(2, data.length - 7);
+        shareScope = parseShareScope(data.slice(1, shareKeyIndex).join('|'));
+        pkgName = data[shareKeyIndex];
+        const pkgVersionRange = data[shareKeyIndex + 1];
         pkgVersion = '';
         if (pkgVersionRange.startsWith('=')) {
-          pkgVersion = data[3].replace('=', '');
+          pkgVersion = pkgVersionRange.replace('=', '');
         } else {
           if (sharedManagerNormalizedOptions[pkgName]) {
             pkgVersion = sharedManagerNormalizedOptions[pkgName].version;
@@ -363,8 +408,8 @@ class ModuleHandler {
       }
 
       if (pkgName && pkgVersion) {
-        initShared(pkgName, pkgVersion);
-        collectRelationshipMap(mod, pkgName);
+        const sharedKey = initShared(pkgName, pkgVersion, shareScope);
+        collectRelationshipMap(mod, pkgName, sharedKey);
       }
     }
   }
@@ -569,11 +614,36 @@ class ModuleHandler {
       }
     });
 
+    this._disambiguateSharedIds(sharedMap);
+
     return {
       remotes,
       exposesMap,
       sharedMap,
     };
+  }
+
+  // Ids stay `${hostName}:${pkgName}` unless a package is shared in more than one
+  // scope, so manifests without that case keep their existing ids.
+  private _disambiguateSharedIds(sharedMap: ShareMap) {
+    const entriesByName = new Map<string, StatsShared[]>();
+    Object.values(sharedMap).forEach((shared) => {
+      entriesByName.set(shared.name, [
+        ...(entriesByName.get(shared.name) || []),
+        shared,
+      ]);
+    });
+    entriesByName.forEach((entries) => {
+      if (entries.length < 2) {
+        return;
+      }
+      entries.forEach((shared) => {
+        const scope = Array.isArray(shared.shareScope)
+          ? shared.shareScope.join('|')
+          : shared.shareScope || 'default';
+        shared.id = `${shared.id}@${scope}`;
+      });
+    });
   }
 }
 
