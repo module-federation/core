@@ -1,5 +1,13 @@
 # @module-federation/devtools
 
+## 2.9.3
+
+### Patch Changes
+
+- Updated dependencies [9135b23]
+  - @module-federation/sdk@2.9.3
+  - @module-federation/observability-plugin@2.6.3
+
 ## 2.9.2
 
 ### Patch Changes

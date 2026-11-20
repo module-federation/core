@@ -187,7 +187,7 @@ For Modern.js v2 projects, install `@module-federation/modern-js` and import Run
     import { loadRemote } from '@module-federation/enhanced/runtime';
 
     const RemoteButton = React.lazy(() => loadRemote('provider/button'));
-    // 也可通过模块别名加载：
+    // It can also be loaded via its module alias:
     // const RemoteButton = React.lazy(() => loadRemote('remotes-1/button'));
 
     export default () => {
@@ -205,7 +205,7 @@ For Modern.js v2 projects, install `@module-federation/modern-js` and import Run
     import { createInstance } from '@module-federation/enhanced/runtime';
     import React from 'react';
 
-    // 创建实例
+    // Create an instance
     const mf = createInstance({
       name: 'mf_host',
       remotes: [
@@ -264,7 +264,7 @@ For Modern.js v2 projects, install `@module-federation/modern-js` and import Run
     import { createInstance } from '@module-federation/enhanced/runtime';
     import React from 'react';
 
-    // 创建实例
+    // Create an instance
     const mf = createInstance({
       name: 'mf_host',
       remotes: [
@@ -304,7 +304,7 @@ For Modern.js v2 projects, install `@module-federation/modern-js` and import Run
     import React from 'react';
     import { loadRemote } from '@module-federation/enhanced/runtime';
 
-    // 加载 remote1 expose 的 util
+    // Load the util exposed by remote1
     loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
         md.add(1,2);
     });
