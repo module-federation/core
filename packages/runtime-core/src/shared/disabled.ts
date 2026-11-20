@@ -35,6 +35,9 @@ export class DisabledSharedHandler {
     scopeName: string,
     shareScope: ShareScopeMap[string],
   ): void {
-    this.shareScopeMap[scopeName] = shareScope;
+    this.shareScopeMap[scopeName] = {
+      ...this.shareScopeMap[scopeName],
+      ...shareScope,
+    };
   }
 }
