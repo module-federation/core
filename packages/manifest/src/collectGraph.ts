@@ -130,10 +130,17 @@ export function collectGraph(
       configured.find(([, value]) => value.layer === layer) ??
       configured.find(([, value]) => value.layer === undefined) ??
       [];
+    // A consume-only share that is not installed has no package version.
+    // Like the legacy reader, take the version from `requiredVersion: '=1.2.3'`.
+    const required = consume ? normalized?.requiredVersion : undefined;
+    const exactVersion =
+      typeof required === 'string' && required.startsWith('=')
+        ? required.slice(1)
+        : undefined;
     const version =
       'version' in data
         ? JSON.parse(data.version)
-        : (normalized?.version ?? sharedMap[key]?.version);
+        : (exactVersion ?? normalized?.version ?? sharedMap[key]?.version);
     if (!name || !version) continue;
     sharedKeys.set(module, key);
     if (!sharedMap[key]) {

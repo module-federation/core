@@ -1,0 +1,170 @@
+# Aislamiento de estilos
+
+En Module Federation, las aplicaciones host y remote se ejecutan en la misma página y comparten un único ámbito CSS global, por lo que los estilos de un lado pueden filtrarse fácilmente al otro y provocar una "contaminación de estilos" no deseada. Module Federation no incluye aislamiento de estilos integrado (consulta las [preguntas frecuentes](#why-doesnt-module-federation-directly-handle-css-style-isolation) más abajo para conocer el motivo), así que los producers deben elegir la estrategia que mejor se adapte a su escenario.
+
+## BEM (Block Element Modifier)
+
+BEM es una convención de nombres que consigue el aislamiento de estilos añadiendo prefijos y sufijos a los nombres de clase. La estructura de BEM es la siguiente:
+
+- **Block**: representa un bloque funcional independiente, p. ej., `.button`
+- **Element**: representa una parte del bloque, p. ej., `.button__text`
+- **Modifier**: representa distintos estados o versiones del bloque o del elemento, p. ej., `.button--primary`
+
+```html
+<div class="button">
+  <span class="button__text">Button</span>
+</div>
+```
+
+```css
+.button {
+  background-color: blue;
+  color: white;
+}
+
+.button__text {
+  font-size: 16px;
+}
+
+.button--primary {
+  background-color: green;
+}
+```
+
+## CSS Modules
+
+CSS Modules consigue el aislamiento de estilos tratando cada archivo CSS como un módulo, en el que cada nombre de clase se transforma en un identificador único durante la compilación. [Usar CSS Modules en Rsbuild](https://v2.rsbuild.rs/guide/styling/css-modules)
+
+
+1. Crea un archivo CSS llamado `styles.module.css`:
+
+```css
+/* styles.module.css */
+.button {
+  background-color: blue;
+  color: white;
+}
+```
+
+2. Impórtalo y úsalo en un componente de React:
+
+```javascript
+import React from 'react';
+import styles from './styles.module.css';
+
+function App() {
+  return <button className={styles.button}>Button</button>;
+}
+
+export default App;
+```
+
+## CSS-in-JS
+
+CSS-in-JS escribe los estilos directamente en archivos JavaScript. Entre las bibliotecas más comunes están [styled-components](https://styled-components.com/) y [emotion](https://github.com/emotion-js/emotion). [Usar CSS-in-JS en Rsbuild](https://rsbuild.rs/guide/styling/css-in-js)
+
+
+1. Instala styled-components:
+
+```bash
+npm install styled-components
+```
+
+2. Úsalo en un componente de React:
+
+```javascript
+import React from 'react';
+import styled from 'styled-components';
+
+const Button = styled.button`
+  background: blue;
+  color: white;
+`;
+
+function App() {
+  return <Button>Button</Button>;
+}
+
+export default App;
+```
+
+## Shadow DOM
+
+Shadow DOM forma parte de la tecnología Web Components y crea un árbol DOM aislado para conseguir el aislamiento de estilos. React puede usar Shadow DOM mediante [react-shadow](https://www.npmjs.com/package/react-shadow).
+
+
+1. Crea una plantilla HTML:
+
+```html
+<template id="my-component">
+  <style>
+    .button {
+      background: blue;
+      color: white;
+    }
+  </style>
+  <button class="button">Button</button>
+</template>
+```
+
+2. Define un elemento personalizado y adjúntale un Shadow DOM:
+
+```javascript
+class MyComponent extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const template = document.getElementById('my-component').content;
+    shadow.appendChild(template.cloneNode(true));
+  }
+}
+
+customElements.define('my-component', MyComponent);
+```
+
+3. Usa el elemento personalizado en HTML:
+
+```html
+<my-component></my-component>
+```
+
+## Estilos con scope en Vue
+
+En Vue, se puede usar el atributo `scoped` para conseguir el aislamiento de estilos a nivel de componente.
+
+
+1. Define los estilos en un componente de Vue:
+
+```vue
+<template>
+  <button class="button">Button</button>
+</template>
+
+<style scoped>
+.button {
+  background: blue;
+  color: white;
+}
+</style>
+```
+
+Cada método tiene sus propios escenarios de aplicación y limitaciones. Puedes elegir la solución de aislamiento de estilos adecuada según los requisitos del proyecto.
+
+## Preguntas frecuentes
+
+### ¿Por qué Module Federation no gestiona directamente el aislamiento de estilos CSS? {#why-doesnt-module-federation-directly-handle-css-style-isolation}
+
+Los principales motivos para no incorporar directamente el aislamiento de CSS en Module Federation son:
+
+* El aislamiento de CSS puede entrar en conflicto de forma importante con las dependencias shared. Las dependencias shared buscan reutilizar las dependencias comunes al máximo, lo que puede hacer que algunas de ellas escapen del sandbox, de modo que el aislamiento se vuelve incontrolable y puede verse afectado por el orden de carga.
+
+* Gestionar el aislamiento de CSS en runtime puede presentar muchos casos límite, y diagnosticar los problemas puede ser muy difícil, lo que reduce la estabilidad del negocio. Los problemas habituales incluyen:
+  * Shadow DOM: este método puede causar problemas de compatibilidad con diversas bibliotecas de componentes, y diagnosticar incidencias en producción puede ser largo y complejo, sin garantía de solución.
+  * Recopilar y limpiar el CSS: debido a los problemas de aislamiento y de reutilización compartida mencionados, el CSS podría limpiarse de forma involuntaria.
+  * Actualizar el sandbox en el consumer: el impacto en el negocio es incontrolable.
+
+> Formas de gestión recomendadas:
+
+* Procesa el CSS a nivel del producer del módulo o de la subaplicación para garantizar que el módulo o la aplicación se ejecute como se espera en cualquier entorno.
+* Usa CSS Modules, prefijos de bibliotecas de componentes y versiones unificadas de las bibliotecas de componentes para resolver el problema.
+* Exporta directamente componentes con Shadow DOM para que los usen otros equipos.
