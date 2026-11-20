@@ -457,6 +457,43 @@ describe('getRemoteEntry - script load error discrimination', () => {
   });
 });
 
+describe('getRemoteEntry - Node.js entry', () => {
+  afterEach(() => {
+    rs.unstubAllGlobals();
+    delete (globalThis as any)['node_remote'];
+  });
+
+  it('loads the remote entry through the fetch hook', async () => {
+    // Stands in for the bundler define that selects the Node.js loader.
+    rs.stubGlobal('ENV_TARGET', 'node');
+    const fetchHook = rs.fn(
+      async () => new Response('module.exports = { loadedBy: "fetch hook" };'),
+    );
+    const origin = new ModuleFederation({
+      name: 'node-fetch-hook',
+      remotes: [],
+      plugins: [{ name: 'fetch-hook', fetch: fetchHook }],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'node_remote',
+      entry: 'http://remote.test/remoteEntry.js',
+    });
+    const resourceContext = {
+      initiator: 'loadRemote',
+      id: 'node_remote',
+      resourceType: 'remoteEntry',
+    } as const;
+
+    await expect(
+      getRemoteEntry({ origin, remoteInfo, resourceContext }),
+    ).resolves.toEqual({ loadedBy: 'fetch hook' });
+    expect(fetchHook).toHaveBeenCalledWith(remoteInfo.entry, {}, remoteInfo, {
+      ...resourceContext,
+      url: remoteInfo.entry,
+    });
+  });
+});
+
 describe('getRemoteEntry - globalLoading rejection cache', () => {
   beforeEach(() => {
     resetFederationGlobalInfo();

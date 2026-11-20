@@ -835,7 +835,7 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
 
 `AsyncHook`
 
-La función `fetch` permite personalizar la petición que obtiene el JSON del manifest. Una `Response` correcta debe devolver un JSON válido.
+La función `fetch` permite personalizar la petición que obtiene el JSON del manifest. Una `Response` correcta debe devolver un JSON válido. En Node.js el hook también se llama para el script del remoteEntry y los módulos ES que importa; en ese caso la `Response` debe contener JavaScript.
 
 ```typescript
 function fetch(
