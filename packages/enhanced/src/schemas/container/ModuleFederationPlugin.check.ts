@@ -482,6 +482,7 @@ const t = {
         properties: {
           enableBridgeRouter: { type: 'boolean', default: !1 },
           disableAlias: { type: 'boolean', default: !1 },
+          showBridgeRouterLogs: { type: 'boolean', default: !1 },
         },
         additionalProperties: !1,
       },
@@ -4877,7 +4878,8 @@ function D(
                                                   if (
                                                     'enableBridgeRouter' !==
                                                       t &&
-                                                    'disableAlias' !== t
+                                                    'disableAlias' !== t &&
+                                                    'showBridgeRouterLogs' !== t
                                                   )
                                                     return (
                                                       (D.errors = [
@@ -4920,6 +4922,28 @@ function D(
                                                       if (
                                                         'boolean' !=
                                                         typeof e.disableAlias
+                                                      )
+                                                        return (
+                                                          (D.errors = [
+                                                            {
+                                                              params: {
+                                                                type: 'boolean',
+                                                              },
+                                                            },
+                                                          ]),
+                                                          !1
+                                                        );
+                                                      q = t === c;
+                                                    } else q = !0;
+                                                  if (q)
+                                                    if (
+                                                      void 0 !==
+                                                      e.showBridgeRouterLogs
+                                                    ) {
+                                                      const t = c;
+                                                      if (
+                                                        'boolean' !=
+                                                        typeof e.showBridgeRouterLogs
                                                       )
                                                         return (
                                                           (D.errors = [
