@@ -325,6 +325,63 @@ describe('typeScriptCompiler', () => {
       expect(projectPath).not.toContain("'");
     });
 
+    it.each(['linux', 'win32'] as const)(
+      'executes an absolute compilerInstance path directly without a shell on %s',
+      async (platform) => {
+        const execPromise = rs.fn().mockResolvedValue({});
+        rs.spyOn(util, 'promisify').mockReturnValue(
+          execPromise as unknown as ReturnType<typeof util.promisify>,
+        );
+        const compilerPath = join(tmpDir, 'native tsgo.exe');
+        writeFileSync(compilerPath, '');
+        const restorePlatform = withProcessPlatform(platform);
+        const filepath = join(__dirname, './typeScriptCompiler.ts');
+
+        try {
+          await compileTs(
+            { tsCompiler: filepath },
+            { ...tsConfig, files: [filepath] },
+            { ...remoteOptions, compilerInstance: compilerPath },
+          );
+        } finally {
+          restorePlatform();
+        }
+
+        expect(execPromise).toHaveBeenCalledWith(
+          compilerPath,
+          ['--project', expect.any(String)],
+          expect.objectContaining({ shell: false }),
+        );
+      },
+    );
+
+    it('keeps an absolute .cmd compilerInstance path on the package manager route on Windows', async () => {
+      const execPromise = rs.fn().mockResolvedValue({});
+      rs.spyOn(util, 'promisify').mockReturnValue(
+        execPromise as unknown as ReturnType<typeof util.promisify>,
+      );
+      const compilerPath = join(tmpDir, 'tsgo.cmd');
+      writeFileSync(compilerPath, '');
+      const restorePlatform = withProcessPlatform('win32');
+      const filepath = join(__dirname, './typeScriptCompiler.ts');
+
+      try {
+        await compileTs(
+          { tsCompiler: filepath },
+          { ...tsConfig, files: [filepath] },
+          { ...remoteOptions, compilerInstance: compilerPath },
+        );
+      } finally {
+        restorePlatform();
+      }
+
+      expect(execPromise).toHaveBeenCalledWith(
+        'npx',
+        expect.any(Array),
+        expect.objectContaining({ shell: true }),
+      );
+    });
+
     it('ignores inherited declarationDir', async () => {
       const projectDir = join(tmpDir, 'declarationDirProject');
       const srcDir = join(projectDir, 'src');
