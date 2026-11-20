@@ -1,21 +1,24 @@
 import type { ModuleFederation } from '@module-federation/runtime';
 import type { Remote } from '@module-federation/runtime/types';
+import {
+  loadTrackerKey,
+  nodeLifecycleKey,
+  updatingKey,
+  type NodeFederation,
+  type NodeInstanceLifecycle,
+} from './lifecycle/symbols';
 
 export {
   clearContainerCache,
   planRemoteCache,
 } from '@module-federation/webpack-bundler-runtime/clear-cache';
-
-export const nodeLifecycleKey = Symbol.for('module-federation.node.lifecycle');
-export const loadTrackerKey = Symbol.for('module-federation.node.load-tracker');
-export const updatingKey = Symbol.for('module-federation.node.updating');
-
-export interface NodeInstanceLifecycle {
-  readonly closed: boolean;
-  destroy(): Promise<void>;
-  updateRemotes(remotes: Remote[]): Promise<void>;
-  removeRemote(remote: Remote | string): Promise<void>;
-}
+export {
+  loadTrackerKey,
+  nodeLifecycleKey,
+  updatingKey,
+  type NodeFederation,
+  type NodeInstanceLifecycle,
+};
 
 /** Return the optional lifecycle installed by the Node runtime plugin. */
 export function getNodeInstanceLifecycle(

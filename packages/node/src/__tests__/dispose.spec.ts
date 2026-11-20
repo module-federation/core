@@ -2,7 +2,7 @@ import { destroyNodeInstance, getNodeInstanceLifecycle } from '../lifecycle';
 import { describe, it, expect, rs } from '@rstest/core';
 import { ModuleFederation } from './runtimeTestUtils';
 import { ModuleFederation as CoreFederation } from '../../../runtime-core/src';
-import { nodeRuntimeLifecycle } from '../runtimeLifecycle';
+import { nodeRuntimeLifecycle } from '../lifecycle/runtimeLifecycle';
 import {
   CurrentGlobal,
   setGlobalFederationInstance,

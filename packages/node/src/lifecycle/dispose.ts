@@ -1,12 +1,12 @@
 import type { Remote } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
-import type { NodeFederation } from './runtimeLifecycle';
 import {
   forEachSharedRecord,
   pruneRetiredShareScopes,
   retireShareScope,
   sharedRecords,
 } from './share';
+import type { NodeFederation } from './symbols';
 
 const CurrentGlobal = globalThis;
 const { Global } = helpers.global;
