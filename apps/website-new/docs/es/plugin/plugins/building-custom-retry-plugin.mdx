@@ -1,20 +1,20 @@
 # Crear un plugin de reintentos personalizado
 
-Esta guía muestra cómo crear un plugin de reintentos personalizado con funcionalidades avanzadas como el patrón circuit breaker, componentes de fallback y un manejo de errores inteligente para aplicaciones con Module Federation.
+En esta guía crearás un plugin de reintentos para Module Federation con un circuit breaker y componentes de fallback para los errores de carga.
 
 ## Descripción general
 
-Al crear aplicaciones distribuidas con Module Federation, gestionar con elegancia los remotes sin conexión es fundamental para mantener la estabilidad de la aplicación. Un plugin de reintentos personalizado puede ofrecer un manejo de errores sofisticado que va más allá de los mecanismos de reintento básicos.
+Si un remote deja de responder, tu aplicación necesita decidir cuándo reintentar y qué mostrar mientras tanto. Con un plugin propio puedes definir ese comportamiento.
 
 ## Funcionalidades principales
 
-Un plugin de reintentos robusto debería incluir:
+El plugin de este ejemplo incluye:
 
 - **Lógica de reintentos**: número de reintentos configurable con backoff exponencial
 - **Patrón circuit breaker**: evita fallos en cascada deshabilitando temporalmente los remotes que fallan
-- **Componentes de fallback**: degradación elegante de la UI cuando los remotes no están disponibles
+- **Componentes de fallback**: muestra una alternativa cuando los remotes no están disponibles
 - **Gestión de timeouts**: evita peticiones que se quedan colgadas
-- **Gestión de estado inteligente**: hace seguimiento de la salud de los remotes y de los patrones de fallo
+- **Estado de los remotes**: registra cuáles responden y cómo fallan los demás
 
 ## Implementación
 
@@ -184,7 +184,7 @@ async errorLoadRemote(args) {
 
 ### Componentes de fallback
 
-Crea componentes de UI de fallback que degraden con elegancia:
+Crea componentes de fallback para mostrar cuando falle la carga:
 
 ```ts
 const createFallbackComponent = (remoteId: string, error?: Error) => {
@@ -293,11 +293,11 @@ shareStrategy: 'version-first'
 shareStrategy: 'loaded-first' // Recommended for offline scenarios
 ```
 
-Para aplicaciones que necesitan gestionar con elegancia los escenarios sin conexión, considera usar la estrategia `loaded-first` junto con tu plugin de reintentos.
+Si tu aplicación necesita seguir funcionando cuando un remote está sin conexión, considera usar `loaded-first` junto con tu plugin de reintentos.
 
 ## Buenas prácticas
 
-1. **Degradación elegante**: proporciona siempre una UI de fallback útil
+1. **Fallback**: muestra una alternativa útil cuando falle la carga
 2. **Circuit breaker**: evita fallos en cascada con el patrón circuit breaker
 3. **Logging**: incluye logs completos para facilitar la depuración
 4. **Rendimiento**: guarda en caché los módulos de fallback para no tener que recrearlos
@@ -445,6 +445,6 @@ Considera añadir estas funcionalidades avanzadas:
 - **Fuentes alternativas**: intenta cargar desde varias URL de manifest
 - **Métricas**: recopila métricas sobre la fiabilidad de los remotes
 - **Notificaciones a usuarios**: avisa a los usuarios de los remotes sin conexión
-- **Mejora progresiva**: gestiona con elegancia la funcionalidad parcial
+- **Funcionamiento parcial**: permite usar las partes disponibles de la aplicación
 
-Este enfoque proporciona un manejo de errores robusto y mantiene una buena experiencia de usuario incluso cuando los módulos remotos no están disponibles.
+Con estas piezas puedes reintentar la carga, mostrar un fallback mientras falla y recuperar el módulo cuando vuelva a estar disponible.
