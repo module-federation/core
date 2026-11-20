@@ -440,6 +440,9 @@ const BARE_IMPORT = /(?:from |import\()['"]([^'"./][^'"]*)['"]/g;
 // Keep the type package's dependencies in step with the Webpack release, so
 // imports such as `webpack-sources` resolve to the versions its types expect.
 function syncTypeDependencies({ cloneDir, outputDir }) {
+  const packageJsonPath = join(outputDir, 'package.json');
+  // An --output directory other than the type package has no manifest.
+  if (!existsSync(packageJsonPath)) return;
   const webpackDependencies =
     JSON.parse(readFileSync(join(cloneDir, 'package.json'), 'utf8'))
       .dependencies || {};
@@ -465,7 +468,6 @@ function syncTypeDependencies({ cloneDir, outputDir }) {
       )
       .sort(([a], [b]) => a.localeCompare(b)),
   );
-  const packageJsonPath = join(outputDir, 'package.json');
   const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
   packageJson.dependencies = dependencies;
   writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
