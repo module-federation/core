@@ -398,6 +398,7 @@ class StatsManager {
               name: name!,
               exposes: this._containerManager.containerPluginExposesOptions,
               shared: this._sharedManager.normalizedOptions,
+              shareScope: this._options.shareScope,
               remotes: this._remoteManager.normalizedOptions,
             })
           : undefined;
