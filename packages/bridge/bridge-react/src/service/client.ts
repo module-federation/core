@@ -114,8 +114,7 @@ export async function loadServiceClient(
             loaded.remoteInfo.entry !==
               getResourceUrl(selected.snapshot, selected.snapshot.remoteEntry)
           ) {
-            await producer.remoteHandler.removeRemote(remote);
-            producer.registerRemotes([remote]);
+            producer.registerRemotes([remote], { force: true });
           }
         }
       }

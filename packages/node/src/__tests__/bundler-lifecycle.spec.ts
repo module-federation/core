@@ -1,7 +1,10 @@
 import { describe, expect, it, rs } from '@rstest/core';
 import { ModuleFederation } from './runtimeTestUtils';
 import { Module, helpers } from '../../../runtime-core/src';
-import { installClearCache } from '../../../webpack-bundler-runtime/src/clearCache';
+import {
+  installClearCache,
+  installNodeCacheRuntime,
+} from '../../../webpack-bundler-runtime/src/clearCache';
 
 const entry = 'https://example.test/remote.js';
 function createHost() {
@@ -154,4 +157,79 @@ describe('Node runtime and bundler lifecycle integration', () => {
       }
     },
   );
+
+  it('drains in-flight loads before clearing caches and holds new direct or compiled loads until replacement finishes', async () => {
+    const { host, runtime, dispose } = createHost();
+    let releaseOld!: () => void;
+    const oldGate = new Promise<void>((resolve) => {
+      releaseOld = resolve;
+    });
+    let releaseHook!: () => void;
+    const hookGate = new Promise<void>((resolve) => {
+      releaseHook = resolve;
+    });
+    const calls: string[] = [];
+    const seenEntries: Array<string | undefined> = [];
+    host.registerPlugins([
+      {
+        name: 'slow-remove',
+        async removeRemote() {
+          calls.push('remove');
+          await hookGate;
+        },
+      },
+    ]);
+    const bundled = rs.fn(({ promises }: any) => {
+      promises.push(
+        oldGate.then(() => {
+          calls.push('compiled');
+          seenEntries.push(host.options.remotes[0]?.entry);
+        }),
+      );
+    });
+    runtime.federation.bundlerRuntime = {
+      init: () => host,
+      remotes: bundled,
+    };
+    installNodeCacheRuntime(runtime);
+    const compiledLoad = () => {
+      const promises: Promise<unknown>[] = [];
+      runtime.federation.bundlerRuntime.remotes({
+        webpackRequire: runtime,
+        chunkId: 10,
+        chunkMapping: { 10: [101] },
+        promises,
+      });
+      return Promise.all(promises);
+    };
+    let update: Promise<void> | undefined;
+    try {
+      const firstCompiled = compiledLoad();
+      update = host.updateRemotes([
+        {
+          name: 'provider',
+          alias: 'registered',
+          entry: 'https://example.test/v2.js',
+        },
+      ]);
+      const secondCompiled = compiledLoad();
+      expect(bundled).toHaveBeenCalledTimes(1);
+      expect(calls).toEqual([]);
+      releaseOld();
+      await firstCompiled;
+      expect(seenEntries).toEqual([entry]);
+      await rs.waitFor(() => expect(calls).toEqual(['compiled', 'remove']));
+      expect(bundled).toHaveBeenCalledTimes(1);
+      releaseHook();
+      await update;
+      await secondCompiled;
+      expect(seenEntries).toEqual([entry, 'https://example.test/v2.js']);
+      expect(bundled).toHaveBeenCalledTimes(2);
+    } finally {
+      releaseOld();
+      releaseHook();
+      await update?.catch(() => {});
+      dispose();
+    }
+  });
 });

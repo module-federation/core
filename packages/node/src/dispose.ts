@@ -1,11 +1,21 @@
+import type { Remote } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
 import type { NodeFederation } from './runtimeLifecycle';
-import { pruneRetiredShareScopes, retireShareScope } from './share';
+import {
+  forEachSharedRecord,
+  pruneRetiredShareScopes,
+  retireShareScope,
+  sharedRecords,
+} from './share';
+
 const CurrentGlobal = globalThis;
 const { Global } = helpers.global;
 
 /** Release instance-owned roots. Shared values used by another host stay alive. */
-export async function disposeInstance(host: NodeFederation): Promise<void> {
+export async function disposeInstance(
+  host: NodeFederation,
+  removeRemoteInternal: (remote: Remote) => Promise<void>,
+): Promise<void> {
   const globals = new Set([
     CurrentGlobal.__FEDERATION__,
     Global.__FEDERATION__,
@@ -13,26 +23,21 @@ export async function disposeInstance(host: NodeFederation): Promise<void> {
   const others = [...globals]
     .flatMap((g) => g.__INSTANCES__)
     .filter((i) => i !== host);
-  // useIn/from are logical names, not build IDs. A same-name peer may still
-  // depend on those records, even when its runtime has another options.id.
-  // A closing peer remains an owner until its registry reference is released.
   let retainSharedOwner = others.some((i) => i.name === host.name);
   const releaseSharedOwner = () => {
     for (const global of globals)
-      for (const scopes of Object.values(global.__SHARE__))
-        for (const packages of Object.values(scopes))
-          for (const versions of Object.values(packages))
-            for (const [version, shared] of Object.entries(versions)) {
-              shared.useIn = shared.useIn.filter((name) => name !== host.name);
-              if (
-                shared.from === host.name &&
-                !shared.useIn.length &&
-                (!shared.loading || shared.loaded)
-              )
-                delete versions[version];
-            }
+      forEachSharedRecord(global.__SHARE__, (shared, versions, version) => {
+        shared.useIn = shared.useIn.filter((name) => name !== host.name);
+        if (
+          shared.from === host.name &&
+          !shared.useIn.length &&
+          (!shared.loading || shared.loaded)
+        )
+          delete versions[version];
+      });
   };
   if (!retainSharedOwner) releaseSharedOwner();
+
   for (const remote of [...host.options.remotes]) {
     const module = host.moduleCache.get(remote.name);
     const usedElsewhere =
@@ -45,10 +50,10 @@ export async function disposeInstance(host: NodeFederation): Promise<void> {
               value.remoteEntryExports === module.remoteEntryExports),
         ),
       );
-    // Another consumer owns this container too; only drop our local reference.
-    if (!usedElsewhere) await host.remoteHandler.removeRemote(remote);
+    if (!usedElsewhere) await removeRemoteInternal(remote);
   }
   await helpers.dispose.notifyDispose(host);
+
   if (
     retainSharedOwner &&
     ![...globals].some((global) =>
@@ -60,35 +65,31 @@ export async function disposeInstance(host: NodeFederation): Promise<void> {
   }
   retireShareScope(host.shareScopeMap);
   for (const global of globals) {
-    for (const scopes of Object.values(global.__SHARE__))
-      for (const packages of Object.values(scopes))
-        for (const versions of Object.values(packages))
-          for (const [version, shared] of Object.entries(versions))
-            if (
-              !retainSharedOwner &&
-              shared.from === host.name &&
-              !shared.useIn.length &&
-              (!shared.loading || shared.loaded)
-            )
-              delete versions[version];
+    if (!retainSharedOwner) {
+      forEachSharedRecord(global.__SHARE__, (shared, versions, version) => {
+        if (
+          shared.from === host.name &&
+          !shared.useIn.length &&
+          (!shared.loading || shared.loaded)
+        )
+          delete versions[version];
+      });
+    }
     for (let index = global.__INSTANCES__.length - 1; index >= 0; index--)
       if (global.__INSTANCES__[index] === host)
         global.__INSTANCES__.splice(index, 1);
-    for (const [id, scopes] of Object.entries(global.__SHARE__))
-      if (
-        !retainSharedOwner &&
-        scopes === host.shareScopeMap &&
-        !Object.values(scopes).some((packages) =>
-          Object.values(packages).some((versions) =>
-            Object.values(versions).some(
-              (shared) =>
-                shared.from === host.name &&
-                (shared.useIn.length || (shared.loading && !shared.loaded)),
-            ),
-          ),
+    if (!retainSharedOwner) {
+      for (const [id, scopes] of Object.entries(global.__SHARE__))
+        if (
+          scopes === host.shareScopeMap &&
+          !sharedRecords(scopes).some(
+            (shared) =>
+              shared.from === host.name &&
+              (shared.useIn.length || (shared.loading && !shared.loaded)),
+          )
         )
-      )
-        delete global.__SHARE__[id];
+          delete global.__SHARE__[id];
+    }
   }
   pruneRetiredShareScopes();
   host.moduleCache.clear();

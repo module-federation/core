@@ -164,11 +164,13 @@ export const resolveFile = (rootOutputDir: string, chunkId: string): string => {
   return path.join(__dirname, rootOutputDir + __webpack_require__.u(chunkId));
 };
 
+const getGlobalInstances = (): ModuleFederation[] =>
+  new Function('return globalThis')()['__FEDERATION__']?.['__INSTANCES__'] ||
+  [];
+
 // Hoisted utility function to get remote entry from cache
 export const returnFromCache = (remoteName: string): string | null => {
-  const globalThisVal = new Function('return globalThis')();
-  const federationInstances = globalThisVal['__FEDERATION__']['__INSTANCES__'];
-  for (const instance of federationInstances) {
+  for (const instance of getGlobalInstances()) {
     const moduleContainer = instance.moduleCache.get(remoteName);
     if (moduleContainer?.remoteInfo) return moduleContainer.remoteInfo.entry;
   }
@@ -179,9 +181,7 @@ export const returnFromCache = (remoteName: string): string | null => {
 export const returnFromGlobalInstances = (
   remoteName: string,
 ): string | null => {
-  const globalThisVal = new Function('return globalThis')();
-  const federationInstances = globalThisVal['__FEDERATION__']['__INSTANCES__'];
-  for (const instance of federationInstances) {
+  for (const instance of getGlobalInstances()) {
     for (const remote of instance.options.remotes) {
       if (remote.name === remoteName || remote.alias === remoteName) {
         console.log('Backup remote entry found:', remote.entry);
@@ -654,7 +654,7 @@ export default function (): ModuleFederationRuntimePlugin {
     name: 'node-federation-plugin',
     apply(instance) {
       return {
-        ...createClearCacheRuntimePlugin(),
+        ...createClearCacheRuntimePlugin({ handleRemoveRemote: false }),
         ...(nodeRuntimeLifecycle().apply!(instance) || {}),
         beforeInit: this.beforeInit,
       };

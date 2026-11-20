@@ -1,19 +1,27 @@
 import { expect, it, rs } from '@rstest/core';
 import { ModuleFederation } from '../src';
 
-it('uses a plugin cleanup without knowing the container implementation', async () => {
-  const remove = rs.fn();
+it('exposes the asynchronous removeRemote hook without embedding Node container policy', async () => {
+  const observed = rs.fn();
   const host = new ModuleFederation({
     name: 'custom-cleanup',
     remotes: [{ name: 'a', entry: 'https://example.test/a.js' }],
     plugins: [
-      { name: 'custom-container', beforeRemoveRemote: () => ({ remove }) },
+      {
+        name: 'custom-container',
+        async removeRemote({ remote, origin }) {
+          observed(remote.name, origin);
+        },
+      },
     ],
   });
-  await host.removeRemote('a');
-  expect(remove).toHaveBeenCalledOnce();
-  expect(host.options.remotes).toEqual([]);
+  await host.remoteHandler.hooks.lifecycle.removeRemote.emit({
+    remote: host.options.remotes[0],
+    origin: host,
+  });
+  expect(observed).toHaveBeenCalledWith('a', host);
   expect('retainedProviders' in host).toBe(false);
+  expect('updateRemotes' in host).toBe(false);
 });
 
 it('notifies every disposal listener and waits for asynchronous cleanup after a failure', async () => {

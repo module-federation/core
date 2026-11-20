@@ -1,5 +1,6 @@
 import type { ModuleFederation } from '@module-federation/runtime';
 import type {
+  GlobalShareScopeMap,
   RemoteInfo,
   Shared,
   ShareScopeMap,
@@ -7,10 +8,26 @@ import type {
 import helpers from '@module-federation/runtime/helpers';
 import { composeKeyWithSeparator } from '@module-federation/sdk';
 
-const sharedRecords = (scopes: ShareScopeMap | undefined): Shared[] =>
+export const sharedRecords = (scopes: ShareScopeMap | undefined): Shared[] =>
   Object.values(scopes || {}).flatMap((packages) =>
     Object.values(packages).flatMap((versions) => Object.values(versions)),
   );
+
+export function forEachSharedRecord(
+  globalScopes: GlobalShareScopeMap | undefined,
+  visitor: (
+    shared: Shared,
+    versions: Record<string, Shared>,
+    version: string,
+    instanceId: string,
+  ) => void,
+): void {
+  for (const [id, scopes] of Object.entries(globalScopes || {}))
+    for (const packages of Object.values(scopes || {}))
+      for (const versions of Object.values(packages || {}))
+        for (const [version, shared] of Object.entries(versions || {}))
+          visitor(shared, versions, version, id);
+}
 
 export function getRemoteSharedOwnership(
   remoteInfo: RemoteInfo,

@@ -1090,10 +1090,8 @@ test2; // "test2 value"
 
 以下 hook 允许可选插件实现特定环境的资源管理：
 
-- `beforeRemoveRemote({ remote, origin })` 在移除 hook 前同步执行。
-  返回 `{ remove() {} }` 可以先记录资源归属，再在异步移除 hook 成功后执行清理。
-  该回调替代默认容器清理，注册和 snapshot 失效仍由 Core 处理。
-  同步强制注册也会使用该回调。
+- `removeRemote({ remote, origin, remoteInfo })` 在可选生命周期插件（如
+  `@module-federation/node/runtimePlugin`）移除或替换远端注册时异步执行。
 - `dispose({ origin })` 通知插件实例即将退出，可以返回 Promise。
   生命周期管理方排空工作后，通过 `@module-federation/runtime/helpers` 中的
   `helpers.dispose.notifyDispose(instance)` 触发通知。

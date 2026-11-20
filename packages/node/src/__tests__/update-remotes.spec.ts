@@ -1,11 +1,12 @@
 import { describe, expect, it } from '@rstest/core';
-import { ModuleFederation } from '../src/index';
+import { ModuleFederation } from './runtimeTestUtils';
 
 const remote = (name: string, entry = 'https://example.test/v1.js') => ({
   name,
   entry,
 });
-describe('explicit remote updates', () => {
+
+describe('explicit Node remote updates', () => {
   it('serializes updates, captures input, and preserves unspecified registrations', async () => {
     let release!: () => void;
     const barrier = new Promise<void>((resolve) => {
@@ -47,6 +48,7 @@ describe('explicit remote updates', () => {
       ['c', 'https://example.test/v1.js'],
     ]);
   });
+
   it('preflights the whole batch and allows retry after an asynchronous cleanup failure', async () => {
     let fail = true;
     let removals = 0;
@@ -82,6 +84,7 @@ describe('explicit remote updates', () => {
       entry: 'https://example.test/v2.js',
     });
   });
+
   it('can exchange aliases within one upsert batch', async () => {
     const host = new ModuleFederation({
       name: 'aliases',

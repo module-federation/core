@@ -22,10 +22,7 @@ export class DevWorker {
 
     this.removeUnSerializationOptions();
     this._rpcWorker = rpc.createRpcWorker(
-      path.resolve(
-        __dirname,
-        `fork-dev-worker${path.extname(__filename) === '.mjs' ? '.mjs' : '.js'}`,
-      ),
+      path.resolve(__dirname, './fork-dev-worker.js'),
       {},
       undefined,
       false,

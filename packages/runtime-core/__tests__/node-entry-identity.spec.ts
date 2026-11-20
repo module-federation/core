@@ -96,7 +96,7 @@ describe('Node remote entry provenance', () => {
     expect(await a.loadRemote('catalog/first')).toBe('v1');
     expect(await b.loadRemote('catalog/first')).toBe('v1');
     version = 'v2';
-    await a.updateRemotes([{ ...remote }]);
+    a.registerRemotes([{ ...remote }], { force: true });
     expect(await a.loadRemote('catalog/first')).toBe('v2');
     expect(await b.loadRemote('catalog/another')).toBe('v1');
     expect(

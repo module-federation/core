@@ -1136,11 +1136,9 @@ test2; // "test2 value"
 
 These hooks let optional plugins implement environment-specific ownership:
 
-- `beforeRemoveRemote({ remote, origin })` runs synchronously before removal
-  hooks. Return `{ remove() {} }` to capture ownership now and apply custom
-  cleanup after asynchronous removal hooks succeed. The returned callback replaces
-  default container cleanup. Registration and snapshot invalidation remain in Core.
-  Synchronous force registration also uses this callback.
+- `removeRemote({ remote, origin, remoteInfo })` runs asynchronously when an
+  optional lifecycle plugin (such as `@module-federation/node/runtimePlugin`)
+  removes or replaces a remote registration.
 - `dispose({ origin })` notifies plugins that the lifecycle owner is retiring
   the instance. It may return a Promise. The owner calls
   `helpers.dispose.notifyDispose(instance)` from `@module-federation/runtime/helpers`

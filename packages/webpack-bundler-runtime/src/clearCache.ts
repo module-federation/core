@@ -1,4 +1,3 @@
-import { AsyncLocalStorage } from 'node:async_hooks';
 import type {
   ClearCacheOptions,
   ClearCacheResult,
@@ -11,78 +10,68 @@ import type {
 type State = {
   dispose?: () => void;
   evictedChunks?: Set<string>;
+  cleaning?: number;
 };
-type Activity = { kind: 'load' | 'update'; active: boolean };
-type Adapters = {
-  bindings: Set<WebpackRequire>;
-  restore(): void;
-  load<T>(run: () => Promise<T>): Promise<T>;
-  update<T>(run: () => Promise<T>): Promise<T>;
-  updating(): boolean;
-};
+type Bindings = { bindings: Set<WebpackRequire> };
+
 const stateKey = Symbol.for('module-federation.clear-cache.state');
 const adaptersKey = Symbol.for('module-federation.clear-cache.adapters');
 const nodeRuntimeKey = Symbol.for('module-federation.clear-cache.runtime');
+const loadTrackerKey = Symbol.for('module-federation.node.load-tracker');
+const updatingKey = Symbol.for('module-federation.node.updating');
 const containerCacheKey = Symbol.for(
   'module-federation.clear-cache.containers',
 );
+
 type ContainerCacheClearer = NonNullable<
   WebpackRequire['federation']['clearContainerCache']
 >;
 type GetContainer = NonNullable<WebpackRequire['getContainer']>;
-function containerCacheClearers(): WeakMap<
+
+const containerCacheClearers = (): WeakMap<
   GetContainer,
   ContainerCacheClearer
-> {
-  return ((globalThis as any)[containerCacheKey] ||= new WeakMap());
-}
-const getAdapters = (instance: any): Adapters | undefined =>
-  instance?.[adaptersKey];
-const unique = <T>(values: T[]) => [...new Set(values)];
-const getState = (runtime: WebpackRequire): State => {
-  return ((runtime.federation as any)[stateKey] ||= {});
-};
+> => ((globalThis as any)[containerCacheKey] ||= new WeakMap());
 
-const remoteNames = (runtime: WebpackRequire, key: string) =>
-  unique(
+const getBindings = (instance: any): Bindings | undefined =>
+  instance?.[adaptersKey];
+const getState = (runtime: WebpackRequire): State =>
+  ((runtime.federation as any)[stateKey] ||= {});
+const unique = <T>(values: Iterable<T>) => [...new Set(values)];
+const safeId = (id: string) =>
+  id !== '__proto__' && id !== 'constructor' && id !== 'prototype';
+
+function collectNames(runtime: WebpackRequire, key: string): string[] {
+  const remoteInfos =
+    runtime.federation.bundlerRuntimeOptions.remotes?.remoteInfos;
+  const remotes = runtime.federation.instance?.options.remotes || [];
+  return unique(
     [
       key,
-      ...(
-        runtime.federation.bundlerRuntimeOptions.remotes?.remoteInfos?.[key] ||
-        []
-      ).flatMap((info) => [info.name, info.alias]),
-      ...(runtime.federation.instance?.options.remotes || [])
+      ...(remoteInfos?.[key] || []).flatMap((info) => [info.name, info.alias]),
+      ...remotes
         .filter((remote) => remote.name === key || remote.alias === key)
         .flatMap((remote) => [remote.name, remote.alias]),
     ].filter((name): name is string => Boolean(name)),
   );
+}
 
-const requestKeys = (runtime: WebpackRequire, request: string) => {
+function targetFor(runtime: WebpackRequire, name: string, key = name) {
+  if (!name) throw new Error('clearCache requires a remote name');
+  const remoteInfos =
+    runtime.federation.bundlerRuntimeOptions.remotes?.remoteInfos || {};
   const keys = unique([
-    ...Object.keys(
-      runtime.federation.bundlerRuntimeOptions.remotes?.remoteInfos || {},
-    ),
-    ...(runtime.federation.instance?.options.remotes || []).map(
-      (remote) => remote.name,
-    ),
+    ...Object.keys(remoteInfos),
+    ...(runtime.federation.instance?.options.remotes || []).map((r) => r.name),
   ]);
-  return unique(
-    keys.flatMap((key) => {
-      const names = remoteNames(runtime, key);
-      return names.some(
-        (name) => request === name || request.startsWith(`${name}/`),
-      )
-        ? names
+  const names = unique([
+    ...collectNames(runtime, key),
+    ...keys.flatMap((k) => {
+      const group = collectNames(runtime, k);
+      return group.some((n) => name === n || name.startsWith(`${n}/`))
+        ? group
         : [];
     }),
-  );
-};
-
-const targetFor = (runtime: WebpackRequire, name: string, key = name) => {
-  if (!name) throw new Error('clearCache requires a remote name');
-  const names = unique([
-    ...remoteNames(runtime, key),
-    ...requestKeys(runtime, name),
     name,
   ]);
   const options = runtime.federation.bundlerRuntimeOptions.remotes;
@@ -96,10 +85,7 @@ const targetFor = (runtime: WebpackRequire, name: string, key = name) => {
   ))
     if (names.includes(data.remoteName)) remoteIds.add(id);
   return { key, remoteIds: [...remoteIds] };
-};
-
-const safeId = (id: string) =>
-  id !== '__proto__' && id !== 'constructor' && id !== 'prototype';
+}
 
 /** The same read-only graph plan drives framework selection and cache eviction. */
 export function planRemoteCache({
@@ -153,11 +139,9 @@ export function ensureRemoteChunks(
   chunkIds?: Array<string | number>,
 ): Promise<void> | undefined {
   const remotesHandler = runtime.f?.remotes;
-  if (typeof remotesHandler !== 'function') return;
   const loading =
     runtime.federation.remotesLoadingData || runtime.remotesLoadingData;
-  const chunkMapping = loading?.chunkMapping;
-  if (!chunkMapping) return;
+  if (typeof remotesHandler !== 'function' || !loading?.chunkMapping) return;
   const factories =
     runtime.federation.remotesLoadingData?.cache?.factories || runtime.m;
   const state = getState(runtime);
@@ -167,11 +151,9 @@ export function ensureRemoteChunks(
   if (!candidates.length) return;
   const promises: unknown[] = [];
   for (const chunkId of unique(candidates)) {
-    const ids = chunkMapping[chunkId];
-    if (!ids?.length) continue;
-    if (ids.some((id) => !factories?.[String(id)])) {
+    const ids = loading.chunkMapping[chunkId];
+    if (ids?.some((id) => !factories?.[String(id)]))
       remotesHandler(chunkId, promises);
-    }
     state.evictedChunks?.delete(chunkId);
   }
   return promises.length
@@ -179,17 +161,13 @@ export function ensureRemoteChunks(
     : undefined;
 }
 
-// An MF instance can be shared by multiple physical container runtimes.
-// Match the same getter function exported by the loaded container.
 function installContainerCache(runtime: WebpackRequire) {
   const get = runtime.getContainer;
   if (!get) return;
   const clear = (preserveShared: boolean) => {
     if (preserveShared) return false;
     const modules = runtime.c;
-    if (modules) {
-      for (const id of Object.keys(modules)) delete modules[id];
-    }
+    if (modules) for (const id of Object.keys(modules)) delete modules[id];
     void runtime.federation.clearNodeChunks?.({ remoteOnly: false });
     return Boolean(modules);
   };
@@ -201,12 +179,11 @@ export function clearContainerCache(
   value: unknown,
   preserveShared = false,
 ): void {
-  const entry = value as { get?: GetContainer } | undefined;
-  const clear = entry?.get && containerCacheClearers().get(entry.get);
-  clear?.(preserveShared);
+  const get = (value as { get?: GetContainer } | undefined)?.get;
+  if (get) containerCacheClearers().get(get)?.(preserveShared);
 }
 
-async function drainLoads(drain: () => Promise<unknown>) {
+async function withDrainTimeout(drain: () => Promise<unknown>) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     await Promise.race([
@@ -232,167 +209,56 @@ export async function clearCache(
   options: ClearCacheRuntimeOptions,
 ): Promise<ClearCacheResult> {
   const runtime = options.webpackRequire;
-  const clear = async (): Promise<ClearCacheResult> => {
-    const plan = planRemoteCache(options);
-    if (
-      !plan &&
-      targetFor(runtime, options.name, options.remoteKey).remoteIds.length
-    )
-      throw new Error(
-        'SSR remote invalidation requires a compiled dependency graph and module tables',
-      );
-    if (!plan?.remoteModuleIds.length)
-      return { name: options.name, cleared: true };
-    const loading = runtime.federation.remotesLoadingData!;
-    const records = plan.remoteModuleIds.flatMap((id) => [
-      runtime.federation.bundlerRuntimeOptions.remotes
-        ?.idToExternalAndNameMapping[id],
-      loading.moduleIdToRemoteDataMapping?.[id],
-      runtime.remotesLoadingData?.moduleIdToRemoteDataMapping?.[id],
-    ]);
-    const pending = records.flatMap((record) =>
-      record?.p && typeof record.p === 'object' && 'then' in record.p
-        ? [record.p]
-        : [],
+  const plan = planRemoteCache(options);
+  if (
+    !plan &&
+    targetFor(runtime, options.name, options.remoteKey).remoteIds.length
+  )
+    throw new Error(
+      'SSR remote invalidation requires a compiled dependency graph and module tables',
     );
-    if (pending.length) await drainLoads(() => Promise.allSettled(pending));
-    if (runtime.federation.clearNodeChunks) {
-      await drainLoads(() =>
-        runtime.federation.clearNodeChunks!({ remoteOnly: true }),
-      );
-    }
-
-    const { factories, modules } = loading.cache!;
-    const chunkMapping =
-      loading.chunkMapping || runtime.remotesLoadingData?.chunkMapping || {};
-    const evictedIds = new Set(
-      plan.remoteModuleIds.filter((id) => Boolean(factories[id])),
-    );
-    if (evictedIds.size) {
-      const evictedChunks = (getState(runtime).evictedChunks ||= new Set());
-      for (const [chunkId, ids] of Object.entries(chunkMapping)) {
-        if (ids.some((id) => evictedIds.has(String(id)))) {
-          evictedChunks.add(chunkId);
-        }
-      }
-    }
-    for (const record of records) if (record) delete record.p;
-    for (const id of plan.remoteModuleIds) {
-      delete factories[id];
-      delete modules[id];
-    }
-    for (const id of plan.externalModuleIds) delete modules[id];
-    for (const id of plan.consumerModuleIds) delete modules[id];
+  if (!plan?.remoteModuleIds.length)
     return { name: options.name, cleared: true };
-  };
-  const adapters = getAdapters(runtime.federation.instance);
-  return adapters ? adapters.update(clear) : clear();
-}
-
-const wrapMethod = (
-  target: any,
-  key: string,
-  wrapper: (original: any) => any,
-) => {
-  const descriptor = Object.getOwnPropertyDescriptor(target, key);
-  const wrapped = wrapper(target[key]);
-  target[key] = wrapped;
-  return () => {
-    if (target[key] !== wrapped) return;
-    if (descriptor) Object.defineProperty(target, key, descriptor);
-    else delete target[key];
-  };
-};
-
-const createAdapters = (instance: any): Adapters => {
-  const bindings = new Set<WebpackRequire>();
-  const contexts = new AsyncLocalStorage<Activity>();
-  const pending = new Set<Promise<unknown>>();
-  let queue = Promise.resolve();
-  let updates = 0;
-
-  const track = <T>(kind: Activity['kind'], run: () => Promise<T>) => {
-    const context: Activity = { kind, active: true };
-    const result = contexts.run(context, async () => run());
-    const finish = () => {
-      context.active = false;
-      pending.delete(result);
-    };
-    if (kind === 'load') pending.add(result);
-    void result.then(finish, finish);
-    return result;
-  };
-
-  const adapters: Adapters = {
-    bindings,
-    load(run) {
-      if (updates && !contexts.getStore()?.active)
-        return queue.then(() => {
-          if (!bindings.size)
-            throw new Error(
-              'Cache adapter detached while waiting to load a remote',
-            );
-          return adapters.load(run);
-        });
-      return track('load', run);
-    },
-    update(run) {
-      const context = contexts.getStore();
-      if (context?.active) {
-        return context.kind === 'update'
-          ? run()
-          : Promise.reject(
-              new Error('Cannot replace a remote from its in-flight load'),
-            );
-      }
-      updates++;
-      const result = queue.then(async () => {
-        if (pending.size)
-          await drainLoads(async () => {
-            while (pending.size) await Promise.allSettled([...pending]);
-          });
-        return track('update', run);
-      });
-      const finish = () => {
-        updates--;
-      };
-      queue = result.then(finish, finish);
-      return result;
-    },
-    updating: () => updates > 0,
-    restore() {
-      for (const restore of restores.reverse()) restore();
-      if (instance[adaptersKey] === adapters) delete instance[adaptersKey];
-    },
-  };
-  const restores = [
-    ...(['loadRemote', 'preloadRemote'] as const).map(
-      (key) => [key, adapters.load] as const,
-    ),
-    ...(['updateRemotes', 'removeRemote'] as const).map(
-      (key) => [key, adapters.update] as const,
-    ),
-  ].flatMap(([key, run]) =>
-    typeof instance[key] === 'function'
-      ? [
-          wrapMethod(
-            instance,
-            key,
-            (original) =>
-              function (this: any, ...args: unknown[]) {
-                if (!bindings.size) return original.apply(this, args);
-                return run(() => original.apply(this, args));
-              },
-          ),
-        ]
-      : [],
+  const loading = runtime.federation.remotesLoadingData!;
+  const records = plan.remoteModuleIds.flatMap((id) => [
+    runtime.federation.bundlerRuntimeOptions.remotes
+      ?.idToExternalAndNameMapping[id],
+    loading.moduleIdToRemoteDataMapping?.[id],
+    runtime.remotesLoadingData?.moduleIdToRemoteDataMapping?.[id],
+  ]);
+  const pending = records.filter(
+    (r) => r?.p && typeof r.p === 'object' && 'then' in r.p,
   );
-  Object.defineProperty(instance, adaptersKey, {
-    value: adapters,
-    configurable: true,
-  });
-  return adapters;
-};
+  if (pending.length)
+    await withDrainTimeout(() =>
+      Promise.allSettled(pending.map((r) => r!.p as Promise<unknown>)),
+    );
+  if (runtime.federation.clearNodeChunks)
+    await withDrainTimeout(() =>
+      runtime.federation.clearNodeChunks!({ remoteOnly: true }),
+    );
+
+  const { factories, modules } = loading.cache!;
+  const chunkMapping =
+    loading.chunkMapping || runtime.remotesLoadingData?.chunkMapping || {};
+  const evictedIds = new Set(
+    plan.remoteModuleIds.filter((id) => Boolean(factories[id])),
+  );
+  if (evictedIds.size) {
+    const evictedChunks = (getState(runtime).evictedChunks ||= new Set());
+    for (const [chunkId, ids] of Object.entries(chunkMapping))
+      if (ids.some((id) => evictedIds.has(String(id))))
+        evictedChunks.add(chunkId);
+  }
+  for (const record of records) if (record) delete record.p;
+  for (const id of plan.remoteModuleIds) {
+    delete factories[id];
+    delete modules[id];
+  }
+  for (const id of plan.externalModuleIds) delete modules[id];
+  for (const id of plan.consumerModuleIds) delete modules[id];
+  return { name: options.name, cleared: true };
+}
 
 /** Attach after runtime initialization. Disposing the handle releases its binding. */
 export function installClearCache({
@@ -403,7 +269,7 @@ export function installClearCache({
   const state = getState(webpackRequire);
   if (state.dispose) {
     if (
-      ![...(getAdapters(instance)?.bindings || [])].some(
+      ![...(getBindings(instance)?.bindings || [])].some(
         (binding) => getState(binding) === state,
       )
     )
@@ -413,81 +279,82 @@ export function installClearCache({
     return state.dispose;
   }
   let runtime: WebpackRequire | undefined = webpackRequire;
-  let adapters: Adapters | undefined =
-    getAdapters(instance) || createAdapters(instance);
-  adapters.bindings.add(runtime);
-  const restores: Array<() => void> = [
-    wrapMethod(
-      runtime.federation,
-      'clearCache',
-      () => (options: ClearCacheOptions) =>
-        runtime
-          ? clearCache({ ...options, webpackRequire: runtime })
-          : Promise.reject(new Error('Cache adapter is detached')),
-    ),
-    wrapMethod(
-      runtime.federation,
-      'ensureRemoteChunks',
-      () => (chunkIds?: Array<string | number>) =>
-        runtime ? ensureRemoteChunks(runtime, chunkIds) : undefined,
-    ),
-    wrapMethod(
-      runtime.federation,
-      'trackLoad',
-      () =>
-        <T>(run: () => Promise<T>) =>
-          adapters ? adapters.load(run) : run(),
-    ),
-  ];
-  if (typeof runtime.mfAsyncStartup === 'function') {
-    restores.push(
-      wrapMethod(runtime, 'mfAsyncStartup', (original) => () => {
-        const base = original.call(runtime);
-        if (!runtime) return base;
-        const recheck = () => ensureRemoteChunks(runtime!);
-        if (base && typeof (base as PromiseLike<unknown>).then === 'function') {
-          return (base as Promise<unknown>).then(recheck);
-        }
-        return recheck() ?? base;
-      }),
-    );
+  let holder = getBindings(instance);
+  if (!holder) {
+    holder = { bindings: new Set<WebpackRequire>() };
+    Object.defineProperty(instance, adaptersKey, {
+      value: holder,
+      configurable: true,
+    });
   }
-  const originalDispose = Object.getOwnPropertyDescriptor(
-    runtime.federation,
-    'disposeClearCache',
-  );
+  holder.bindings.add(runtime);
+  const prevStartup = runtime.mfAsyncStartup;
+  if (typeof prevStartup === 'function') {
+    runtime.mfAsyncStartup = () => {
+      const base = prevStartup.call(runtime);
+      if (!runtime) return base;
+      const recheck = () => ensureRemoteChunks(runtime!);
+      return base && typeof (base as PromiseLike<unknown>).then === 'function'
+        ? (base as Promise<unknown>).then(recheck)
+        : (recheck() ?? base);
+    };
+  }
+  runtime.federation.clearCache = async (options: ClearCacheOptions) => {
+    if (!runtime) throw new Error('Cache adapter is detached');
+    state.cleaning = (state.cleaning || 0) + 1;
+    try {
+      return await clearCache({ ...options, webpackRequire: runtime });
+    } finally {
+      state.cleaning!--;
+    }
+  };
+  runtime.federation.ensureRemoteChunks = (chunkIds) =>
+    runtime ? ensureRemoteChunks(runtime, chunkIds) : undefined;
+  runtime.federation.trackLoad = <T>(run: () => Promise<T>) => {
+    const tracker = (runtime?.federation.instance as any)?.[loadTrackerKey];
+    return typeof tracker === 'function' ? tracker(run) : run();
+  };
   const dispose = () => {
     if (!runtime) return;
-    if (adapters!.updating())
+    if (state.cleaning || (instance as any)?.[updatingKey]?.())
       throw new Error(
         'Cannot detach cache adapter while cache cleanup is pending',
       );
-    for (const restore of restores.reverse()) restore();
-    restores.length = 0;
-    adapters!.bindings.delete(runtime);
-    if (runtime.federation.disposeClearCache === dispose) {
-      if (originalDispose)
-        Object.defineProperty(
-          runtime.federation,
-          'disposeClearCache',
-          originalDispose,
-        );
-      else delete runtime.federation.disposeClearCache;
-    }
+    if (prevStartup) runtime.mfAsyncStartup = prevStartup;
+    delete runtime.federation.clearCache;
+    delete runtime.federation.ensureRemoteChunks;
+    delete runtime.federation.trackLoad;
+    delete runtime.federation.disposeClearCache;
+    holder!.bindings.delete(runtime);
+    if (!holder!.bindings.size && (instance as any)[adaptersKey] === holder)
+      delete (instance as any)[adaptersKey];
     runtime = undefined;
     state.dispose = undefined;
     state.evictedChunks?.clear();
-    if (!adapters!.bindings.size) adapters!.restore();
-    adapters = undefined;
   };
   runtime.federation.disposeClearCache = state.dispose = dispose;
   return dispose;
 }
 
-export const createClearCacheRuntimePlugin = () => ({
+export async function clearBoundCaches(
+  origin: object,
+  name: string,
+): Promise<void> {
+  const bindings = getBindings(origin)?.bindings;
+  if (!bindings?.size) return;
+  const results = await Promise.allSettled(
+    [...bindings].map((binding) => binding.federation.clearCache!({ name })),
+  );
+  const failure = results.find((result) => result.status === 'rejected');
+  if (failure?.status === 'rejected') throw failure.reason;
+}
+
+export const createClearCacheRuntimePlugin = ({
+  handleRemoveRemote = true,
+}: { handleRemoveRemote?: boolean } = {}) => ({
   name: 'bundler-runtime-clear-cache-plugin',
   dispose({ origin }: { origin: object }) {
-    for (const binding of [...(getAdapters(origin)?.bindings || [])]) {
+    for (const binding of [...(getBindings(origin)?.bindings || [])]) {
       binding.federation.disposeClearCache?.();
       if (binding.federation.instance === origin)
         binding.federation.instance = undefined;
@@ -500,7 +367,7 @@ export const createClearCacheRuntimePlugin = () => ({
     remote: { name: string; alias?: string; shareScope?: string | string[] };
     origin: object;
   }) {
-    for (const binding of getAdapters(origin)?.bindings || []) {
+    for (const binding of getBindings(origin)?.bindings || []) {
       const options = binding.federation.bundlerRuntimeOptions.remotes;
       if (!options) continue;
       const target = targetFor(
@@ -521,31 +388,27 @@ export const createClearCacheRuntimePlugin = () => ({
       (options.remoteInfos ||= {})[target.key] = [info];
     }
   },
-  async removeRemote({
-    remote,
-    origin,
-  }: {
-    remote: { name: string; alias?: string };
-    origin: object;
-  }) {
-    const bindings = getAdapters(origin)?.bindings;
-    if (!bindings) return;
-    const results = await Promise.allSettled(
-      [...bindings].map((binding) =>
-        binding.federation.clearCache!({ name: remote.alias || remote.name }),
-      ),
-    );
-    const failure = results.find((result) => result.status === 'rejected');
-    if (failure?.status === 'rejected') throw failure.reason;
-  },
+  ...(handleRemoveRemote
+    ? {
+        removeRemote({
+          remote,
+          origin,
+        }: {
+          remote: { name: string; alias?: string };
+          origin: object;
+        }) {
+          const bindings = getBindings(origin)?.bindings;
+          if (!bindings?.size) return;
+          return clearBoundCaches(origin, remote.alias || remote.name);
+        },
+      }
+    : {}),
 });
 
 /** Opt in from a Node runtime plugin before bundler init runs. */
 export function installNodeCacheRuntime(runtime: WebpackRequire): void {
   const original = runtime.federation.bundlerRuntime;
   if (!original) {
-    // Rspack evaluates plugin factories before assigning its bundler runtime.
-    // Each entry must opt in even when MF reuses an instance and its plugins.
     Object.defineProperty(runtime.federation, 'bundlerRuntime', {
       configurable: true,
       enumerable: true,
@@ -572,19 +435,20 @@ export function installNodeCacheRuntime(runtime: WebpackRequire): void {
       return instance;
     },
     remotes(options) {
-      const adapters = getAdapters(runtime.federation.instance);
-      if (!adapters || !options.chunkMapping[options.chunkId]?.length) {
+      const tracker = (runtime.federation.instance as any)?.[loadTrackerKey];
+      if (
+        typeof tracker !== 'function' ||
+        !options.chunkMapping[options.chunkId]?.length
+      ) {
         original.remotes(options);
         return;
       }
       options.promises.push(
-        adapters.load(async () => {
+        tracker(async () => {
           const promises: Promise<unknown>[] = [];
           original.remotes({ ...options, promises });
           const settled = await Promise.allSettled(promises);
-          const failure = settled.find(
-            (result) => result.status === 'rejected',
-          );
+          const failure = settled.find((r) => r.status === 'rejected');
           if (failure?.status === 'rejected') throw failure.reason;
         }),
       );

@@ -36,6 +36,7 @@ import {
 import {
   assert,
   error,
+  getFMId,
   getRemoteInfo,
   getRemoteEntryUniqueKey,
   composeRemoteRequestId,
@@ -69,72 +70,6 @@ export interface LoadedRemoteInfo {
   /** False when the value is an individual export rather than its namespace. */
   isModule: boolean;
 }
-const getRemoteEntry = (remote: Remote): string | undefined =>
-  'entry' in remote ? remote.entry : undefined;
-
-const clearRemoteSnapshotCache = (
-  host: ModuleFederation,
-  remote: Remote,
-  remoteInfo?: RemoteInfo,
-): void => {
-  const remoteNames = new Set(
-    [remote.name, remoteInfo?.name].filter(Boolean) as string[],
-  );
-  const remoteEntries = new Set(
-    [getRemoteEntry(remote), remoteInfo?.entry].filter(Boolean) as string[],
-  );
-  const globalModuleInfo = Global.__FEDERATION__.moduleInfo;
-
-  const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
-  if (hostGlobalSnapshot?.remotesInfo) {
-    remoteNames.forEach((remoteName) => {
-      const remoteRecord = getInfoWithoutType(
-        hostGlobalSnapshot.remotesInfo,
-        remoteName,
-      );
-      if (remoteRecord.value) {
-        delete hostGlobalSnapshot.remotesInfo[remoteRecord.key];
-      }
-    });
-  }
-
-  remoteEntries.forEach((entry) => {
-    host.snapshotHandler.manifestCache.delete(entry);
-  });
-
-  Object.keys(globalModuleInfo).forEach((moduleKey) => {
-    const snapshot = globalModuleInfo[moduleKey];
-    const snapshotBuildVersion =
-      snapshot && 'buildVersion' in snapshot
-        ? snapshot.buildVersion
-        : undefined;
-    // Another build can already occupy the same registration/manifest URL.
-    if (
-      remoteInfo?.buildVersion &&
-      snapshot &&
-      snapshotBuildVersion &&
-      snapshotBuildVersion !== remoteInfo.buildVersion
-    )
-      return;
-    remoteNames.forEach((remoteName) => {
-      if (
-        moduleKey === remoteName ||
-        [...remoteEntries].some(
-          (entry) => moduleKey === `${remoteName}:${entry}`,
-        ) ||
-        (remoteInfo?.version &&
-          moduleKey === `${remoteName}:${remoteInfo.version}`)
-      ) {
-        delete globalModuleInfo[moduleKey];
-      }
-    });
-  });
-
-  remoteEntries.forEach((entry) => {
-    host.snapshotHandler.manifestCache.delete(entry);
-    delete Global.__FEDERATION__.__MANIFEST_LOADING__[entry];
-  });
-};
 
 export class RemoteHandler {
   host: ModuleFederation;
@@ -153,16 +88,11 @@ export class RemoteHandler {
       remote: Remote;
       origin: ModuleFederation;
     }>('registerRemote'),
-    beforeRemoveRemote: new SyncHook<
-      [{ remote: Remote; origin: ModuleFederation }],
-      { remove: () => void } | void
-    >('beforeRemoveRemote'),
     removeRemote: new AsyncHook<
       [
         {
           remote: Remote;
           origin: ModuleFederation;
-          /** Resolved identity captured before user removal hooks mutate caches. */
           remoteInfo?: RemoteInfo;
         },
       ],
@@ -756,67 +686,6 @@ export class RemoteHandler {
     }
   }
 
-  private updateQueue: Promise<void> = Promise.resolve();
-
-  private prepareRemotes(remotes: Remote[]): Remote[] {
-    assert(Array.isArray(remotes), 'Remotes must be an array');
-    const names = new Set<string>();
-    const prepared = remotes.map((remote) => {
-      assert(
-        remote && typeof remote.name === 'string' && remote.name.length > 0,
-        'Remote name is required',
-      );
-      assert(!names.has(remote.name), `Duplicate remote: ${remote.name}`);
-      names.add(remote.name);
-      const result = { ...remote };
-      if (Array.isArray(remote.shareScope))
-        result.shareScope = [...remote.shareScope];
-      if ('entry' in result) {
-        assert(
-          typeof result.entry === 'string' && result.entry.length > 0,
-          'Remote entry is required',
-        );
-        if (
-          isBrowserEnvValue &&
-          typeof window !== 'undefined' &&
-          !result.entry.startsWith('http')
-        )
-          result.entry = new URL(result.entry, window.location.origin).href;
-      } else
-        assert(
-          'version' in result &&
-            typeof result.version === 'string' &&
-            result.version.length > 0,
-          'Remote entry or version is required',
-        );
-      result.shareScope ||= DEFAULT_SCOPE;
-      result.type ||= DEFAULT_REMOTE_TYPE;
-      return result;
-    });
-    const existing = this.host.options.remotes;
-    const final = [
-      ...existing.filter((remote) => !names.has(remote.name)),
-      ...prepared,
-    ];
-    for (const remote of final)
-      if (remote.alias) {
-        assert(
-          typeof remote.alias === 'string',
-          'Remote alias must be a string',
-        );
-        assert(
-          !final.some(
-            (other) =>
-              other !== remote &&
-              (other.name.startsWith(remote.alias!) ||
-                other.alias?.startsWith(remote.alias!)),
-          ),
-          `Remote alias conflicts with another registration: ${remote.alias}`,
-        );
-      }
-    return prepared;
-  }
-
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
     const { host } = this;
     remotes.forEach((remote) => {
@@ -824,29 +693,6 @@ export class RemoteHandler {
         force: options?.force,
       });
     });
-  }
-
-  updateRemotes(remotes: Remote[]): Promise<void> {
-    let captured: Remote[];
-    try {
-      // Capture caller-owned values immediately; validate again when the queue runs.
-      captured = this.prepareRemotes(remotes);
-    } catch (error) {
-      return Promise.reject(error);
-    }
-    const operation = this.updateQueue.then(async () => {
-      const prepared = this.prepareRemotes(captured);
-      for (const remote of prepared) {
-        const previous = this.host.options.remotes.find(
-          (item) => item.name === remote.name,
-        );
-        if (previous) await this.removeRemote(previous);
-      }
-      for (const remote of prepared)
-        this.registerRemote(remote, this.host.options.remotes);
-    });
-    this.updateQueue = operation.catch(() => {});
-    return operation;
   }
 
   initRawContainer(
@@ -1025,7 +871,7 @@ export class RemoteHandler {
       ];
       if (options?.force) {
         // remove registered remote
-        this.removeRemoteLegacy(registeredRemote);
+        this.removeRemote(registeredRemote);
         normalizeRemote();
         targetRemotes.push(remote);
         this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
@@ -1034,47 +880,46 @@ export class RemoteHandler {
     }
   }
 
-  async removeRemote(remote: Remote): Promise<void> {
-    const remove = this.prepareRemoteRemoval(remote);
-    const remoteInfo = this.host.moduleCache.get(remote.name)?.remoteInfo;
+  private removeRemote(remote: Remote): void {
     try {
-      await this.hooks.lifecycle.removeRemote.emit({
-        remote,
-        origin: this.host,
-        remoteInfo: remoteInfo ? { ...remoteInfo } : undefined,
-      });
-      remove();
-    } catch (err) {
-      logger.error(
-        `removeRemote failed: ${err instanceof Error ? err.message : String(err)}`,
-      );
-      throw err;
-    }
-  }
-
-  private prepareRemoteRemoval(remote: Remote): () => void {
-    const { host } = this;
-    const { name } = remote;
-    const loadedModule = host.moduleCache.get(remote.name);
-    const custom = this.hooks.lifecycle.beforeRemoveRemote.emit({
-      remote,
-      origin: host,
-    }) as { remove: () => void } | undefined;
-    const remoteIns = loadedModule
-      ? getRemoteFederationInstance(loadedModule.remoteInfo)
-      : undefined;
-    return () => {
-      custom?.remove();
+      const { host } = this;
+      const { name } = remote;
       const remoteIndex = host.options.remotes.findIndex(
         (item) => item.name === name,
       );
       if (remoteIndex !== -1) {
         host.options.remotes.splice(remoteIndex, 1);
       }
-      clearRemoteSnapshotCache(host, remote, loadedModule?.remoteInfo);
-      if (custom) return;
+      const globalSnapshotKey = getInfoWithoutType(
+        CurrentGlobal.__FEDERATION__.moduleInfo,
+        getFMId(remote),
+      ).key;
+      delete CurrentGlobal.__FEDERATION__.moduleInfo[globalSnapshotKey];
+
+      if ('entry' in remote) {
+        host.snapshotHandler.manifestCache.delete(remote.entry);
+        delete Global.__FEDERATION__.__MANIFEST_LOADING__[remote.entry];
+      }
+
+      const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
+      if (
+        hostGlobalSnapshot &&
+        'remotesInfo' in hostGlobalSnapshot &&
+        hostGlobalSnapshot.remotesInfo
+      ) {
+        const remoteKey = getInfoWithoutType(
+          hostGlobalSnapshot.remotesInfo,
+          remote.name,
+        ).key;
+        if (remoteKey) {
+          delete hostGlobalSnapshot.remotesInfo[remoteKey];
+        }
+      }
+
+      const loadedModule = host.moduleCache.get(remote.name);
       if (loadedModule) {
         const remoteInfo = loadedModule.remoteInfo;
+        const remoteIns = getRemoteFederationInstance(remoteInfo);
         const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
         if (CurrentGlobal[key]) {
           if (
@@ -1086,9 +931,7 @@ export class RemoteHandler {
             CurrentGlobal[key] = undefined;
           }
         }
-        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
-          loadedModule.remoteInfo,
-        );
+        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(remoteInfo);
         if (globalLoading[remoteEntryUniqueKey]) {
           delete globalLoading[remoteEntryUniqueKey];
         }
@@ -1102,7 +945,7 @@ export class RemoteHandler {
                   if (shared.from !== remoteInfo.name) continue;
                   if (shared.loaded || shared.loading)
                     shared.useIn = shared.useIn.filter(
-                      (name) => name !== remoteInfo.name,
+                      (usedName) => usedName !== remoteInfo.name,
                     );
                   if ((shared.loaded || shared.loading) && shared.useIn.length)
                     used = true;
@@ -1118,14 +961,6 @@ export class RemoteHandler {
         }
         host.moduleCache.delete(remote.name);
       }
-    };
-  }
-
-  // Preserve the existing synchronous force-registration contract.
-  // Coordinated SSR updates use the asynchronous removal path above.
-  private removeRemoteLegacy(remote: Remote): void {
-    try {
-      this.prepareRemoteRemoval(remote)();
     } catch (err) {
       logger.error(
         `removeRemote failed: ${err instanceof Error ? err.message : String(err)}`,

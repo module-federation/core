@@ -202,29 +202,17 @@ describe('optional bundler cache runtime', () => {
     expect(runtime.c[301]).toBeUndefined();
   });
 
-  test('admits direct and compiled loads after the replacement registration', async () => {
+  test('routes compiled chunk loads through the installed Node load tracker', async () => {
     const { instance, runtime } = fixture();
-    const oldChunk = deferred();
-    const cleared = deferred();
-    const register = deferred();
-    let version = 'v1';
-    instance.loadRemote = jest.fn(async () => version);
-    instance.updateRemotes = async () => {
-      await runtime.federation.clearCache!({ name: 'remoteA' });
-      cleared.resolve();
-      await register.promise;
-      version = 'v2';
-    };
-    const originalLoad = instance.loadRemote;
+    const tracker = jest.fn((run: () => Promise<unknown>) => run());
+    instance[Symbol.for('module-federation.node.load-tracker')] = tracker;
     const bundled = jest.fn(({ promises }) => {
-      promises.push(
-        oldChunk.promise.then(() => instance.loadRemote('aliasA/Button')),
-      );
+      promises.push(instance.loadRemote('aliasA/Button'));
     });
     runtime.federation.bundlerRuntime!.remotes = bundled;
     installNodeCacheRuntime(runtime);
     const dispose = installClearCache({ webpackRequire: runtime })!;
-    const compiledLoad = () => {
+    try {
       const promises: Promise<unknown>[] = [];
       runtime.federation.bundlerRuntime!.remotes({
         webpackRequire: runtime,
@@ -232,31 +220,10 @@ describe('optional bundler cache runtime', () => {
         chunkMapping: { 10: [101] },
         promises,
       } as any);
-      return Promise.all(promises);
-    };
-    const old = compiledLoad();
-    const update = instance.updateRemotes();
-    const direct = instance.loadRemote('aliasA/Button');
-    const fresh = compiledLoad();
-    try {
+      await Promise.all(promises);
+      expect(tracker).toHaveBeenCalledTimes(1);
       expect(bundled).toHaveBeenCalledTimes(1);
-      expect(runtime.m[101]).toBeDefined();
-      oldChunk.resolve();
-      await old;
-      await cleared.promise;
-      expect(runtime.m[101]).toBeUndefined();
-      expect(originalLoad).toHaveBeenCalledTimes(1);
-      expect(bundled).toHaveBeenCalledTimes(1);
-      register.resolve();
-      await update;
-      await expect(direct).resolves.toBe('v2');
-      await fresh;
-      expect(bundled).toHaveBeenCalledTimes(2);
-      expect(originalLoad).toHaveBeenCalledTimes(3);
     } finally {
-      oldChunk.resolve();
-      register.resolve();
-      await Promise.allSettled([old, update, direct, fresh]);
       dispose();
     }
   });
@@ -295,7 +262,6 @@ describe('cache adapter lifecycle', () => {
       const bundlerRuntime = runtime.federation.bundlerRuntime;
       delete (runtime.federation as any).bundlerRuntime;
       installNodeCacheRuntime(runtime);
-      // Rspack assigns the imported runtime after evaluating plugin factories.
       runtime.federation.bundlerRuntime = bundlerRuntime;
       runtime.federation.initOptions = { name: instance.name };
       runtime.federation.runtime = { init: () => instance } as any;
@@ -308,7 +274,8 @@ describe('cache adapter lifecycle', () => {
     }
     try {
       const next = { ...remote, entry: 'https://example.test/new.js' };
-      await instance.updateRemotes([next]);
+      await plugin().removeRemote({ origin: instance, remote });
+      instance.registerRemotes([next], { force: true });
       for (const runtime of runtimes) {
         expect(runtime.m[101]).toBeUndefined();
         expect(
@@ -345,7 +312,7 @@ describe('cache adapter lifecycle', () => {
     }
   });
 
-  test('restores exact methods and rejects saved clear entry points after detach', async () => {
+  test('rejects detaching during active cleanup and rejects saved clear entry points after detach', async () => {
     const { instance, runtime } = fixture();
     const originalLoad = instance.loadRemote;
     const dispose = installClearCache({ webpackRequire: runtime })!;
@@ -361,28 +328,10 @@ describe('cache adapter lifecycle', () => {
     await expect(clear({ name: 'remoteA' })).rejects.toThrow('detached');
   });
 
-  test('preserves third-party wrappers without reviving a detached adapter', async () => {
-    const { instance, runtime } = fixture();
-    const original = instance.loadRemote;
-    const dispose = installClearCache({ webpackRequire: runtime })!;
-    const ours = instance.loadRemote;
-    const thirdParty = jest.fn((...args: any[]) => ours(...args));
-    instance.loadRemote = thirdParty;
-    dispose();
-    const again = installClearCache({ webpackRequire: runtime })!;
-    await instance.loadRemote('remoteA/Button');
-    again();
-    expect(instance.loadRemote).toBe(thirdParty);
-    await instance.loadRemote('remoteA/Other');
-    expect(original).toHaveBeenCalledTimes(2);
-    expect(thirdParty).toHaveBeenCalledTimes(2);
-  });
-
   test('routes removal to all bindings across bundled copies and releases each independently', async () => {
     const { instance, runtime: first } = fixture();
     const { runtime: second } = fixture(instance);
     const disposeFirst = installClearCache({ webpackRequire: first })!;
-    const wrapped = instance.loadRemote;
     let other!: typeof import('../src/clearCache');
     jest.isolateModules(() => {
       other = require('../src/clearCache');
@@ -414,7 +363,6 @@ describe('cache adapter lifecycle', () => {
     });
     expect(firstClear).toHaveBeenCalledTimes(1);
     expect(secondClear).toHaveBeenCalledTimes(2);
-    expect(instance.loadRemote).toBe(wrapped);
     disposeSecond();
     await plugin().removeRemote({
       origin: instance,
@@ -455,8 +403,6 @@ describe('cache adapter lifecycle', () => {
     const { instance: first, runtime } = fixture();
     const { instance: second } = fixture();
     const { runtime: sibling } = fixture(first);
-    const firstLoad = first.loadRemote;
-    const secondLoad = second.loadRemote;
     const runtimeInit = jest
       .fn()
       .mockReturnValueOnce(first)
@@ -474,14 +420,11 @@ describe('cache adapter lifecycle', () => {
       webpackRequire: runtime,
     });
     await expect(firstClear({ name: 'remoteA' })).rejects.toThrow('detached');
-    expect(first.loadRemote).not.toBe(firstLoad);
     plugin().dispose({ origin: first });
-    expect(first.loadRemote).toBe(firstLoad);
     expect(runtime.federation.instance).toBe(second);
     await runtime.federation.clearCache!({ name: 'remoteA' });
     siblingDispose();
     runtime.federation.disposeClearCache!();
-    expect(second.loadRemote).toBe(secondLoad);
   });
 
   test('rejects reinitialization during cleanup before invoking runtime init', async () => {
@@ -499,52 +442,5 @@ describe('cache adapter lifecycle', () => {
     await pending;
     expect(initialize()).toBe(instance);
     runtime.federation.disposeClearCache!();
-  });
-
-  test('keeps force registration synchronous and coordinates explicit updates across attached bindings', async () => {
-    const remote = { name: 'remoteA', entry: 'https://example.test/old.js' };
-    const instance = new ModuleFederation({
-      name: 'multi-bundler',
-      remotes: [remote],
-      plugins: [plugin()],
-    });
-    const { runtime: first } = fixture(instance);
-    const { runtime: second } = fixture(instance);
-    const disposeFirst = installClearCache({ webpackRequire: first })!;
-    const disposeSecond = installClearCache({ webpackRequire: second })!;
-    const clear = jest.spyOn(first.federation, 'clearCache');
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    try {
-      expect(
-        instance.registerRemotes(
-          [{ ...remote, entry: 'https://example.test/force.js' }],
-          { force: true },
-        ),
-      ).toBeUndefined();
-      expect(clear).not.toHaveBeenCalled();
-      const next = { ...remote, entry: 'https://example.test/new.js' };
-      await instance.updateRemotes([next]);
-      for (const runtime of [first, second])
-        expect(
-          runtime.federation.bundlerRuntimeOptions.remotes!.remoteInfos!
-            .remoteA[0].entry,
-        ).toBe(next.entry);
-      disposeFirst();
-      await instance.updateRemotes([
-        { ...remote, entry: 'https://example.test/final.js' },
-      ]);
-      expect(
-        first.federation.bundlerRuntimeOptions.remotes!.remoteInfos!.remoteA[0]
-          .entry,
-      ).toBe(next.entry);
-      expect(
-        second.federation.bundlerRuntimeOptions.remotes!.remoteInfos!.remoteA[0]
-          .entry,
-      ).toBe('https://example.test/final.js');
-    } finally {
-      warn.mockRestore();
-      disposeFirst();
-      disposeSecond();
-    }
   });
 });

@@ -189,12 +189,8 @@ export async function forkDevWorker(
   }
 }
 
-process.on('message', (message: any) => {
+process.on('message', (message: rpc.RpcMessage) => {
   handleDevWorkerMessage(message, { moduleServer, log: fileLog });
-});
-
-process.on('disconnect', () => {
-  process.exit(0);
 });
 
 rpc.exposeRpc(forkDevWorker);

@@ -22,6 +22,11 @@ import type { DevWorker } from '../dev-worker';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+enum PROCESS_EXIT_CODE {
+  SUCCESS = 0,
+  FAILURE = 1,
+}
+
 function ensureTempDir(filePath: string): void {
   try {
     const dir = path.dirname(filePath);
@@ -70,6 +75,44 @@ export class DevPlugin implements WebpackPluginInstance {
     fs.writeFileSync(filePath, liveReloadEntryWithOptions);
   }
 
+  private _stopWhenSIGTERMOrSIGINT(): void {
+    process.on('SIGTERM', () => {
+      logger.info(
+        `${this._options.name} Process(${process.pid}) SIGTERM, mf server will exit...`,
+      );
+      this._exit(PROCESS_EXIT_CODE.SUCCESS);
+    });
+
+    process.on('SIGINT', () => {
+      logger.info(
+        `${this._options.name} Process(${process.pid}) SIGINT, mf server will exit...`,
+      );
+      this._exit(PROCESS_EXIT_CODE.SUCCESS);
+    });
+  }
+
+  private _handleUnexpectedExit(): void {
+    process.on('unhandledRejection', (error) => {
+      logger.error(error);
+      logger.error(
+        `Process(${process.pid}) unhandledRejection, mf server will exit...`,
+      );
+      this._exit(PROCESS_EXIT_CODE.FAILURE);
+    });
+    process.on('uncaughtException', (error) => {
+      logger.error(error);
+      logger.error(
+        `Process(${process.pid}) uncaughtException, mf server will exit...`,
+      );
+      this._exit(PROCESS_EXIT_CODE.FAILURE);
+    });
+  }
+
+  private _exit(exitCode = 0): void {
+    this._devWorker?.exit();
+    process.exit(exitCode);
+  }
+
   private _afterEmit(): void {
     this._devWorker?.update();
   }
@@ -109,8 +152,7 @@ export class DevPlugin implements WebpackPluginInstance {
       throw new Error('name is required if you want to enable dev server!');
     }
 
-    const hasTypes = isTSProject(dts, compiler.context);
-    if (hasTypes && !normalizedDev.disableDynamicRemoteTypeHints) {
+    if (!normalizedDev.disableDynamicRemoteTypeHints) {
       if (!this._options.runtimePlugins) {
         this._options.runtimePlugins = [];
       }
@@ -225,38 +267,26 @@ export class DevPlugin implements WebpackPluginInstance {
       remote.tsConfigPath = normalizedDtsOptions.tsConfigPath;
     }
 
-    let closed = false;
-    const close = () => {
-      closed = true;
-      this._devWorker?.exit();
-      this._devWorker = undefined;
-      process.removeListener('exit', close);
-    };
-    process.once('exit', close);
-    compiler.hooks.watchClose.tap(this.name, close);
-    compiler.hooks.shutdown?.tap(this.name, close);
-
-    void Promise.all([
+    Promise.all([
       this.generateTypesPromise,
       this.fetchRemoteTypeUrlsPromise,
-    ])
-      .then(([_, remoteTypeUrls]) => {
-        if (closed) return;
-        this._devWorker = createDevWorker({
-          name,
-          remote: remote,
-          host: {
-            moduleFederationConfig: this._options,
-            ...host,
-            remoteTypeUrls,
-          },
-          extraOptions: extraOptions,
-          disableLiveReload: normalizedDev.disableLiveReload,
-          disableHotTypesReload:
-            !hasTypes || normalizedDev.disableHotTypesReload,
-        });
-      })
-      .catch((error) => logger.error(error));
+    ]).then(([_, remoteTypeUrls]) => {
+      this._devWorker = createDevWorker({
+        name,
+        remote: remote,
+        host: {
+          moduleFederationConfig: {},
+          ...host,
+          remoteTypeUrls,
+        },
+        extraOptions: extraOptions,
+        disableLiveReload: normalizedDev.disableHotTypesReload,
+        disableHotTypesReload: normalizedDev.disableHotTypesReload,
+      });
+    });
+
+    this._stopWhenSIGTERMOrSIGINT();
+    this._handleUnexpectedExit();
 
     compiler.hooks.afterEmit.tap(this.name, this._afterEmit.bind(this));
   }

@@ -119,7 +119,7 @@ export class Broker {
         ws.on('message', (message) => {
           try {
             const text = message.toString();
-            const action = JSON.parse(text) as Action & { type?: string };
+            const action = JSON.parse(text) as Action;
             fileLog(`${action?.kind} action received `, 'Broker', 'info');
             this._takeAction(action, ws);
           } catch (error) {
