@@ -186,7 +186,7 @@
     "react-router-dom": "6.30.3",
     "react-router": "7.18.2",
     "typescript": "7.0.2",
-    "vite": "^5.4.21",
+    "vite": "^6.4.5",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
     "hono": "4.13.5"
