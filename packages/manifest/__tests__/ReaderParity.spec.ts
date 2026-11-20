@@ -271,9 +271,28 @@ const prefixSingletonFixtures: Fixture[] = [false, true].map(
               ],
         );
         if (!consumeOnly)
-          expect(row(manifest.shared, 'ds/Exact').singleton).toBe(true);
+          expect(
+            Object.fromEntries(
+              manifest.shared.map((item) => [item.name, item.singleton]),
+            ),
+          ).toEqual({
+            'ds/Button': false,
+            'ds/Table': false,
+            'ds/Exact': true,
+            'ds/Default': true,
+            'ds/nested/Child': true,
+            'renamed/Child': false,
+            '@default/lib/Child': true,
+          });
       },
-      statsReader: unnamedExpose,
+      // The stats reader looks options up by the exact share key, so a module
+      // matched by a prefix share such as `ds/` gets no `singleton`.
+      statsReader: (manifest) => {
+        unnamedExpose(manifest);
+        for (const shared of manifest.shared)
+          if (!['ds/Exact', 'ds/Default'].includes(shared.name))
+            delete shared.singleton;
+      },
     };
   },
 );
@@ -338,11 +357,83 @@ const requiredVersionFixtures: Fixture[] = [
     if (index === 0)
       manifest.shared = manifest.shared.filter(({ name }) => name !== shareKey);
     if (index === 1) manifest.shared = [];
-    if (index === 2)
-      Object.assign(row(manifest.shared, shareKey), {
-        version: 'false',
-        requiredVersion: '^false',
-      });
+    if (index === 2) row(manifest.shared, shareKey).version = 'false';
+  },
+}));
+
+// Two scalar scopes provide the same key at the same version.
+const scalarScopeFixtures: Fixture[] = [undefined, 'common'].map((layer) => ({
+  name: `scalar share scopes${layer ? ' in a layer' : ''}`,
+  files: {
+    'package.json': pkg('scalar-scopes', '1.0.0'),
+    'index.js': 'import("./bootstrap.js");',
+    'bootstrap.js': `
+      export { default as a } from 'react-a';
+      export { default as b } from 'react-b';`,
+    'a.js': 'export default { scope: "a" };',
+    'b.js': 'export default { scope: "b" };',
+  },
+  webpack: (directory) => ({
+    experiments: { layers: true },
+    module: {
+      rules: layer
+        ? [{ test: path.join(directory, 'bootstrap.js'), layer }]
+        : [],
+    },
+  }),
+  federation: {
+    name: 'scalar_scopes',
+    filename: 'container.js',
+    exposes: { './bootstrap': { import: './bootstrap.js', name: 'exposed' } },
+    shared: Object.fromEntries(
+      [
+        ['a', 'a', false],
+        ['b', 'default', '1.0.0'],
+      ].map(([file, shareScope, requiredVersion]) => [
+        `react-${file}`,
+        {
+          import: `./${file}.js`,
+          shareKey: 'react',
+          ...(layer === undefined ? {} : { layer, issuerLayer: layer }),
+          shareScope,
+          version: '1.0.0',
+          requiredVersion,
+          singleton: true,
+        },
+      ]),
+    ),
+  },
+  check: (manifest) => {
+    const prefix = layer ? '_common_' : '';
+    expect(
+      manifest.shared
+        .map((item) => ({
+          name: item.name,
+          scope: item.shareScope,
+          layer: item.layer,
+          version: item.version,
+          requiredVersion: item.requiredVersion,
+          assets: item.assets.js.sync,
+        }))
+        .sort((first, second) => first.scope.localeCompare(second.scope)),
+    ).toEqual([
+      {
+        name: 'react',
+        scope: 'a',
+        layer,
+        version: '1.0.0',
+        requiredVersion: false,
+        assets: [`${prefix}a_js.js`],
+      },
+      {
+        name: 'react',
+        scope: 'default',
+        layer,
+        version: '1.0.0',
+        requiredVersion: '1.0.0',
+        assets: [`${prefix}b_js.js`],
+      },
+    ]);
   },
 }));
 
@@ -439,6 +530,7 @@ const fixtures: Fixture[] = [
   ...provideSharedFixtures,
   ...prefixSingletonFixtures,
   ...requiredVersionFixtures,
+  ...scalarScopeFixtures,
   {
     // The share is not installed, so its version comes from the exact range.
     name: 'consume-only share in the plugin share scope',

@@ -14,6 +14,7 @@ import {
   StatsMetaDataWithGetPublicPath,
   StatsMetaDataWithPublicPath,
   StatsShared,
+  disambiguateSharedScopes,
 } from '@module-federation/sdk';
 import { Compilation, Compiler } from 'webpack';
 import type { StatsCompilation } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
@@ -382,7 +383,7 @@ class StatsManager {
           const [pkgName, normalizedShareOptions] = cur;
           sum.push(
             getShareItem({
-              pkgName,
+              pkgName: normalizedShareOptions.shareKey ?? pkgName,
               normalizedShareOptions,
               pkgVersion: normalizedShareOptions.version || UNKNOWN_MODULE_NAME,
               hostName: name,
@@ -553,12 +554,9 @@ class StatsManager {
     compiler: Compiler,
     compilation: Compilation,
   ): Promise<Stats> {
-    try {
-      const stats = await this._generateStats(compiler, compilation);
-      return stats;
-    } catch (err) {
-      throw err;
-    }
+    const stats = await this._generateStats(compiler, compilation);
+    stats.shared = disambiguateSharedScopes(stats.shared);
+    return stats;
   }
 
   validate(compiler: Compiler): boolean {

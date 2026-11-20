@@ -105,7 +105,10 @@ export function collectGraph(
     const scope = data.shareScope;
     const layer = data.shareConfig.layer ?? undefined;
     const layered = layer !== undefined || Array.isArray(scope);
-    const key = layered ? getSharedIdentityKey(name, scope, layer) : name;
+    const key =
+      layered || scope !== 'default'
+        ? getSharedIdentityKey(name, scope, layer)
+        : name;
     const configured = configuredShared.filter(([key, value]) => {
       const shareKey = value.shareKey || key;
       // A share without its own scope is in the plugin's `shareScope`.
@@ -117,8 +120,10 @@ export function collectGraph(
         scopes.some((item) => JSON.stringify(item) === JSON.stringify(scope))
       );
     });
-    const normalized = (configured.find(([, value]) => value.layer === layer) ??
-      configured.find(([, value]) => value.layer === undefined))?.[1];
+    const [request, normalized] =
+      configured.find(([, value]) => value.layer === layer) ??
+      configured.find(([, value]) => value.layer === undefined) ??
+      [];
     // A consume-only share that is not installed has no package version.
     // Like the legacy reader, take the version from `requiredVersion: '=1.2.3'`.
     const required = consume ? normalized?.requiredVersion : undefined;
@@ -133,17 +138,21 @@ export function collectGraph(
     if (!name || !version) continue;
     sharedKeys.set(module, key);
     if (!sharedMap[key]) {
+      const exactShareKey = (normalized?.shareKey || request) === name;
       const row = getShareItem({
         pkgName: name,
         pkgVersion: version,
-        normalizedShareOptions: layered ? normalized : shared[name],
+        normalizedShareOptions:
+          layered || scope !== 'default' || exactShareKey
+            ? normalized
+            : undefined,
         hostName,
       });
       if (layered) {
         row.id = `${hostName}:shared:${key}`;
         if (layer !== undefined) row.layer = layer;
-        if (scope !== 'default') row.shareScope = scope;
       }
+      if (scope !== 'default') row.shareScope = scope;
       sharedMap[key] = row;
     }
     if (consume) {
