@@ -1,10 +1,10 @@
-import { isBrowserEnvValue } from '@module-federation/sdk';
-import type {
-  CreateLinkHookReturnDom,
-  CreateScriptHookReturn,
-  GlobalModuleInfo,
-  ModuleInfo,
-} from '@module-federation/sdk';
+import {
+  isBrowserEnvValue,
+  type CreateLinkHookReturnDom,
+  type CreateScriptHookReturn,
+  type GlobalModuleInfo,
+  type ModuleInfo,
+} from '@module-federation/sdk/core';
 import {
   Options,
   PreloadRemoteArgs,
@@ -21,6 +21,12 @@ import {
   ResourceLoadContext,
   LoadShareExtraOptions,
   SharedLoadContext,
+  ResolvedCapabilities,
+  Capabilities,
+  RemoteHandlerContract,
+  SharedHandlerContract,
+  SnapshotHandlerContract,
+  Platform,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -36,43 +42,20 @@ import {
   SyncHook,
   SyncWaterfallHook,
 } from './utils/hooks';
-import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
-import { snapshotPlugin } from './plugins/snapshot';
+import type { ModuleFederation } from './index';
+import type { RemoteHandler } from './remote';
+import type { SharedHandler } from './shared';
+import type { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { DEFAULT_SCOPE } from './constant';
-import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
-import { DisabledSnapshotHandler } from './plugins/snapshot/disabled';
-import { SharedHandler } from './shared';
-import { DisabledSharedHandler } from './shared/disabled';
-import { RemoteHandler } from './remote';
-import { DisabledRemoteHandler } from './remote/disabled';
-import { formatShareConfigs } from './utils/share';
-
-// Declare the global constant that will be defined by DefinePlugin
-// Default to true if not defined (e.g., when runtime-core is used outside of webpack)
-// so that snapshot functionality is included by default.
-declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
-declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
-declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
+import { disabledRemote } from './remote/disabled';
+import { disabledShared } from './shared/disabled';
 
 type BridgeHookContext = object;
 type BridgeHookResult = {
   context: BridgeHookContext;
   result?: unknown;
 };
-const USE_SNAPSHOT =
-  typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
-    : true; // Default to true (use snapshot) when not explicitly defined
-const USE_REMOTE =
-  typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_REMOTE
-    : true;
-const USE_SHARED =
-  typeof FEDERATION_OPTIMIZE_NO_SHARED === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_SHARED
-    : true;
-
-export class ModuleFederation {
+export class FederationCore {
   options: Options;
   hooks = new PluginSystem({
     beforeInit: new SyncWaterfallHook<{
@@ -119,6 +102,7 @@ export class ModuleFederation {
   snapshotHandler: SnapshotHandler;
   sharedHandler: SharedHandler;
   remoteHandler: RemoteHandler;
+  platform: Platform;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
     // FIXME: may not be suitable , not open to the public yet
@@ -306,33 +290,31 @@ export class ModuleFederation {
   });
   moduleInfo?: GlobalModuleInfo[string];
 
-  constructor(userOptions: UserOptions) {
-    const plugins =
-      USE_REMOTE && USE_SNAPSHOT
-        ? [snapshotPlugin(), generatePreloadAssetsPlugin()]
-        : [];
+  constructor(
+    userOptions: UserOptions,
+    { shared, remote, snapshot, platform }: ResolvedCapabilities,
+  ) {
+    const plugins = snapshot ? snapshot.plugins() : [];
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
-      id: getBuilderId(),
+      id: userOptions.id || getBuilderId(),
       name: userOptions.name,
       plugins,
       remotes: [],
       shared: {},
-      inBrowser: isBrowserEnvValue,
+      inBrowser: platform.isBrowser(),
     };
 
     this.name = userOptions.name;
     this.options = defaultOptions;
-    this.snapshotHandler = (
-      USE_REMOTE ? new SnapshotHandler(this) : new DisabledSnapshotHandler()
-    ) as SnapshotHandler;
-    this.sharedHandler = (
-      USE_SHARED ? new SharedHandler(this) : new DisabledSharedHandler()
-    ) as SharedHandler;
-    this.remoteHandler = (
-      USE_REMOTE ? new RemoteHandler(this) : new DisabledRemoteHandler()
-    ) as RemoteHandler;
+    this.platform = platform;
+    const handlers = remote.create(this);
+    // A disabled capability hands back its contract-only stand-in; the
+    // public type keeps the full handler, as it did before capabilities.
+    this.snapshotHandler = handlers.snapshot as SnapshotHandler;
+    this.sharedHandler = shared.create(this) as SharedHandler;
+    this.remoteHandler = handlers.remote as RemoteHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,
@@ -414,9 +396,10 @@ export class ModuleFederation {
   }
 
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
-    const shared = USE_SHARED
-      ? formatShareConfigs(globalOptions, userOptions).allShareInfos
-      : {};
+    const shared = this.sharedHandler.formatShareInfos(
+      globalOptions,
+      userOptions,
+    );
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
         origin: this,
@@ -475,3 +458,41 @@ export class ModuleFederation {
     });
   }
 }
+
+export const PLATFORM_UNAVAILABLE_MESSAGE =
+  'No platform capability: pass capabilities.platform to load entries.';
+
+const unavailable = () =>
+  Promise.reject(new Error(PLATFORM_UNAVAILABLE_MESSAGE));
+
+export const unavailablePlatform: Platform = {
+  isBrowser: () => isBrowserEnvValue,
+  loadScript: unavailable,
+  loadEntry: unavailable,
+};
+
+class Kernel extends FederationCore {
+  constructor(userOptions: UserOptions, capabilities: Capabilities = {}) {
+    super(userOptions, {
+      shared: capabilities.shared || disabledShared,
+      remote: capabilities.remote || disabledRemote,
+      snapshot: capabilities.remote && capabilities.snapshot,
+      platform: capabilities.platform || unavailablePlatform,
+    });
+  }
+}
+
+// Handlers of capabilities the caller left out are disabled, so a kernel
+// promises only the handler contracts.
+export type FederationKernel = Omit<
+  Kernel,
+  'remoteHandler' | 'sharedHandler' | 'snapshotHandler'
+> & {
+  remoteHandler: RemoteHandlerContract;
+  sharedHandler: SharedHandlerContract;
+  snapshotHandler: SnapshotHandlerContract;
+};
+export const FederationKernel = Kernel as new (
+  userOptions: UserOptions,
+  capabilities?: Capabilities,
+) => FederationKernel;
