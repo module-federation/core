@@ -72,6 +72,7 @@ const setRouterAlias = (
 
 export const getBridgeRouterAlias = (
   originalAlias: string,
+  mode?: string,
 ): Record<string, string> => {
   const userDependencies = getDependencies();
   let reactRouterDomPath = '';
@@ -100,6 +101,16 @@ export const getBridgeRouterAlias = (
         fs.readFileSync(packageJsonPath, 'utf-8'),
       );
       const majorVersion = checkVersion(packageJsonContent.version);
+      // React Router 8 ships only an `exports` map (no `main`), so the package
+      // directory cannot be an alias target. Point at the entry file instead.
+      if (majorVersion === 7 && !packageJsonContent.main) {
+        reactRouterDomPath = path.join(
+          path.dirname(packageJsonPath),
+          'dist',
+          mode === 'development' ? 'development' : 'production',
+          'index.js',
+        );
+      }
       const bridgeRouterAlias = setRouterAlias(
         majorVersion,
         reactRouterDomPath,
