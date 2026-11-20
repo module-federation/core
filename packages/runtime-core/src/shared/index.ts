@@ -361,6 +361,14 @@ export class SharedHandler {
             return factory as () => T;
           };
           const loading = asyncLoadProcess();
+          loading.catch(() =>
+            this.forgetFailedLoad(
+              pkgName,
+              registeredShared,
+              useTreesShaking,
+              loading,
+            ),
+          );
           this.setShared({
             pkgName,
             loaded: false,
@@ -420,6 +428,14 @@ export class SharedHandler {
           return factory as () => T;
         };
         const loading = asyncLoadProcess();
+        loading.catch(() =>
+          this.forgetFailedLoad(
+            pkgName,
+            resolvedShareOptions,
+            _useTreeShaking,
+            loading,
+          ),
+        );
         this.setShared({
           pkgName,
           loaded: false,
@@ -816,6 +832,25 @@ export class SharedHandler {
         registeredShared.from = from;
       }
     });
+  }
+
+  // A rejected load left in the share scope makes every later loadShare fail the same way.
+  // Remove it from each scope, unless a newer load has replaced it.
+  private forgetFailedLoad(
+    pkgName: string,
+    shared: Shared,
+    useTreeShaking: boolean | undefined,
+    loading: Promise<unknown>,
+  ): void {
+    const { version, scope = 'default' } = shared;
+    for (const sc of Array.isArray(scope) ? scope : [scope]) {
+      const registered = this.shareScopeMap[sc]?.[pkgName]?.[version];
+      if (!registered) continue;
+      const target = directShare(registered, useTreeShaking);
+      if (target.loading === loading) {
+        target.loading = null;
+      }
+    }
   }
 
   private _setGlobalShareScopeMap(hostOptions: Options): void {
