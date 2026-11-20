@@ -173,7 +173,7 @@
     "encoding": "^0.1.13",
     "express": "5.2.1",
     "fast-glob": "3.3.3",
-    "glob": "^11.0.0",
+    "glob": "^14.0.2",
     "openai": "^6.27.0",
     "rambda": "11.1.0",
     "regenerator-runtime": "0.14.1",
