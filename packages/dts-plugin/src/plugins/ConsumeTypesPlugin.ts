@@ -61,7 +61,7 @@ export const consumeTypesAPI = async (
       ? dtsManagerOptions.host.remoteTypeUrls()
       : Promise.resolve(dtsManagerOptions.host.remoteTypeUrls);
   return fetchRemoteTypeUrlsPromise.then((remoteTypeUrls) => {
-    consumeTypes({
+    return consumeTypes({
       ...dtsManagerOptions,
       host: {
         ...dtsManagerOptions.host,
