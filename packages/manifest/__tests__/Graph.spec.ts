@@ -19,22 +19,26 @@ it.each([
   'native-shared',
   'enhanced-shared',
   'enhanced-prefix',
+  'enhanced-exact',
   'remotes',
 ])(
   'collects %s with multiple runtimes and supports explicit rollback',
   async (mode) => {
     const directory = await mkdtemp(path.join(__dirname, 'mf-graph-'));
     const prefix = mode === 'enhanced-prefix';
-    const shared = mode.includes('shared') || prefix;
+    const exact = mode === 'enhanced-exact';
+    const shared = mode.includes('shared') || prefix || exact;
     const native = mode === 'native-shared';
     try {
       await writeFile(
         path.join(directory, 'entry.js'),
         prefix
           ? 'module.exports = require("prefix/subpath");'
-          : mode === 'remotes'
-            ? 'module.exports = require("remote/nested/Button");'
-            : 'module.exports = require("./shared.js");',
+          : exact
+            ? 'module.exports = require("missing-exact");'
+            : mode === 'remotes'
+              ? 'module.exports = require("remote/nested/Button");'
+              : 'module.exports = require("./shared.js");',
       );
       await writeFile(
         path.join(directory, 'shared.js'),
@@ -69,14 +73,21 @@ it.each([
                   requiredVersion: '^1.0.0',
                 },
               }
-            : shared
+            : exact
               ? {
-                  './shared.js': {
-                    version: '1.0.0',
-                    requiredVersion: '^1.0.0',
+                  'missing-exact': {
+                    import: false as const,
+                    requiredVersion: '=1.2.3',
                   },
                 }
-              : {},
+              : shared
+                ? {
+                    './shared.js': {
+                      version: '1.0.0',
+                      requiredVersion: '^1.0.0',
+                    },
+                  }
+                : {},
           manifest: { useLegacyStats, additionalData },
         };
         const compiler = webpack({
@@ -174,7 +185,8 @@ it.each([
         expect(stats.exposes).toHaveLength(1);
         expect(stats.exposes[0].assets.js.sync.length).toBeGreaterThan(0);
         expect(stats.shared).toHaveLength(shared ? 1 : 0);
-        if (shared) expect(stats.shared[0].version).toBe('1.0.0');
+        if (shared)
+          expect(stats.shared[0].version).toBe(exact ? '1.2.3' : '1.0.0');
         expect(manifest.metaData.types).toEqual({
           path: '',
           name: '',
