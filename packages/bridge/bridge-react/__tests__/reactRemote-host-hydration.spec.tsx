@@ -201,7 +201,12 @@ it.each([false, true])(
       expect(container.querySelector('button')).toBe(originalButton);
       expect(originalButton.textContent).toBe('updated: 0');
       originalButton.click();
-      await tick();
+      for (
+        let i = 0;
+        i < 20 && originalButton.textContent !== 'updated: 1';
+        i++
+      )
+        await tick();
       expect(originalButton.textContent).toBe('updated: 1');
     } finally {
       root?.unmount();
@@ -217,8 +222,15 @@ it.each([false, true])(
 );
 
 it('hydrates ordinary remote DOM and state instead of replacing it with client loading', async () => {
+  let hydratedCommitted!: () => void;
+  const hydrated = new Promise<void>(
+    (resolve) => (hydratedCommitted = resolve),
+  );
   function Counter() {
     const [count, setCount] = React.useState(0);
+    React.useEffect(() => {
+      hydratedCommitted();
+    }, []);
     return <button onClick={() => setCount(count + 1)}>count: {count}</button>;
   }
   const server = remoteRuntime({ default: Counter }, 'component');
@@ -262,8 +274,7 @@ it('hydrates ordinary remote DOM and state instead of replacing it with client l
     await tick();
     expect(container.querySelector('button')).toBe(button);
     release();
-    for (let i = 0; i < 20 && !client.loadRemote.mock.calls.length; i++)
-      await tick();
+    await hydrated;
     await tick();
     button.click();
     for (let i = 0; i < 20 && button.textContent !== 'count: 1'; i++)
