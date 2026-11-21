@@ -31,6 +31,10 @@ export class DisabledSharedHandler {
     return [];
   }
 
+  resetShareInit(): void {
+    // no-op: sharing initialization is disabled
+  }
+
   initShareScopeMap(
     scopeName: string,
     shareScope: ShareScopeMap[string],
