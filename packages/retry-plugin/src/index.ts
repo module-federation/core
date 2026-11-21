@@ -97,6 +97,7 @@ const RetryPlugin = (
 };
 
 export { RetryPlugin };
+export default RetryPlugin;
 export type {
   CommonRetryOptions,
   FetchRetryOptions,

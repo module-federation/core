@@ -85,6 +85,16 @@ const retryPlugin = () => RetryPlugin({
 export default retryPlugin;
 ```
 
+如果配置项都是可 JSON 序列化的值（不包含 `addQuery`、`onRetry` 等函数），可以省去包装文件，直接列出该包：
+
+```ts title="rspack.config.ts"
+pluginModuleFederation({
+  runtimePlugins: [
+    [require.resolve('@module-federation/retry-plugin'), { retryTimes: 3, retryDelay: 1000 }],
+  ],
+});
+```
+
 ### 方式二：运行时注册
 
 ```ts
