@@ -54,7 +54,8 @@ function formatShare(
     loading: null,
     ...shareArgs,
     shareConfig: {
-      requiredVersion: `^${shareArgs.version}`,
+      // no version means we can't guess a range, accept anything
+      requiredVersion: shareArgs.version ? `^${shareArgs.version}` : '*',
       singleton: false,
       eager: false,
       strictVersion: false,
@@ -395,6 +396,7 @@ export function getRegisteredShare(
         if (shareConfig.singleton) {
           if (
             typeof requiredVersion === 'string' &&
+            requiredVersion !== '*' &&
             !satisfy(maxOrSingletonVersion, requiredVersion)
           ) {
             const msg = `Version ${maxOrSingletonVersion} from ${
