@@ -9,6 +9,8 @@
 
 import { comparator } from './constants';
 
+const comparatorRegex = parseRegex(comparator);
+
 export function parseRegex(source: string): RegExp {
   return new RegExp(source);
 }
@@ -66,7 +68,7 @@ export function pipe(...fns: ((params: any) => any)[]) {
 export function extractComparator(
   comparatorString: string,
 ): RegExpMatchArray | null {
-  return comparatorString.match(parseRegex(comparator));
+  return comparatorString.match(comparatorRegex);
 }
 
 export function combineVersion(
