@@ -171,6 +171,7 @@ export function initializeSharing({
       strategy: mfInstance.options.shareStrategy,
       initScope,
       from: 'build',
+      ...(dispatch && { context: { shareScopeDispatch: 'declared' } }),
     });
     attachShareScopeMap(webpackRequire);
 

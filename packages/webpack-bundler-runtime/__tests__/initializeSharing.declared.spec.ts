@@ -1,3 +1,5 @@
+import { ModuleFederation } from '@module-federation/runtime';
+import { remotes } from '../src/remotes';
 import { initializeSharing } from '../src/initializeSharing';
 
 type Scope = string | string[];
@@ -79,6 +81,69 @@ describe('initializeSharing with declared share scope dispatch', () => {
     warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
   afterEach(() => warn.mockRestore());
+
+  it.each([
+    ['sharing', true],
+    ['sharing', false],
+    ['remote import', true],
+    ['remote import', false],
+  ])(
+    'passes the script dispatch opt-in through %s when flagged: %s',
+    async (path, declared) => {
+      const remote = container();
+      const initiators: Array<string | undefined> = [];
+      const entry = `https://remote.test/dispatch-${path}-${declared}.js`;
+      const instance = new ModuleFederation({
+        name: `script-host-${path}-${declared}`,
+        shareStrategy: 'version-first',
+        remotes: [
+          { name: 'peer', type: 'script', entry, shareScope: ['a', 'b'] },
+        ],
+        plugins: [
+          {
+            name: 'in-memory-entry',
+            loadEntry: async ({ resourceContext }) => {
+              initiators.push(resourceContext?.initiator);
+              return { init: remote.init, get: () => () => 'widget' };
+            },
+          },
+        ],
+      });
+      const { I, webpackRequire } = host({}, { declared });
+      webpackRequire.federation.instance = instance;
+      webpackRequire.S = instance.shareScopeMap;
+
+      if (path === 'sharing') {
+        expect(await settles(I('b'))).toBe(true);
+        expect(remote.calls).toHaveLength(declared ? 1 : 0);
+        expect(initiators).toEqual(declared ? ['loadShare'] : []);
+        return;
+      }
+
+      const promises: Array<Promise<unknown>> = [];
+      webpackRequire.o = Object.hasOwn;
+      webpackRequire.m = {};
+      remotes({
+        chunkId: 'chunk',
+        promises,
+        chunkMapping: { chunk: ['import'] },
+        idToExternalAndNameMapping: {
+          import: [['a', 'b'], './widget', 'external'],
+        },
+        idToRemoteMap: { import: [{ name: 'peer', externalType: 'script' }] },
+        webpackRequire,
+      });
+      expect(await settles(Promise.all(promises))).toBe(true);
+      const module = { exports: undefined };
+      webpackRequire.m.import(module);
+      expect(module.exports).toBe('widget');
+      const S = instance.shareScopeMap;
+      expect(remote.calls).toEqual([
+        { pool: S['a'], keys: ['a', 'b'], map: S, args: 3 },
+      ]);
+      expect(initiators).toEqual([declared ? 'loadShare' : 'loadRemote']);
+    },
+  );
 
   it('keeps the legacy walk for array requests if only the shared options have the flag', async () => {
     const a = container();
