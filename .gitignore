@@ -115,3 +115,6 @@ apps/rsc-demo/e2e/test-results/
 
 # Repo-local Cursor litter; tokensave/Cursor config comes from the installed user-level plugin
 .cursor/
+
+# Local git worktrees
+.worktrees/
