@@ -2,7 +2,7 @@ import { InitContainerEntryOptions, WebpackRequire } from './types';
 
 export function initContainerEntry(
   options: InitContainerEntryOptions,
-): ReturnType<WebpackRequire['I']> {
+): WebpackRequire['I'] | void {
   const {
     webpackRequire,
     shareScope,
@@ -87,7 +87,7 @@ export function initContainerEntry(
   ) {
     const ownsArray = Array.isArray(shareScopeKey);
     const hostArray = Array.isArray(hostShareScopeKeys);
-    for (const key of new Set(additionalShareScopeKeys)) {
+    for (const key of additionalShareScopeKeys) {
       if (
         ownsArray
           ? shareScopeKey.includes(key)
@@ -119,7 +119,7 @@ export function initContainerEntry(
           shareScopeKey.map((key) => webpackRequire.I(key, initScope)),
         ).then(() => true);
 
-  if (!additionalScopes.length) return primary;
+  if (!additionalScopes.length) return primary as WebpackRequire['I'] | void;
 
   const initializeAdditionalScopes = () =>
     Promise.all(
@@ -132,9 +132,11 @@ export function initContainerEntry(
         }),
       ),
     ).then(() => true);
-  return primary &&
+  const ready =
+    primary &&
     typeof primary !== 'boolean' &&
     typeof primary.then === 'function'
-    ? Promise.resolve(primary).then(initializeAdditionalScopes)
-    : initializeAdditionalScopes();
+      ? Promise.resolve(primary).then(initializeAdditionalScopes)
+      : initializeAdditionalScopes();
+  return ready as unknown as WebpackRequire['I'];
 }

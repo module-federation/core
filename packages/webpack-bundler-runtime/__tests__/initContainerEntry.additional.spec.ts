@@ -123,7 +123,6 @@ describe('additional container share scopes', () => {
       'container',
       'extra',
       'missing',
-      'extra',
     ]);
     expect(ready).toBeInstanceOf(Promise);
     await ready;
