@@ -203,6 +203,7 @@ export interface ConsumesOptions {
 export interface InitContainerEntryOptions {
   shareScope: ShareScopeMap[string];
   shareScopeKey: string | string[];
+  additionalShareScopeKeys?: string[];
   webpackRequire: WebpackRequire;
   remoteEntryInitOptions?: RemoteEntryInitOptions;
   initScope?: InitializeSharingOptions['initScope'];
