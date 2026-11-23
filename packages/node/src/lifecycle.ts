@@ -13,6 +13,21 @@ export {
   planRemoteCache,
 } from '@module-federation/webpack-bundler-runtime/clear-cache';
 export {
+  applyNodeGlobalModuleInfo,
+  diffNodeGlobalModuleInfo,
+  isNodeRemoteLoaded,
+  isRawManifest,
+  isResolvedProviderModuleInfo,
+  lookupProviderInGlobalModuleInfo,
+  manifestFingerprint,
+  moduleInfoFingerprint,
+  resolveProviderEntryUrl,
+  resolveTargetModuleInfo,
+  type GlobalModuleInfoDiffResult,
+  type GlobalModuleInfoRemoteDiff,
+  type RegisteredRemoteDescriptor,
+} from './lifecycle/snapshot';
+export {
   loadTrackerKey,
   nodeLifecycleKey,
   updatingKey,
