@@ -17,6 +17,7 @@ import {
   getAssetsByChunkGroup,
   getAssetsByChunkIDs,
   getSharedIdentityKey,
+  createSharedOptionsLookup,
 } from './utils';
 
 type ProvideData = {
@@ -40,11 +41,9 @@ export function collectGraph(
     name: hostName,
     exposes,
     shared,
-    shareScope: defaultScope = 'default',
     remotes: configuredRemotes,
   }: {
     name: string;
-    shareScope?: string | string[];
     exposes: ContainerManager['containerPluginExposesOptions'];
     shared: SharedManager['normalizedOptions'];
     remotes: RemoteManager['normalizedOptions'];
@@ -91,9 +90,7 @@ export function collectGraph(
     });
   }
 
-  const configuredShared = Object.entries(shared).sort(
-    ([a, av], [b, bv]) => (bv.shareKey || b).length - (av.shareKey || a).length,
-  );
+  const findSharedOptions = createSharedOptionsLookup(shared);
   const providersFirst = [...sharedData].sort(
     ([a], [b]) =>
       Number(a.type === 'consume-shared-module') -
@@ -109,21 +106,7 @@ export function collectGraph(
       layered || scope !== 'default'
         ? getSharedIdentityKey(name, scope, layer)
         : name;
-    const configured = configuredShared.filter(([key, value]) => {
-      const shareKey = value.shareKey || key;
-      // A share without its own scope is in the plugin's `shareScope`.
-      const scopes = [value.shareScope ?? 'default'];
-      if (scopes[0] === 'default') scopes.push(defaultScope);
-      return (
-        (shareKey === name ||
-          (shareKey.endsWith('/') && name.startsWith(shareKey))) &&
-        scopes.some((item) => JSON.stringify(item) === JSON.stringify(scope))
-      );
-    });
-    const [request, normalized] =
-      configured.find(([, value]) => value.layer === layer) ??
-      configured.find(([, value]) => value.layer === undefined) ??
-      [];
+    const normalized = findSharedOptions(name, scope, layer);
     // A consume-only share that is not installed has no package version.
     // Like the legacy reader, take the version from `requiredVersion: '=1.2.3'`.
     const required = consume ? normalized?.requiredVersion : undefined;
@@ -138,14 +121,10 @@ export function collectGraph(
     if (!name || !version) continue;
     sharedKeys.set(module, key);
     if (!sharedMap[key]) {
-      const exactShareKey = (normalized?.shareKey || request) === name;
       const row = getShareItem({
         pkgName: name,
         pkgVersion: version,
-        normalizedShareOptions:
-          layered || scope !== 'default' || exactShareKey
-            ? normalized
-            : undefined,
+        normalizedShareOptions: normalized,
         hostName,
       });
       if (layered) {

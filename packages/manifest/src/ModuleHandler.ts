@@ -18,6 +18,7 @@ import {
   getFileNameWithOutExt,
   splitSharedIdentifier,
   getSharedIdentity,
+  createSharedOptionsLookup,
 } from './utils';
 
 type ShareMap = { [sharedKey: string]: StatsShared };
@@ -276,6 +277,7 @@ class ModuleHandler {
   private _exposeImports = new Map<string, string[]>();
   private _remoteManager: RemoteManager = new RemoteManager();
   private _sharedManager: SharedManager = new SharedManager();
+  private _findSharedOptions: ReturnType<typeof createSharedOptionsLookup>;
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -305,6 +307,9 @@ class ModuleHandler {
     this._remoteManager.init(options);
     this._sharedManager = new SharedManager();
     this._sharedManager.init(options);
+    this._findSharedOptions = createSharedOptionsLookup(
+      this._sharedManager.normalizedOptions,
+    );
   }
 
   get isRspack(): boolean {
@@ -341,14 +346,11 @@ class ModuleHandler {
       sharedMap[key] = getShareItem({
         pkgName,
         pkgVersion,
-        normalizedShareOptions:
-          Object.entries(sharedManagerNormalizedOptions).find(
-            ([request, options]) =>
-              (options.shareKey ?? request) === pkgName &&
-              options.layer === identity.layer &&
-              JSON.stringify(options.shareScope ?? 'default') ===
-                JSON.stringify(identity.shareScope),
-          )?.[1] ?? sharedManagerNormalizedOptions[pkgName],
+        normalizedShareOptions: this._findSharedOptions(
+          pkgName,
+          identity.shareScope,
+          identity.layer,
+        ),
         hostName: this._options.name,
       });
       if (layered) {
