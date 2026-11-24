@@ -480,12 +480,12 @@ class StatsManager {
         ...shared,
         usedIn: Array.from(shared.usedIn),
       }));
-      const sharedAssets = new Set<unknown>(
+      const sharedAssets = new Set<string>(
         stats.shared.flatMap(({ assets: { js, css } }) => [
           ...js.sync,
           ...js.async,
           ...css.async,
-          css.sync,
+          ...css.sync,
         ]),
       );
       stats.exposes = stats.exposes.map((expose) => {
