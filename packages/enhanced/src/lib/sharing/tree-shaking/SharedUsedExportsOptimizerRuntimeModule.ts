@@ -1,6 +1,5 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-
 import { getFederationGlobalScope } from '../../container/runtime/utils';
+import { getRuntimeGlobals, getRuntimeModule, getWebpack } from '../../webpack';
 
 /**
  * Map of shared module name to Map of runtime id to Set of exported names
@@ -10,9 +9,10 @@ import { getFederationGlobalScope } from '../../container/runtime/utils';
  */
 export type ReferencedExports = Map<string, Set<string>>;
 
-const { Template, RuntimeGlobals, RuntimeModule } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const webpack = getWebpack();
+const { Template } = webpack;
+const RuntimeGlobals = getRuntimeGlobals(webpack);
+const RuntimeModule = getRuntimeModule(webpack);
 
 class SharedUsedExportsOptimizerRuntimeModule extends RuntimeModule {
   private sharedUsedExports: ReferencedExports;

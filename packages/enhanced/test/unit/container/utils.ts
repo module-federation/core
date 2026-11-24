@@ -175,6 +175,7 @@ export const createMockCompiler = (): any => {
  * Mock dependency for container tests
  */
 export class MockModuleDependency {
+  static Template = class {};
   request: string;
   userRequest: string;
   weak = false;
@@ -490,6 +491,7 @@ export function createWebpackMock() {
 
   const dependencies = {
     ModuleDependency: class ModuleDependency {
+      static Template = class {};
       weak: boolean;
       optional: boolean;
       request: string;

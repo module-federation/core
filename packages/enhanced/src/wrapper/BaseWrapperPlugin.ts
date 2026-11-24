@@ -1,5 +1,6 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { setActiveWebpack } from '../lib/webpack';
 
 // Use module.require instead of require to prevent bundlers (rolldown/tsdown) from
 // hoisting the call to the top of the file. This ensures the require only executes
@@ -37,7 +38,13 @@ export default abstract class BaseWrapperPlugin implements WebpackPluginInstance
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
-    // Lazily load core plugin after webpack path is set.
+    // Bind the active compiler's webpack instance before lazily loading core modules
+    // so top-level Module/Dependency/RuntimeModule subclasses reuse compiler.webpack.
+    if (compiler?.webpack) {
+      setActiveWebpack(compiler.webpack);
+    }
+
+    // Lazily load core plugin after webpack path and active webpack are set.
     const CorePlugin = lazyRequire(this.coreModulePath).default as any;
 
     // Create core plugin instance and apply it

@@ -2,9 +2,6 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { getUndoPath } = require(
-  normalizeWebpackPath('webpack/lib/util/identifier'),
-) as typeof import('webpack/lib/util/identifier');
 import type { Chunk, ChunkGraph, Compilation } from 'webpack';
 
 type ChunkFilenameTemplate = ReturnType<
@@ -27,6 +24,19 @@ export function getChunkRootOutputDir(
     chunk,
     contentHashType: 'javascript',
   });
+  const getUndoPath =
+    (
+      compilation.compiler?.webpack?.util as
+        | {
+            getUndoPath?: (typeof import('webpack/lib/util/identifier'))['getUndoPath'];
+          }
+        | undefined
+    )?.getUndoPath ??
+    (
+      require(
+        normalizeWebpackPath('webpack/lib/util/identifier'),
+      ) as typeof import('webpack/lib/util/identifier')
+    ).getUndoPath;
   return getUndoPath(outputName, compilation.outputOptions.path || '', false);
 }
 
@@ -87,7 +97,11 @@ export function generateHmrCode(
     // Replace placeholders in the HMR runtime code
     Template.getFunctionContent(
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js'),
+      require(
+        normalizeWebpackPath(
+          'webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js',
+        ),
+      ),
     )
       .replace(/\$key\$/g, 'readFileVm')
       .replace(/\$installedChunks\$/g, 'installedChunks')

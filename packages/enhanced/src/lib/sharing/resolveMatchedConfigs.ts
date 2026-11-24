@@ -2,17 +2,10 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/resolve/ResolverFactory';
 import type { ConsumeOptions } from '@module-federation/sdk';
-
-const ModuleNotFoundError = require(
-  normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
-) as typeof import('webpack/lib/ModuleNotFoundError');
-const LazySet = require(
-  normalizeWebpackPath('webpack/lib/util/LazySet'),
-) as typeof import('webpack/lib/util/LazySet');
+import { getWebpack, getWebpackApi } from '../webpack';
 
 const RELATIVE_REQUEST_REGEX = /^\.\.?(\/|$)/;
 const ABSOLUTE_PATH_REGEX = /^(\/|[A-Za-z]:\\|\\\\)/;
@@ -42,6 +35,17 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   compilation: Compilation,
   configs: [string, T][],
 ): Promise<MatchedConfigs<T>> {
+  const webpack = getWebpack(compilation.compiler);
+  const ModuleNotFoundError = getWebpackApi(
+    webpack,
+    (w) => w.ModuleNotFoundError,
+    'webpack/lib/ModuleNotFoundError',
+  );
+  const LazySet = getWebpackApi(
+    webpack,
+    (w) => w.util?.LazySet,
+    'webpack/lib/util/LazySet',
+  );
   const resolved = new Map<string, T>();
   const unresolved = new Map<string, T>();
   const prefixed = new Map<string, T>();

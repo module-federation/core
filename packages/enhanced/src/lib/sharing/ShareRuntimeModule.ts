@@ -4,16 +4,17 @@
 */
 
 'use strict';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation, ChunkGraph } from 'webpack';
 import { getFederationGlobalScope } from '../container/runtime/utils';
+import {
+  getRuntimeGlobals,
+  getRuntimeModule,
+  getWebpack,
+  getWebpackApi,
+} from '../webpack';
 
-const { Template, RuntimeGlobals, RuntimeModule } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { compareModulesByIdentifier } = require(
-  normalizeWebpackPath('webpack/lib/util/comparators'),
-) as typeof import('webpack/lib/util/comparators');
+const defaultWebpack = getWebpack();
+const RuntimeModule = getRuntimeModule(defaultWebpack);
 
 class ShareRuntimeModule extends RuntimeModule {
   constructor() {
@@ -29,6 +30,14 @@ class ShareRuntimeModule extends RuntimeModule {
     if (!compilation) {
       throw new Error('Compilation is undefined');
     }
+    const webpack = getWebpack(compilation.compiler);
+    const Template = webpack.Template ?? defaultWebpack.Template;
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
+    const { compareModulesByIdentifier } = getWebpackApi(
+      webpack,
+      (w) => w.util?.comparators,
+      'webpack/lib/util/comparators',
+    );
     const { runtimeTemplate, codeGenerationResults } = compilation;
     if (!codeGenerationResults) {
       return null;

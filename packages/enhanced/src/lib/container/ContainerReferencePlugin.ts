@@ -3,9 +3,7 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 import type { Compiler } from 'webpack';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
-// import * as RuntimeGlobals from 'webpack/lib/runtime/RuntimeGlobals';
 import FallbackDependency from './FallbackDependency';
 import FallbackItemDependency from './FallbackItemDependency';
 import FallbackModuleFactory from './FallbackModuleFactory';
@@ -19,10 +17,7 @@ import type {
 } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
-
-const { ExternalsPlugin } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+import { getRuntimeGlobals, getWebpack } from '../webpack';
 
 const slashCode = '/'.charCodeAt(0);
 
@@ -74,7 +69,9 @@ class ContainerReferencePlugin {
         i++;
       }
     }
-    const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
+    const webpack = getWebpack(compiler);
+    const Externals = webpack.ExternalsPlugin ?? getWebpack().ExternalsPlugin;
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
     new Externals(remoteType, remoteExternals).apply(compiler);
 
     compiler.hooks.compilation.tap(
@@ -131,13 +128,13 @@ class ContainerReferencePlugin {
         );
 
         compilation.hooks.runtimeRequirementInTree
-          .for(compiler.webpack.RuntimeGlobals.ensureChunkHandlers)
+          .for(RuntimeGlobals.ensureChunkHandlers)
           .tap('ContainerReferencePlugin', (chunk, set) => {
-            set.add(compiler.webpack.RuntimeGlobals.module);
-            set.add(compiler.webpack.RuntimeGlobals.moduleFactoriesAddOnly);
-            set.add(compiler.webpack.RuntimeGlobals.hasOwnProperty);
-            set.add(compiler.webpack.RuntimeGlobals.initializeSharing);
-            set.add(compiler.webpack.RuntimeGlobals.shareScopeMap);
+            set.add(RuntimeGlobals.module);
+            set.add(RuntimeGlobals.moduleFactoriesAddOnly);
+            set.add(RuntimeGlobals.hasOwnProperty);
+            set.add(RuntimeGlobals.initializeSharing);
+            set.add(RuntimeGlobals.shareScopeMap);
             compilation.addRuntimeModule(chunk, new RemoteRuntimeModule());
           });
       },

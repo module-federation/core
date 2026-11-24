@@ -35,10 +35,14 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
     const currentChunk = this.chunk;
     let undoPath: string | null = null;
     if (compilation && currentChunk && path) {
+      const jsModulesPlugin =
+        compilation.compiler?.webpack?.javascript?.JavascriptModulesPlugin ??
+        compilation.compiler?.webpack?.JavascriptModulesPlugin ??
+        javascript.JavascriptModulesPlugin;
       undoPath = getChunkRootOutputDir(
         compilation,
         currentChunk,
-        javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
+        jsModulesPlugin.getChunkFilenameTemplate(
           currentChunk,
           compilation.outputOptions,
         ),

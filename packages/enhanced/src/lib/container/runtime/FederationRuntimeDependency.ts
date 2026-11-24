@@ -1,8 +1,11 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackApi } from '../../webpack';
 
-const ModuleDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
-) as typeof import('webpack/lib/dependencies/core/ModuleDependency');
+const ModuleDependency: typeof import('webpack/lib/dependencies/core/ModuleDependency') =
+  getWebpackApi(
+    getWebpack(),
+    (w) => w.dependencies?.ModuleDependency,
+    'webpack/lib/dependencies/ModuleDependency',
+  );
 
 class FederationRuntimeDependency extends ModuleDependency {
   constructor(request: string) {

@@ -13,7 +13,6 @@ import {
   type moduleFederationPlugin,
   infrastructureLogger,
 } from '@module-federation/sdk';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -26,16 +25,24 @@ import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependencie
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
 import TreeShakingSharedPlugin from '../sharing/tree-shaking/TreeShakingSharedPlugin';
+import { getWebpack, setActiveWebpack } from '../webpack';
 
-const isValidExternalsType = require(
-  normalizeWebpackPath(
-    'webpack/schemas/plugins/container/ExternalsType.check.js',
-  ),
-) as typeof import('webpack/schemas/plugins/container/ExternalsType.check.js');
+const checkExternalsType =
+  require('../../schemas/container/ExternalsType.check.js').validate as (
+    value: unknown,
+  ) => boolean;
 
-const { ExternalsPlugin } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const EXTRA_EXTERNALS_TYPES = new Set([
+  'amd-async',
+  'asset',
+  'asset-url',
+  'css-import',
+  'css-url',
+]);
+
+const isValidExternalsType = (value: unknown): boolean =>
+  checkExternalsType(value) ||
+  (typeof value === 'string' && EXTRA_EXTERNALS_TYPES.has(value));
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -163,6 +170,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
+    if (compiler?.webpack) {
+      setActiveWebpack(compiler.webpack);
+    }
     bindLoggerToCompiler(
       infrastructureLogger,
       compiler,
@@ -192,7 +202,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     }
 
     if (experiments?.externalRuntime === true) {
-      const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
+      const webpack = getWebpack(compiler);
+      const Externals = webpack.ExternalsPlugin ?? getWebpack().ExternalsPlugin;
       new Externals(compiler.options.externalsType || 'global', {
         '@module-federation/runtime-core': '_FEDERATION_RUNTIME_CORE',
       }).apply(compiler);

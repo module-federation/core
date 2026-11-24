@@ -9,12 +9,10 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack } from '../webpack';
 
 import makeSerializable from '../makeSerializable';
-const { Dependency } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const { Dependency } = getWebpack();
 
 class FallbackDependency extends Dependency {
   requests: string[];

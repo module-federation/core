@@ -2,7 +2,6 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import type {
   Compiler,
@@ -14,10 +13,7 @@ import type {
   javascript,
 } from 'webpack';
 import type { SyncWaterfallHook } from 'tapable';
-
-const SortableSet = require(
-  normalizeWebpackPath('webpack/lib/util/SortableSet'),
-) as typeof import('webpack/lib/util/SortableSet');
+import { getRuntimeGlobals, getWebpack, getWebpackApi } from '../webpack';
 
 type CompilationHooksJavascriptModulesPlugin = ReturnType<
   typeof javascript.JavascriptModulesPlugin.getCompilationHooks
@@ -83,9 +79,14 @@ class AsyncEntryStartupPlugin {
   }
 
   private _handleRenderStartup(compiler: Compiler, compilation: Compilation) {
-    compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-      compilation,
-    ).renderStartup.tap(
+    const webpack = getWebpack(compiler);
+    const runtimeGlobals = getRuntimeGlobals(webpack);
+    const JavascriptModulesPlugin = getWebpackApi(
+      webpack,
+      (w) => w.javascript?.JavascriptModulesPlugin ?? w.JavascriptModulesPlugin,
+      'webpack/lib/javascript/JavascriptModulesPlugin',
+    );
+    JavascriptModulesPlugin.getCompilationHooks(compilation).renderStartup.tap(
       'AsyncEntryStartupPlugin',
       (source, _renderContext, upperContext) => {
         const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
@@ -103,7 +104,7 @@ class AsyncEntryStartupPlugin {
           return source;
         }
 
-        const runtime = this._getChunkRuntime(upperContext);
+        const runtime = this._getChunkRuntime(compiler, upperContext);
 
         let remotes = '';
         let shared = '';
@@ -156,7 +157,7 @@ class AsyncEntryStartupPlugin {
           }
 
           remotes = this._getRemotes(
-            compiler.webpack.RuntimeGlobals,
+            runtimeGlobals,
             requirements,
             hasRemoteModules,
             initialChunks,
@@ -164,7 +165,7 @@ class AsyncEntryStartupPlugin {
           );
 
           shared = this._getShared(
-            compiler.webpack.RuntimeGlobals,
+            runtimeGlobals,
             requirements,
             consumeShares,
             initialChunks,
@@ -193,7 +194,15 @@ class AsyncEntryStartupPlugin {
     );
   }
 
-  private _getChunkRuntime(upperContext: StartupRenderContext) {
+  private _getChunkRuntime(
+    compiler: Compiler,
+    upperContext: StartupRenderContext,
+  ) {
+    const SortableSet = getWebpackApi(
+      getWebpack(compiler),
+      (w) => w.util?.SortableSet,
+      'webpack/lib/util/SortableSet',
+    );
     const runtime = new Set<Chunk>();
     const chunkRuntime = upperContext.chunk.runtime;
     if (chunkRuntime) {

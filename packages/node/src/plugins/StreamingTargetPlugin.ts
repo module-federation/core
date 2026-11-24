@@ -1,4 +1,5 @@
 import type { Compiler, WebpackPluginInstance } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { ModuleFederationPluginOptions } from '../types';
 
 import CommonJsChunkLoadingPlugin from './CommonJsChunkLoadingPlugin';
@@ -56,14 +57,14 @@ class StreamingTargetPlugin implements WebpackPluginInstance {
 
     new (
       webpack?.node?.NodeEnvironmentPlugin ||
-      require('webpack/lib/node/NodeEnvironmentPlugin')
+      require(normalizeWebpackPath('webpack/lib/node/NodeEnvironmentPlugin'))
     )({
       infrastructureLogging: compiler.options.infrastructureLogging,
     }).apply(compiler);
 
     new (
       webpack?.node?.NodeTargetPlugin ||
-      require('webpack/lib/node/NodeTargetPlugin')
+      require(normalizeWebpackPath('webpack/lib/node/NodeTargetPlugin'))
     )().apply(compiler);
     new CommonJsChunkLoadingPlugin({
       asyncChunkLoading: true,

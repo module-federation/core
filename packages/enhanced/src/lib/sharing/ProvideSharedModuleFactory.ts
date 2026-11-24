@@ -2,18 +2,19 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-
 import ProvideSharedModule from './ProvideSharedModule';
 import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
 } from 'webpack/lib/module/ModuleFactory';
 import ProvideSharedDependency from './ProvideSharedDependency';
+import { getWebpack, getWebpackApi } from '../webpack';
 
-const ModuleFactory = require(
-  normalizeWebpackPath('webpack/lib/ModuleFactory'),
-) as typeof import('webpack/lib/module/ModuleFactory');
+const ModuleFactory = getWebpackApi(
+  getWebpack(),
+  (w) => w.ModuleFactory,
+  'webpack/lib/ModuleFactory',
+);
 
 class ProvideSharedModuleFactory extends ModuleFactory {
   /**

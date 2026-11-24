@@ -2,7 +2,6 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
@@ -22,14 +21,7 @@ import type {
   Falsy,
   OptimizationSplitChunksCacheGroup,
 } from 'webpack/declarations/WebpackOptions';
-
-const ModuleDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
-) as typeof import('webpack/lib/dependencies/core/ModuleDependency');
-
-const EntryDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
-) as typeof import('webpack/lib/entry/EntryDependency');
+import { getWebpack, getWebpackApi } from '../webpack';
 
 const PLUGIN_NAME = 'ContainerPlugin';
 
@@ -152,6 +144,17 @@ class ContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
+    const webpack = getWebpack(compiler);
+    const ModuleDependency = getWebpackApi(
+      webpack,
+      (w) => w.dependencies?.ModuleDependency,
+      'webpack/lib/dependencies/ModuleDependency',
+    );
+    const EntryDependency = getWebpackApi(
+      webpack,
+      (w) => w.dependencies?.EntryDependency,
+      'webpack/lib/dependencies/EntryDependency',
+    );
     const useModuleFederationPlugin = compiler.options.plugins.find(
       (p: Falsy | WebpackPluginInstance | WebpackPluginFunction) => {
         if (typeof p !== 'object' || !p) {

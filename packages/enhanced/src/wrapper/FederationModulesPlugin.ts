@@ -1,5 +1,6 @@
 import type { Compilation } from 'webpack';
 import BaseWrapperPlugin from './BaseWrapperPlugin';
+import { setActiveWebpack } from '../lib/webpack';
 
 // Use module.require instead of require to prevent bundlers (rolldown/tsdown) from
 // hoisting the call to the top of the file. This ensures the require only executes
@@ -14,6 +15,9 @@ export default class FederationModulesPlugin extends BaseWrapperPlugin {
   }
 
   static getCompilationHooks(compilation: Compilation) {
+    if (compilation?.compiler?.webpack) {
+      setActiveWebpack(compilation.compiler.webpack);
+    }
     const CoreFederationModulesPlugin = lazyRequire(
       '../lib/container/runtime/FederationModulesPlugin',
     )

@@ -1,9 +1,6 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-
 import makeSerializable from '../../../makeSerializable';
-const { Dependency } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+import { getWebpack } from '../../../webpack';
+const { Dependency } = getWebpack();
 
 class SharedEntryDependency extends Dependency {
   public name: string;

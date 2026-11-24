@@ -1,6 +1,7 @@
 'use strict';
 
 import type { Compiler, container } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { ModuleFederationPluginOptions } from '../types';
 import EntryChunkTrackerPlugin from './EntryChunkTrackerPlugin';
 import { bindLoggerToCompiler } from '@module-federation/sdk';
@@ -124,7 +125,9 @@ class NodeFederationPlugin {
       ) {
         ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
       } else {
-        ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+        ModuleFederationPlugin = require(
+          normalizeWebpackPath('webpack/lib/container/ModuleFederationPlugin'),
+        );
       }
       return ModuleFederationPlugin;
     }

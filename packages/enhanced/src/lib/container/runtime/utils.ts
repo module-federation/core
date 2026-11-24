@@ -2,13 +2,13 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import crypto from 'crypto';
 import { parseOptions } from '../options';
 import type webpack from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/runtime/RuntimeGlobals';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { init } from '@module-federation/runtime-tools';
+import { getWebpack, getWebpackApi } from '../../webpack';
 
 type Remotes = Parameters<typeof init>[0]['remotes'];
 
@@ -18,10 +18,6 @@ export interface NormalizedRuntimeInitOptionsWithOutShared {
     Remotes[0] & { externalType: moduleFederationPlugin.ExternalsType }
   >;
 }
-
-const extractUrlAndGlobal = require(
-  normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
-) as typeof import('webpack/lib/externals/extractUrlAndGlobal');
 
 type EntryStaticNormalized = Awaited<
   ReturnType<Extract<webpack.WebpackOptionsNormalized['entry'], () => any>>
@@ -41,7 +37,13 @@ export function getFederationGlobalScope(
 
 export function normalizeRuntimeInitOptionsWithOutShared(
   options: moduleFederationPlugin.ModuleFederationPluginOptions,
+  compiler?: webpack.Compiler,
 ): NormalizedRuntimeInitOptionsWithOutShared {
+  const extractUrlAndGlobal = getWebpackApi(
+    getWebpack(compiler),
+    (w) => w.container?.extractUrlAndGlobal,
+    'webpack/lib/util/extractUrlAndGlobal',
+  );
   const parsedOptions = parseOptions(
     options.remotes || [],
     (item) => ({

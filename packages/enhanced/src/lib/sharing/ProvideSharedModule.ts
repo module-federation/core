@@ -2,7 +2,6 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type {
   Compilation,
   ObjectDeserializerContext,
@@ -21,10 +20,11 @@ import ProvideForSharedDependency from './ProvideForSharedDependency';
 import { WEBPACK_MODULE_TYPE_PROVIDE } from '../Constants';
 import type { InputFileSystem } from 'webpack/lib/fs/fs';
 import type { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
+import { getRuntimeGlobals, getWebpack } from '../webpack';
 
-const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const webpack = getWebpack();
+const { AsyncDependenciesBlock, Module } = webpack;
+const RuntimeGlobals = getRuntimeGlobals(webpack);
 import makeSerializable from '../makeSerializable';
 
 const TYPES = new Set(['share-init']);

@@ -1,18 +1,12 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type {
   Compiler,
   Compilation,
   Chunk,
   sources,
   Module,
-  RuntimeGlobals,
   javascript,
 } from 'webpack';
 import type { SyncWaterfallHook } from 'tapable';
-
-const SortableSet = require(
-  normalizeWebpackPath('webpack/lib/util/SortableSet'),
-) as typeof import('webpack/lib/util/SortableSet');
 
 type CompilationHooksJavascriptModulesPlugin = ReturnType<
   typeof javascript.JavascriptModulesPlugin.getCompilationHooks

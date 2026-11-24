@@ -1,12 +1,8 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { getFederationGlobalScope } from './utils';
+import type { Template } from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/runtime/RuntimeGlobals';
 import type { NormalizedRuntimeInitOptionsWithOutShared } from './utils';
 import type { RemoteInfos } from '@module-federation/webpack-bundler-runtime';
-
-const { Template } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
 
 function getFederationGlobal(
   template: typeof Template,

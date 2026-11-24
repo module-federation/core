@@ -2,19 +2,22 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackApi } from '../webpack';
 
 import makeSerializable from '../makeSerializable';
-const { dependencies } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const ModuleDependency: typeof import('webpack/lib/dependencies/core/ModuleDependency') =
+  getWebpackApi(
+    getWebpack(),
+    (w) => w.dependencies?.ModuleDependency,
+    'webpack/lib/dependencies/ModuleDependency',
+  );
 
 import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack';
 
-class ContainerExposedDependency extends dependencies.ModuleDependency {
+class ContainerExposedDependency extends ModuleDependency {
   exposedName: string;
   override request: string;
 

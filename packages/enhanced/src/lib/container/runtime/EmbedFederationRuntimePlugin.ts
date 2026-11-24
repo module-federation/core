@@ -1,18 +1,12 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import EmbedFederationRuntimeModule from './EmbedFederationRuntimeModule';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import type { Compiler, Chunk, Compilation } from 'webpack';
 import { getFederationGlobalScope } from './utils';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
-
-const { RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+import { getRuntimeGlobals, getWebpack, getWebpackApi } from '../../webpack';
 
 const PLUGIN_NAME = 'EmbedFederationRuntimePlugin';
-
-const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 interface EmbedFederationRuntimePluginOptions {
   /**
@@ -63,15 +57,22 @@ class EmbedFederationRuntimePlugin {
       return;
     }
 
+    const webpack = getWebpack(compiler);
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
+    const JavascriptModulesPlugin = getWebpackApi(
+      webpack,
+      (w) => w.javascript?.JavascriptModulesPlugin ?? w.JavascriptModulesPlugin,
+      'webpack/lib/javascript/JavascriptModulesPlugin',
+    );
+
     // Tap into the compilation to modify renderStartup and runtime requirements.
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation) => {
         // --- Part 1: Modify renderStartup to append a startup call when none is added automatically ---
         const { renderStartup } =
-          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-            compilation,
-          );
+          JavascriptModulesPlugin.getCompilationHooks(compilation);
 
         renderStartup.tap(
           PLUGIN_NAME,

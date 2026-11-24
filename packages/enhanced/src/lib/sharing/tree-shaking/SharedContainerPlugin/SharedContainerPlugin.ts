@@ -1,6 +1,5 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { assert, encodeName } from '@module-federation/sdk';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 import type { Compilation, Compiler, WebpackError } from 'webpack';
 import SharedDependency from './SharedDependency';
@@ -8,10 +7,7 @@ import SharedEntryDependency from './SharedEntryDependency';
 import SharedEntryModuleFactory from './SharedEntryModuleFactory';
 import { getFederationGlobalScope } from '../../../container/runtime/utils';
 import FederationRuntimeModule from '../../../container/runtime/FederationRuntimeModule';
-
-const EntryDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
-) as typeof import('webpack/lib/entry/EntryDependency');
+import { getRuntimeGlobals, getWebpack, getWebpackApi } from '../../../webpack';
 
 export const PLUGIN_NAME = 'SharedContainerPlugin';
 const HOT_UPDATE_SUFFIX = '.hot-update';
@@ -64,6 +60,13 @@ class SharedContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
+    const webpack = getWebpack(compiler);
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
+    const EntryDependency = getWebpackApi(
+      webpack,
+      (w) => w.dependencies?.EntryDependency,
+      'webpack/lib/dependencies/EntryDependency',
+    );
     const { library, name, request, fileName } = this._options;
 
     if (
@@ -124,8 +127,8 @@ class SharedContainerPlugin {
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           PLUGIN_NAME,
           (chunk, set) => {
-            set.add(getFederationGlobalScope(compiler.webpack.RuntimeGlobals));
-            set.add(compiler.webpack.RuntimeGlobals.runtimeId);
+            set.add(getFederationGlobalScope(RuntimeGlobals));
+            set.add(RuntimeGlobals.runtimeId);
             compilation.addRuntimeModule(
               chunk,
               new FederationRuntimeModule(set, name, { name, remotes: [] }),
