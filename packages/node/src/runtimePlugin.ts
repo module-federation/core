@@ -37,6 +37,7 @@ type WebpackRequire = {
 };
 
 declare const __webpack_require__: WebpackRequire;
+declare const __rspack_context: object;
 declare const __non_webpack_require__: (id: string) => any;
 
 export const nodeRuntimeImportCache = new Map<string, Promise<any>>();
@@ -357,7 +358,13 @@ export const installChunk = (
   for (const moduleId in chunk.modules) {
     __webpack_require__.m[moduleId] = chunk.modules[moduleId];
   }
-  if (chunk.runtime) chunk.runtime(__webpack_require__);
+  if (chunk.runtime) {
+    chunk.runtime(
+      typeof __rspack_context === 'undefined'
+        ? __webpack_require__
+        : __rspack_context,
+    );
+  }
   for (const chunkId of chunk.ids) {
     if (installedChunks[chunkId]) installedChunks[chunkId][0]();
     installedChunks[chunkId] = 0;

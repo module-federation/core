@@ -292,13 +292,16 @@ describe('shouldKeepBundledForFederation', () => {
     ).toBe(true);
   });
 
-  it('keeps webpack container reference requests bundled', () => {
-    expect(
-      shouldKeepBundledForFederation(
-        'webpack/container/reference/component-app',
-      ),
-    ).toBe(true);
-  });
+  it.each(['webpack', 'rspack'])(
+    'keeps %s container reference requests bundled',
+    (runtime) => {
+      expect(
+        shouldKeepBundledForFederation(
+          `${runtime}/container/reference/component-app`,
+        ),
+      ).toBe(true);
+    },
+  );
 
   it('keeps requests that match discovered remote names bundled', () => {
     const remoteNames = new Set<string>(['component-app']);

@@ -1,8 +1,75 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   ModuleFederationPlugin,
   resolveRspackRuntimeAlias,
   resolveRspackRuntimeImplementation,
 } from '../src/ModuleFederationPlugin';
+import { RemoteEntryPlugin } from '../src/RemoteEntryPlugin';
+
+describe('remote entry public path', () => {
+  it.each(['webpack', 'rspack'] as const)(
+    'sets the modern-module public path in %s runtime mode',
+    async (runtimeMode) => {
+      const require = process
+        .getBuiltinModule('module')
+        .createRequire(__filename);
+      const { rspack }: typeof import('@rspack/core') = require('@rspack/core');
+      const outputPath = await mkdtemp(join(tmpdir(), 'mf-public-path-'));
+      const compiler = rspack({
+        mode: 'development',
+        target: 'node',
+        devtool: false,
+        entry: `data:text/javascript,${encodeURIComponent(
+          'export const readPublicPath = () => __webpack_public_path__;',
+        )}`,
+        output: {
+          path: outputPath,
+          filename: '[name].mjs',
+          publicPath: '/initial/',
+          module: true,
+          library: { type: 'modern-module' },
+        },
+        optimization: { runtimeChunk: 'single' },
+        experiments: { runtimeMode },
+        plugins: [
+          {
+            apply(compiler) {
+              RemoteEntryPlugin.addPublicPathEntry(
+                compiler,
+                'return "https://cdn.example.test/";',
+                'main',
+              );
+            },
+          },
+        ],
+      });
+
+      try {
+        expect(compiler.options.experiments.runtimeMode).toBe(runtimeMode);
+        await new Promise<void>((resolve, reject) => {
+          compiler.run((error, stats) => {
+            if (error) return reject(error);
+            if (stats?.hasErrors()) {
+              return reject(
+                new Error(stats.toString({ all: false, errors: true })),
+              );
+            }
+            resolve();
+          });
+        });
+        const { readPublicPath } = require(join(outputPath, 'main.mjs'));
+        expect(readPublicPath()).toBe('https://cdn.example.test/');
+      } finally {
+        await new Promise<void>((resolve, reject) => {
+          compiler.close((error) => (error ? reject(error) : resolve()));
+        });
+        await rm(outputPath, { recursive: true, force: true });
+      }
+    },
+  );
+});
 
 function getOptimizationDefines(
   optimization?: NonNullable<
