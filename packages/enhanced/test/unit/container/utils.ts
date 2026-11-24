@@ -131,14 +131,6 @@ export const createMockCompiler = (): any => {
       },
     },
     webpack: {
-      javascript: {
-        JavascriptModulesPlugin: {
-          getCompilationHooks: rstest.fn(() => ({
-            chunkHash: { tap: rstest.fn() },
-            renderModuleContent: { tap: rstest.fn() },
-          })),
-        },
-      },
       ExternalsPlugin: class ExternalsPlugin {
         type: string;
         externals: any;

@@ -5,15 +5,10 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
-import ContainerEntryModule from './ContainerEntryModule';
-import { getDeclaredShareScopes } from '../sharing/getDeclaredShareScopes';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
 import type {
   Compiler,
-  Chunk,
-  ChunkGraph,
-  CodeGenerationResults,
   Compilation,
   WebpackError,
   WebpackPluginInstance,
@@ -33,66 +28,6 @@ const ModuleDependency = require(
 const EntryDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
 ) as typeof import('webpack/lib/dependencies/EntryDependency');
-
-const sharingHooksInstalled = new WeakSet<Compilation>();
-
-function installContainerSharingHooks(
-  compiler: Compiler,
-  compilation: Compilation,
-) {
-  if (sharingHooksInstalled.has(compilation)) return;
-  sharingHooksInstalled.add(compilation);
-
-  const { chunkHash, renderModuleContent } =
-    compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-      compilation,
-    );
-  function* additionalScopes(
-    chunk: Chunk,
-    chunkGraph: ChunkGraph,
-    results: CodeGenerationResults,
-  ) {
-    for (const [
-      module,
-      entrypoint,
-    ] of chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunk)) {
-      if (!(module instanceof ContainerEntryModule)) continue;
-      const runtime = entrypoint?.getRuntimeChunk();
-      const scopes =
-        runtime && getDeclaredShareScopes(runtime, chunkGraph, results);
-      if (scopes?.length) yield { module, scopes };
-    }
-  }
-
-  // Sharing metadata is available after the container module's code generation.
-  chunkHash.tap(
-    PLUGIN_NAME,
-    (chunk, hash, { chunkGraph, codeGenerationResults }) => {
-      for (const { module, scopes } of additionalScopes(
-        chunk,
-        chunkGraph,
-        codeGenerationResults,
-      )) {
-        hash.update(JSON.stringify([module.identifier(), scopes]));
-      }
-    },
-  );
-  renderModuleContent.tap(
-    PLUGIN_NAME,
-    (source, module, { chunk, chunkGraph, codeGenerationResults }) => {
-      if (!(module instanceof ContainerEntryModule)) return source;
-      for (const entry of additionalScopes(
-        chunk,
-        chunkGraph,
-        codeGenerationResults,
-      )) {
-        if (entry.module === module)
-          return module.renderAdditionalShareScopes(source, entry.scopes);
-      }
-      return source;
-    },
-  );
-}
 
 const PLUGIN_NAME = 'ContainerPlugin';
 
@@ -358,8 +293,6 @@ class ContainerPlugin {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
-        installContainerSharingHooks(compiler, compilation);
-
         compilation.dependencyFactories.set(
           ContainerEntryDependency,
           new ContainerEntryModuleFactory(),

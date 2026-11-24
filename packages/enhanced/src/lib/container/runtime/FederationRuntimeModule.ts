@@ -76,11 +76,12 @@ class FederationRuntimeModule extends RuntimeModule {
     }
 
     const results = this.compilation?.codeGenerationResults;
-    const declared =
+    const scopes =
       this.chunk &&
       this.chunkGraph &&
       results &&
       getDeclaredShareScopes(this.chunk, this.chunkGraph, results);
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
     return Template.asString([
       getFederationGlobal(
         Template,
@@ -89,9 +90,12 @@ class FederationRuntimeModule extends RuntimeModule {
         rootOutputDir,
         this.initOptionsWithoutShared,
       ),
-      ...(declared
+      ...(scopes
+        ? [`${federationGlobal}.shareScopeDispatch = 'declared';`]
+        : []),
+      ...(scopes?.length
         ? [
-            `${getFederationGlobalScope(RuntimeGlobals)}.shareScopeDispatch = 'declared';`,
+            `${federationGlobal}.additionalShareScopeKeys = ${JSON.stringify(scopes)};`,
           ]
         : []),
     ]);

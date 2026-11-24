@@ -1,15 +1,11 @@
 import type { Chunk, ChunkGraph, CodeGenerationResults } from 'webpack';
 
-const scopesByChunk = new WeakMap<Chunk, string[] | undefined>();
-
 // Read the same generated data as the sharing runtime modules, not the input config.
 export function getDeclaredShareScopes(
   chunk: Chunk,
   chunkGraph: ChunkGraph,
   results: CodeGenerationResults,
 ): string[] | undefined {
-  if (scopesByChunk.has(chunk)) return scopesByChunk.get(chunk);
-
   const providerScopes = new Set<string>();
   let layered = false;
   for (const referenced of chunk.getAllReferencedChunks()) {
@@ -40,7 +36,5 @@ export function getDeclaredShareScopes(
       layered = layered || typeof consume?.shareConfig?.layer === 'string';
     }
   }
-  const scopes = layered ? [...providerScopes].sort() : undefined;
-  scopesByChunk.set(chunk, scopes);
-  return scopes;
+  return layered ? [...providerScopes].sort() : undefined;
 }

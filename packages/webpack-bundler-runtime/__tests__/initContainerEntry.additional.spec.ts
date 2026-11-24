@@ -61,13 +61,14 @@ function setup(shareScopeKey: string | string[] = 'container', optedIn = true) {
     remoteEntryInitOptions?: RemoteEntryInitOptions,
     additionalShareScopeKeys?: string[],
   ) {
+    webpackRequire.federation.additionalShareScopeKeys =
+      additionalShareScopeKeys;
     return initContainerEntry({
       webpackRequire,
       shareScopeKey,
       shareScope,
       initScope,
       remoteEntryInitOptions,
-      additionalShareScopeKeys,
     });
   }
   return { init, instance, I, S: instance.shareScopeMap, registered, bound };

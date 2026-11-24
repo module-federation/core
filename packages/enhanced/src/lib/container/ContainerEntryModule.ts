@@ -351,23 +351,6 @@ class ContainerEntryModule extends Module {
     };
   }
 
-  renderAdditionalShareScopes(
-    source: import('webpack').sources.Source,
-    scopes: string[],
-  ): import('webpack').sources.Source {
-    const text = source.source().toString();
-    const key = 'shareScopeKey: ';
-    const offset = text.lastIndexOf(key);
-    const indentStart = text.lastIndexOf('\n', offset) + 1;
-    const indent = text.slice(indentStart, offset);
-    const result = new webpackSources.ReplaceSource(source);
-    result.insert(
-      offset,
-      `additionalShareScopeKeys: ${JSON.stringify(scopes)},\n${indent}`,
-    );
-    return result;
-  }
-
   /**
    * @param {string=} type the source type for which the size should be estimated
    * @returns {number} the estimated size of the module (must be non-zero)

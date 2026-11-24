@@ -203,7 +203,6 @@ export interface ConsumesOptions {
 export interface InitContainerEntryOptions {
   shareScope: ShareScopeMap[string];
   shareScopeKey: string | string[];
-  additionalShareScopeKeys?: string[];
   webpackRequire: WebpackRequire;
   remoteEntryInitOptions?: RemoteEntryInitOptions;
   initScope?: InitializeSharingOptions['initScope'];
@@ -222,6 +221,7 @@ export interface GetSharedFallbackGetterOptions {
 export interface Federation {
   // The build opts into ordered dispatch on its own federation object.
   shareScopeDispatch?: 'declared';
+  additionalShareScopeKeys?: string[];
   runtime?: typeof runtime;
   instance?: runtime.ModuleFederation;
   initOptions?: InitOptions;

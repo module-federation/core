@@ -13,7 +13,9 @@ it('initializes the non-script external with the expected scopes', async () => {
     const expected =
       VARIANT === 'scalar'
         ? [[pools.a, 'a']]
-        : VARIANT === 'layered' || VARIANT === 'consume-only'
+        : VARIANT === 'layered' ||
+            VARIANT === 'layered-eval' ||
+            VARIANT === 'consume-only'
           ? [[pools.a, ['a', 'b']]]
           : [
               [pools.a, ['a', 'b']],
@@ -26,9 +28,13 @@ it('initializes the non-script external with the expected scopes', async () => {
   }
 });
 
-if (VARIANT === 'layered') {
+if (VARIANT === 'layered' || VARIANT === 'layered-eval') {
+  const loadContainer = () =>
+    VARIANT === 'layered-eval'
+      ? require('./layered-eval-container.js')
+      : require('./layered-container.js');
   it('publishes its additional provider into the pool supplied by the host', async () => {
-    const container = require('./layered-container.js');
+    const container = loadContainer();
     const pools = { host: {}, extra: {} };
     const options = { shareScopeKeys: 'host' };
     Object.defineProperty(options, 'shareScopeMap', { value: pools });
@@ -39,7 +45,7 @@ if (VARIANT === 'layered') {
   });
 
   it('does not publish an additional provider to a two-argument host', async () => {
-    const container = require('./layered-container.js');
+    const container = loadContainer();
     const pool = {};
     await expect(Promise.resolve(container.init(pool, []))).resolves.toBe(true);
     expect(pool).toEqual({});

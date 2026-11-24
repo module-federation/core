@@ -8,7 +8,6 @@ export function initContainerEntry(
     shareScope,
     initScope,
     shareScopeKey,
-    additionalShareScopeKeys,
     remoteEntryInitOptions,
   } = options;
   if (!webpackRequire.S) return;
@@ -78,7 +77,8 @@ export function initContainerEntry(
     });
   }
 
-  const shareScopeDispatch = webpackRequire.federation.shareScopeDispatch;
+  const { shareScopeDispatch, additionalShareScopeKeys } =
+    webpackRequire.federation;
   const additionalScopes: string[] = [];
   if (
     shareScopeDispatch === 'declared' &&
