@@ -3537,7 +3537,7 @@ importers:
     devDependencies:
       '@module-federation/enhanced-legacy':
         specifier: npm:@module-federation/enhanced@2.9.3
-        version: '@module-federation/enhanced@2.9.3(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))'
+        version: '@module-federation/enhanced@2.9.3(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))'
       '@module-federation/manifest-legacy':
         specifier: npm:@module-federation/manifest@2.8.2
         version: '@module-federation/manifest@2.8.2(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))'
@@ -3548,8 +3548,8 @@ importers:
         specifier: npm:@module-federation/runtime-tools@2.9.3
         version: '@module-federation/runtime-tools@2.9.3'
       '@rspack/core':
-        specifier: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b
-        version: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
+        specifier: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6
+        version: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
       '@rspack/core-legacy':
         specifier: npm:@rspack/core@1.3.9
         version: '@rspack/core@1.3.9(@swc/helpers@0.5.23)'
@@ -12891,9 +12891,9 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@44017e21f108fa7abec1c3631a3a7efc7a8f334b}
-    version: 2.3.0-beta.1
+  '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
+    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
+    version: 2.3.3
     cpu: [arm64]
     os: [darwin]
 
@@ -13257,9 +13257,9 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@44017e21f108fa7abec1c3631a3a7efc7a8f334b}
-    version: 2.3.0-beta.1
+  '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
+    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
+    version: 2.3.3
     cpu: [x64]
     os: [linux]
 
@@ -13603,9 +13603,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@rspack/binding-win32-x64-msvc@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@44017e21f108fa7abec1c3631a3a7efc7a8f334b}
-    version: 2.3.0-beta.1
+  '@rspack/binding-win32-x64-msvc@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
+    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
+    version: 2.3.3
     cpu: [x64]
     os: [win32]
 
@@ -13654,9 +13654,9 @@ packages:
   '@rspack/binding@2.3.3':
     resolution: {integrity: sha512-wwF++36a3rqYi0G9zj+rUavn/GIMzbzXehelGS1jkYeKPHyPXrVYwRHqwEKNKMD9z+FdW4YJKQcfFkPlHEiwUg==}
 
-  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@44017e21f108fa7abec1c3631a3a7efc7a8f334b}
-    version: 2.3.0-beta.1
+  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
+    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
+    version: 2.3.3
 
   '@rspack/cli@2.1.10':
     resolution: {integrity: sha512-qkuQQ3PzD2sTS2tBAWyWNeOeZmPxRBzB+eNDBhCZmbm8DoMPujW2VQj0k9CulrkBq9sBxU8fQ+5Z/ELzbz5S8g==}
@@ -13821,9 +13821,9 @@ packages:
       '@swc/helpers':
         optional: true
 
-  '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
-    resolution: {integrity: sha512-CffYkOCKqblgdTMwDeO1yVgGHDpmWW+p8JJBLTYGZk9luNgg9dAw6y4WkLCZfov0M9RW/qI2niHRh9pSyqdLaA==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b}
-    version: 2.3.0-beta.1
+  '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
+    resolution: {integrity: sha512-mdgJi64IyGq/BCOiFQyGAG47kGiSl3h/Ixuy7qguccdcDbYeMKseg3A8roRxRxwA+ODv1zWUIFJEQQDcfnx7MA==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
+    version: 2.3.3
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@module-federation/runtime-tools': ^0.24.1 || ^2.0.0
@@ -36390,7 +36390,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@module-federation/enhanced@2.9.3(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))':
+  '@module-federation/enhanced@2.9.3(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))':
     dependencies:
       '@module-federation/bridge-react-webpack-plugin': 2.9.3
       '@module-federation/cli': 2.9.3(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
@@ -36399,7 +36399,7 @@ snapshots:
       '@module-federation/inject-external-runtime-core-plugin': 2.9.3(@module-federation/runtime-tools@2.9.3)
       '@module-federation/managers': 2.9.3
       '@module-federation/manifest': 2.9.3(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
-      '@module-federation/rspack': 2.9.3(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
+      '@module-federation/rspack': 2.9.3(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
       '@module-federation/runtime-tools': 2.9.3
       '@module-federation/sdk': 2.9.3
       '@module-federation/webpack-bundler-runtime': 2.9.3
@@ -36583,7 +36583,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@module-federation/rspack@2.9.3(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))':
+  '@module-federation/rspack@2.9.3(@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))':
     dependencies:
       '@module-federation/bridge-react-webpack-plugin': 2.9.3
       '@module-federation/dts-plugin': 2.9.3(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
@@ -36592,7 +36592,7 @@ snapshots:
       '@module-federation/manifest': 2.9.3(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
       '@module-federation/runtime-tools': 2.9.3
       '@module-federation/sdk': 2.9.3
-      '@rspack/core': https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
+      '@rspack/core': https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)
     optionalDependencies:
       typescript: 7.0.2
       vue-tsc: 2.2.12(typescript@7.0.2)
@@ -41591,7 +41591,7 @@ snapshots:
   '@rspack/binding-darwin-arm64@2.3.3':
     optional: true
 
-  '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
+  '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
     optional: true
 
   '@rspack/binding-darwin-x64@0.7.5':
@@ -41810,7 +41810,7 @@ snapshots:
   '@rspack/binding-linux-x64-gnu@2.3.3':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
+  '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
     optional: true
 
   '@rspack/binding-linux-x64-musl@0.7.5':
@@ -42056,7 +42056,7 @@ snapshots:
   '@rspack/binding-win32-x64-msvc@2.3.3':
     optional: true
 
-  '@rspack/binding-win32-x64-msvc@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
+  '@rspack/binding-win32-x64-msvc@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
     optional: true
 
   '@rspack/binding@0.7.5':
@@ -42264,11 +42264,11 @@ snapshots:
       '@rspack/binding-win32-ia32-msvc': 2.3.3
       '@rspack/binding-win32-x64-msvc': 2.3.3
 
-  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@44017e21f108fa7abec1c3631a3a7efc7a8f334b':
+  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
     optionalDependencies:
-      '@rspack/binding-darwin-arm64': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@44017e21f108fa7abec1c3631a3a7efc7a8f334b
-      '@rspack/binding-linux-x64-gnu': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@44017e21f108fa7abec1c3631a3a7efc7a8f334b
-      '@rspack/binding-win32-x64-msvc': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@44017e21f108fa7abec1c3631a3a7efc7a8f334b
+      '@rspack/binding-darwin-arm64': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6
+      '@rspack/binding-linux-x64-gnu': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6
+      '@rspack/binding-win32-x64-msvc': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6
 
   '@rspack/cli@2.1.10(@rspack/core@2.1.10(@module-federation/runtime-tools@2.9.3)(@swc/helpers@0.5.13))(@rspack/dev-server@2.2.1(@rspack/core@2.1.10(@module-federation/runtime-tools@2.9.3)(@swc/helpers@0.5.13))(selfsigned@5.5.0))':
     dependencies:
@@ -42438,9 +42438,9 @@ snapshots:
       '@module-federation/runtime-tools': link:packages/runtime-tools
       '@swc/helpers': 0.5.23
 
-  '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@44017e21f108fa7abec1c3631a3a7efc7a8f334b(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)':
+  '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)':
     dependencies:
-      '@rspack/binding': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@44017e21f108fa7abec1c3631a3a7efc7a8f334b
+      '@rspack/binding': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6
     optionalDependencies:
       '@module-federation/runtime-tools': link:packages/runtime-tools
       '@swc/helpers': 0.5.23

@@ -50,6 +50,8 @@ beforeAll(() => {
     nativeRequire('../package.json').devDependencies['@rspack/core'];
   const remotePackage = nativeRequire.resolve('@rspack/core/package.json');
   const revision = remotePreview.slice(remotePreview.lastIndexOf('@') + 1);
+  const remoteVersion = nativeRequire('@rspack/core/package.json').version;
+  expect(remoteVersion).toBe('2.3.3');
   // pnpm truncates long URL dependency directory names, retaining the SHA prefix.
   expect(remotePackage).toContain(revision.slice(0, 12));
   const bindingRequire = process
@@ -72,8 +74,8 @@ beforeAll(() => {
   // Single-platform preview publishes replace the wrapper's optional metadata.
   // The frozen lock preserves the exact binary URLs installed by CI.
   const binaryVersions = {
-    ...lock.snapshots[`@rspack/binding@${bindingVersion}`].optionalDependencies,
     ...platformRequire('./package.json').optionalDependencies,
+    ...lock.snapshots[`@rspack/binding@${bindingVersion}`].optionalDependencies,
   };
   const nativeBindings = Object.keys(nativeRequire.cache).filter(
     (file) => file.endsWith('.node') && file.includes('@rspack+binding'),
@@ -84,8 +86,8 @@ beforeAll(() => {
         path.join(path.dirname(file), 'package.json'),
       );
       return (
-        binaryVersions[name]?.split('@').at(-1)?.startsWith(revision) &&
-        version === nativeRequire('@rspack/core/package.json').version &&
+        binaryVersions[name]?.split('@').at(-1) === revision &&
+        version === remoteVersion &&
         platformRequire.resolve(name) === file
       );
     }),
@@ -185,9 +187,6 @@ it.each([
     expect(
       toolsRequire('@module-federation/runtime/package.json').version,
     ).toBe('0.13.1');
-    expect(nativeRequire('@rspack/core/package.json').version).toBe(
-      '2.3.0-beta.1',
-    );
     expect(
       nativeRequire('@module-federation/runtime-tools/package.json').version,
     ).toBe(nativeRequire('../package.json').version);
