@@ -132,6 +132,7 @@ export function generateSnapshotFromManifest(
     buildInfo: { buildVersion },
     globalName,
     ssrRemoteEntry,
+    serviceBaseUrl,
   } = manifest.metaData;
   const { exposes } = manifest;
 
@@ -139,6 +140,7 @@ export function generateSnapshotFromManifest(
     version: version ? version : '',
     buildVersion,
     globalName,
+    ...(serviceBaseUrl !== undefined && { serviceBaseUrl }),
     remoteEntry: simpleJoinRemoteEntry(remoteEntryPath, remoteEntryName),
     remoteEntryType,
     remoteTypes: simpleJoinRemoteEntry(remoteTypes.path, remoteTypes.name),
@@ -156,6 +158,10 @@ export function generateSnapshotFromManifest(
       moduleName: expose.name,
       modulePath: expose.path,
       assets: expose.assets,
+      ...(expose.render !== undefined && { render: expose.render }),
+      ...(Object.prototype.hasOwnProperty.call(expose, 'servicePath') && {
+        servicePath: expose.servicePath,
+      }),
     })),
   };
 

@@ -1,5 +1,11 @@
 import { afterEach, describe, it, expect, rs } from '@rstest/core';
-import { createSSRMFConfig, patchSSRRspackConfig, SSR_DIR } from './ssr';
+import {
+  createSSRMFConfig,
+  patchNodeConfig,
+  patchSSRRspackConfig,
+  SSR_DIR,
+} from './ssr';
+import { SSRPublicPathPlugin } from './SSRPublicPathPlugin';
 import type { Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
@@ -70,6 +76,15 @@ describe('createSSRMFConfig', () => {
 });
 
 describe('patchSSRRspackConfig', () => {
+  it('adds the publicPath requirement once when Node config is patched repeatedly', () => {
+    const config: Rspack.Configuration = {};
+    patchNodeConfig(config, { name: 'testApp' });
+    patchNodeConfig(config, { name: 'testApp' });
+    expect(
+      config.plugins?.filter((plugin) => plugin instanceof SSRPublicPathPlugin),
+    ).toHaveLength(1);
+  });
+
   const baseConfig: Rspack.Configuration = {
     output: {
       publicPath: '/test/',
@@ -114,9 +129,9 @@ describe('patchSSRRspackConfig', () => {
     rs.stubEnv('NODE_ENV', 'development');
     const config = JSON.parse(JSON.stringify(baseConfig));
     const patchedConfig = patchSSRRspackConfig(config, baseMfConfig, 'ssr');
-    expect(patchedConfig.plugins).toHaveLength(1);
+    expect(patchedConfig.plugins).toHaveLength(2);
     // @ts-expect-error default is a class
-    expect(patchedConfig.plugins?.[0].constructor.name).toBe(
+    expect(patchedConfig.plugins?.[1].constructor.name).toBe(
       'UniverseEntryChunkTrackerPlugin',
     );
   });

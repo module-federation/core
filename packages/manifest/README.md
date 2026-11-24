@@ -32,3 +32,74 @@ new StatsPlugin(mfOptions, {
   bundler: 'webpack',
 }).apply(compiler);
 ```
+
+## Build identity
+
+`metaData.buildInfo.buildVersion` identifies the compilation. In development,
+it is a timestamp-based counter that advances on every compilation, including
+empty rebuilds. The container runtime and manifest use the same value.
+Production builds use `MF_BUILD_VERSION`, then the package version in the
+compiler context, then the local fallback.
+
+In development, create one `createBuildVersionCoordinator({ onInvalidate })`
+per application and apply that same coordinator to its Browser and Node
+compilers. It assigns one version before federation's compilation hooks run,
+invalidates peer targets when either changes, and identifies the latest complete
+build through `isCurrent(stats)`. Publish a merged manifest only when compilation
+succeeded and `isCurrent(stats)` is true. Recheck after asynchronous preparation
+because another edit can supersede that result. Frameworks own resource readiness,
+HTTP availability and subscriber notification. Modern and Rslib share this
+coordinator, exported by `@module-federation/enhanced/rspack`.
+
+The lower-level `setCompilationBuildVersion(compilation, buildVersion)` remains
+available for custom integrations. Changing only the manifest after compilation
+would leave container IDs stale. Production version precedence is unchanged.
+
+## Bridge rendering metadata
+
+Statically identifiable default exports created with `createBridgeComponent` publish
+`render: 'bridge'` on the corresponding expose. Application options retain the
+statically declared `isService` flag, which is available as build analysis in Stats.
+Published manifests and runtime Snapshots identify a Service App by the presence
+of `servicePath`, without an additional `isService` flag. Ordinary exposes keep
+their existing shape.
+
+The plugin collects metadata after modules are built and before module concatenation,
+then writes it during manifest generation. It follows the expose's default export
+through local bindings and static re-exports using the compilation's resolved module
+graph, including aliases, module-specific resolution and module replacements. It
+never executes producer code. It recognizes calls named
+`createBridgeComponent`, including named-import aliases and namespace members,
+regardless of the factory's package or a framework's bundled implementation.
+No framework import registration is required. A local factory with this name is
+also treated as a Bridge factory. Merely importing or calling the factory elsewhere
+in the file, or exporting only a named provider, does not mark the default export.
+Framework wrappers are recognized when the expose calls or imports them under the
+`createBridgeComponent` name. Arbitrary wrapper function bodies are not inspected,
+so a differently named wrapper is not inferred as Bridge.
+Remote, external and ignored modules are opaque and keep their existing metadata.
+The analyzer does not resolve their requests against the local filesystem.
+
+Provider options must be static objects without spreads or computed keys.
+Service App declarations accept a statically known `isService: true`. Dynamic flags
+and ambiguous wrappers are diagnosed at build time. Framework integrations receive
+analyzed Bridge metadata in `manifest.additionalData`, and assign a relative
+`servicePath` to each Service expose and one absolute `metaData.serviceBaseUrl` for
+the producer deployment. This base is independent of the static asset `publicPath`.
+The framework must use the same route definition to register its HTTP middleware.
+Changing metadata alone does not register a server route.
+
+Compilation fails when a Service declaration has no valid service path or base.
+Paths cannot be empty, absolute, or traverse outside the service base. The SDK
+copies the base to `Snapshot.serviceBaseUrl` and paths to its modules. Consumers
+resolve endpoints from the selected Snapshot, including directly supplied Snapshots,
+without fetching another manifest or deriving the service origin from the asset URL.
+Service authentication credentials belong in private server configuration and must
+not be included in these public fields.
+
+Webpack reuses its parser AST and caches compact export descriptions with each
+module. Rspack analyzes the already transformed source of reachable built modules
+once per compilation. Loader output and resource queries therefore use the actual
+built exports, rather than the original file contents. An unmarked legacy provider
+requires an explicit
+`render: 'bridge'` hint in the unified consumer.

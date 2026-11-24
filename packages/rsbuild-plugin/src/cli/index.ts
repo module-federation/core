@@ -3,6 +3,7 @@ import {
   ModuleFederationPlugin,
   TreeShakingSharedPlugin,
   PLUGIN_NAME,
+  createBuildVersionCoordinator,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
 import logger from '../logger';
@@ -184,6 +185,8 @@ export const pluginModuleFederation = (
     const isRstest = callerName === 'rstest';
     const isRstestCompanionActive = () => isRstest && hasNodeTargetConfigOwner;
     const isSSR = target === 'dual';
+    const buildVersions =
+      isRslib && isSSR ? createBuildVersionCoordinator() : undefined;
     const environment =
       configuredEnvironment ??
       resolveDefaultEnvironmentName({
@@ -444,6 +447,15 @@ export const pluginModuleFederation = (
           (isNodeTargetEnvironmentConfig && !isRstestCompanionActive());
 
         if (
+          buildVersions &&
+          bundlerConfig.mode === 'development' &&
+          (isConfiguredEnvironmentConfig || shouldUseSSRPluginConfig)
+        ) {
+          bundlerConfig.plugins ||= [];
+          bundlerConfig.plugins.push(buildVersions);
+        }
+
+        if (
           target === 'node' &&
           !isNodeTargetEnvironmentConfig &&
           !isActiveRspressSSGEnvironmentConfig
@@ -656,7 +668,14 @@ export const pluginModuleFederation = (
       }
     };
 
-    api.onDevCompileDone(generateMergedStatsAndManifest);
+    api.onDevCompileDone(({ stats }) => {
+      if (
+        stats.hasErrors() ||
+        (buildVersions && !buildVersions.isCurrent(stats))
+      )
+        return;
+      generateMergedStatsAndManifest();
+    });
     api.onAfterBuild(generateMergedStatsAndManifest);
   },
 });

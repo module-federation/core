@@ -14,6 +14,16 @@ The following items are exported:
 - AsyncBoundaryPlugin
 - HoistContainerReferencesPlugin
 
+## Runtime entry
+
+Import runtime APIs, types and helpers from `@module-federation/enhanced/runtime`:
+
+```ts
+import { createInstance, helpers, type ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+```
+
+The `helpers` export provides the existing runtime `global`, `share` and `utils` helpers. It uses the same runtime implementation as the other APIs and works with React Bridge without additional application dependencies on the lower-level runtime packages.
+
 ## Documentation
 
 See [https://module-federation.io/guide/build-plugins/plugins.html](https://module-federation.io/guide/build-plugins/plugins.html) for details.
@@ -28,6 +38,16 @@ See [https://module-federation.io/guide/build-plugins/plugins.html](https://modu
 - Required: No
 
 The name of the container.
+
+### Manifest build versions
+
+The manifest's `metaData.buildInfo.buildVersion` defaults to a digest of the completed build's assets. This detects content changes with fixed filenames and an unchanged package version, including production builds served locally. Transient HMR files and the manifest/stats files themselves are excluded. An unchanged output keeps the same version.
+
+Set `MF_BUILD_VERSION` in the build environment to supply an explicit release version, or assign `stats.metaData.buildInfo.buildVersion` in `manifest.additionalData`. Explicit versions must identify the assets that will be served.
+
+The Rsbuild SSR integration combines the browser and Node build versions when merging their manifests. An unchanged compiler can contribute its previous output. Framework integrations must wait for successful compilation and server resource preparation before advertising the merged manifest.
+
+Manifest versions do not need to match runtime instance IDs. Node execution graphs receive independent runtime instances, and container initialization records the actual provider for cache cleanup and shared ownership.
 
 ### exposes
 

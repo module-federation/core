@@ -1,7 +1,6 @@
 import {
   isBrowserEnvValue,
   warn,
-  composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
@@ -11,6 +10,7 @@ import {
   getInfoWithoutType,
   globalLoading,
   CurrentGlobal,
+  getRemoteFederationInstance,
 } from '../global';
 import {
   Options,
@@ -36,9 +36,9 @@ import {
 import {
   assert,
   error,
+  getFMId,
   getRemoteInfo,
   getRemoteEntryUniqueKey,
-  getFMId,
   composeRemoteRequestId,
   matchRemoteWithNameAndExpose,
   optionsToMFContext,
@@ -61,9 +61,23 @@ export interface LoadRemoteMatch {
   remoteSnapshot?: ModuleInfo;
 }
 
+/** The resolved source of an object returned by a completed remote factory. */
+export interface LoadedRemoteInfo {
+  remoteMatchInfo?: LoadRemoteMatch;
+  id: string;
+  /** A runtime recovery result has no normal expose protocol or data assets. */
+  recovered: boolean;
+  /** False when the value is an individual export rather than its namespace. */
+  isModule: boolean;
+}
+
 export class RemoteHandler {
   host: ModuleFederation;
   idToRemoteMap: Record<string, { name: string; expose: string }>;
+  private loadedRemoteInfo = new WeakMap<
+    object,
+    Map<string, LoadedRemoteInfo>
+  >();
 
   hooks = new PluginSystem({
     beforeRegisterRemote: new SyncWaterfallHook<{
@@ -74,6 +88,16 @@ export class RemoteHandler {
       remote: Remote;
       origin: ModuleFederation;
     }>('registerRemote'),
+    removeRemote: new AsyncHook<
+      [
+        {
+          remote: Remote;
+          origin: ModuleFederation;
+          remoteInfo?: RemoteInfo;
+        },
+      ],
+      void
+    >('removeRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
@@ -93,6 +117,12 @@ export class RemoteHandler {
       ],
       void
     >('afterMatchRemote'),
+    /** Resolve a module without loading its container. The normal success
+     * lifecycle and provenance apply equally to plugin and container factories. */
+    beforeLoadRemote: new AsyncHook<
+      [LoadRemoteMatch],
+      { factory: () => unknown } | void
+    >('beforeLoadRemote'),
     onLoad: new AsyncHook<
       [
         {
@@ -211,11 +241,138 @@ export class RemoteHandler {
     this.idToRemoteMap = {};
   }
 
+  /** Look up this instance's completed load without resolving or loading again. */
+  getLoadedRemoteInfo(value: unknown): LoadedRemoteInfo | undefined {
+    if (!value || (typeof value !== 'object' && typeof value !== 'function'))
+      return;
+    const matches = this.loadedRemoteInfo.get(value);
+    if (!matches?.size) return;
+    if (matches.size !== 1) {
+      throw new Error(
+        'The preloaded remote value has multiple expose or version identities. Return an unambiguous MF module namespace instead.',
+      );
+    }
+    return matches.values().next().value;
+  }
+
+  private rememberLoadedRemote(
+    value: unknown,
+    match?: LoadRemoteMatch,
+    recoveredId?: string,
+  ): void {
+    if (!value || (typeof value !== 'object' && typeof value !== 'function'))
+      return;
+    const snapshot = match?.remoteSnapshot;
+    const metadata =
+      match && snapshot && 'modules' in snapshot
+        ? snapshot.modules.find(
+            (item) =>
+              item.modulePath === match.expose ||
+              item.moduleName === match.expose.replace(/^\.\//, ''),
+          )
+        : undefined;
+    // Alias requests for the same source coalesce. Reusing one value across
+    // exposes or deployments must not silently choose the last completed load.
+    const key = JSON.stringify(
+      match
+        ? [
+            match.remote.name,
+            match.expose,
+            match.remoteInfo.entry,
+            match.remoteInfo.version,
+            match.remoteInfo.buildVersion,
+            snapshot?.version,
+            snapshot?.buildVersion,
+            snapshot && 'remoteEntry' in snapshot
+              ? snapshot.remoteEntry
+              : undefined,
+            snapshot && 'ssrRemoteEntry' in snapshot
+              ? snapshot.ssrRemoteEntry
+              : undefined,
+            snapshot && 'publicPath' in snapshot
+              ? snapshot.publicPath
+              : undefined,
+            metadata?.render,
+            metadata?.servicePath,
+            snapshot && 'serviceBaseUrl' in snapshot
+              ? snapshot.serviceBaseUrl
+              : undefined,
+          ]
+        : ['recovered', recoveredId],
+    );
+    const remember = (item: unknown, isModule: boolean) => {
+      if (!item || (typeof item !== 'object' && typeof item !== 'function'))
+        return;
+      let matches = this.loadedRemoteInfo.get(item);
+      if (!matches) {
+        matches = new Map();
+        this.loadedRemoteInfo.set(item, matches);
+      }
+      const previous = matches.get(key);
+      if (!previous || isModule)
+        matches.set(key, {
+          remoteMatchInfo: match,
+          id: match?.id || recoveredId!,
+          recovered: !match,
+          isModule,
+        });
+    };
+    remember(value, true);
+    let descriptors: ReturnType<typeof Object.getOwnPropertyDescriptors>;
+    try {
+      descriptors = Object.getOwnPropertyDescriptors(value);
+    } catch {
+      // Provenance collection must not turn a successfully loaded Proxy into
+      // a runtime failure. Its namespace is still associated with this load.
+      return;
+    }
+    // Inspect data exports without evaluating arbitrary namespace getters.
+    // The default getter is the standard ESM interop boundary and is needed
+    // for preloaded default imports. A throwing getter must not break loading.
+    for (const [name, descriptor] of Object.entries(descriptors)) {
+      if ('value' in descriptor) remember(descriptor.value, false);
+      else if (name === 'default' && descriptor.get) {
+        try {
+          remember(descriptor.get.call(value), false);
+        } catch {
+          /* Leave the getter's error to its actual consumer. */
+        }
+      }
+    }
+  }
+
+  private observeModuleFactory(
+    factory: (...args: any[]) => unknown,
+    match?: LoadRemoteMatch,
+    recoveredId?: string,
+  ) {
+    const remember = (result: unknown) => {
+      this.rememberLoadedRemote(result, match, recoveredId);
+      return result;
+    };
+    return function (this: unknown, ...args: unknown[]) {
+      const value = factory.apply(this, args);
+      // The native Promise method checks internal slots across realms. Do not
+      // read value.then: a synchronous namespace can export that business name.
+      if (value && (typeof value === 'object' || typeof value === 'function')) {
+        try {
+          return Promise.prototype.then.call(value, remember);
+        } catch {
+          // Ordinary values (including custom thenables) stay synchronous.
+        }
+      }
+      return remember(value);
+    };
+  }
+
   formatAndRegisterRemote(globalOptions: Options, userOptions: UserOptions) {
     const userRemotes = userOptions.remotes || [];
 
     return userRemotes.reduce((res, remote) => {
-      this.registerRemote(remote, res, { force: false });
+      // Rebuilt bundlers may repeat their original bootstrap configuration.
+      // The persistent runtime registration remains authoritative.
+      if (!res.some((item) => item.name === remote.name))
+        this.registerRemote(remote, res);
       return res;
     }, globalOptions.remotes);
   }
@@ -270,9 +427,7 @@ export class RemoteHandler {
       // id: alias(app1) + expose(button) = app1/button
       // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
       const { module, moduleOptions, remoteMatchInfo } =
-        await this.getRemoteModuleAndOptions({
-          id,
-        });
+        await this.getRemoteModuleAndOptions({ id });
       const {
         pkgNameOrAlias,
         remote,
@@ -284,12 +439,18 @@ export class RemoteHandler {
       completeExpose = expose;
       completeRemote = getRemoteInfo(remote);
 
-      const moduleOrFactory = (await module.get(
-        idRes,
-        expose,
-        options,
-        remoteSnapshot,
-      )) as T;
+      const resolved =
+        await this.hooks.lifecycle.beforeLoadRemote.emit(remoteMatchInfo);
+      const moduleOrFactory = (
+        resolved
+          ? await module.getModuleExports(
+              idRes,
+              expose,
+              resolved.factory,
+              options,
+            )
+          : await module.get(idRes, expose, options, remoteSnapshot)
+      ) as T;
 
       const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
@@ -304,6 +465,7 @@ export class RemoteHandler {
       });
 
       this.setIdToRemoteMap(id, remoteMatchInfo);
+      if (idRes !== id) this.setIdToRemoteMap(idRes, remoteMatchInfo);
       afterLoadRemoteArgs = {
         id: completeRequestId,
         expose: completeExpose,
@@ -312,11 +474,18 @@ export class RemoteHandler {
         origin: host,
       };
 
-      if (typeof moduleWrapper === 'function') {
-        return moduleWrapper as T;
+      const result =
+        typeof moduleWrapper === 'function'
+          ? (moduleWrapper as T)
+          : moduleOrFactory;
+      if (!loadFactory && typeof result === 'function') {
+        return this.observeModuleFactory(
+          result as (...args: any[]) => unknown,
+          remoteMatchInfo,
+        ) as T;
       }
-
-      return moduleOrFactory;
+      this.rememberLoadedRemote(result, remoteMatchInfo);
+      return result;
     } catch (error) {
       const { from = 'runtime' } = options || { from: 'runtime' };
 
@@ -365,6 +534,14 @@ export class RemoteHandler {
         recovered: true,
       };
 
+      if (options?.loadFactory === false && typeof failOver === 'function') {
+        return this.observeModuleFactory(
+          failOver as (...args: any[]) => unknown,
+          undefined,
+          id,
+        ) as T;
+      }
+      this.rememberLoadedRemote(failOver, undefined, id);
       return failOver as T;
     } finally {
       if (afterLoadRemoteArgs) {
@@ -725,12 +902,15 @@ export class RemoteHandler {
       }
 
       const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
-      if (hostGlobalSnapshot) {
-        const remoteKey =
-          hostGlobalSnapshot &&
-          'remotesInfo' in hostGlobalSnapshot &&
-          hostGlobalSnapshot.remotesInfo &&
-          getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
+      if (
+        hostGlobalSnapshot &&
+        'remotesInfo' in hostGlobalSnapshot &&
+        hostGlobalSnapshot.remotesInfo
+      ) {
+        const remoteKey = getInfoWithoutType(
+          hostGlobalSnapshot.remotesInfo,
+          remote.name,
+        ).key;
         if (remoteKey) {
           delete hostGlobalSnapshot.remotesInfo[remoteKey];
         }
@@ -739,8 +919,8 @@ export class RemoteHandler {
       const loadedModule = host.moduleCache.get(remote.name);
       if (loadedModule) {
         const remoteInfo = loadedModule.remoteInfo;
+        const remoteIns = getRemoteFederationInstance(remoteInfo);
         const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
-
         if (CurrentGlobal[key]) {
           if (
             Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
@@ -751,93 +931,34 @@ export class RemoteHandler {
             CurrentGlobal[key] = undefined;
           }
         }
-        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
-          loadedModule.remoteInfo,
-        );
-
+        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(remoteInfo);
         if (globalLoading[remoteEntryUniqueKey]) {
           delete globalLoading[remoteEntryUniqueKey];
         }
-
-        // delete unloaded shared and instance
-        let remoteInsId = remoteInfo.buildVersion
-          ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
-          : remoteInfo.name;
-        const remoteInsIndex =
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
-            if (remoteInfo.buildVersion) {
-              return ins.options.id === remoteInsId;
-            } else {
-              return ins.name === remoteInsId;
-            }
-          });
-        if (remoteInsIndex !== -1) {
-          const remoteIns =
-            CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex];
-          remoteInsId = remoteIns.options.id || remoteInsId;
-          const globalShareScopeMap = getGlobalShareScope();
-
-          let isAllSharedNotUsed = true;
-          const needDeleteKeys: Array<[string, string, string, string]> = [];
-          Object.keys(globalShareScopeMap).forEach((instId) => {
-            const shareScopeMap = globalShareScopeMap[instId];
-            shareScopeMap &&
-              Object.keys(shareScopeMap).forEach((shareScope) => {
-                const shareScopeVal = shareScopeMap[shareScope];
-                shareScopeVal &&
-                  Object.keys(shareScopeVal).forEach((shareName) => {
-                    const sharedPkgs = shareScopeVal[shareName];
-                    sharedPkgs &&
-                      Object.keys(sharedPkgs).forEach((shareVersion) => {
-                        const shared = sharedPkgs[shareVersion];
-                        if (
-                          shared &&
-                          typeof shared === 'object' &&
-                          shared.from === remoteInfo.name
-                        ) {
-                          if (shared.loaded || shared.loading) {
-                            shared.useIn = shared.useIn.filter(
-                              (usedHostName) =>
-                                usedHostName !== remoteInfo.name,
-                            );
-                            if (shared.useIn.length) {
-                              isAllSharedNotUsed = false;
-                            } else {
-                              needDeleteKeys.push([
-                                instId,
-                                shareScope,
-                                shareName,
-                                shareVersion,
-                              ]);
-                            }
-                          } else {
-                            needDeleteKeys.push([
-                              instId,
-                              shareScope,
-                              shareName,
-                              shareVersion,
-                            ]);
-                          }
-                        }
-                      });
-                  });
-              });
-          });
-
-          if (isAllSharedNotUsed) {
+        if (remoteIns) {
+          const scopes = getGlobalShareScope();
+          let used = false;
+          for (const scopeMap of Object.values(scopes))
+            for (const packages of Object.values(scopeMap))
+              for (const versions of Object.values(packages))
+                for (const [version, shared] of Object.entries(versions)) {
+                  if (shared.from !== remoteInfo.name) continue;
+                  if (shared.loaded || shared.loading)
+                    shared.useIn = shared.useIn.filter(
+                      (usedName) => usedName !== remoteInfo.name,
+                    );
+                  if ((shared.loaded || shared.loading) && shared.useIn.length)
+                    used = true;
+                  else delete versions[version];
+                }
+          if (!used) {
             remoteIns.shareScopeMap = {};
-            delete globalShareScopeMap[remoteInsId];
+            delete scopes[remoteIns.options.id || remoteIns.name];
           }
-          needDeleteKeys.forEach(
-            ([insId, shareScope, shareName, shareVersion]) => {
-              delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
-                shareVersion
-              ];
-            },
-          );
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
+          const instances = CurrentGlobal.__FEDERATION__.__INSTANCES__;
+          const index = instances.indexOf(remoteIns);
+          if (index !== -1) instances.splice(index, 1);
         }
-
         host.moduleCache.delete(remote.name);
       }
     } catch (err) {

@@ -381,8 +381,6 @@ class DTSManager {
     const pkgsDeclareStr = [...runtimePkgs]
       .map((pkg) => {
         return `declare module "${pkg}" {
-      ${remoteKeysStr}
-      ${packageTypesStr}
       export function loadRemote<T extends RemoteKeys,Y>(packageName: T): Promise<PackageType<T, Y>>;
       export function loadRemote<T extends string,Y>(packageName: T): Promise<PackageType<T, Y>>;
     }`;
@@ -390,6 +388,8 @@ class DTSManager {
       .join('\n');
 
     const fileStr = `${importTypeStr}
+    ${remoteKeysStr}
+    ${packageTypesStr}
     ${pkgsDeclareStr}
     `;
 

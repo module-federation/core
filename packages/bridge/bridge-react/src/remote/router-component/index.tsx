@@ -4,6 +4,8 @@
  */
 export {
   createRemoteAppComponent,
+  createReactRemote,
+  ReactRemote,
   createRemoteComponent,
   createLazyRemoteComponent,
   type LazyRemoteComponentInfo,

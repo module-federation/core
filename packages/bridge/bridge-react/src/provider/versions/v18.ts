@@ -27,7 +27,7 @@ export function hydrateReact18Root(
   container: Element | DocumentFragment,
   initialChildren: React.ReactNode,
   options?: CreateRootOptions,
-) {
+): Root {
   return hydrateRoot(
     container as Element,
     initialChildren as React.ReactElement,
@@ -40,6 +40,7 @@ export function createBridgeComponent<T = any>(
 ) {
   const fullBridgeInfo = {
     createRoot: createReact18Root,
+    hydrateRoot: hydrateReact18Root,
     ...bridgeInfo,
   } as unknown as ProviderFnParams<T>;
 

@@ -165,12 +165,14 @@ export const createScriptNode =
         getFetch()
           .then(async (f) => {
             if (attrs?.['type'] === 'esm' || attrs?.['type'] === 'module') {
-              return loadModule(urlObj.href, {
+              const options = {
+                modules: new Map(),
                 fetch: f,
                 vm: await importNodeModule<typeof import('vm')>('vm'),
-              })
+              };
+              return loadModule(urlObj.href, options)
                 .then(async (module) => {
-                  await module.evaluate();
+                  await evaluateDynamicModule(module, options);
                   cb(undefined, module.namespace);
                 })
                 .catch((e) => {
@@ -201,6 +203,49 @@ export const createScriptNode =
         );
       };
 
+const nodeEntryIdentityKey = Symbol.for(
+  'module-federation.node-entry-identities',
+);
+type NodeEntryIdentity = { entry: string; type: string; buildVersion?: string };
+const getNodeEntryIdentities = (): WeakMap<object, NodeEntryIdentity> =>
+  ((globalThis as any)[nodeEntryIdentityKey] ||= new WeakMap());
+const nodeEntryIdentity = (
+  entry: string,
+  attrs: Record<string, any> = {},
+): NodeEntryIdentity => ({
+  entry,
+  type: attrs.type || 'global',
+  buildVersion: attrs.buildVersion || undefined,
+});
+const nodeEntryKey = (attrs: Record<string, any> = {}) =>
+  attrs.globalName || `__FEDERATION_${attrs.name}:custom__`;
+
+/** Reuse a Node preload only when its entry and build provenance match. */
+export function getNodeEntryExports<T = Record<string, any>>(
+  entry: string,
+  attrs: Record<string, any> = {},
+): T | undefined {
+  const value = (globalThis as any)[nodeEntryKey(attrs)];
+  if (!value || (typeof value !== 'object' && typeof value !== 'function'))
+    return;
+  const identities = getNodeEntryIdentities();
+  const identity = nodeEntryIdentity(entry, attrs);
+  const previous = identities.get(value);
+  if (!previous) {
+    // Legacy script preloads have no URL metadata. Claim one unversioned entry
+    // once, but never assume that an unknown global belongs to a known build.
+    if (identity.buildVersion) return;
+    identities.set(value, identity);
+    return value as T;
+  }
+  if (
+    previous.entry === identity.entry &&
+    previous.type === identity.type &&
+    previous.buildVersion === identity.buildVersion
+  )
+    return value as T;
+}
+
 export const loadScriptNode =
   typeof ENV_TARGET === 'undefined' || ENV_TARGET !== 'web'
     ? (
@@ -212,18 +257,27 @@ export const loadScriptNode =
           };
         },
       ) => {
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<Record<string, any>>((resolve, reject) => {
           createScriptNode(
             url,
             (error, scriptContext) => {
               if (error) {
                 reject(error);
               } else {
-                const remoteEntryKey =
-                  info?.attrs?.['globalName'] ||
-                  `__FEDERATION_${info?.attrs?.['name']}:custom__`;
-                const entryExports = ((globalThis as any)[remoteEntryKey] =
-                  scriptContext);
+                const entryExports = scriptContext;
+                if (
+                  entryExports &&
+                  (typeof entryExports === 'object' ||
+                    typeof entryExports === 'function')
+                ) {
+                  getNodeEntryIdentities().set(
+                    entryExports,
+                    nodeEntryIdentity(url, info.attrs),
+                  );
+                }
+                (globalThis as any)[nodeEntryKey(info.attrs)] = entryExports;
+                // The global is only a compatibility alias. A concurrent load
+                // may replace it before the awaiting caller resumes.
                 resolve(entryExports);
               }
             },
@@ -246,9 +300,13 @@ export const loadScriptNode =
         );
       };
 
-const esmModuleCache = new Map<string, any>();
+// Node builtins are process resources. Remote graphs are owned by one entry
+// execution instead, so retiring a container releases its graph and late lazy
+// imports of a retained container still use that container's modules.
+const nodeBuiltinModuleCache = new Map<string, any>();
 
 type LoadModuleOptions = {
+  modules: Map<string, any>;
   vm: typeof import('vm') & {
     SourceTextModule: any;
     SyntheticModule: any;
@@ -344,7 +402,7 @@ async function createSyntheticModuleFromExports(
     { identifier },
   );
 
-  esmModuleCache.set(identifier, syntheticModule);
+  nodeBuiltinModuleCache.set(identifier, syntheticModule);
   await syntheticModule.link(async () => {
     throw new Error(
       `Node.js built-in module "${identifier}" should not request child modules.`,
@@ -360,8 +418,8 @@ async function loadNodeBuiltinModule(
   vm: LoadModuleOptions['vm'],
 ) {
   const cacheKey = `node-builtin:${specifier}`;
-  if (esmModuleCache.has(cacheKey)) {
-    return esmModuleCache.get(cacheKey)!;
+  if (nodeBuiltinModuleCache.has(cacheKey)) {
+    return nodeBuiltinModuleCache.get(cacheKey)!;
   }
 
   const moduleExports = await importNodeModule(specifier);
@@ -393,7 +451,14 @@ async function loadResolvedModule(
   return loadModule(resolvedUrl, options);
 }
 
-async function evaluateDynamicModule(module: any) {
+async function evaluateDynamicModule(module: any, options: LoadModuleOptions) {
+  if (module.status === 'unlinked') {
+    // vm links the whole graph recursively. Linking every child ourselves would
+    // wait on an unfinished parent when a remote contains a static cycle.
+    await module.link((specifier: string, referencingModule: any) =>
+      loadResolvedModule(specifier, referencingModule.identifier, options),
+    );
+  }
   if (module.status === 'linked') {
     await module.evaluate();
   }
@@ -406,9 +471,11 @@ async function evaluateDynamicModule(module: any) {
 }
 
 async function loadModule(url: string, options: LoadModuleOptions) {
-  // Check cache to prevent infinite recursion in ESM loading
-  if (esmModuleCache.has(url)) {
-    return esmModuleCache.get(url)!;
+  // Runtime entry/build promises own cross-host reuse. This local graph only
+  // deduplicates modules and cycles within one container execution.
+  const { modules } = options;
+  if (modules.has(url)) {
+    return modules.get(url)!;
   }
 
   const { fetch, vm } = options;
@@ -431,16 +498,13 @@ async function loadModule(url: string, options: LoadModuleOptions) {
     importModuleDynamically: async (specifier: string) => {
       return evaluateDynamicModule(
         await loadResolvedModule(specifier, url, options),
+        options,
       );
     },
   });
 
   // Cache the module before linking to prevent cycles
-  esmModuleCache.set(url, sourceTextModule);
-
-  await sourceTextModule.link(async (specifier: string) => {
-    return loadResolvedModule(specifier, url, options);
-  });
+  modules.set(url, sourceTextModule);
 
   return sourceTextModule;
 }

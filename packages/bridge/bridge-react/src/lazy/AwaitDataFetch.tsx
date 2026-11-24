@@ -93,9 +93,14 @@ export function AwaitDataFetch<T>({
   params,
   delayLoading,
 }: AwaitProps<T>) {
-  const dataRef = useRef<T>();
-  const data = dataRef.current || resolve;
-  const getData = isPromise(data) ? fetchData(data, dataRef) : () => data;
+  const settledRef = useRef<{ settled: boolean; value?: T }>({
+    settled: false,
+  });
+  const getData = settledRef.current.settled
+    ? () => settledRef.current.value as T
+    : isPromise(resolve)
+      ? fetchData(resolve, settledRef)
+      : () => resolve;
 
   return (
     <AwaitSuspense
@@ -103,7 +108,6 @@ export function AwaitDataFetch<T>({
       loading={loading}
       errorElement={errorElement}
       delayLoading={delayLoading}
-      // @ts-expect-error
       resolve={getData}
     >
       {children}
@@ -193,25 +197,48 @@ function ResolveAwait<T>({
   return <>{toRender}</>;
 }
 
+type TrackedPromise<T> = {
+  status: 'pending' | 'fulfilled' | 'rejected';
+  value?: T | string;
+  suspender: Promise<void>;
+};
+
+const trackedPromises = new WeakMap<
+  PromiseLike<unknown>,
+  TrackedPromise<any>
+>();
+
 // return string when promise is rejected
-const fetchData = <T,>(promise: Promise<T>, ref: MutableRefObject<T>) => {
-  let data: T | string;
-  let status: 'pending' | 'success' = 'pending';
-  const suspender = promise
-    .then((res) => {
-      status = 'success';
-      data = res;
-      ref.current = res;
-    })
-    .catch((e) => {
-      status = 'success';
-      console.warn(e);
-      data = AWAIT_ERROR_PREFIX + e;
-    });
+const fetchData = <T,>(
+  promise: PromiseLike<T>,
+  settledRef: MutableRefObject<{ settled: boolean; value?: T }>,
+) => {
+  let entry = trackedPromises.get(promise) as TrackedPromise<T> | undefined;
+  if (!entry) {
+    const record: TrackedPromise<T> = {
+      status: 'pending',
+      suspender: Promise.resolve(promise)
+        .then((res) => {
+          record.status = 'fulfilled';
+          record.value = res;
+          settledRef.current = { settled: true, value: res };
+        })
+        .catch((e) => {
+          record.status = 'rejected';
+          console.warn(e);
+          record.value = AWAIT_ERROR_PREFIX + e;
+        }),
+    };
+    trackedPromises.set(promise, record);
+    entry = record;
+  }
   return () => {
-    if (status === 'pending') {
-      throw suspender;
+    if (entry.status === 'pending') {
+      throw entry.suspender;
     }
-    return data;
+    if (entry.status === 'fulfilled' && !settledRef.current.settled) {
+      settledRef.current = { settled: true, value: entry.value as T };
+    }
+    return entry.value as T | string;
   };
 };

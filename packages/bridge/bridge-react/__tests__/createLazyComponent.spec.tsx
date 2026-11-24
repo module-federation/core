@@ -6,11 +6,14 @@ import {
   collectSSRAssets,
 } from '../src/lazy/createLazyComponent';
 import { ERROR_TYPE } from '../src/lazy/constant';
-import * as runtime from '@module-federation/runtime';
+import * as runtime from '@module-federation/enhanced/runtime';
 import * as utils from '../src/lazy/utils';
 
 // Mocking dependencies
-jest.mock('@module-federation/runtime');
+jest.mock('@module-federation/enhanced/runtime', () => ({
+  ...jest.requireActual('@module-federation/enhanced/runtime'),
+  getInstance: jest.fn(),
+}));
 jest.mock('../src/lazy/utils');
 
 const mockGetInstance = runtime.getInstance as jest.Mock;

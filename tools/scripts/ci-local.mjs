@@ -486,6 +486,13 @@ const jobs = [
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
       step('Build packages (current)', (ctx) => runPackagesBuild(ctx)),
+      step('Test Bridge size measurement', (ctx) =>
+        runCommand(
+          'node',
+          ['--test', 'scripts/bridge-bundle-size.test.mjs'],
+          ctx,
+        ),
+      ),
       step('Measure bundle sizes (current)', (ctx) =>
         runCommand(
           'node',
@@ -495,21 +502,21 @@ const jobs = [
       ),
       step('Prepare base worktree', async (ctx) => {
         const baseRef = process.env.CI_LOCAL_BASE_REF ?? 'origin/main';
-        const localBaseRef = baseRef.startsWith('origin/')
-          ? baseRef.slice('origin/'.length)
-          : baseRef;
+        const baseSHA = spawnSync('git', ['merge-base', baseRef, 'HEAD'], {
+          cwd: ROOT,
+          encoding: 'utf8',
+        });
+        if (baseSHA.status !== 0) throw new Error(baseSHA.stderr);
         const basePath = join(ROOT, `.ci-local-base-${Date.now()}`);
         if (existsSync(basePath)) {
           throw new Error(`Base worktree path already exists: ${basePath}`);
         }
         ctx.state.baseRef = baseRef;
-        ctx.state.localBaseRef = localBaseRef;
         ctx.state.basePath = basePath;
         console.log(`[ci:local] Using base ref ${baseRef}`);
-        await runCommand('git', ['worktree', 'add', basePath, baseRef], ctx);
         await runCommand(
           'git',
-          ['-C', basePath, 'branch', '-f', localBaseRef, baseRef],
+          ['worktree', 'add', '--detach', basePath, baseSHA.stdout.trim()],
           ctx,
         );
       }),

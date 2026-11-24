@@ -2,6 +2,7 @@ import {
   nativeGlobal,
   resetFederationGlobalInfo,
   setGlobalFederationInstance,
+  getRemoteFederationInstance,
   getGlobalFederationConstructor,
   setGlobalFederationConstructor,
   getInfoWithoutType,
@@ -18,8 +19,13 @@ import {
   Global,
 } from './global';
 import { getRegisteredShare, getGlobalShareScope } from './utils/share';
-import { getRemoteInfo, matchRemoteWithNameAndExpose } from './utils';
+import {
+  getRemoteInfo,
+  getRemoteEntryUniqueKey,
+  matchRemoteWithNameAndExpose,
+} from './utils';
 import { preloadAssets } from './utils/preload';
+import { notifyDispose } from './utils/dispose';
 interface IShareUtils {
   getRegisteredShare: typeof getRegisteredShare;
   getGlobalShareScope: typeof getGlobalShareScope;
@@ -34,6 +40,7 @@ interface IGlobalUtils {
   nativeGlobal: typeof global;
   resetFederationGlobalInfo: typeof resetFederationGlobalInfo;
   setGlobalFederationInstance: typeof setGlobalFederationInstance;
+  getRemoteFederationInstance: typeof getRemoteFederationInstance;
   getGlobalFederationConstructor: typeof getGlobalFederationConstructor;
   setGlobalFederationConstructor: typeof setGlobalFederationConstructor;
   getInfoWithoutType: typeof getInfoWithoutType;
@@ -54,6 +61,7 @@ const GlobalUtils: IGlobalUtils = {
   nativeGlobal,
   resetFederationGlobalInfo,
   setGlobalFederationInstance,
+  getRemoteFederationInstance,
   getGlobalFederationConstructor,
   setGlobalFederationConstructor,
   getInfoWithoutType,
@@ -72,10 +80,12 @@ const GlobalUtils: IGlobalUtils = {
 export default {
   global: GlobalUtils,
   share: ShareUtils,
+  dispose: { notifyDispose },
   utils: {
     matchRemoteWithNameAndExpose,
     preloadAssets,
     getRemoteInfo,
+    getRemoteEntryUniqueKey,
   },
 };
 

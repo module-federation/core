@@ -9,6 +9,7 @@ import logger from '../logger';
 import { isDev } from './utils';
 import {
   updateStatsAndManifest,
+  SSRPublicPathPlugin,
   type StatsAssetResource,
 } from '@module-federation/rsbuild-plugin/utils';
 import {
@@ -187,6 +188,10 @@ const mfSSRRsbuildPlugin = (
       };
       api.modifyRspackConfig((config, utils) => {
         modifySSRPublicPath(config, utils);
+        if (ssrEnv === utils.environment.name) {
+          config.plugins ||= [];
+          config.plugins.push(new SSRPublicPathPlugin());
+        }
         return config;
       });
 

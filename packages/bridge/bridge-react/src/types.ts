@@ -1,9 +1,23 @@
 import * as React from 'react';
+import type { ModuleFederation } from '@module-federation/enhanced/runtime';
+import { BRIDGE_ROUTING, type BridgeRouting } from './provider/routing';
 
 export type ErrorFallbackProps = {
   error: unknown;
   resetErrorBoundary: (...args: unknown[]) => void;
 };
+
+/** A router-owned URL, including its basename, search and hash. */
+export interface BridgeNavigation {
+  /** Format a full logical host location as a browser or hash href. */
+  createHref?: (to: string) => string;
+  getLocation: () => string;
+  subscribe: (listener: () => void) => () => void;
+  navigate: (
+    to: string | number,
+    options?: { replace?: boolean },
+  ) => void | Promise<void>;
+}
 
 /**
  * Options for creating a React root
@@ -33,11 +47,13 @@ export type RootType = HTMLElement | Root;
 export interface RenderParams {
   moduleName?: string;
   basename?: string;
+  [BRIDGE_ROUTING]?: BridgeRouting;
   memoryRoute?: {
     entryPath: string;
     initialState?: Record<string, unknown>;
   };
   dom: HTMLElement;
+  signal?: AbortSignal;
   /**
    * Options to pass to createRoot for React 18 and 19
    * @example
@@ -64,6 +80,7 @@ export interface DestroyParams {
 export interface ProviderParams {
   moduleName?: string;
   basename?: string;
+  navigation?: BridgeNavigation;
   memoryRoute?: {
     entryPath: string;
     initialState?: Record<string, unknown>;
@@ -85,11 +102,28 @@ export interface RenderFnParams extends ProviderParams {
  * Parameters for the provider function
  */
 export interface ProviderFnParams<T> {
+  /** Execute application SSR in a separately configured HTTP service. */
+  isService?: boolean;
   rootComponent: React.ComponentType<T>;
   render?: (
     App: React.ReactElement,
     id?: HTMLElement | string,
+    info?: RenderParams & BridgeRendererContext,
   ) => RootType | Promise<RootType>;
+  renderStream?: (
+    App: React.ReactElement,
+    info: BridgeSSRRequest & BridgeRendererContext,
+  ) => Promise<BridgeSSRResult | BridgeSSRMessageResult>;
+  hydrate?: (
+    App: React.ReactElement,
+    container: HTMLElement,
+    info: HydrateParams & BridgeRendererContext,
+  ) => RootType | Promise<RootType>;
+  hydrateRoot?: (
+    container: Element | DocumentFragment,
+    children: React.ReactNode,
+    options?: CreateRootOptions,
+  ) => Root;
   createRoot?: (
     container: Element | DocumentFragment,
     options?: CreateRootOptions,
@@ -104,6 +138,11 @@ export interface ProviderFnParams<T> {
    * }
    */
   defaultRootOptions?: CreateRootOptions;
+}
+
+/** Producer-local metadata. Never serialized into the Host's SSR request. */
+export interface BridgeRendererContext {
+  rootComponent: React.ComponentType<any>;
 }
 
 /**
@@ -124,6 +163,11 @@ export interface RemoteComponentParams<
   E extends keyof T = keyof T,
 > {
   loader: () => Promise<T>;
+  /** Optional runtime and Router integration shared by all Bridge consumers. */
+  instance?: ModuleFederation | null;
+  basename?: string;
+  memoryRoute?: ProviderParams['memoryRoute'];
+  navigation?: BridgeNavigation;
   loading: React.ReactNode;
   fallback: React.ComponentType<{ error: Error }>;
   export?: E;
@@ -148,4 +192,87 @@ export interface RemoteAppParams extends ProviderParams {
   providerInfo: NonNullable<RemoteModule['provider']>;
   exportName: string | number | symbol;
   fallback: React.ComponentType<ErrorFallbackProps>;
+}
+
+/** Phantom business-props metadata. It does not add a runtime provider field. */
+declare const bridgeProviderProps: unique symbol;
+export type BridgeProvider<
+  Props = Record<string, unknown>,
+  RenderResult extends void | Promise<void> = void | Promise<void>,
+> = (() => BridgeProviderInstance<RenderResult>) & {
+  readonly [bridgeProviderProps]?: Props;
+};
+
+/** A mounted provider. The factory keeps business-props inference separately. */
+export interface BridgeProviderInstance<
+  RenderResult extends void | Promise<void> = void | Promise<void>,
+> {
+  render(info: RenderParams): RenderResult;
+  destroy(info: DestroyParams): void;
+  hydrate?(info: HydrateParams): void | Promise<void>;
+  renderStream?(
+    info: BridgeSSRRequest,
+  ): Promise<BridgeSSRResult | BridgeSSRMessageResult>;
+}
+
+export interface HydrateParams extends RenderParams {
+  snapshot: unknown;
+  updates?: ReadableStream<unknown>;
+}
+
+/** Application props and mount inputs rendered by the producer. */
+export interface BridgeSSRRenderParams {
+  moduleName?: string;
+  basename?: string;
+  memoryRoute?: RenderParams['memoryRoute'];
+  props: Record<string, unknown>;
+}
+
+export interface BridgeSSRRequest extends BridgeSSRRenderParams {
+  instanceId: string;
+  identifierPrefix: string;
+  url: string;
+  headers?: Record<string, string>;
+  nonce?: string;
+  signal: AbortSignal;
+  /** Server-local producer ownership, never sent in messages or HTTP payloads. */
+  work?: { track<T>(promise: Promise<T>): Promise<T> };
+}
+
+interface BridgeSSRStream {
+  client?: import('./service/protocol').BridgeServiceClient;
+  stylesheets?: string[];
+  stream: ReadableStream<Uint8Array>;
+  abort(reason?: unknown): void;
+}
+
+interface BridgeSSRHydration {
+  snapshot: Promise<unknown>;
+  updates: ReadableStream<unknown>;
+  shellMarker: string;
+}
+
+/** Complete renderers provide a final snapshot; progressive renderers may omit it. */
+export type BridgeSSRResult = BridgeSSRStream &
+  (
+    | { snapshot: Promise<unknown>; hydration?: BridgeSSRHydration }
+    | { snapshot?: never; hydration: BridgeSSRHydration }
+  );
+
+export type BridgeSSRMessage =
+  | { type: 'client'; client: import('./service/protocol').BridgeServiceClient }
+  | { type: 'html'; html: string }
+  | { type: 'ready'; snapshot: unknown }
+  | { type: 'update'; value: unknown }
+  | { type: 'data'; snapshot: unknown }
+  | { type: 'done' };
+
+/** Complete producer-owned messages. Consumers preserve their order. */
+export interface BridgeSSRMessageResult {
+  client?: import('./service/protocol').BridgeServiceClient;
+  protocol: 'module-federation/bridge-ssr/producer/v1';
+  stylesheets?: string[];
+  hydration: 'progressive' | 'complete';
+  messages: ReadableStream<BridgeSSRMessage>;
+  abort(reason?: unknown): void;
 }

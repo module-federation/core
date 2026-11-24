@@ -1,0 +1,1 @@
+export { bridgeIdentifierPrefix } from './identity';

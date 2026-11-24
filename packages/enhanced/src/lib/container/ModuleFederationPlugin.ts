@@ -5,11 +5,13 @@
 
 'use strict';
 import { DtsPlugin } from '@module-federation/dts-plugin';
-import { ContainerManager, utils } from '@module-federation/managers';
-import { StatsPlugin } from '@module-federation/manifest';
+import { ContainerManager } from '@module-federation/managers';
+import {
+  StatsPlugin,
+  getFederationBuildIdentifier,
+} from '@module-federation/manifest';
 import {
   bindLoggerToCompiler,
-  composeKeyWithSeparator,
   type moduleFederationPlugin,
   infrastructureLogger,
 } from '@module-federation/sdk';
@@ -106,9 +108,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     ).length;
 
     if (name && MFPluginNum < 2) {
-      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
-        composeKeyWithSeparator(name, utils.getBuildVersion()),
-      );
+      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] =
+        getFederationBuildIdentifier(compiler, name);
     }
 
     const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;

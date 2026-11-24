@@ -4,6 +4,7 @@ module.exports = {
   preset: '../../jest.preset.js',
   globals: {},
   testEnvironment: 'node',
+  testMatch: ['**/*.test.ts'],
   transform: {
     '^.+\\.[tj]sx?$': ['@swc/jest'],
   },

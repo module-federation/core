@@ -1,21 +1,17 @@
 import { prefetch } from '../src/lazy/data-fetch/prefetch';
 import * as utils from '../src/lazy/utils';
 import logger from '../src/lazy/logger';
-import helpers from '@module-federation/runtime/helpers';
+import { helpers } from '@module-federation/enhanced/runtime';
 
 // Mock dependencies
 jest.mock('../src/lazy/logger');
 jest.mock('../src/lazy/utils');
-jest.mock('@module-federation/runtime/helpers', () => ({
-  default: {
+jest.mock('@module-federation/enhanced/runtime', () => ({
+  helpers: {
     utils: {
       matchRemoteWithNameAndExpose: jest.fn(),
       getRemoteInfo: jest.fn(),
     },
-  },
-  utils: {
-    matchRemoteWithNameAndExpose: jest.fn(),
-    getRemoteInfo: jest.fn(),
   },
 }));
 

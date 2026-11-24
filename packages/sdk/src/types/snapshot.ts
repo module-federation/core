@@ -1,5 +1,5 @@
 import { TreeShakingStatus } from '../constant';
-import { RemoteEntryType, StatsAssets } from './stats';
+import { RemoteEntryType, StatsAssets, ExposeRenderMetadata } from './stats';
 
 interface BasicModuleInfo {
   dev?: {
@@ -26,17 +26,21 @@ interface BasicModuleInfo {
 }
 
 export interface BasicProviderModuleInfo extends BasicModuleInfo {
+  /** Absolute HTTP service base copied from the selected manifest/deployment. */
+  serviceBaseUrl?: string;
   remoteEntry: string;
   remoteEntryType: RemoteEntryType;
   // ssrRemoteEntry/ssrRemoteEntryType only appear while manifest has serveSideRemoteEntry field
   ssrRemoteEntry?: string;
   ssrRemoteEntryType?: RemoteEntryType;
   globalName: string;
-  modules: Array<{
-    moduleName: string;
-    modulePath?: string;
-    assets: StatsAssets;
-  }>;
+  modules: Array<
+    ExposeRenderMetadata & {
+      moduleName: string;
+      modulePath?: string;
+      assets: StatsAssets;
+    }
+  >;
 }
 
 interface BasicProviderModuleInfoWithPublicPath extends BasicProviderModuleInfo {

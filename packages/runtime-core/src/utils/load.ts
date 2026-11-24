@@ -1,6 +1,7 @@
 import {
   loadScript,
   loadScriptNode,
+  getNodeEntryExports,
   composeKeyWithSeparator,
   isBrowserEnvValue,
 } from '@module-federation/sdk';
@@ -280,18 +281,22 @@ async function loadEntryNode({
   loaderHook: ModuleFederation['loaderHook'];
   resourceContext?: ResourceLoadContext;
 }) {
-  const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
-  const { entryExports: remoteEntryExports } = getRemoteEntryExports(
+  const {
+    entry,
+    entryGlobalName: globalName,
     name,
-    globalName,
+    type,
+    buildVersion,
+  } = remoteInfo;
+  const attrs = { name, globalName, type, buildVersion };
+  const remoteEntryExports = getNodeEntryExports<RemoteEntryExports>(
+    entry,
+    attrs,
   );
-
-  if (remoteEntryExports) {
-    return remoteEntryExports;
-  }
+  if (remoteEntryExports) return remoteEntryExports;
 
   return loadScriptNode(entry, {
-    attrs: { name, globalName, type },
+    attrs,
     loaderHook: {
       createScriptHook: (url: string, attrs: Record<string, any> = {}) => {
         const res = loaderHook.lifecycle.createScript.emit({
@@ -316,8 +321,15 @@ async function loadEntryNode({
       },
     },
   })
-    .then(() => {
-      return handleRemoteEntryLoaded(name, globalName, entry);
+    .then((entryExports) => {
+      if (!entryExports) {
+        error(RUNTIME_001, runtimeDescMap, {
+          remoteName: name,
+          remoteEntryUrl: entry,
+          remoteEntryKey: globalName,
+        });
+      }
+      return entryExports as RemoteEntryExports;
     })
     .catch((e) => {
       const msg = e instanceof Error ? e.message : String(e);
@@ -327,9 +339,11 @@ async function loadEntryNode({
     });
 }
 
-export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
-  const { entry, name } = remoteInfo;
-  return composeKeyWithSeparator(name, entry);
+export function getRemoteEntryUniqueKey(
+  remoteInfo: Pick<RemoteInfo, 'name' | 'entry' | 'buildVersion'>,
+): string {
+  const { entry, name, buildVersion } = remoteInfo;
+  return composeKeyWithSeparator(name, entry, buildVersion);
 }
 
 export async function getRemoteEntry(params: {

@@ -1,7 +1,13 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, readdir, readFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
 const entrypoints = {
+  'dist/service-runtime-plugin.d.ts': [
+    "export { default } from './service/runtime-plugin';",
+  ],
+  'dist/service-runtime-plugin.node.d.ts': [
+    "export { default } from './service/runtime-plugin.node';",
+  ],
   'dist/plugin.d.ts': [
     "export { default } from './provider/plugin';",
     "export * from './provider/plugin';",
@@ -27,4 +33,24 @@ const entrypoints = {
 for (const [file, lines] of Object.entries(entrypoints)) {
   await mkdir(dirname(file), { recursive: true });
   await writeFile(file, `${lines.join('\n')}\n`);
+}
+
+// ESM wrappers share the canonical declaration tree with CommonJS. Copying
+// the tree would duplicate global declarations and nominal cache/enum types
+// when a program consumes both formats in the same compilation.
+for (const file of await readdir('dist')) {
+  if (!file.endsWith('.d.ts')) continue;
+  const source = await readFile(`dist/${file}`, 'utf8');
+  const target = `./${file.replace(/\.d\.ts$/, '.js')}`;
+  const lines = [`export * from '${target}';`];
+  if (/export\s+(?:default|\{\s*default\s*\})/.test(source)) {
+    lines.push(
+      `declare const defaultExport: typeof import('${target}').default;`,
+      'export default defaultExport;',
+    );
+  }
+  await writeFile(
+    `dist/${file.replace(/\.d\.ts$/, '.d.mts')}`,
+    `${lines.join('\n')}\n`,
+  );
 }

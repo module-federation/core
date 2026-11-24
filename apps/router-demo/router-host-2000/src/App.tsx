@@ -15,6 +15,7 @@ import { createRemoteAppComponent } from '@module-federation/bridge-react';
 import Navigation from './navigation';
 import Detail from './pages/Detail';
 import Home from './pages/Home';
+import BridgeParity from './pages/BridgeParity';
 import './App.css';
 import BridgeReactPlugin from '@module-federation/bridge-react/plugin';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -216,6 +217,7 @@ const App = () => {
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/detail/*" Component={Detail} />
+        <Route path="/router-parity/:variant/*" Component={BridgeParity} />
         <Route
           path="/remote1/*"
           Component={() => (

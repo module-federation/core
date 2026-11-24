@@ -32,5 +32,25 @@
     "typescript": "7.0.2",
     "vite": "^5.4.21",
     "vue-tsc": "^2.0.6"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
+    },
+    "./router": {
+      "types": "./dist/src/router.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/router.cjs"
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      "router": [
+        "dist/src/router.d.ts"
+      ]
+    }
   }
 }
