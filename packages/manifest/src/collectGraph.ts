@@ -168,10 +168,9 @@ export function collectGraph(
       const resource = connection.originModule?.nameForCondition();
       if (resource)
         usedIn.add(
-          path.relative(
-            compilation.compiler.context || process.cwd(),
-            resource,
-          ),
+          path
+            .relative(compilation.compiler.context || process.cwd(), resource)
+            .replace(/\\/g, '/'),
         );
     }
     const row: StatsRemote = {
