@@ -117,6 +117,16 @@ export function bridgeStreamBootstrap(
   };
   const timeout = options.timeoutMs || 30000;
   const limit = options.maxQueuedBytes || 8 * 1024 * 1024;
+  // This bootstrap is serialized into HTML and must remain self-contained.
+  const frameError = (frame: Extract<BridgeStreamFrame, { type: 'error' }>) =>
+    Object.assign(
+      Error(frame.message),
+      Number.isInteger(frame.status) &&
+        frame.status! >= 400 &&
+        frame.status! <= 599
+        ? { status: frame.status }
+        : {},
+    );
   let redirecting = false;
   let leaving = false;
   const showError = () => {
@@ -128,8 +138,10 @@ export function bridgeStreamBootstrap(
       'The application could not be loaded. Please try again.';
     (document.body || document.documentElement).appendChild(element);
   };
-  const fallback = (_error?: unknown) => {
+  const fallback = (error?: unknown) => {
     if (leaving || redirecting) return;
+    // Switching to CSR would replay the same conflicting Service request.
+    if ((error as { status?: number } | undefined)?.status === 409) return;
     const url = new URL(window.location.href);
     let csr = '';
     url.searchParams.forEach((value, name) => {
@@ -287,6 +299,7 @@ export function bridgeStreamBootstrap(
     releaseStyles(state);
     const value = {
       snapshot: state.snapshot,
+      client: state.client,
       identifierPrefix: state.identifierPrefix,
     };
     state.resolve(value);
@@ -310,7 +323,7 @@ export function bridgeStreamBootstrap(
       state.queuedBytes -= next.bytes;
       try {
         if (state.streamDone) throw Error('Bridge frame after completion');
-        if (frame.type === 'error') throw Error(frame.message);
+        if (frame.type === 'error') throw frameError(frame);
         if (frame.type === 'meta') {
           if (state.meta || !frame.identifierPrefix) {
             throw Error('Invalid Bridge stream metadata');
@@ -321,6 +334,7 @@ export function bridgeStreamBootstrap(
           )
             throw Error('Unsupported Bridge hydration mode');
           state.progressive = frame.hydration === 'progressive';
+          state.client = frame.client;
           state.meta = true;
           state.identifierPrefix = frame.identifierPrefix;
           if (
@@ -350,7 +364,18 @@ export function bridgeStreamBootstrap(
             );
           }
         } else if (!state.meta) throw Error('Missing Bridge stream metadata');
-        else if (frame.type === 'html') {
+        else if (frame.type === 'client') {
+          if (
+            !state.client ||
+            frame.client.name !== state.client.name ||
+            frame.client.snapshot.buildVersion !==
+              state.client.snapshot.buildVersion
+          )
+            throw Error('Invalid Bridge client update');
+          // Keep the reference already returned with readiness. Late nested
+          // dependencies become visible to the same mounted client scope.
+          state.client.dependencies = frame.client.dependencies;
+        } else if (frame.type === 'html') {
           if (state.hasData || typeof frame.html !== 'string')
             throw Error('Invalid Bridge HTML frame');
           insert(container!, frame.html, state);
@@ -380,6 +405,7 @@ export function bridgeStreamBootstrap(
           );
           state.resolveReady({
             snapshot: frame.snapshot,
+            client: state.client,
             identifierPrefix: state.identifierPrefix,
             updates,
           });
@@ -458,7 +484,7 @@ export function bridgeStreamBootstrap(
       try {
         // A server failure must not wait behind HTML held for pending CSS.
         if (frame.type === 'error') {
-          fail(state, Error(frame.message));
+          fail(state, frameError(frame));
           return;
         }
         const bytes = new TextEncoder().encode(

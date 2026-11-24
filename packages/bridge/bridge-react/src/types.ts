@@ -235,9 +235,12 @@ export interface BridgeSSRRequest extends BridgeSSRRenderParams {
   headers?: Record<string, string>;
   nonce?: string;
   signal: AbortSignal;
+  /** Server-local producer ownership, never sent in messages or HTTP payloads. */
+  work?: { track<T>(promise: Promise<T>): Promise<T> };
 }
 
 interface BridgeSSRStream {
+  client?: import('./service/protocol').BridgeServiceClient;
   stylesheets?: string[];
   stream: ReadableStream<Uint8Array>;
   abort(reason?: unknown): void;
@@ -257,6 +260,7 @@ export type BridgeSSRResult = BridgeSSRStream &
   );
 
 export type BridgeSSRMessage =
+  | { type: 'client'; client: import('./service/protocol').BridgeServiceClient }
   | { type: 'html'; html: string }
   | { type: 'ready'; snapshot: unknown }
   | { type: 'update'; value: unknown }
@@ -265,6 +269,7 @@ export type BridgeSSRMessage =
 
 /** Complete producer-owned messages. Consumers preserve their order. */
 export interface BridgeSSRMessageResult {
+  client?: import('./service/protocol').BridgeServiceClient;
   protocol: 'module-federation/bridge-ssr/producer/v1';
   stylesheets?: string[];
   hydration: 'progressive' | 'complete';

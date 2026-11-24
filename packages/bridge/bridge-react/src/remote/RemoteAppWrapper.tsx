@@ -37,6 +37,8 @@ export interface RemoteAppWrapperProps {
   /** Request-local producer instance, only present during server rendering. */
   ssrProvider?: BridgeProviderInstance;
   service?: BrowserServiceRequest;
+  /** Resolve discovery while retaining an already streamed SSR container. */
+  loadService?: () => Promise<BrowserServiceRequest | undefined>;
 }
 
 const asError = (error: unknown) =>
@@ -70,6 +72,7 @@ export const RemoteAppWrapper = forwardRef<
     let hydration: ReturnType<typeof claimRemoteHydration>;
     let service: ReturnType<typeof receiveBridgeService> | undefined;
     let renderedProps: RemoteAppWrapperProps | undefined;
+    let clientRelease: (() => void) | undefined;
     const initialProps = latest.current;
     let destroyed = false;
     const getRenderInfo = () => {
@@ -142,7 +145,11 @@ export const RemoteAppWrapper = forwardRef<
         reason: 'unmount',
       };
       instance?.bridgeHook?.lifecycle.beforeBridgeDestroy.emit(info, context);
-      await owner.provider.destroy({ moduleName, dom: element });
+      try {
+        await owner.provider.destroy({ moduleName, dom: element });
+      } finally {
+        clientRelease?.();
+      }
       instance?.bridgeHook?.lifecycle.afterBridgeDestroy.emit(info, {
         context,
       });
@@ -152,7 +159,10 @@ export const RemoteAppWrapper = forwardRef<
       .then(async () => {
         if (!owner.active) return;
         hydration = claimRemoteHydration(instanceId, element);
-        if (!hydration && initialProps.service) {
+        const serviceOptions =
+          initialProps.service || (await initialProps.loadService?.());
+        if (!owner.active) return;
+        if (!hydration && serviceOptions) {
           if (!instanceId)
             throw Error('Service hydration requires React 18 or newer.');
           const { receiveBridgeService } = await import('../service/browser');
@@ -172,14 +182,29 @@ export const RemoteAppWrapper = forwardRef<
               props: initialProps.remoteProps,
               signal: controller.signal,
             },
-            initialProps.service,
+            serviceOptions,
           );
           hydration = service;
           void service.done.catch((failure) => {
             if (owner.active) setError(asError(failure));
           });
         }
-        const factory = loadProvider ? await loadProvider() : providerInfo;
+        let factory;
+        if (hydration && serviceOptions) {
+          const snapshot = await (hydration.session.ready ||
+            hydration.session.done);
+          if (!owner.active) return;
+          if (!snapshot.client || !instance)
+            throw Error('Service response has no client description');
+          const { loadServiceClient } = await import('../service/client');
+          const selected = await loadServiceClient(snapshot.client, instance);
+          if (!owner.active) {
+            selected.release();
+            return;
+          }
+          clientRelease = selected.release;
+          factory = selected.factory;
+        } else factory = loadProvider ? await loadProvider() : providerInfo;
         if (!owner.active) return;
         const provider = await factory?.();
         if (
@@ -210,6 +235,7 @@ export const RemoteAppWrapper = forwardRef<
       })
       .catch((failure) => {
         if (owner.active) {
+          clientRelease?.();
           hydration?.runtime.fallback?.(failure);
           setError(asError(failure));
         }

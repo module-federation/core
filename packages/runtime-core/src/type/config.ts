@@ -102,6 +102,8 @@ export type Shared = {
   scope: Array<string>;
   useIn: Array<string>;
   from: string;
+  // Undefined and 0 mean active; 1 means removed but retained by consumers.
+  providerState?: 0 | 1;
   deps: Array<string>;
   lib?: () => Module;
   loaded?: boolean;

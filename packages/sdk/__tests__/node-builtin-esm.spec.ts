@@ -207,3 +207,136 @@ describe('Node ESM builtin loading', () => {
     expect(fetchMock).toHaveBeenCalledWith(remoteEntryUrl);
   });
 });
+
+describe('Node entry identity and graph lifetime', () => {
+  let getNodeEntryExports: typeof import('../src/node').getNodeEntryExports;
+  let loadScriptNode: typeof import('../src/node').loadScriptNode;
+  beforeEach(async () => {
+    jest.resetModules();
+    ({ getNodeEntryExports, loadScriptNode } = await import('../src/node'));
+  });
+
+  const key = 'node-entry-identity-container';
+  const attrs = { name: 'remote', globalName: key, type: 'commonjs-module' };
+  const originalFetch = globalThis.fetch;
+  const source = (value: string) =>
+    `module.exports = {init() {}, get() { return () => ${JSON.stringify(value)}; }};`;
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+    delete (globalThis as any)[key];
+  });
+
+  it('returns each execution result when concurrent Node scripts share a global name', async () => {
+    globalThis.fetch = jest.fn(async (url: string) => ({
+      text: async () => source(url),
+    })) as any;
+    const urls = ['https://entry.example/v1.js', 'https://entry.example/v2.js'];
+    const [first, second] = await Promise.all(
+      urls.map((url) => loadScriptNode(url, { attrs })),
+    );
+    expect((await first.get())()).toBe(urls[0]);
+    expect((await second.get())()).toBe(urls[1]);
+    expect(first).not.toBe(second);
+  });
+
+  it('matches a preload by entry, format and build without adopting another known source', async () => {
+    globalThis.fetch = jest.fn(async () => ({
+      text: async () => source('v1'),
+    })) as any;
+    const url = 'https://entry.example/fixed.js';
+    const versioned = { ...attrs, buildVersion: 'v1' };
+    const loaded = await loadScriptNode(url, { attrs: versioned });
+    expect(getNodeEntryExports(url, versioned)).toBe(loaded);
+    expect(
+      getNodeEntryExports(url, { ...versioned, buildVersion: 'v2' }),
+    ).toBeUndefined();
+    expect(
+      getNodeEntryExports('https://entry.example/other.js', versioned),
+    ).toBeUndefined();
+    expect(
+      getNodeEntryExports(url, { ...versioned, type: 'module' }),
+    ).toBeUndefined();
+  });
+
+  it('claims a legacy unversioned preload only once and requires provenance for versioned remotes', () => {
+    const preload = {
+      init() {},
+      get() {
+        return () => 'preloaded';
+      },
+    };
+    (globalThis as any)[key] = preload;
+    expect(
+      getNodeEntryExports('https://entry.example/v1.js', {
+        ...attrs,
+        buildVersion: 'v1',
+      }),
+    ).toBeUndefined();
+    expect(getNodeEntryExports('https://entry.example/v1.js', attrs)).toBe(
+      preload,
+    );
+    expect(
+      getNodeEntryExports('https://entry.example/v2.js', attrs),
+    ).toBeUndefined();
+  });
+
+  it('keeps same-URL ESM entries and their relative modules separate across build versions', async () => {
+    const url = 'https://entry.example/esm-fixed.js';
+    let version = 'v1';
+    const fetch = jest.fn(async (request: string) => ({
+      text: async () =>
+        request === url
+          ? `import {version} from './esm-child.js'; export function init() {} export function get() { return () => version; }`
+          : `export const version = ${JSON.stringify(version)};`,
+    }));
+    globalThis.fetch = fetch as any;
+    const first = await loadScriptNode(url, {
+      attrs: { ...attrs, type: 'module', buildVersion: 'v1' },
+    });
+    version = 'v2';
+    const second = await loadScriptNode(url, {
+      attrs: { ...attrs, type: 'module', buildVersion: 'v2' },
+    });
+    expect((await first.get())()).toBe('v1');
+    expect((await second.get())()).toBe('v2');
+    expect(fetch).toHaveBeenCalledTimes(4);
+  });
+
+  it('retains entry-local cycles and lazy imports after another build loads the same URLs', async () => {
+    const url = 'https://entry.example/cyclic-entry.js';
+    let version = 'v1';
+    const fetch = jest.fn(async (request: string) => ({
+      text: async () => {
+        if (request === url)
+          return `
+      import {read} from './cyclic-child.js';
+      export const version = ${JSON.stringify(version)};
+      export function get() { return () => read(); }
+      export async function lazy() { return (await import('./cyclic-child.js')).read(); }
+    `;
+        return `import {version} from './cyclic-entry.js'; export function read() { return version; }`;
+      },
+    }));
+    globalThis.fetch = fetch as any;
+    const first = await loadScriptNode(url, {
+      attrs: { ...attrs, type: 'module', buildVersion: 'v1' },
+    });
+    version = 'v2';
+    const second = await loadScriptNode(url, {
+      attrs: { ...attrs, type: 'module', buildVersion: 'v2' },
+    });
+    expect((await first.get())()).toBe('v1');
+    expect((await second.get())()).toBe('v2');
+    expect(await first.lazy()).toBe('v1');
+    expect(await second.lazy()).toBe('v2');
+    expect(fetch).toHaveBeenCalledTimes(4);
+    // Once the runtime drops its entry promise/global it may execute the same
+    // identity again. The SDK must not resurrect its former global ESM graph.
+    const fresh = await loadScriptNode(url, {
+      attrs: { ...attrs, type: 'module', buildVersion: 'v2' },
+    });
+    expect(fresh).not.toBe(second);
+    expect(fetch).toHaveBeenCalledTimes(6);
+  });
+});

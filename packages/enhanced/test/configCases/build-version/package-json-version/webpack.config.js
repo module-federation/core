@@ -2,7 +2,7 @@ const ModuleFederationPlugin =
   require('../../../../dist/src/lib/container/ModuleFederationPlugin').default;
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
   entry: './index.js',
   devtool: false,
   output: {

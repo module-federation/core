@@ -1,3 +1,4 @@
+import type { ModuleInfo } from '@module-federation/sdk';
 import type { BridgeSSRMessage } from '../types';
 export const BRIDGE_PRODUCER_PROTOCOL =
   'module-federation/bridge-ssr/producer/v1';
@@ -6,6 +7,13 @@ export const DEFAULT_FRAME_BYTES = 3 * 1024 * 1024;
 export const DEFAULT_BUFFER_BYTES = 4 * 1024 * 1024;
 export const BUFFER_HEADER = 'x-mf-bridge-buffer-bytes';
 export type HydrationMode = 'progressive' | 'complete';
+/** Selected by the producer for this render, never inferred from a Host cache. */
+export interface BridgeServiceClient {
+  name: string;
+  expose: string;
+  snapshot: ModuleInfo;
+  dependencies?: { name: string; snapshot: ModuleInfo }[];
+}
 export type Meta = {
   type: 'meta';
   protocol: typeof BRIDGE_PRODUCER_PROTOCOL;
@@ -13,6 +21,7 @@ export type Meta = {
   identifierPrefix: string;
   hydration: HydrationMode;
   stylesheets?: string[];
+  client?: BridgeServiceClient;
 };
 export type Frame =
   | Meta
@@ -143,4 +152,37 @@ export function validateServiceRequest(
         !input.memoryRoute.entryPath.startsWith('/')))
   )
     throw Error('Invalid Bridge service request parameters.');
+}
+
+export function validateServiceClient(
+  value: unknown,
+): asserts value is BridgeServiceClient | undefined {
+  if (value === undefined) return;
+  const client = value as BridgeServiceClient;
+  const validSnapshot = (snapshot: ModuleInfo | undefined) =>
+    snapshot &&
+    typeof snapshot.buildVersion === 'string' &&
+    !!snapshot.buildVersion &&
+    'remoteEntry' in snapshot &&
+    typeof snapshot.remoteEntry === 'string' &&
+    !!snapshot.remoteEntry &&
+    'modules' in snapshot &&
+    Array.isArray(snapshot.modules);
+  if (
+    !client ||
+    typeof client.name !== 'string' ||
+    !client.name ||
+    typeof client.expose !== 'string' ||
+    !client.expose.startsWith('./') ||
+    !validSnapshot(client.snapshot) ||
+    (client.dependencies !== undefined &&
+      (!Array.isArray(client.dependencies) ||
+        client.dependencies.some(
+          (item) =>
+            !item ||
+            typeof item.name !== 'string' ||
+            !validSnapshot(item.snapshot),
+        )))
+  )
+    throw Error('Invalid Bridge Service client description');
 }

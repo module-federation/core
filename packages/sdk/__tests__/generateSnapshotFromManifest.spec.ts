@@ -2,6 +2,22 @@ import { manifest, snapshot } from './resources/manifestSnapshotMap';
 import { generateSnapshotFromManifest } from '../src/generateSnapshotFromManifest';
 
 describe('generateSnapshotFromManifest', () => {
+  it('preserves the application build version with an SSR entry', () => {
+    const source = manifest.devAppManifest;
+    const result = generateSnapshotFromManifest({
+      ...source,
+      metaData: {
+        ...source.metaData,
+        ssrRemoteEntry: {
+          name: 'server.js',
+          path: '',
+          type: 'commonjs-module',
+        },
+      },
+    });
+    expect(result.ssrRemoteEntry).toBe('server.js');
+    expect(result.buildVersion).toBe(source.metaData.buildInfo.buildVersion);
+  });
   it('preserves per-expose rendering metadata without changing legacy modules', () => {
     const input = {
       ...manifest.devAppManifest,

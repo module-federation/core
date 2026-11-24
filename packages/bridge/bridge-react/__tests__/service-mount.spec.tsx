@@ -7,6 +7,23 @@ import { ReadableStream } from 'node:stream/web';
 global.ReadableStream = ReadableStream as typeof global.ReadableStream;
 import { BRIDGE_PRODUCER_PROTOCOL } from '../src/service/protocol';
 import type { BridgeProviderInstance } from '../src/types';
+import { loadServiceClient } from '../src/service/client';
+import type { BridgeServiceClient } from '../src/service/protocol';
+
+jest.mock('../src/service/client', () => ({ loadServiceClient: jest.fn() }));
+const client = {
+  name: 'weather',
+  expose: './App',
+  snapshot: {
+    modules: [],
+    buildVersion: 'build-1',
+    remoteEntry: 'entry.js',
+    version: 'https://service.test/mf-manifest.json',
+  },
+} as BridgeServiceClient;
+const instance =
+  {} as import('@module-federation/enhanced/runtime').ModuleFederation;
+beforeEach(() => jest.mocked(loadServiceClient).mockReset());
 
 function Counter({ label }: { label: string }) {
   const [count, setCount] = React.useState(0);
@@ -49,6 +66,7 @@ it('hands off an empty container, hydrates once before done, and retains the net
             type: 'meta',
             protocol: BRIDGE_PRODUCER_PROTOCOL,
             buildVersion: 'build-1',
+            client,
             identifierPrefix: input.request.identifierPrefix,
             hydration: 'progressive',
           });
@@ -66,12 +84,20 @@ it('hands off an empty container, hydrates once before done, and retains the net
   });
   global.fetch = fetcher;
   let load!: (value: () => BridgeProviderInstance) => void;
-  const loadProvider = jest.fn(
+  const loadSelectedProvider = jest.fn(
     () =>
       new Promise<() => BridgeProviderInstance>((resolve) => {
         load = resolve;
       }),
   );
+  const loadProvider = jest.fn(() => {
+    throw Error('stale Host provider');
+  });
+  const release = jest.fn();
+  jest.mocked(loadServiceClient).mockImplementation(async () => ({
+    factory: await loadSelectedProvider(),
+    release,
+  }));
   const service = {
     moduleName: 'weather/App',
     url: '/render',
@@ -81,6 +107,7 @@ it('hands off an empty container, hydrates once before done, and retains the net
     <React.StrictMode>
       <RemoteAppWrapper
         moduleName="weather/App"
+        instance={instance}
         ssrInstanceId="service-mount"
         service={service}
         loadProvider={loadProvider}
@@ -106,6 +133,8 @@ it('hands off an empty container, hydrates once before done, and retains the net
       load(() => provider);
     });
     await waitFor(() => expect(provider.hydrate).toHaveBeenCalledTimes(1));
+    expect(loadProvider).not.toHaveBeenCalled();
+    expect(loadServiceClient).toHaveBeenCalledWith(client, instance);
     fireEvent.click(button);
     await waitFor(() => expect(button.textContent).toBe('initial: 1'));
     expect(
@@ -124,6 +153,7 @@ it('hands off an empty container, hydrates once before done, and retains the net
     expect(provider.hydrate).toHaveBeenCalledTimes(1);
     view.unmount();
     await waitFor(() => expect(provider.destroy).toHaveBeenCalledTimes(1));
+    expect(release).toHaveBeenCalledTimes(1);
   } finally {
     finish();
     global.fetch = originalFetch;
@@ -156,6 +186,7 @@ it.each([true, false])(
               type: 'meta',
               protocol: BRIDGE_PRODUCER_PROTOCOL,
               buildVersion: 'build-1',
+              client,
               identifierPrefix: input.request.identifierPrefix,
               hydration: 'progressive',
             });
@@ -192,10 +223,15 @@ it.each([true, false])(
           ),
           destroy: jest.fn(() => root.unmount()),
         };
+        const release = jest.fn();
+        jest
+          .mocked(loadServiceClient)
+          .mockResolvedValue({ factory: () => provider, release });
         const view = render(
           <React.StrictMode>
             <RemoteAppWrapper
               moduleName="weather/App"
+              instance={instance}
               ssrInstanceId="repeat-service"
               service={{
                 moduleName: 'weather/App',
@@ -232,6 +268,7 @@ it.each([true, false])(
         expect(new Set([...released, id]).size).toBe(mount + 1);
         view.unmount();
         await waitFor(() => expect(provider.destroy).toHaveBeenCalledTimes(1));
+        expect(release).toHaveBeenCalledTimes(1);
         expect(runtime.get(id)).toBeUndefined();
         expect(runtime.claim(id, container)).toBeUndefined();
         expect(session.container).toBeUndefined();

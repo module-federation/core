@@ -83,6 +83,6 @@ export function getBridgeService(instance: ModuleFederation, id: string) {
 export interface BrowserServiceRequest {
   moduleName: string;
   url: string;
-  buildVersion: string;
+  buildVersion?: string;
   timeoutMs?: number;
 }

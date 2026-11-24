@@ -1,19 +1,49 @@
+export type BridgeStreamErrorFrame = {
+  type: 'error';
+  message: string;
+  status?: number;
+};
+
+export function getHttpErrorStatus(error: unknown): number | undefined {
+  const status = (error as { status?: unknown } | null)?.status;
+  return typeof status === 'number' &&
+    Number.isInteger(status) &&
+    status >= 400 &&
+    status <= 599
+    ? status
+    : undefined;
+}
+
+export function bridgeErrorFrame(
+  error: unknown,
+  message: string,
+): BridgeStreamErrorFrame {
+  const status = getHttpErrorStatus(error);
+  return { type: 'error', message, ...(status && { status }) };
+}
+
 /** Private transport shared by the Host SSR adapter and its early bootstrap. */
 export type BridgeStreamFrame =
   | {
       type: 'meta';
+      client?: import('../service/protocol').BridgeServiceClient;
       identifierPrefix: string;
       stylesheets?: string[];
       hydration?: 'progressive';
+    }
+  | {
+      type: 'client';
+      client: import('../service/protocol').BridgeServiceClient;
     }
   | { type: 'html'; html: string }
   | { type: 'ready'; snapshot: unknown }
   | { type: 'update'; value: unknown }
   | { type: 'data'; snapshot: unknown }
   | { type: 'done' }
-  | { type: 'error'; message: string };
+  | BridgeStreamErrorFrame;
 
 export interface BridgeBrowserSnapshot {
+  client?: import('../service/protocol').BridgeServiceClient;
   updates?: ReadableStream<unknown>;
   snapshot: unknown;
   identifierPrefix: string;
