@@ -19,7 +19,7 @@ const hostRequire = process
   .getBuiltinModule('module')
   .createRequire(nativeRequire.resolve('@rspack/core-legacy/package.json'));
 const host = hostRequire('@rspack/core');
-const remote = nativeRequire('@rspack/core');
+const rspackPreviewRemote = nativeRequire('@rspack/core');
 const hostTools = hostRequire.resolve('@module-federation/runtime-tools', {
   paths: [path.dirname(hostRequire.resolve('@rspack/core/package.json'))],
 });
@@ -87,6 +87,71 @@ beforeAll(() => {
   });
 });
 
+async function withBrowserFixture<T>(
+  run: (fixture: {
+    directory: string;
+    origin: string;
+    requests: string[];
+    load: <R>(entry: string) => Promise<R>;
+  }) => Promise<T>,
+): Promise<T> {
+  const directory = await mkdtemp(path.join(tmpdir(), 'mf-old-host-'));
+  const requests: string[] = [];
+  const server = createServer(async (request, response) => {
+    requests.push(request.url!);
+    try {
+      const file = path.join(
+        directory,
+        new URL(request.url!, 'http://localhost').pathname,
+      );
+      response.setHeader(
+        'Content-Type',
+        file.endsWith('.json') ? 'application/json' : 'text/javascript',
+      );
+      response.end(await readFile(file));
+    } catch {
+      response.writeHead(404).end();
+    }
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const address = server.address() as import('node:net').AddressInfo;
+  const origin = `http://127.0.0.1:${address.port}/`;
+  let window: Window | undefined;
+  async function load<T>(entry: string): Promise<T> {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const value = await new Promise<T>((resolve, reject) => {
+      timeout = setTimeout(
+        () => reject(new Error(`Host did not finish loading ${entry}`)),
+        10000,
+      );
+      const browser = new JSDOM(`<script src="${entry}"></script>`, {
+        url: origin,
+        runScripts: 'dangerously',
+        resources: 'usable',
+        beforeParse(
+          browserWindow: Window & {
+            complete?: typeof resolve;
+            fail?: typeof reject;
+          },
+        ) {
+          browserWindow.fetch = fetch;
+          browserWindow.complete = resolve;
+          browserWindow.fail = reject;
+        },
+      });
+      window = browser.window;
+    }).finally(() => clearTimeout(timeout));
+    return value;
+  }
+  try {
+    return await run({ directory, origin, requests, load });
+  } finally {
+    window?.close();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await rm(directory, { recursive: true, force: true });
+  }
+}
+
 it.each([
   ['remoteEntry.js', 'default'],
   ['mf-manifest.json', 'default'],
@@ -105,31 +170,7 @@ it.each([
     expect(
       nativeRequire('@module-federation/runtime-tools/package.json').version,
     ).toBe(nativeRequire('../package.json').version);
-    const directory = await mkdtemp(path.join(tmpdir(), 'mf-old-host-'));
-    const requests: string[] = [];
-    const server = createServer(async (request, response) => {
-      requests.push(request.url!);
-      try {
-        const file = path.join(
-          directory,
-          new URL(request.url!, 'http://localhost').pathname,
-        );
-        response.setHeader(
-          'Content-Type',
-          file.endsWith('.json') ? 'application/json' : 'text/javascript',
-        );
-        response.end(await readFile(file));
-      } catch {
-        response.writeHead(404).end();
-      }
-    });
-    await new Promise<void>((resolve) =>
-      server.listen(0, '127.0.0.1', resolve),
-    );
-    const address = server.address() as import('node:net').AddressInfo;
-    const origin = `http://127.0.0.1:${address.port}/`;
-    let window: Window | undefined;
-    try {
+    await withBrowserFixture(async ({ directory, origin, requests, load }) => {
       // Isolate fixture module rules from package.json files above the temp dir.
       await writeFile(path.join(directory, 'package.json'), '{}');
       await writeFile(
@@ -153,7 +194,7 @@ it.each([
         'import("./bootstrap").then(({default: value}) => window.complete(value), window.fail);',
       );
       for (const [compiler, name] of [
-        [remote, 'ordinary'],
+        [rspackPreviewRemote, 'ordinary'],
         [host, 'host'],
       ] as const) {
         const isHost = name === 'host';
@@ -245,38 +286,12 @@ it.each([
         }),
       ]);
       expect(manifest.shared[0].layer).toBeUndefined();
-      let timeout: ReturnType<typeof setTimeout> | undefined;
-      const value = await new Promise((resolve, reject) => {
-        timeout = setTimeout(
-          () => reject(new Error('Old host did not finish loading the remote')),
-          10000,
-        );
-        const browser = new JSDOM('<script src="host/main.js"></script>', {
-          url: origin,
-          runScripts: 'dangerously',
-          resources: 'usable',
-          beforeParse(
-            browserWindow: Window & {
-              complete?: typeof resolve;
-              fail?: typeof reject;
-            },
-          ) {
-            browserWindow.fetch = fetch;
-            browserWindow.complete = resolve;
-            browserWindow.fail = reject;
-          },
-        });
-        window = browser.window;
-      }).finally(() => clearTimeout(timeout));
+      const value = await load('host/main.js');
       expect(value).toEqual({ source: 'host singleton', same: true });
       expect(requests).toContain('/ordinary/remoteEntry.js');
       if (entry === 'mf-manifest.json')
         expect(requests).toContain('/ordinary/mf-manifest.json');
-    } finally {
-      window?.close();
-      await new Promise<void>((resolve) => server.close(() => resolve()));
-      await rm(directory, { recursive: true, force: true });
-    }
+    });
   },
   30000,
 );
