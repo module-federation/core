@@ -7,9 +7,6 @@ const { RuntimeGlobals, RuntimeModule } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 import { SyncWaterfallHook } from 'tapable';
-const compileBooleanMatcher = require(
-  normalizeWebpackPath('webpack/lib/util/compileBooleanMatcher'),
-) as typeof import('webpack/lib/util/compileBooleanMatcher');
 import {
   generateHmrCode,
   getInitialChunkIds,
@@ -121,11 +118,19 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
 
     const { runtimeTemplate } = compilation;
     const jsModulePlugin =
-      webpack?.javascript?.JavascriptModulesPlugin ||
-      require('webpack/lib/javascript/JavascriptModulesPlugin');
+      webpack?.javascript?.JavascriptModulesPlugin ??
+      webpack?.JavascriptModulesPlugin ??
+      require(
+        normalizeWebpackPath('webpack/lib/javascript/JavascriptModulesPlugin'),
+      );
     const { chunkHasJs } = jsModulePlugin;
     const fn = RuntimeGlobals.ensureChunkHandlers;
 
+    const compileBooleanMatcher =
+      webpack?.util?.compileBooleanMatcher ??
+      (require(
+        normalizeWebpackPath('webpack/lib/util/compileBooleanMatcher'),
+      ) as typeof import('webpack/lib/util/compileBooleanMatcher'));
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
     const hasJsMatcher = compileBooleanMatcher(conditionMap);
     const initialChunkIds = getInitialChunkIds(chunk, chunkGraph, chunkHasJs);

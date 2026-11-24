@@ -4,10 +4,7 @@
 */
 
 'use strict';
-import {
-  getWebpackPath,
-  normalizeWebpackPath,
-} from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type {
   Compiler,
   Compilation,
@@ -24,9 +21,6 @@ type ProvidesConfig = provideSharedPlugin.ProvidesConfig;
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
-const { satisfy, parseRange } = require(
-  normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/sharing/semver');
 import {
   addSingletonFilterWarning,
   testRequestFilters,
@@ -34,9 +28,7 @@ import {
   extractPathAfterNodeModules,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
-const WebpackError = require(
-  normalizeWebpackPath('webpack/lib/WebpackError'),
-) as typeof import('webpack/lib/WebpackError');
+import { getWebpack, getWebpackApi, setActiveWebpack } from '../webpack';
 
 export type ResolvedProvideMap = Map<
   string,
@@ -134,9 +126,18 @@ class ProvideSharedPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    new FederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+    if (compiler?.webpack) {
+      setActiveWebpack(compiler.webpack);
+    }
+    const webpack = getWebpack(compiler);
+    const { satisfy, parseRange } = getWebpackApi(
+      webpack,
+      (w) => w.sharing?.semver,
+      'webpack/lib/util/semver',
+    );
+    new FederationRuntimePlugin().apply(compiler);
 
     const compilationData: WeakMap<Compilation, ResolvedProvideMap> =
       new WeakMap();
@@ -156,7 +157,7 @@ class ProvideSharedPlugin {
           );
           if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(actualRequest)) {
             if (
-              this.shouldProvideSharedModule(config) &&
+              this.shouldProvideSharedModule(config, compiler) &&
               testRequestFilters(
                 actualRequest,
                 config.include?.request,
@@ -565,6 +566,17 @@ class ProvideSharedPlugin {
     resource: string,
     resourceResolveData: any,
   ): void {
+    const webpack = getWebpack(compilation.compiler);
+    const { satisfy, parseRange } = getWebpackApi(
+      webpack,
+      (w) => w.sharing?.semver,
+      'webpack/lib/util/semver',
+    );
+    const WebpackError = getWebpackApi(
+      webpack,
+      (w) => w.WebpackError,
+      'webpack/lib/WebpackError',
+    );
     let version = config.version;
     if (version === undefined) {
       let details = '';
@@ -703,7 +715,10 @@ class ProvideSharedPlugin {
     });
   }
 
-  private shouldProvideSharedModule(config: ProvidesConfig): boolean {
+  private shouldProvideSharedModule(
+    config: ProvidesConfig,
+    compiler?: Compiler,
+  ): boolean {
     // For static (relative/absolute path) modules, we can only check version filters
     // if the version is explicitly provided in the config
     if (!config.version) {
@@ -716,6 +731,12 @@ class ProvideSharedPlugin {
     if (typeof version !== 'string') {
       return true;
     }
+
+    const { satisfy, parseRange } = getWebpackApi(
+      getWebpack(compiler),
+      (w) => w.sharing?.semver,
+      'webpack/lib/util/semver',
+    );
 
     // Check include version filter
     if (config.include?.version) {

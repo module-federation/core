@@ -5,7 +5,6 @@
 
 'use strict';
 
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type {
   Chunk,
   ChunkGraph,
@@ -26,13 +25,11 @@ import type { ResolverWithOptions } from 'webpack/lib/resolve/ResolverFactory';
 import type RequestShortener from 'webpack/lib/util/RequestShortener';
 import { WEBPACK_MODULE_TYPE_FALLBACK } from '../Constants';
 import FallbackItemDependency from './FallbackItemDependency';
+import { getRuntimeGlobals, getWebpack } from '../webpack';
 
-const { sources: webpackSources } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { Template, Module, RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const webpack = getWebpack();
+const { sources: webpackSources, Template, Module } = webpack;
+const RuntimeGlobals = getRuntimeGlobals(webpack);
 import makeSerializable from '../makeSerializable';
 
 const TYPES = new Set(['javascript']);

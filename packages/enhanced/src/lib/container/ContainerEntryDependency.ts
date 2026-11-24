@@ -4,12 +4,10 @@
 */
 
 import { ExposeOptions } from './ContainerEntryModule';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack } from '../webpack';
 
 import makeSerializable from '../makeSerializable';
-const { Dependency } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const { Dependency } = getWebpack();
 
 class ContainerEntryDependency extends Dependency {
   public name: string;

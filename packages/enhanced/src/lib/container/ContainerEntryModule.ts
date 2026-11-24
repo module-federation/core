@@ -4,7 +4,6 @@
 */
 
 'use strict';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { infrastructureLogger as logger } from '@module-federation/sdk';
 import { buildDescMap, BUILD_001 } from '@module-federation/error-codes';
 import { logAndReport } from '@module-federation/error-codes/node';
@@ -27,21 +26,28 @@ import type RequestShortener from 'webpack/lib/util/RequestShortener';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { getFederationGlobalScope } from './runtime/utils';
+import { getRuntimeGlobals, getWebpack, getWebpackApi } from '../webpack';
 
 import makeSerializable from '../makeSerializable';
+
+const webpack = getWebpack();
 const {
   sources: webpackSources,
   AsyncDependenciesBlock,
   Template,
   Module,
-  RuntimeGlobals,
-} = require(normalizeWebpackPath('webpack')) as typeof import('webpack');
-const StaticExportsDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
-) as typeof import('webpack/lib/dependencies/core/StaticExportsDependency');
-const EntryDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
-) as typeof import('webpack/lib/entry/EntryDependency');
+} = webpack;
+const RuntimeGlobals = getRuntimeGlobals(webpack);
+const StaticExportsDependency = getWebpackApi(
+  webpack,
+  (w) => w.dependencies?.StaticExportsDependency,
+  'webpack/lib/dependencies/StaticExportsDependency',
+);
+const EntryDependency = getWebpackApi(
+  webpack,
+  (w) => w.dependencies?.EntryDependency,
+  'webpack/lib/dependencies/EntryDependency',
+);
 
 const SOURCE_TYPES = new Set(['javascript']);
 

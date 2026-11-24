@@ -1,6 +1,5 @@
 'use strict';
 
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import {
   federationStartup,
   generateEntryStartup,
@@ -8,13 +7,7 @@ import {
 } from './StartupHelpers';
 import type { Compiler, Chunk } from 'webpack';
 import ContainerEntryModule from '../container/ContainerEntryModule';
-
-const { RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const StartupEntrypointRuntimeModule = require(
-  normalizeWebpackPath('webpack/lib/runtime/StartupEntrypointRuntimeModule'),
-) as typeof import('webpack/lib/runtime/StartupEntrypointRuntimeModule');
+import { getRuntimeGlobals, getWebpack, getWebpackApi } from '../webpack';
 
 interface Options {
   asyncChunkLoading?: boolean;
@@ -39,6 +32,18 @@ class StartupChunkDependenciesPlugin {
   }
 
   apply(compiler: Compiler): void {
+    const webpack = getWebpack(compiler);
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
+    const StartupEntrypointRuntimeModule = getWebpackApi(
+      webpack,
+      (w) => w.runtime?.StartupEntrypointRuntimeModule,
+      'webpack/lib/runtime/StartupEntrypointRuntimeModule',
+    );
+    const JavascriptModulesPlugin = getWebpackApi(
+      webpack,
+      (w) => w.javascript?.JavascriptModulesPlugin ?? w.JavascriptModulesPlugin,
+      'webpack/lib/javascript/JavascriptModulesPlugin',
+    );
     compiler.hooks.thisCompilation.tap(
       'MfStartupChunkDependenciesPlugin',
       (compilation) => {
@@ -84,9 +89,7 @@ class StartupChunkDependenciesPlugin {
 
         // Replace the generated startup with a custom version if entry modules exist.
         const { renderStartup } =
-          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-            compilation,
-          );
+          JavascriptModulesPlugin.getCompilationHooks(compilation);
 
         renderStartup.tap(
           'MfStartupChunkDependenciesPlugin',

@@ -2,15 +2,14 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 
 import type { NormalModule as NormalModuleType } from 'webpack';
 import type FederationRuntimeDependency from './FederationRuntimeDependency';
+import { getRuntimeGlobals, getRuntimeModule, getWebpack } from '../../webpack';
 
-const { RuntimeModule, Template, RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const defaultWebpack = getWebpack();
+const RuntimeModule = getRuntimeModule(defaultWebpack);
 
 class EmbedFederationRuntimeModule extends RuntimeModule {
   private containerEntrySet: Set<
@@ -61,6 +60,9 @@ class EmbedFederationRuntimeModule extends RuntimeModule {
       runtimeRequirements: new Set(),
     });
 
+    const webpack = getWebpack(compilation.compiler);
+    const Template = webpack.Template ?? defaultWebpack.Template;
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
     const result = Template.asString([
       `var prevStartup = ${RuntimeGlobals.startup};`,
       `var hasRun = false;`,

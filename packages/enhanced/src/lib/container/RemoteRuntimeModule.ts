@@ -2,7 +2,6 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
 import RemoteModule from './RemoteModule';
 import { getFederationGlobalScope } from './runtime/utils';
@@ -12,17 +11,15 @@ import type {
   ModuleIdToRemoteDataMapping,
   RemotesOptions,
 } from '@module-federation/webpack-bundler-runtime';
+import {
+  getRuntimeGlobals,
+  getRuntimeModule,
+  getWebpack,
+  getWebpackApi,
+} from '../webpack';
 
-const extractUrlAndGlobal = require(
-  normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
-) as typeof import('webpack/lib/externals/extractUrlAndGlobal');
-
-const { Template, RuntimeModule, RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { compareModulesByIdentifier } = require(
-  normalizeWebpackPath('webpack/lib/util/comparators'),
-) as typeof import('webpack/lib/util/comparators');
+const defaultWebpack = getWebpack();
+const RuntimeModule = getRuntimeModule(defaultWebpack);
 
 class RemoteRuntimeModule extends RuntimeModule {
   constructor() {
@@ -34,6 +31,19 @@ class RemoteRuntimeModule extends RuntimeModule {
    */
   override generate(): string | null {
     const { compilation, chunkGraph } = this;
+    const webpack = getWebpack(compilation?.compiler);
+    const Template = webpack.Template ?? defaultWebpack.Template;
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
+    const extractUrlAndGlobal = getWebpackApi(
+      webpack,
+      (w) => w.container?.extractUrlAndGlobal,
+      'webpack/lib/util/extractUrlAndGlobal',
+    );
+    const { compareModulesByIdentifier } = getWebpackApi(
+      webpack,
+      (w) => w.util?.comparators,
+      'webpack/lib/util/comparators',
+    );
     const { runtimeTemplate, moduleGraph } = compilation as Compilation;
     const chunkToRemotesMapping: Record<string, any> = {};
     const idToExternalAndNameMapping: Record<string | number, any> = {};

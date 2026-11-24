@@ -11,10 +11,7 @@ const ABSOLUTE_PATH_REGEX = /^(\/|[A-Za-z]:|\\\\)/;
 const RELATIVE_OR_ABSOLUTE_PATH_REGEX = /^(?:\.{1,2}[\\/]|\/|[A-Za-z]:|\\\\)/;
 const PACKAGE_NAME_REGEX = /^((?:@[^\\/]+[\\/])?[^\\/]+)/;
 
-import {
-  getWebpackPath,
-  normalizeWebpackPath,
-} from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { isRequiredVersion } from '@module-federation/sdk';
 import type { Compiler, Compilation, Module } from 'webpack';
 import { parseOptions } from '../container/options';
@@ -43,28 +40,18 @@ import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/module/Modu
 import type { ConsumeOptions } from '@module-federation/sdk';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
-const { satisfy, parseRange } = require(
-  normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/sharing/semver');
 import {
   addSingletonFilterWarning,
   testRequestFilters,
   createLookupKeyForSharing,
   extractPathAfterNodeModules,
 } from './utils';
-
-const ModuleNotFoundError = require(
-  normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
-) as typeof import('webpack/lib/ModuleNotFoundError');
-const { RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const LazySet = require(
-  normalizeWebpackPath('webpack/lib/util/LazySet'),
-) as typeof import('webpack/lib/util/LazySet');
-const WebpackError = require(
-  normalizeWebpackPath('webpack/lib/WebpackError'),
-) as typeof import('webpack/lib/WebpackError');
+import {
+  getRuntimeGlobals,
+  getWebpack,
+  getWebpackApi,
+  setActiveWebpack,
+} from '../webpack';
 
 const validate = createSchemaValidation(
   // eslint-disable-next-line
@@ -191,6 +178,27 @@ class ConsumeSharedPlugin {
     request: string,
     config: ConsumeOptions,
   ): Promise<ConsumeSharedModule | undefined> {
+    const webpack = getWebpack(compilation.compiler);
+    const { satisfy, parseRange } = getWebpackApi(
+      webpack,
+      (w) => w.sharing?.semver,
+      'webpack/lib/util/semver',
+    );
+    const ModuleNotFoundError = getWebpackApi(
+      webpack,
+      (w) => w.ModuleNotFoundError,
+      'webpack/lib/ModuleNotFoundError',
+    );
+    const LazySet = getWebpackApi(
+      webpack,
+      (w) => w.util?.LazySet,
+      'webpack/lib/util/LazySet',
+    );
+    const WebpackError = getWebpackApi(
+      webpack,
+      (w) => w.WebpackError,
+      'webpack/lib/WebpackError',
+    );
     const requiredVersionWarning = (details: string) => {
       const error = new WebpackError(
         `No required version specified and unable to automatically determine one. ${details}`,
@@ -411,9 +419,13 @@ class ConsumeSharedPlugin {
   }
 
   apply(compiler: Compiler): void {
-    new FederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+    if (compiler?.webpack) {
+      setActiveWebpack(compiler.webpack);
+    }
+    const RuntimeGlobals = getRuntimeGlobals(getWebpack(compiler));
+    new FederationRuntimePlugin().apply(compiler);
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,

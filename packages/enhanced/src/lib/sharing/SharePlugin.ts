@@ -20,6 +20,7 @@ import ConsumeSharedPlugin from './ConsumeSharedPlugin';
 import ProvideSharedPlugin from './ProvideSharedPlugin';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { createSchemaValidation } from '../../utils';
+import { setActiveWebpack } from '../webpack';
 
 const validate = createSchemaValidation(
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -134,6 +135,9 @@ class SharePlugin {
   apply(compiler: Compiler): void {
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+    if (compiler?.webpack) {
+      setActiveWebpack(compiler.webpack);
+    }
     new ConsumeSharedPlugin({
       shareScope: this._shareScope,
       consumes: this._consumes,

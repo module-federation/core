@@ -6,16 +6,12 @@ import type {
   Module,
   Dependency,
 } from 'webpack';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import FallbackDependency from './FallbackDependency';
-
-const { AsyncDependenciesBlock, ExternalModule } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+import { getWebpack } from '../webpack';
 
 const PLUGIN_NAME = 'HoistContainerReferences';
 
@@ -217,6 +213,10 @@ export function getAllReferencedModules(
   module: Module,
   type?: 'all' | 'initial' | 'external',
 ): Set<Module> {
+  const webpack = getWebpack(compilation.compiler);
+  const AsyncDependenciesBlock =
+    webpack.AsyncDependenciesBlock ?? getWebpack().AsyncDependenciesBlock;
+  const ExternalModule = webpack.ExternalModule ?? getWebpack().ExternalModule;
   const collectedModules = new Set<Module>([module]);
   const visitedModules = new WeakSet<Module>([module]);
   const stack = [module];

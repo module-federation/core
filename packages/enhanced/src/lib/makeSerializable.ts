@@ -1,8 +1,13 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { getWebpack, getWebpackApi } from './webpack';
 
-const webpackMakeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
+type WebpackMakeSerializable =
+  typeof import('webpack/lib/util/makeSerializable');
+
+const webpackMakeSerializable = getWebpackApi<WebpackMakeSerializable>(
+  getWebpack(),
+  (w) => w.util?.makeSerializable as WebpackMakeSerializable | undefined,
+  'webpack/lib/util/makeSerializable',
+);
 
 /**
  * Webpack's serializer registry is process-wide and throws on a duplicate key.

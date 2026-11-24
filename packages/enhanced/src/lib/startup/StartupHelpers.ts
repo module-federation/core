@@ -5,27 +5,9 @@
 
 'use strict';
 import type { Compilation, Chunk, ChunkGraph, Entrypoint } from 'webpack';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { EntryModuleWithChunkGroup } from 'webpack/lib/graph/ChunkGraph';
 import type RuntimeTemplate from 'webpack/lib/template/RuntimeTemplate';
-
-const { RuntimeGlobals, Template } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { isSubset } = require(
-  normalizeWebpackPath('webpack/lib/util/SetHelpers'),
-) as typeof import('webpack/lib/util/SetHelpers');
-const { getAllChunks } = require(
-  normalizeWebpackPath('webpack/lib/javascript/ChunkHelpers'),
-) as typeof import('webpack/lib/javascript/ChunkHelpers');
-const HotUpdateChunk = require(
-  normalizeWebpackPath('webpack/lib/HotUpdateChunk'),
-) as typeof import('webpack/lib/graph/HotUpdateChunk');
-const { getUndoPath } = require(
-  normalizeWebpackPath('webpack/lib/util/identifier'),
-) as typeof import('webpack/lib/util/identifier');
-
-const EXPORT_PREFIX = `var ${RuntimeGlobals.exports} = `;
+import { getRuntimeGlobals, getWebpack, getWebpackApi } from '../webpack';
 
 export const federationStartup = 'federation-entry-startup';
 
@@ -39,6 +21,20 @@ export const generateEntryStartup = (
   chunk: Chunk,
   passive: boolean,
 ): string => {
+  const webpack = getWebpack(compilation.compiler);
+  const RuntimeGlobals = getRuntimeGlobals(webpack);
+  const Template = webpack.Template ?? getWebpack().Template;
+  const EXPORT_PREFIX = `var ${RuntimeGlobals.exports} = `;
+  const { isSubset } = getWebpackApi(
+    webpack,
+    (w) => w.util?.SetHelpers,
+    'webpack/lib/util/SetHelpers',
+  );
+  const { getAllChunks } = getWebpackApi(
+    webpack,
+    (w) => w.javascript?.ChunkHelpers,
+    'webpack/lib/javascript/ChunkHelpers',
+  );
   /** @type {string[]} */
   const runtime: string[] = [
     `var __webpack_exec__ = ${runtimeTemplate.returningFunction(
@@ -159,10 +155,31 @@ export const generateESMEntryStartup = (
   chunk: Chunk,
   passive: boolean,
 ): string => {
-  const { chunkHasJs, getChunkFilenameTemplate } =
-    compilation.compiler.webpack?.javascript?.JavascriptModulesPlugin ||
-    compilation.compiler.webpack.JavascriptModulesPlugin;
-  const { ConcatSource } = compilation.compiler.webpack.sources;
+  const webpack = getWebpack(compilation.compiler);
+  const RuntimeGlobals = getRuntimeGlobals(webpack);
+  const EXPORT_PREFIX = `var ${RuntimeGlobals.exports} = `;
+  const { chunkHasJs, getChunkFilenameTemplate } = getWebpackApi(
+    webpack,
+    (w) => w.javascript?.JavascriptModulesPlugin ?? w.JavascriptModulesPlugin,
+    'webpack/lib/javascript/JavascriptModulesPlugin',
+  );
+  const { ConcatSource } = webpack.sources;
+  const HotUpdateChunk = getWebpackApi(
+    webpack,
+    (w) => w.HotUpdateChunk,
+    'webpack/lib/HotUpdateChunk',
+  );
+  const { getAllChunks } = getWebpackApi(
+    webpack,
+    (w) => w.javascript?.ChunkHelpers,
+    'webpack/lib/javascript/ChunkHelpers',
+  );
+  const getUndoPath = getWebpackApi(
+    webpack,
+    (w) => w.util?.getUndoPath,
+    'webpack/lib/util/identifier',
+    (m: typeof import('webpack/lib/util/identifier')) => m.getUndoPath,
+  );
   const hotUpdateChunk = chunk instanceof HotUpdateChunk ? chunk : null;
   if (hotUpdateChunk) {
     throw new Error('HMR is not implemented for module chunk format yet');

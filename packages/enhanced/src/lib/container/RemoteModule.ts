@@ -2,7 +2,6 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type {
   Compilation,
   InputFileSystem,
@@ -22,13 +21,11 @@ import type { ResolverWithOptions } from 'webpack/lib/resolve/ResolverFactory';
 import type RequestShortener from 'webpack/lib/util/RequestShortener';
 import type { ObjectDeserializerContext } from 'webpack/lib/serialization/ObjectMiddleware';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
+import { getRuntimeGlobals, getWebpack } from '../webpack';
 
-const { sources: webpackSources } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { Module, RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const webpack = getWebpack();
+const { sources: webpackSources, Module } = webpack;
+const RuntimeGlobals = getRuntimeGlobals(webpack);
 import makeSerializable from '../makeSerializable';
 
 const TYPES: Set<string> = new Set(['remote', 'share-init']);

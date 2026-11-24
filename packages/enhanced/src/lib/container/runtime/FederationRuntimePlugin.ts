@@ -6,7 +6,6 @@ import type {
   Compilation,
   Chunk,
 } from 'webpack';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
@@ -20,17 +19,8 @@ import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
-
-const ModuleDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
-) as typeof import('webpack/lib/dependencies/core/ModuleDependency');
-
-const { RuntimeGlobals, Template } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { mkdirpSync } = require(
-  normalizeWebpackPath('webpack/lib/util/fs'),
-) as typeof import('webpack/lib/fs/fs');
+import { mkdirpSync } from '../../fs';
+import { getRuntimeGlobals, getWebpack, getWebpackApi } from '../../webpack';
 
 type ResolveFn = typeof require.resolve;
 type RuntimeEntrySpec = {
@@ -123,7 +113,6 @@ const {
   bundlerRuntimePath: BundlerRuntimePath,
   runtimePath: RuntimePath,
 } = resolveRuntimePaths();
-const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
 const onceForCompilerEntryMap = new WeakMap<Compiler, string>();
@@ -176,6 +165,10 @@ class FederationRuntimePlugin {
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
   ) {
+    const webpack = getWebpack(compiler);
+    const Template = webpack.Template ?? getWebpack().Template;
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
     // internal runtime plugin
     const runtimePlugins = options.runtimePlugins;
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
@@ -341,6 +334,12 @@ class FederationRuntimePlugin {
       this.ensureFile(compiler);
     }
 
+    const ModuleDependency = getWebpackApi(
+      getWebpack(compiler),
+      (w) => w.dependencies?.ModuleDependency,
+      'webpack/lib/dependencies/ModuleDependency',
+    );
+
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation: Compilation, { normalModuleFactory }) => {
@@ -381,9 +380,12 @@ class FederationRuntimePlugin {
     if (!this.options || !this.options.name) {
       return;
     }
+    const webpack = getWebpack(compiler);
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
     const name = this.options.name;
     const initOptionsWithoutShared = normalizeRuntimeInitOptionsWithOutShared(
       this.options,
+      compiler,
     );
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
@@ -548,8 +550,13 @@ class FederationRuntimePlugin {
       compiler.hooks.thisCompilation.tap(
         this.constructor.name,
         (compilation: Compilation) => {
+          const WebpackError = getWebpackApi(
+            getWebpack(compiler),
+            (w) => w.WebpackError,
+            'webpack/lib/WebpackError',
+          );
           for (const message of fallbackWarnings.get(compiler) ?? []) {
-            const warning = new compiler.webpack.WebpackError(message);
+            const warning = new WebpackError(message);
             warning.name = 'FederationRuntimePluginWarning';
             warning.hideStack = true;
             compilation.warnings.push(warning);

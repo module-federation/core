@@ -2,18 +2,18 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-
 import type { Module, ChunkGraph, Compilation, Chunk } from 'webpack';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import { getFederationGlobalScope } from '../container/runtime/utils';
+import {
+  getRuntimeGlobals,
+  getRuntimeModule,
+  getWebpack,
+  getWebpackApi,
+} from '../webpack';
 
-const { Template, RuntimeGlobals, RuntimeModule } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { compareModulesByIdentifier } = require(
-  normalizeWebpackPath('webpack/lib/util/comparators'),
-) as typeof import('webpack/lib/util/comparators');
+const defaultWebpack = getWebpack();
+const RuntimeModule = getRuntimeModule(defaultWebpack);
 
 class ConsumeSharedRuntimeModule extends RuntimeModule {
   private _runtimeRequirements: ReadonlySet<string>;
@@ -31,6 +31,14 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
    */
   override generate(): string | null {
     const compilation: Compilation = this.compilation!;
+    const webpack = getWebpack(compilation?.compiler);
+    const Template = webpack.Template ?? defaultWebpack.Template;
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
+    const { compareModulesByIdentifier } = getWebpackApi(
+      webpack,
+      (w) => w.util?.comparators,
+      'webpack/lib/util/comparators',
+    );
     const chunkGraph: ChunkGraph = this.chunkGraph!;
     const { runtimeTemplate, codeGenerationResults } = compilation;
     if (!codeGenerationResults) {

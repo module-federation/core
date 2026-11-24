@@ -1,17 +1,15 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-const compileBooleanMatcher = require(
-  normalizeWebpackPath('webpack/lib/util/compileBooleanMatcher'),
-) as typeof import('webpack/lib/util/compileBooleanMatcher');
-const { getUndoPath } = require(
-  normalizeWebpackPath('webpack/lib/util/identifier'),
-) as typeof import('webpack/lib/util/identifier');
 // inspired by react-refresh-webpack-plugin
 import getFederationGlobal from './getFederationGlobal';
 import type { NormalizedRuntimeInitOptionsWithOutShared } from './utils';
+import {
+  getRuntimeGlobals,
+  getRuntimeModule,
+  getWebpack,
+  getWebpackApi,
+} from '../../webpack';
 
-const { RuntimeModule, RuntimeGlobals, Template } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const defaultWebpack = getWebpack();
+const RuntimeModule = getRuntimeModule(defaultWebpack);
 
 class FederationRuntimeModule extends RuntimeModule {
   runtimeRequirements: ReadonlySet<string>;
@@ -33,19 +31,25 @@ class FederationRuntimeModule extends RuntimeModule {
    * @returns {string | null} runtime code
    */
   override generate() {
+    const webpack = getWebpack(this.compilation?.compiler);
+    const Template = webpack.Template ?? defaultWebpack.Template;
+    const RuntimeGlobals = getRuntimeGlobals(webpack);
     let matcher: string | boolean = false;
     let rootOutputDir: string | undefined;
     if (this.compilation && this.chunk) {
-      const jsModulePlugin =
-        this.compilation.compiler.webpack?.javascript
-          ?.JavascriptModulesPlugin ||
-        require(
-          normalizeWebpackPath(
-            'webpack/lib/javascript/JavascriptModulesPlugin',
-          ),
-        );
+      const jsModulePlugin = getWebpackApi(
+        webpack,
+        (w) =>
+          w.javascript?.JavascriptModulesPlugin ?? w.JavascriptModulesPlugin,
+        'webpack/lib/javascript/JavascriptModulesPlugin',
+      );
       const { chunkHasJs } = jsModulePlugin;
       if (this.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)) {
+        const compileBooleanMatcher = getWebpackApi(
+          webpack,
+          (w) => w.util?.compileBooleanMatcher,
+          'webpack/lib/util/compileBooleanMatcher',
+        );
         const conditionMap = this.compilation.chunkGraph.getChunkConditionMap(
           this.chunk,
           chunkHasJs,
@@ -62,6 +66,12 @@ class FederationRuntimeModule extends RuntimeModule {
         if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
           rootOutputDir = runtimeTemplate.chunkRootOutputDir(this.chunk, false);
         } else {
+          const getUndoPath = getWebpackApi(
+            webpack,
+            (w) => w.util?.getUndoPath,
+            'webpack/lib/util/identifier',
+            (m: typeof import('webpack/lib/util/identifier')) => m.getUndoPath,
+          );
           // Older webpack ignores an error in that first pass and generates
           // again once hashes exist, so the real filename gives the real depth,
           // even for a hash digest that contains `/`.
