@@ -13,6 +13,8 @@ export interface ManifestShared {
   version: string;
   singleton: boolean;
   requiredVersion: string;
+  // Absent in manifests generated before share scopes were recorded; treat as 'default'.
+  shareScope?: string | string[];
   hash: string;
   assets: StatsAssets;
   fallback?: string;

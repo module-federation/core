@@ -85,6 +85,8 @@ export interface StatsShared {
   version: string;
   singleton: boolean;
   requiredVersion: string;
+  // Absent in stats generated before share scopes were recorded; treat as 'default'.
+  shareScope?: string | string[];
   hash: string;
   assets: StatsAssets;
   deps: string[];

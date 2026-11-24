@@ -74,6 +74,7 @@ class ManifestManager {
         version: cur.version,
         singleton: cur.singleton,
         requiredVersion: cur.requiredVersion,
+        shareScope: cur.shareScope,
         hash: cur.hash,
         assets: cur.assets,
         fallback: cur.fallback,

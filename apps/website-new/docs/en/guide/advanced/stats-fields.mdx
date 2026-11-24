@@ -30,6 +30,7 @@ Use this document to understand every field in `mf-stats.json`, which is helpful
 | `version` | `string` | Yes | Version used in this build |
 | `singleton` | `boolean` | Yes | Singleton |
 | `requiredVersion` | `string` | Yes | requiredVersion |
+| `shareScope` | `string \| string[]` | No | Share scope(s) the shared module is registered in; treat a missing value as `default` |
 | `hash` | `string` | Yes | Content hash |
 | `assets` | `StatsAssets` | Yes | Assets |
 | `deps` | `string[]` | Yes | Dependencies |
