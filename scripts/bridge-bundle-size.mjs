@@ -92,6 +92,19 @@ function sizes(value) {
   };
 }
 
+function isMissingNamedExportError(error, api) {
+  return (
+    Array.isArray(error?.errors) &&
+    error.errors.length > 0 &&
+    error.errors.every(
+      (item) =>
+        typeof item?.text === 'string' &&
+        item.text.startsWith('No matching export in ') &&
+        item.text.includes(`for import "${api}"`),
+    )
+  );
+}
+
 export async function measureBridge(packagesDirectory) {
   const root = resolve(packagesDirectory, '..');
   const directory = resolve(packagesDirectory, 'bridge/bridge-react');
@@ -150,9 +163,24 @@ export async function measureBridge(packagesDirectory) {
       platform: fixture.target,
       define: { 'process.env.NODE_ENV': JSON.stringify(report.config.nodeEnv) },
       external: peers.flatMap((name) => [name, `${name}/*`]),
+      logLevel: 'silent',
     };
-    const raw = await build({ ...options, minify: false });
-    const minified = await build({ ...options, minify: true });
+    let raw;
+    let minified;
+    try {
+      raw = await build({ ...options, minify: false });
+      minified = await build({ ...options, minify: true });
+    } catch (error) {
+      if (isMissingNamedExportError(error, fixture.api)) {
+        report.fixtures[fixture.id] = {
+          ...fixture,
+          status: 'unavailable',
+          reason: `Named export "${fixture.api}" absent at this revision`,
+        };
+        continue;
+      }
+      throw error;
+    }
     report.fixtures[fixture.id] = {
       ...fixture,
       status: 'available',

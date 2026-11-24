@@ -226,3 +226,34 @@ test('retains prebundled dependency provenance only for reached chunks', async (
     ['node_modules/parser/Parser.js'],
   );
 });
+
+test('marks a newly added named export on an existing subpath as unavailable on base and New capability in comparison', async () => {
+  const live = await fixture();
+  live.manifest.exports['./base'] = {
+    import: './dist/base.mjs',
+  };
+  await writeFile(
+    join(live.directory, 'dist/base.mjs'),
+    `export function createRemoteAppComponent() { return 'bridge'; }
+export function createLazyComponent() { return 'lazy'; }`,
+  );
+  await live.saveManifest();
+  const base = await live.measure();
+  assert.equal(base.fixtures['fixed-bridge-browser'].status, 'available');
+  assert.equal(base.fixtures['component-browser'].status, 'available');
+  assert.equal(base.fixtures['consumer-browser'].status, 'unavailable');
+  assert.equal(base.fixtures['consumer-node'].status, 'unavailable');
+
+  await writeFile(
+    join(live.directory, 'dist/base.mjs'),
+    `export function createRemoteAppComponent() { return 'bridge'; }
+export function createLazyComponent() { return 'lazy'; }
+export function createReactRemote() { return 'remote'; }`,
+  );
+  const current = await live.measure();
+  assert.equal(current.fixtures['consumer-browser'].status, 'available');
+  const row = compareBridge(base, current)
+    .split('\n')
+    .find((line) => line.startsWith('| consumer-browser |'));
+  assert.match(row, /New capability/);
+});
