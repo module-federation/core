@@ -1,6 +1,19 @@
 import * as React from 'react';
 import type { ModuleFederation } from '@module-federation/enhanced/runtime';
 import { BRIDGE_ROUTING, type BridgeRouting } from './provider/routing';
+import type {
+  BridgeMemoryRoute,
+  BridgeMemoryRouteEntry,
+  BridgeMemoryRouteOptions,
+  NormalizedBridgeMemoryRoute,
+} from './memoryRoute';
+
+export type {
+  BridgeMemoryRoute,
+  BridgeMemoryRouteEntry,
+  BridgeMemoryRouteOptions,
+  NormalizedBridgeMemoryRoute,
+};
 
 export type ErrorFallbackProps = {
   error: unknown;
@@ -48,10 +61,7 @@ export interface RenderParams {
   moduleName?: string;
   basename?: string;
   [BRIDGE_ROUTING]?: BridgeRouting;
-  memoryRoute?: {
-    entryPath: string;
-    initialState?: Record<string, unknown>;
-  };
+  memoryRoute?: BridgeMemoryRoute;
   dom: HTMLElement;
   signal?: AbortSignal;
   /**
@@ -81,10 +91,7 @@ export interface ProviderParams {
   moduleName?: string;
   basename?: string;
   navigation?: BridgeNavigation;
-  memoryRoute?: {
-    entryPath: string;
-    initialState?: Record<string, unknown>;
-  };
+  memoryRoute?: BridgeMemoryRoute;
   style?: React.CSSProperties;
   className?: string;
 }

@@ -57,7 +57,17 @@ export type {
 } from './reactRemoteTypes';
 
 export { useBridgeRouter } from './provider/context';
-export type { BridgeNavigation } from './types';
+export {
+  normalizeBridgeMemoryRoute,
+  bridgeMemoryEntryToPath,
+} from './memoryRoute';
+export type {
+  BridgeNavigation,
+  BridgeMemoryRoute,
+  BridgeMemoryRouteEntry,
+  BridgeMemoryRouteOptions,
+  NormalizedBridgeMemoryRoute,
+} from './types';
 
 export type { BridgeProvider } from './types';
 export type {

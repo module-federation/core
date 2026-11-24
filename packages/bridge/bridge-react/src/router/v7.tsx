@@ -1,8 +1,9 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 // The upper alias react-router$ into this file avoids the loop
 // React Router v7 uses different dist structure, we'll import from the main entry
 import * as ReactRouterDom from 'react-router';
 import { RouterContext } from '../provider/context';
+import { normalizeBridgeMemoryRoute } from '../memoryRoute';
 import { LoggerInstance } from '../utils';
 
 function WraperRouter(props: Record<string, unknown>) {
@@ -19,11 +20,20 @@ function WraperRouter(props: Record<string, unknown>) {
     WraperRouterProps: props,
   });
 
-  if (routerContextProps?.memoryRoute) {
+  const normalizedMemory = normalizeBridgeMemoryRoute(
+    routerContextProps?.memoryRoute,
+  );
+  if (normalizedMemory) {
     return (
       <MemoryRouter
-        {...props}
-        initialEntries={[routerContextProps?.memoryRoute.entryPath]}
+        {...propsRes}
+        basename={
+          normalizedMemory.basename !== '/'
+            ? normalizedMemory.basename
+            : undefined
+        }
+        initialEntries={normalizedMemory.initialEntries}
+        initialIndex={normalizedMemory.initialIndex}
       />
     );
   }
@@ -53,20 +63,33 @@ function WraperRouterProvider(props: Record<string, unknown>) {
     'create' + 'BrowserRouter'
   ];
 
-  if (routerContextProps.memoryRoute) {
-    const MemeoryRouterInstance = createMemoryRouter(routers, {
-      initialEntries: [routerContextProps?.memoryRoute.entryPath],
-    });
-    return <RouterProvider router={MemeoryRouterInstance} />;
-  } else {
-    const BrowserRouterInstance = createBrowserRouter(routers, {
+  const normalizedMemory = normalizeBridgeMemoryRoute(
+    routerContextProps.memoryRoute,
+  );
+  const memoryKey = normalizedMemory ? JSON.stringify(normalizedMemory) : '';
+  const basename = routerContextProps.basename || router.basename;
+
+  const routerInstance = useMemo(() => {
+    if (normalizedMemory) {
+      return createMemoryRouter(routers, {
+        basename: normalizedMemory.basename,
+        initialEntries: normalizedMemory.initialEntries,
+        initialIndex: normalizedMemory.initialIndex,
+        ...(router.hydrationData
+          ? { hydrationData: router.hydrationData }
+          : {}),
+      });
+    }
+    return createBrowserRouter(routers, {
       // In host app, the routerContextProps is {}, so we should use router.basename as fallback
-      basename: routerContextProps.basename || router.basename,
+      basename,
       future: router.future,
       window: router.window,
+      ...(router.hydrationData ? { hydrationData: router.hydrationData } : {}),
     });
-    return <RouterProvider {...propsRes} router={BrowserRouterInstance} />;
-  }
+  }, [routers, memoryKey, basename, router.future, router.window]);
+
+  return <RouterProvider {...propsRes} router={routerInstance} />;
 }
 
 // Export all from react-router for v7 compatibility

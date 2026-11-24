@@ -62,8 +62,16 @@ export type {
   CreateRootOptions,
   Root,
   BridgeNavigation,
+  BridgeMemoryRoute,
+  BridgeMemoryRouteEntry,
+  BridgeMemoryRouteOptions,
+  NormalizedBridgeMemoryRoute,
 } from './types';
 export { useBridgeRouter } from './provider/context';
+export {
+  normalizeBridgeMemoryRoute,
+  bridgeMemoryEntryToPath,
+} from './memoryRoute';
 export { createBridgeRouterConnector } from './bridgeRouter';
 export type {
   BridgeRouterAdapter,

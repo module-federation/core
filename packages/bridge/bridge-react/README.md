@@ -336,9 +336,13 @@ That hook retains its existing observation behavior and does not acknowledge tha
 a Router's loaders have completed. Older providers keep their existing routing
 behavior, and independent `memoryRoute` cards do not attach a browser connector.
 
-`memoryRoute` preserves the existing Bridge option for independent navigation
-with an initial `entryPath`. Existing Router wrappers use it to select a memory
-Router instead of browser history. It does not select a producer route scope.
+`memoryRoute` enables independent in-memory navigation without touching browser
+history. Alongside `{ entryPath }`, it supports `initialEntries`, `initialIndex`,
+`initialState`, and `basename`.
+Existing Router wrappers memoize the created memory Router across Host rerenders
+so internal route state and history are preserved, and Service App HTTP requests
+validate and forward the extended `memoryRoute` contract. It does not select a
+producer route scope.
 
 No routing metadata is added to manifests or Snapshots. These routing controls do
 not select an SSR implementation, execute a service, or replace a remote version.
