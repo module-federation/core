@@ -2,6 +2,54 @@ import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { RemoteEntryExports, InitializeSharingOptions } from './types';
 
+// Kept on each init token so every container runtime on the page sees the same waits
+const INIT_WAITS: unique symbol = Symbol.for('mf.initWaits');
+
+interface InitToken {
+  // Pending inits this container share scope init is waiting on, null once its own init settled
+  [INIT_WAITS]?: Set<InitToken> | null;
+}
+
+const waitsOn = (
+  from: InitToken,
+  to: InitToken,
+  seen = new Set<InitToken>(),
+): boolean => {
+  if (from === to) return true;
+  if (seen.has(from)) return false;
+  seen.add(from);
+  return Array.from(from[INIT_WAITS] || []).some((next) =>
+    waitsOn(next, to, seen),
+  );
+};
+
+// Records that from waits on to's pending init, unless waiting would close a cycle
+const wait = (from: InitToken, to: InitToken, promise: Promise<unknown>) => {
+  if (waitsOn(to, from)) return false;
+  if (from[INIT_WAITS] === null) return true;
+  const waits = (from[INIT_WAITS] = from[INIT_WAITS] || new Set());
+  waits.add(to);
+  const done = () => waits.delete(to);
+  promise.then(done, done);
+  return true;
+};
+
+let initCaller: InitToken | undefined;
+
+// Runs fn with the init token of the sharing init that is calling into this container
+export function withInitCaller<T>(
+  caller: InitToken | undefined,
+  fn: () => T,
+): T {
+  const previous = initCaller;
+  initCaller = caller;
+  try {
+    return fn();
+  } finally {
+    initCaller = previous;
+  }
+}
+
 export function initializeSharing({
   shareScopeName,
   webpackRequire,
@@ -9,6 +57,7 @@ export function initializeSharing({
   initTokens,
   initScope,
 }: InitializeSharingOptions): Promise<boolean> | boolean | void {
+  const caller = initCaller;
   const shareScopeKeys = Array.isArray(shareScopeName)
     ? shareScopeName
     : [shareScopeName];
@@ -25,7 +74,12 @@ export function initializeSharing({
     initScope.push(initToken);
 
     const promise = initPromises[shareScopeKey];
-    if (promise) return promise;
+    if (promise) {
+      // Waiting would close a cycle when this pending init already waits on the caller
+      if (caller && promise !== true && !wait(caller, initToken, promise))
+        return;
+      return promise;
+    }
     var warn = (msg: string) =>
       typeof console !== 'undefined' && console.warn && console.warn(msg);
 
@@ -35,14 +89,16 @@ export function initializeSharing({
       try {
         var module = webpackRequire(id);
         if (!module) return;
+        var initOptions = {
+          shareScopeMap: webpackRequire.S || {},
+          shareScopeKeys: shareScopeName,
+        };
+        Object.defineProperty(initOptions, 'initFrom', { value: initToken });
         var initFn = (module: RemoteEntryExports) =>
           module &&
           module.init &&
           // @ts-ignore compat legacy mf shared behavior
-          module.init(webpackRequire.S![shareScopeKey], initScope, {
-            shareScopeMap: webpackRequire.S || {},
-            shareScopeKeys: shareScopeName,
-          });
+          module.init(webpackRequire.S![shareScopeKey], initScope, initOptions);
         if (module.then) return promises.push(module.then(initFn, handleError));
         var initResult = initFn(module);
         // @ts-ignore
@@ -57,6 +113,7 @@ export function initializeSharing({
       strategy: mfInstance.options.shareStrategy,
       initScope,
       from: 'build',
+      initFrom: initToken,
     });
     attachShareScopeMap(webpackRequire);
 
@@ -86,9 +143,15 @@ export function initializeSharing({
       return (initPromises[shareScopeKey] = true);
     }
 
-    return (initPromises[shareScopeKey] = Promise.all(promises).then(
+    const pending = (initPromises[shareScopeKey] = Promise.all(promises).then(
       () => (initPromises[shareScopeKey] = true),
     ));
+    // A failed init no longer waits on anything, even while its waits are pending
+    const settle = () => ((initToken as InitToken)[INIT_WAITS] = null);
+    pending.then(settle, settle);
+    // Inits started synchronously above may already wait on the caller
+    if (caller && !wait(caller, initToken, pending)) return;
+    return pending;
   };
 
   shareScopeKeys.forEach((key) => {
