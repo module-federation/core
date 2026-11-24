@@ -400,7 +400,6 @@ class StatsManager {
               name: name!,
               exposes: this._containerManager.containerPluginExposesOptions,
               shared: this._sharedManager.normalizedOptions,
-              shareScope: this._options.shareScope,
               remotes: this._remoteManager.normalizedOptions,
             })
           : undefined;
@@ -464,12 +463,12 @@ class StatsManager {
         ...shared,
         usedIn: Array.from(shared.usedIn),
       }));
-      const sharedAssets = new Set<unknown>(
+      const sharedAssets = new Set<string>(
         stats.shared.flatMap(({ assets: { js, css } }) => [
           ...js.sync,
           ...js.async,
           ...css.async,
-          css.sync,
+          ...css.sync,
         ]),
       );
       stats.exposes = stats.exposes.map((expose) => {

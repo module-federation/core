@@ -4,6 +4,7 @@ import type {
   StatsModule,
 } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import path from 'path';
+import type { SharedManager } from '@module-federation/managers';
 import fs from 'fs';
 import {
   StatsAssets,
@@ -58,6 +59,31 @@ export function splitSharedIdentifier(
   return {
     tokens: [...tokens.slice(0, scopeTokenIndex + 1), ...layered[2].split(' ')],
     layer: layered[1],
+  };
+}
+
+export function createSharedOptionsLookup(
+  shared: SharedManager['normalizedOptions'],
+) {
+  const entries = Object.entries(shared)
+    .map(([request, options]) => ({
+      key: options.shareKey ?? request,
+      scope: JSON.stringify(options.shareScope ?? 'default'),
+      options,
+    }))
+    .sort((first, second) => second.key.length - first.key.length);
+  return (name: string, shareScope: string | string[], layer?: string) => {
+    const scope = JSON.stringify(shareScope);
+    const matches = entries.filter(
+      (entry) =>
+        entry.scope === scope &&
+        (entry.key === name ||
+          (entry.key.endsWith('/') && name.startsWith(entry.key))),
+    );
+    return (
+      matches.find((entry) => entry.options.layer === layer) ??
+      matches.find((entry) => entry.options.layer === undefined)
+    )?.options;
   };
 }
 

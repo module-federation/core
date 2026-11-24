@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Stats } from 'webpack';
 import { StatsPlugin } from '../src/StatsPlugin';
@@ -43,7 +43,19 @@ it.each([
     const exact = mode === 'enhanced-exact';
     const shared = mode.includes('shared') || prefix || exact;
     const native = mode === 'native-shared';
+    const withCss = mode === 'enhanced-shared';
     try {
+      if (mode === 'remotes') {
+        await mkdir(path.join(directory, 'src'));
+        await writeFile(
+          path.join(directory, 'src/consumer.js'),
+          'module.exports = require("remote/nested/Button");',
+        );
+      }
+      if (withCss) {
+        await writeFile(path.join(directory, 'shared.css'), '.shared {}');
+        await writeFile(path.join(directory, 'entry.css'), '.entry {}');
+      }
       await writeFile(
         path.join(directory, 'entry.js'),
         prefix
@@ -51,12 +63,12 @@ it.each([
           : exact
             ? 'module.exports = require("missing-exact");'
             : mode === 'remotes'
-              ? 'module.exports = require("remote/nested/Button");'
-              : 'module.exports = require("./shared.js");',
+              ? 'module.exports = require("./src/consumer.js");'
+              : `${withCss ? 'require("./entry.css");' : ''}module.exports = require("./shared.js");`,
       );
       await writeFile(
         path.join(directory, 'shared.js'),
-        'module.exports = "shared";',
+        `${withCss ? 'require("./shared.css");' : ''}module.exports = "shared";`,
       );
       await writeFile(
         path.join(directory, 'package.json'),
@@ -112,6 +124,7 @@ it.each([
         const compiler = webpack({
           context: directory,
           mode: 'development',
+          experiments: { css: withCss },
           cache: {
             type: 'filesystem',
             cacheDirectory: path.join(directory, 'cache'),
@@ -204,6 +217,16 @@ it.each([
         expect(stats.exposes).toHaveLength(1);
         expect(stats.exposes[0].assets.js.sync.length).toBeGreaterThan(0);
         expect(stats.shared).toHaveLength(shared ? 1 : 0);
+        if (mode === 'remotes')
+          expect(stats.remotes).toContainEqual(
+            expect.objectContaining({ usedIn: ['src/consumer.js'] }),
+          );
+        if (withCss) {
+          expect(stats.shared[0].assets.css.sync).not.toHaveLength(0);
+          expect(stats.exposes[0].assets.css.sync).toContain('exposed.css');
+          for (const asset of stats.shared[0].assets.css.sync)
+            expect(stats.exposes[0].assets.css.async).not.toContain(asset);
+        }
         if (shared)
           expect(stats.shared[0].version).toBe(exact ? '1.2.3' : '1.0.0');
         expect(manifest.metaData.types).toEqual({
