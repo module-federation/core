@@ -20,6 +20,14 @@ const hostRequire = process
   .createRequire(nativeRequire.resolve('@rspack/core-legacy/package.json'));
 const host = hostRequire('@rspack/core');
 const rspackPreviewRemote = nativeRequire('@rspack/core');
+const rspackRelease = nativeRequire('@rspack/core-release');
+// Keep the released compiler on its published runtime instead of the workspace peer.
+const releasedRspackTools = nativeRequire.resolve(
+  '@module-federation/runtime-tools-release',
+);
+const workspaceRspackTools = nativeRequire.resolve(
+  '@module-federation/runtime-tools/bundler',
+);
 const hostTools = hostRequire.resolve('@module-federation/runtime-tools', {
   paths: [path.dirname(hostRequire.resolve('@rspack/core/package.json'))],
 });
@@ -31,6 +39,13 @@ const { JSDOM } = process
   .createRequire(hostRequire.resolve('jest-environment-jsdom'))('jsdom');
 
 beforeAll(() => {
+  expect(nativeRequire('@rspack/core-release/package.json').version).toBe(
+    '2.3.3',
+  );
+  expect(
+    nativeRequire('@module-federation/runtime-tools-release/package.json')
+      .version,
+  ).toBe('2.9.3');
   const remotePreview =
     nativeRequire('../package.json').devDependencies['@rspack/core'];
   const remotePackage = nativeRequire.resolve('@rspack/core/package.json');
@@ -310,6 +325,7 @@ const releasedEnhancedPath = nativeRequire.resolve(
   '@module-federation/enhanced-legacy/webpack',
 );
 
+type Bundler = 'Webpack' | 'Rspack';
 type Release = 'old' | 'new' | 'layered';
 type Route = [name: string, scope: string];
 type Fleet = {
@@ -391,12 +407,13 @@ function promiseRemote(url: string, name: string) {
   return `(new Promise((resolve, reject) => __webpack_require__.l(${JSON.stringify(url)}, () => window[${JSON.stringify(name)}] ? resolve(window[${JSON.stringify(name)}]) : reject(new Error('Remote entry did not load: ${name}')), ${JSON.stringify(name)})))`;
 }
 
-async function webpackApp({
+async function buildApp({
   directory,
   origin,
   output,
   name,
   release,
+  bundler,
   routes = [],
   entry,
   expose,
@@ -406,17 +423,22 @@ async function webpackApp({
   output: string;
   name: string;
   release: Release;
+  bundler: Bundler;
   routes?: Route[];
   entry?: string;
   expose?: string;
 }) {
-  const Plugin = enhancedPlugin(release);
+  const compiler = release === 'old' ? rspackRelease : rspackPreviewRemote;
+  const Plugin =
+    bundler === 'Webpack'
+      ? enhancedPlugin(release)
+      : compiler.container.ModuleFederationPlugin;
   const version =
     name === 'second' ? '3.0.0' : name === 'top' ? '2.0.0' : '1.0.0';
-  await runWebpack({
+  const config = {
     context: directory,
-    mode: 'development',
-    devtool: false,
+    mode: 'development' as const,
+    devtool: false as const,
     entry: entry || {},
     experiments: { layers: release === 'layered' },
     output: {
@@ -428,7 +450,12 @@ async function webpackApp({
       new Plugin({
         name,
         filename: 'remoteEntry.js',
-        dts: false,
+        ...(bundler === 'Webpack'
+          ? { dts: false }
+          : {
+              implementation:
+                release === 'old' ? releasedRspackTools : workspaceRspackTools,
+            }),
         manifest: false,
         shareStrategy: 'version-first',
         remoteType: 'promise',
@@ -458,12 +485,38 @@ async function webpackApp({
         },
       }),
     ],
+  };
+  if (bundler === 'Webpack') return runWebpack(config);
+  await new Promise<void>((resolve, reject) => {
+    compiler.rspack(config, (error: Error | null, stats: RspackStats) => {
+      if (error || !stats || stats.hasErrors())
+        reject(error ?? new Error(stats?.toString()));
+      else resolve();
+    });
   });
 }
 
-it.each(fleets)(
-  'matches the published Webpack fleet for $name',
-  async ({ routes, middle, order, upgrades }) => {
+it.each([
+  ...(['Webpack', 'Rspack'] as const).flatMap((bundler) =>
+    fleets.map((fleet) => ({ ...fleet, bundler, remoteBundler: bundler })),
+  ),
+  {
+    ...fleets[0],
+    name: 'cross-bundler remote',
+    upgrades: ['first'],
+    bundler: 'Rspack',
+    remoteBundler: 'Webpack',
+  },
+  {
+    ...fleets[0],
+    name: 'cross-bundler remote',
+    upgrades: ['first'],
+    bundler: 'Webpack',
+    remoteBundler: 'Rspack',
+  },
+] as const)(
+  'matches the published $bundler fleet for $name ($remoteBundler remote)',
+  async ({ routes, middle, order, upgrades, bundler, remoteBundler }) => {
     await withBrowserFixture(async ({ directory, origin, load }) => {
       const names =
         middle || routes.length === 2
@@ -506,12 +559,13 @@ it.each(fleets)(
         release: Release = 'old',
       ) {
         for (const name of [...names].reverse()) {
-          await webpackApp({
+          await buildApp({
             directory,
             origin,
             output,
             name,
             release: name === upgraded ? release : 'old',
+            bundler: name === 'top' ? bundler : remoteBundler,
             routes: name === 'top' ? routes : name === 'first' ? middle : [],
             ...(name === 'top'
               ? { entry: './host.js' }
@@ -531,7 +585,14 @@ it.each(fleets)(
       const reference = await observe('reference');
       console.info(
         'Fleet reference',
-        JSON.stringify({ order, routes, middle, reference }),
+        JSON.stringify({
+          bundler,
+          remoteBundler,
+          order,
+          routes,
+          middle,
+          reference,
+        }),
       );
       for (const release of ['new', 'layered'] as const)
         for (const upgraded of upgrades) {
@@ -543,6 +604,8 @@ it.each(fleets)(
           console.info(
             'Fleet mixed pairing',
             JSON.stringify({
+              bundler,
+              remoteBundler,
               order,
               routes,
               middle,
@@ -558,9 +621,14 @@ it.each(fleets)(
   30000,
 );
 
-it.each(['sharing first', 'remote first'])(
-  'runtime 0.13.1 preserves singleton selection with %s',
-  async (order) => {
+it.each([
+  ['Webpack', 'sharing first'],
+  ['Webpack', 'remote first'],
+  ['Rspack', 'sharing first'],
+  ['Rspack', 'remote first'],
+] as const)(
+  'runtime 0.13.1 preserves singleton selection with a %s remote and %s',
+  async (bundler, order) => {
     await withBrowserFixture(async ({ directory, origin, load }) => {
       await Promise.all(
         Object.entries({
@@ -574,11 +642,12 @@ it.each(['sharing first', 'remote first'])(
         ),
       );
       async function observe(release: Release) {
-        await webpackApp({
+        await buildApp({
           directory,
           origin,
           output: release,
           name: 'first',
+          bundler,
           release,
           expose: './first-component.js',
         });
@@ -646,7 +715,7 @@ it.each(['sharing first', 'remote first'])(
       const layered = await observe('layered');
       console.info(
         'Runtime 0.13.1 touch order',
-        JSON.stringify({ order, reference, unlayered, layered }),
+        JSON.stringify({ bundler, order, reference, unlayered, layered }),
       );
       expect(reference).toMatchObject({
         same: true,
