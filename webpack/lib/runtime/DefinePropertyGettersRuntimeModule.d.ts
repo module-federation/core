@@ -1,10 +1,13 @@
 export = DefinePropertyGettersRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Compilation from "../Compilation" */
+/** @import { ReadOnlyRuntimeRequirements } from "../module/Module" */
 declare class DefinePropertyGettersRuntimeModule extends HelperRuntimeModule {
-  constructor();
+    /**
+     * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
+     */
+    constructor(runtimeRequirements: ReadOnlyRuntimeRequirements);
+    /** @type {ReadOnlyRuntimeRequirements} */
+    runtimeRequirements: ReadOnlyRuntimeRequirements;
 }
-declare namespace DefinePropertyGettersRuntimeModule {
-  export { Compilation };
-}
-import HelperRuntimeModule = require('./HelperRuntimeModule');
-type Compilation = import('../Compilation');
+import HelperRuntimeModule = require("./HelperRuntimeModule");
+import type { ReadOnlyRuntimeRequirements } from "../module/Module";

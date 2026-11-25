@@ -1,25 +1,29 @@
 export = AggressiveMergingPlugin;
 declare class AggressiveMergingPlugin {
-  /**
-   * @param {AggressiveMergingPluginOptions=} options options object
-   */
-  constructor(options?: AggressiveMergingPluginOptions | undefined);
-  options: AggressiveMergingPluginOptions;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Creates an instance of AggressiveMergingPlugin.
+     * @param {AggressiveMergingPluginOptions=} options options object
+     */
+    constructor(options?: AggressiveMergingPluginOptions | undefined);
+    /** @type {AggressiveMergingPluginOptions} */
+    options: AggressiveMergingPluginOptions;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace AggressiveMergingPlugin {
-  export { Chunk, Compiler, AggressiveMergingPluginOptions };
+    export { AggressiveMergingPluginOptions };
 }
-type Chunk = import('../Chunk');
-type Compiler = import('../Compiler');
+import type Compiler from "../Compiler";
+/**
+ * Defines the aggressive merging plugin options type used by this module.
+ */
 type AggressiveMergingPluginOptions = {
-  /**
-   * minimal size reduction to trigger merging
-   */
-  minSizeReduce?: number | undefined;
+    /**
+     * minimal size reduction to trigger merging
+     */
+    minSizeReduce?: number | undefined;
 };

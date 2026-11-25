@@ -1,6 +1,6 @@
 # Precarga de datos
 
-La función `prefetch` se usa para precargar recursos y **datos** de los módulos remotos, lo que mejora el rendimiento de la aplicación y la experiencia de usuario. Al cargar de antemano el contenido necesario antes de que el usuario acceda a una funcionalidad, los tiempos de espera pueden reducirse considerablemente.
+La función `prefetch` carga los recursos y datos de un módulo remoto antes de que el usuario lo necesite. Así puedes reducir la espera al abrir una página o usar un componente.
 
 import React from 'react';
 import PrefetchTip from '@docs/es/_components/data-fetch/prefetch-tip';
@@ -46,4 +46,4 @@ import PrefetchDemo from '@docs/es/_components/data-fetch/prefetch-demo';
 
 {props.prefetchDemo || React.createElement(PrefetchDemo)}
 
-Usando `prefetch` con flexibilidad, puedes controlar con precisión el momento en que se cargan los recursos según los escenarios concretos de tu aplicación y el comportamiento de los usuarios, optimizando así el rendimiento de la aplicación.
+Elige cuándo llamar a `prefetch` según lo que haga el usuario, por ejemplo, al pasar el cursor sobre un enlace que abre el módulo remoto.

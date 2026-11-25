@@ -6,21 +6,23 @@
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type {
-  WebpackOptions,
   Compilation,
-  UpdateHashContext,
+  InputFileSystem,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  WebpackError,
+  WebpackOptionsNormalized as WebpackOptions,
+} from 'webpack';
+import type {
   CodeGenerationContext,
   CodeGenerationResult,
   LibIdentOptions,
   NeedBuildContext,
-  RequestShortener,
-  ResolverWithOptions,
-  WebpackError,
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
-  Hash,
-  InputFileSystem,
-} from 'webpack/lib/Module';
+} from 'webpack/lib/module/Module';
+import type { UpdateHashContext } from 'webpack/lib/graph/Dependency';
+import type { ResolverWithOptions } from 'webpack/lib/resolve/ResolverFactory';
+import type Hash from 'webpack/lib/util/Hash';
+import type RequestShortener from 'webpack/lib/util/RequestShortener';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import { normalizeConsumeShareOptions } from './utils';
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
@@ -28,7 +30,7 @@ import type { ConsumeOptions } from '@module-federation/sdk';
 
 const { stringifyHoley } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/util/semver');
+) as typeof import('webpack/lib/sharing/semver');
 const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');

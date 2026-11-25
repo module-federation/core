@@ -1,29 +1,35 @@
 export = NodeTemplatePlugin;
-/** @typedef {import("../Compiler")} Compiler */
+/** @import Compiler from "../Compiler" */
 /**
+ * Represents the node template plugin runtime component.
  * @typedef {object} NodeTemplatePluginOptions
  * @property {boolean=} asyncChunkLoading enable async chunk loading
  */
 declare class NodeTemplatePlugin {
-  /**
-   * @param {NodeTemplatePluginOptions=} options options object
-   */
-  constructor(options?: NodeTemplatePluginOptions | undefined);
-  _options: NodeTemplatePluginOptions;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Creates an instance of NodeTemplatePlugin.
+     * @param {NodeTemplatePluginOptions=} options options object
+     */
+    constructor(options?: NodeTemplatePluginOptions | undefined);
+    /** @type {NodeTemplatePluginOptions} */
+    _options: NodeTemplatePluginOptions;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace NodeTemplatePlugin {
-  export { Compiler, NodeTemplatePluginOptions };
+    export { NodeTemplatePluginOptions };
 }
-type Compiler = import('../Compiler');
+import type Compiler from "../Compiler";
+/**
+ * Represents the node template plugin runtime component.
+ */
 type NodeTemplatePluginOptions = {
-  /**
-   * enable async chunk loading
-   */
-  asyncChunkLoading?: boolean | undefined;
+    /**
+     * enable async chunk loading
+     */
+    asyncChunkLoading?: boolean | undefined;
 };

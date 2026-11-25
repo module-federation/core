@@ -13,7 +13,7 @@ import type { Compilation } from 'webpack';
 import ModuleNotFoundError from 'webpack/lib/ModuleNotFoundError';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import LazySet from 'webpack/lib/util/LazySet';
-import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
+import type { ResolveOptionsWithDependencyType } from 'webpack/lib/resolve/ResolverFactory';
 
 import { resolveMatchedConfigs } from '../../../src/lib/sharing/resolveMatchedConfigs';
 import type { ConsumeOptions } from '../../../src/declarations/plugins/sharing/ConsumeSharedModule';

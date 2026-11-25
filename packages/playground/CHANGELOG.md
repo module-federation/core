@@ -1,5 +1,12 @@
 # @module-federation/playground
 
+## 0.1.4
+
+### Patch Changes
+
+- @module-federation/bridge-react@2.9.4
+- @module-federation/runtime@2.9.4
+
 ## 0.1.3
 
 ### Patch Changes

@@ -192,7 +192,8 @@ export default class IndependentSharedPlugin {
   private createEntry(context: string) {
     const { sharedOptions } = this;
     const entryContent = sharedOptions.reduce((acc, cur, index) => {
-      return `${acc}import shared_${index} from '${cur[0]}';\n`;
+      // Shared packages need not have a default export.
+      return `${acc}import * as shared_${index} from '${cur[0]}';\n`;
     }, '');
     const entryPath = path.resolve(
       context,
