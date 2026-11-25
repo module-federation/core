@@ -20,13 +20,14 @@ export function forEachSharedRecord(
     versions: Record<string, Shared>,
     version: string,
     instanceId: string,
+    pkgName: string,
   ) => void,
 ): void {
   for (const [id, scopes] of Object.entries(globalScopes || {}))
     for (const packages of Object.values(scopes || {}))
-      for (const versions of Object.values(packages || {}))
+      for (const [pkgName, versions] of Object.entries(packages || {}))
         for (const [version, shared] of Object.entries(versions || {}))
-          visitor(shared, versions, version, id);
+          visitor(shared, versions, version, id, pkgName);
 }
 
 export function getRemoteSharedOwnership(

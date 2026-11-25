@@ -180,4 +180,61 @@ describe('instance disposal', () => {
       rs.useRealTimers();
     }
   });
+
+  it('emits debug log when retaining a remote used elsewhere or preserving shared singletons', async () => {
+    const previousDebug = process.env.FEDERATION_DEBUG;
+    process.env.FEDERATION_DEBUG = '1';
+    const debugSpy = rs.spyOn(console, 'debug').mockImplementation(() => {});
+    try {
+      const hostA = new ModuleFederation({
+        name: 'host-a',
+        remotes: [
+          { name: 'shared-remote', entry: 'https://example.test/v1.js' },
+        ],
+      });
+      const hostB = new ModuleFederation({
+        name: 'host-b',
+        remotes: [
+          { name: 'shared-remote', entry: 'https://example.test/v1.js' },
+        ],
+      });
+      setGlobalFederationInstance(hostA);
+      setGlobalFederationInstance(hostB);
+      const exportsObj = { init: () => {}, get: async () => () => ({}) };
+      const remoteInfo = {
+        name: 'shared-remote',
+        entry: 'https://example.test/v1.js',
+        type: 'global',
+        entryGlobalName: 'shared_remote',
+        shareScope: 'default',
+      } as any;
+      hostA.moduleCache.set('shared-remote', {
+        remoteInfo,
+        remoteEntryExports: exportsObj,
+      } as any);
+      hostB.moduleCache.set('shared-remote', {
+        remoteInfo,
+        remoteEntryExports: exportsObj,
+      } as any);
+
+      await hostA.removeRemote('shared-remote');
+
+      const messages = debugSpy.mock.calls.map((args) => args.join(' '));
+      expect(
+        messages.some(
+          (msg) =>
+            msg.includes('[ MF Node Lifecycle ]') &&
+            msg.includes('remote=shared-remote') &&
+            msg.includes('reason=usedElsewhere'),
+        ),
+      ).toBe(true);
+
+      await destroyNodeInstance(hostA);
+      await destroyNodeInstance(hostB);
+    } finally {
+      if (previousDebug === undefined) delete process.env.FEDERATION_DEBUG;
+      else process.env.FEDERATION_DEBUG = previousDebug;
+      debugSpy.mockRestore();
+    }
+  });
 });

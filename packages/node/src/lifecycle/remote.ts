@@ -1,6 +1,7 @@
 import type { ModuleFederation } from '@module-federation/runtime';
 import type { Remote, RemoteInfo } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
+import { createLogger, isDebugMode } from '@module-federation/sdk';
 import { clearContainerCache } from '@module-federation/webpack-bundler-runtime/clear-cache';
 import {
   forEachSharedRecord,
@@ -9,6 +10,8 @@ import {
   retireShareScope,
 } from './share';
 import type { NodeFederation } from './symbols';
+
+const lifecycleLogger = createLogger('[ MF Node Lifecycle ]');
 
 export function prepareNodeRemotes(
   host: ModuleFederation,
@@ -168,20 +171,35 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
                 ])),
           ),
       );
-      if (usedElsewhere) return releaseLocal();
+      if (usedElsewhere) {
+        if (isDebugMode()) {
+          lifecycleLogger.debug(
+            `retain remote=${target.name} host=${host.name} reason=usedElsewhere`,
+          );
+        }
+        return releaseLocal();
+      }
 
       const scopes = helpers.share.getGlobalShareScope();
       let preserveShared = false;
+      const retainedShared: string[] = [];
       const releaseShared: Array<() => void> = [];
-      forEachSharedRecord(scopes, (shared, versions, version) => {
+      forEachSharedRecord(scopes, (shared, versions, version, _id, pkgName) => {
         if (!ownership.owns(shared)) return;
         if (ownership.sharedWithPeer(shared)) {
           preserveShared = true;
+          if (isDebugMode()) retainedShared.push(`${pkgName}@${version}(peer)`);
           return;
         }
         const useIn = shared.useIn.filter((name) => name !== shared.from);
         if (useIn.length || (shared.loading && !shared.loaded)) {
           preserveShared = true;
+          if (isDebugMode()) {
+            const detail = useIn.length
+              ? `useIn=${useIn.join(',')}`
+              : 'loading';
+            retainedShared.push(`${pkgName}@${version}(${detail})`);
+          }
           releaseShared.push(() => {
             shared.useIn = useIn;
             shared.providerState = 1;
@@ -206,8 +224,14 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
       ];
       if (provider) {
         retireShareScope(provider.shareScopeMap);
-        if (preserveShared) host.retainedProviders.add(provider);
-        else {
+        if (preserveShared) {
+          host.retainedProviders.add(provider);
+          if (isDebugMode()) {
+            lifecycleLogger.debug(
+              `retain remote=${target.name} host=${host.name} provider=${provider.name} reason=preserveShared shared=${retainedShared.join(',')}`,
+            );
+          }
+        } else {
           provider.shareScopeMap = {};
           delete scopes[ownership.id];
         }
