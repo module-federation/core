@@ -1,10 +1,6 @@
 export = CompatGetDefaultExportRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Compilation from "../Compilation" */
 declare class CompatGetDefaultExportRuntimeModule extends HelperRuntimeModule {
-  constructor();
+    constructor();
 }
-declare namespace CompatGetDefaultExportRuntimeModule {
-  export { Compilation };
-}
-import HelperRuntimeModule = require('./HelperRuntimeModule');
-type Compilation = import('../Compilation');
+import HelperRuntimeModule = require("./HelperRuntimeModule");

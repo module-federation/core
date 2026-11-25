@@ -18,16 +18,18 @@ import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
-import type { OptimizationSplitChunksCacheGroup } from 'webpack/lib/optimize/SplitChunksPlugin';
-import type { Falsy } from 'webpack/declarations/WebpackOptions';
+import type {
+  Falsy,
+  OptimizationSplitChunksCacheGroup,
+} from 'webpack/declarations/WebpackOptions';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
-) as typeof import('webpack/lib/dependencies/ModuleDependency');
+) as typeof import('webpack/lib/dependencies/core/ModuleDependency');
 
 const EntryDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
-) as typeof import('webpack/lib/dependencies/EntryDependency');
+) as typeof import('webpack/lib/entry/EntryDependency');
 
 const PLUGIN_NAME = 'ContainerPlugin';
 

@@ -8,7 +8,7 @@ const { dependencies } = require(
 import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
-} from 'webpack/lib/dependencies/ModuleDependency';
+} from 'webpack';
 
 class SharedDependency extends dependencies.ModuleDependency {
   sharedName: string;

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/manifest",
-  "version": "2.9.3",
+  "version": "2.9.4",
   "license": "MIT",
   "description": "Provide manifest/stats for webpack/rspack MF project .",
   "keywords": [

@@ -1,5 +1,6 @@
 export = SyncModuleIdsPlugin;
 /**
+ * Represents the sync module ids plugin runtime component.
  * @typedef {object} SyncModuleIdsPluginOptions
  * @property {string} path path to file
  * @property {string=} context context for module names
@@ -7,51 +8,47 @@ export = SyncModuleIdsPlugin;
  * @property {"read" | "create" | "merge" | "update"=} mode operation mode (defaults to merge)
  */
 declare class SyncModuleIdsPlugin {
-  /**
-   * @param {SyncModuleIdsPluginOptions} options options
-   */
-  constructor({ path, context, test, mode }: SyncModuleIdsPluginOptions);
-  _path: string;
-  _context: string;
-  _test: (module: Module) => boolean;
-  _read: boolean;
-  _write: boolean;
-  _prune: boolean;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Creates an instance of SyncModuleIdsPlugin.
+     * @param {SyncModuleIdsPluginOptions} options options
+     */
+    constructor(options: SyncModuleIdsPluginOptions);
+    /** @type {SyncModuleIdsPluginOptions} */
+    options: SyncModuleIdsPluginOptions;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace SyncModuleIdsPlugin {
-  export {
-    Compiler,
-    Module,
-    ModuleId,
-    IntermediateFileSystem,
-    SyncModuleIdsPluginOptions,
-  };
+    export { JSONContent, SyncModuleIdsPluginOptions };
 }
-type Compiler = import('../Compiler');
-type Module = import('../Module');
-type ModuleId = import('../Module').ModuleId;
-type IntermediateFileSystem = import('../util/fs').IntermediateFileSystem;
-type SyncModuleIdsPluginOptions = {
-  /**
-   * path to file
-   */
-  path: string;
-  /**
-   * context for module names
-   */
-  context?: string | undefined;
-  /**
-   * selector for modules
-   */
-  test?: ((module: Module) => boolean) | undefined;
-  /**
-   * operation mode (defaults to merge)
-   */
-  mode?: ('read' | 'create' | 'merge' | 'update') | undefined;
+import type Compiler from "../Compiler";
+type JSONContent = {
+    [key: string]: ModuleId;
 };
+/**
+ * Represents the sync module ids plugin runtime component.
+ */
+type SyncModuleIdsPluginOptions = {
+    /**
+     * path to file
+     */
+    path: string;
+    /**
+     * context for module names
+     */
+    context?: string | undefined;
+    /**
+     * selector for modules
+     */
+    test?: ((module: Module) => boolean) | undefined;
+    /**
+     * operation mode (defaults to merge)
+     */
+    mode?: ("read" | "create" | "merge" | "update") | undefined;
+};
+import type { ModuleId } from "../graph/ChunkGraph";
+import type Module from "../module/Module";

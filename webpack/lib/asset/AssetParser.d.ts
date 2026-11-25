@@ -1,38 +1,34 @@
 export = AssetParser;
-/** @typedef {import("../../declarations/WebpackOptions").AssetParserDataUrlOptions} AssetParserDataUrlOptions */
-/** @typedef {import("../../declarations/WebpackOptions").AssetParserOptions} AssetParserOptions */
-/** @typedef {import("../Module").BuildInfo} BuildInfo */
-/** @typedef {import("../Module").BuildMeta} BuildMeta */
-/** @typedef {import("../Parser").ParserState} ParserState */
-/** @typedef {import("../Parser").PreparsedAst} PreparsedAst */
-declare class AssetParser extends Parser {
-  /**
-   * @param {AssetParserOptions["dataUrlCondition"] | boolean} dataUrlCondition condition for inlining as DataUrl
-   */
-  constructor(
-    dataUrlCondition: AssetParserOptions['dataUrlCondition'] | boolean,
-  );
-  dataUrlCondition:
-    | boolean
-    | import('../../declarations/WebpackOptions').AssetParserDataUrlOptions
-    | import('../../declarations/WebpackOptions').AssetParserDataUrlFunction;
+/** @import { BuiltAssetModule } from "./AssetModule" */
+/**
+ * @import {
+ * 	AssetParserDataUrlOptions,
+ * 	AssetParserOptions
+ * } from "../../declarations/WebpackOptions"
+ */
+/** @import Module from "../module/Module" */
+/** @import { ParserState, PreparsedAst } from "../module/Parser" */
+/** @typedef {((source: string | Buffer, context: { filename: string, module: Module }) => boolean)} AssetParserDataUrlFunction */
+/**
+ * @extends {Parser<BuiltAssetModule>}
+ */
+declare class AssetParser extends Parser<BuiltAssetModule> {
+    /**
+     * Creates an instance of AssetParser.
+     * @param {AssetParserOptions["dataUrlCondition"] | boolean} dataUrlCondition condition for inlining as DataUrl
+     */
+    constructor(dataUrlCondition: AssetParserOptions["dataUrlCondition"] | boolean);
+    /** @type {AssetParserOptions["dataUrlCondition"] | boolean} */
+    dataUrlCondition: AssetParserOptions["dataUrlCondition"] | boolean;
 }
 declare namespace AssetParser {
-  export {
-    AssetParserDataUrlOptions,
-    AssetParserOptions,
-    BuildInfo,
-    BuildMeta,
-    ParserState,
-    PreparsedAst,
-  };
+    export { AssetParserDataUrlFunction };
 }
-import Parser = require('../Parser');
-type AssetParserDataUrlOptions =
-  import('../../declarations/WebpackOptions').AssetParserDataUrlOptions;
-type AssetParserOptions =
-  import('../../declarations/WebpackOptions').AssetParserOptions;
-type BuildInfo = import('../Module').BuildInfo;
-type BuildMeta = import('../Module').BuildMeta;
-type ParserState = import('../Parser').ParserState;
-type PreparsedAst = import('../Parser').PreparsedAst;
+import type { BuiltAssetModule } from "./AssetModule";
+import Parser = require("../module/Parser");
+import type { AssetParserOptions } from "../../declarations/WebpackOptions";
+type AssetParserDataUrlFunction = ((source: string | Buffer, context: {
+    filename: string;
+    module: Module;
+}) => boolean);
+import type Module from "../module/Module";
