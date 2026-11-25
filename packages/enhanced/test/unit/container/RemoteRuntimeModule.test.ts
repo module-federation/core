@@ -7,16 +7,20 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import { getFederationGlobalScope } from '../../../src/lib/container/runtime/utils';
 import { createMockCompilation, MockModuleDependency } from './utils';
 import type Chunk from 'webpack/lib/Chunk';
-import type ChunkGraph from 'webpack/lib/ChunkGraph';
-import type Module from 'webpack/lib/Module';
-import type ModuleGraph from 'webpack/lib/ModuleGraph';
+import type ChunkGraph from 'webpack/lib/graph/ChunkGraph';
+import type Module from 'webpack/lib/module/Module';
+import type ModuleGraph from 'webpack/lib/graph/ModuleGraph';
 import type Dependency from 'webpack/lib/Dependency';
-import type ExternalModule from 'webpack/lib/ExternalModule';
+import type ExternalModule from 'webpack/lib/externals/ExternalModule';
 import type FallbackModule from '../../../src/lib/container/FallbackModule';
 
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 const mocks = rs.hoisted(() => ({
-  mockNormalizeWebpackPath: rs.fn((path: string) => path),
+  mockNormalizeWebpackPath: rs.fn(
+    rs.requireActual<
+      typeof import('@module-federation/sdk/normalize-webpack-path')
+    >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
+  ),
   mockGetFederationGlobalScope: rs.fn(() => '__FEDERATION__'),
   mockExtractUrlAndGlobal: rs.fn(),
   mockTemplateAsString: rs.fn((strings: string[]) => strings.join('\n')),
@@ -32,6 +36,10 @@ rs.mock('../../../src/lib/container/runtime/utils', () => ({
 }));
 rs.mock(
   'webpack/lib/util/extractUrlAndGlobal',
+  () => mocks.mockExtractUrlAndGlobal,
+);
+rs.mock(
+  'webpack/lib/externals/extractUrlAndGlobal',
   () => mocks.mockExtractUrlAndGlobal,
 );
 

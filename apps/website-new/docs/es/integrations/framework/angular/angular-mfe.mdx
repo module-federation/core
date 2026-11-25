@@ -8,7 +8,7 @@ import {Steps, Tabs, Tab} from '@theme';
 
 ## Descripción general
 
-Module Federation ha tenido un impacto notable en el panorama de los micro-frontends. Integrado con Angular, ofrece una solución robusta y escalable para arquitecturas front-end distribuidas. Esta guía analiza un ejemplo práctico y detalla la configuración del `ModuleFederationPlugin` de Webpack en una aplicación shell de Angular y en una aplicación remota.
+En esta guía vas a conectar dos aplicaciones Angular con Module Federation. Verás cómo configurar el `ModuleFederationPlugin` de Webpack en la aplicación principal, o shell, y en una aplicación remota.
 
 
 ### Requisitos previos
@@ -310,7 +310,7 @@ En tu vista de Angular, puedes usar la directiva así:
 
 #### Importancia de las dependencias shared
 
-La sección `shared` de la configuración de Webpack desempeña un papel clave a la hora de definir los módulos comunes entre la shell y el módulo remoto. Hacerlo puede reducir considerablemente el tamaño del bundle y mejorar la experiencia de usuario.
+En la sección `shared` de la configuración de Webpack defines qué dependencias comparten la shell y el módulo remoto. Así puedes evitar que cada aplicación cargue su propia copia.
 
 #### Gestión de discrepancias de versiones
 

@@ -21,7 +21,15 @@
     "access": "public"
   },
   "dependencies": {
-    "enhanced-resolve": "^5.17.1",
-    "tapable": "^2.1.1"
+    "@types/estree": "^1.0.8",
+    "@types/json-schema": "^7.0.15",
+    "@webassemblyjs/ast": "^1.14.1",
+    "chrome-trace-event": "^1.0.2",
+    "enhanced-resolve": "^5.26.0",
+    "minimizer-webpack-plugin": "^5.13.0",
+    "schema-utils": "^4.8.1",
+    "tapable": "^2.3.0",
+    "watchpack": "^2.6.3",
+    "webpack-sources": "^3.6.0"
   }
 }

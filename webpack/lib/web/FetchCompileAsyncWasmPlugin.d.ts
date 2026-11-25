@@ -1,14 +1,15 @@
 export = FetchCompileAsyncWasmPlugin;
+/**
+ * Enables asynchronous WebAssembly loading through `fetch` for environments
+ * that can instantiate fetched binaries at runtime.
+ */
 declare class FetchCompileAsyncWasmPlugin {
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Registers compilation hooks that attach the async fetch-based wasm runtime
+     * to chunks containing async WebAssembly modules.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
-declare namespace FetchCompileAsyncWasmPlugin {
-  export { Chunk, Compiler };
-}
-type Chunk = import('../Chunk');
-type Compiler = import('../Compiler');
+import type Compiler from "../Compiler";

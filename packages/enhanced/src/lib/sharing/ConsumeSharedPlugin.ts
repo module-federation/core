@@ -29,23 +29,23 @@ import {
 import type {
   ResolveOptionsWithDependencyType,
   ResolverWithOptions,
-} from 'webpack/lib/ResolverFactory';
+} from 'webpack/lib/resolve/ResolverFactory';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import ShareRuntimeModule from './ShareRuntimeModule';
-import type { SemVerRange } from 'webpack/lib/util/semver';
-import type { InputFileSystem } from 'webpack/lib/util/fs';
-import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
-import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
+import type { SemVerRange } from 'webpack/lib/sharing/semver';
+import type { InputFileSystem } from 'webpack/lib/fs/fs';
+import type { ResolveData } from 'webpack/lib/module/NormalModuleFactory';
+import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/module/ModuleFactory';
 import type { ConsumeOptions } from '@module-federation/sdk';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
 const { satisfy, parseRange } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/util/semver');
+) as typeof import('webpack/lib/sharing/semver');
 import {
   addSingletonFilterWarning,
   testRequestFilters,

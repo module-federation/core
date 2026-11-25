@@ -13,7 +13,7 @@ const { Dependency } = require(
 import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
-} from 'webpack/lib/Dependency';
+} from 'webpack';
 
 class ProvideSharedDependency extends Dependency {
   shareScope: string | string[];

@@ -60,18 +60,28 @@ class FederationRuntimeModule extends RuntimeModule {
         } else {
           matcher = hasJsMatcher('chunkId');
         }
-        const outputName = this.compilation.getPath(
-          jsModulePlugin.getChunkFilenameTemplate(
-            this.chunk,
-            this.compilation.outputOptions,
-          ),
-          { chunk: this.chunk, contentHashType: 'javascript' },
-        );
-        rootOutputDir = getUndoPath(
-          outputName,
-          this.compilation.outputOptions.path || '',
-          false,
-        );
+        const { runtimeTemplate } = this.compilation;
+        // Webpack generates runtime modules for hashing before chunk hashes
+        // exist. From 5.110, chunkRootOutputDir avoids resolving the hash.
+        if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
+          rootOutputDir = runtimeTemplate.chunkRootOutputDir(this.chunk, false);
+        } else {
+          // Older webpack ignores an error in that first pass and generates
+          // again once hashes exist, so the real filename gives the real depth,
+          // even for a hash digest that contains `/`.
+          const outputName = this.compilation.getPath(
+            jsModulePlugin.getChunkFilenameTemplate(
+              this.chunk,
+              this.compilation.outputOptions,
+            ),
+            { chunk: this.chunk, contentHashType: 'javascript' },
+          );
+          rootOutputDir = getUndoPath(
+            outputName,
+            this.compilation.outputOptions.path || '',
+            false,
+          );
+        }
       }
     }
 

@@ -4,7 +4,7 @@
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
-import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
+import type { ResolveOptionsWithDependencyType } from 'webpack/lib/resolve/ResolverFactory';
 import type { ConsumeOptions } from '@module-federation/sdk';
 
 const ModuleNotFoundError = require(

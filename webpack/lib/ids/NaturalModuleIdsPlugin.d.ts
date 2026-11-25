@@ -1,13 +1,10 @@
 export = NaturalModuleIdsPlugin;
 declare class NaturalModuleIdsPlugin {
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
-declare namespace NaturalModuleIdsPlugin {
-  export { Compiler };
-}
-type Compiler = import('../Compiler');
+import type Compiler from "../Compiler";
