@@ -1,8 +1,11 @@
 import type { ModuleFederation } from '@module-federation/runtime';
 import type { Remote, RemoteInfo } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
-import { createLogger, isDebugMode } from '@module-federation/sdk';
 import { clearContainerCache } from '@module-federation/webpack-bundler-runtime/clear-cache';
+import {
+  debugNodeLifecycle,
+  isNodeLifecycleDebugEnabled,
+} from './debug';
 import {
   forEachSharedRecord,
   getRemoteSharedOwnership,
@@ -10,8 +13,6 @@ import {
   retireShareScope,
 } from './share';
 import type { NodeFederation } from './symbols';
-
-const lifecycleLogger = createLogger('[ MF Node Lifecycle ]');
 
 export function prepareNodeRemotes(
   host: ModuleFederation,
@@ -157,24 +158,27 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
           if (match.name === target.name)
             delete host.remoteHandler.idToRemoteMap[id];
       };
-      const usedElsewhere = instances.some(
-        (other) =>
-          other !== host &&
-          [...other.moduleCache.values()].some(
-            (value) =>
-              (value.remoteEntryExports &&
-                entries.has(value.remoteEntryExports)) ||
-              (value.lib && entries.has(value.lib)) ||
-              (provider &&
-                helpers.global.getRemoteFederationInstance(value.remoteInfo, [
-                  provider,
-                ])),
-          ),
-      );
+      const debugEnabled = isNodeLifecycleDebugEnabled();
+      const holdsTarget = (other: ModuleFederation) =>
+        other !== host &&
+        [...other.moduleCache.values()].some(
+          (value) =>
+            (value.remoteEntryExports &&
+              entries.has(value.remoteEntryExports)) ||
+            (value.lib && entries.has(value.lib)) ||
+            (provider &&
+              helpers.global.getRemoteFederationInstance(value.remoteInfo, [
+                provider,
+              ])),
+        );
+      const usedElsewhere = instances.some(holdsTarget);
       if (usedElsewhere) {
-        if (isDebugMode()) {
-          lifecycleLogger.debug(
-            `retain remote=${target.name} host=${host.name} reason=usedElsewhere`,
+        if (debugEnabled) {
+          const holders = [
+            ...new Set(instances.filter(holdsTarget).map((other) => other.name)),
+          ];
+          debugNodeLifecycle(
+            `retain remote=${target.name} host=${host.name} reason=usedElsewhere holders=${holders.join(',')}`,
           );
         }
         return releaseLocal();
@@ -182,19 +186,19 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
 
       const scopes = helpers.share.getGlobalShareScope();
       let preserveShared = false;
-      const retainedShared: string[] = [];
+      const retainedShared = debugEnabled ? ([] as string[]) : undefined;
       const releaseShared: Array<() => void> = [];
       forEachSharedRecord(scopes, (shared, versions, version, _id, pkgName) => {
         if (!ownership.owns(shared)) return;
         if (ownership.sharedWithPeer(shared)) {
           preserveShared = true;
-          if (isDebugMode()) retainedShared.push(`${pkgName}@${version}(peer)`);
+          if (retainedShared) retainedShared.push(`${pkgName}@${version}(peer)`);
           return;
         }
         const useIn = shared.useIn.filter((name) => name !== shared.from);
         if (useIn.length || (shared.loading && !shared.loaded)) {
           preserveShared = true;
-          if (isDebugMode()) {
+          if (retainedShared) {
             const detail = useIn.length
               ? `useIn=${useIn.join(',')}`
               : 'loading';
@@ -222,15 +226,16 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
       delete globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__[
         helpers.utils.getRemoteEntryUniqueKey(info)
       ];
+      if (debugEnabled && preserveShared) {
+        const providerField = provider ? ` provider=${provider.name}` : '';
+        debugNodeLifecycle(
+          `retain remote=${target.name} host=${host.name}${providerField} reason=preserveShared shared=${retainedShared!.join(',')}`,
+        );
+      }
       if (provider) {
         retireShareScope(provider.shareScopeMap);
         if (preserveShared) {
           host.retainedProviders.add(provider);
-          if (isDebugMode()) {
-            lifecycleLogger.debug(
-              `retain remote=${target.name} host=${host.name} provider=${provider.name} reason=preserveShared shared=${retainedShared.join(',')}`,
-            );
-          }
         } else {
           provider.shareScopeMap = {};
           delete scopes[ownership.id];
