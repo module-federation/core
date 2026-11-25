@@ -213,11 +213,17 @@ export default class IndependentSharedPlugin {
 
   private createEntry(context: string) {
     const { sharedOptions } = this;
-    const entryContent = sharedOptions.reduce((acc, cur) => {
-      if (cur[1].import === false) return acc;
-      const request = cur[1].import || cur[0];
-      return `${acc}import ${JSON.stringify(request.startsWith('.') ? path.resolve(context, request) : request)};\n`;
-    }, '');
+    const entryContent = sharedOptions.reduce(
+      (acc, [shareName, shareConfig]) => {
+        if (shareConfig.import === false) return acc;
+        const request = shareConfig.import || shareName;
+        const resolvedRequest = request.startsWith('.')
+          ? path.resolve(context, request)
+          : request;
+        return `${acc}import ${JSON.stringify(resolvedRequest)};\n`;
+      },
+      '',
+    );
     const entryPath = path.resolve(
       context,
       'node_modules',

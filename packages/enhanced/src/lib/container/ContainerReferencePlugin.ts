@@ -5,7 +5,7 @@
 import type { Compiler } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
-// import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+// import * as RuntimeGlobals from 'webpack/lib/runtime/RuntimeGlobals';
 import FallbackDependency from './FallbackDependency';
 import FallbackItemDependency from './FallbackItemDependency';
 import FallbackModuleFactory from './FallbackModuleFactory';

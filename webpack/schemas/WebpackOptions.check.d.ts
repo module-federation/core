@@ -1,9 +1,8 @@
-/*
- * This file was automatically generated.
- * DO NOT MODIFY BY HAND.
- * Run `yarn fix:special` to update
- */
-declare const check: (
-  options: import('../declarations/WebpackOptions').WebpackOptions,
-) => boolean;
-export = check;
+export = Y;
+declare function Y(c: any, { instancePath: y, parentData, parentDataProperty, rootData }?: {
+    instancePath?: string;
+    rootData?: any;
+}): boolean;
+declare namespace Y {
+    export { Y as default };
+}

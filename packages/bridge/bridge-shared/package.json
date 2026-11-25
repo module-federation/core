@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-shared",
-  "version": "2.9.3",
+  "version": "2.9.4",
   "publishConfig": {
     "access": "public"
   },

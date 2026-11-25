@@ -1,5 +1,32 @@
 # @module-federation/enhanced
 
+## 2.9.4
+
+### Patch Changes
+
+- 28187fb: Correct the minimum Webpack peer dependency to 5.64.4 to match the internal APIs already required by the enhanced plugin.
+- 28187fb: Record destructured properties of a shared module's default import as export names in tree-shaking `usedExports`. The plugin stored webpack's destructuring records, including source locations, in the injected runtime data and the stats manifest.
+- 28187fb: Support webpack 5.112's relocated internals while preserving older layouts. Resolve each candidate through the caller's resolver and accept it only inside the caller's webpack package.
+
+  Resolve the active compiler in CommonJS and ES modules. `getWebpackPath` returns the entry of the webpack package that contains the compiler, or an empty string for a bundled compiler. Keep the SDK browser entry free of Node-only resolver dependencies.
+
+  Generate output paths with webpack's `chunkRootOutputDir` on 5.110 and later. On older webpack, use the real chunk filename so hashes containing `/` have the correct depth. This applies to the federation runtime and the Node chunk loading and public path runtime modules.
+
+  For async startup with ESM output, check `output.module` instead of `experiments.outputModule`, which webpack 5.112 ignores. Detect top-level await from `output.environment.topLevelAwait` on webpack 5.111 and later, and treat it as available on 5.102 to 5.110, where webpack removed `experiments.topLevelAwait`. Use namespace imports in independent shared builds so packages without a default export compile.
+
+- Updated dependencies [28187fb]
+  - @module-federation/sdk@2.9.4
+  - @module-federation/bridge-react-webpack-plugin@2.9.4
+  - @module-federation/cli@2.9.4
+  - @module-federation/dts-plugin@2.9.4
+  - @module-federation/managers@2.9.4
+  - @module-federation/manifest@2.9.4
+  - @module-federation/rspack@2.9.4
+  - @module-federation/webpack-bundler-runtime@2.9.4
+  - @module-federation/runtime-tools@2.9.4
+  - @module-federation/inject-external-runtime-core-plugin@2.9.4
+  - @module-federation/error-codes@2.9.4
+
 ## 2.9.3
 
 ### Patch Changes

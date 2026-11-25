@@ -1,14 +1,14 @@
 # Descripción general de React Bridge
 
-`@module-federation/bridge-react` es una potente solución de micro-frontends diseñada específicamente para aplicaciones React. Gracias a sus capacidades de renderizado entre frameworks y de coordinación de rutas, puedes exportar y cargar fácilmente aplicaciones o módulos React como aplicaciones independientes.
+Con `@module-federation/bridge-react` puedes compartir una aplicación React y cargarla dentro de otra aplicación. El paquete se encarga del renderizado y de coordinar las rutas de ambas aplicaciones, incluso si usan distintos frameworks.
 
 ## Funcionalidades principales
 
 ### Capacidades básicas
 
 - **🚀 Exportación de módulos a nivel de aplicación**: usa `createBridgeComponent` para envolver aplicaciones React completas como módulos que se pueden cargar de forma remota
-- **📦 Carga de módulos a nivel de aplicación**: integra sin fricciones aplicaciones React remotas en aplicaciones host mediante `createRemoteAppComponent`
-- **🎯 Lazy loading a nivel de componente**: admite `createLazyComponent` para una carga diferida granular a nivel de componente
+- **Carga de módulos a nivel de aplicación**: carga aplicaciones React remotas en el host con `createRemoteAppComponent`
+- **Carga diferida de componentes**: usa `createLazyComponent` para cargar cada componente cuando lo necesites
 
 ### Funcionalidades
 
@@ -20,7 +20,7 @@
 ### ¿Por qué es importante?
 
 - **Actualización progresiva**: permite que distintos equipos actualicen la versión de React a su propio ritmo
-- **Integración sin interrupciones**: las aplicaciones nuevas y las heredadas pueden funcionar juntas sin fricciones y sin necesidad de actualizaciones sincronizadas
+- **Integración con aplicaciones existentes**: las aplicaciones nuevas y las antiguas pueden funcionar juntas sin tener que actualizarse a la vez
 - **Gestión de la deuda técnica**: evita los problemas de integración causados por inconsistencias de versiones
 - **Autonomía de los equipos**: cada equipo puede elegir de forma independiente la versión de React más adecuada
 
