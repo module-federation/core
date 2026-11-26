@@ -10,6 +10,7 @@ import SharedUsedExportsOptimizerRuntimeModule, {
 } from './SharedUsedExportsOptimizerRuntimeModule';
 import { NormalizedSharedOptions } from '../SharePlugin';
 import ConsumeSharedModule from '../ConsumeSharedModule';
+import { isInheritedChildCompilation } from '../../container/runtime/utils';
 import ProvideSharedModule from '../ProvideSharedModule';
 import SharedEntryModule from './SharedContainerPlugin/SharedEntryModule';
 
@@ -114,6 +115,7 @@ export default class SharedUsedExportsOptimizerPlugin implements WebpackPluginIn
     compiler.hooks.compilation.tap(
       'SharedUsedExportsOptimizerPlugin',
       (compilation) => {
+        if (isInheritedChildCompilation(compiler, compilation)) return;
         // collect referenced export
         compilation.hooks.dependencyReferencedExports.tap(
           'SharedUsedExportsOptimizerPlugin',

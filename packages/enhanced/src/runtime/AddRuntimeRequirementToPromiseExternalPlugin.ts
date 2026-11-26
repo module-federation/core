@@ -1,10 +1,12 @@
 import type { Compiler } from 'webpack';
+import { isInheritedChildCompilation } from '../lib/container/runtime/utils';
 
 export class AddRuntimeRequirementToPromiseExternal {
   apply(compiler: Compiler) {
     compiler.hooks.compilation.tap(
       'AddRuntimeRequirementToPromiseExternal',
       (compilation) => {
+        if (isInheritedChildCompilation(compiler, compilation)) return;
         const { RuntimeGlobals } = compiler.webpack;
         compilation.hooks.additionalModuleRuntimeRequirements.tap(
           'AddRuntimeRequirementToPromiseExternal',

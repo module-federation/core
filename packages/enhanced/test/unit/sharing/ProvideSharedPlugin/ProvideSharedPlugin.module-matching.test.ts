@@ -32,6 +32,16 @@ describe('ProvideSharedPlugin', () => {
     let mockNormalModuleFactory: MockNormalModuleFactory;
     let plugin: InstanceType<typeof ProvideSharedPlugin>;
 
+    // Plugins skip compilations that belong to another (child) compiler, so the mock
+    // compilation must point at the compiler the plugin is applied to.
+    const applyWithCompilation = (
+      target: InstanceType<typeof ProvideSharedPlugin>,
+      compiler: any,
+    ) => {
+      (mockCompilation as any).compiler = compiler;
+      target.apply(compiler);
+    };
+
     beforeEach(() => {
       mockCompilation = createMockCompilation().mockCompilation;
       mockNormalModuleFactory = {
@@ -158,7 +168,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -219,7 +229,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -280,7 +290,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -345,7 +355,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -410,7 +420,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -475,7 +485,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -537,7 +547,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -596,7 +606,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -661,7 +671,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -726,7 +736,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -789,7 +799,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(
@@ -847,7 +857,7 @@ describe('ProvideSharedPlugin', () => {
           },
         );
 
-        plugin.apply({
+        applyWithCompilation(plugin, {
           hooks: {
             compilation: {
               tap: rs.fn(

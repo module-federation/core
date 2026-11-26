@@ -287,6 +287,7 @@ describe('ContainerReferencePlugin', () => {
 
       // Use createMockCompilation to get a properly structured mock compilation
       const { mockCompilation } = createMockCompilation();
+      mockCompilation.compiler = mockCompiler;
 
       // Create a runtime hook that has a for method
       const runtimeRequirementInTree = {
@@ -374,6 +375,7 @@ describe('ContainerReferencePlugin', () => {
 
       // Use createMockCompilation to get a properly structured mock compilation
       const { mockCompilation } = createMockCompilation();
+      mockCompilation.compiler = mockCompiler;
 
       // Create a runtime hook that has a for method
       const runtimeRequirementInTree = {
@@ -421,6 +423,7 @@ describe('ContainerReferencePlugin', () => {
 
       // Use createMockCompilation to get a properly structured mock compilation
       const { mockCompilation } = createMockCompilation();
+      mockCompilation.compiler = mockCompiler;
 
       // Create a runtime hook that has a for method
       const runtimeRequirementInTree = {

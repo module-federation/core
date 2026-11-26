@@ -1,4 +1,5 @@
 import type { Compiler } from 'webpack';
+import { isInheritedChildCompilation } from '../../container/runtime/utils';
 import * as fs from 'fs';
 import * as path from 'path';
 import { NormalizedSharedOptions } from '../SharePlugin';
@@ -116,6 +117,7 @@ class CollectSharedEntryPlugin {
     compiler.hooks.compilation.tap(
       'CollectSharedEntryPlugin',
       (compilation) => {
+        if (isInheritedChildCompilation(compiler, compilation)) return;
         compilation.hooks.finishModules.tap(
           'CollectSharedEntryPlugin',
           (modules) => {

@@ -9,6 +9,7 @@ const { getUndoPath } = require(
 import getFederationGlobal from './getFederationGlobal';
 import { getDeclaredShareScopes } from '../../sharing/getDeclaredShareScopes';
 import {
+  FEDERATION_RUNTIME_MODULE_NAME,
   getFederationGlobalScope,
   type NormalizedRuntimeInitOptionsWithOutShared,
 } from './utils';
@@ -27,7 +28,7 @@ class FederationRuntimeModule extends RuntimeModule {
     containerName: string,
     initOptionsWithoutShared: NormalizedRuntimeInitOptionsWithOutShared,
   ) {
-    super('federation runtime', RuntimeModule.STAGE_NORMAL - 1);
+    super(FEDERATION_RUNTIME_MODULE_NAME, RuntimeModule.STAGE_NORMAL - 1);
     this.runtimeRequirements = runtimeRequirements;
     this.containerName = containerName;
     this.initOptionsWithoutShared = initOptionsWithoutShared;

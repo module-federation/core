@@ -69,6 +69,7 @@ describe('ProvideSharedPlugin', () => {
       mockCompiler = createMockCompiler() as MockCompiler;
       const compilationResult = createMockCompilation();
       mockCompilation = compilationResult.mockCompilation;
+      mockCompilation.compiler = mockCompiler;
 
       // Add ProvideSharedDependency to dependencyFactories map
       mockCompilation.dependencyFactories = new Map();
@@ -431,6 +432,7 @@ describe('ProvideSharedPlugin', () => {
       mockCompiler = createMockCompiler() as MockCompiler;
       const compilationResult = createMockCompilation();
       mockCompilation = compilationResult.mockCompilation;
+      mockCompilation.compiler = mockCompiler;
 
       // Add ProvideSharedDependency to dependencyFactories map
       mockCompilation.dependencyFactories = new Map();

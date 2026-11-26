@@ -23,6 +23,7 @@ type ProvideSharedPluginOptions =
 type ProvidesConfig = provideSharedPlugin.ProvidesConfig;
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
+import { isInheritedChildCompilation } from '../container/runtime/utils';
 import path from 'path';
 const { satisfy, parseRange } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
@@ -144,6 +145,7 @@ class ProvideSharedPlugin {
     compiler.hooks.compilation.tap(
       'ProvideSharedPlugin',
       (compilation: Compilation, { normalModuleFactory }) => {
+        if (isInheritedChildCompilation(compiler, compilation)) return;
         const resolvedProvideMap: ResolvedProvideMap = new Map();
         const matchProvides: Map<string, ProvidesConfig> = new Map();
         const prefixMatchProvides: Map<string, ProvidesConfig> = new Map();
@@ -478,6 +480,7 @@ class ProvideSharedPlugin {
     compiler.hooks.finishMake.tapPromise(
       'ProvideSharedPlugin',
       async (compilation: Compilation) => {
+        if (isInheritedChildCompilation(compiler, compilation)) return;
         const resolvedProvideMap = compilationData.get(compilation);
         if (!resolvedProvideMap) return;
 
@@ -544,6 +547,7 @@ class ProvideSharedPlugin {
     compiler.hooks.compilation.tap(
       'ProvideSharedPlugin',
       (compilation: Compilation, { normalModuleFactory }) => {
+        if (isInheritedChildCompilation(compiler, compilation)) return;
         compilation.dependencyFactories.set(
           ProvideForSharedDependency,
           normalModuleFactory,
