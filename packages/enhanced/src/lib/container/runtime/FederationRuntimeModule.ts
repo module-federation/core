@@ -7,7 +7,11 @@ const { getUndoPath } = require(
 ) as typeof import('webpack/lib/util/identifier');
 // inspired by react-refresh-webpack-plugin
 import getFederationGlobal from './getFederationGlobal';
-import type { NormalizedRuntimeInitOptionsWithOutShared } from './utils';
+import { getDeclaredShareScopes } from '../../sharing/getDeclaredShareScopes';
+import {
+  getFederationGlobalScope,
+  type NormalizedRuntimeInitOptionsWithOutShared,
+} from './utils';
 
 const { RuntimeModule, RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -81,6 +85,13 @@ class FederationRuntimeModule extends RuntimeModule {
       }
     }
 
+    const results = this.compilation?.codeGenerationResults;
+    const scopes =
+      this.chunk &&
+      this.chunkGraph &&
+      results &&
+      getDeclaredShareScopes(this.chunk, this.chunkGraph, results);
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
     return Template.asString([
       getFederationGlobal(
         Template,
@@ -89,6 +100,14 @@ class FederationRuntimeModule extends RuntimeModule {
         rootOutputDir,
         this.initOptionsWithoutShared,
       ),
+      ...(scopes
+        ? [`${federationGlobal}.shareScopeDispatch = 'declared';`]
+        : []),
+      ...(scopes?.length
+        ? [
+            `${federationGlobal}.additionalShareScopeKeys = ${JSON.stringify(scopes)};`,
+          ]
+        : []),
     ]);
   }
 }

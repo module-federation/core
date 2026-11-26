@@ -219,6 +219,9 @@ export interface GetSharedFallbackGetterOptions {
 }
 
 export interface Federation {
+  // The build opts into ordered dispatch on its own federation object.
+  shareScopeDispatch?: 'declared';
+  additionalShareScopeKeys?: string[];
   runtime?: typeof runtime;
   instance?: runtime.ModuleFederation;
   initOptions?: InitOptions;

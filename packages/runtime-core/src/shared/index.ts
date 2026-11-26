@@ -591,7 +591,13 @@ export class SharedHandler {
       strategy === 'version-first'
     ) {
       host.options.remotes.forEach((remote) => {
-        if (remote.shareScope === shareScopeName) {
+        const { shareScope } = remote;
+        if (
+          shareScope === shareScopeName ||
+          (extraOptions?.context?.shareScopeDispatch === 'declared' &&
+            Array.isArray(shareScope) &&
+            shareScope.includes(shareScopeName))
+        ) {
           promises.push(initRemoteModule(remote.name));
         }
       });
