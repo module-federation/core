@@ -326,7 +326,7 @@ const releasedEnhancedPath = nativeRequire.resolve(
 
 type Bundler = 'Webpack' | 'Rspack';
 type Release = 'old' | 'new' | 'layered';
-type Route = [name: string, scope: string];
+type Route = [name: keyof typeof promiseRemotes, scope: string];
 type Fleet = {
   name: string;
   routes: Route[];
@@ -402,9 +402,17 @@ function singleton(importPath: string, version: string) {
   };
 }
 
-function promiseRemote(url: string, name: string) {
-  return `(new Promise((resolve, reject) => __webpack_require__.l(${JSON.stringify(url)}, () => window[${JSON.stringify(name)}] ? resolve(window[${JSON.stringify(name)}]) : reject(new Error('Remote entry did not load: ${name}')), ${JSON.stringify(name)})))`;
-}
+const loadRemoteEntry = `(name => new Promise((resolve, reject) => {
+  const url = new URL('../' + name + '/remoteEntry.js', __webpack_require__.p);
+  __webpack_require__.l(url.href, () => {
+    if (window[name]) resolve(window[name]);
+    else reject(new Error('Remote entry did not load: ' + name));
+  }, name);
+}))`;
+const promiseRemotes = {
+  first: `${loadRemoteEntry}('first')`,
+  second: `${loadRemoteEntry}('second')`,
+};
 
 async function buildApp({
   directory,
@@ -463,10 +471,7 @@ async function buildApp({
           routes.map(([remote, shareScope]) => [
             remote,
             {
-              external: promiseRemote(
-                `${origin}${output}/${remote}/remoteEntry.js`,
-                remote,
-              ),
+              external: promiseRemotes[remote],
               shareScope,
             },
           ]),
