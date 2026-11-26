@@ -16,7 +16,11 @@ import type FallbackModule from '../../../src/lib/container/FallbackModule';
 
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 const mocks = rs.hoisted(() => ({
-  mockNormalizeWebpackPath: rs.fn((path: string) => path),
+  mockNormalizeWebpackPath: rs.fn(
+    rs.requireActual<
+      typeof import('@module-federation/sdk/normalize-webpack-path')
+    >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
+  ),
   mockGetFederationGlobalScope: rs.fn(() => '__FEDERATION__'),
   mockExtractUrlAndGlobal: rs.fn(),
   mockTemplateAsString: rs.fn((strings: string[]) => strings.join('\n')),
@@ -32,6 +36,10 @@ rs.mock('../../../src/lib/container/runtime/utils', () => ({
 }));
 rs.mock(
   'webpack/lib/util/extractUrlAndGlobal',
+  () => mocks.mockExtractUrlAndGlobal,
+);
+rs.mock(
+  'webpack/lib/externals/extractUrlAndGlobal',
   () => mocks.mockExtractUrlAndGlobal,
 );
 

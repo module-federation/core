@@ -1,7 +1,10 @@
 // Use test globals (describe/it/expect) via test.globals=true
 describe('warmup', () => {
   it('should warmup webpack', async () => {
-    const webpack = require('webpack');
+    const {
+      normalizeWebpackPath,
+    } = require('@module-federation/sdk/normalize-webpack-path');
+    const webpack = require(normalizeWebpackPath('webpack'));
     const END = new Error('end warmup');
     await new Promise((resolve, reject) => {
       webpack(
