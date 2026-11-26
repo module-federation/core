@@ -36,6 +36,9 @@ import {
   directShare,
   shouldUseTreeShaking,
   addUseIn,
+  getSharedVersions,
+  getOwnEntry,
+  defineEntry,
 } from '../utils/share';
 import {
   assert,
@@ -136,7 +139,7 @@ export class SharedHandler {
   constructor(host: ModuleFederation) {
     this.host = host;
     this.shareScopeMap = {};
-    this.initTokens = {};
+    this.initTokens = Object.create(null);
     this._setGlobalShareScopeMap(host.options);
   }
 
@@ -236,7 +239,11 @@ export class SharedHandler {
             pkgName: sharedKey,
             shared: sharedVal,
           });
-          const registeredShared = this.shareScopeMap[sc]?.[sharedKey];
+          const registeredShared = getSharedVersions(
+            getOwnEntry(this.shareScopeMap, sc),
+            sharedKey,
+            sharedVal.shareConfig.layer,
+          );
           const previousAtVersion = registeredShared?.[sharedVal.version];
           if (!registeredShared) {
             this.setShared({
@@ -252,8 +259,11 @@ export class SharedHandler {
             scope: sc,
             shared: sharedVal,
             previousShared: previousAtVersion,
-            registeredShared:
-              this.shareScopeMap[sc]?.[sharedKey]?.[sharedVal.version],
+            registeredShared: getSharedVersions(
+              getOwnEntry(this.shareScopeMap, sc),
+              sharedKey,
+              sharedVal.shareConfig.layer,
+            )?.[sharedVal.version],
             trigger: 'runtime',
           });
         });
@@ -488,18 +498,19 @@ export class SharedHandler {
     const shareScope = this.shareScopeMap;
     const hostName = host.options.name;
     // Creates a new share scope if necessary
-    if (!shareScope[shareScopeName]) {
-      shareScope[shareScopeName] = {};
-    }
+    const scope =
+      getOwnEntry(shareScope, shareScopeName) ??
+      defineEntry(shareScope, shareScopeName, {});
     // Executes all initialization snippets from all accessible modules
-    const scope = shareScope[shareScopeName];
     const register = (name: string, shared: Shared) => {
       const { version, eager } = shared;
-      scope[name] = scope[name] || {};
-      const versions = scope[name];
-      const existingShared = versions[version];
-      const activeVersion: Shared =
-        existingShared && (directShare(existingShared) as Shared);
+      const versions = getSharedVersions(
+        scope,
+        name,
+        shared.shareConfig.layer,
+        true,
+      )!;
+      const activeVersion = getOwnEntry(versions, version);
       const activeVersionEager = Boolean(
         activeVersion &&
         (('eager' in activeVersion && activeVersion.eager) ||
@@ -511,15 +522,16 @@ export class SharedHandler {
           !activeVersion.loaded &&
           (Boolean(!eager) !== !activeVersionEager
             ? eager
-            : hostName > versions[version].from)),
+            : hostName > activeVersion.from)),
       );
       if (shouldReplace) {
-        versions[version] = shared;
+        if (activeVersion) versions[version] = shared;
+        else defineEntry(versions, version, shared);
       }
       this.emitAfterRegisterShare(name, {
         scope: shareScopeName,
         shared,
-        previousShared: existingShared,
+        previousShared: activeVersion,
         registeredShared: versions[version],
         trigger,
       });
@@ -743,7 +755,7 @@ export class SharedHandler {
     extraOptions: { hostShareScopeMap?: ShareScopeMap } = {},
   ): void {
     const { host } = this;
-    this.shareScopeMap[scopeName] = shareScope;
+    defineEntry(this.shareScopeMap, scopeName, shareScope);
     this.hooks.lifecycle.initContainerShareScopeMap.emit({
       shareScope,
       options: host.options,
@@ -794,23 +806,24 @@ export class SharedHandler {
       merge(targetShared, 'lib', lib);
     };
     scopes.forEach((sc) => {
-      if (!this.shareScopeMap[sc]) {
-        this.shareScopeMap[sc] = {};
-      }
-      if (!this.shareScopeMap[sc][pkgName]) {
-        this.shareScopeMap[sc][pkgName] = {};
-      }
+      const scope =
+        getOwnEntry(this.shareScopeMap, sc) ??
+        defineEntry(this.shareScopeMap, sc, {});
+      const versions = getSharedVersions(
+        scope,
+        pkgName,
+        shared.shareConfig?.layer,
+        true,
+      )!;
 
-      if (!this.shareScopeMap[sc][pkgName][version]) {
-        this.shareScopeMap[sc][pkgName][version] = {
+      const registeredShared =
+        getOwnEntry(versions, version) ??
+        defineEntry(versions, version, {
           version,
           scope: [sc],
           ...shareInfo,
           lib,
-        };
-      }
-
-      const registeredShared = this.shareScopeMap[sc][pkgName][version];
+        });
       mergeAttrs(registeredShared);
       if (from && registeredShared.from !== from) {
         registeredShared.from = from;

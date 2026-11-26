@@ -28,7 +28,7 @@ export default class SharedEntryModuleFactory extends ModuleFactory {
 
     callback(null, {
       // @ts-ignore
-      module: new SharedEntryModule(dep.name, dep.request),
+      module: new SharedEntryModule(dep.name, dep.request, dep.layer),
     });
   }
 }

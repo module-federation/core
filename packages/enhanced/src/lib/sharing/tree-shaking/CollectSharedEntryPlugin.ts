@@ -8,8 +8,7 @@ const PLUGIN_NAME = 'CollectSharedEntryPlugin';
 export type ShareRequestsMap = Record<
   string,
   {
-    // request, version
-    requests: [string, string][];
+    requests: [resource: string, version: string, optionIndex?: number][];
   }
 >;
 
@@ -92,55 +91,74 @@ class CollectSharedEntryPlugin {
     this._collectedEntries = {};
   }
 
-  private getMatchedSharedOption(request: string) {
-    const matchedSharedOption = this.sharedOptions.find(
-      ([sharedName, sharedConfig]) =>
-        request === sharedName ||
-        request === sharedConfig.import ||
-        request === sharedConfig.request ||
-        request === sharedConfig.shareKey,
-    );
-    return matchedSharedOption;
-  }
-
-  private addRequest(sharedName: string, resource: string, version: string) {
+  private addRequest(
+    sharedName: string,
+    resource: string,
+    version: string,
+    optionIndex: number,
+  ) {
     this._collectedEntries[sharedName] ||= { requests: [] };
     const requests = this._collectedEntries[sharedName].requests;
-    if (requests.some(([, existingVersion]) => existingVersion === version)) {
+    if (
+      requests.some(
+        ([existingResource, existingVersion, existingIndex]) =>
+          existingResource === resource &&
+          existingVersion === version &&
+          existingIndex === optionIndex,
+      )
+    ) {
       return;
     }
-    requests.push([resource, version]);
+    requests.push([resource, version, optionIndex]);
   }
 
   apply(compiler: Compiler): void {
     compiler.hooks.compilation.tap(
       'CollectSharedEntryPlugin',
-      (_compilation, { normalModuleFactory }) => {
-        this.resetData();
-        normalModuleFactory.hooks.module.tap(
+      (compilation) => {
+        compilation.hooks.finishModules.tap(
           'CollectSharedEntryPlugin',
-          (module, { resource }) => {
-            if (!resource || !('rawRequest' in module)) {
-              return module;
+          (modules) => {
+            this.resetData();
+            for (const module of modules) {
+              if (
+                !('resource' in module) ||
+                typeof module.resource !== 'string' ||
+                !('rawRequest' in module)
+              )
+                continue;
+              const resource = module.resource;
+              this.sharedOptions.forEach(
+                ([sharedName, sharedConfig], optionIndex) => {
+                  const request = module.rawRequest;
+                  if (
+                    sharedConfig.import === false ||
+                    (module.layer ?? undefined) !== sharedConfig.layer ||
+                    ![
+                      sharedName,
+                      sharedConfig.import,
+                      sharedConfig.request,
+                      sharedConfig.shareKey,
+                    ].includes(request as string)
+                  ) {
+                    return;
+                  }
+                  const configuredVersion =
+                    typeof sharedConfig.version === 'string'
+                      ? sharedConfig.version
+                      : undefined;
+                  const sharedVersion =
+                    configuredVersion || inferPkgVersionFromResource(resource);
+                  if (sharedVersion)
+                    this.addRequest(
+                      sharedName,
+                      resource,
+                      sharedVersion,
+                      optionIndex,
+                    );
+                },
+              );
             }
-            const matchedSharedOption = this.getMatchedSharedOption(
-              module.rawRequest as string,
-            );
-            if (!matchedSharedOption) {
-              return module;
-            }
-            const [sharedName, sharedConfig] = matchedSharedOption;
-            const configuredVersion =
-              typeof sharedConfig.version === 'string'
-                ? sharedConfig.version
-                : undefined;
-            const sharedVersion =
-              inferPkgVersionFromResource(resource) || configuredVersion;
-            if (!sharedVersion) {
-              return module;
-            }
-            this.addRequest(sharedName, resource, sharedVersion);
-            return module;
           },
         );
       },

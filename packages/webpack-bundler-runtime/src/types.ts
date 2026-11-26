@@ -103,6 +103,7 @@ export type InitializeSharingData = WithStatus<{
       name: string;
       version: string;
       factory: SharedGetter;
+      layer?: string;
       eager?: boolean;
       singleton?: boolean;
       requiredVersion?: string;
@@ -211,6 +212,8 @@ export interface GetSharedFallbackGetterOptions {
   shareKey: string;
   factory: SharedGetter;
   version?: string;
+  scope?: string | string[];
+  layer?: string;
   webpackRequire: WebpackRequire;
   libraryType?: string;
 }
@@ -221,6 +224,7 @@ export interface Federation {
   initOptions?: InitOptions;
   installInitialConsumes?: (options: InstallInitialConsumesOptions) => any;
   bundlerRuntime?: {
+    supportsSharedIdentity?: boolean;
     remotes: (options: RemotesOptions) => void;
     consumes: (options: ConsumesOptions) => void;
     I: typeof initializeSharing;
@@ -252,5 +256,15 @@ export interface Federation {
   };
   libraryType?: string;
   // { react: [  [ react/19.0.0/index.js , 19.0.0, react_global_name,  ]  ] }
-  sharedFallback?: Record<string, Array<[string, string, string]>>;
+  sharedFallback?: Record<
+    string,
+    Array<
+      [
+        string,
+        string,
+        string,
+        { shareScope: string | string[]; layer?: string }?,
+      ]
+    >
+  >;
 }
