@@ -179,7 +179,12 @@ export function generateLoadingCode(
                   'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
                   'function installChunkCallback(error,chunk){',
                   Template.indent([
-                    'if(error) return reject(error);',
+                    'if(error) {',
+                    Template.indent([
+                      'if(installedChunks[chunkId] === installedChunkData) delete installedChunks[chunkId];',
+                      'return reject(error);',
+                    ]),
+                    '}',
                     'installChunk(chunk);',
                   ]),
                   '}',
