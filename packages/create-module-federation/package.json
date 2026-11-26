@@ -38,7 +38,7 @@
     "execa": "5.1.1",
     "minimist": "1.2.8",
     "rslog": "1.2.3",
-    "glob": "7.2.0",
+    "glob": "14.0.2",
     "handlebars": "4.7.10"
   },
   "devDependencies": {
