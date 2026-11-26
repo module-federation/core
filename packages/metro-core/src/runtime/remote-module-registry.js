@@ -1,4 +1,5 @@
 import {
+  getInstance,
   loadRemote,
   loadShare,
   loadShareSync,
@@ -6,6 +7,8 @@ import {
 
 const registry = {};
 const loading = {};
+// shared modules whose async load handed out a placeholder that isn't filled yet
+const pendingShared = new Set();
 
 const earlyModuleTest = __EARLY_MODULE_TEST__;
 
@@ -53,10 +56,15 @@ export async function loadSharedToRegistryAsync(id) {
     await promise;
   } else {
     registry[id] = {};
+    pendingShared.add(id);
     loading[id] = (async () => {
       const factory = await loadShare(id);
-      const sharedModule = factory();
-      cloneModule(sharedModule, registry[id]);
+      // a synchronous require may have loaded it in the meantime
+      if (!pendingShared.has(id)) {
+        return;
+      }
+      cloneModule(factory(), registry[id]);
+      pendingShared.delete(id);
     })();
     await loading[id];
   }
@@ -70,11 +78,27 @@ export function loadSharedToRegistrySync(id) {
   registry[id] = loading[id]();
 }
 
+// this container provides an eager shared module synchronously
+function isEagerShared(id) {
+  const shared = getInstance()?.options.shared[id];
+  return shared?.some(({ shareConfig }) => shareConfig?.eager) ?? false;
+}
+
 export function getModuleFromRegistry(id) {
   const module = registry[id];
 
   if (!module) {
     throw new Error(`Module ${id} not found in registry`);
+  }
+
+  // Only react and react-native load synchronously, but the host entry, or
+  // another shared module, can require any eager shared module before its
+  // async load finishes. Load it now instead of returning the empty
+  // placeholder. The module is cloned before the flag is cleared, so the
+  // async load still fills the placeholder if the factory throws.
+  if (pendingShared.has(id) && isEagerShared(id)) {
+    cloneModule(loadShareSync(id)(), module);
+    pendingShared.delete(id);
   }
 
   return module;
