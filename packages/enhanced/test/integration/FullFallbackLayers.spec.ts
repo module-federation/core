@@ -7,7 +7,10 @@ import path from 'node:path';
 const nativeRequire = process
   .getBuiltinModule('module')
   .createRequire(__filename);
-const webpack = nativeRequire('webpack');
+const { normalizeWebpackPath } = nativeRequire(
+  '@module-federation/sdk/normalize-webpack-path',
+);
+const webpack = nativeRequire(normalizeWebpackPath('webpack'));
 const { ModuleFederationPlugin } = nativeRequire('@module-federation/enhanced');
 const { JSDOM } = process
   .getBuiltinModule('module')

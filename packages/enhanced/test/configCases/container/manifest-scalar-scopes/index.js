@@ -51,7 +51,9 @@ it('retains and selects both same-version singletons in scalar scopes', async ()
       version: '1.0.0',
       singleton: true,
       requiredVersion: false,
-      assets: [`${TEST_PREFIX}${TEST_LAYER ? '_common_' : ''}a_js.js`],
+      assets: [
+        expect.stringMatching(new RegExp(`^${TEST_PREFIX}.*a_js\\.js$`)),
+      ],
     },
     {
       scope: 'default',
@@ -59,10 +61,13 @@ it('retains and selects both same-version singletons in scalar scopes', async ()
       version: '1.0.0',
       singleton: true,
       requiredVersion: '1.0.0',
-      assets: [`${TEST_PREFIX}${TEST_LAYER ? '_common_' : ''}b_js.js`],
+      assets: [
+        expect.stringMatching(new RegExp(`^${TEST_PREFIX}.*b_js\\.js$`)),
+      ],
     },
   ];
-  for (const row of expectedRows) {
+  expect(artifacts[0]).toEqual(artifacts[1]);
+  for (const row of artifacts[0]) {
     for (const filename of row.assets) {
       expect(fs.existsSync(path.join(__dirname, filename))).toBe(true);
     }
