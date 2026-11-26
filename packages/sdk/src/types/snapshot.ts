@@ -14,6 +14,8 @@ interface BasicModuleInfo {
   remotesInfo: Record<string, { matchedVersion: string }>;
   shared: Array<{
     sharedName: string;
+    layer?: string;
+    shareScope?: string | string[];
     fallback?: string;
     fallbackName?: string;
     fallbackType?: RemoteEntryType;

@@ -54,6 +54,7 @@ export type ExposeOptions = {
    * custom chunk name for the exposed module
    */
   name: string;
+  layer?: string;
 };
 
 class ContainerEntryModule extends Module {
@@ -173,7 +174,11 @@ class ContainerEntryModule extends Module {
       );
       let idx = 0;
       for (const request of options.import) {
-        const dep = new ContainerExposedDependency(name, request);
+        const dep = new ContainerExposedDependency(
+          name,
+          request,
+          options.layer,
+        );
         dep.loc = {
           name,
           index: idx++,

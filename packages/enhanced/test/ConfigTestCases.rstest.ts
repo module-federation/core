@@ -17,6 +17,13 @@ import {
 
 // Create a require function using __filename (available in CommonJS output mode)
 const nativeRequire = createRequire(__filename);
+// FEDERATION_WEBPACK_PATH selects one webpack for the harness and the plugins
+// under test, so a legacy webpack run does not mix two copies.
+const { normalizeWebpackPath } = nativeRequire(
+  '@module-federation/sdk/normalize-webpack-path',
+);
+const webpackEntry = normalizeWebpackPath('webpack');
+const { supportsWebpackFeature } = nativeRequire('./helpers/webpackFeatures');
 
 // 预热 webpack（与原逻辑一致）
 nativeRequire('./helpers/warmup-webpack');
@@ -30,7 +37,9 @@ const asModule = nativeRequire('./helpers/asModule');
 const filterInfraStructureErrors = nativeRequire(
   './helpers/infrastructureLogErrors',
 );
-const { parseResource } = nativeRequire('webpack/lib/util/identifier');
+const { parseResource } = nativeRequire(
+  normalizeWebpackPath('webpack/lib/util/identifier'),
+);
 
 const casesPath = path.join(__dirname, 'configCases');
 
@@ -324,6 +333,8 @@ export const describeCases = (config: any) => {
     for (const category of selectedCategories) {
       describe(category.name, () => {
         for (const testName of category.tests) {
+          if (config.includeTests && !config.includeTests.includes(testName))
+            continue;
           describe(testName, () => {
             const testDirectory = path.join(casesPath, category.name, testName);
             const filterPath = path.join(testDirectory, 'test.filter.js');
@@ -438,6 +449,7 @@ export const describeCases = (config: any) => {
                   };
                   opt.infrastructureLogging = {
                     debug: true,
+                    ...opt.infrastructureLogging,
                     console: createLogger(infraStructureLog),
                   };
                 }
@@ -528,7 +540,7 @@ export const describeCases = (config: any) => {
                     withLegacyTreeShakingBuildVersion(
                       () =>
                         new Promise<void>((innerResolve, innerReject) => {
-                          require('webpack')(options, (err: any) => {
+                          nativeRequire(webpackEntry)(options, (err: any) => {
                             const stderrOutput = stderr.toString();
                             const {
                               unhandled,
@@ -590,7 +602,7 @@ export const describeCases = (config: any) => {
                     withLegacyTreeShakingBuildVersion(
                       () =>
                         new Promise<void>((innerResolve, innerReject) => {
-                          require('webpack')(
+                          nativeRequire(webpackEntry)(
                             options,
                             (err: any, stats: any) => {
                               if (err) {
@@ -710,7 +722,8 @@ export const describeCases = (config: any) => {
                         };
                         try {
                           if (config.cache) {
-                            const compiler = require('webpack')(options);
+                            const compiler =
+                              nativeRequire(webpackEntry)(options);
                             compiler.run((err: any) => {
                               if (err) return reject(err);
                               compiler.run((error: any, stats: any) => {
@@ -722,7 +735,7 @@ export const describeCases = (config: any) => {
                               });
                             });
                           } else {
-                            require('webpack')(options, onCompiled);
+                            nativeRequire(webpackEntry)(options, onCompiled);
                           }
                         } catch (e: any) {
                           reject(e);
@@ -1026,6 +1039,7 @@ export const describeCases = (config: any) => {
                           (setTimeout as any)(...args),
                       },
                       __STATS__: jsonStats,
+                      supportsWebpackFeature,
                       nsObj: (m: any) => {
                         Object.defineProperty(m, Symbol.toStringTag, {
                           value: 'Module',

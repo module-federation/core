@@ -5,6 +5,7 @@ import {
 } from '@module-federation/runtime';
 import { ShareArgs } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
+import { disambiguateSharedScopes } from '@module-federation/sdk';
 
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
 
@@ -51,6 +52,8 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
                     webpackRequire,
                     libraryType,
                     version: sharedArg.version,
+                    scope: sharedArg.scope,
+                    layer: sharedArg.shareConfig?.layer,
                   });
                 }
               });
@@ -73,9 +76,25 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
               });
             });
 
+            const snapshotShares = disambiguateSharedScopes(
+              hostGlobalSnapshot.shared,
+            );
             const patchShared = (pkgName: string, shared: ShareArgs) => {
-              const shareSnapshot = hostGlobalSnapshot.shared.find(
-                (item) => item.sharedName === pkgName,
+              const shareSnapshot = snapshotShares.find(
+                (item) =>
+                  item.sharedName === pkgName &&
+                  (!item.version || item.version === shared.version) &&
+                  item.layer === (shared.shareConfig?.layer ?? undefined) &&
+                  (!item.shareScope ||
+                    (Array.isArray(item.shareScope)
+                      ? item.shareScope
+                      : [item.shareScope]
+                    ).some((scope) =>
+                      (Array.isArray(shared.scope)
+                        ? shared.scope
+                        : [shared.scope || 'default']
+                      ).includes(scope),
+                    )),
               );
               if (!shareSnapshot) {
                 return;
