@@ -1,5 +1,8 @@
 const { ModuleFederationPlugin } = require('../../../../dist/src');
-const { DefinePlugin } = require('webpack');
+const {
+  normalizeWebpackPath,
+} = require('@module-federation/sdk/normalize-webpack-path');
+const { DefinePlugin } = require(normalizeWebpackPath('webpack'));
 
 const cases = [undefined, 'common'].map((layer) => ({
   layer,
