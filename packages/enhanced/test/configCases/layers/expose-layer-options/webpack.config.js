@@ -1,4 +1,7 @@
-const { DefinePlugin } = require('webpack');
+const {
+  normalizeWebpackPath,
+} = require('@module-federation/sdk/normalize-webpack-path');
+const { DefinePlugin } = require(normalizeWebpackPath('webpack'));
 const assert = require('assert');
 const { ModuleFederationPlugin } = require('../../../../dist/src');
 

@@ -10,7 +10,10 @@ import type { Manifest, Stats } from '@module-federation/sdk';
 const nativeRequire = process
   .getBuiltinModule('module')
   .createRequire(__filename);
-const webpack = nativeRequire('webpack');
+const { normalizeWebpackPath } = nativeRequire(
+  '@module-federation/sdk/normalize-webpack-path',
+);
+const webpack = nativeRequire(normalizeWebpackPath('webpack'));
 const manifestRequire = process
   .getBuiltinModule('module')
   .createRequire(nativeRequire.resolve('@module-federation/manifest'));
