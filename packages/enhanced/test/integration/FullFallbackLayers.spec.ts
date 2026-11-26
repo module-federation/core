@@ -1,5 +1,12 @@
 /** @rstest-environment node */
-import { mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import {
+  mkdtemp,
+  readFile,
+  readdir,
+  realpath,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -23,14 +30,14 @@ it.each([false, true])(
       await mkdtemp(path.join(tmpdir(), 'mf-full-fallback-')),
     );
     const requests: string[] = [];
-    const server = createServer(async (request, response) => {
+    const assets = new Map<string, Buffer>();
+    const server = createServer((request, response) => {
       requests.push(request.url!);
-      try {
+      const asset = assets.get(request.url!);
+      if (asset) {
         response.setHeader('Content-Type', 'text/javascript');
-        response.end(
-          await readFile(path.join(directory, 'dist', request.url!)),
-        );
-      } catch {
+        response.end(asset);
+      } else {
         response.writeHead(404).end();
       }
     });
@@ -146,6 +153,14 @@ it.each([false, true])(
             }),
           ),
         );
+      }
+      const dist = path.join(directory, 'dist');
+      for (const name of await readdir(dist, { recursive: true })) {
+        if (name.endsWith('.js'))
+          assets.set(
+            `/${name.split(path.sep).join('/')}`,
+            await readFile(path.join(dist, name)),
+          );
       }
       const manifest = JSON.parse(
         await readFile(path.join(directory, 'dist/mf-manifest.json'), 'utf8'),

@@ -26,6 +26,26 @@ type LayeredShareScope = ShareScopeMap[string] & {
   [LAYERED_SHARES]?: Map<string, Map<string, SharedVersions>>;
 };
 
+export function getOwnEntry<T>(entries: Record<string, T>, key: string) {
+  return Object.prototype.hasOwnProperty.call(entries, key)
+    ? entries[key]
+    : undefined;
+}
+
+export function defineEntry<T>(
+  entries: Record<string, T>,
+  key: string,
+  value: T,
+) {
+  Object.defineProperty(entries, key, {
+    value,
+    enumerable: true,
+    configurable: true,
+    writable: true,
+  });
+  return value;
+}
+
 // Share scopes are exchanged by reference. Keep ordinary version entries
 // unchanged for older runtimes; layered-only packages must not create empty
 // enumerable package entries that those runtimes mistake for a provider.
@@ -37,9 +57,10 @@ export function getSharedVersions(
 ): SharedVersions | undefined {
   if (!scope) return;
   if (layer == null) {
-    // The native Lynx bytecode parser does not support logical assignment.
-    if (create && !scope[pkgName]) scope[pkgName] = {};
-    return scope[pkgName];
+    return (
+      getOwnEntry(scope, pkgName) ??
+      (create ? defineEntry(scope, pkgName, {}) : undefined)
+    );
   }
   const layeredScope = scope as LayeredShareScope;
   let packages = layeredScope[LAYERED_SHARES];
@@ -165,24 +186,24 @@ export function formatShareConfigs(
   const shareArgs = newOptions.shared || {};
   const from = newOptions.name;
 
-  const newShareInfos = Object.keys(shareArgs).reduce((res, pkgName) => {
-    const arrayShareArgs = arrayOptions(shareArgs[pkgName]);
-    res[pkgName] = res[pkgName] || [];
-    arrayShareArgs.forEach((shareConfig) => {
-      res[pkgName].push(
+  const newShareInfos: ShareInfos = {};
+  for (const [pkgName, args] of Object.entries(shareArgs)) {
+    defineEntry(
+      newShareInfos,
+      pkgName,
+      arrayOptions(args).map((shareConfig) =>
         formatShare(shareConfig, from, pkgName, newOptions.shareStrategy),
-      );
-    });
-    return res;
-  }, {} as ShareInfos);
+      ),
+    );
+  }
 
   const allShareInfos = {
     ...prevOptions.shared,
   };
 
   Object.keys(newShareInfos).forEach((shareKey) => {
-    if (!allShareInfos[shareKey]) {
-      allShareInfos[shareKey] = newShareInfos[shareKey];
+    if (!getOwnEntry(allShareInfos, shareKey)) {
+      defineEntry(allShareInfos, shareKey, newShareInfos[shareKey]);
     } else {
       newShareInfos[shareKey].forEach((newUserSharedOptions) => {
         const isSameVersion = allShareInfos[shareKey].find(
@@ -458,16 +479,13 @@ export function getRegisteredShare(
 
   for (const sc of scopes) {
     const layer = shareConfig?.layer;
-    const exactVersions = getSharedVersions(
-      localShareScopeMap[sc],
-      pkgName,
-      layer,
-    );
+    const scope = getOwnEntry(localShareScopeMap, sc);
+    const exactVersions = getSharedVersions(scope, pkgName, layer);
     const versions =
       exactVersions && Object.keys(exactVersions).length
         ? exactVersions
         : layer != null
-          ? getSharedVersions(localShareScopeMap[sc], pkgName)
+          ? getSharedVersions(scope, pkgName)
           : exactVersions;
     if (shareConfig && versions && Object.keys(versions).length) {
       const { requiredVersion } = shareConfig;
@@ -580,7 +598,7 @@ export function getTargetSharedOptions(options: {
     if (!sharedOptions) {
       return undefined;
     }
-    const shareVersionMap: ShareScopeMap[string][string] = {};
+    const shareVersionMap: ShareScopeMap[string][string] = Object.create(null);
     sharedOptions.forEach((shared) => {
       shareVersionMap[shared.version] = shared;
     });
