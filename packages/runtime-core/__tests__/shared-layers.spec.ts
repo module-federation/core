@@ -1,5 +1,6 @@
 import { describe, expect, it } from '@rstest/core';
 import { ModuleFederation } from '../src/core';
+import { getSharedVersions } from '../src/utils/share';
 import type { ShareArgs } from '../src/type';
 import { setGlobalFederationInstance } from '../src/global';
 import { Module } from '../src/module';
@@ -27,6 +28,29 @@ const host = (shared: ShareArgs[], name = 'layer-host') =>
   new ModuleFederation({ name, remotes: [], shared: { pkg: shared } });
 
 describe('shared layer selection', () => {
+  it('creates an own version map instead of reusing an inherited package', () => {
+    const parent = { pkg: {} };
+    const scope = Object.create(parent);
+    expect(getSharedVersions(scope, 'pkg')).toBeUndefined();
+    const versions = getSharedVersions(scope, 'pkg', undefined, true);
+    expect(versions).not.toBe(parent.pkg);
+    expect(Object.keys(scope)).toEqual(['pkg']);
+    expect(getSharedVersions(scope, 'pkg')).toBe(versions);
+  });
+
+  it('registers a package and scope named like inherited object methods', () => {
+    const mf = new ModuleFederation({
+      name: 'own-share-entries',
+      remotes: [],
+      shared: { toString: { ...provider('own'), scope: 'valueOf' } },
+    });
+    expect(Object.keys(mf.shareScopeMap)).toEqual(['valueOf']);
+    expect(Object.keys(mf.shareScopeMap['valueOf'])).toEqual(['toString']);
+    expect(Object.keys(mf.shareScopeMap['valueOf']['toString'])).toEqual([
+      '1.0.0',
+    ]);
+  });
+
   it.each([undefined, 'server'])(
     'uses a hook-replaced version map for layer %s',
     async (layer) => {
