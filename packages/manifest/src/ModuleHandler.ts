@@ -18,6 +18,7 @@ import {
   getFileNameWithOutExt,
   splitSharedIdentifier,
   getSharedIdentity,
+  createSharedOptionsLookup,
 } from './utils';
 
 type ShareMap = { [sharedKey: string]: StatsShared };
@@ -246,7 +247,7 @@ export const getShareItem = ({
     ...normalizedShareOptions,
     id: `${hostName}:${pkgName}`,
     requiredVersion:
-      normalizedShareOptions?.requiredVersion || `^${pkgVersion}`,
+      normalizedShareOptions?.requiredVersion ?? `^${pkgVersion}`,
     name: pkgName,
     version: pkgVersion,
     assets: {
@@ -276,6 +277,7 @@ class ModuleHandler {
   private _exposeImports = new Map<string, string[]>();
   private _remoteManager: RemoteManager = new RemoteManager();
   private _sharedManager: SharedManager = new SharedManager();
+  private _findSharedOptions: ReturnType<typeof createSharedOptionsLookup>;
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -305,6 +307,9 @@ class ModuleHandler {
     this._remoteManager.init(options);
     this._sharedManager = new SharedManager();
     this._sharedManager.init(options);
+    this._findSharedOptions = createSharedOptionsLookup(
+      this._sharedManager.normalizedOptions,
+    );
   }
 
   get isRspack(): boolean {
@@ -331,7 +336,8 @@ class ModuleHandler {
     );
     const layered =
       identity.layer !== undefined || Array.isArray(identity.shareScope);
-    const sharedKey = (name: string) => (layered ? identity.key : name);
+    const sharedKey = (name: string) =>
+      layered || identity.shareScope !== 'default' ? identity.key : name;
     const initShared = (pkgName: string, pkgVersion: string) => {
       const key = sharedKey(pkgName);
       if (sharedMap[key]) {
@@ -340,15 +346,19 @@ class ModuleHandler {
       sharedMap[key] = getShareItem({
         pkgName,
         pkgVersion,
-        normalizedShareOptions: sharedManagerNormalizedOptions[pkgName],
+        normalizedShareOptions: this._findSharedOptions(
+          pkgName,
+          identity.shareScope,
+          identity.layer,
+        ),
         hostName: this._options.name,
       });
       if (layered) {
         sharedMap[key].id = `${this._options.name}:shared:${identity.key}`;
         if (identity.layer !== undefined) sharedMap[key].layer = identity.layer;
-        if (identity.shareScope !== 'default')
-          sharedMap[key].shareScope = identity.shareScope;
       }
+      if (identity.shareScope !== 'default')
+        sharedMap[key].shareScope = identity.shareScope;
     };
 
     const collectRelationshipMap = (mod: StatsModule, pkgName: string) => {

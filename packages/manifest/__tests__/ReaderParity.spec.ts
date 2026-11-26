@@ -208,19 +208,22 @@ const provideSharedFixtures: Fixture[] = [
       : [],
 }));
 
-const prefixSingletonFixtures: Fixture[] = [false, true].map(
-  (consumeOnly, index) => {
-    const defaults = {
-      requiredVersion: '^1.0.0',
-      ...(consumeOnly ? { import: false as const } : {}),
-    };
-    const options = { ...defaults, singleton: false };
-    return {
-      name: `manifest-prefix-singleton ${index}`,
-      files: {
-        'package.json': pkg('prefix-singleton', '1.0.0'),
-        'index.js': 'import("./module.js");',
-        'module.js': `
+const prefixSingletonFixtures: Fixture[] = [
+  { shareScope: 'custom', consumeOnly: false },
+  { shareScope: 'custom', consumeOnly: true },
+  { shareScope: 'default', consumeOnly: false },
+].map(({ shareScope, consumeOnly }, index) => {
+  const defaults = {
+    requiredVersion: '^1.0.0',
+    ...(consumeOnly ? { import: false as const } : {}),
+  };
+  const options = { ...defaults, singleton: false };
+  return {
+    name: `manifest-prefix-singleton ${index}`,
+    files: {
+      'package.json': pkg('prefix-singleton', '1.0.0'),
+      'index.js': 'import("./module.js");',
+      'module.js': `
           export { default as Button } from 'ds/Button';
           export { default as Table } from 'ds/Table';
           export { default as Exact } from 'ds/Exact';
@@ -228,55 +231,66 @@ const prefixSingletonFixtures: Fixture[] = [false, true].map(
           export { default as Nested } from 'ds/nested/Child';
           export { default as Aliased } from '@scope/lib/Child';
           export { default as DefaultPrefix } from '@default/lib/Child';`,
-        'node_modules/ds/package.json': pkg('ds', '1.0.0'),
-        'node_modules/ds/Button.js': 'export default "Button";',
-        'node_modules/ds/Table.js': 'export default "Table";',
-        'node_modules/ds/Exact.js': 'export default "Exact";',
-        'node_modules/ds/Default.js': 'export default "DefaultExact";',
-        'node_modules/ds/nested/Child.js': 'export default "Nested";',
-        'node_modules/@scope/lib/package.json': pkg('@scope/lib', '1.0.0'),
-        'node_modules/@scope/lib/Child.js': 'export default "Aliased";',
-        'node_modules/@default/lib/package.json': pkg('@default/lib', '1.0.0'),
-        'node_modules/@default/lib/Child.js': 'export default "DefaultPrefix";',
+      'node_modules/ds/package.json': pkg('ds', '1.0.0'),
+      'node_modules/ds/Button.js': 'export default "Button";',
+      'node_modules/ds/Table.js': 'export default "Table";',
+      'node_modules/ds/Exact.js': 'export default "Exact";',
+      'node_modules/ds/Default.js': 'export default "DefaultExact";',
+      'node_modules/ds/nested/Child.js': 'export default "Nested";',
+      'node_modules/@scope/lib/package.json': pkg('@scope/lib', '1.0.0'),
+      'node_modules/@scope/lib/Child.js': 'export default "Aliased";',
+      'node_modules/@default/lib/package.json': pkg('@default/lib', '1.0.0'),
+      'node_modules/@default/lib/Child.js': 'export default "DefaultPrefix";',
+    },
+    federation: {
+      name: `container${index}`,
+      filename: `${index}-container.js`,
+      shareScope,
+      exposes: { './module': './module.js' },
+      shared: {
+        'ds/': options,
+        'ds/Exact': { ...options, singleton: true },
+        'ds/Default': defaults,
+        'ds/nested/': { ...options, singleton: true },
+        '@scope/lib/': { ...options, shareKey: 'renamed/' },
+        '@default/lib/': defaults,
       },
-      federation: {
-        name: `container${index}`,
-        filename: `${index}-container.js`,
-        shareScope: `manifest-prefix-singleton-${index}`,
-        exposes: { './module': './module.js' },
-        shared: {
-          'ds/': options,
-          'ds/Exact': { ...options, singleton: true },
-          'ds/Default': defaults,
-          'ds/nested/': { ...options, singleton: true },
-          '@scope/lib/': { ...options, shareKey: 'renamed/' },
-          '@default/lib/': defaults,
-        },
-      },
-      check: (manifest) => {
-        expect(manifest.exposes[0].assets.js.sync).toEqual(['module_js.js']);
-        // Neither reader knows the version of a share that has no fallback
-        // and no exact `requiredVersion`, so neither emits a row for it.
-        expect(names(manifest.shared)).toEqual(
-          consumeOnly
-            ? []
-            : [
-                '@default/lib/Child',
-                'ds/Button',
-                'ds/Default',
-                'ds/Exact',
-                'ds/Table',
-                'ds/nested/Child',
-                'renamed/Child',
-              ],
-        );
-        if (!consumeOnly)
-          expect(row(manifest.shared, 'ds/Exact').singleton).toBe(true);
-      },
-      statsReader: unnamedExpose,
-    };
-  },
-);
+    },
+    check: (manifest) => {
+      expect(manifest.exposes[0].assets.js.sync).toEqual(['module_js.js']);
+      // Neither reader knows the version of a share that has no fallback
+      // and no exact `requiredVersion`, so neither emits a row for it.
+      expect(names(manifest.shared)).toEqual(
+        consumeOnly
+          ? []
+          : [
+              '@default/lib/Child',
+              'ds/Button',
+              'ds/Default',
+              'ds/Exact',
+              'ds/Table',
+              'ds/nested/Child',
+              'renamed/Child',
+            ],
+      );
+      if (!consumeOnly)
+        expect(
+          Object.fromEntries(
+            manifest.shared.map((item) => [item.name, item.singleton]),
+          ),
+        ).toEqual({
+          'ds/Button': false,
+          'ds/Table': false,
+          'ds/Exact': true,
+          'ds/Default': true,
+          'ds/nested/Child': true,
+          'renamed/Child': false,
+          '@default/lib/Child': true,
+        });
+    },
+    statsReader: unnamedExpose,
+  };
+});
 
 const requiredVersionFixtures: Fixture[] = [
   { shareKey: 'shared (custom)', shareScope: 'default', version: '1.2.3' },
@@ -338,11 +352,84 @@ const requiredVersionFixtures: Fixture[] = [
     if (index === 0)
       manifest.shared = manifest.shared.filter(({ name }) => name !== shareKey);
     if (index === 1) manifest.shared = [];
-    if (index === 2)
-      Object.assign(row(manifest.shared, shareKey), {
-        version: 'false',
-        requiredVersion: '^false',
-      });
+    if (index === 2) row(manifest.shared, shareKey).version = 'false';
+  },
+}));
+
+// Two scalar scopes provide the same key at the same version.
+const scalarScopeFixtures: Fixture[] = [undefined, 'common'].map((layer) => ({
+  name: `scalar share scopes${layer ? ' in a layer' : ''}`,
+  files: {
+    'package.json': pkg('scalar-scopes', '1.0.0'),
+    'index.js': 'import("./bootstrap.js");',
+    'bootstrap.js': `
+      export { default as a } from 'react-a';
+      export { default as b } from 'react-b';`,
+    'a.js': 'export default { scope: "a" };',
+    'b.js': 'export default { scope: "b" };',
+  },
+  webpack: (directory) => ({
+    experiments: { layers: true },
+    module: {
+      rules: layer
+        ? [{ test: path.join(directory, 'bootstrap.js'), layer }]
+        : [],
+    },
+  }),
+  federation: {
+    name: 'scalar_scopes',
+    shareScope: 'a',
+    filename: 'container.js',
+    exposes: { './bootstrap': { import: './bootstrap.js', name: 'exposed' } },
+    shared: Object.fromEntries(
+      [
+        ['b', 'default', '1.0.0'],
+        ['a', undefined, false],
+      ].map(([file, shareScope, requiredVersion]) => [
+        `react-${file}`,
+        {
+          import: `./${file}.js`,
+          shareKey: 'react',
+          ...(layer === undefined ? {} : { layer, issuerLayer: layer }),
+          ...(shareScope === undefined ? {} : { shareScope }),
+          version: '1.0.0',
+          requiredVersion,
+          singleton: true,
+        },
+      ]),
+    ),
+  },
+  check: (manifest) => {
+    const prefix = layer ? '_common_' : '';
+    expect(
+      manifest.shared
+        .map((item) => ({
+          name: item.name,
+          scope: item.shareScope,
+          layer: item.layer,
+          version: item.version,
+          requiredVersion: item.requiredVersion,
+          assets: item.assets.js.sync,
+        }))
+        .sort((first, second) => first.scope.localeCompare(second.scope)),
+    ).toEqual([
+      {
+        name: 'react',
+        scope: 'a',
+        layer,
+        version: '1.0.0',
+        requiredVersion: false,
+        assets: [`${prefix}a_js.js`],
+      },
+      {
+        name: 'react',
+        scope: 'default',
+        layer,
+        version: '1.0.0',
+        requiredVersion: '1.0.0',
+        assets: [`${prefix}b_js.js`],
+      },
+    ]);
   },
 }));
 
@@ -439,6 +526,7 @@ const fixtures: Fixture[] = [
   ...provideSharedFixtures,
   ...prefixSingletonFixtures,
   ...requiredVersionFixtures,
+  ...scalarScopeFixtures,
   {
     // The share is not installed, so its version comes from the exact range.
     name: 'consume-only share in the plugin share scope',
