@@ -18,6 +18,7 @@ it('requests a remote chunk again after an interrupted response', async () => {
   const body = Buffer.from(
     'exports.ids = ["retry"]; exports.modules = { value: (module) => { module.exports = "loaded"; } };',
   );
+
   const server = createServer((request, response) => {
     requests.push(`${request.method} ${request.url}`);
     response.writeHead(200, {
@@ -32,6 +33,7 @@ it('requests a remote chunk again after an interrupted response', async () => {
     server.unref();
     await once(server, 'listening');
     const { port } = server.address() as AddressInfo;
+
     const handlers = {} as {
       readFileVm: (id: string, pending: Promise<void>[]) => void;
     };
@@ -47,6 +49,7 @@ it('requests a remote chunk again after an interrupted response', async () => {
       {},
       { globalObject: 'globalThis', environment: {} },
     );
+
     runInNewContext(
       [
         'const installedChunks = {};',
@@ -64,6 +67,7 @@ it('requests a remote chunk again after an interrupted response', async () => {
         URL,
       },
     );
+
     const load = () => {
       const pending: Promise<void>[] = [];
       handlers.readFileVm('retry', pending);
@@ -79,6 +83,7 @@ it('requests a remote chunk again after an interrupted response', async () => {
     const module = { exports: undefined };
     modules.value(module);
     expect(module.exports).toBe('loaded');
+
     expect(load()).toHaveLength(0);
     expect(requests).toEqual(['GET /retry.js', 'GET /retry.js']);
   } finally {
