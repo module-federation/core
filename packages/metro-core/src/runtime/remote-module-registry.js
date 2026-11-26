@@ -78,10 +78,38 @@ export function loadSharedToRegistrySync(id) {
   registry[id] = loading[id]();
 }
 
-// this container provides an eager shared module synchronously
-function isEagerShared(id) {
-  const shared = getInstance()?.options.shared[id];
-  return shared?.some(({ shareConfig }) => shareConfig?.eager) ?? false;
+// Whether loading a shared module synchronously gives the provider that its
+// async load gives. This container has to provide the module synchronously,
+// which it does when it shares it eagerly. And every provider registered for
+// it has to be eager, or loaded already: the async load can select one that
+// is neither, while a synchronous load can only fall back to this
+// container's copy, and a singleton would then have two instances.
+function canLoadSharedSync(id) {
+  const instance = getInstance();
+  const shared = instance?.options.shared[id];
+  if (!shared?.some(({ shareConfig }) => shareConfig?.eager)) {
+    return false;
+  }
+  return shared.every(({ scope }) =>
+    scope.every((scopeName) =>
+      Object.values(instance.shareScopeMap[scopeName]?.[id] ?? {}).every(
+        (provider) => provider.lib || provider.shareConfig?.eager,
+      ),
+    ),
+  );
+}
+
+// Only react and react-native load synchronously, but the host entry, or
+// another shared module, can require any eager shared module before its async
+// load finishes. This loads it then, instead of leaving the empty placeholder.
+export function loadPendingSharedToRegistrySync(id) {
+  if (!pendingShared.has(id) || !canLoadSharedSync(id)) {
+    return;
+  }
+  // the flag is cleared once the module is cloned, so a module that throws
+  // while it loads isn't taken as loaded, and its async load fails as well
+  cloneModule(loadShareSync(id)(), registry[id]);
+  pendingShared.delete(id);
 }
 
 export function getModuleFromRegistry(id) {
@@ -89,16 +117,6 @@ export function getModuleFromRegistry(id) {
 
   if (!module) {
     throw new Error(`Module ${id} not found in registry`);
-  }
-
-  // Only react and react-native load synchronously, but the host entry, or
-  // another shared module, can require any eager shared module before its
-  // async load finishes. Load it now instead of returning the empty
-  // placeholder. The module is cloned before the flag is cleared, so the
-  // async load still fills the placeholder if the factory throws.
-  if (pendingShared.has(id) && isEagerShared(id)) {
-    cloneModule(loadShareSync(id)(), module);
-    pendingShared.delete(id);
   }
 
   return module;
