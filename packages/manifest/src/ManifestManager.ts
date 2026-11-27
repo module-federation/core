@@ -63,6 +63,8 @@ class ManifestManager {
         name: cur.name,
         assets: cur.assets,
         path: cur.path,
+        ...(cur.layer !== undefined ? { layer: cur.layer } : {}),
+        ...(cur.requiredShared ? { requiredShared: cur.requiredShared } : {}),
       };
       sum.push(expose);
       return sum;
@@ -82,6 +84,8 @@ class ManifestManager {
         ...(cur.providers && cur.providers.length > 1
           ? { providers: cur.providers }
           : {}),
+        ...(cur.layer !== undefined ? { layer: cur.layer } : {}),
+        ...(cur.shareScope !== undefined ? { shareScope: cur.shareScope } : {}),
       };
       sum.push(shared);
       return sum;

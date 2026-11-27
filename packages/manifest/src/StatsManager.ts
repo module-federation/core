@@ -10,19 +10,16 @@ import {
   StatsAssets,
   moduleFederationPlugin,
   RemoteEntryType,
-  composeKeyWithSeparator,
   getManifestFileName,
   StatsMetaDataWithGetPublicPath,
   StatsMetaDataWithPublicPath,
   StatsShared,
   StatsSharedProvider,
+  disambiguateSharedScopes,
 } from '@module-federation/sdk';
 import { Compilation, Compiler } from 'webpack';
 import path from 'path';
-import type {
-  StatsCompilation,
-  StatsModule,
-} from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
+import type { StatsCompilation } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import {
   isDev,
   getAssetsByChunk,
@@ -30,7 +27,6 @@ import {
   getAssetsByChunkIDs,
   getSharedModules,
   assert,
-  getFileNameWithOutExt,
   getTypesMetaInfo,
 } from './utils';
 import logger from './logger';
@@ -47,10 +43,10 @@ import {
   ModuleHandler,
   SharedProviderModule,
   getExposeItem,
-  getExposeName,
   getShareItem,
 } from './ModuleHandler';
 import { StatsInfo } from './types';
+import { collectGraph } from './collectGraph';
 
 class StatsManager {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
@@ -189,83 +185,94 @@ class StatsManager {
     return this.setMetaDataPublicPath(metaData, compiler);
   }
 
-  private _getFilteredModules(stats: StatsCompilation): StatsModule[] {
-    const filteredModules = stats.modules!.filter((module) => {
-      if (!module || !module.name) {
-        return false;
-      }
-      const array = [
-        module.name.includes('container entry'),
-        module.name.includes('remote '),
-        module.name.includes('shared module '),
-        module.name.includes('provide module '),
-      ];
-      return array.some((item) => item);
-    });
-
-    return filteredModules;
-  }
-
   private _getModuleAssets(
     compilation: Compilation,
     entryPointNames: string[],
   ): Record<string, StatsAssets> {
     const { chunks } = compilation;
-    const { exposeFileNameImportMap } = this._containerManager;
+    const exposes = this._containerManager.containerPluginExposesOptions;
+    const exposeKeysByChunk = new Map<string, string[]>();
+    for (const [key, options] of Object.entries(exposes)) {
+      if (
+        typeof options === 'object' &&
+        !Array.isArray(options) &&
+        options.name
+      ) {
+        const keys = exposeKeysByChunk.get(options.name) || [];
+        keys.push(key);
+        exposeKeysByChunk.set(options.name, keys);
+      }
+    }
     const assets: Record<string, StatsAssets> = {};
 
-    chunks.forEach((chunk) => {
-      if (typeof chunk.name !== 'string') return;
-
-      // Support split chunks caused by splitChunks.maxSize:
-      // A chunk named "__federation_expose_Foo" may be split into
-      // "__federation_expose_Foo-<hash>" chunks, so we match both exact
-      // and prefix+dash patterns.
-      const matchedKey =
-        exposeFileNameImportMap[chunk.name] !== undefined
-          ? chunk.name
-          : Object.keys(exposeFileNameImportMap).find((key) =>
-              chunk.name!.startsWith(key + '-'),
+    const matchExpose = (name?: string | null) =>
+      typeof name !== 'string'
+        ? undefined
+        : exposeKeysByChunk.has(name)
+          ? name
+          : // Split chunks retain the expose name followed by a hash suffix.
+            [...exposeKeysByChunk.keys()].find((key) =>
+              name.startsWith(key + '-'),
             );
 
-      if (!matchedKey) return;
+    chunks.forEach((chunk) => {
+      // Optimizers can merge equal expose chunks under just one chunk name.
+      // Their named groups still identify every expose that loads those assets.
+      const ownName = matchExpose(chunk.name);
+      const exposeNames = new Set(
+        [
+          ownName,
+          ...[...chunk.groupsIterable].map((g) => matchExpose(g.name)),
+        ].filter((name): name is string => name !== undefined),
+      );
+      for (const exposeName of exposeNames) {
+        // A split chunk can sit in the groups of several exposes. Give each
+        // expose the files of its own group, not the files of the others.
+        const chunkAssets = getAssetsByChunk(
+          chunk,
+          entryPointNames,
+          exposeName === ownName
+            ? undefined
+            : (group) => matchExpose(group.name) === exposeName,
+        );
+        const assetKeys = exposeKeysByChunk.get(exposeName)!;
 
-      // TODO: support multiple import
-      const exposeKey = exposeFileNameImportMap[matchedKey][0];
-      const assetKey = getFileNameWithOutExt(exposeKey);
-      const chunkAssets = getAssetsByChunk(chunk, entryPointNames);
-
-      if (!assets[assetKey]) {
-        assets[assetKey] = chunkAssets;
-      } else {
-        // Merge split chunk assets, deduplicating with Set
-        assets[assetKey] = {
-          js: {
-            sync: [
-              ...new Set([...assets[assetKey].js.sync, ...chunkAssets.js.sync]),
-            ],
-            async: [
-              ...new Set([
-                ...assets[assetKey].js.async,
-                ...chunkAssets.js.async,
-              ]),
-            ],
-          },
-          css: {
-            sync: [
-              ...new Set([
-                ...assets[assetKey].css.sync,
-                ...chunkAssets.css.sync,
-              ]),
-            ],
-            async: [
-              ...new Set([
-                ...assets[assetKey].css.async,
-                ...chunkAssets.css.async,
-              ]),
-            ],
-          },
-        };
+        for (const assetKey of assetKeys) {
+          if (!assets[assetKey]) {
+            assets[assetKey] = chunkAssets;
+          } else {
+            assets[assetKey] = {
+              js: {
+                sync: [
+                  ...new Set([
+                    ...assets[assetKey].js.sync,
+                    ...chunkAssets.js.sync,
+                  ]),
+                ],
+                async: [
+                  ...new Set([
+                    ...assets[assetKey].js.async,
+                    ...chunkAssets.js.async,
+                  ]),
+                ],
+              },
+              css: {
+                sync: [
+                  ...new Set([
+                    ...assets[assetKey].css.sync,
+                    ...chunkAssets.css.sync,
+                  ]),
+                ],
+                async: [
+                  ...new Set([
+                    ...assets[assetKey].css.async,
+                    ...chunkAssets.css.async,
+                  ]),
+                ],
+              },
+            };
+          }
+        }
       }
     });
 
@@ -355,7 +362,7 @@ class StatsManager {
   ): Record<string, StatsSharedProvider[]> {
     const providers: Record<string, StatsSharedProvider[]> = {};
     for (const {
-      name,
+      key,
       version,
       request,
       module: providerModule,
@@ -420,7 +427,7 @@ class StatsManager {
             return `${relative.startsWith('../') ? '' : './'}${relative}${suffix}`;
           })
           .join('!');
-        const entries = (providers[name] ||= []);
+        const entries = (providers[key] ||= []);
         let provider = entries.find(
           (item) => item.version === version && item.import === imported,
         );
@@ -476,11 +483,7 @@ class StatsManager {
     extraOptions?: object,
   ): Promise<Stats> {
     try {
-      const {
-        name,
-        manifest: manifestOptions = {},
-        exposes = {},
-      } = this._options;
+      const { name, manifest: manifestOptions = {} } = this._options;
 
       const metaData = this._getMetaData(compiler, compilation, extraOptions);
 
@@ -500,22 +503,18 @@ class StatsManager {
         const remotes: StatsRemote[] =
           this._remoteManager.statsRemoteWithEmptyUsedIn;
         stats.remotes = remotes;
-        stats.exposes = Object.keys(exposes).map((exposeKey) => {
-          return getExposeItem({
-            exposeKey,
-            name: name!,
-            file: {
-              import: exposes[exposeKey].import,
-            },
-          });
-        });
+        stats.exposes = Object.entries(
+          this._containerManager.containerPluginExposesOptions,
+        ).map(([exposeKey, file]) =>
+          getExposeItem({ exposeKey, name: name!, file }),
+        );
         stats.shared = Object.entries(
           this._sharedManager.normalizedOptions,
         ).reduce<StatsShared[]>((sum, cur) => {
           const [pkgName, normalizedShareOptions] = cur;
           sum.push(
             getShareItem({
-              pkgName,
+              pkgName: normalizedShareOptions.shareKey ?? pkgName,
               normalizedShareOptions,
               pkgVersion: normalizedShareOptions.version || UNKNOWN_MODULE_NAME,
               hostName: name,
@@ -526,172 +525,110 @@ class StatsManager {
         return stats;
       }
 
-      const liveStats = compilation.getStats();
-      const statsOptions: Record<string, boolean> = {
-        all: false,
-        modules: true,
-        builtAt: true,
-        hash: true,
-        ids: true,
-        version: true,
-        entrypoints: true,
-        assets: false,
-        chunks: false,
-        reasons: true,
-      };
-      if (this._bundler === 'webpack') {
-        statsOptions['cached'] = true;
-      }
-      statsOptions['cachedModules'] = true;
+      const graph =
+        this._bundler === 'webpack'
+          ? collectGraph(compilation, {
+              name: name!,
+              exposes: this._containerManager.containerPluginExposesOptions,
+              shared: this._sharedManager.normalizedOptions,
+              remotes: this._remoteManager.normalizedOptions,
+            })
+          : undefined;
 
-      const webpackStats = liveStats.toJson(statsOptions);
-
-      const filteredModules = this._getFilteredModules(webpackStats);
-      const moduleHandler = new ModuleHandler(this._options, filteredModules, {
-        bundler: this._bundler,
-      });
-      const { remotes, exposesMap, sharedMap, sharedProviderModules } =
-        moduleHandler.collect();
-      const entryPointNames = [...compilation.entrypoints.values()]
-        .map((e) => e.name)
-        .filter((v) => !!v) as Array<string>;
-
-      await Promise.all([
-        new Promise<void>((resolve) => {
-          const sharedAssets = this._getProvideSharedAssets(
-            compilation,
-            webpackStats,
-            entryPointNames,
-          );
-
-          const providers = this._getSharedProviders(
-            compiler,
-            compilation,
-            webpackStats,
-            sharedProviderModules,
-            entryPointNames,
-          );
-          Object.keys(sharedMap).forEach((sharedKey) => {
-            if (providers[sharedKey])
-              sharedMap[sharedKey].providers = providers[sharedKey];
-            const assets = sharedAssets[sharedKey];
-            if (assets) {
-              sharedMap[sharedKey].assets = assets;
-            }
-          });
-          resolve();
-        }),
-        new Promise<void>((resolve) => {
-          const moduleAssets = this._getModuleAssets(
-            compilation,
-            entryPointNames,
-          );
-
-          Object.keys(exposesMap).forEach((exposeKey) => {
-            const assets = moduleAssets[exposeKey];
-            if (assets) {
-              exposesMap[exposeKey].assets = assets;
-            }
-            exposesMap[exposeKey].requires = Array.from(
-              new Set(exposesMap[exposeKey].requires),
-            );
-          });
-          resolve();
-        }),
-      ]);
-
-      await Promise.all([
-        new Promise<void>((resolve) => {
-          const remoteMemo: Set<string> = new Set();
-          stats.remotes = remotes.map((remote) => {
-            remoteMemo.add(remote.federationContainerName);
-            return {
-              ...remote,
-              usedIn: Array.from(remote.usedIn.values()),
-            };
-          });
-          const statsRemoteWithEmptyUsedIn =
-            this._remoteManager.statsRemoteWithEmptyUsedIn;
-          statsRemoteWithEmptyUsedIn.forEach((remoteInfo) => {
-            if (!remoteMemo.has(remoteInfo.federationContainerName)) {
-              stats.remotes.push(remoteInfo);
-            }
-          });
-          resolve();
-        }),
-        new Promise<void>((resolve) => {
-          stats.shared = Object.values(sharedMap).map((shared) => ({
-            ...shared,
-            usedIn: Array.from(shared.usedIn),
-          }));
-          resolve();
-        }),
-      ]);
-
-      await new Promise<void>((resolve) => {
-        const sharedAssets = stats.shared.reduce((sum, shared) => {
-          const { js, css } = shared.assets;
-          [...js.sync, ...js.async, ...css.async, css.sync].forEach((asset) => {
-            sum.add(asset);
-          });
-          return sum;
-        }, new Set());
-        const { fileExposeKeyMap } = this._containerManager;
-
-        stats.exposes = [];
-        Object.entries(fileExposeKeyMap).forEach(
-          ([exposeFileWithoutExt, exposeKeySet]) => {
-            const expose = exposesMap[exposeFileWithoutExt] || {
-              assets: {
-                js: { sync: [], async: [] },
-                css: { sync: [], async: [] },
-              },
-            };
-            exposeKeySet.forEach((exposeKey) => {
-              const { js, css } = expose.assets;
-              const exposeModuleName = getExposeName(exposeKey);
-              stats.exposes.push({
-                ...expose,
-                path: exposeKey,
-                id: composeKeyWithSeparator(
-                  this._options.name!,
-                  exposeModuleName,
-                ),
-                name: exposeModuleName,
-                assets: {
-                  js: {
-                    sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
-                    async: js.async.filter((asset) => !sharedAssets.has(asset)),
-                  },
-                  css: {
-                    sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
-                    async: css.async.filter(
-                      (asset) => !sharedAssets.has(asset),
-                    ),
-                  },
-                },
-              });
-            });
-          },
-        );
-
-        Object.values(exposesMap).map((expose) => {
-          const { js, css } = expose.assets;
-          return {
-            ...expose,
-            assets: {
-              js: {
-                sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
-                async: js.async.filter((asset) => !sharedAssets.has(asset)),
-              },
-              css: {
-                sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
-                async: css.async.filter((asset) => !sharedAssets.has(asset)),
-              },
-            },
-          };
+      if (graph) {
+        Object.assign(stats, graph);
+      } else {
+        const webpackStats = compilation.getStats().toJson({
+          all: false,
+          modules: true,
+          builtAt: true,
+          hash: true,
+          ids: true,
+          version: true,
+          entrypoints: true,
+          assets: false,
+          chunks: false,
+          reasons: true,
+          ...(this._bundler === 'webpack' ? { cached: true } : {}),
+          cachedModules: true,
         });
-        resolve();
+        const moduleHandler = new ModuleHandler(
+          this._options,
+          webpackStats.modules || [],
+          { bundler: this._bundler },
+        );
+        const { remotes, exposesMap, sharedMap, sharedProviderModules } =
+          moduleHandler.collect();
+        const entryPointNames = [...compilation.entrypoints.keys()];
+        const sharedAssets = this._getProvideSharedAssets(
+          compilation,
+          webpackStats,
+          entryPointNames,
+        );
+        const moduleAssets = this._getModuleAssets(
+          compilation,
+          entryPointNames,
+        );
+        const providers = this._getSharedProviders(
+          compiler,
+          compilation,
+          webpackStats,
+          sharedProviderModules,
+          entryPointNames,
+        );
+        for (const [key, shared] of Object.entries(sharedMap)) {
+          if (providers[key]) shared.providers = providers[key];
+          if (sharedAssets[key]) shared.assets = sharedAssets[key];
+        }
+        for (const [key, expose] of Object.entries(exposesMap)) {
+          if (moduleAssets[key]) expose.assets = moduleAssets[key];
+        }
+        stats.remotes = remotes;
+        stats.shared = Object.values(sharedMap);
+        stats.exposes = Object.values(exposesMap);
+      }
+
+      const remoteNames = new Set(
+        stats.remotes.map((remote) => remote.federationContainerName),
+      );
+      stats.remotes = stats.remotes.map((remote) => ({
+        ...remote,
+        usedIn: Array.from(remote.usedIn),
+      }));
+      for (const remote of this._remoteManager.statsRemoteWithEmptyUsedIn) {
+        if (!remoteNames.has(remote.federationContainerName))
+          stats.remotes.push(remote);
+      }
+      stats.shared = stats.shared.map((shared) => ({
+        ...shared,
+        usedIn: Array.from(shared.usedIn),
+      }));
+      const sharedAssets = new Set<string>(
+        stats.shared.flatMap(({ assets: { js, css } }) => [
+          ...js.sync,
+          ...js.async,
+          ...css.async,
+          ...css.sync,
+        ]),
+      );
+      stats.exposes = stats.exposes.map((expose) => {
+        const { js, css } = expose.assets;
+        return {
+          ...expose,
+          ...(expose.requires
+            ? { requires: [...new Set(expose.requires)] }
+            : {}),
+          assets: {
+            js: {
+              sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
+              async: js.async.filter((asset) => !sharedAssets.has(asset)),
+            },
+            css: {
+              sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
+              async: css.async.filter((asset) => !sharedAssets.has(asset)),
+            },
+          },
+        };
       });
 
       return stats;
@@ -756,12 +693,9 @@ class StatsManager {
     compiler: Compiler,
     compilation: Compilation,
   ): Promise<Stats> {
-    try {
-      const stats = await this._generateStats(compiler, compilation);
-      return stats;
-    } catch (err) {
-      throw err;
-    }
+    const stats = await this._generateStats(compiler, compilation);
+    stats.shared = disambiguateSharedScopes(stats.shared);
+    return stats;
   }
 
   validate(compiler: Compiler): boolean {

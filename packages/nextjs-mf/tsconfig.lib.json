@@ -10,6 +10,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
       "@module-federation/enhanced/src/*": ["../enhanced/src/*"],
+      "webpack": ["../enhanced/node_modules/webpack/types.d.ts"],
       "*": ["./*"]
     }
   },

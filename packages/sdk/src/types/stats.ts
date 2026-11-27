@@ -85,14 +85,22 @@ export interface StatsSharedProvider {
   assets: StatsAssets;
 }
 
+export interface StatsSharedRequirement {
+  name: string;
+  layer?: string;
+  shareScope?: string | string[];
+}
+
 export interface StatsShared {
   id: string;
   /** Concrete providers when more than one version/import pair is available. */
   providers?: StatsSharedProvider[];
+  layer?: string;
+  shareScope?: string | string[];
   name: string;
   version: string;
   singleton: boolean;
-  requiredVersion: string;
+  requiredVersion: string | false | null;
   hash: string;
   assets: StatsAssets;
   deps: string[];
@@ -131,6 +139,8 @@ export interface ManifestModuleInfos {
 
 export interface StatsExpose {
   id: string;
+  layer?: string;
+  requiredShared?: StatsSharedRequirement[];
   name: string;
   path?: string;
   file: string;

@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "getting-started",
+    "label": "Primeros pasos"
+  },
+  {
+    "type": "file",
+    "name": "export-app",
+    "label": "Exportar una aplicación"
+  },
+  {
+    "type": "file",
+    "name": "load-app",
+    "label": "Cargar una aplicación"
+  },
+  {
+    "type": "file",
+    "name": "load-component",
+    "label": "Carga diferida y precarga de componentes"
+  }
+]

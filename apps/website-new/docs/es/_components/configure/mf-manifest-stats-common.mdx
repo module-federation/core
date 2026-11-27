@@ -1,0 +1,68 @@
+## metaData (ambos archivos)
+
+`metaData` describe cómo se consume este build en runtime y el contexto del build. Tanto `mf-stats.json` como `mf-manifest.json` lo incluyen.
+
+### StatsMetaData
+
+`StatsMetaData` tiene dos formas mutuamente excluyentes:
+
+- **Forma de función**: `getPublicPath: string`
+- **Forma de cadena**: `publicPath: string` (opcionalmente `ssrPublicPath: string`)
+
+Campos compartidos:
+
+| Campo            | Tipo             | Obligatorio | Descripción                          |
+| ---------------- | ---------------- | ----------- | ------------------------------------ |
+| `name`           | `string`         | Sí          | Nombre del remote/host actual        |
+| `globalName`     | `string`         | Sí          | Nombre global del remoteEntry        |
+| `buildInfo`      | `StatsBuildInfo` | Sí          | Información del build                |
+| `remoteEntry`    | `ResourceInfo`   | Sí          | Recurso de entrada del remote        |
+| `ssrRemoteEntry` | `ResourceInfo`   | No          | Entrada del remote para SSR (si hay) |
+| `types`          | `MetaDataTypes`  | No          | Información del bundle de tipos (si hay) |
+| `type`           | `string`         | Sí          | APP, NPM                             |
+| `pluginVersion`  | `string`         | No          | Versión del plugin de MF             |
+
+### ResourceInfo
+
+| Campo  | Tipo              | Obligatorio | Descripción                                           |
+| ------ | ----------------- | ----------- | ----------------------------------------------------- |
+| `path` | `string`          | Sí          | Ruta relativa en la salida del build                  |
+| `name` | `string`          | Sí          | Nombre del archivo                                    |
+| `type` | `RemoteEntryType` | Sí          | Formato de la entrada del remote (`var/umd/system/...`) |
+
+### StatsBuildInfo
+
+| Campo            | Tipo       | Obligatorio | Descripción                          |
+| ---------------- | ---------- | ----------- | ------------------------------------ |
+| `buildVersion`   | `string`   | Sí          | Versión del build                    |
+| `buildName`      | `string`   | Sí          | Nombre del build                     |
+| `target`         | `string[]` | No          | Targets del build                    |
+| `plugins`        | `string[]` | No          | Plugins de tree shaking              |
+| `excludePlugins` | `string[]` | No          | Plugins excluidos del tree shaking   |
+
+### MetaDataTypes
+
+| Campo  | Tipo     | Obligatorio | Descripción                                                          |
+| ------ | -------- | ----------- | -------------------------------------------------------------------- |
+| `path` | `string` | Sí          | Ruta de salida                                                       |
+| `name` | `string` | Sí          | Nombre del archivo (obligatorio para tipos legacy; quedará obsoleto) |
+| `api`  | `string` | Sí          | Entrada de la API                                                    |
+| `zip`  | `string` | Sí          | Ruta del zip                                                         |
+
+## assets (ambos archivos)
+
+`StatsAssets` describe los assets síncronos y asíncronos de un módulo shared o expuesto. Ambos archivos lo usan.
+
+### StatsAssets
+
+| Campo | Tipo              | Obligatorio | Descripción       |
+| ----- | ----------------- | ----------- | ----------------- |
+| `js`  | `StatsAssetsInfo` | Sí          | Assets JavaScript |
+| `css` | `StatsAssetsInfo` | Sí          | Assets CSS        |
+
+### StatsAssetsInfo
+
+| Campo   | Tipo       | Obligatorio | Descripción        |
+| ------- | ---------- | ----------- | ------------------ |
+| `sync`  | `string[]` | Sí          | Assets iniciales   |
+| `async` | `string[]` | Sí          | Assets asíncronos  |

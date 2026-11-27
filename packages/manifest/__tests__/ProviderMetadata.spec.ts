@@ -8,6 +8,7 @@ import { mkdtemp, realpath, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { StatsPlugin } from '../src/StatsPlugin';
+import { collectGraph } from '../src/collectGraph';
 
 const webpack = process.getBuiltinModule('module').createRequire(__filename)(
   'webpack',
@@ -220,4 +221,108 @@ it('matches nameless Webpack providers through resolved reason identifiers', () 
     { version: '18.0.0', imported: './react18.js' },
     { version: '19.0.0', imported: './react19.js' },
   ]);
+});
+
+it('collects graph providers without mixing scopes or layers', () => {
+  const records = [
+    { version: '1.0.0', request: '/project/shared.js?first', scope: 'default' },
+    {
+      version: '2.0.0',
+      request: '/project/shared.js?second',
+      scope: 'default',
+    },
+    { version: '3.0.0', request: '/project/shared.js?tenant', scope: 'tenant' },
+    {
+      version: '4.0.0',
+      request: '/project/shared.js?server',
+      scope: 'default',
+      layer: 'server',
+    },
+    { version: '5.0.0', request: undefined, scope: 'default' },
+  ].map((record, index) => {
+    const target = {
+      type: 'javascript/auto',
+      resource: record.request,
+      nameForCondition: () => (record.request ? '/project/shared.js' : null),
+      identifier: () => 'external commonjs \"external-share\"',
+      blocks: [],
+      dependencies: [],
+    };
+    const dependency = { target };
+    const module = {
+      type: 'provide-module',
+      blocks: [],
+      dependencies: [dependency],
+    };
+    const chunk = {
+      id: index,
+      files: [`provider-${index}.js`],
+      groupsIterable: [],
+      getAllAsyncChunks: () => [],
+    };
+    return { ...record, target, module, chunk };
+  });
+  const compilation = {
+    compiler: { context: '/project' },
+    modules: records.flatMap(({ module, target }) => [module, target]),
+    entrypoints: new Map(),
+    moduleGraph: { getModule: (dependency) => dependency.target },
+    chunkGraph: {
+      getModuleRuntimes: () => ['runtime'],
+      getModuleChunksIterable: (target) => [
+        records.find((record) => record.target === target)!.chunk,
+      ],
+    },
+    codeGenerationResults: {
+      has: () => true,
+      getData: (module) => {
+        const record = records.find((record) => record.module === module)!;
+        return {
+          name: 'shared',
+          version: JSON.stringify(record.version),
+          shareScope: record.scope,
+          shareConfig: { layer: record.layer },
+        };
+      },
+    },
+  } as unknown as Compilation;
+  const result = collectGraph(compilation, {
+    name: 'host',
+    exposes: {},
+    shared: {},
+    remotes: {},
+  })!;
+  expect(result.shared).toHaveLength(3);
+  const unlayered = result.shared.find((row) => !row.layer && !row.shareScope)!;
+  expect(unlayered.providers).toEqual([
+    {
+      version: '1.0.0',
+      import: './shared.js?first',
+      assets: {
+        js: { sync: ['provider-0.js'], async: [] },
+        css: { sync: [], async: [] },
+      },
+    },
+    {
+      version: '2.0.0',
+      import: './shared.js?second',
+      assets: {
+        js: { sync: ['provider-1.js'], async: [] },
+        css: { sync: [], async: [] },
+      },
+    },
+    {
+      version: '5.0.0',
+      import: 'external commonjs "external-share"',
+      assets: {
+        js: { sync: ['provider-4.js'], async: [] },
+        css: { sync: [], async: [] },
+      },
+    },
+  ]);
+  expect(
+    result.shared
+      .filter((row) => row !== unlayered)
+      .map((row) => row.providers),
+  ).toEqual([undefined, undefined]);
 });

@@ -3,8 +3,12 @@ import { rs } from '@rstest/core';
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 // This ensures mocks are set up BEFORE any imports that use them
 const mocks = rs.hoisted(() => ({
-  mockNormalizeWebpackPath: rs.fn((path: string) => path),
-  mockGetWebpackPath: rs.fn(() => 'mocked-webpack-path'),
+  mockNormalizeWebpackPath: rs.fn(
+    rs.requireActual<
+      typeof import('@module-federation/sdk/normalize-webpack-path')
+    >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
+  ),
+  mockGetWebpackPath: rs.fn(() => require.resolve('webpack')),
   mockFederationRuntimePluginApply: rs.fn(),
   mockFederationRuntimePlugin: rs.fn(),
 }));
