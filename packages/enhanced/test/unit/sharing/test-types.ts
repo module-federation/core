@@ -1,6 +1,6 @@
 import type { Compilation } from 'webpack';
 import type ConsumeSharedPlugin from '../../../src/lib/sharing/ConsumeSharedPlugin';
-import type { SemVerRange } from 'webpack/lib/util/semver';
+import type { SemVerRange } from 'webpack/lib/sharing/semver';
 
 export type ConsumeSharedPluginInstance = ConsumeSharedPlugin;
 

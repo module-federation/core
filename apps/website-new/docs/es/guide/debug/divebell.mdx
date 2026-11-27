@@ -1,0 +1,159 @@
+# Solucionar problemas de runtime
+
+Diagnosticar problemas de runtime de Module Federation es complejo. La resolución de
+Remotes, la selección de versiones de Shared, el ciclo de vida de Bridge y la evidencia
+de rendimiento de los módulos solo existen en el runtime de la página en vivo. El código
+fuente o la salida de la consola por sí solos rara vez permiten reconstruir la cadena completa.
+
+Construimos la MF Extension de [Divebell](https://github.com/2heal1/divebell) sobre
+las capacidades de runtime y observabilidad de MF. Identifica las instancias de MF,
+traza la carga de Remote, Shared y Bridge, y analiza la relación entre la carga de
+módulos, las peticiones de recursos y los tiempos de pintado de la página.
+
+## Instalar la CLI y descubrir su Skill
+
+Instala Divebell de forma global en la máquina del agente:
+
+```bash
+npm install --global @divebell/cli
+```
+
+Revisa los comandos instalados e imprime la ruta de la Skill de la CLI incluida:
+
+```bash
+divebell --help
+divebell skill
+```
+
+Un agente de programación con IA debe leer por completo el `SKILL.md` devuelto antes de
+ejecutar comandos. La ayuda instalada es la fuente de verdad para comandos y opciones.
+
+## Instalar la Extension de Module Federation
+
+```bash
+divebell extensions add @divebell/extension-mf
+divebell --help
+divebell mf --help
+divebell mf --skill
+```
+
+`divebell mf --skill` imprime la Skill empaquetada con la Extension instalada.
+El agente debe leerla antes de elegir un comando de MF o interpretar la salida
+de un comando.
+
+La CLI y la Extension son herramientas del lado del agente. No son dependencias
+de la aplicación y no modifican el proyecto inspeccionado.
+
+## Abrir la página con diagnósticos de MF
+
+```bash
+divebell setup
+divebell open "https://example.com" --mf
+```
+
+El flag `--mf` sin argumentos habilita la Extension antes de la navegación, de modo que
+pueda capturar el historial inicial de carga de MF. Es distinto de `--mf <name>` en
+algunos comandos `divebell mf`, que selecciona una instancia de MF visible una vez que
+la página está abierta.
+
+Usa la cuenta autorizada y el entorno que requiera la tarea. Nunca eludas
+un límite de autorización.
+
+## Capacidades de diagnóstico de runtime
+
+| Comando | Úsalo para |
+| --- | --- |
+| `divebell mf status` | Identificar instancias de MF, sus roles y las entradas Shared cargadas |
+| `divebell mf module-info [remote]` | Metadatos y declaraciones resueltos del Remote |
+| `divebell mf remote status <remote>` | Determinar si un Remote ha funcionado, ha fallado o carece de evidencia en este momento |
+| `divebell mf remote trace [remote/expose]` | Localizar las fases de manifest, remoteEntry, expose o preload |
+| `divebell mf shared status [package]` | Inspeccionar el registro Shared actual y los candidatos de versión |
+| `divebell mf shared trace [package]` | Trazar el historial de registro, elección de versión, reutilización y carga de Shared |
+| `divebell mf bridge trace [remote]` | Trazar el render, la actualización, la destrucción, el commit y la sincronización de rutas de Bridge |
+| `divebell mf module-perf [remote/expose]` | Encontrar cuellos de botella en módulos del producer, Shared y recursos, y su impacto en el pintado |
+
+Usa `divebell mf status` solo cuando el objetivo sea desconocido. Cuando el objetivo
+esté claro, ve directamente al comando especializado más pequeño en lugar de revisar
+todos los logs del navegador.
+
+Usa `module-perf --report --view timeline` solo cuando necesites una línea de tiempo
+de rendimiento consolidada y legible para personas:
+
+```bash
+divebell mf module-perf --report --view timeline
+```
+
+`module-perf --report` reorganiza la misma evidencia; no vuelve a ejecutar la carga
+del módulo. La línea de tiempo del terminal relaciona los tiempos de Page Paint, Consumer,
+Provider, módulos, Shared y peticiones de recursos.
+
+## Uso
+
+Tras la instalación, describe el síntoma de la página y la decisión que necesitas
+que tome el agente.
+
+**Diagnosticar un fallo de runtime de MF**
+
+```text
+/mf observability
+Visit https://example.com. The checkout Remote fails to load. Use Divebell to
+determine whether manifest, remoteEntry, or expose loading failed, with evidence.
+```
+
+**Localizar un cuello de botella de rendimiento**
+
+```text
+/mf observability
+Visit https://example.com/products. The product Remote renders slowly on first
+load. Analyze module, Shared, and resource timing and its FP, FCP, and LCP impact.
+```
+
+**Trazar el comportamiento de Shared o Bridge**
+
+```text
+/mf observability
+Visit https://example.com. Inspect the selected Shared version of react and
+trace the cart Remote from Bridge render through commit. Identify missing stages.
+```
+
+El agente debe diagnosticar en este orden:
+
+1. Iniciar la recopilación antes de la navegación con `divebell open <url> --mf`.
+2. Usar `mf status` cuando el objetivo sea desconocido; en caso contrario, ejecutar
+   directamente el comando especializado correspondiente.
+3. Reproducir la interacción en el navegador solo cuando esta desencadene la carga diferida,
+   y luego volver a leer la evidencia especializada de MF.
+4. Leer `warnings`, `recommendedActions`, `selection`, las capacidades y la
+   completitud antes de sacar conclusiones. Volver a abrir con `--mf` cuando el historial sea parcial.
+5. Indicar qué demuestra la evidencia, qué no demuestra y el comando exacto
+   utilizado.
+
+## Hacer proxy de un Remote antes de que arranque MF
+
+`--mf-proxy` sustituye un Remote antes de la navegación. La clave puede ser el
+nombre configurado del Remote o su alias:
+
+```bash
+divebell open "https://example.com" \
+  --mf-proxy "checkout=http://localhost:3001/mf-manifest.json" \
+  --mf
+```
+
+El proxy se aplica solo a esa operación de apertura. Añade `--mf` cuando la misma
+ejecución también necesite diagnósticos estructurados.
+
+## Límites de la evidencia
+
+- Una carga de MF correcta demuestra que el runtime completó esa capa. No
+  demuestra que la UI se haya renderizado ni que los datos de negocio estén listos.
+- Verifica el resultado final de la página con Divebell después de inspeccionar la evidencia de MF.
+- La MF Extension devuelve evidencia acotada y serializable. No lee
+  cookies, tokens, factories, objetos contenedores ni cuerpos de respuesta de negocio.
+- No añadas el Runtime SDK ni el Observability Plugin solo para iniciar una
+  investigación puntual.
+- Usa el Observability Plugin de la aplicación cuando los informes deban conservarse,
+  subirse o recopilarse de forma continua en desarrollo o producción.
+
+Consulta la
+[documentación de la MF Extension de Divebell](https://github.com/2heal1/divebell/blob/main/packages/extensions/mf/README.md)
+para ver la superficie completa de comandos instalados.

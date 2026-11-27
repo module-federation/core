@@ -1,0 +1,190 @@
+import { Badge, PackageManagerTabs } from '@theme';
+
+<div style={{float:"right"}}><Badge text="Beta" type="warning" /></div>
+
+# Nuxt
+
+`@module-federation/nuxt` é um módulo do Nuxt que integra o Module Federation a hosts e remotes Nuxt. Ele usa o `@module-federation/vite` com o builder Vite padrão do Nuxt, ou o `@module-federation/enhanced/rspack` quando a aplicação usa o builder Rspack. Assim, você configura a federação uma única vez no `nuxt.config.ts`, independentemente do builder.
+
+:::warning Beta
+O `@module-federation/nuxt` ainda está em beta, e sua API pode mudar enquanto a integração se estabiliza. Relate bugs e casos extremos em [module-federation/nuxt](https://github.com/module-federation/nuxt).
+:::
+
+## Suporte
+
+- Nuxt `>=4.5.1` com o builder Vite padrão ou um `@nuxt/rspack-builder` de versão correspondente
+- Node.js `^22.18.0`, `^24.11.0` ou `>=26.0.0`
+- Componentes remotos renderizados no servidor, em desenvolvimento e em produção, em deploys Node com sistema de arquivos gravável
+- Exposes de componentes por convenção a partir de `~/components/exposed`
+- Componentes Vue remotos registrados nos auto-imports de templates do Nuxt
+- `vue` e `vue-router` compartilhados como singletons por padrão
+
+## Instalação
+
+Instale o módulo tanto no host quanto no remote:
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/nuxt',
+    yarn: 'yarn add @module-federation/nuxt',
+    pnpm: 'pnpm add @module-federation/nuxt',
+    bun: 'bun add @module-federation/nuxt',
+  }}
+/>
+
+## Configurar um remote
+
+Registre o módulo e dê a cada container publicado um nome único:
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  modules: ['@module-federation/nuxt'],
+  moduleFederation: {
+    config: {
+      name: 'catalog',
+    },
+  },
+});
+```
+
+Os componentes colocados em `app/components/exposed` são expostos automaticamente. Por exemplo, `app/components/exposed/ProductCard.vue` é exposto aos hosts como `./ProductCard`.
+
+Você também pode configurar `exposes` diretamente. Caminhos relativos são resolvidos a partir da raiz da aplicação Nuxt:
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  modules: ['@module-federation/nuxt'],
+  moduleFederation: {
+    config: {
+      name: 'catalog',
+      exposes: {
+        './catalog-app': './app/app.vue',
+      },
+    },
+  },
+});
+```
+
+## Configurar um host
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  modules: ['@module-federation/nuxt'],
+  moduleFederation: {
+    remoteComponents: {
+      catalog: ['ProductCard'],
+    },
+    config: {
+      name: 'shell',
+      hostInitInjectLocation: 'entry',
+      remotes: {
+        catalog: {
+          type: 'module',
+          name: 'catalog',
+          entry: 'https://catalog.example.com/mf-manifest.json',
+          entryGlobalName: 'catalog',
+          shareScope: 'default',
+        },
+      },
+    },
+  },
+});
+```
+
+O componente exposto fica então disponível por meio dos auto-imports de componentes do Nuxt:
+
+```vue title="app/app.vue"
+<template>
+  <RemoteProductCard product-id="123" />
+</template>
+```
+
+Durante o setup, o módulo busca o `mf-manifest.json` de cada remote e registra seus exposes de componentes. `remoteComponents` é a lista de fallback usada quando o manifest não pode ser acessado, por exemplo quando o remote é publicado separadamente do build do host.
+
+Prefira URLs de manifest em hosts com SSR: o runtime usa o manifest para escolher o entry do navegador ou do servidor e consegue detectar um novo build de servidor sem reiniciar o host.
+
+### Nomes dos componentes
+
+Com um único remote, `./ProductCard` vira `RemoteProductCard`. Com vários remotes, o nome do remote é incluído para evitar colisões, então `catalog/ProductCard` vira `RemoteCatalogProductCard`.
+
+Apenas exposes cujos nomes começam com uma letra e contêm letras, números, underscores ou hífens são registrados como componentes do Nuxt. Os demais exposes continuam disponíveis por meio de imports normais em runtime.
+
+## Renderização no servidor
+
+Por padrão, os componentes remotos são renderizados no servidor do Nuxt. Um remote de produção publica tanto o `remoteEntry.js` para o navegador quanto o `remoteEntry.ssr.js` para o servidor; o host carrega o entry de servidor durante a renderização, inclui o HTML do remote na resposta e faz a hidratação do mesmo componente no navegador.
+
+O loader de SSR padrão grava os módulos baixados em `node_modules/.ssr-cache`, abaixo do diretório de trabalho do servidor. Em deploys somente leitura ou serverless, desative o SSR de remotes:
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  moduleFederation: {
+    ssr: false,
+    config: {
+      // ...
+    },
+  },
+});
+```
+
+Se um remote falhar durante uma requisição no servidor, o host renderiza um fallback vazio para essa requisição, de modo que a página continue respondendo, e as requisições seguintes tentam carregar o remote novamente.
+
+:::warning
+O SSR de remotes executa o entry de servidor do remote com os privilégios do processo do host. Configure apenas remotes confiáveis e use URLs HTTPS diretas em produção.
+:::
+
+## Dependências compartilhadas
+
+Quando `config.shared` não está definido, `vue` e `vue-router` são compartilhados como singletons usando as versões instaladas. Defina `config.shared` para substituir esses padrões:
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  moduleFederation: {
+    config: {
+      shared: {
+        vue: { singleton: true, requiredVersion: '^3.5.0' },
+        'vue-router': { singleton: true, requiredVersion: '^5.1.0' },
+        pinia: { singleton: true },
+      },
+    },
+  },
+});
+```
+
+## Usar o builder Rspack
+
+O Vite é o padrão. Para usar o Rspack, instale o `@nuxt/rspack-builder` na mesma versão do Nuxt e defina `builder: 'rspack'` na aplicação:
+
+```ts title="nuxt.config.ts"
+export default defineNuxtConfig({
+  builder: 'rspack',
+  modules: ['@module-federation/nuxt'],
+  moduleFederation: {
+    config: { name: 'catalog' },
+  },
+});
+```
+
+Os dois builders usam a mesma configuração `moduleFederation` e conseguem consumir os manifests um do outro. Opções exclusivas do Vite, como `hostInitInjectLocation`, são ignoradas pelo Rspack.
+
+## Opções
+
+Configure estes valores em `moduleFederation` no `nuxt.config.ts`:
+
+| Opção | Tipo | Padrão | Descrição |
+| --- | --- | --- | --- |
+| `base` | `string` | `"/"` | Rota pública e diretório de saída dos entries de federação e do manifest. |
+| `exposedDir` | `string` | `"~/components/exposed"` | Diretório cujos componentes são expostos automaticamente. |
+| `manifestFetchTimeoutMs` | `number` | `500` | Tempo máximo de setup para buscar o manifest de cada remote. |
+| `manifestMetadata` | `Record<string, unknown>` | `{}` | Valores mesclados em `metaData.custom` nos arquivos de manifest e de stats gerados. |
+| `remoteComponents` | `Record<string, string[]>` | `{}` | Exposes de componentes a registrar quando a descoberta via manifest não está disponível ou está desativada. |
+| `ssr` | `boolean` | `true` | Renderiza no servidor do Nuxt os componentes remotos consumidos. Os exposes de servidor continuam sendo publicados quando `false`. |
+| `ssrFetchTimeoutMs` | `number` | `10000` | Tempo máximo de cada requisição de rede de remotes no SSR; `0` desativa o timeout. |
+| `ssrManifestMaxAgeMs` | `number` | `30000` | Intervalo até o servidor verificar novamente o manifest de um remote em busca de uma nova versão. |
+| `config` | `FederationOptions` | | Opções do Module Federation repassadas ao builder selecionado. Consulte a [Visão geral da configuração](/configure/index.html). |
+
+Consulte a [referência do pacote](https://github.com/module-federation/nuxt/blob/main/packages/nuxt/README.md) para componentes remotos tipados, exports de aplicações Bridge e o contrato completo de deploy.
+
+## Exemplos
+
+- [Aplicações de exemplo do module-federation/nuxt](https://github.com/module-federation/nuxt/tree/main/apps): hosts e remotes com Vite e Rspack
+- [Host e remote Nuxt](https://github.com/gioboa/module-federation-vite-examples/tree/main/nuxt): Nuxt 4 com componentes remotos renderizados via SSR

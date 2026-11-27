@@ -77,28 +77,66 @@ export function initContainerEntry(
     });
   }
 
+  const { shareScopeDispatch, additionalShareScopeKeys } =
+    webpackRequire.federation;
+  const additionalScopes: string[] = [];
+  if (
+    shareScopeDispatch === 'declared' &&
+    hostShareScopeMap &&
+    additionalShareScopeKeys?.length
+  ) {
+    const ownsArray = Array.isArray(shareScopeKey);
+    const hostArray = Array.isArray(hostShareScopeKeys);
+    for (const key of additionalShareScopeKeys) {
+      if (
+        ownsArray
+          ? shareScopeKey.includes(key)
+          : key === (shareScopeKey || 'default')
+      ) {
+        continue;
+      }
+      if (hostArray && !hostShareScopeKeys.includes(key)) continue;
+      // A scalar container already binds every name from an array request.
+      if (!hostArray || ownsArray) {
+        if (!hostShareScopeMap[key]) hostShareScopeMap[key] = {};
+        federationInstance.initShareScopeMap(key, hostShareScopeMap[key], {
+          hostShareScopeMap,
+        });
+      }
+      additionalScopes.push(key);
+    }
+  }
+
   if (webpackRequire.federation.attachShareScopeMap) {
     webpackRequire.federation.attachShareScopeMap(webpackRequire);
   }
 
-  if (!Array.isArray(shareScopeKey)) {
-    // @ts-ignore
-    return webpackRequire.I(shareScopeKey || 'default', initScope);
-  }
+  const primary = !Array.isArray(shareScopeKey)
+    ? webpackRequire.I(shareScopeKey || 'default', initScope)
+    : webpackRequire.federation.initOptions.shared
+      ? webpackRequire.I(shareScopeKey, initScope)
+      : Promise.all(
+          shareScopeKey.map((key) => webpackRequire.I(key, initScope)),
+        ).then(() => true);
 
-  var proxyInitializeSharing = Boolean(
-    webpackRequire.federation.initOptions.shared,
-  );
+  if (!additionalScopes.length) return primary as WebpackRequire['I'] | void;
 
-  if (proxyInitializeSharing) {
-    // @ts-ignore
-    return webpackRequire.I(shareScopeKey, initScope);
-  }
-  // @ts-ignore
-  return Promise.all(
-    shareScopeKey.map((key) => {
-      // @ts-ignore
-      return webpackRequire.I(key, initScope);
-    }),
-  ).then(() => true);
+  const initializeAdditionalScopes = () =>
+    Promise.all(
+      additionalScopes.flatMap((scope) =>
+        federationInstance.initializeSharing(scope, {
+          from: 'build',
+          strategy: federationInstance.options.shareStrategy,
+          initScope,
+          context: { shareScopeDispatch },
+        }),
+      ),
+    ).then(() => true);
+  const ready =
+    primary &&
+    typeof primary !== 'boolean' &&
+    typeof primary.then === 'function'
+      ? Promise.resolve(primary).then(initializeAdditionalScopes)
+      : initializeAdditionalScopes();
+  return ready as unknown as WebpackRequire['I'];
 }

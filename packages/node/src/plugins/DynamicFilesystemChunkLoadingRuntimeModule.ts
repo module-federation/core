@@ -6,9 +6,6 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 const { RuntimeGlobals, RuntimeModule } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { getUndoPath } = require(
-  normalizeWebpackPath('webpack/lib/util/identifier'),
-) as typeof import('webpack/lib/util/identifier');
 import { SyncWaterfallHook } from 'tapable';
 const compileBooleanMatcher = require(
   normalizeWebpackPath('webpack/lib/util/compileBooleanMatcher'),
@@ -22,6 +19,7 @@ import {
   generateLoadScript,
   generateInstallChunk,
   generateExternalInstallChunkCode,
+  getChunkRootOutputDir,
 } from './webpackChunkUtilities';
 import { createBundlerLogger } from './createBundlerLogger';
 import {
@@ -132,14 +130,10 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     const hasJsMatcher = compileBooleanMatcher(conditionMap);
     const initialChunkIds = getInitialChunkIds(chunk, chunkGraph, chunkHasJs);
 
-    const outputName = compilation.getPath(
+    const rootOutputDir = getChunkRootOutputDir(
+      compilation,
+      chunk,
       jsModulePlugin.getChunkFilenameTemplate(chunk, compilation.outputOptions),
-      { chunk, contentHashType: 'javascript' },
-    );
-    const rootOutputDir = getUndoPath(
-      outputName,
-      compilation.outputOptions.path || '',
-      false,
     );
     const stateExpression = this.runtimeRequirements.has(
       RuntimeGlobals.hmrDownloadUpdateHandlers,
