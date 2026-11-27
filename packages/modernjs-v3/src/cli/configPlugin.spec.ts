@@ -1,3 +1,5 @@
+import { execFileSync } from 'child_process';
+import path from 'path';
 import { it, expect, describe, rs, afterEach } from '@rstest/core';
 import {
   moduleFederationConfigPlugin,
@@ -111,6 +113,18 @@ describe('patchMFConfig', async () => {
         },
       },
     });
+  });
+
+  it('patchMFConfig: native ESM build', () => {
+    execFileSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '--eval',
+        "import { patchMFConfig } from '@module-federation/modern-js-v3/config-plugin'; patchMFConfig({ name: 'host' }, true);",
+      ],
+      { cwd: path.resolve(__dirname, '../..') },
+    );
   });
 });
 
