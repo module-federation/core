@@ -6,6 +6,9 @@ const t = require(babelTypesPath);
 const METRO_PREFIX = '__METRO_GLOBAL_PREFIX__';
 const GLOBAL_NAMES_TO_PREFIX = ['__r', '__c', '__registerSegment', '__accept'];
 const REFRESH_SYMBOLS = ['$RefreshReg$', '$RefreshSig$'];
+const METRO_REQUIRE_PATH = 'metro-runtime/src/polyfills/require.js';
+// Expo CLI serves its own copy of Metro's require runtime
+const EXPO_REQUIRE_PATH = '@expo/cli/build/metro-require/require.js';
 
 /**
  * - global.__r = metroRequire;
@@ -139,10 +142,12 @@ function metroPatchRequireBabelPlugin() {
     visitor: {
       Program: {
         enter(_, state) {
+          const filename = state.file.opts.filename.replaceAll('\\', '/');
           // Transform only require.js from metro-runtime
-          state.shouldTransform = state.file.opts.filename
-            .replaceAll('\\', '/')
-            .includes('metro-runtime/src/polyfills/require.js');
+          state.shouldTransform = filename.includes(METRO_REQUIRE_PATH);
+          // Expo's copy already defaults the refresh symbols and prefixes module
+          // IDs, but still installs the names in GLOBAL_NAMES_TO_PREFIX unprefixed
+          state.isExpoRequire = filename.includes(EXPO_REQUIRE_PATH);
           // Perform refreshSymbols transformation only once
           // Because it is referenced in multiple places
           state.hasTransformed = {
@@ -152,7 +157,7 @@ function metroPatchRequireBabelPlugin() {
         },
       },
       MemberExpression(path, state) {
-        if (!state.shouldTransform) return;
+        if (!state.shouldTransform && !state.isExpoRequire) return;
         prefixGlobalNames(path);
       },
       AssignmentExpression(path, state) {
