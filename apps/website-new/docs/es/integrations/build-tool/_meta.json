@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "rsbuild",
+    "label": "Rsbuild"
+  },
+  {
+    "type": "file",
+    "name": "rslib",
+    "label": "Rslib"
+  },
+  {
+    "type": "file",
+    "name": "rstest",
+    "label": "Rstest"
+  },
+  {
+    "type": "file",
+    "name": "vite",
+    "label": "Vite"
+  }
+]

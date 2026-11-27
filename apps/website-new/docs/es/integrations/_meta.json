@@ -1,0 +1,36 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Descripción general"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "build-tool",
+    "label": "Herramientas de build"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "bundler",
+    "label": "Bundler"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "documentation",
+    "label": "Solución de documentación"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "framework",
+    "label": "Framework",
+    "collapsible": true,
+    "collapsed": true
+  },
+  {
+    "type": "dir-section-header",
+    "name": "practice",
+    "label": "Práctica",
+    "collapsible": true,
+    "collapsed": true
+  }
+]

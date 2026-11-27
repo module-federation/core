@@ -4,10 +4,10 @@
 
 import ConsumeSharedPlugin from '../../../../src/lib/sharing/ConsumeSharedPlugin';
 import ConsumeSharedModule from '../../../../src/lib/sharing/ConsumeSharedModule';
-import type AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
+import type AsyncDependenciesBlock from 'webpack/lib/graph/AsyncDependenciesBlock';
 import type Dependency from 'webpack/lib/Dependency';
-import type Module from 'webpack/lib/Module';
-import type { SemVerRange } from 'webpack/lib/util/semver';
+import type Module from 'webpack/lib/module/Module';
+import type { SemVerRange } from 'webpack/lib/sharing/semver';
 import { createSharingTestEnvironment, shareScopes } from '../utils';
 import { resetAllMocks } from '../plugin-test-utils';
 
@@ -17,7 +17,11 @@ const toSemVerRange = (range: string): SemVerRange =>
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 const mocks = rs.hoisted(() => ({
   mockGetWebpackPath: rs.fn(() => 'webpack'),
-  mockNormalizeWebpackPath: rs.fn((p: string) => p),
+  mockNormalizeWebpackPath: rs.fn(
+    rs.requireActual<
+      typeof import('@module-federation/sdk/normalize-webpack-path')
+    >('@module-federation/sdk/normalize-webpack-path').normalizeWebpackPath,
+  ),
   mockFederationRuntimePluginApply: rs.fn(),
   mockFederationRuntimePlugin: rs.fn(),
 }));

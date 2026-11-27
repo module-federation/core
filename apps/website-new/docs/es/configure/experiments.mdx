@@ -1,0 +1,119 @@
+# experiments
+
+La configuración `experiments` habilita capacidades avanzadas y experimentales en el plugin.
+
+## asyncStartup
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Cuando `asyncStartup` está habilitado, todos los entrypoints de Module Federation se inicializarán de forma asíncrona por defecto. Esto significa:
+
+- No necesitas sentencias `import()` manuales al inicio de tu aplicación (por ejemplo, `import('./bootstrap')`)
+- Todos los entrypoints gestionan automáticamente la inicialización asíncrona
+- Se evitan los errores de "consumo anticipado" (eager consumption) gracias a la gestión asíncrona automática
+
+:::warning
+
+Al usar este modo, todos los entrypoints se inicializarán de forma asíncrona. Si haces un `require` manual de un entrypoint empaquetado o expones una biblioteca UMD, obtendrás una promesa que se resuelve con los exports.
+
+:::
+
+## externalRuntime
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Si lo estableces en `true`, `@module-federation/runtime-core` se tratará como external y se leerá en tiempo de ejecución desde la variable global `_FEDERATION_RUNTIME_CORE`. Asegúrate de que el consumer proporcione esta variable global (normalmente se usa junto con `provideExternalRuntime`); de lo contrario, no funcionará.
+
+## provideExternalRuntime
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Solo para escenarios de consumer puro (sin `exposes`). Cuando está habilitado, inyecta automáticamente `@module-federation/inject-external-runtime-core-plugin` para proporcionar el runtime externo en tiempo de ejecución.
+
+:::warning Notas
+
+- Usarlo junto con `exposes` lanzará un error: solo los consumers puros pueden habilitarlo.
+- Es preferible configurarlo en el consumer de nivel superior para evitar inyecciones múltiples.
+
+:::
+
+## optimization
+
+Este objeto contiene flags relacionados con optimizaciones en tiempo de build que pueden afectar al tamaño y al comportamiento del runtime de Module Federation.
+
+### disableSnapshot
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Si lo estableces en `true`, esta opción define la constante global `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` como `true` durante el build. En `@module-federation/runtime-core`, esto impide que `snapshotPlugin()` y `generatePreloadAssetsPlugin()` se incluyan e inicialicen dentro de la instancia de Module Federation.
+
+**Impacto:**
+
+- **Beneficio:** Puede reducir el tamaño total del bundle del runtime de Module Federation al excluir el código de estos dos plugins.
+- **Costo:** Desactiva la funcionalidad que aportan estos plugins. El `snapshotPlugin` es fundamental para el "protocolo mf-manifest": se encarga de generar o proporcionar acceso en tiempo de ejecución a un manifest de build (por ejemplo, `mf-manifest.json`) con metadatos sobre los módulos expuestos, las dependencias compartidas, las versiones y los remotes. Desactivarlo implica que:
+  - El runtime pierde el acceso a los datos de este manifest de build.
+  - Las funcionalidades que dependen del manifest, como el descubrimiento dinámico de remotes, las comprobaciones de compatibilidad de versiones basadas en el manifest, la precarga avanzada de recursos (que también gestiona el `generatePreloadAssetsPlugin` eliminado) y, potencialmente, las herramientas de depuración e introspección en tiempo de ejecución, no funcionarán correctamente o no estarán disponibles.
+  - Usa esta opción solo si no dependes de estas funcionalidades basadas en el manifest y priorizas un runtime lo más ligero posible.
+
+:::warning
+**Precaución:** Establecer `disableSnapshot: true` desactivará el protocolo mf-manifest. Esto significa que perderás la sincronización de tipos de TypeScript y el hot module replacement (HMR) para los módulos federados. Si solo usas remotes `.js` (no remotes basados en manifest), no perderás ninguna funcionalidad, ya que los remotes `js` no admiten estas capacidades de todos modos.
+:::
+
+### disableRemote y disableShared
+
+- Tipo: `boolean`
+- Obligatorio: No
+- Valor por defecto: `false`
+
+Estas opciones eliminan en tiempo de build capacidades independientes de runtime-core:
+
+- `disableRemote` elimina por completo la ruta de consumo de remotes, incluidos el registro, la carga de entradas, la precarga, la lectura y ejecución de módulos expuestos y la gestión de snapshots relacionada. No elimina los `exposes` ni el `container.get` generados para el producer actual. Úsala solo cuando el build nunca consuma ni registre remotes dinámicamente.
+- `disableShared` elimina el registro, la resolución y la carga de dependencias compartidas. Se conserva un share scope vacío mínimo para que un remote sin dependencias compartidas pueda inicializarse igualmente.
+
+Las opciones se pueden combinar. Llamar a una API de una capacidad desactivada lanza un error explícito. Mantén cada opción en su valor por defecto salvo que tengas la garantía de que el build no usa esa capacidad.
+
+### target
+
+- Tipo: `'web' | 'node'`
+- Obligatorio: No
+- Valor por defecto: se infiere de la opción `target` de Webpack (normalmente `'web'`)
+
+Esta opción define la constante global `ENV_TARGET` durante el build, especificando el entorno de ejecución previsto.
+
+**Impacto:**
+
+- **`target: 'web'`**: Optimiza el build para entornos de navegador.
+  - Garantiza que se usen los mecanismos de carga de remote entry específicos del navegador (`loadEntryDom`).
+  - Lo más importante: habilita el tree shaking y la eliminación de código muerto para el código específico de Node.js dentro de `@module-federation/sdk`. Funciones como `createScriptNode` y `loadScriptNode`, junto con los módulos integrados de Node.js que requieren (por ejemplo, `vm`, `path`, `http`), se eliminan por completo del bundle, lo que reduce considerablemente su tamaño.
+- **`target: 'node'`**: Optimiza el build para entornos Node.js.
+  - Garantiza que se usen los mecanismos de carga de remote entry específicos de Node.js (`loadEntryNode`).
+  - Incluye en el bundle las funciones específicas de Node.js del SDK (`createScriptNode`, `loadScriptNode`), lo que permite que la aplicación federada funcione correctamente en Node.js.
+
+Se recomienda establecer este valor de forma explícita para garantizar que se apliquen las optimizaciones previstas, especialmente en escenarios universales o de renderizado del lado del servidor.
+
+### Impacto de los flags de optimización en el tamaño de `remoteEntry.js`
+
+La siguiente tabla muestra cómo distintas combinaciones de los flags de optimización `disableSnapshot`, `target: 'web'` y `externalRuntime` afectan al tamaño del archivo `remoteEntry.js` generado. Estas mediciones pueden ayudarte a elegir el equilibrio adecuado entre funcionalidades del runtime y tamaño del bundle para tu caso de uso.
+
+| Flags de optimización                         | remoteEntry.js | Tamaño Gzip | Tamaño Brotli |
+| --------------------------------------------- | :------------: | :---------: | :-----------: |
+| Ningún flag de optimización habilitado        |      69K       |   21437 B   |    19024 B    |
+| `disableSnapshot: true`                       |      65K       |   20096 B   |    17860 B    |
+| `target: 'web'`                               |      60K       |   19314 B   |    17105 B    |
+| Ambos habilitados                             |      56K       |   17998 B   |    15982 B    |
+| Ambos habilitados + `externalRuntime: true`   |      14K       |   5381 B    |    4703 B     |
+| Ambos desactivados + `externalRuntime: true`  |      22K       |   8222 B    |    7269 B     |
+
+**Notas:**
+
+- Habilitar a la vez `disableSnapshot` y `target: 'web'` ofrece la mayor reducción del tamaño del bundle, sobre todo si se combina con `externalRuntime: true`.
+- Usar el runtime externo (`externalRuntime: true`) puede reducir drásticamente el tamaño de tu remote entry, pero requiere que el consumer proporcione el runtime.
+- Un bundle más pequeño puede traducirse en tiempos de carga más rápidos y un mejor rendimiento, pero puede desactivar ciertas funcionalidades (consulta más arriba qué hace cada flag).

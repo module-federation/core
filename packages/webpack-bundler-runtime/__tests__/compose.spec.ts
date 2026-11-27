@@ -120,7 +120,11 @@ async function loadSharedModule(capabilities: Capabilities) {
 describe('createFederation', () => {
   test.each([
     ['remotes', remotes, ['remotes']],
-    ['consumes', consumes, ['consumes', 'getSharedFallbackGetter']],
+    [
+      'consumes',
+      consumes,
+      ['supportsSharedIdentity', 'consumes', 'getSharedFallbackGetter'],
+    ],
     ['share-scope', shareScope, ['I', 'installInitialConsumes']],
     ['container', container, ['initContainerEntry']],
   ])('%s exposes exactly its bundlerRuntime keys', (_, adapter, keys) => {

@@ -8,18 +8,22 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import { infrastructureLogger as logger } from '@module-federation/sdk';
 import { buildDescMap, BUILD_001 } from '@module-federation/error-codes';
 import { logAndReport } from '@module-federation/error-codes/node';
-import type { Compilation, Dependency, Module as WebpackModule } from 'webpack';
 import type {
+  Compilation,
+  Dependency,
   InputFileSystem,
-  LibIdentOptions,
-  NeedBuildContext,
+  Module as WebpackModule,
   ObjectDeserializerContext,
   ObjectSerializerContext,
-  RequestShortener,
-  ResolverWithOptions,
-  WebpackOptions,
-} from 'webpack/lib/Module';
-import type WebpackError from 'webpack/lib/WebpackError';
+  WebpackError,
+  WebpackOptionsNormalized as WebpackOptions,
+} from 'webpack';
+import type {
+  LibIdentOptions,
+  NeedBuildContext,
+} from 'webpack/lib/module/Module';
+import type { ResolverWithOptions } from 'webpack/lib/resolve/ResolverFactory';
+import type RequestShortener from 'webpack/lib/util/RequestShortener';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { getFederationGlobalScope } from './runtime/utils';
@@ -34,10 +38,10 @@ const {
 } = require(normalizeWebpackPath('webpack')) as typeof import('webpack');
 const StaticExportsDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
-) as typeof import('webpack/lib/dependencies/StaticExportsDependency');
+) as typeof import('webpack/lib/dependencies/core/StaticExportsDependency');
 const EntryDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
-) as typeof import('webpack/lib/dependencies/EntryDependency');
+) as typeof import('webpack/lib/entry/EntryDependency');
 
 const SOURCE_TYPES = new Set(['javascript']);
 
@@ -50,6 +54,7 @@ export type ExposeOptions = {
    * custom chunk name for the exposed module
    */
   name: string;
+  layer?: string;
 };
 
 class ContainerEntryModule extends Module {
@@ -169,7 +174,11 @@ class ContainerEntryModule extends Module {
       );
       let idx = 0;
       for (const request of options.import) {
-        const dep = new ContainerExposedDependency(name, request);
+        const dep = new ContainerExposedDependency(
+          name,
+          request,
+          options.layer,
+        );
         dep.loc = {
           name,
           index: idx++,

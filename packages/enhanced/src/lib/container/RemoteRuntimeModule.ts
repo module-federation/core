@@ -6,7 +6,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import type { Compilation } from 'webpack';
 import RemoteModule from './RemoteModule';
 import { getFederationGlobalScope } from './runtime/utils';
-import type ExternalModule from 'webpack/lib/ExternalModule';
+import type ExternalModule from 'webpack/lib/externals/ExternalModule';
 import type FallbackModule from './FallbackModule';
 import type {
   ModuleIdToRemoteDataMapping,
@@ -15,7 +15,7 @@ import type {
 
 const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
-) as typeof import('webpack/lib/util/extractUrlAndGlobal');
+) as typeof import('webpack/lib/externals/extractUrlAndGlobal');
 
 const { Template, RuntimeModule, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),

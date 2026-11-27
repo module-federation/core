@@ -30,6 +30,7 @@ if (USE_EXPOSES) adapters.push(container);
 
 const bundlerRuntime = Object.assign(
   {
+    supportsSharedIdentity: USE_SHARED,
     S: {},
     init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
       const { initOptions } = webpackRequire.federation;
