@@ -1,27 +1,31 @@
 export = AssetModulesPlugin;
+/**
+ * Represents the asset modules plugin runtime component.
+ * @typedef {object} AssetModulesPluginOptions
+ * @property {boolean=} sideEffectFree
+ */
 declare class AssetModulesPlugin {
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Creates an instance of AssetModulesPlugin.
+     * @param {AssetModulesPluginOptions} options options
+     */
+    constructor(options: AssetModulesPluginOptions);
+    /** @type {AssetModulesPluginOptions} */
+    options: AssetModulesPluginOptions;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace AssetModulesPlugin {
-  export {
-    Source,
-    Schema,
-    AssetInfo,
-    Compiler,
-    BuildInfo,
-    CodeGenerationResult,
-    NormalModule,
-  };
+    export { AssetModulesPluginOptions };
 }
-type Source = import('webpack-sources').Source;
-type Schema = import('schema-utils').Schema;
-type AssetInfo = import('../Compilation').AssetInfo;
-type Compiler = import('../Compiler');
-type BuildInfo = import('../Module').BuildInfo;
-type CodeGenerationResult = import('../Module').CodeGenerationResult;
-type NormalModule = import('../NormalModule');
+import type Compiler from "../Compiler";
+/**
+ * Represents the asset modules plugin runtime component.
+ */
+type AssetModulesPluginOptions = {
+    sideEffectFree?: boolean | undefined;
+};

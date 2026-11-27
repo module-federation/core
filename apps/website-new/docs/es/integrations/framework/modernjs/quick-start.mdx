@@ -1,0 +1,279 @@
+---
+title: "Inicio rápido"
+---
+
+# Modern.js
+
+Este capítulo explica cómo usar el plugin de Module Federation en Modern.js e incluye un ejemplo sencillo que muestra cómo crear aplicaciones provider y consumer.
+
+:::tip
+
+* Demo de ejemplo [Modern.js SSR](https://github.com/module-federation/module-federation-examples/tree/master/modernjs-ssr)
+
+:::
+
+## Entorno
+
+### Node.js
+
+Antes de empezar, necesitas instalar [Node.js](https://nodejs.org/) y asegurarte de que tu versión de Node.js no sea inferior a v20.19.5. **Recomendamos usar la versión LTS de Node.js 24.**
+
+Puedes comprobar la versión de Node.js que estás usando con el siguiente comando:
+
+```bash
+node -v
+```
+
+Si no tienes Node.js instalado en tu entorno actual, o la versión instalada es inferior a v20.19.5, puedes usar [nvm](https://github.com/nvm-sh/nvm) o [fnm](https://github.com/Schniz/fnm) para instalar la versión necesaria.
+
+Este es un ejemplo de cómo instalar la versión LTS de Node.js 24 mediante nvm:
+
+```bash
+# Install the long-term support version of Node.js 24
+nvm install 24 --lts
+
+# Make the newly installed Node.js 24 as the default version
+nvm alias default 24
+
+# Switch to the newly installed Node.js 24
+nvm use 24
+```
+
+:::tip nvm y fnm
+Tanto nvm como fnm son herramientas de gestión de versiones de Node.js. En términos relativos, nvm es más maduro y estable, mientras que fnm está implementado en Rust, lo que le da un mejor rendimiento que nvm.
+:::
+
+### pnpm
+
+Se recomienda usar [pnpm](https://pnpm.io/installation) para gestionar las dependencias:
+
+```bash
+npm install -g pnpm@8
+```
+
+:::note
+Modern.js también admite la gestión de dependencias con `yarn` y `npm`.
+:::
+
+
+## Crear el proyecto
+
+`@modern-js/create` ofrece una interfaz interactiva de preguntas y respuestas para inicializar el proyecto según tus respuestas, con la inicialización basada en la configuración por defecto:
+
+### Crear el consumer
+
+```bash
+npx @modern-js/create@latest modern-consumer
+```
+
+### Crear el provider
+
+```bash
+npx @modern-js/create@latest modern-provider
+```
+
+### Instalar los plugins
+
+Module Federation proporciona el plugin `@module-federation/modern-js-v3` para Modern.js.
+
+```bash
+pnpm add @module-federation/modern-js-v3
+```
+
+## Configurar Module Federation
+
+### Provider
+
+#### 1. Crear el archivo de configuración
+
+Crea un archivo `module-federation.config.ts` en el directorio raíz del proyecto con el siguiente contenido:
+
+```ts title='module-federation.config.ts'
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
+
+export default createModuleFederationConfig({
+  name: 'provider',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './Image': './src/components/Image.tsx',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+```
+
+#### 2. Aplicar el plugin
+
+Aplica `@module-federation/modern-js-v3` en `modern.config.ts` :
+
+```ts title='modern.config.ts'
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+    port: 3006,
+  },
+  plugins: [appTools(), moduleFederationPlugin()],
+});
+```
+
+#### 3. Crear el componente que se va a exponer
+
+Crea el archivo `src/components/Image.tsx` con el siguiente contenido:
+
+```tsx title='Image.tsx'
+import React from 'react';
+import styles from './Image.module.css';
+
+export default (): JSX.Element => (
+  <div
+    id="remote-components"
+    style={{
+      backgroundColor: '#1ee9c1',
+      color: 'lightgrey',
+      padding: '1rem',
+    }}
+  >
+    <h2>
+      <strong>remote</strong>&nbsp;image
+    </h2>
+    <button
+      id="remote-components-button"
+      style={{ marginBottom: '1rem' }}
+      onClick={() => alert('[remote-components] Client side Javascript works!')}
+    >
+      Click me to test i'm interactive!
+    </button>
+    <img
+      id="remote-components-image"
+      src="https://module-federation.io/module-federation-logo.svg"
+      style={{ width: '100px' }}
+      alt="serge"
+    />
+    <button className={styles['button']}>Button from remote</button>
+  </div>
+);
+```
+
+Y crea el archivo de estilos correspondiente con el siguiente contenido:
+
+```css title='Image.module.css'
+.button {
+  background: red;
+}
+```
+
+### Consumer
+
+#### 1. Crear el archivo de configuración
+
+Crea un archivo `module-federation.config.ts` en el directorio raíz del proyecto con el siguiente contenido:
+
+```ts title='module-federation.config.ts'
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
+
+export default createModuleFederationConfig({
+  name: 'consumer',
+  remotes: {
+    remote: 'provider@http://localhost:3006/mf-manifest.json',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+```
+
+#### 2. Aplicar el plugin
+
+Aplica `@module-federation/modern-js-v3` en `modern.config.ts`:
+
+```ts title='modern.config.ts'
+import { appTools, defineConfig } from '@modern-js/app-tools';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
+
+// https://modernjs.dev/en/configure/app/usage
+export default defineConfig({
+
+  server: {
+    ssr: {
+      mode: 'stream',
+    },
+    port: 3007,
+  },
+  plugins: [appTools(), moduleFederationPlugin()],
+});
+```
+#### 3. Sugerencias de tipos
+
+Añade `paths` en `tsconfig.json` para obtener los tipos del producer:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  }
+}
+```
+#### 4. Consumir el provider
+
+Modifica la página de entrada (`src/routes/page.tsx`) y referencia los componentes que proporciona el producer. El contenido es el siguiente:
+
+```tsx title='page.tsx'
+import ProviderImage from 'remote/Image';
+import './index.css';
+
+const Index = () => (
+  <div className="container-box">
+    <ProviderImage />
+  </div>
+);
+
+export default Index;
+```
+
+## Problema de parpadeo de CSS
+
+Arranca el proyecto y visita `http://localhost:3007/`: verás que el SSR funciona con normalidad y la página se renderiza correctamente, pero aparece un problema de parpadeo de estilos. Esto se debe a que los archivos de estilos del producer no pueden inyectarse en el HTML correspondiente. Este problema se puede resolver con [createLazyComponent](/guide/bridge/react/load-component.html#what-is-createlazycomponent).
+
+Modifica el código del consumer que referencia al producer:
+
+```tsx title='src/routes/page.tsx'
+import { getInstance } from '@module-federation/modern-js-v3/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/data-fetch';
+import './index.css';
+
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+const RemoteSSRComponent = instance.createLazyComponent({
+  loader: () => import('remote/Image'),
+  loading: 'loading...',
+  export: 'default',
+  fallback: ({ error }) => {
+    if (error instanceof Error && error.message.includes('not exist')) {
+      return <div>fallback - not existed id</div>;
+    }
+    return <div>fallback</div>;
+  },
+});
+
+const Index = () => (
+  <div className="container-box">
+    <RemoteSSRComponent />
+  </div>
+);
+
+export default Index;
+```
+
+Tras modificar la página y volver a visitarla, verás que el HTML devuelto incluye automáticamente el archivo de estilos del producer, lo que resuelve el problema de parpadeo de CSS.

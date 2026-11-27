@@ -1,32 +1,30 @@
 export = NodeEnvironmentPlugin;
 declare class NodeEnvironmentPlugin {
-  /**
-   * @param {NodeEnvironmentPluginOptions} options options
-   */
-  constructor(options: NodeEnvironmentPluginOptions);
-  options: NodeEnvironmentPluginOptions;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Creates an instance of NodeEnvironmentPlugin.
+     * @param {NodeEnvironmentPluginOptions} options options
+     */
+    constructor(options: NodeEnvironmentPluginOptions);
+    /** @type {NodeEnvironmentPluginOptions} */
+    options: NodeEnvironmentPluginOptions;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace NodeEnvironmentPlugin {
-  export {
-    InfrastructureLogging,
-    Compiler,
-    InputFileSystem,
-    NodeEnvironmentPluginOptions,
-  };
+    export { NodeEnvironmentPluginOptions };
 }
-type InfrastructureLogging =
-  import('../../declarations/WebpackOptions').InfrastructureLogging;
-type Compiler = import('../Compiler');
-type InputFileSystem = import('../util/fs').InputFileSystem;
+import type Compiler from "../Compiler";
+/**
+ * Defines the node environment plugin options type used by this module.
+ */
 type NodeEnvironmentPluginOptions = {
-  /**
-   * infrastructure logging options
-   */
-  infrastructureLogging: InfrastructureLogging;
+    /**
+     * infrastructure logging options
+     */
+    infrastructureLogging: InfrastructureLogging;
 };
+import type { InfrastructureLogging } from "../../declarations/WebpackOptions";

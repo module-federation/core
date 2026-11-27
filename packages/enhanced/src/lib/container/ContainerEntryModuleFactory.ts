@@ -11,11 +11,11 @@ import ContainerEntryDependency from './ContainerEntryDependency';
 
 const ModuleFactory = require(
   normalizeWebpackPath('webpack/lib/ModuleFactory'),
-) as typeof import('webpack/lib/ModuleFactory');
+) as typeof import('webpack/lib/module/ModuleFactory');
 import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
-} from 'webpack/lib/ModuleFactory';
+} from 'webpack/lib/module/ModuleFactory';
 
 export default class ContainerEntryModuleFactory extends ModuleFactory {
   /**

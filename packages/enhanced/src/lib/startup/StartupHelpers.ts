@@ -4,11 +4,10 @@
 */
 
 'use strict';
-import type { Compilation, Chunk, ChunkGraph } from 'webpack';
+import type { Compilation, Chunk, ChunkGraph, Entrypoint } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { EntryModuleWithChunkGroup } from 'webpack/lib/ChunkGraph';
-import type RuntimeTemplate from 'webpack/lib/RuntimeTemplate';
-import type Entrypoint from 'webpack/lib/Entrypoint';
+import type { EntryModuleWithChunkGroup } from 'webpack/lib/graph/ChunkGraph';
+import type RuntimeTemplate from 'webpack/lib/template/RuntimeTemplate';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -21,7 +20,7 @@ const { getAllChunks } = require(
 ) as typeof import('webpack/lib/javascript/ChunkHelpers');
 const HotUpdateChunk = require(
   normalizeWebpackPath('webpack/lib/HotUpdateChunk'),
-) as typeof import('webpack/lib/HotUpdateChunk');
+) as typeof import('webpack/lib/graph/HotUpdateChunk');
 const { getUndoPath } = require(
   normalizeWebpackPath('webpack/lib/util/identifier'),
 ) as typeof import('webpack/lib/util/identifier');
@@ -126,7 +125,7 @@ export const generateEntryStartup = (
 
   for (const [module, entrypoint] of entries) {
     if (!entrypoint) continue;
-    const runtimeChunk = entrypoint.getRuntimeChunk() as Entrypoint.Chunk;
+    const runtimeChunk = entrypoint.getRuntimeChunk() as Chunk;
     const moduleId = chunkGraph.getModuleId(module) as string;
     const chunks = getAllChunks(entrypoint, chunk, runtimeChunk);
     if (
@@ -271,7 +270,7 @@ export const generateESMEntryStartup = (
         );
       }
 
-      return startupSource.source();
+      return startupSource.source().toString();
     }
   }
   return '';

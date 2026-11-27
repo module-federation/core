@@ -1,1 +1,1 @@
-["retry-plugin", "observability-plugin"]
+["retry-plugin", "observability-plugin", "fetchalo-plugin"]

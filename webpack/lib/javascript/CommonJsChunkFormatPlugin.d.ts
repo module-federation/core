@@ -1,14 +1,10 @@
 export = CommonJsChunkFormatPlugin;
 declare class CommonJsChunkFormatPlugin {
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
-declare namespace CommonJsChunkFormatPlugin {
-  export { Chunk, Compiler };
-}
-type Chunk = import('../Chunk');
-type Compiler = import('../Compiler');
+import type Compiler from "../Compiler";
