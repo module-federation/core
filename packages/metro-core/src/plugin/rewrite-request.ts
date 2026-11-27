@@ -38,17 +38,17 @@ export function createRewriteRequest({
     // rewrite /index.bundle -> /<tmp-dir>/index.bundle
     if (pathname.match(hostEntryPathRegex)) {
       const target = `${relativeTmpDirPath}/${hostEntryName}`;
-      return url.replace(hostEntryName, target);
+      return replaceInPath(url, hostEntryName, target);
     }
     // rewrite /mini.bundle -> /<tmp-dir>/mini.bundle
     if (pathname.match(remoteEntryPathRegex)) {
       const target = `${relativeTmpDirPath}/${remoteEntryName}`;
-      return url.replace(remoteEntryName, target);
+      return replaceInPath(url, remoteEntryName, target);
     }
     // rewrite /mf-manifest.json -> /[metro-project]/node_modules/.mf-metro/mf-manifest.json
     if (pathname.startsWith(`/${MANIFEST_FILENAME}`)) {
       const target = toPosixPath(manifestPath.replace(root, '[metro-project]'));
-      return url.replace(MANIFEST_FILENAME, target);
+      return replaceInPath(url, MANIFEST_FILENAME, target);
     }
     // rewrite /@mf-types.zip and /@mf-types.d.ts -> /<tmp-dir>/<type-asset>
     const dtsAssets = getDtsAssetNames?.();
@@ -57,7 +57,7 @@ export function createRewriteRequest({
       .find((value) => pathname === `/${value}`);
     if (dtsAssetName) {
       const target = `${relativeTmpDirPath}/${dtsAssetName}`;
-      return url.replace(dtsAssetName, target);
+      return replaceInPath(url, dtsAssetName, target);
     }
     // pass through to original rewriteRequestUrl
     if (config.server.rewriteRequestUrl) {
@@ -69,4 +69,15 @@ export function createRewriteRequest({
 
 function getEntryPathRegex(entryFilename: string) {
   return new RegExp(`^\\/${entryFilename}(\\.js)?(\\.bundle)$`);
+}
+
+// Metro passes request URLs as paths (/index.bundle?platform=ios), but HMR
+// entry points and stack frames to symbolicate as full URLs
+// (http://localhost:8081/index.bundle?platform=ios). The origin has to be left
+// alone: an entry named `host` is also found in `localhost`.
+const URL_ORIGIN_REGEX = /^(?:[a-z][a-z\d+.-]*:)?\/\/[^/?#]*/i;
+
+function replaceInPath(url: string, searchValue: string, replaceValue: string) {
+  const origin = url.match(URL_ORIGIN_REGEX)?.[0] ?? '';
+  return origin + url.slice(origin.length).replace(searchValue, replaceValue);
 }

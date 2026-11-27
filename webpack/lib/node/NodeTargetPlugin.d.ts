@@ -1,19 +1,24 @@
 export = NodeTargetPlugin;
+/** @import { ExternalsType } from "../../declarations/WebpackOptions" */
+/** @import Compiler from "../Compiler" */
 declare class NodeTargetPlugin {
-  /**
-   * @param {ExternalsType} type default external type
-   */
-  constructor(type?: ExternalsType);
-  type: import('../../declarations/WebpackOptions').ExternalsType;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Creates an instance of NodeTargetPlugin.
+     * @param {ExternalsType} type default external type
+     */
+    constructor(type?: ExternalsType);
+    /** @type {ExternalsType} */
+    type: ExternalsType;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace NodeTargetPlugin {
-  export { ExternalsType, Compiler };
+    export { builtins };
 }
-type ExternalsType = import('../../declarations/WebpackOptions').ExternalsType;
-type Compiler = import('../Compiler');
+import type { ExternalsType } from "../../declarations/WebpackOptions";
+import type Compiler from "../Compiler";
+import { builtins } from "./nodeBuiltins";

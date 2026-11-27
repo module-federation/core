@@ -1,5 +1,6 @@
 export = HotModuleReplacementRuntimeModule;
+/** @import Compilation from "../Compilation" */
 declare class HotModuleReplacementRuntimeModule extends RuntimeModule {
-  constructor();
+    constructor();
 }
-import RuntimeModule = require('../RuntimeModule');
+import RuntimeModule = require("../runtime/RuntimeModule");

@@ -26,14 +26,14 @@ import FederationCompositionPlugin, {
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
-) as typeof import('webpack/lib/dependencies/ModuleDependency');
+) as typeof import('webpack/lib/dependencies/core/ModuleDependency');
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
-) as typeof import('webpack/lib/util/fs');
+) as typeof import('webpack/lib/fs/fs');
 
 type ResolveFn = typeof require.resolve;
 type RuntimeEntrySpec = {
@@ -130,6 +130,32 @@ const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
 const onceForCompilerEntryMap = new WeakMap<Compiler, string>();
+const fallbackWarnings = new WeakMap<Compiler, Set<string>>();
+
+function warn(compiler: Compiler, message: string) {
+  let messages = fallbackWarnings.get(compiler);
+  if (!messages) {
+    messages = new Set();
+    fallbackWarnings.set(compiler, messages);
+  }
+  messages.add(message);
+}
+
+function resolveRuntimePluginPath(compiler: Compiler, entry: string) {
+  const fromContext = path.resolve(compiler.context, entry);
+  if (path.isAbsolute(entry) || fs.existsSync(fromContext)) {
+    return fromContext;
+  }
+  const fromCwd = path.resolve(entry);
+  if (!fs.existsSync(fromCwd)) {
+    return fromContext;
+  }
+  warn(
+    compiler,
+    `runtimePlugins entry ${JSON.stringify(entry)} was found relative to the working directory, not the compiler context ${compiler.context}. Relative runtimePlugins paths resolve against the context. Update the path; the working-directory fallback will be removed.`,
+  );
+  return fromCwd;
+}
 
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -173,15 +199,13 @@ class FederationRuntimePlugin {
           ? runtimePlugin[0]
           : runtimePlugin;
         const runtimePluginPath = normalizeToPosixPath(
-          path.isAbsolute(runtimePluginEntry)
-            ? runtimePluginEntry
-            : path.join(process.cwd(), runtimePluginEntry),
+          resolveRuntimePluginPath(compiler, runtimePluginEntry),
         );
         const paramsStr =
           Array.isArray(runtimePlugin) && runtimePlugin.length > 1
             ? JSON.stringify(runtimePlugin[1])
             : 'undefined';
-        runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
+        runtimePluginTemplates += `import ${runtimePluginName} from ${JSON.stringify(runtimePluginPath)};\n`;
         runtimePluginCalls.push(
           `${runtimePluginName} ? (${runtimePluginName}.default || ${runtimePluginName})(${paramsStr}) : false`,
         );
@@ -206,7 +230,7 @@ class FederationRuntimePlugin {
 
     return Template.asString([
       composition ??
-        `import federation from '${normalizedBundlerRuntimePath}';`,
+        `import federation from ${JSON.stringify(normalizedBundlerRuntimePath)};`,
       runtimePluginTemplates,
       embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
@@ -512,7 +536,8 @@ class FederationRuntimePlugin {
     if (this.options && !this.options?.name) {
       //! the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
       this.options.name =
-        compiler.options.output.uniqueName || `container_${Date.now()}`;
+        compiler.options.output.uniqueName ||
+        `container_${createHash(`${compiler.options.name ?? ''} ${compiler.context}`).slice(0, 8)}`;
     }
 
     const resolvedPaths = resolveRuntimePaths(this.options?.implementation);
@@ -553,6 +578,17 @@ class FederationRuntimePlugin {
       this.prependEntry(compiler);
       this.injectRuntime(compiler);
       this.setRuntimeAlias(compiler);
+      compiler.hooks.thisCompilation.tap(
+        this.constructor.name,
+        (compilation: Compilation) => {
+          for (const message of fallbackWarnings.get(compiler) ?? []) {
+            const warning = new compiler.webpack.WebpackError(message);
+            warning.name = 'FederationRuntimePluginWarning';
+            warning.hideStack = true;
+            compilation.warnings.push(warning);
+          }
+        },
+      );
       onceForCompiler.add(compiler);
     }
   }

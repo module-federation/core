@@ -8,12 +8,12 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
-} from 'webpack/lib/ModuleFactory';
+} from 'webpack/lib/module/ModuleFactory';
 import FallbackModule from './FallbackModule';
 
 const ModuleFactory = require(
   normalizeWebpackPath('webpack/lib/ModuleFactory'),
-) as typeof import('webpack/lib/ModuleFactory');
+) as typeof import('webpack/lib/module/ModuleFactory');
 
 export default class FallbackModuleFactory extends ModuleFactory {
   /**
