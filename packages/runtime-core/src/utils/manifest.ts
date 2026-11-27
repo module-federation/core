@@ -26,46 +26,31 @@ export function matchRemoteWithNameAndExpose(
     }
   | undefined {
   for (const remote of remotes) {
-    // match pkgName
-    const isNameMatched = id.startsWith(remote.name);
-    let expose = id.replace(remote.name, '');
-    if (isNameMatched) {
-      if (expose.startsWith('/')) {
-        const pkgNameOrAlias = remote.name;
-        expose = `.${expose}`;
-        return {
-          pkgNameOrAlias,
-          expose,
-          remote,
-        };
-      } else if (expose === '') {
-        return {
-          pkgNameOrAlias: remote.name,
-          expose: '.',
-          remote,
-        };
-      }
+    const { name } = remote;
+    // Only materialize the expose after a complete name or alias matches.
+    // Keep reading the live list: plugins can update remote options directly.
+    if (
+      id.startsWith(name) &&
+      (id.length === name.length || id.charCodeAt(name.length) === 47)
+    ) {
+      return {
+        pkgNameOrAlias: name,
+        expose: `.${id.slice(name.length)}`,
+        remote,
+      };
     }
 
-    // match alias
-    const isAliasMatched = remote.alias && id.startsWith(remote.alias);
-    let exposeWithAlias = remote.alias && id.replace(remote.alias, '');
-    if (remote.alias && isAliasMatched) {
-      if (exposeWithAlias && exposeWithAlias.startsWith('/')) {
-        const pkgNameOrAlias = remote.alias;
-        exposeWithAlias = `.${exposeWithAlias}`;
-        return {
-          pkgNameOrAlias,
-          expose: exposeWithAlias,
-          remote,
-        };
-      } else if (exposeWithAlias === '') {
-        return {
-          pkgNameOrAlias: remote.alias,
-          expose: '.',
-          remote,
-        };
-      }
+    const { alias } = remote;
+    if (
+      alias &&
+      id.startsWith(alias) &&
+      (id.length === alias.length || id.charCodeAt(alias.length) === 47)
+    ) {
+      return {
+        pkgNameOrAlias: alias,
+        expose: `.${id.slice(alias.length)}`,
+        remote,
+      };
     }
   }
 

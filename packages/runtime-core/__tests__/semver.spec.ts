@@ -24,6 +24,32 @@ const xRange2 = 'x';
 const specialXRange1 = '1.x';
 const specialXRange2 = '1.*';
 
+test('interleaved matches do not retain regular expression state', () => {
+  const cases: [string, string, boolean][] = [
+    ['1.2.3', '^1.0.0', true],
+    ['2.0.0', '^1.0.0', false],
+    ['1.2.3-beta.2', '^1.2.3-beta.1', true],
+    ['1.2.3-beta.0', '^1.2.3-beta.1', false],
+    ['1.2.9', '~ 1.2.0', true],
+    ['1.3.0', '~ 1.2.0', false],
+    ['3.0.0', '^1 || >= 3.0.0', true],
+    ['2.0.0', '^1 || >= 3.0.0', false],
+    ['1.2.3', '1.0.0 - 2.0.0', true],
+    ['2.0.1', '1.0.0 - 2.0.0', false],
+    ['1.2.3', '1.x', true],
+    ['1.2.3', '*', true],
+    ['not-a-version', '*', false],
+    ['1.2.3', 'not-a-range', false],
+  ];
+  for (let round = 0; round < 20; round++) {
+    for (const [version, range, expected] of round % 2
+      ? [...cases].reverse()
+      : cases) {
+      expect(satisfy(version, range)).toBe(expected);
+    }
+  }
+});
+
 describe('satisfy ranges', () => {
   test('tilde', () => {
     expect(satisfy(version, tilde)).toBe(true);

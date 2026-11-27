@@ -24,8 +24,6 @@ const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
-const slashCode = '/'.charCodeAt(0);
-
 class ContainerReferencePlugin {
   private _remoteType: moduleFederationPlugin.ExternalsType;
   private _remotes: [string, moduleFederationPlugin.RemotesConfig][];
@@ -58,11 +56,19 @@ class ContainerReferencePlugin {
    */
   apply(compiler: Compiler): void {
     const { _remotes: remotes, _remoteType: remoteType } = this;
+    // Short lists are cheaper to scan than to slice and hash request prefixes.
+    // For larger lists, store configuration order so the first match still wins.
+    const remoteIndex =
+      remotes.length > 32 ? new Map<string, number>() : undefined;
     new FederationRuntimePlugin().apply(compiler);
     /** @type {Record<string, string>} */
     const remoteExternals: Record<string, string> = {};
 
-    for (const [key, config] of remotes) {
+    for (let index = 0; index < remotes.length; index++) {
+      const [key, config] = remotes[index];
+      if (remoteIndex && !remoteIndex.has(key)) {
+        remoteIndex.set(key, index);
+      }
       let i = 0;
       for (const external of config.external) {
         if (typeof external === 'string' && external.startsWith('internal ')) {
@@ -101,30 +107,52 @@ class ContainerReferencePlugin {
           'ContainerReferencePlugin',
           //@ts-ignore
           (data) => {
-            if (!data.request.includes('!')) {
-              for (const [key, config] of remotes) {
-                if (
-                  data.request.startsWith(`${key}`) &&
-                  (data.request.length === key.length ||
-                    data.request.charCodeAt(key.length) === slashCode)
+            if (remotes.length > 0 && !data.request.includes('!')) {
+              const request = data.request;
+              let match = remotes.length;
+              if (remoteIndex) {
+                match = remoteIndex.get(request) ?? remotes.length;
+                for (
+                  let end = request.indexOf('/');
+                  end !== -1 && match !== 0;
+                  end = request.indexOf('/', end + 1)
                 ) {
-                  const remoteModule = new RemoteModule(
-                    data.request,
-                    //@ts-ignore
-                    config.external.map((external: any, i: any) =>
-                      external.startsWith('internal ')
-                        ? external.slice(9)
-                        : `webpack/container/reference/${key}${
-                            i ? `/fallback-${i}` : ''
-                          }`,
-                    ),
-                    `.${data.request.slice(key.length)}`,
-                    //@ts-ignore
-                    config.shareScope,
-                  );
-                  hooks.addRemoteDependency.call(remoteModule);
-                  return remoteModule;
+                  const index = remoteIndex.get(request.slice(0, end));
+                  if (index !== undefined && index < match) {
+                    match = index;
+                  }
                 }
+              } else {
+                for (let index = 0; index < remotes.length; index++) {
+                  const [key] = remotes[index];
+                  if (
+                    request.startsWith(key) &&
+                    (request.length === key.length ||
+                      request.charCodeAt(key.length) === 47)
+                  ) {
+                    match = index;
+                    break;
+                  }
+                }
+              }
+              if (match !== remotes.length) {
+                const [key, config] = remotes[match];
+                const remoteModule = new RemoteModule(
+                  data.request,
+                  //@ts-ignore
+                  config.external.map((external: any, i: any) =>
+                    external.startsWith('internal ')
+                      ? external.slice(9)
+                      : `webpack/container/reference/${key}${
+                          i ? `/fallback-${i}` : ''
+                        }`,
+                  ),
+                  `.${data.request.slice(key.length)}`,
+                  //@ts-ignore
+                  config.shareScope,
+                );
+                hooks.addRemoteDependency.call(remoteModule);
+                return remoteModule;
               }
             }
           },
