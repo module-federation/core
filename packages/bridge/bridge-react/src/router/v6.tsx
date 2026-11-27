@@ -1,7 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 // The upper alias react-router-dom$ into this file avoids the loop
 import * as ReactRouterDom from 'react-router-dom/dist/index.js';
 import { RouterContext } from '../provider/context';
+import { normalizeBridgeMemoryRoute } from '../memoryRoute';
 import { LoggerInstance } from '../utils';
 
 function WraperRouter(
@@ -18,11 +19,20 @@ function WraperRouter(
     WraperRouterProps: props,
   });
 
-  if (routerContextProps?.memoryRoute) {
+  const normalizedMemory = normalizeBridgeMemoryRoute(
+    routerContextProps?.memoryRoute,
+  );
+  if (normalizedMemory) {
     return (
       <ReactRouterDom.MemoryRouter
-        {...props}
-        initialEntries={[routerContextProps?.memoryRoute.entryPath]}
+        {...propsRes}
+        basename={
+          normalizedMemory.basename !== '/'
+            ? normalizedMemory.basename
+            : undefined
+        }
+        initialEntries={normalizedMemory.initialEntries as any}
+        initialIndex={normalizedMemory.initialIndex}
       />
     );
   }
@@ -52,20 +62,35 @@ function WraperRouterProvider(
     'create' + 'BrowserRouter'
   ];
 
-  if (routerContextProps.memoryRoute) {
-    const MemeoryRouterInstance = createMemoryRouter(routers, {
-      initialEntries: [routerContextProps?.memoryRoute.entryPath],
-    });
-    return <RouterProvider router={MemeoryRouterInstance} />;
-  } else {
-    const BrowserRouterInstance = createBrowserRouter(routers, {
+  const normalizedMemory = normalizeBridgeMemoryRoute(
+    routerContextProps.memoryRoute,
+  );
+  const memoryKey = normalizedMemory ? JSON.stringify(normalizedMemory) : '';
+  const basename = routerContextProps.basename || router.basename;
+
+  const routerInstance = useMemo(() => {
+    if (normalizedMemory) {
+      return createMemoryRouter(routers, {
+        basename: normalizedMemory.basename,
+        initialEntries: normalizedMemory.initialEntries,
+        initialIndex: normalizedMemory.initialIndex,
+        ...((router as any).hydrationData
+          ? { hydrationData: (router as any).hydrationData }
+          : {}),
+      });
+    }
+    return createBrowserRouter(routers, {
       // In host app, the routerContextProps is {}, so we should use router.basename as fallback
-      basename: routerContextProps.basename || router.basename,
+      basename,
       future: router.future,
       window: router.window,
+      ...((router as any).hydrationData
+        ? { hydrationData: (router as any).hydrationData }
+        : {}),
     });
-    return <RouterProvider {...propsRes} router={BrowserRouterInstance} />;
-  }
+  }, [routers, memoryKey, basename, router.future, router.window]);
+
+  return <RouterProvider {...propsRes} router={routerInstance} />;
 }
 
 // export * from 'react-router-dom/dist/index.js';

@@ -118,6 +118,71 @@ export function validateStylesheets(
     throw new Error('Invalid Bridge service stylesheets.');
 }
 
+const MAX_MEMORY_ENTRIES = 256;
+
+function isValidMemoryEntry(
+  value: unknown,
+  record: (v: unknown) => v is Record<string, unknown>,
+): boolean {
+  if (typeof value === 'string') {
+    return value.startsWith('/');
+  }
+  if (!record(value)) return false;
+  if (
+    value.pathname !== undefined &&
+    (typeof value.pathname !== 'string' || !value.pathname.startsWith('/'))
+  )
+    return false;
+  if (value.search !== undefined && typeof value.search !== 'string')
+    return false;
+  if (value.hash !== undefined && typeof value.hash !== 'string') return false;
+  if (value.key !== undefined && typeof value.key !== 'string') return false;
+  if (value.state !== undefined && !record(value.state)) return false;
+  return true;
+}
+
+function isValidMemoryRoute(
+  value: unknown,
+  record: (v: unknown) => v is Record<string, unknown>,
+): boolean {
+  if (!record(value)) return false;
+  const hasEntryPath = value.entryPath !== undefined;
+  const hasEntries = value.initialEntries !== undefined;
+  if (!hasEntryPath && !hasEntries) return false;
+  if (
+    hasEntryPath &&
+    (typeof value.entryPath !== 'string' || !value.entryPath.startsWith('/'))
+  )
+    return false;
+  if (hasEntries) {
+    if (
+      !Array.isArray(value.initialEntries) ||
+      value.initialEntries.length === 0 ||
+      value.initialEntries.length > MAX_MEMORY_ENTRIES ||
+      !value.initialEntries.every((entry) => isValidMemoryEntry(entry, record))
+    )
+      return false;
+  }
+  if (value.initialIndex !== undefined) {
+    const count = hasEntries ? (value.initialEntries as unknown[]).length : 1;
+    if (
+      typeof value.initialIndex !== 'number' ||
+      !Number.isSafeInteger(value.initialIndex) ||
+      value.initialIndex < 0 ||
+      value.initialIndex >= count
+    )
+      return false;
+  }
+  if (value.initialState !== undefined && !record(value.initialState))
+    return false;
+  if (
+    value.basename !== undefined &&
+    (typeof value.basename !== 'string' || !value.basename.startsWith('/'))
+  )
+    return false;
+  return true;
+}
+
 /** The HTTP boundary accepts JSON application input, never DOM or closures. */
 export function validateServiceRequest(
   value: unknown,
@@ -147,9 +212,7 @@ export function validateServiceRequest(
           (value) => typeof value !== 'string',
         ))) ||
     (input.memoryRoute !== undefined &&
-      (!record(input.memoryRoute) ||
-        typeof input.memoryRoute.entryPath !== 'string' ||
-        !input.memoryRoute.entryPath.startsWith('/')))
+      !isValidMemoryRoute(input.memoryRoute, record))
   )
     throw Error('Invalid Bridge service request parameters.');
 }

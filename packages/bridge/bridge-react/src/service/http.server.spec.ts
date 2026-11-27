@@ -562,4 +562,35 @@ describe('Service inbound body lifetime', () => {
     expect(body.locked).toBe(false);
     expect(f.render).toHaveBeenCalledTimes(1);
   });
+  it('forwards extended memoryRoute (initialEntries, initialIndex, initialState, basename) through the Service HTTP boundary', async () => {
+    const f = fixture();
+    const memoryRoute = {
+      initialEntries: [
+        '/home',
+        {
+          pathname: '/detail/42',
+          search: '?tab=specs',
+          state: { from: 'svc' },
+        },
+      ] as [
+        string,
+        { pathname: string; search: string; state: { from: string } },
+      ],
+      initialIndex: 1,
+      basename: '/shop',
+    };
+    const result = await fetchBridgeService(
+      { ...input(), memoryRoute },
+      {
+        url: 'http://service.test/render',
+        fetch: ((url: string | URL | Request, init?: RequestInit) =>
+          f.handler(new Request(url, init))) as typeof fetch,
+      },
+    );
+    const messages = await collect(result.messages);
+    expect(messages.at(-1)).toEqual({ type: 'done' });
+    expect(f.render).toHaveBeenCalledWith(
+      expect.objectContaining({ memoryRoute }),
+    );
+  });
 });

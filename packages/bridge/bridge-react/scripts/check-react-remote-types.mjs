@@ -55,8 +55,16 @@ try {
   link('@types/node');
   const source = `
 import * as React from 'react';
-import { createReactRemote, ReactRemote, type CreateReactRemoteOptions } from '@module-federation/bridge-react';
-import { createReactRemote as createBaseRemote, ReactRemote as BaseRemote } from '@module-federation/bridge-react/base';
+import {
+  createReactRemote,
+  ReactRemote,
+  type CreateReactRemoteOptions,
+  type BridgeMemoryRoute,
+} from '@module-federation/bridge-react';
+import {
+  createReactRemote as createBaseRemote,
+  ReactRemote as BaseRemote,
+} from '@module-federation/bridge-react/base';
 import { createBridgeComponent as create18 } from '@module-federation/bridge-react/v18';
 import { createBridgeComponent as create19 } from '@module-federation/bridge-react/v19';
 import { createBridgeComponent as create17 } from '@module-federation/bridge-react';
@@ -198,6 +206,17 @@ const App19 = createReactRemote({remote:()=>({default:p19})});
 createReactRemote({remote:()=>({provider:p18}), exportName:'provider'});
 const NoProps = () => <p>empty</p>;
 const Empty = createReactRemote({remote:()=>NoProps});
+const MemoryApp = createReactRemote({
+  remote: () => Shop,
+  memoryRoute: {
+    initialEntries: ['/', { pathname: '/detail/42', search: '?tab=specs', state: { from: 'card' } }],
+    initialIndex: 1,
+    basename: '/shop',
+  },
+});
+const MemoryRouteObj: BridgeMemoryRoute = { entryPath: '/overview' };
+<MemoryApp value={1} />;
+<ReactRemote remote={() => Shop} memoryRoute={MemoryRouteObj} props={{ value: 1 }} />;
 <Empty />; <ReactRemote remote={()=>NoProps} />;
 const Optional = (props: {value?:number}) => <p>{props.value}</p>;
 <ReactRemote remote={()=>Optional} />;

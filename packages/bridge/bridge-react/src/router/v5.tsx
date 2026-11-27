@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 // @ts-ignore
 import * as ReactRouterDom from 'react-router-dom/index.js';
 import { RouterContext } from '../provider/context';
+import { normalizeBridgeMemoryRoute } from '../memoryRoute';
 import { LoggerInstance } from '../utils';
 
 function WraperRouter(props: Record<string, unknown>) {
@@ -19,11 +20,15 @@ function WraperRouter(props: Record<string, unknown>) {
     WraperRouterProps: props,
   });
 
-  if (routerContextProps?.memoryRoute) {
+  const normalizedMemory = normalizeBridgeMemoryRoute(
+    routerContextProps?.memoryRoute,
+  );
+  if (normalizedMemory) {
     return (
       <MemoryRouter
-        {...props}
-        initialEntries={[routerContextProps?.memoryRoute.entryPath]}
+        {...propsRes}
+        initialEntries={normalizedMemory.initialEntries}
+        initialIndex={normalizedMemory.initialIndex}
       />
     );
   }
