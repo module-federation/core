@@ -192,11 +192,15 @@ describe('instance disposal', () => {
       delete process.env.DEBUG;
       const silentA = new ModuleFederation({
         name: 'silent-a',
-        remotes: [{ name: 'silent-remote', entry: 'https://example.test/v1.js' }],
+        remotes: [
+          { name: 'silent-remote', entry: 'https://example.test/v1.js' },
+        ],
       });
       const silentB = new ModuleFederation({
         name: 'silent-b',
-        remotes: [{ name: 'silent-remote', entry: 'https://example.test/v1.js' }],
+        remotes: [
+          { name: 'silent-remote', entry: 'https://example.test/v1.js' },
+        ],
       });
       setGlobalFederationInstance(silentA);
       setGlobalFederationInstance(silentB);

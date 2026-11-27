@@ -2,10 +2,7 @@ import type { ModuleFederation } from '@module-federation/runtime';
 import type { Remote, RemoteInfo } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
 import { clearContainerCache } from '@module-federation/webpack-bundler-runtime/clear-cache';
-import {
-  debugNodeLifecycle,
-  isNodeLifecycleDebugEnabled,
-} from './debug';
+import { debugNodeLifecycle, isNodeLifecycleDebugEnabled } from './debug';
 import {
   forEachSharedRecord,
   getRemoteSharedOwnership,
@@ -174,7 +171,9 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
       if (usedElsewhere) {
         debugNodeLifecycle(() => {
           const holders = [
-            ...new Set(instances.filter(holdsTarget).map((other) => other.name)),
+            ...new Set(
+              instances.filter(holdsTarget).map((other) => other.name),
+            ),
           ];
           return `retain remote=${target.name} host=${host.name} reason=usedElsewhere holders=${holders.join(',')}`;
         });
@@ -191,7 +190,8 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
         if (!ownership.owns(shared)) return;
         if (ownership.sharedWithPeer(shared)) {
           preserveShared = true;
-          if (retainedShared) retainedShared.push(`${pkgName}@${version}(peer)`);
+          if (retainedShared)
+            retainedShared.push(`${pkgName}@${version}(peer)`);
           return;
         }
         const useIn = shared.useIn.filter((name) => name !== shared.from);
