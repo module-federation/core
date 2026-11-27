@@ -22,6 +22,11 @@ import {
   type NormalizedSharedOptions,
 } from '../SharePlugin';
 import IndependentSharedRuntimeModule from './IndependentSharedRuntimeModule';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+
+const { RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 
 const IGNORED_ENTRY = 'ignored-entry';
 
@@ -142,7 +147,9 @@ export default class IndependentSharedPlugin {
         );
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'OptimizeDependencyReferencedExportsPlugin',
-          (chunk) => {
+          (chunk, runtimeRequirements) => {
+            // The shared fallback getter prefixes its secondary entry with this.
+            runtimeRequirements.add(RuntimeGlobals.publicPath);
             compilation.addRuntimeModule(
               chunk,
               new IndependentSharedRuntimeModule(
