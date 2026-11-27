@@ -1,16 +1,16 @@
 export = ChunkPreloadTriggerRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../Chunk").ChunkChildIdsByOrdersMap} ChunkChildIdsByOrdersMap */
+/** @import Compilation from "../Compilation" */
+/** @import { ChunkChildIdsByOrdersMap } from "../graph/Chunk" */
 declare class ChunkPreloadTriggerRuntimeModule extends RuntimeModule {
-  /**
-   * @param {ChunkChildIdsByOrdersMap} chunkMap map from chunk to chunks
-   */
-  constructor(chunkMap: ChunkChildIdsByOrdersMap);
-  chunkMap: import('../Chunk').ChunkChildIdsByOrdersMap;
+    /**
+     * @param {ChunkChildIdsByOrdersMap} chunkMap map from chunk to chunks
+     * @param {string=} handlerKey the `ensureChunkHandlers` key to install under (default `"preload"`); `"cssPreload"` preloads only the CSS handler so it stays CSS-only even when the build also registers a JS preload handler
+     */
+    constructor(chunkMap: ChunkChildIdsByOrdersMap, handlerKey?: string | undefined);
+    /** @type {ChunkChildIdsByOrdersMap} */
+    chunkMap: ChunkChildIdsByOrdersMap;
+    /** @type {string} */
+    handlerKey: string;
 }
-declare namespace ChunkPreloadTriggerRuntimeModule {
-  export { Compilation, ChunkChildIdsByOrdersMap };
-}
-import RuntimeModule = require('../RuntimeModule');
-type Compilation = import('../Compilation');
-type ChunkChildIdsByOrdersMap = import('../Chunk').ChunkChildIdsByOrdersMap;
+import RuntimeModule = require("../runtime/RuntimeModule");
+import type { ChunkChildIdsByOrdersMap } from "../graph/Chunk";

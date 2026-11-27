@@ -23,6 +23,7 @@ describe('legacy root keeps the keys rspack copies onto federation', () => {
         'initContainerEntry',
         'installInitialConsumes',
         'remotes',
+        'supportsSharedIdentity',
       ].sort(),
     );
   });

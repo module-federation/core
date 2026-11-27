@@ -5,52 +5,34 @@ export = WasmChunkLoadingRuntimeModule;
  * @property {boolean=} supportsStreaming
  * @property {boolean=} mangleImports
  * @property {ReadOnlyRuntimeRequirements} runtimeRequirements
+ * @property {boolean=} fullHashDigest the binary's name inlines a re-encoded compilation hash
  */
 declare class WasmChunkLoadingRuntimeModule extends RuntimeModule {
-  /**
-   * @param {WasmChunkLoadingRuntimeModuleOptions} options options
-   */
-  constructor({
-    generateLoadBinaryCode,
-    supportsStreaming,
-    mangleImports,
-    runtimeRequirements,
-  }: WasmChunkLoadingRuntimeModuleOptions);
-  generateLoadBinaryCode: (path: string) => string;
-  supportsStreaming: boolean;
-  mangleImports: boolean;
-  _runtimeRequirements: import('../Module').ReadOnlyRuntimeRequirements;
+    /**
+     * @param {WasmChunkLoadingRuntimeModuleOptions} options options
+     */
+    constructor({ generateLoadBinaryCode, supportsStreaming, mangleImports, runtimeRequirements, fullHashDigest }: WasmChunkLoadingRuntimeModuleOptions);
+    generateLoadBinaryCode: (path: string) => string;
+    /** @type {boolean | undefined} */
+    supportsStreaming: boolean | undefined;
+    /** @type {boolean | undefined} */
+    mangleImports: boolean | undefined;
+    /** @type {ReadOnlyRuntimeRequirements} */
+    _runtimeRequirements: Module.ReadOnlyRuntimeRequirements;
 }
 declare namespace WasmChunkLoadingRuntimeModule {
-  export {
-    Signature,
-    Chunk,
-    ChunkGraph,
-    ModuleId,
-    Compilation,
-    Module,
-    ReadOnlyRuntimeRequirements,
-    ModuleGraph,
-    RuntimeSpec,
-    Declarations,
-    WasmChunkLoadingRuntimeModuleOptions,
-  };
+    export { Declarations, WasmChunkLoadingRuntimeModuleOptions };
 }
-import RuntimeModule = require('../RuntimeModule');
-type Signature = any;
-type Chunk = import('../Chunk');
-type ChunkGraph = import('../ChunkGraph');
-type ModuleId = import('../ChunkGraph').ModuleId;
-type Compilation = import('../Compilation');
-type Module = import('../Module');
-type ReadOnlyRuntimeRequirements =
-  import('../Module').ReadOnlyRuntimeRequirements;
-type ModuleGraph = import('../ModuleGraph');
-type RuntimeSpec = import('../util/runtime').RuntimeSpec;
+import RuntimeModule = require("../runtime/RuntimeModule");
+import type Module from "../module/Module";
 type Declarations = string[];
 type WasmChunkLoadingRuntimeModuleOptions = {
-  generateLoadBinaryCode: (path: string) => string;
-  supportsStreaming?: boolean | undefined;
-  mangleImports?: boolean | undefined;
-  runtimeRequirements: ReadOnlyRuntimeRequirements;
+    generateLoadBinaryCode: (path: string) => string;
+    supportsStreaming?: boolean | undefined;
+    mangleImports?: boolean | undefined;
+    runtimeRequirements: Module.ReadOnlyRuntimeRequirements;
+    /**
+     * the binary's name inlines a re-encoded compilation hash
+     */
+    fullHashDigest?: boolean | undefined;
 };

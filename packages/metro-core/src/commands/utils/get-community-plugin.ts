@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import type { ConfigT } from 'metro-config';
 import { CLIError } from '../../utils/errors';
 import type {
@@ -42,7 +43,17 @@ export function getCommunityCliPlugin(reactNativePath?: string) {
   try {
     communityCliPluginPath = require.resolve(
       '@react-native/community-cli-plugin',
-      { paths: [reactNativePath ?? require.resolve('react-native')] },
+      {
+        // The plugin is a dependency of react-native, so it is looked up from
+        // where react-native is installed. React Native Community CLI passes
+        // <project>/node_modules/react-native, which is a symlink under pnpm,
+        // and Node.js doesn't follow it when looking up from `paths`.
+        paths: [
+          reactNativePath
+            ? fs.realpathSync(reactNativePath)
+            : require.resolve('react-native'),
+        ],
+      },
     );
   } catch {
     throw new CLIError('Community CLI plugin is not installed.');

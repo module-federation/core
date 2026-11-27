@@ -1,5 +1,5 @@
 import shared_0 from 'ui-lib';
-import shared_1 from 'ui-lib-dep';
+import { Message as shared_1 } from 'ui-lib-dep';
 
 const fs = __non_webpack_require__('fs');
 const path = __non_webpack_require__('path');
