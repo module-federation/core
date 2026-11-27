@@ -113,7 +113,14 @@ describe('experiments.optimization.disableRemote', () => {
         instance: origin,
         bundlerRuntime,
         sharedFallback: {
-          'test-shared': [['fallback.js', '1.0.0', 'fallbackEntry', 'var']],
+          'test-shared': [
+            [
+              'fallback.js',
+              '1.0.0',
+              'fallbackEntry',
+              { shareScope: 'default' },
+            ],
+          ],
         },
       },
     } as unknown as Parameters<
@@ -125,6 +132,7 @@ describe('experiments.optimization.disableRemote', () => {
       version: '1.0.0',
       factory: () => () => ({ value: 'local' }),
       webpackRequire,
+      libraryType: 'var',
     });
     const factory = await getter();
 
