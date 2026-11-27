@@ -1,0 +1,100 @@
+# Sugerencias de tipos
+
+Igual que un paquete NPM, los artefactos de {props.name || 'Module Federation'} también generan tipos y disfrutan de recarga en caliente de tipos, aunque los artefactos estén alojados en una CDN remota.
+
+<code>{props.pkgName || '@module-federation/enhanced'}</code> tiene las sugerencias de tipos activadas por defecto. Este artículo presenta varios escenarios de uso habituales y su configuración concreta.
+
+## Escenarios de uso
+
+### Generar tipos
+
+Al hacer build con el plugin de build que proporciona <code>{props.pkgName || '@module-federation/enhanced'}</code>, los archivos de tipos se generan automáticamente.
+
+### Cargar tipos
+
+1. El consumer modifica `tsconfig.json` y añade `paths`:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  }
+}
+```
+
+2. Inicia las aplicaciones
+
+Tras iniciarse, el consumer obtendrá automáticamente los archivos de tipos del producer.
+
+:::tip
+No tienes que preocuparte por el orden de arranque del producer y el consumer.
+:::
+
+
+
+### Recarga en caliente de tipos
+
+Después de modificar el código del producer, el consumer obtendrá automáticamente los tipos del producer.
+
+![hot-types-reload-static](@public/guide/type-prompt/hot-types-reload-static.gif)
+
+### Sugerencias de tipos de la API de runtime
+
+Añade `./@mf-types/*` al campo `include` para disfrutar de sugerencias de tipos y recarga en caliente de tipos en `loadRemote` del `Runtime`:
+
+```json title="tsconfig.json"
+{
+  "include": ["./@mf-types/*"]
+}
+```
+
+![hot-types-reload](@public/guide/type-prompt/hot-types-reload.gif)
+
+:::info
+Cuando el builder es `webpack`, añade `**/@mf-types/**` a [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored) para evitar problemas de compilación circular provocados por las actualizaciones de tipos.
+:::
+
+
+### Extracción de tipos de paquetes de terceros {#third-party-package-type-extraction}
+
+{props.name || 'Module Federation'} extrae automáticamente los tipos de los paquetes de terceros para garantizar que se pueda acceder con normalidad a los tipos de los archivos de `exposes`.
+
+![third-party](@public/guide/type-prompt/third-party.jpg)
+
+### Reexportación de tipos anidados {#nested-type-re-export}
+
+{props.name || 'Module Federation'} admite remotes anidados y extrae automáticamente los tipos de los remotes anidados.
+
+![nested-remote](@public/guide/type-prompt/nested-remote.jpg)
+
+### Sugerencias de tipos dinámicos
+
+{props.name || 'Module Federation'} admite la carga de tipos dinámicos y también sus actualizaciones en caliente.
+
+![dynamic-remote-hot-types-reload](@public/guide/type-prompt/dynamic-remote-hot-types-reload-static.gif)
+
+## Configuración
+
+- [dts](/configure/dts.html): generación/carga de tipos
+- [dev](/configure/dev.html): recarga en caliente de tipos
+
+## Preguntas frecuentes
+
+### El proyecto entra en compilación circular y no se puede detener
+
+Probablemente se deba a que el compilador vigila los cambios en la carpeta de tipos o en el directorio `dist`. Añade `@mf-types` a los archivos ignorados. Por ejemplo, con webpack/rspack:
+
+```ts
+config.watchOptions = {
+  ignored: ['**/node_modules/**', '**/@mf-types/**'],
+};
+```
+
+### No se genera ningún archivo de tipos, ¿cómo encuentro la causa?
+
+1. Añade la variable de entorno `FEDERATION_DEBUG=true` antes del comando de arranque del proyecto.
+2. Configura [dts.displayErrorInTerminal](/configure/dts.html#displayerrorinterminal) como `true`.
+3. Inicia el proyecto y revisa la salida de la consola.
+4. (Opcional) Si no hay ningún error en la consola, revisa el archivo de log `.mf/typesGenerate.log`.

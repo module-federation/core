@@ -1,0 +1,44 @@
+# exposes
+
+- Tipo: `PluginExposesOptions`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+- Uso: determina los módulos y las entradas de archivo que expone <code>{props.brandName || props.name || 'Module Federation'}</code>.
+
+:::tip
+Es un parámetro específico del producer: configurar `exposes` indica que se trata de un producer.
+
+:::
+
+Tras la configuración, los módulos expuestos se separan en un chunk independiente y, si hay chunks asíncronos, también se extraen en chunks individuales (el comportamiento concreto de extracción depende de las reglas de división de chunks).
+
+El tipo `PluginExposesOptions` es el siguiente:
+
+```tsx
+interface PluginExposesOptions {
+  [exposeKey: string]: string | ExposesConfig;
+}
+
+interface ExposesConfig {
+  // File entry
+  import: string;
+}
+```
+
+El `exposeKey` sigue esencialmente la especificación de [Package Entry Points](https://nodejs.org/api/packages.html#package-entry-points) (salvo que no admite coincidencias con expresiones regulares). Ejemplo de uso:
+
+```jsx
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'provider',
+      exposes: {
+        // Note: "./" is not supported. Exporting as `.` indicates a default export
+        '.': './src/index.tsx',
+        './add': './src/utils/add.ts',
+        './Button': './src/components/Button.tsx',
+      },
+    }),
+  ],
+};
+```

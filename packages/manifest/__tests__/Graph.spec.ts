@@ -1,0 +1,255 @@
+/** @jest-environment node */
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import type { Stats } from 'webpack';
+import { StatsPlugin } from '../src/StatsPlugin';
+
+// The graph collector has no public switch. Wrap it so a build can run the
+// stats reader instead.
+jest.mock('../src/collectGraph', () => {
+  const actual = jest.requireActual('../src/collectGraph');
+  return { ...actual, collectGraph: jest.fn(actual.collectGraph) };
+});
+const { collectGraph: actualCollectGraph } = jest.requireActual(
+  '../src/collectGraph',
+);
+const collectGraph: jest.Mock = jest.requireMock(
+  '../src/collectGraph',
+).collectGraph;
+afterAll(() => collectGraph.mockImplementation(actualCollectGraph));
+
+const nodeRequire = process
+  .getBuiltinModule('module')
+  .createRequire(__filename);
+const webpack = nodeRequire('webpack');
+const EnhancedPlugin = process
+  .getBuiltinModule('module')
+  .createRequire(path.resolve(__dirname, '../../enhanced/package.json'))(
+  '@module-federation/enhanced',
+).ModuleFederationPlugin;
+
+it.each([
+  'exposes',
+  'native-shared',
+  'enhanced-shared',
+  'enhanced-prefix',
+  'enhanced-exact',
+  'remotes',
+])(
+  'collects %s with multiple runtimes like the stats reader',
+  async (mode) => {
+    const directory = await mkdtemp(path.join(__dirname, 'mf-graph-'));
+    const prefix = mode === 'enhanced-prefix';
+    const exact = mode === 'enhanced-exact';
+    const shared = mode.includes('shared') || prefix || exact;
+    const native = mode === 'native-shared';
+    const withCss = mode === 'enhanced-shared';
+    try {
+      if (mode === 'remotes') {
+        await mkdir(path.join(directory, 'src'));
+        await writeFile(
+          path.join(directory, 'src/consumer.js'),
+          'module.exports = require("remote/nested/Button");',
+        );
+      }
+      if (withCss) {
+        await writeFile(path.join(directory, 'shared.css'), '.shared {}');
+        await writeFile(path.join(directory, 'entry.css'), '.entry {}');
+      }
+      await writeFile(
+        path.join(directory, 'entry.js'),
+        prefix
+          ? 'module.exports = require("prefix/subpath");'
+          : exact
+            ? 'module.exports = require("missing-exact");'
+            : mode === 'remotes'
+              ? 'module.exports = require("./src/consumer.js");'
+              : `${withCss ? 'require("./entry.css");' : ''}module.exports = require("./shared.js");`,
+      );
+      await writeFile(
+        path.join(directory, 'shared.js'),
+        `${withCss ? 'require("./shared.css");' : ''}module.exports = "shared";`,
+      );
+      await writeFile(
+        path.join(directory, 'package.json'),
+        JSON.stringify({ name: 'fixture', version: '1.0.0' }),
+      );
+      const artifacts = [];
+      // The second graph build reads modules from the filesystem cache.
+      for (const [build, reader] of ['graph', 'graph', 'stats'].entries()) {
+        const useStatsReader = reader === 'stats';
+        collectGraph.mockImplementation(
+          useStatsReader ? () => undefined : actualCollectGraph,
+        );
+        const additionalData = jest.fn(async ({ stats }) => stats);
+        const options = {
+          name: 'fixture',
+          filename: 'container.js',
+          library: { type: 'commonjs-module' },
+          dts: false as const,
+          remotes:
+            mode === 'remotes'
+              ? {
+                  remote: 'remote@https://example.test/remote.js',
+                  'remote/nested': 'nested@https://example.test/nested.js',
+                  unused: 'unused@https://example.test/unused.js',
+                }
+              : {},
+          exposes: { './Entry': { import: './entry.js', name: 'exposed' } },
+          shared: prefix
+            ? {
+                'prefix/': {
+                  packageName: path.join(directory, 'shared.js'),
+                  import: false as const,
+                  requiredVersion: '^1.0.0',
+                },
+              }
+            : exact
+              ? {
+                  'missing-exact': {
+                    import: false as const,
+                    requiredVersion: '=1.2.3',
+                  },
+                }
+              : shared
+                ? {
+                    './shared.js': {
+                      version: '1.0.0',
+                      requiredVersion: '^1.0.0',
+                    },
+                  }
+                : {},
+          manifest: { additionalData },
+        };
+        const compiler = webpack({
+          context: directory,
+          mode: 'development',
+          experiments: { css: withCss },
+          cache: {
+            type: 'filesystem',
+            cacheDirectory: path.join(directory, 'cache'),
+          },
+          entry: { first: './entry.js', second: './entry.js' },
+          optimization: { runtimeChunk: 'multiple' },
+          output: { path: directory, publicPath: '/', filename: '[name].js' },
+          plugins: [
+            native
+              ? new webpack.container.ModuleFederationPlugin({
+                  name: options.name,
+                  filename: options.filename,
+                  library: options.library,
+                  exposes: options.exposes,
+                  shared: options.shared,
+                })
+              : new EnhancedPlugin({ ...options, manifest: false }),
+          ],
+        });
+        const statsPlugin = new StatsPlugin(options, {
+          pluginVersion: 'test',
+          bundler: 'webpack',
+        });
+        statsPlugin.apply(compiler);
+        const statsManager = statsPlugin['_statsManager'];
+        const generateStats = statsManager.generateStats;
+        let readerCalls = 0;
+        const collect = jest
+          .spyOn(statsManager, 'generateStats')
+          .mockImplementation(async function (compiler, compilation) {
+            const getStats = jest.spyOn(compilation, 'getStats');
+            const identifiers =
+              !native && !useStatsReader
+                ? [...compilation.modules].flatMap((module) => [
+                    jest.spyOn(module, 'identifier').mockImplementation(() => {
+                      throw new Error('identifier parsing');
+                    }),
+                    jest
+                      .spyOn(module, 'readableIdentifier')
+                      .mockImplementation(() => {
+                        throw new Error('readable identifier parsing');
+                      }),
+                  ])
+                : [];
+            try {
+              const result = await generateStats.call(
+                this,
+                compiler,
+                compilation,
+              );
+              readerCalls += getStats.mock.calls.length;
+              return result;
+            } finally {
+              getStats.mockRestore();
+              identifiers.forEach((spy) => spy.mockRestore());
+            }
+          });
+        try {
+          const result = await new Promise<Stats>((resolve, reject) => {
+            compiler.run((error, stats) =>
+              compiler.close((closeError) => {
+                if (error || closeError) reject(error || closeError);
+                else if (stats.hasErrors()) reject(new Error(stats.toString()));
+                else resolve(stats);
+              }),
+            );
+          });
+          if (build === 1) {
+            const modules =
+              result.toJson({ all: false, modules: true, cachedModules: true })
+                .modules || [];
+            expect(
+              modules.some(
+                (module) =>
+                  module.name?.endsWith('/entry.js') && module.built === false,
+              ),
+            ).toBe(true);
+          }
+        } finally {
+          collect.mockRestore();
+        }
+        expect(readerCalls).toBe(native || useStatsReader ? 1 : 0);
+        expect(additionalData).toHaveBeenCalledTimes(1);
+        const stats = JSON.parse(
+          await readFile(path.join(directory, 'mf-stats.json'), 'utf8'),
+        );
+        const manifest = JSON.parse(
+          await readFile(path.join(directory, 'mf-manifest.json'), 'utf8'),
+        );
+        expect(stats.exposes).toHaveLength(1);
+        expect(stats.exposes[0].assets.js.sync.length).toBeGreaterThan(0);
+        expect(stats.shared).toHaveLength(shared ? 1 : 0);
+        if (mode === 'remotes')
+          expect(stats.remotes).toContainEqual(
+            expect.objectContaining({ usedIn: ['src/consumer.js'] }),
+          );
+        if (withCss) {
+          expect(stats.shared[0].assets.css.sync).not.toHaveLength(0);
+          expect(stats.exposes[0].assets.css.sync).toContain('exposed.css');
+          for (const asset of stats.shared[0].assets.css.sync)
+            expect(stats.exposes[0].assets.css.async).not.toContain(asset);
+        }
+        if (shared)
+          expect(stats.shared[0].version).toBe(exact ? '1.2.3' : '1.0.0');
+        expect(manifest.metaData.types).toEqual({
+          path: '',
+          name: '',
+          zip: '',
+          api: '',
+        });
+        artifacts.push({ stats, manifest });
+      }
+      expect(artifacts[0]).toEqual(artifacts[1]);
+      if (mode === 'enhanced-shared') {
+        expect(artifacts[0].stats.exposes[0].requires).toEqual(['./shared.js']);
+        expect(artifacts[0].stats.shared[0].usedIn).toEqual(['./Entry']);
+        expect(artifacts[2].stats.exposes[0].requires).toEqual([]);
+        expect(artifacts[2].stats.shared[0].usedIn).toEqual([]);
+        artifacts[2].stats.exposes[0].requires = ['./shared.js'];
+        artifacts[2].stats.shared[0].usedIn = ['./Entry'];
+      }
+      expect(artifacts[0]).toEqual(artifacts[2]);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+  60000,
+);

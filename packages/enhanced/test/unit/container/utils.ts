@@ -8,9 +8,9 @@ import type {
   ObjectSerializerContext,
   ObjectDeserializerContext,
 } from 'webpack/lib/serialization/ObjectMiddleware';
-import type RuntimeTemplate from 'webpack/lib/RuntimeTemplate';
-import type ChunkGraph from 'webpack/lib/ChunkGraph';
-import type Module from 'webpack/lib/Module';
+import type RuntimeTemplate from 'webpack/lib/template/RuntimeTemplate';
+import type ChunkGraph from 'webpack/lib/graph/ChunkGraph';
+import type Module from 'webpack/lib/module/Module';
 import type Dependency from 'webpack/lib/Dependency';
 
 /**
