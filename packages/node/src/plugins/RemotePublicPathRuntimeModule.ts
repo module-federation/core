@@ -2,9 +2,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 const { RuntimeGlobals, RuntimeModule, Template, javascript } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { getUndoPath } = require(
-  normalizeWebpackPath('webpack/lib/util/identifier'),
-) as typeof import('webpack/lib/util/identifier');
+import { getChunkRootOutputDir } from './webpackChunkUtilities';
 
 class AutoPublicPathRuntimeModule extends RuntimeModule {
   private options: any;
@@ -35,22 +33,16 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       });
 
     const currentChunk = this.chunk;
-    const chunkName =
-      currentChunk &&
-      compilation?.getPath(
+    let undoPath: string | null = null;
+    if (compilation && currentChunk && path) {
+      undoPath = getChunkRootOutputDir(
+        compilation,
+        currentChunk,
         javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
           currentChunk,
-          compilation?.outputOptions,
+          compilation.outputOptions,
         ),
-        {
-          chunk: currentChunk,
-          contentHashType: 'javascript',
-        },
       );
-
-    let undoPath: string | null = null;
-    if (chunkName && path) {
-      undoPath = getUndoPath(chunkName, path, false);
     }
 
     const getPathFromFederation = `

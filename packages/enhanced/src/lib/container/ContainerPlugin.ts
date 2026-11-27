@@ -21,16 +21,18 @@ import FederationCompositionPlugin, {
 } from './runtime/FederationCompositionPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
-import type { OptimizationSplitChunksCacheGroup } from 'webpack/lib/optimize/SplitChunksPlugin';
-import type { Falsy } from 'webpack/declarations/WebpackOptions';
+import type {
+  Falsy,
+  OptimizationSplitChunksCacheGroup,
+} from 'webpack/declarations/WebpackOptions';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
-) as typeof import('webpack/lib/dependencies/ModuleDependency');
+) as typeof import('webpack/lib/dependencies/core/ModuleDependency');
 
 const EntryDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
-) as typeof import('webpack/lib/dependencies/EntryDependency');
+) as typeof import('webpack/lib/entry/EntryDependency');
 
 const PLUGIN_NAME = 'ContainerPlugin';
 
@@ -66,6 +68,7 @@ class ContainerPlugin {
         (item) => ({
           import: Array.isArray(item.import) ? item.import : [item.import],
           name: item.name || undefined,
+          ...(item.layer !== undefined ? { layer: item.layer } : {}),
         }),
       ),
       runtimePlugins: options.runtimePlugins,
@@ -311,10 +314,19 @@ class ContainerPlugin {
           new ContainerEntryModuleFactory(),
         );
 
-        compilation.dependencyFactories.set(
-          ContainerExposedDependency,
-          normalModuleFactory,
-        );
+        compilation.dependencyFactories.set(ContainerExposedDependency, {
+          create(data, callback) {
+            const dependency = data
+              .dependencies[0] as ContainerExposedDependency;
+            if (dependency.layer !== undefined) {
+              data.contextInfo = {
+                ...data.contextInfo,
+                issuerLayer: dependency.layer,
+              };
+            }
+            normalModuleFactory.create(data, callback);
+          },
+        });
 
         if (!compilation.dependencyFactories.has(EntryDependency)) {
           compilation.dependencyFactories.set(

@@ -1,0 +1,187 @@
+import { getRemoteEntry } from '@module-federation/runtime-core/kernel';
+import { createInstance } from '@module-federation/runtime';
+import { TreeShakingStatus } from '@module-federation/sdk';
+import { consumes } from '../src/adapters/consumes';
+
+import { getSharedFallbackGetter } from '../src/getSharedFallbackGetter';
+import type { Federation, WebpackRequire } from '../src/types';
+
+const init = ({ webpackRequire }: { webpackRequire: WebpackRequire }) => {
+  const { initOptions, runtime } = webpackRequire.federation;
+  consumes.beforeInit!(webpackRequire, initOptions!);
+  return runtime!.init(initOptions!);
+};
+
+jest.mock('@module-federation/runtime-core/kernel', () => ({
+  ...jest.requireActual('@module-federation/runtime-core/kernel'),
+  getRemoteEntry: jest.fn(),
+}));
+
+it.each([false, true])(
+  'loads full fallbacks by scope, layer and version (reverse=%s)',
+  async (reverse) => {
+    const variants = [
+      { shareScope: 'default', layer: 'server', version: '1.0.0' },
+      { shareScope: 'default', layer: 'client', version: '1.0.0' },
+      { shareScope: 'custom', layer: 'client', version: '1.0.0' },
+      { shareScope: 'default', layer: undefined, version: '1.0.0' },
+      { shareScope: 'default', layer: 'client', version: '2.0.0' },
+    ];
+    if (reverse) variants.reverse();
+    const entries: Federation['sharedFallback'] = {
+      pkg: variants.map(({ version, ...identity }, index) => [
+        `${index}.js`,
+        version,
+        `entry${index}`,
+        identity,
+      ]),
+    };
+    const loadEntry = jest.fn(async ({ remoteInfo }) => ({
+      init: async () => undefined,
+      get: () => () => remoteInfo.entry,
+    }));
+    jest.mocked(getRemoteEntry).mockImplementation(loadEntry);
+    const localGet = jest.fn(() => () => 'tree-shaken');
+    const webpackRequire = {
+      p: '/assets/',
+      federation: {
+        initOptions: {
+          name: `full-fallback-${reverse}`,
+          shared: {
+            pkg: variants.map(({ shareScope, layer, version }) => ({
+              version,
+              scope: shareScope,
+              get: localGet,
+              shareConfig: { requiredVersion: false, layer },
+              treeShaking: {
+                mode: 'server-calc',
+                status: TreeShakingStatus.UNKNOWN,
+              },
+            })),
+          },
+        },
+        sharedFallback: entries,
+        runtime: { init: createInstance, getRemoteEntry: loadEntry },
+        bundlerRuntime: { getSharedFallbackGetter },
+      },
+    } as unknown as WebpackRequire;
+    const instance = init({ webpackRequire });
+    webpackRequire.federation.instance = instance;
+    for (const [index, { shareScope, layer, version }] of variants.entries()) {
+      const factory = await instance.loadShare('pkg', {
+        customShareInfo: {
+          scope: [shareScope],
+          shareConfig: { layer, requiredVersion: version },
+          treeShaking: {
+            mode: 'server-calc',
+            status: TreeShakingStatus.UNKNOWN,
+          },
+        },
+      });
+      expect(factory && factory()).toBe(`/assets/${index}.js`);
+    }
+    expect(localGet).not.toHaveBeenCalled();
+    expect(loadEntry).toHaveBeenCalledTimes(variants.length);
+  },
+);
+
+it('keeps legacy unlayered fallback tuples executable', async () => {
+  const webpackRequire = {
+    p: '/',
+    federation: {
+      sharedFallback: { pkg: [['legacy.js', '1.0.0', 'legacy']] },
+      runtime: {
+        getRemoteEntry: async () => ({
+          init: async () => undefined,
+          get: () => () => 'legacy',
+        }),
+      },
+    },
+  } as unknown as WebpackRequire;
+  jest
+    .mocked(getRemoteEntry)
+    .mockImplementation(webpackRequire.federation.runtime!.getRemoteEntry);
+  const get = getSharedFallbackGetter({
+    shareKey: 'pkg',
+    version: '1.0.0',
+    scope: 'custom',
+    factory: () => () => 'local',
+    webpackRequire,
+  });
+  const factory = await get();
+  expect(factory()).toBe('legacy');
+});
+
+it.each([false, true])(
+  'preserves scalar and ordered fallback identities (reverse=%s)',
+  async (reverse) => {
+    const variants: NonNullable<Federation['sharedFallback']>[string] = [
+      ['scalar.js', '1.0.0', 'scalar', { shareScope: 'default' }],
+      ['ordered.js', '1.0.0', 'ordered', { shareScope: ['default'] }],
+    ];
+    const webpackRequire = {
+      p: '/',
+      federation: {
+        sharedFallback: { pkg: reverse ? variants.reverse() : variants },
+        runtime: {
+          getRemoteEntry: async ({
+            remoteInfo,
+          }: {
+            remoteInfo: { entry: string };
+          }) => ({
+            init: async () => undefined,
+            get: () => () => remoteInfo.entry,
+          }),
+        },
+      },
+    } as unknown as WebpackRequire;
+    jest
+      .mocked(getRemoteEntry)
+      .mockImplementation(webpackRequire.federation.runtime!.getRemoteEntry);
+    for (const [scope, expected] of [
+      ['default', '/scalar.js'],
+      [['default'], '/ordered.js'],
+    ] as [string | string[], string][]) {
+      const get = getSharedFallbackGetter({
+        shareKey: 'pkg',
+        version: '1.0.0',
+        scope,
+        factory: () => () => 'local',
+        webpackRequire,
+      });
+      expect((await get())()).toBe(expected);
+    }
+  },
+);
+
+it('keeps a local provider when only another identity has a full fallback', () => {
+  const webpackRequire = {
+    federation: {
+      sharedFallback: {
+        pkg: [
+          [
+            'server.js',
+            '1.0.0',
+            'server',
+            { shareScope: 'default', layer: 'server' },
+          ],
+        ],
+      },
+    },
+  } as unknown as WebpackRequire;
+  const factory = () => () => 'local';
+  for (const identity of [
+    { scope: 'default' },
+    { scope: 'custom', layer: 'server' },
+  ]) {
+    expect(
+      getSharedFallbackGetter({
+        shareKey: 'pkg',
+        version: '1.0.0',
+        factory,
+        webpackRequire,
+        ...identity,
+      }),
+    ).toBe(factory);
+  }
+});
