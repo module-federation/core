@@ -1,24 +1,13 @@
 export = ChunkPrefetchStartupRuntimeModule;
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Chunk, { ChunkChildOfTypeInOrder } from "../graph/Chunk" */
+/** @import Compilation from "../Compilation" */
 declare class ChunkPrefetchStartupRuntimeModule extends RuntimeModule {
-  /**
-   * @param {{ onChunks: Chunk[], chunks: Set<Chunk> }[]} startupChunks chunk ids to trigger when chunks are loaded
-   */
-  constructor(
-    startupChunks: {
-      onChunks: Chunk[];
-      chunks: Set<Chunk>;
-    }[],
-  );
-  startupChunks: {
-    onChunks: Chunk[];
-    chunks: Set<Chunk>;
-  }[];
+    /**
+     * @param {ChunkChildOfTypeInOrder[]} startupChunks chunk ids to trigger when chunks are loaded
+     */
+    constructor(startupChunks: Chunk.ChunkChildOfTypeInOrder[]);
+    /** @type {ChunkChildOfTypeInOrder[]} */
+    startupChunks: Chunk.ChunkChildOfTypeInOrder[];
 }
-declare namespace ChunkPrefetchStartupRuntimeModule {
-  export { Chunk, Compilation };
-}
-import RuntimeModule = require('../RuntimeModule');
-type Chunk = import('../Chunk');
-type Compilation = import('../Compilation');
+import RuntimeModule = require("../runtime/RuntimeModule");
+import type Chunk from "../graph/Chunk";

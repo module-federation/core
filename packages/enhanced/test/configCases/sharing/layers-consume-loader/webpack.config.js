@@ -1,5 +1,11 @@
 const { ConsumeSharedPlugin } = require('../../../../dist/src');
-const WConsumeSharedPlugin = require('webpack/lib/sharing/ConsumeSharedPlugin');
+const {
+  normalizeWebpackPath,
+} = require('@module-federation/sdk/normalize-webpack-path');
+
+const WConsumeSharedPlugin = require(
+  normalizeWebpackPath('webpack/lib/sharing/ConsumeSharedPlugin'),
+);
 const path = require('path');
 
 module.exports = {

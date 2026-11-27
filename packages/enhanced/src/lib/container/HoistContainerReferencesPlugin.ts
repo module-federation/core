@@ -202,7 +202,7 @@ export function getAllReferencedModules(
       }
 
       // Handle 'initial' type (skipping async blocks)
-      if (type === 'initial') {
+      if (type === 'initial' && connection.dependency) {
         const parentBlock = compilation.moduleGraph.getParentBlock(
           connection.dependency,
         );

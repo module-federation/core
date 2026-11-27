@@ -1,17 +1,13 @@
 export = EnsureChunkRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../Module").ReadOnlyRuntimeRequirements} ReadOnlyRuntimeRequirements */
+/** @import Compilation from "../Compilation" */
+/** @import { ReadOnlyRuntimeRequirements } from "../module/Module" */
 declare class EnsureChunkRuntimeModule extends RuntimeModule {
-  /**
-   * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
-   */
-  constructor(runtimeRequirements: ReadOnlyRuntimeRequirements);
-  runtimeRequirements: import('../Module').ReadOnlyRuntimeRequirements;
+    /**
+     * @param {ReadOnlyRuntimeRequirements} runtimeRequirements runtime requirements
+     */
+    constructor(runtimeRequirements: ReadOnlyRuntimeRequirements);
+    /** @type {ReadOnlyRuntimeRequirements} */
+    runtimeRequirements: ReadOnlyRuntimeRequirements;
 }
-declare namespace EnsureChunkRuntimeModule {
-  export { Compilation, ReadOnlyRuntimeRequirements };
-}
-import RuntimeModule = require('../RuntimeModule');
-type Compilation = import('../Compilation');
-type ReadOnlyRuntimeRequirements =
-  import('../Module').ReadOnlyRuntimeRequirements;
+import RuntimeModule = require("./RuntimeModule");
+import type { ReadOnlyRuntimeRequirements } from "../module/Module";

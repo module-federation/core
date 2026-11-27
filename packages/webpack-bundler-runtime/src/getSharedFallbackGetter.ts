@@ -4,22 +4,48 @@ export const getSharedFallbackGetter = ({
   shareKey,
   factory,
   version,
+  scope = 'default',
+  layer,
   webpackRequire,
   libraryType = 'global',
 }: GetSharedFallbackGetterOptions) => {
-  const { runtime, instance, bundlerRuntime, sharedFallback } =
+  const { runtime, bundlerRuntime, sharedFallback } =
     webpackRequire.federation!;
   if (!sharedFallback) {
     return factory;
   }
-  // { react: [  [ react/19.0.0/index.js , 19.0.0, react_global_name, var ]  ] }
   const fallbackItems = sharedFallback[shareKey];
   if (!fallbackItems) {
     return factory;
   }
-  const fallbackItem = version
-    ? fallbackItems.find((item) => item[1] === version)
-    : fallbackItems[0];
+  const scopes = Array.isArray(scope) ? scope : [scope];
+  const candidates = scopes.flatMap((shareScope) =>
+    fallbackItems.filter((item) => {
+      const identity = item[3];
+      if (!identity) return true;
+      const itemScopes = Array.isArray(identity.shareScope)
+        ? identity.shareScope
+        : [identity.shareScope];
+      return (
+        (identity.layer ?? undefined) === (layer ?? undefined) &&
+        itemScopes.includes(shareScope)
+      );
+    }),
+  );
+  if (!candidates.length) return factory;
+  const versionMatches = version
+    ? candidates.filter((item) => item[1] === version)
+    : candidates;
+  const fallbackItem =
+    versionMatches.find((item) => {
+      const itemScope = item[3]?.shareScope;
+      return Array.isArray(scope) && Array.isArray(itemScope)
+        ? scope.length === itemScope.length &&
+            scope.every((value, index) => value === itemScope[index])
+        : scope === itemScope;
+    }) ??
+    versionMatches.find((item) => item[3]) ??
+    versionMatches[0];
   if (!fallbackItem) {
     throw new Error(
       `No fallback item found for shareKey: ${shareKey} and version: ${version}`,

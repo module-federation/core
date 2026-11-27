@@ -1,5 +1,6 @@
 export type ErrorFirstCallback = (error: Error | null, result?: Buffer) => void;
 /**
+ * Returns protocol if absolute URL specifier provided.
  * @param {string} specifier specifier
  * @returns {string | null | undefined} protocol if absolute URL specifier provided
  */

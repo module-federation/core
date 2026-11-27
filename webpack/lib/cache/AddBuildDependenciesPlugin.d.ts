@@ -1,18 +1,34 @@
 export = AddBuildDependenciesPlugin;
+/**
+ * @typedef {object} NormalizedBuildDependencyItem
+ * @property {string} dependency request to resolve
+ * @property {boolean} optional when true the dependency may be missing
+ */
 declare class AddBuildDependenciesPlugin {
     /**
-     * @param {Iterable<string>} buildDependencies list of build dependencies
+     * Creates an instance of AddBuildDependenciesPlugin.
+     * @param {NormalizedBuildDependencyItem[]} buildDependencies normalized build dependencies
      */
-    constructor(buildDependencies: Iterable<string>);
-    buildDependencies: Set<string>;
+    constructor(buildDependencies: NormalizedBuildDependencyItem[]);
+    buildDependencies: NormalizedBuildDependencyItem[];
     /**
-     * Apply the plugin
+     * Applies the plugin by registering its hooks on the compiler.
      * @param {Compiler} compiler the compiler instance
      * @returns {void}
      */
     apply(compiler: Compiler): void;
 }
 declare namespace AddBuildDependenciesPlugin {
-    export { Compiler };
+    export { NormalizedBuildDependencyItem };
 }
-type Compiler = import("../Compiler");
+import type Compiler from "../Compiler";
+type NormalizedBuildDependencyItem = {
+    /**
+     * request to resolve
+     */
+    dependency: string;
+    /**
+     * when true the dependency may be missing
+     */
+    optional: boolean;
+};
