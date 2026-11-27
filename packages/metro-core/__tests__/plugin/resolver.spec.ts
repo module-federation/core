@@ -217,4 +217,33 @@ describe('createResolveRequest', () => {
       filePath: expect.stringContaining(path.join('modules', 'HMRClient.ts')),
     });
   });
+
+  it("replaces Expo's getDevServer in a remote", () => {
+    const projectDir = '/project';
+    const tmpDir = path.join(projectDir, 'node_modules', '.mf-metro');
+    const fallbackResolver = rs.fn<CustomResolver>(() => ({
+      type: 'sourceFile',
+      filePath: '/project/node_modules/expo/src/utils/getDevServer.native.ts',
+    }));
+    const context = createResolverContext(
+      '/project/node_modules/expo/src/async-require/hmrUtils.native.ts',
+      fallbackResolver,
+    );
+
+    const resolveRequest = createResolveRequest({
+      isRemote: true,
+      hacks: { patchHMRClient: false, patchInitializeCore: false },
+      options: createBaseConfig(),
+      paths: createPaths(projectDir, tmpDir),
+      vmManager: { registerVirtualModule: rs.fn() },
+      customResolver: fallbackResolver,
+    });
+
+    expect(resolveRequest(context, '../utils/getDevServer', 'ios')).toEqual({
+      type: 'sourceFile',
+      filePath: expect.stringContaining(
+        path.join('modules', 'getDevServer.ts'),
+      ),
+    });
+  });
 });

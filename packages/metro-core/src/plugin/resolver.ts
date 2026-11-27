@@ -4,6 +4,7 @@ import type { ModuleFederationConfigNormalized } from '../types';
 import type { VirtualModuleManager } from '../utils';
 import {
   ASYNC_REQUIRE,
+  EXPO_GET_DEV_SERVER_REGEX,
   GET_DEV_SERVER_REGEX,
   HMR_CLIENT_REGEX,
   INIT_HOST,
@@ -172,9 +173,12 @@ export function createResolveRequest({
       const res = customResolver
         ? customResolver(context, moduleName, platform)
         : context.resolveRequest(context, moduleName, platform);
-      const from = GET_DEV_SERVER_REGEX;
       const to = resolveModule('getDevServer.ts');
-      return replaceModule(from, to)(res);
+      // React Native's module, and Expo's own copy that its HMR client reads
+      return [GET_DEV_SERVER_REGEX, EXPO_GET_DEV_SERVER_REGEX].reduce(
+        (resolved, from) => replaceModule(from, to)(resolved),
+        res,
+      );
     }
 
     // replace HMRClient module with HMRClientShim when using bundle commands

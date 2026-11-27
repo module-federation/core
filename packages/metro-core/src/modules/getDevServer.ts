@@ -11,5 +11,6 @@ export default function getDevServer() {
   return {
     url: scriptUrl.match(/^https?:\/\/.*?\//)![0],
     fullBundleUrl: scriptUrl,
+    bundleLoadedFromServer: true,
   };
 }
