@@ -6,21 +6,24 @@
 'use strict';
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Chunk, ChunkGraph } from 'webpack';
+import type {
+  Chunk,
+  ChunkGraph,
+  Compilation,
+  InputFileSystem,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  WebpackError,
+  WebpackOptionsNormalized as WebpackOptions,
+} from 'webpack';
 import type {
   CodeGenerationContext,
   CodeGenerationResult,
-  Compilation,
-  InputFileSystem,
   LibIdentOptions,
   NeedBuildContext,
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
-  RequestShortener,
-  ResolverWithOptions,
-  WebpackError,
-  WebpackOptions,
-} from 'webpack/lib/Module';
+} from 'webpack/lib/module/Module';
+import type { ResolverWithOptions } from 'webpack/lib/resolve/ResolverFactory';
+import type RequestShortener from 'webpack/lib/util/RequestShortener';
 import { WEBPACK_MODULE_TYPE_FALLBACK } from '../Constants';
 import FallbackItemDependency from './FallbackItemDependency';
 

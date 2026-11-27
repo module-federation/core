@@ -1,16 +1,23 @@
 declare namespace _exports {
-  export { InfrastructureLoggingNormalizedWithDefaults, LoggerConsole };
+    export { StatusMessageState };
 }
-declare function _exports({
-  colors,
-  appendOnly,
-  stream,
-}: {
-  colors?: boolean | undefined;
-  appendOnly?: boolean | undefined;
-  stream: InfrastructureLoggingNormalizedWithDefaults['stream'];
+declare function _exports({ colors, appendOnly, stream, compiler }: {
+    colors?: boolean | undefined;
+    appendOnly?: boolean | undefined;
+    stream: InfrastructureLoggingNormalizedWithDefaults["stream"];
+    compiler: Compiler;
 }): LoggerConsole;
 export = _exports;
-type InfrastructureLoggingNormalizedWithDefaults =
-  import('../config/defaults').InfrastructureLoggingNormalizedWithDefaults;
-type LoggerConsole = import('../logging/createConsoleLogger').LoggerConsole;
+type StatusMessageState = {
+    /**
+     * current status message
+     */
+    currentMessage: string[] | undefined;
+    /**
+     * current status message rows
+     */
+    currentLines: number;
+};
+import type { InfrastructureLoggingNormalizedWithDefaults } from "../config/defaults";
+import type Compiler from "../Compiler";
+import type { LoggerConsole } from "../logging/createConsoleLogger";

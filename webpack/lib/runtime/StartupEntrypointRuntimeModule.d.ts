@@ -1,14 +1,12 @@
 export = StartupEntrypointRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Chunk from "../graph/Chunk" */
+/** @import Compilation from "../Compilation" */
 declare class StartupEntrypointRuntimeModule extends RuntimeModule {
-  /**
-   * @param {boolean} asyncChunkLoading use async chunk loading
-   */
-  constructor(asyncChunkLoading: boolean);
-  asyncChunkLoading: boolean;
+    /**
+     * @param {boolean} asyncChunkLoading use async chunk loading
+     */
+    constructor(asyncChunkLoading: boolean);
+    /** @type {boolean} */
+    asyncChunkLoading: boolean;
 }
-declare namespace StartupEntrypointRuntimeModule {
-  export { Compilation };
-}
-import RuntimeModule = require('../RuntimeModule');
-type Compilation = import('../Compilation');
+import RuntimeModule = require("./RuntimeModule");

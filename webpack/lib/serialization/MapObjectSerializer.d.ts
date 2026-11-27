@@ -1,24 +1,17 @@
 export = MapObjectSerializer;
-/** @typedef {import("./ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("./ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 declare class MapObjectSerializer {
-  /**
-   * @template K, V
-   * @param {Map<K, V>} obj map
-   * @param {ObjectSerializerContext} context context
-   */
-  serialize<K, V>(obj: Map<K, V>, context: ObjectSerializerContext): void;
-  /**
-   * @template K, V
-   * @param {ObjectDeserializerContext} context context
-   * @returns {Map<K, V>} map
-   */
-  deserialize<K, V>(context: ObjectDeserializerContext): Map<K, V>;
+    /**
+     * Serializes this instance into the provided serializer context.
+     * @template K, V
+     * @param {Map<K, V>} obj map
+     * @param {import("./ObjectMiddleware").ObjectSerializerContext<(number | K | V)[]>} context context
+     */
+    serialize<K, V>(obj: Map<K, V>, context: import("./ObjectMiddleware").ObjectSerializerContext<(number | K | V)[]>): void;
+    /**
+     * Restores this instance from the provided deserializer context.
+     * @template K, V
+     * @param {import("./ObjectMiddleware").ObjectDeserializerContext<(number | K | V)[]>} context context
+     * @returns {Map<K, V>} map
+     */
+    deserialize<K, V>(context: import("./ObjectMiddleware").ObjectDeserializerContext<(number | K | V)[]>): Map<K, V>;
 }
-declare namespace MapObjectSerializer {
-  export { ObjectDeserializerContext, ObjectSerializerContext };
-}
-type ObjectDeserializerContext =
-  import('./ObjectMiddleware').ObjectDeserializerContext;
-type ObjectSerializerContext =
-  import('./ObjectMiddleware').ObjectSerializerContext;
