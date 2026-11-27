@@ -38,6 +38,7 @@ interface MountSourceRecord {
   deploymentId?: string;
   sources: Record<string, DeploymentChildSource>;
   fixedChildren?: Record<string, DeploymentSnapshot>;
+  bundledChildren?: Record<string, DeploymentSnapshot>;
 }
 
 interface SerializedClientState {
@@ -164,6 +165,7 @@ export function createDeploymentClient(
           deploymentId: rootDeploymentId,
           sources: snapshot.sources || {},
           fixedChildren: snapshot.fixedChildren,
+          bundledChildren: snapshot.bundledChildren,
         },
         snapshot.sid,
         ctx.transactionId,
@@ -205,6 +207,7 @@ export function createDeploymentClient(
           deploymentId: childSource.deploymentId,
           sources: embeddedFixed.sources || {},
           fixedChildren: embeddedFixed.fixedChildren,
+          bundledChildren: embeddedFixed.bundledChildren,
         },
         undefined,
         ctx.transactionId,
@@ -215,11 +218,16 @@ export function createDeploymentClient(
       };
     }
 
-    const childSnapshot = await readDeployment({
-      source: childSource.source,
-      deploymentId: childSource.deploymentId,
-      signal: ctx.signal,
-    });
+    // Serve full-delivery pre-bundled child snapshots without extra network calls,
+    // while preserving independent source `sid` consistency checks.
+    const embeddedBundled = parentRecord.bundledChildren?.[key];
+    const childSnapshot =
+      embeddedBundled ??
+      (await readDeployment({
+        source: childSource.source,
+        deploymentId: childSource.deploymentId,
+        signal: ctx.signal,
+      }));
     if (!childSnapshot) {
       if (childSource.deploymentId) {
         throw new DeploymentSnapshotExpiredError(
@@ -255,6 +263,7 @@ export function createDeploymentClient(
         deploymentId: childSource.deploymentId,
         sources: childSnapshot.sources || {},
         fixedChildren: childSnapshot.fixedChildren,
+        bundledChildren: childSnapshot.bundledChildren,
       },
       childSnapshot.sid,
       ctx.transactionId,

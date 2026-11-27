@@ -51,6 +51,12 @@ export interface DeploymentSnapshot {
   moduleInfo: GlobalModuleInfo;
   sources: Record<string, DeploymentChildSource>;
   fixedChildren?: Record<string, DeploymentSnapshot>;
+  /**
+   * Pre-bundled dynamic child snapshots for full-delivery mode. Unlike
+   * `fixedChildren`, these retain independent `sid` validation while avoiding
+   * extra network requests on child discovery.
+   */
+  bundledChildren?: Record<string, DeploymentSnapshot>;
 }
 
 export interface ResolvedProducer {

@@ -401,4 +401,85 @@ describe('@module-federation/sdk deployment helpers', () => {
       SNAPSHOT_EXPIRED_CODE,
     );
   });
+
+  it('serves pre-bundled dynamic children in full-delivery mode with zero extra reads while keeping sid checks', async () => {
+    const shopSnap = await computeDeploymentSnapshot(
+      {
+        consumer: 'shop',
+        consumerManifestUrl: 'https://cdn.example.com/shop/v1/mf-manifest.json',
+        sid: 'shop-s1',
+        applications: [
+          {
+            manifestUrl: 'https://cdn.example.com/rec/v1/mf-manifest.json',
+            route: 'recommend/*',
+            expose: './App',
+            children: false,
+          },
+        ],
+      },
+      { loadManifest },
+    );
+
+    const portalSnap = await computeDeploymentSnapshot(
+      {
+        consumer: 'portal',
+        sid: 'portal-s1',
+        applications: [
+          {
+            manifestUrl: 'https://cdn.example.com/shop/v1/mf-manifest.json',
+            route: 'shop/*',
+            expose: './App',
+            children: { source: 'shop-deployment' },
+          },
+        ],
+      },
+      { loadManifest },
+    );
+
+    const childKey = Object.keys(portalSnap.sources)[0];
+    const fullSnap = {
+      ...portalSnap,
+      bundledChildren: {
+        [childKey]: shopSnap,
+      },
+    };
+
+    const readCalls: string[] = [];
+    const client = createDeploymentClient({
+      rootSource: 'portal',
+      readDeployment: async ({ source }) => {
+        readCalls.push(source);
+        return source === 'portal' ? fullSnap : shopSnap;
+      },
+    });
+
+    const rootRes = await client.getApplications({
+      consumer: null,
+      pathname: '/shop/recommend',
+      search: '',
+      basename: '/',
+      mountId: 'root',
+      transactionId: 'tx-full',
+    });
+    expect(rootRes.routes[0].moduleName).toBe('shop');
+
+    const childRes = await client.getApplications({
+      consumer: {
+        moduleName: 'shop',
+        expose: './App',
+        versionOrUrl: 'https://cdn.example.com/shop/v1/mf-manifest.json',
+      },
+      pathname: '/shop/recommend',
+      search: '',
+      basename: '/shop',
+      mountId: 'm-shop',
+      parentMountId: 'root',
+      transactionId: 'tx-full',
+    });
+    expect(childRes.routes[0].moduleName).toBe('recommendation');
+    client.lifecycle.onCommit('tx-full');
+
+    // Only 1 readDeployment call occurred for both layers in full-delivery mode.
+    expect(readCalls).toEqual(['portal']);
+  });
 });
