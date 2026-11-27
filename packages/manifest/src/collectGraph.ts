@@ -4,6 +4,7 @@ import type {
   StatsExpose,
   StatsRemote,
   StatsShared,
+  StatsSharedProvider,
   Stats,
 } from '@module-federation/sdk';
 import type {
@@ -12,9 +13,11 @@ import type {
   SharedManager,
 } from '@module-federation/managers';
 import path from 'path';
+import { HOT_UPDATE_SUFFIX } from './constants';
 import { getExposeItem, getShareItem } from './ModuleHandler';
 import {
   getAssetsByChunkGroup,
+  getAssetsByChunk,
   getAssetsByChunkIDs,
   getSharedIdentityKey,
   createSharedOptionsLookup,
@@ -134,6 +137,63 @@ export function collectGraph(
       if (scope !== 'default') row.shareScope = scope;
       sharedMap[key] = row;
     }
+    if (!consume) {
+      for (const target of dependencies(module)) {
+        const resourceModule =
+          (target as Module & { rootModule?: Module }).rootModule ?? target;
+        const request =
+          (resourceModule as Module & { resource?: string }).resource ??
+          resourceModule.nameForCondition() ??
+          resourceModule.identifier();
+        if (!request) continue;
+        const query = request.indexOf('?');
+        const resourcePath = query < 0 ? request : request.slice(0, query);
+        const suffix = query < 0 ? '' : request.slice(query);
+        const paths =
+          path.win32.isAbsolute(resourcePath) &&
+          !path.posix.isAbsolute(resourcePath)
+            ? path.win32
+            : path.posix;
+        let imported = request;
+        if (paths.isAbsolute(resourcePath)) {
+          const relative = paths
+            .relative(compilation.compiler.context, resourcePath)
+            .replace(/\\/g, '/');
+          if (!paths.isAbsolute(relative))
+            imported = `${relative.startsWith('../') ? '' : './'}${relative}${suffix}`;
+        }
+        const providers = (sharedMap[key].providers ||= []);
+        let provider = providers.find(
+          (entry) => entry.version === version && entry.import === imported,
+        );
+        if (!provider) {
+          provider = {
+            version,
+            import: imported,
+            assets: {
+              js: { sync: [], async: [] },
+              css: { sync: [], async: [] },
+            },
+          } satisfies StatsSharedProvider;
+          providers.push(provider);
+        }
+        for (const chunk of chunkGraph.getModuleChunksIterable(target)) {
+          const assets = getAssetsByChunk(chunk, entryNames);
+          for (const file of chunk.files) {
+            if (file.includes(HOT_UPDATE_SUFFIX)) continue;
+            assets[file.endsWith('.css') ? 'css' : 'js'].sync.push(file);
+          }
+          for (const type of ['js', 'css'] as const)
+            for (const loading of ['sync', 'async'] as const)
+              provider.assets[type][loading] = [
+                ...new Set([
+                  ...provider.assets[type][loading],
+                  ...assets[type][loading],
+                ]),
+              ].sort();
+        }
+      }
+    }
     if (consume) {
       const ids = new Set<string | number>();
       for (const fallback of dependencies(module)) {
@@ -219,6 +279,17 @@ export function collectGraph(
         }
       }
     }
+  }
+  for (const row of Object.values(sharedMap)) {
+    if (!row.providers || row.providers.length < 2) delete row.providers;
+    else
+      row.providers.sort((first, second) => {
+        if (first.version !== second.version)
+          return first.version < second.version ? -1 : 1;
+        if (first.import !== second.import)
+          return first.import < second.import ? -1 : 1;
+        return 0;
+      });
   }
   return {
     exposes: Object.values(exposesMap),

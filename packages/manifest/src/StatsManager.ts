@@ -14,9 +14,11 @@ import {
   StatsMetaDataWithGetPublicPath,
   StatsMetaDataWithPublicPath,
   StatsShared,
+  StatsSharedProvider,
   disambiguateSharedScopes,
 } from '@module-federation/sdk';
 import { Compilation, Compiler } from 'webpack';
+import path from 'path';
 import type { StatsCompilation } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import {
   isDev,
@@ -37,7 +39,12 @@ import {
   UNKNOWN_MODULE_NAME,
 } from '@module-federation/managers';
 import { HOT_UPDATE_SUFFIX } from './constants';
-import { ModuleHandler, getExposeItem, getShareItem } from './ModuleHandler';
+import {
+  ModuleHandler,
+  SharedProviderModule,
+  getExposeItem,
+  getShareItem,
+} from './ModuleHandler';
 import { StatsInfo } from './types';
 import { collectGraph } from './collectGraph';
 
@@ -346,6 +353,130 @@ class StatsManager {
     return assets;
   }
 
+  private _getSharedProviders(
+    compiler: Compiler,
+    compilation: Compilation,
+    stats: StatsCompilation,
+    providerModules: SharedProviderModule[],
+    entryPointNames: string[],
+  ): Record<string, StatsSharedProvider[]> {
+    const providers: Record<string, StatsSharedProvider[]> = {};
+    for (const {
+      key,
+      version,
+      request,
+      module: providerModule,
+    } of providerModules) {
+      const targets = (stats.modules || []).filter(
+        (module) =>
+          (providerModule.name !== undefined &&
+            module.issuerName === providerModule.name) ||
+          module.reasons?.some(
+            (reason) =>
+              (providerModule.identifier !== undefined &&
+                (reason.moduleIdentifier === providerModule.identifier ||
+                  reason.resolvedModuleIdentifier ===
+                    providerModule.identifier)) ||
+              (providerModule.name !== undefined &&
+                (reason.moduleName === providerModule.name ||
+                  reason.resolvedModule === providerModule.name)),
+          ),
+      );
+      for (const target of targets) {
+        const resourceModule = target.modules?.[0] || target;
+        let resolvedRequest = resourceModule.identifier || request;
+        if (
+          resourceModule.moduleType &&
+          resolvedRequest.startsWith(`${resourceModule.moduleType}|`)
+        )
+          resolvedRequest = resolvedRequest.slice(
+            resourceModule.moduleType.length + 1,
+          );
+        if (
+          resourceModule.layer != null &&
+          resolvedRequest.endsWith(`|${resourceModule.layer}`)
+        )
+          resolvedRequest = resolvedRequest.slice(
+            0,
+            -resourceModule.layer.length - 1,
+          );
+        if (resourceModule.nameForCondition) {
+          const condition = resourceModule.nameForCondition;
+          const index = resolvedRequest.lastIndexOf(condition);
+          const suffix =
+            index >= 0 ? resolvedRequest.slice(index + condition.length) : '';
+          resolvedRequest = condition + (suffix.startsWith('?') ? suffix : '');
+        }
+        const imported = resolvedRequest
+          .split('!')
+          .map((resource) => {
+            const query = resource.indexOf('?');
+            const resourcePath =
+              query < 0 ? resource : resource.slice(0, query);
+            const suffix = query < 0 ? '' : resource.slice(query);
+            const paths =
+              path.win32.isAbsolute(resourcePath) &&
+              !path.posix.isAbsolute(resourcePath)
+                ? path.win32
+                : path.posix;
+            if (!paths.isAbsolute(resourcePath)) return resource;
+            const relative = paths
+              .relative(compiler.context, resourcePath)
+              .replace(/\\/g, '/');
+            if (paths.isAbsolute(relative)) return resource;
+            return `${relative.startsWith('../') ? '' : './'}${relative}${suffix}`;
+          })
+          .join('!');
+        const entries = (providers[key] ||= []);
+        let provider = entries.find(
+          (item) => item.version === version && item.import === imported,
+        );
+        if (!provider) {
+          provider = {
+            version,
+            import: imported,
+            assets: {
+              js: { sync: [], async: [] },
+              css: { sync: [], async: [] },
+            },
+          };
+          entries.push(provider);
+        }
+        for (const chunkID of target.chunks || []) {
+          const chunk = findChunk(chunkID, compilation.chunks);
+          if (!chunk) continue;
+          const assets = getAssetsByChunk(chunk, entryPointNames);
+          for (const file of chunk.files) {
+            if (file.includes(HOT_UPDATE_SUFFIX)) continue;
+            assets[file.endsWith('.css') ? 'css' : 'js'].sync.push(file);
+          }
+          for (const type of ['js', 'css'] as const) {
+            for (const loading of ['sync', 'async'] as const) {
+              provider.assets[type][loading] = [
+                ...new Set([
+                  ...provider.assets[type][loading],
+                  ...assets[type][loading],
+                ]),
+              ].sort();
+            }
+          }
+        }
+      }
+    }
+    for (const [name, entries] of Object.entries(providers)) {
+      if (entries.length < 2) {
+        delete providers[name];
+      } else {
+        entries.sort((a, b) => {
+          if (a.version !== b.version) return a.version < b.version ? -1 : 1;
+          if (a.import !== b.import) return a.import < b.import ? -1 : 1;
+          return 0;
+        });
+      }
+    }
+    return providers;
+  }
+
   private async _generateStats(
     compiler: Compiler,
     compilation: Compilation,
@@ -426,7 +557,8 @@ class StatsManager {
           webpackStats.modules || [],
           { bundler: this._bundler },
         );
-        const { remotes, exposesMap, sharedMap } = moduleHandler.collect();
+        const { remotes, exposesMap, sharedMap, sharedProviderModules } =
+          moduleHandler.collect();
         const entryPointNames = [...compilation.entrypoints.keys()];
         const sharedAssets = this._getProvideSharedAssets(
           compilation,
@@ -437,7 +569,15 @@ class StatsManager {
           compilation,
           entryPointNames,
         );
+        const providers = this._getSharedProviders(
+          compiler,
+          compilation,
+          webpackStats,
+          sharedProviderModules,
+          entryPointNames,
+        );
         for (const [key, shared] of Object.entries(sharedMap)) {
+          if (providers[key]) shared.providers = providers[key];
           if (sharedAssets[key]) shared.assets = sharedAssets[key];
         }
         for (const [key, expose] of Object.entries(exposesMap)) {
