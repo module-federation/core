@@ -1,0 +1,88 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+# Build
+
+Esta página recoge los códigos de error en tiempo de build y orientación habitual para la resolución de problemas.
+
+## Códigos de error
+
+- [BUILD-001](#build-001)
+- [BUILD-002](#build-002)
+
+## BUILD-001
+
+<ErrorCodeTitle code='BUILD-001'/>
+
+### Causas
+
+No se encontró el recurso del módulo Expose.
+
+Hay dos posibles causas:
+
+1. La ruta del archivo de exposeModules configurada en `exposes` es incorrecta y apunta a una ruta inexistente.
+2. Al usar `Next.js` u otros frameworks con webpack integrado, la ruta de webpack que usa MF no coincide con la ruta de webpack del framework.
+
+### Soluciones
+
+1. Comprueba si la ruta del archivo del módulo en exposes es correcta, prestando atención a mayúsculas y minúsculas.
+2. Comprueba si FEDERATION_WEBPACK_PATH coincide con la ruta de webpack que usa el framework. Si no es así, verifica que las dependencias estén instaladas correctamente o establece process.env.FEDERATION_WEBPACK_PATH con la ruta real de webpack.
+
+## BUILD-002
+
+<ErrorCodeTitle code='BUILD-002'/>
+
+### Causas
+
+Al hacer el build de un producer de Rspress, el proyecto debe establecer `publicPath`; de lo contrario, otros consumers no podrán cargarlo correctamente.
+
+### Soluciones
+
+Establece `publicPath` mediante uno de los siguientes métodos:
+
+* Define [builderConfig.output.assetPrefix](https://rsbuild.rs/config/output/asset-prefix) en `rspress.config.ts`
+
+```ts title="rspress.config.ts"
+export default {
+  builderConfig: {
+    output: {
+      assetPrefix: 'https://module-federation.io/',
+    }
+  }
+}
+```
+
+* Define [builderConfig.tools.rspack](https://rsbuild.rs/config/tools/rspack) en `rspress.config.js`
+
+```ts title="rspress.config.ts"
+export default {
+  builderConfig: {
+    tools: {
+      rspack: (config)=>{
+        config.output.publicPath = 'https://module-federation.io/';
+      },
+    }
+  }
+}
+```
+
+## Problemas comunes (sin código de error)
+
+### Advertencia de CORS
+
+Cuando se define `exposes` en el proyecto, este se considera un producer. Para garantizar que los consumers puedan cargar correctamente los recursos del producer, `@module-federation/modern-js-v3` y `@module-federation/rsbuild-plugin` establecen `Access-Control-Allow-Origin` en `*` y, al mismo tiempo, emiten una advertencia.
+
+#### Soluciones
+
+* [Modern.js]: establece el valor de [devServer.headers](https://modernjs.dev/configure/app/tools/dev-server.html#headers) con la lista blanca de dominios concreta en lugar de `*`
+
+* [Rsbuild]: establece el valor de [server.cors.origin](https://rsbuild.dev/config/server/cors#origin) con la lista blanca de dominios concreta en lugar de `*`
+
+### Varios assets emiten contenido distinto al mismo nombre de archivo mf-manifest.json
+
+#### Causa
+
+En Rspack `1.6.0-beta.0` portamos la implementación del manifest a Rust. Actualizar Rspack sin actualizar los paquetes relacionados con MF provoca este error.
+
+#### Solución
+
+Actualiza los paquetes npm del scope `@module-federation` a la versión 0.21.0 o posterior.

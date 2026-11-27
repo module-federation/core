@@ -1,12 +1,15 @@
 export = ChunkPrefetchPreloadPlugin;
+/**
+ * Adds runtime support for chunk prefetch and preload relationships discovered
+ * in the chunk graph.
+ */
 declare class ChunkPrefetchPreloadPlugin {
-  /**
-   * @param {Compiler} compiler the compiler
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Registers compilation hooks that emit the runtime modules responsible for
+     * scheduling chunk prefetch and preload requests.
+     * @param {Compiler} compiler the compiler
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
-declare namespace ChunkPrefetchPreloadPlugin {
-  export { Compiler };
-}
-type Compiler = import('../Compiler');
+import type Compiler from "../Compiler";

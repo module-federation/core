@@ -1,10 +1,11 @@
 export = DebugHash;
-/** @typedef {import("../../../declarations/WebpackOptions").HashDigest} Encoding */
+/**
+ * @import {
+ * 	HashDigest as Encoding
+ * } from "../../../declarations/WebpackOptions"
+ */
 declare class DebugHash extends Hash {
-  string: string;
+    /** @type {string} */
+    string: string;
 }
-declare namespace DebugHash {
-  export { Encoding };
-}
-import Hash = require('../Hash');
-type Encoding = import('../../../declarations/WebpackOptions').HashDigest;
+import Hash = require("../Hash");

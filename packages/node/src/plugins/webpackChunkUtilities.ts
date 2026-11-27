@@ -2,7 +2,33 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-import type { Chunk, ChunkGraph } from 'webpack';
+const { getUndoPath } = require(
+  normalizeWebpackPath('webpack/lib/util/identifier'),
+) as typeof import('webpack/lib/util/identifier');
+import type { Chunk, ChunkGraph, Compilation } from 'webpack';
+
+type ChunkFilenameTemplate = ReturnType<
+  typeof import('webpack').javascript.JavascriptModulesPlugin.getChunkFilenameTemplate
+>;
+
+// Runtime generation runs before chunk hashes exist. Webpack 5.110's helper
+// avoids resolving hashes. Older webpack retries generation after hashing,
+// when the real filename gives the correct depth for digests containing `/`.
+export function getChunkRootOutputDir(
+  compilation: Compilation,
+  chunk: Chunk,
+  filenameTemplate: ChunkFilenameTemplate,
+): string {
+  const { runtimeTemplate } = compilation;
+  if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
+    return runtimeTemplate.chunkRootOutputDir(chunk, false);
+  }
+  const outputName = compilation.getPath(filenameTemplate, {
+    chunk,
+    contentHashType: 'javascript',
+  });
+  return getUndoPath(outputName, compilation.outputOptions.path || '', false);
+}
 
 /**
  * Generates the hot module replacement (HMR) code.

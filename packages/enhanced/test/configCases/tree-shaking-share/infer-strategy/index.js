@@ -2,6 +2,16 @@ const fs = __non_webpack_require__('fs');
 const path = __non_webpack_require__('path');
 
 __webpack_require__.p = 'PUBLIC_PATH';
+
+// Older webpack keeps more exports of a shared module, which is safe, so only
+// the precision checks depend on what the webpack under test supports.
+const tracksDestructuring = supportsWebpackFeature(
+  'destructuredImportTracking',
+);
+const shakesDynamicPropertyReads = supportsWebpackFeature(
+  'dynamicImportPropertyTreeShaking',
+);
+
 it('should load tree shaking shared via set "runtime-infer" mode', async () => {
   const app = await import('./App.js');
   expect(app.default()).toEqual(
@@ -18,12 +28,14 @@ it('should load tree shaking shared via set "runtime-infer" mode', async () => {
     __FEDERATION__.__SHARE__['tree_shaking_share:0.0.0'].default['ui-lib'][
       '1.0.0'
     ];
-  expect(uiLibShared.loaded).toEqual(undefined);
-  expect(uiLibShared.treeShaking.loaded).toEqual(true);
-  expect(Object.keys(uiLibShared.treeShaking.lib()).sort()).toEqual([
-    'Button',
-    'default',
-  ]);
+  if (tracksDestructuring) {
+    expect(uiLibShared.loaded).toEqual(undefined);
+    expect(uiLibShared.treeShaking.loaded).toEqual(true);
+    expect(Object.keys(uiLibShared.treeShaking.lib()).sort()).toEqual([
+      'Button',
+      'default',
+    ]);
+  }
 
   const uiLibFallback = (await uiLibShared.get())();
   expect(Object.keys(uiLibFallback).sort()).toEqual([
@@ -69,8 +81,10 @@ it('should tree shaking ui-lib-dynamic-specific-export correctly', async () => {
   );
   const bundleContent = fs.readFileSync(bundlePath, 'utf-8');
   expect(bundleContent).toContain('List');
-  expect(bundleContent).not.toContain('Button');
-  expect(bundleContent).not.toContain('Badge');
+  if (tracksDestructuring) {
+    expect(bundleContent).not.toContain('Button');
+    expect(bundleContent).not.toContain('Badge');
+  }
 });
 
 it('should not tree shaking ui-lib-dynamic-default-export', async () => {
@@ -85,8 +99,10 @@ it('should not tree shaking ui-lib-dynamic-default-export', async () => {
   );
   const bundleContent = fs.readFileSync(bundlePath, 'utf-8');
   expect(bundleContent).toContain('List');
-  expect(bundleContent).not.toContain('Button');
-  expect(bundleContent).not.toContain('Badge');
+  if (shakesDynamicPropertyReads) {
+    expect(bundleContent).not.toContain('Button');
+    expect(bundleContent).not.toContain('Badge');
+  }
 });
 
 it('should not tree shaking ui-lib-side-effect if not set sideEffect:false ', async () => {
@@ -105,22 +121,25 @@ it('should not tree shaking ui-lib-side-effect if not set sideEffect:false ', as
   expect(bundleContent).toContain('Badge');
 });
 
-it('should inject usedExports into entry chunk by default', async () => {
-  expect(__webpack_require__.federation.usedExports['ui-lib'].sort()).toEqual([
-    'Button',
-    'default',
-  ]);
-});
+if (tracksDestructuring) {
+  it('should inject usedExports into entry chunk by default', async () => {
+    expect(__webpack_require__.federation.usedExports['ui-lib'].sort()).toEqual(
+      ['Button', 'default'],
+    );
+  });
+}
 
 it('should inject usedExports into manifest and stats if enable manifest', async () => {
   const { Button } = await import('ui-lib');
   expect(Button).toEqual('Button');
 
-  const statsPath = path.join(__dirname, 'mf-stats.json');
-  const statsContent = JSON.parse(fs.readFileSync(statsPath, 'utf-8'));
-  expect(
-    JSON.stringify(
-      statsContent.shared.find((s) => s.name === 'ui-lib').usedExports.sort(),
-    ),
-  ).toEqual(JSON.stringify(['Button', 'default']));
+  if (tracksDestructuring) {
+    const statsPath = path.join(__dirname, 'mf-stats.json');
+    const statsContent = JSON.parse(fs.readFileSync(statsPath, 'utf-8'));
+    expect(
+      JSON.stringify(
+        statsContent.shared.find((s) => s.name === 'ui-lib').usedExports.sort(),
+      ),
+    ).toEqual(JSON.stringify(['Button', 'default']));
+  }
 });

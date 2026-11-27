@@ -1,12 +1,8 @@
 export = AutoPublicPathRuntimeModule;
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Chunk from "../graph/Chunk" */
+/** @import ChunkGraph from "../graph/ChunkGraph" */
+/** @import Compilation from "../Compilation" */
 declare class AutoPublicPathRuntimeModule extends RuntimeModule {
-  constructor();
+    constructor();
 }
-declare namespace AutoPublicPathRuntimeModule {
-  export { Chunk, Compilation };
-}
-import RuntimeModule = require('../RuntimeModule');
-type Chunk = import('../Chunk');
-type Compilation = import('../Compilation');
+import RuntimeModule = require("./RuntimeModule");

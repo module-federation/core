@@ -1,15 +1,13 @@
-export type ModuleGraph = import('../ModuleGraph');
-export type Module = import('../Module');
 export type Modules = Set<Module>;
-/** @typedef {import("../ModuleGraph")} ModuleGraph */
-/** @typedef {import("../Module")} Module */
+/** @import ModuleGraph from "../graph/ModuleGraph" */
+/** @import Module from "../module/Module" */
 /** @typedef {Set<Module>} Modules */
 /**
+ * Gets outgoing async modules.
  * @param {ModuleGraph} moduleGraph module graph
  * @param {Module} module module
  * @returns {Modules} set of modules
  */
-export function getOutgoingAsyncModules(
-  moduleGraph: ModuleGraph,
-  module: Module,
-): Modules;
+export function getOutgoingAsyncModules(moduleGraph: ModuleGraph, module: Module): Modules;
+import type Module from "../module/Module";
+import type ModuleGraph from "../graph/ModuleGraph";
