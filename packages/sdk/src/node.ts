@@ -438,9 +438,17 @@ async function loadModule(url: string, options: LoadModuleOptions) {
   // Cache the module before linking to prevent cycles
   esmModuleCache.set(url, sourceTextModule);
 
-  await sourceTextModule.link(async (specifier: string) => {
-    return loadResolvedModule(specifier, url, options);
-  });
+  try {
+    await sourceTextModule.link(async (specifier: string) => {
+      return loadResolvedModule(specifier, url, options);
+    });
+  } catch (error) {
+    // Remove from cache on error so it can be retried
+    if (esmModuleCache.get(url) === sourceTextModule) {
+      esmModuleCache.delete(url);
+    }
+    throw error;
+  }
 
   return sourceTextModule;
 }

@@ -206,4 +206,47 @@ describe('Node ESM builtin loading', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(remoteEntryUrl);
   });
+
+  it('retries a module whose static import failed to load', async () => {
+    const remoteEntryUrl = 'http://example.com/retry/remoteEntry.js';
+    const healthyUrl = 'http://example.com/retry/healthy.mjs';
+    const flakyUrl = 'http://example.com/retry/flaky.mjs';
+    let flakyAvailable = false;
+    const fetchMock = setFetchMock((url) => {
+      if (url === remoteEntryUrl) {
+        return createResponse(
+          moduleSource`
+            import { healthy } from './healthy.mjs';
+            import { flaky } from './flaky.mjs';
+
+            export const values = [healthy, flaky];
+          `,
+        );
+      }
+
+      if (url === healthyUrl) {
+        return createResponse(`export const healthy = 'healthy';`);
+      }
+
+      if (url === flakyUrl && flakyAvailable) {
+        return createResponse(`export const flaky = 'flaky';`);
+      }
+
+      throw new Error(`${url} is unavailable`);
+    });
+
+    await expect(loadNodeEsmScript(remoteEntryUrl)).rejects.toThrow(
+      `${flakyUrl} is unavailable`,
+    );
+
+    flakyAvailable = true;
+    const scriptContext = await loadNodeEsmScript<{ values: string[] }>(
+      remoteEntryUrl,
+    );
+
+    expect(scriptContext.values).toEqual(['healthy', 'flaky']);
+    expect(
+      fetchMock.mock.calls.filter(([url]) => url === healthyUrl),
+    ).toHaveLength(1);
+  });
 });
