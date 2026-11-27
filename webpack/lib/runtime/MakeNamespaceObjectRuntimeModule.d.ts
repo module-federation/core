@@ -1,10 +1,6 @@
 export = MakeNamespaceObjectRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Compilation from "../Compilation" */
 declare class MakeNamespaceObjectRuntimeModule extends HelperRuntimeModule {
-  constructor();
+    constructor();
 }
-declare namespace MakeNamespaceObjectRuntimeModule {
-  export { Compilation };
-}
-import HelperRuntimeModule = require('./HelperRuntimeModule');
-type Compilation = import('../Compilation');
+import HelperRuntimeModule = require("./HelperRuntimeModule");

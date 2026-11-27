@@ -1,5 +1,5 @@
 import type webpack from 'webpack';
-import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import type RuntimeGlobals from 'webpack/lib/runtime/RuntimeGlobals';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { init } from '@module-federation/runtime-tools';
 type Remotes = Parameters<typeof init>[0]['remotes'];

@@ -1,5 +1,10 @@
 export = GlobalRuntimeModule;
+/** @typedef {import("../Compilation")} Compilation */
 declare class GlobalRuntimeModule extends RuntimeModule {
-  constructor();
+    constructor();
 }
-import RuntimeModule = require('../RuntimeModule');
+declare namespace GlobalRuntimeModule {
+    export { Compilation };
+}
+import RuntimeModule = require("./RuntimeModule");
+type Compilation = import("../Compilation");

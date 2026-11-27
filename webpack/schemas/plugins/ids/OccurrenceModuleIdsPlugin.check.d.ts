@@ -1,9 +1,8 @@
-/*
- * This file was automatically generated.
- * DO NOT MODIFY BY HAND.
- * Run `yarn fix:special` to update
- */
-declare const check: (
-  options: import('../../../declarations/plugins/ids/OccurrenceModuleIdsPlugin').OccurrenceModuleIdsPluginOptions,
-) => boolean;
-export = check;
+export = r;
+declare function r(t: any, { instancePath, parentData, parentDataProperty, rootData }?: {
+    instancePath?: string;
+    rootData?: any;
+}): boolean;
+declare namespace r {
+    export { r as default };
+}
