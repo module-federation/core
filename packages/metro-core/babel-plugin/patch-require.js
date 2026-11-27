@@ -143,11 +143,12 @@ function metroPatchRequireBabelPlugin() {
       Program: {
         enter(_, state) {
           const filename = state.file.opts.filename.replaceAll('\\', '/');
-          // Transform only require.js from metro-runtime
+          // Metro's require runtime gets every patch below
           state.shouldTransform = filename.includes(METRO_REQUIRE_PATH);
           // Expo's copy already defaults the refresh symbols and prefixes module
           // IDs, but still installs the names in GLOBAL_NAMES_TO_PREFIX unprefixed
-          state.isExpoRequire = filename.includes(EXPO_REQUIRE_PATH);
+          state.shouldPrefixGlobalNames =
+            state.shouldTransform || filename.includes(EXPO_REQUIRE_PATH);
           // Perform refreshSymbols transformation only once
           // Because it is referenced in multiple places
           state.hasTransformed = {
@@ -157,7 +158,7 @@ function metroPatchRequireBabelPlugin() {
         },
       },
       MemberExpression(path, state) {
-        if (!state.shouldTransform && !state.isExpoRequire) return;
+        if (!state.shouldPrefixGlobalNames) return;
         prefixGlobalNames(path);
       },
       AssignmentExpression(path, state) {

@@ -12,7 +12,11 @@ function transform(filename: string) {
       global.__c = clear;
       global.__registerSegment = registerSegment;
       global.__accept = metroHotUpdateModule;
+      global.$RefreshReg$ = () => {};
       RefreshRuntime.register(type, moduleId + ' ' + id);
+      var requireRefresh = function requireRefresh() {
+        return global[__METRO_GLOBAL_PREFIX__ + '__ReactRefresh'] || metroRequire.Refresh;
+      };
     `,
     {
       babelrc: false,
@@ -25,6 +29,13 @@ function transform(filename: string) {
   return result?.code ?? '';
 }
 
+// What each patch other than the global names leaves in the output
+const otherPatches = {
+  defaultRefreshSymbols: 'global.$RefreshReg$ = global.$RefreshReg$ ??',
+  prefixModuleIDs: 'RefreshRuntime.register(type, __METRO_GLOBAL_PREFIX__ +',
+  patchRequireRefresh: 'global[global.__METRO_GLOBAL_PREFIX__ +',
+};
+
 describe('patch-require babel plugin', () => {
   it('patches Metro require globals with POSIX paths', () => {
     const code = transform(
@@ -36,6 +47,9 @@ describe('patch-require babel plugin', () => {
     expect(code).toContain(
       'global[`${__METRO_GLOBAL_PREFIX__}__registerSegment`]',
     );
+    for (const patched of Object.values(otherPatches)) {
+      expect(code).toContain(patched);
+    }
   });
 
   it('patches Metro require globals with Windows paths', () => {
@@ -58,7 +72,10 @@ describe('patch-require babel plugin', () => {
     for (const name of ['__r', '__c', '__registerSegment', '__accept']) {
       expect(code).toContain(`global[\`\${__METRO_GLOBAL_PREFIX__}${name}\`]`);
     }
-    // Expo's copy prefixes module IDs itself
-    expect(code).not.toMatch(/__METRO_GLOBAL_PREFIX__ \+/);
+    // Expo's copy defaults the refresh symbols, prefixes module IDs and
+    // patches requireRefresh itself
+    for (const patched of Object.values(otherPatches)) {
+      expect(code).not.toContain(patched);
+    }
   });
 });
