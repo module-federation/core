@@ -1,16 +1,21 @@
 export = BatchedHash;
-/** @typedef {import("../../../declarations/WebpackOptions").HashDigest} Encoding */
+/**
+ * @import {
+ * 	HashDigest as Encoding
+ * } from "../../../declarations/WebpackOptions"
+ */
 declare class BatchedHash extends Hash {
-  /**
-   * @param {Hash} hash hash
-   */
-  constructor(hash: Hash);
-  string: string;
-  encoding: string;
-  hash: Hash;
+    /**
+     * Creates an instance of BatchedHash.
+     * @param {Hash} hash hash
+     */
+    constructor(hash: Hash);
+    /** @type {undefined | string} */
+    string: undefined | string;
+    /** @type {undefined | Encoding} */
+    encoding: undefined | Encoding;
+    /** @type {Hash} */
+    hash: Hash;
 }
-declare namespace BatchedHash {
-  export { Encoding };
-}
-import Hash = require('../Hash');
-type Encoding = import('../../../declarations/WebpackOptions').HashDigest;
+import Hash = require("../Hash");
+import type { HashDigest as Encoding } from "../../../declarations/WebpackOptions";

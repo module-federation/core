@@ -1,27 +1,29 @@
 export = ReadFileCompileAsyncWasmPlugin;
 declare class ReadFileCompileAsyncWasmPlugin {
-  /**
-   * @param {ReadFileCompileAsyncWasmPluginOptions=} options options object
-   */
-  constructor({
-    import: useImport,
-  }?: ReadFileCompileAsyncWasmPluginOptions | undefined);
-  _import: boolean;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Creates an instance of ReadFileCompileAsyncWasmPlugin.
+     * @param {ReadFileCompileAsyncWasmPluginOptions=} options options object
+     */
+    constructor({ import: useImport }?: ReadFileCompileAsyncWasmPluginOptions | undefined);
+    /** @type {boolean} */
+    _import: boolean;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace ReadFileCompileAsyncWasmPlugin {
-  export { Chunk, Compiler, ReadFileCompileAsyncWasmPluginOptions };
+    export { ReadFileCompileAsyncWasmPluginOptions };
 }
-type Chunk = import('../Chunk');
-type Compiler = import('../Compiler');
+import type Compiler from "../Compiler";
+/**
+ * Defines the read file compile async wasm plugin options type used by this module.
+ */
 type ReadFileCompileAsyncWasmPluginOptions = {
-  /**
-   * use import?
-   */
-  import?: boolean | undefined;
+    /**
+     * use import?
+     */
+    import?: boolean | undefined;
 };

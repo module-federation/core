@@ -1,7 +1,8 @@
-/*
- * This file was automatically generated.
- * DO NOT MODIFY BY HAND.
- * Run `yarn fix:special` to update
- */
-declare const check: (options: any) => boolean;
-export = check;
+export = a;
+declare function a(t: any, { instancePath, parentData, parentDataProperty, rootData }?: {
+    instancePath?: string;
+    rootData?: any;
+}): boolean;
+declare namespace a {
+    export { a as default };
+}

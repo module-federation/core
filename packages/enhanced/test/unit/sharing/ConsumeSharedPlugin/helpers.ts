@@ -1,4 +1,4 @@
-import type { SemVerRange } from 'webpack/lib/util/semver';
+import type { SemVerRange } from 'webpack/lib/sharing/semver';
 import type {
   ConsumeSharedPluginInstance,
   ConsumeConfig,
