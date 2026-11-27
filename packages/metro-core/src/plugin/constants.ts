@@ -15,6 +15,10 @@ export const GET_DEV_SERVER_REGEX =
 export const HMR_CLIENT_REGEX =
   /react-native\/Libraries\/Utilities\/HMRClient\.js$/;
 
+// internal Expo modules
+export const EXPO_GET_DEV_SERVER_REGEX =
+  /(?:^|\/)expo\/(?:src|build)\/utils\/getDevServer\.native\.(?:ts|js)$/;
+
 // other
 export const TMP_DIR_NAME = '.mf-metro';
 export const MANIFEST_FILENAME = 'mf-manifest.json';

@@ -217,4 +217,57 @@ describe('createResolveRequest', () => {
       filePath: expect.stringContaining(path.join('modules', 'HMRClient.ts')),
     });
   });
+
+  it.each([
+    {
+      label: "React Native's getDevServer",
+      segments: ['react-native', 'Libraries', 'Core', 'Devtools'],
+      file: 'getDevServer.js',
+    },
+    {
+      label: "Expo's getDevServer source",
+      segments: ['expo', 'src', 'utils'],
+      file: 'getDevServer.native.ts',
+    },
+    {
+      label: "Expo's getDevServer build",
+      segments: ['expo', 'build', 'utils'],
+      file: 'getDevServer.native.js',
+    },
+  ])('replaces $label in a remote', ({ segments, file }) => {
+    const projectDir = '/project';
+    const tmpDir = path.join(projectDir, 'node_modules', '.mf-metro');
+    const fallbackResolver = rs.fn<CustomResolver>(() => ({
+      type: 'sourceFile',
+      filePath: path.join(projectDir, 'node_modules', ...segments, file),
+    }));
+    const context = createResolverContext(
+      path.join(projectDir, 'src', 'App.tsx'),
+      fallbackResolver,
+    );
+    const vmManager: Pick<VirtualModuleManager, 'registerVirtualModule'> = {
+      registerVirtualModule: rs.fn(),
+    };
+
+    const resolveRequest = createResolveRequest({
+      isRemote: true,
+      hacks: {
+        patchHMRClient: false,
+        patchInitializeCore: false,
+      },
+      options: createBaseConfig(),
+      paths: createPaths(projectDir, tmpDir),
+      vmManager,
+      customResolver: fallbackResolver,
+    });
+
+    const resolved = resolveRequest(context, '../utils/getDevServer', 'ios');
+
+    expect(resolved).toEqual({
+      type: 'sourceFile',
+      filePath: expect.stringContaining(
+        path.join('modules', 'getDevServer.ts'),
+      ),
+    });
+  });
 });
