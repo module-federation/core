@@ -21,6 +21,7 @@ import {
   RootComponentProps,
   separateType,
   syncActiveTab,
+  isTabEventForCurrentContext,
 } from './utils';
 import { MESSAGE_ACTIVE_TAB_CHANGED } from './utils/chrome/messages';
 import { useDevtoolsTheme, DevtoolsTheme } from './hooks/useDevtoolsTheme';
@@ -278,26 +279,33 @@ const InnerApp = (props: RootComponentProps) => {
       message: {
         type?: string;
         tabId?: number;
+        windowId?: number;
         status?: chrome.tabs.TabChangeInfo['status'];
       },
       _sender: chrome.runtime.MessageSender,
       _sendResponse: (response?: any) => void,
     ) => {
-      if (message?.type === MESSAGE_ACTIVE_TAB_CHANGED) {
+      if (
+        message?.type === MESSAGE_ACTIVE_TAB_CHANGED &&
+        isTabEventForCurrentContext(message.tabId, message.windowId)
+      ) {
         updateActiveTab(message.tabId, { status: message.status });
       }
     };
 
     chrome.runtime.onMessage.addListener(onMessage);
 
+    const tabsOnActivated = chrome.tabs?.onActivated;
     const onActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
-      updateActiveTab(activeInfo.tabId);
+      if (isTabEventForCurrentContext(activeInfo.tabId, activeInfo.windowId)) {
+        updateActiveTab(activeInfo.tabId);
+      }
     };
-    chrome.tabs.onActivated.addListener(onActivated);
+    tabsOnActivated?.addListener(onActivated);
 
     return () => {
       chrome.runtime.onMessage.removeListener(onMessage);
-      chrome.tabs.onActivated.removeListener(onActivated);
+      tabsOnActivated?.removeListener(onActivated);
     };
   }, [applyModuleUpdate]);
 

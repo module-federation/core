@@ -104,7 +104,10 @@ describe('normalizeModuleInfoPayload', () => {
     window.__VMOK__ = window.__FEDERATION__;
 
     let runtimeListener:
-      | ((message: { data?: unknown; type?: string; tabId?: number }) => void)
+      | ((
+          message: { data?: unknown; type?: string; tabId?: number },
+          sender?: { tab?: { id?: number } },
+        ) => void)
       | undefined;
     const addListener = rs.fn((listener) => {
       runtimeListener = listener;
@@ -142,27 +145,52 @@ describe('normalizeModuleInfoPayload', () => {
     await rs.advanceTimersByTimeAsync(300);
     expect(addListener).toHaveBeenCalledTimes(1);
 
-    runtimeListener?.({
-      type: MESSAGE_ACTIVE_TAB_CHANGED,
-      tabId: 1,
-    });
-    runtimeListener?.({
-      type: MESSAGE_OBSERVABILITY_DEVTOOLS_EVENT,
-      data: {
-        kind: 'installed',
+    runtimeListener?.(
+      {
+        type: MESSAGE_ACTIVE_TAB_CHANGED,
+        tabId: 1,
       },
-    });
+      { tab: { id: 1 } },
+    );
+    runtimeListener?.(
+      {
+        type: MESSAGE_OBSERVABILITY_DEVTOOLS_EVENT,
+        data: {
+          kind: 'installed',
+        },
+      },
+      { tab: { id: 1 } },
+    );
 
     expect(window.__FEDERATION__?.moduleInfo).toEqual(moduleInfo);
     expect(callback).toHaveBeenCalledTimes(1);
 
-    runtimeListener?.({
-      data: {
-        share: {
-          default: {},
+    runtimeListener?.(
+      {
+        data: {
+          moduleInfo: {
+            'remote:https://other.example/remoteEntry.js': {
+              remoteEntry: 'https://other.example/remoteEntry.js',
+            },
+          },
         },
       },
-    });
+      { tab: { id: 2 } },
+    );
+
+    expect(window.__FEDERATION__?.moduleInfo).toEqual(moduleInfo);
+    expect(callback).toHaveBeenCalledTimes(1);
+
+    runtimeListener?.(
+      {
+        data: {
+          share: {
+            default: {},
+          },
+        },
+      },
+      { tab: { id: 1 } },
+    );
 
     expect(window.__FEDERATION__?.moduleInfo).toEqual(moduleInfo);
     expect(window.__FEDERATION__?.__SHARE__).toEqual({
@@ -176,11 +204,14 @@ describe('normalizeModuleInfoPayload', () => {
         version: 'http://localhost:3001/remoteEntry.js',
       },
     };
-    runtimeListener?.({
-      data: {
-        moduleInfo: nextModuleInfo,
+    runtimeListener?.(
+      {
+        data: {
+          moduleInfo: nextModuleInfo,
+        },
       },
-    });
+      { tab: { id: 1 } },
+    );
 
     expect(window.__FEDERATION__?.moduleInfo).toEqual(nextModuleInfo);
     expect(callback).toHaveBeenCalledWith(nextModuleInfo);

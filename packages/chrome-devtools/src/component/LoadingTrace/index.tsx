@@ -26,6 +26,7 @@ import {
   type ObservabilityDevtoolsConfig,
   type ObservabilityDevtoolsLevel,
 } from '../../utils/chrome/observability-shared';
+import { isRuntimeMessageForCurrentTab } from '../../utils/chrome';
 import { MESSAGE_OBSERVABILITY_DEVTOOLS_EVENT } from '../../utils/chrome/messages';
 import styles from './index.module.scss';
 
@@ -561,7 +562,8 @@ const LoadingTrace = ({ tabId, resetKey = 0 }: LoadingTraceProps) => {
       const senderTabId = sender?.tab?.id;
       const messageTabKey = getLoadingTraceTabKey(senderTabId || tabId);
       const isCurrentTabMessage =
-        !tabId || !senderTabId || senderTabId === tabId;
+        isRuntimeMessageForCurrentTab(senderTabId) &&
+        (!tabId || !senderTabId || senderTabId === tabId);
 
       const payload = message.data;
       if (payload?.config && isCurrentTabMessage) {
