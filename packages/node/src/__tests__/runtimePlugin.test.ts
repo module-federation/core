@@ -750,6 +750,18 @@ describe('runtimePlugin', () => {
       expect(installedChunks['chunk2']).toBe(0);
     });
 
+    it('passes the Rspack context to an installed chunk runtime', () => {
+      const context = { r: mockWebpackRequire };
+      Object.assign(global, { __rspack_context: context });
+      try {
+        const runtime = jest.fn();
+        installChunk({ modules: {}, runtime, ids: [] }, {});
+        expect(runtime).toHaveBeenCalledWith(context);
+      } finally {
+        Reflect.deleteProperty(global, '__rspack_context');
+      }
+    });
+
     it('should call resolver for installed chunk data', () => {
       const resolver = jest.fn();
       const installedChunks = {

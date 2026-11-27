@@ -41,9 +41,7 @@ export class RemoteEntryPlugin implements RspackPluginInstance {
     const sanitizedPublicPath = escapeUnsafeChars(getPublicPath);
 
     if (!getPublicPath.startsWith('function')) {
-      code = `${
-        compiler.webpack.RuntimeGlobals.publicPath
-      } = new Function(${JSON.stringify(sanitizedPublicPath)})()`;
+      code = `__webpack_public_path__ = new Function(${JSON.stringify(sanitizedPublicPath)})()`;
     } else {
       code = `(${sanitizedPublicPath}())`;
     }

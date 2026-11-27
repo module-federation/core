@@ -42,7 +42,10 @@ export const shouldKeepBundledForFederation = (
     return true;
   }
 
-  if (request.startsWith('webpack/container/reference/')) {
+  if (
+    request.startsWith('webpack/container/reference/') ||
+    request.startsWith('rspack/container/reference/')
+  ) {
     return true;
   }
 
