@@ -395,7 +395,8 @@ class StatsManager {
       }
 
       const graph =
-        this._bundler === 'webpack'
+        this._bundler === 'webpack' &&
+        !(typeof manifestOptions === 'object' && manifestOptions.useLegacyStats)
           ? collectGraph(compilation, {
               name: name!,
               exposes: this._containerManager.containerPluginExposesOptions,

@@ -15,6 +15,7 @@ The `PluginManifestOptions` types are as follows:
 interface PluginManifestOptions {
   filePath?: string;
   disableAssetsAnalyze?: boolean;
+  useLegacyStats?: boolean;
   fileName?: string;
 }
 ```
@@ -36,6 +37,21 @@ manifest filePath
 manifest fileName
 
 If `fileName` is provided, the companion stats file automatically receives a `-stats` suffix (for example, `fileName: 'mf.json'` produces both `mf.json` and `mf-stats.json`). Generated files are written under `filePath` when that option is set.
+
+## useLegacyStats
+
+- Type: `boolean`
+- Required: No
+- Default value: `false`
+
+For Webpack, set this option to `true` to use the previous JavaScript stats reader as a rollback. Omitting it, or setting it to `false`, collects manifest data from the compilation graph when the required metadata is available and falls back to the stats reader otherwise. This option does not change stats emitted natively by Rspack.
+
+```js
+new ModuleFederationPlugin({
+  name: 'host',
+  manifest: { useLegacyStats: true },
+});
+```
 
 ## disableAssetsAnalyze
 

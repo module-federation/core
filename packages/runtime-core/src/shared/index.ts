@@ -510,7 +510,9 @@ export class SharedHandler {
         shared.shareConfig.layer,
         true,
       )!;
-      const activeVersion = getOwnEntry(versions, version);
+      const existingShared = getOwnEntry(versions, version);
+      const activeVersion: Shared =
+        existingShared && (directShare(existingShared) as Shared);
       const activeVersionEager = Boolean(
         activeVersion &&
         (('eager' in activeVersion && activeVersion.eager) ||

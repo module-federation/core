@@ -1,0 +1,287 @@
+.RemotePanel {
+  display: flex;
+  flex-direction: column;
+  background-color: #17212b;
+  border-width: 1px;
+  border-color: #2c3946;
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 12px;
+}
+
+.RemotePanelAccent {
+  background-color: #effcf6;
+  border-color: #b7ecd1;
+}
+
+.RemotePanelHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.RemotePanelTitle {
+  color: #f7fbff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.RemotePanelTitleDark {
+  color: #13221a;
+}
+
+.RemoteStatus {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.RemoteStatusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #60e2a4;
+  margin-right: 7px;
+}
+
+.RemoteStatusText {
+  color: #93a3b3;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.RemoteStatusTextDark {
+  color: #35654d;
+}
+
+.HealthRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom-width: 1px;
+  border-bottom-color: #2c3946;
+}
+
+.HealthRowLast {
+  border-bottom-width: 0;
+}
+
+.HealthLabel {
+  color: #93a3b3;
+  font-size: 13px;
+}
+
+.HealthValue {
+  color: #f7fbff;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.CountHero {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  margin-bottom: 14px;
+}
+
+.CountValue {
+  color: #13221a;
+  font-size: 44px;
+  font-weight: 750;
+  line-height: 48px;
+}
+
+.CountLabel {
+  color: #52705f;
+  font-size: 12px;
+  margin-left: 10px;
+  margin-bottom: 6px;
+}
+
+.CountGrid {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: #dff7e9;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.CountCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 31%;
+}
+
+.CountCellLabel {
+  color: #52705f;
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+.CountCellValue {
+  color: #13221a;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.RemoteAction {
+  height: 42px;
+  border-radius: 13px;
+  background-color: #ff6c47;
+  align-items: center;
+  justify-content: center;
+}
+
+.RemoteActionText {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.IdentityLine {
+  color: #35654d;
+  font-size: 11px;
+  line-height: 16px;
+  margin-bottom: 12px;
+}
+
+.RealmGrid {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.RealmCell {
+  width: 48%;
+  background-color: #22303d;
+  border-radius: 14px;
+  padding: 13px;
+}
+
+.RealmName {
+  color: #f7fbff;
+  font-size: 12px;
+  font-weight: 650;
+  margin-bottom: 6px;
+}
+
+.RealmMeta {
+  color: #60e2a4;
+  font-size: 10px;
+}
+
+.ActivityPanel {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+}
+
+.FilterRow {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 12px;
+}
+
+.FilterButton {
+  height: 34px;
+  padding-left: 14px;
+  padding-right: 14px;
+  border-radius: 17px;
+  background-color: #e8edf1;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+.FilterButtonActive {
+  background-color: #17212b;
+}
+
+.FilterText {
+  color: #64717d;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.FilterTextActive {
+  color: #ffffff;
+}
+
+.ActivityList {
+  width: 100%;
+  height: 324px;
+  background-color: #ffffff;
+  border-radius: 18px;
+}
+
+.ActivityRow {
+  width: 100%;
+  min-height: 76px;
+  display: flex;
+  flex-direction: row;
+  padding: 14px;
+  border-bottom-width: 1px;
+  border-bottom-color: #e8edf1;
+}
+
+.ActivityMarker {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #4a7cfa;
+  margin-top: 4px;
+  margin-right: 12px;
+}
+
+.ActivityMarkerState {
+  background-color: #ff6c47;
+}
+
+.ActivityCopy {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.ActivityTopline {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.ActivityTitle {
+  color: #17212b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ActivityTime {
+  color: #89949e;
+  font-size: 10px;
+}
+
+.ActivityDetail {
+  color: #64717d;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.EmptyActivity {
+  height: 140px;
+  align-items: center;
+  justify-content: center;
+}
+
+.EmptyActivityText {
+  color: #64717d;
+  font-size: 13px;
+}
