@@ -367,6 +367,7 @@ export async function computeDeploymentSnapshot(
       versionOrUrl: effectiveManifestUrl,
       discoverChildren: hasChildren,
       ...(app.props ? { props: { ...app.props } } : {}),
+      ...(app.render ? { render: app.render } : {}),
     });
 
     if (app.children && typeof app.children === 'object') {

@@ -13,6 +13,11 @@ export interface DeploymentApplicationConfig {
   expose: string;
   children?: DeploymentChildrenConfig;
   props?: Record<string, unknown>;
+  /**
+   * Optional rendering protocol hint for legacy producers whose manifest does
+   * not emit `exposes[i].render` metadata (e.g. older Bridge/Vmok builds).
+   */
+  render?: 'bridge' | 'component';
 }
 
 export interface DeploymentConfig {
@@ -31,6 +36,8 @@ export interface DeploymentRemoteRoute {
   versionOrUrl: string;
   discoverChildren: boolean;
   props?: Record<string, unknown>;
+  /** Optional rendering protocol hint for legacy producers lacking manifest render metadata. */
+  render?: 'bridge' | 'component';
 }
 
 export interface DeploymentChildSource {
