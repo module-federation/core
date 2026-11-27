@@ -2,6 +2,7 @@ import type { ModuleFederation } from '@module-federation/runtime';
 import type { Remote, RemoteInfo } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
 import { clearContainerCache } from '@module-federation/webpack-bundler-runtime/clear-cache';
+import { debugNodeLifecycle, isNodeLifecycleDebugEnabled } from './debug';
 import {
   forEachSharedRecord,
   getRemoteSharedOwnership,
@@ -154,34 +155,54 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
           if (match.name === target.name)
             delete host.remoteHandler.idToRemoteMap[id];
       };
-      const usedElsewhere = instances.some(
-        (other) =>
-          other !== host &&
-          [...other.moduleCache.values()].some(
-            (value) =>
-              (value.remoteEntryExports &&
-                entries.has(value.remoteEntryExports)) ||
-              (value.lib && entries.has(value.lib)) ||
-              (provider &&
-                helpers.global.getRemoteFederationInstance(value.remoteInfo, [
-                  provider,
-                ])),
-          ),
-      );
-      if (usedElsewhere) return releaseLocal();
+      const holdsTarget = (other: ModuleFederation) =>
+        other !== host &&
+        [...other.moduleCache.values()].some(
+          (value) =>
+            (value.remoteEntryExports &&
+              entries.has(value.remoteEntryExports)) ||
+            (value.lib && entries.has(value.lib)) ||
+            (provider &&
+              helpers.global.getRemoteFederationInstance(value.remoteInfo, [
+                provider,
+              ])),
+        );
+      const usedElsewhere = instances.some(holdsTarget);
+      if (usedElsewhere) {
+        debugNodeLifecycle(() => {
+          const holders = [
+            ...new Set(
+              instances.filter(holdsTarget).map((other) => other.name),
+            ),
+          ];
+          return `retain remote=${target.name} host=${host.name} reason=usedElsewhere holders=${holders.join(',')}`;
+        });
+        return releaseLocal();
+      }
 
       const scopes = helpers.share.getGlobalShareScope();
       let preserveShared = false;
+      const retainedShared = isNodeLifecycleDebugEnabled()
+        ? ([] as string[])
+        : undefined;
       const releaseShared: Array<() => void> = [];
-      forEachSharedRecord(scopes, (shared, versions, version) => {
+      forEachSharedRecord(scopes, (shared, versions, version, _id, pkgName) => {
         if (!ownership.owns(shared)) return;
         if (ownership.sharedWithPeer(shared)) {
           preserveShared = true;
+          if (retainedShared)
+            retainedShared.push(`${pkgName}@${version}(peer)`);
           return;
         }
         const useIn = shared.useIn.filter((name) => name !== shared.from);
         if (useIn.length || (shared.loading && !shared.loaded)) {
           preserveShared = true;
+          if (retainedShared) {
+            const detail = useIn.length
+              ? `useIn=${useIn.join(',')}`
+              : 'loading';
+            retainedShared.push(`${pkgName}@${version}(${detail})`);
+          }
           releaseShared.push(() => {
             shared.useIn = useIn;
             shared.providerState = 1;
@@ -204,10 +225,17 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
       delete globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__[
         helpers.utils.getRemoteEntryUniqueKey(info)
       ];
+      if (preserveShared && retainedShared) {
+        const providerField = provider ? ` provider=${provider.name}` : '';
+        debugNodeLifecycle(
+          `retain remote=${target.name} host=${host.name}${providerField} reason=preserveShared shared=${retainedShared.join(',')}`,
+        );
+      }
       if (provider) {
         retireShareScope(provider.shareScopeMap);
-        if (preserveShared) host.retainedProviders.add(provider);
-        else {
+        if (preserveShared) {
+          host.retainedProviders.add(provider);
+        } else {
           provider.shareScopeMap = {};
           delete scopes[ownership.id];
         }
