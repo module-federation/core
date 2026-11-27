@@ -53,10 +53,7 @@ import {
   getGlobalRemoteInfo,
   SnapshotHandler,
 } from '../plugins/snapshot/SnapshotHandler';
-import {
-  getAllSharedVersions,
-  removeSharedVersion,
-} from '../utils/share';
+import { getAllSharedVersions, removeSharedVersion } from '../utils/share';
 
 export interface LoadRemoteMatch {
   id: string;
