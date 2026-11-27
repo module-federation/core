@@ -116,11 +116,18 @@ export function remotes(options: RemotesOptions) {
             });
 
           if (instance.options.shareStrategy === 'version-first') {
+            const shareScopeDispatch =
+              webpackRequire.federation.shareScopeDispatch;
             const shareScopes = Array.isArray(data[0]) ? data[0] : [data[0]];
 
             return Promise.all(
               shareScopes.map((shareScope) =>
-                instance.sharedHandler.initializeSharing(shareScope),
+                instance.sharedHandler.initializeSharing(
+                  shareScope,
+                  shareScopeDispatch === 'declared'
+                    ? { context: { shareScopeDispatch } }
+                    : undefined,
+                ),
               ),
             ).then(() => {
               return loadRemote();

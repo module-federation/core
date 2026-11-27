@@ -1,5 +1,74 @@
 # @module-federation/enhanced
 
+## 2.9.4
+
+### Patch Changes
+
+- 28187fb: Correct the minimum Webpack peer dependency to 5.64.4 to match the internal APIs already required by the enhanced plugin.
+- 28187fb: Record destructured properties of a shared module's default import as export names in tree-shaking `usedExports`. The plugin stored webpack's destructuring records, including source locations, in the injected runtime data and the stats manifest.
+- 28187fb: Support webpack 5.112's relocated internals while preserving older layouts. Resolve each candidate through the caller's resolver and accept it only inside the caller's webpack package.
+
+  Resolve the active compiler in CommonJS and ES modules. `getWebpackPath` returns the entry of the webpack package that contains the compiler, or an empty string for a bundled compiler. Keep the SDK browser entry free of Node-only resolver dependencies.
+
+  Generate output paths with webpack's `chunkRootOutputDir` on 5.110 and later. On older webpack, use the real chunk filename so hashes containing `/` have the correct depth. This applies to the federation runtime and the Node chunk loading and public path runtime modules.
+
+  For async startup with ESM output, check `output.module` instead of `experiments.outputModule`, which webpack 5.112 ignores. Detect top-level await from `output.environment.topLevelAwait` on webpack 5.111 and later, and treat it as available on 5.102 to 5.110, where webpack removed `experiments.topLevelAwait`. Use namespace imports in independent shared builds so packages without a default export compile.
+
+- Updated dependencies [28187fb]
+  - @module-federation/sdk@2.9.4
+  - @module-federation/bridge-react-webpack-plugin@2.9.4
+  - @module-federation/cli@2.9.4
+  - @module-federation/dts-plugin@2.9.4
+  - @module-federation/managers@2.9.4
+  - @module-federation/manifest@2.9.4
+  - @module-federation/rspack@2.9.4
+  - @module-federation/webpack-bundler-runtime@2.9.4
+  - @module-federation/runtime-tools@2.9.4
+  - @module-federation/inject-external-runtime-core-plugin@2.9.4
+  - @module-federation/error-codes@2.9.4
+
+## 2.9.3
+
+### Patch Changes
+
+- ee32a0d: Keep one consume-shared module per `requiredVersion` range. Two packages that
+  require different ranges of the same shared dependency no longer collapse into
+  one module, so each gets its own version check.
+- caafd8d: Read the version for `include.version` and `exclude.version` on consumed
+  shared modules from the `package.json` whose `name` matches the consumed
+  package. Prefix consumes such as `'lib/'` matched against `lib/sub`, scoped
+  packages, and `node_modules` suffix matches previously skipped the filter
+  and were always consumed. Relative, absolute, and aliased consume configs
+  are unchanged unless `packageName` is set.
+- edf1219: HoistContainerReferencesPlugin no longer hoists modules that webpack already pruned. The module graph walk now skips connections whose active state is false, such as an unused import of a `sideEffects: false` package, so the runtime chunk keeps only modules that are reachable through an active connection.
+- b4b5477: Give each shared tree-shaking child compiler its own filesystem cache pack and close it after its run. Before, the children overwrote the parent's cache pack, so the next build rebuilt every parent module.
+- 543eba3: Test `include.request` and `exclude.request` on provided shared modules only against the import request, or against the path after `node_modules/` (for example `lodash/get.js`) when `allowNodeModulesSuffixMatch` matches, never against the resolved file path. A prefix such as `'lodash/'` with `include: { request: 'get' }` and a direct entry such as `react` with `include: { request: 'react' }` now provide their modules, and an `exclude.request` pattern no longer drops modules whose absolute path happens to match it.
+- fdaeb75: Make the generated federation runtime entry stable and valid. When
+  `output.uniqueName` is empty, the fallback container name no longer contains
+  the build time. It is now derived from the compiler name and context, so it is
+  the same on every build of the same checkout but differs between machines.
+  Relative `runtimePlugins` paths now resolve against the compiler `context`. A
+  path that only exists relative to the working directory still loads, with a
+  warning that asks you to update it. Paths that contain a quote no longer break
+  the generated entry.
+- 020fa27: Fix remote runtime output ordering for stable build hashes.
+- 06cb964: Let two installed copies of `@module-federation/enhanced` load in one webpack
+  process. Each copy now registers its cache serializers under its own install
+  directory, so the second copy no longer throws "serializer ... is already
+  registered" and both copies restore their modules from the filesystem cache.
+- Updated dependencies [9135b23]
+  - @module-federation/runtime-tools@2.9.3
+  - @module-federation/webpack-bundler-runtime@2.9.3
+  - @module-federation/sdk@2.9.3
+  - @module-federation/error-codes@2.9.3
+  - @module-federation/inject-external-runtime-core-plugin@2.9.3
+  - @module-federation/dts-plugin@2.9.3
+  - @module-federation/rspack@2.9.3
+  - @module-federation/bridge-react-webpack-plugin@2.9.3
+  - @module-federation/cli@2.9.3
+  - @module-federation/managers@2.9.3
+  - @module-federation/manifest@2.9.3
+
 ## 2.9.2
 
 ### Patch Changes

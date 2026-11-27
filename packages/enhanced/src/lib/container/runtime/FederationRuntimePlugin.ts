@@ -23,14 +23,14 @@ import FederationRuntimeDependency from './FederationRuntimeDependency';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
-) as typeof import('webpack/lib/dependencies/ModuleDependency');
+) as typeof import('webpack/lib/dependencies/core/ModuleDependency');
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
-) as typeof import('webpack/lib/util/fs');
+) as typeof import('webpack/lib/fs/fs');
 
 type ResolveFn = typeof require.resolve;
 type RuntimeEntrySpec = {

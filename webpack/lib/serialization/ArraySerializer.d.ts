@@ -1,24 +1,17 @@
 export = ArraySerializer;
-/** @typedef {import("./ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("./ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 declare class ArraySerializer {
-  /**
-   * @template T
-   * @param {T[]} array array
-   * @param {ObjectSerializerContext} context context
-   */
-  serialize<T>(array: T[], context: ObjectSerializerContext): void;
-  /**
-   * @template T
-   * @param {ObjectDeserializerContext} context context
-   * @returns {T[]} array
-   */
-  deserialize<T>(context: ObjectDeserializerContext): T[];
+    /**
+     * Serializes this instance into the provided serializer context.
+     * @template T
+     * @param {T[]} array array
+     * @param {import("./ObjectMiddleware").ObjectSerializerContext<(number | T)[]>} context context
+     */
+    serialize<T>(array: T[], context: import("./ObjectMiddleware").ObjectSerializerContext<(number | T)[]>): void;
+    /**
+     * Restores this instance from the provided deserializer context.
+     * @template T
+     * @param {import("./ObjectMiddleware").ObjectDeserializerContext<(number | T)[]>} context context
+     * @returns {T[]} array
+     */
+    deserialize<T>(context: import("./ObjectMiddleware").ObjectDeserializerContext<(number | T)[]>): T[];
 }
-declare namespace ArraySerializer {
-  export { ObjectDeserializerContext, ObjectSerializerContext };
-}
-type ObjectDeserializerContext =
-  import('./ObjectMiddleware').ObjectDeserializerContext;
-type ObjectSerializerContext =
-  import('./ObjectMiddleware').ObjectSerializerContext;

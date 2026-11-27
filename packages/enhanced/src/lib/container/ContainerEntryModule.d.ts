@@ -8,7 +8,7 @@ import type {
   RequestShortener,
   ResolverWithOptions,
   WebpackOptions,
-} from 'webpack/lib/Module';
+} from 'webpack/lib/module/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
 declare const Module: typeof import('webpack').Module;
 export type ExposeOptions = {
@@ -20,6 +20,7 @@ export type ExposeOptions = {
    * custom chunk name for the exposed module
    */
   name: string;
+  layer?: string;
 };
 declare class ContainerEntryModule extends Module {
   private _name;

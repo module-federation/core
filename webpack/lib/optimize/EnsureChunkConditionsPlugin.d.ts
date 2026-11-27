@@ -1,15 +1,10 @@
 export = EnsureChunkConditionsPlugin;
 declare class EnsureChunkConditionsPlugin {
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
-declare namespace EnsureChunkConditionsPlugin {
-  export { Chunk, ChunkGroup, Compiler };
-}
-type Chunk = import('../Chunk');
-type ChunkGroup = import('../ChunkGroup');
-type Compiler = import('../Compiler');
+import type Compiler from "../Compiler";
