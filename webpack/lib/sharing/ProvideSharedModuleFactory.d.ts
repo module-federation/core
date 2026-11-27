@@ -1,17 +1,11 @@
 export = ProvideSharedModuleFactory;
-/** @typedef {import("../ModuleFactory").ModuleFactoryCallback} ModuleFactoryCallback */
-/** @typedef {import("../ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
-/** @typedef {import("./ProvideSharedDependency")} ProvideSharedDependency */
-declare class ProvideSharedModuleFactory extends ModuleFactory {}
-declare namespace ProvideSharedModuleFactory {
-  export {
-    ModuleFactoryCallback,
-    ModuleFactoryCreateData,
-    ProvideSharedDependency,
-  };
+/**
+ * @import {
+ * 	ModuleFactoryCallback,
+ * 	ModuleFactoryCreateData
+ * } from "../module/ModuleFactory"
+ */
+/** @import ProvideSharedDependency from "./ProvideSharedDependency" */
+declare class ProvideSharedModuleFactory extends ModuleFactory {
 }
-import ModuleFactory = require('../ModuleFactory');
-type ModuleFactoryCallback = import('../ModuleFactory').ModuleFactoryCallback;
-type ModuleFactoryCreateData =
-  import('../ModuleFactory').ModuleFactoryCreateData;
-type ProvideSharedDependency = import('./ProvideSharedDependency');
+import ModuleFactory = require("../module/ModuleFactory");

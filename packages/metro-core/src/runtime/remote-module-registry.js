@@ -1,4 +1,5 @@
 import {
+  getInstance,
   loadRemote,
   loadShare,
   loadShareSync,
@@ -6,6 +7,8 @@ import {
 
 const registry = {};
 const loading = {};
+// shared modules whose async load handed out a placeholder that isn't filled yet
+const pendingShared = new Set();
 
 const earlyModuleTest = __EARLY_MODULE_TEST__;
 
@@ -53,10 +56,15 @@ export async function loadSharedToRegistryAsync(id) {
     await promise;
   } else {
     registry[id] = {};
+    pendingShared.add(id);
     loading[id] = (async () => {
       const factory = await loadShare(id);
-      const sharedModule = factory();
-      cloneModule(sharedModule, registry[id]);
+      // a synchronous require may have loaded it in the meantime
+      if (!pendingShared.has(id)) {
+        return;
+      }
+      cloneModule(factory(), registry[id]);
+      pendingShared.delete(id);
     })();
     await loading[id];
   }
@@ -68,6 +76,40 @@ export function loadSharedToRegistrySync(id) {
   }
   loading[id] = loadShareSync(id);
   registry[id] = loading[id]();
+}
+
+// Whether loading a shared module synchronously gives the provider that its
+// async load gives. This container has to provide the module synchronously,
+// which it does when it shares it eagerly. And every provider registered for
+// it has to be eager, or loaded already: the async load can select one that
+// is neither, while a synchronous load can only fall back to this
+// container's copy, and a singleton would then have two instances.
+function canLoadSharedSync(id) {
+  const instance = getInstance();
+  const shared = instance?.options.shared[id];
+  if (!shared?.some(({ shareConfig }) => shareConfig?.eager)) {
+    return false;
+  }
+  return shared.every(({ scope }) =>
+    scope.every((scopeName) =>
+      Object.values(instance.shareScopeMap[scopeName]?.[id] ?? {}).every(
+        (provider) => provider.lib || provider.shareConfig?.eager,
+      ),
+    ),
+  );
+}
+
+// Only react and react-native load synchronously, but the host entry, or
+// another shared module, can require any eager shared module before its async
+// load finishes. This loads it then, instead of leaving the empty placeholder.
+export function loadPendingSharedToRegistrySync(id) {
+  if (!pendingShared.has(id) || !canLoadSharedSync(id)) {
+    return;
+  }
+  // the flag is cleared once the module is cloned, so a module that throws
+  // while it loads isn't taken as loaded, and its async load fails as well
+  cloneModule(loadShareSync(id)(), registry[id]);
+  pendingShared.delete(id);
 }
 
 export function getModuleFromRegistry(id) {

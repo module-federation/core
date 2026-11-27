@@ -27,6 +27,7 @@ const USE_EXPOSES =
   typeof FEDERATION_HAS_EXPOSES === 'boolean' ? FEDERATION_HAS_EXPOSES : true;
 
 const bundlerRuntime = {
+  supportsSharedIdentity: USE_SHARED,
   remotes: USE_REMOTE ? remotes : undefined,
   consumes: USE_SHARED ? consumes : undefined,
   I: USE_SHARED ? initializeSharing : undefined,

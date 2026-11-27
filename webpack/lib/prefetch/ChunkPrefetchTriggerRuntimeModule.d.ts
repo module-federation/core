@@ -1,16 +1,13 @@
 export = ChunkPrefetchTriggerRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../Chunk").ChunkChildIdsByOrdersMap} ChunkChildIdsByOrdersMap */
+/** @import Compilation from "../Compilation" */
+/** @import { ChunkChildIdsByOrdersMap } from "../graph/Chunk" */
 declare class ChunkPrefetchTriggerRuntimeModule extends RuntimeModule {
-  /**
-   * @param {ChunkChildIdsByOrdersMap} chunkMap map from chunk to
-   */
-  constructor(chunkMap: ChunkChildIdsByOrdersMap);
-  chunkMap: import('../Chunk').ChunkChildIdsByOrdersMap;
+    /**
+     * @param {ChunkChildIdsByOrdersMap} chunkMap map from chunk to
+     */
+    constructor(chunkMap: ChunkChildIdsByOrdersMap);
+    /** @type {ChunkChildIdsByOrdersMap} */
+    chunkMap: ChunkChildIdsByOrdersMap;
 }
-declare namespace ChunkPrefetchTriggerRuntimeModule {
-  export { Compilation, ChunkChildIdsByOrdersMap };
-}
-import RuntimeModule = require('../RuntimeModule');
-type Compilation = import('../Compilation');
-type ChunkChildIdsByOrdersMap = import('../Chunk').ChunkChildIdsByOrdersMap;
+import RuntimeModule = require("../runtime/RuntimeModule");
+import type { ChunkChildIdsByOrdersMap } from "../graph/Chunk";

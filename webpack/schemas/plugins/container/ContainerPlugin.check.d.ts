@@ -1,9 +1,8 @@
-/*
- * This file was automatically generated.
- * DO NOT MODIFY BY HAND.
- * Run `yarn fix:special` to update
- */
-declare const check: (
-  options: import('../../../declarations/plugins/container/ContainerPlugin').ContainerPluginOptions,
-) => boolean;
-export = check;
+export = c;
+declare function c(e: any, { instancePath: n, parentData, parentDataProperty, rootData }?: {
+    instancePath?: string;
+    rootData?: any;
+}): boolean;
+declare namespace c {
+    export { c as default };
+}

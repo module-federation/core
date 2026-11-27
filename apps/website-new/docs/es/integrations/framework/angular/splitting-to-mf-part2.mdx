@@ -1,0 +1,155 @@
+---
+title: "Ampliar un monolito"
+---
+
+# Ampliar apps Angular con Module Federation: guía paso a paso
+
+En esta segunda parte vamos a añadir Module Federation (MF) a la aplicación Angular que preparamos en la primera guía.
+
+## Conocer nuestras herramientas: @angular-architects/module-federation
+
+El builder por defecto de Angular CLI no permite añadir una configuración de Webpack personalizada. Vamos a sustituirlo por uno que sí lo permita para poder configurar Module Federation.
+
+Usaremos el builder de `@angular-architects/module-federation`, aunque puedes elegir otro que admita configuraciones de Webpack personalizadas. Si quieres saber cómo funcionan, consulta [How To Use Custom webpack Configurations with Angular CLI Builders](https://www.digitalocean.com/community/tutorials/angular-custom-webpack-config) de DigitalOcean.
+
+### Funciones de la biblioteca
+
+- **Actualiza la configuración de build**: permite ampliar el archivo de configuración de Webpack.
+- **Servir aplicaciones**: facilita servir las aplicaciones de forma individual, ya sea mediante la interacción estándar con el navegador o como micro-frontend.
+
+## Configurar la app principal
+
+### Inicialización con schematics
+
+Ejecuta el siguiente comando en el directorio raíz de tu proyecto:
+
+```bash
+ng add @angular-architects/module-federation --project app-micro --type dynamic-host --port 4200
+```
+
+Este comando configura tu proyecto principal para Module Federation, actualiza la configuración de Angular CLI, crea un archivo de manifest para cargar las entradas remotas y reorganiza el proceso de bootstrap.
+
+### Gestionar conflictos entre schematics
+
+Algunos schematics de Angular, como `@angular/pwa` y `@angular/material`, esperan que el bootstrap se haga en `main.ts`. Si piensas usarlos, alterna temporalmente el proceso de bootstrap:
+
+```bash
+ng g @angular-architects/module-federation:boot-async false --project [YOUR_MAIN_PROJECT]
+ng add [YOUR_LIBRARIES_OF_CHOICE] --project yourProject
+ng g @angular-architects/module-federation:boot-async true --project [YOUR_MAIN_PROJECT]
+```
+
+### Actualizar el archivo de manifest
+
+Después de aplicar los cambios del schematic, es imprescindible modificar el archivo de manifest (`mf.manifest.json`) y la configuración de rutas de la aplicación (`app-routing.module.ts`) para que tu aplicación Angular funcione correctamente.
+
+La configuración por defecto de `mf.manifest.json` sirve un archivo en el puerto `4200`. Sin embargo, ese puerto suele usarlo la aplicación principal.
+
+Para evitar conflictos, cambia el puerto en el que se sirve la aplicación secundaria. Por ejemplo, cámbialo a 4201. Tu `mf.manifest.json` debería reflejar este cambio así:
+
+```json
+{
+  "login": "http://localhost:4201/remoteEntry.js"
+}
+```
+
+Con este cambio, las dos aplicaciones se ejecutan en puertos distintos y no compiten por el mismo puerto.
+
+- *Ejemplo simplificado:* en esta guía, la configuración del manifest se define de forma estática en un archivo JSON por simplicidad.
+
+- *Configuración dinámica en producción:* en aplicaciones reales, se recomienda servir la configuración del manifest de forma dinámica. Puedes conseguirlo de dos maneras:
+
+   - Sustituyendo el archivo JSON estático por una versión de producción.
+   - Configurando un endpoint en tu servidor que devuelva la configuración del manifest.
+
+:::details NOTA
+     Si optas por servirlo de forma dinámica, actualiza el archivo main.ts para modificar la URL que usa la función initFederation para obtener los datos del manifest. Ten en cuenta que, con esta configuración, si no hay conexión a internet la aplicación no podrá cargarse. En cambio, con una configuración estática puedes gestionar los errores de conexión, sobre todo si tu app ya se había almacenado en caché.
+:::
+
+4. **Integrar el manifest en las rutas**:
+
+   *Modifica el archivo de manifest:*
+
+   - Ajusta el puerto en el archivo mf.manifest.json si es necesario, como se describe en las secciones anteriores.
+
+   *Actualiza las rutas de la aplicación (`app-routing.module.ts)`:*
+
+   - Elimina el código de import existente (por ejemplo, `import('@@login')`).
+   - Sustitúyelo por una llamada a la función `loadRemoteModule` (importada desde `@angular-architects/module-federation module`).
+   - Configura la función `loadRemoteModule` con el siguiente objeto:
+
+```json
+{
+  "type": "manifest",
+  "remoteName": "login",
+  "exposedModule": "./Module",
+}
+```
+
+   - `type`: indica el tipo de configuración del remote (`'manifest'` en este caso).
+   - `remoteName`: el nombre del módulo tal como se declara en el manifest.
+   - `exposedModule`: la ruta del módulo en la app secundaria.
+
+   El resultado final debería parecerse al siguiente ejemplo:
+
+```typescript
+const routes: Routes = [
+  ...
+  {
+    path: '',
+    canMatch: [isNotLogged],
+    loadChildren: () =>
+      loadRemoteModule({ type: 'manifest', remoteName: 'login', exposedModule: './Module' }).then(
+        (m) => m.LoginModule,
+      ),
+  },
+  ...
+];
+```
+
+Tras seguir estos pasos, la aplicación principal ya está configurada para cargar otras aplicaciones de forma remota. La siguiente fase consiste en configurar las aplicaciones secundarias para que puedan cargarse de esta manera.
+
+## Configurar las apps remote
+
+Al configurar las aplicaciones secundarias, igual que con la app principal, se actualizan varios componentes del proyecto. En particular, este proceso no crea un archivo de manifest, pero sí modifica el archivo `webpack.config.js` y añade más detalles de los que suele tener la configuración de la aplicación principal.
+
+```bash
+ng add @angular-architects/module-federation --project login --type remote --port 4201
+```
+
+:::tip
+ En lugar de usar `--type dynamic-host`, vamos a usar `--type remote`.
+:::
+
+### Entender 'exposes'
+
+- *El papel de 'exposes':* la propiedad `exposes` de `webpack.config.js` indica qué módulos pueden cargar otras aplicaciones. Cada entrada asocia un nombre público con la ruta del módulo.
+- *Relación con 'exposedModule':* esto enlaza con el paso anterior, en el que usamos la propiedad exposedModule en la configuración de rutas para indicar la ruta concreta del módulo que se debe cargar.
+
+### Ajustes en la configuración de Webpack
+
+*Identificar la discrepancia de configuración:* en la configuración actual, la ruta intenta cargar un módulo llamado './Module', pero este no está definido en la configuración de Webpack existente.
+
+Para corregirlo, modifica el archivo `webpack.config.js`:
+
+- Elimina la clave './Component' existente.
+- Añade una nueva clave './Module' y asegúrate de que apunte a la ruta correcta para cargar el módulo de la aplicación. Por ejemplo:
+
+```javascript
+exposes: {
+  './Module': './projects/login/src/app/feature/login/login.module.ts',
+},
+```
+
+Con esta actualización, las aplicaciones secundarias quedan correctamente configuradas para exponer los módulos necesarios, en línea con los requisitos de carga remota definidos en la aplicación principal.
+
+## Probar y ejecutar las aplicaciones
+
+- **Ejecuta la app principal**: `ng serve`
+- **Sirve la app secundaria**: `ng serve login`
+- Después de servir ambas apps, recarga la aplicación principal para ver la integración en acción. La app secundaria debería cargarse ahora correctamente dentro de la app principal.
+- Además, si navegas a `localhost:4201` en tu navegador, verás la aplicación de login funcionando como una entidad independiente.
+
+## Optimizar la configuración de build
+
+Hasta ahora hemos usado `shareAll` de `@angular-architects/module-federation/webpack`. Puedes cambiarlo por `share` para elegir qué dependencias compartir y evitar incluir otras que no necesitas.

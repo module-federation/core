@@ -228,3 +228,58 @@ describe('installInitialConsumes', () => {
     expect(module.exports).toEqual({ loaded: true });
   });
 });
+
+test('preserves generated provider layers during initial consume registration', async () => {
+  const { ModuleFederation } = jest.requireActual('@module-federation/runtime');
+  const actualInstall = jest.requireActual(
+    '../src/installInitialConsumes',
+  ).installInitialConsumes;
+  const factory = () => () => 'server';
+  const instance = new ModuleFederation({
+    name: 'generated-provider-layer',
+    remotes: [],
+    shared: {
+      pkg: {
+        version: '1.0.0',
+        scope: ['default'],
+        get: factory,
+        shareConfig: { layer: 'server', requiredVersion: false },
+      },
+    },
+  });
+  const webpackRequire = {
+    m: {},
+    c: {},
+    federation: { instance },
+    initializeSharingData: {
+      scopeToSharingDataMapping: {
+        default: [
+          {
+            name: 'pkg',
+            version: '1.0.0',
+            factory,
+            layer: 'server',
+            requiredVersion: false,
+          },
+        ],
+      },
+    },
+  };
+  actualInstall({
+    webpackRequire,
+    initialConsumes: [],
+    installedModules: {},
+    moduleToHandlerMapping: {},
+  });
+  expect(
+    instance.options.shared.pkg.map((share) => share.shareConfig.layer),
+  ).toEqual(['server']);
+  expect(
+    await instance.loadShare('pkg', {
+      customShareInfo: {
+        scope: ['default'],
+        shareConfig: { requiredVersion: false },
+      },
+    }),
+  ).toBe(false);
+});

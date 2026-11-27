@@ -14,31 +14,44 @@ it('should still emit the remote entry', () => {
 });
 
 const expectEmptyAssets = (entry) => {
-  expect(entry.assets.js.sync).toEqual([]);
-  expect(entry.assets.js.async).toEqual([]);
+  expect(entry.assets).toEqual({
+    js: { sync: [], async: [] },
+    css: { sync: [], async: [] },
+  });
 };
 
-it('should omit asset details from stats when disableAssetsAnalyze is true', () => {
-  if (stats.shared.length) {
-    expect(stats.shared).toHaveLength(1);
-    expectEmptyAssets(stats.shared[0]);
-  } else {
-    expect(stats.shared).toEqual([]);
-  }
-  expect(stats.exposes).toHaveLength(1);
-  expectEmptyAssets(stats.exposes[0]);
-});
-
-it('should omit asset details from manifest when disableAssetsAnalyze is true', () => {
-  if (manifest.shared.length) {
-    expect(manifest.shared).toHaveLength(1);
-    expectEmptyAssets(manifest.shared[0]);
-  } else {
-    expect(manifest.shared).toEqual([]);
-  }
-  expect(manifest.exposes).toHaveLength(1);
-  expectEmptyAssets(manifest.exposes[0]);
-});
+for (const [name, { shared, exposes }] of Object.entries({ stats, manifest })) {
+  it(`should preserve shared names and scopes without asset details in ${name}`, () => {
+    expect(shared).toHaveLength(3);
+    expect(shared).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'react',
+          layer: 'server',
+          shareScope: ['server', 'default'],
+        }),
+        expect.objectContaining({
+          id: 'container:react',
+          name: 'react',
+          shareScope: 'canary',
+          version: '1.0.0',
+          requiredVersion: false,
+        }),
+        expect.objectContaining({
+          id: 'container:react',
+          name: 'react',
+          shareScope: 'default',
+          version: '1.0.0',
+          requiredVersion: '1.0.0',
+        }),
+      ]),
+    );
+    shared.forEach(expectEmptyAssets);
+    expect(exposes).toHaveLength(1);
+    expectEmptyAssets(exposes[0]);
+    expect(exposes[0].layer).toBe('server');
+  });
+}
 
 it('should mark remote usage locations as UNKNOWN', () => {
   const remote = stats.remotes.find((item) => item.alias === 'remote');

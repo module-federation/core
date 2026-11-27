@@ -8,24 +8,25 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
+import { builtinModules, createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const DEFAULT_REPO = 'https://github.com/webpack/webpack.git';
 const DEFAULT_OUTPUT = resolve(ROOT, 'webpack');
 const UNBUNDLED_EMIT_DIR = '.mf-unbundled-dts';
-const PRESERVE_OUTPUT_ENTRIES = new Set(['package.json']);
-const ROOT_DECLARATION_FILES = new Set(['types.d.ts']);
+const PRESERVE_OUTPUT_ENTRIES = new Set(['package.json', 'node_modules']);
+const ROOT_TYPES = 'types.d.ts';
+const OPTIONS_DECLARATION = 'declarations/WebpackOptions.d.ts';
 const SKIP_SCAN_DIRS = new Set(['.git', 'node_modules', UNBUNDLED_EMIT_DIR]);
 
-function shouldIncludeDeclarationPath(relPath, { syncRootTypes }) {
-  if (relPath.startsWith('test/')) return false;
-  if (!syncRootTypes && ROOT_DECLARATION_FILES.has(relPath)) return false;
-  return true;
+function shouldIncludeDeclarationPath(relPath) {
+  return !relPath.startsWith('test/') && relPath !== ROOT_TYPES;
 }
 
 function printHelp() {
@@ -44,7 +45,6 @@ Options:
   --keep-clone         Keep clone directory after completion
   --skip-install       Skip dependency install in cloned repo
   --skip-generate      Skip webpack type generation step
-  --sync-root-types    Also overwrite root declaration files (types.d.ts)
   --clean              Remove existing output files before syncing
   --dry-run            Print planned actions without writing output
   --verbose            Print each shell command before running it
@@ -188,7 +188,11 @@ function runWebpackTypeGeneration({
     );
   }
 
-  if (!skipGenerate) {
+  if (!skipGenerate && !existsSync(join(cloneDir, 'node_modules/tooling'))) {
+    // Webpack 5.112 moved this tooling into its repository. Its releases
+    // commit the generated declarations, so the clone already has them.
+    console.log('No node_modules/tooling; using the committed declarations.');
+  } else if (!skipGenerate) {
     const generationSteps = [
       ['node', ['node_modules/tooling/inherit-types', '--write']],
       ['node', ['node_modules/tooling/format-schemas', '--write']],
@@ -215,7 +219,7 @@ function runWebpackTypeGeneration({
   }
 }
 
-function emitUnbundledDtsFromJavascript({ cloneDir, verbose }) {
+function emitUnbundledDtsFromJavascript({ cloneDir }) {
   const tsconfigPath = join(cloneDir, 'tsconfig.mf-unbundled-types.json');
   const emittedDir = join(cloneDir, UNBUNDLED_EMIT_DIR);
   const tsConfig = {
@@ -247,26 +251,37 @@ function emitUnbundledDtsFromJavascript({ cloneDir, verbose }) {
   };
 
   writeFileSync(tsconfigPath, JSON.stringify(tsConfig, null, 2));
-  const emitExitCode = runCommand(
-    'node',
-    ['node_modules/typescript/bin/tsc', '-p', tsconfigPath],
+
+  // `tsc` skips any file with declaration-emit diagnostics, such as private
+  // members in JSDoc-inferred types, and webpack 5.112 has several. Force the
+  // emit through the compiler API, as the language service does.
+  const ts = createRequire(join(cloneDir, 'package.json'))('typescript');
+  const config = ts.getParsedCommandLineOfConfigFile(
+    tsconfigPath,
+    {},
     {
-      cwd: cloneDir,
-      verbose,
-      allowNonZeroExit: true,
+      ...ts.sys,
+      onUnRecoverableConfigFileDiagnostic: (diagnostic) => {
+        throw new Error(
+          ts.flattenDiagnosticMessageText(diagnostic.messageText),
+        );
+      },
     },
   );
+  const program = ts.createProgram(config.fileNames, config.options);
+  program.emit(undefined, undefined, undefined, true, undefined, true);
 
-  const emittedFiles = existsSync(emittedDir)
-    ? collectDtsFiles(emittedDir).sort((a, b) => a.localeCompare(b))
-    : [];
-  if (emittedFiles.length === 0) {
-    throw new Error('JS declaration emit produced no files.');
-  }
-
-  if (emitExitCode !== 0) {
-    console.warn(
-      `tsc finished with exit code ${emitExitCode}; continuing with emitted declaration files.`,
+  const emittedFiles = collectDtsFiles(emittedDir).sort((a, b) =>
+    a.localeCompare(b),
+  );
+  const emitted = new Set(emittedFiles);
+  const cloneRoot = realpathSync(cloneDir);
+  const missing = config.fileNames
+    .map((fileName) => relative(cloneRoot, realpathSync(fileName)))
+    .filter((relPath) => !emitted.has(relPath.replace(/\.js$/, '.d.ts')));
+  if (missing.length > 0) {
+    throw new Error(
+      `No declaration was emitted for ${missing.length} files:\n${missing.join('\n')}`,
     );
   }
 
@@ -290,24 +305,175 @@ function collectDtsFiles(rootDir, currentDir = rootDir, collector = []) {
   return collector;
 }
 
-function cleanOutputDirectory(outputDir, { preserveRootTypes }) {
+function cleanOutputDirectory(outputDir) {
   if (!existsSync(outputDir)) {
     mkdirSync(outputDir, { recursive: true });
     return;
   }
 
-  const preserveEntries = new Set(PRESERVE_OUTPUT_ENTRIES);
-  if (preserveRootTypes) {
-    for (const entry of ROOT_DECLARATION_FILES) {
-      preserveEntries.add(entry);
+  const entries = readdirSync(outputDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (PRESERVE_OUTPUT_ENTRIES.has(entry.name)) continue;
+    rmSync(join(outputDir, entry.name), { recursive: true, force: true });
+  }
+}
+
+function findTypeEnd(lines, start) {
+  let depth = 0;
+  for (let i = start; i < lines.length; i++) {
+    for (const char of lines[i].replaceAll('=>', '')) {
+      if ('{([<'.includes(char)) depth++;
+      else if ('})]>'.includes(char)) depth--;
+    }
+    if (depth <= 0 && lines[i].trimEnd().endsWith(';')) return i;
+  }
+  throw new Error(`Unterminated type alias at line ${start + 1}`);
+}
+
+const DECLARED_CLASS = /^declare (?:abstract )?class ([A-Za-z0-9_$]+)\b/gm;
+const ROOT_EXPORT = /^export = ([A-Za-z0-9_$]+);/m;
+const NAMESPACE_EXPORTS =
+  /^declare namespace ([A-Za-z0-9_$]+) \{\s*export \{([^}]*)\}/gm;
+
+// Each class a per-file declaration exports, either as the module itself
+// (`export = Module`) or as a member of its namespace, as ExportsInfo.d.ts
+// exports ExportInfo.
+function findClassFiles(outputDir) {
+  const filesByName = new Map();
+  const add = (name, entry) => {
+    filesByName.set(name, [...(filesByName.get(name) || []), entry]);
+  };
+  for (const relPath of collectDtsFiles(join(outputDir, 'lib'))) {
+    const source = readFileSync(join(outputDir, 'lib', relPath), 'utf8');
+    const root = ROOT_EXPORT.exec(source)?.[1];
+    if (!root) continue;
+    const path = `./lib/${relPath.slice(0, -'.d.ts'.length)}`;
+    const declared = new Set(
+      Array.from(source.matchAll(DECLARED_CLASS), ([, name]) => name),
+    );
+    if (declared.has(root) && path.endsWith(`/${root}`)) add(root, { path });
+    for (const [, namespace, list] of source.matchAll(NAMESPACE_EXPORTS)) {
+      if (namespace !== root) continue;
+      for (const entry of list.split(',')) {
+        const [local, member = local] = entry.trim().split(/\s+as\s+/);
+        if (local !== root && declared.has(local)) {
+          add(local, { path, member });
+        }
+      }
+    }
+  }
+  return filesByName;
+}
+
+// Webpack ships one bundled types.d.ts. Import each class and option type from
+// its per-file declaration instead, so `webpack.Module` and
+// `webpack/lib/module/Module` are the same type rather than two copies.
+function composeRootTypes({ bundledPath, outputDir }) {
+  const bundled = readFileSync(bundledPath, 'utf8').split('\n');
+  const classFiles = findClassFiles(outputDir);
+  const optionTypes = new Set(
+    Array.from(
+      readFileSync(join(outputDir, OPTIONS_DECLARATION), 'utf8').matchAll(
+        /^export (?:interface|type) ([A-Za-z0-9_$]+)\b/gm,
+      ),
+      ([, name]) => name,
+    ),
+  );
+
+  const classImports = [];
+  const moduleImports = new Map();
+  const memberImports = [];
+  const optionImports = [];
+  const kept = [];
+  for (let i = 0; i < bundled.length; i++) {
+    const classMatch = /^declare (?:abstract )?class ([A-Za-z0-9_$]+)\b/.exec(
+      bundled[i],
+    );
+    const optionMatch =
+      /^(?:declare )?(interface|type) ([A-Za-z0-9_$]+)\b/.exec(bundled[i]);
+    const classEntries = classMatch && classFiles.get(classMatch[1]);
+    const isClass = classEntries?.length === 1;
+    const isOption = !isClass && optionMatch && optionTypes.has(optionMatch[2]);
+    if (!isClass && !isOption) {
+      kept.push(bundled[i]);
+      continue;
+    }
+    while (kept.length && /^\s*(\/\*\*|\*)/.test(kept.at(-1))) kept.pop();
+    if (isClass || optionMatch[1] === 'interface') {
+      if (!bundled[i].trimEnd().endsWith('{}')) {
+        while (bundled[i] !== '}') i++;
+      }
+    } else {
+      i = findTypeEnd(bundled, i);
+    }
+    if (isClass) {
+      const [{ path, member }] = classEntries;
+      if (member) {
+        const binding = `__${path.slice('./lib/'.length).replace(/\W/g, '_')}`;
+        moduleImports.set(path, `import ${binding} from '${path}';`);
+        memberImports.push(`import ${classMatch[1]} = ${binding}.${member};`);
+      } else {
+        classImports.push(`import ${classMatch[1]} from '${path}';`);
+      }
+    } else {
+      optionImports.push(optionMatch[2]);
     }
   }
 
-  const entries = readdirSync(outputDir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (preserveEntries.has(entry.name)) continue;
-    rmSync(join(outputDir, entry.name), { recursive: true, force: true });
+  kept.splice(
+    kept.findIndex((line) => line.startsWith('declare ')),
+    0,
+    ...classImports,
+    ...moduleImports.values(),
+    ...memberImports,
+    `import type { ${optionImports.join(', ')} } from './declarations/WebpackOptions';`,
+    '',
+  );
+  writeFileSync(join(outputDir, ROOT_TYPES), kept.join('\n'));
+  console.log(
+    `Composed ${ROOT_TYPES}: ${classImports.length + memberImports.length} classes and ${optionImports.length} option types imported from per-file declarations.`,
+  );
+}
+
+const BARE_IMPORT = /(?:from |import\()['"]([^'"./][^'"]*)['"]/g;
+
+// Keep the type package's dependencies in step with the Webpack release, so
+// imports such as `webpack-sources` resolve to the versions its types expect.
+function syncTypeDependencies({ cloneDir, outputDir }) {
+  const packageJsonPath = join(outputDir, 'package.json');
+  // An --output directory other than the type package has no manifest.
+  if (!existsSync(packageJsonPath)) return;
+  const webpackDependencies =
+    JSON.parse(readFileSync(join(cloneDir, 'package.json'), 'utf8'))
+      .dependencies || {};
+  const importedPackages = new Set();
+  for (const relPath of collectDtsFiles(outputDir)) {
+    const source = readFileSync(join(outputDir, relPath), 'utf8');
+    for (const [, request] of source.matchAll(BARE_IMPORT)) {
+      importedPackages.add(
+        request
+          .split('/')
+          .slice(0, request.startsWith('@') ? 2 : 1)
+          .join('/'),
+      );
+    }
   }
+  const dependencies = Object.fromEntries(
+    Object.entries(webpackDependencies)
+      .filter(
+        ([name]) =>
+          !builtinModules.includes(name) &&
+          (importedPackages.has(name) ||
+            importedPackages.has(name.replace(/^@types\//, ''))),
+      )
+      .sort(([a], [b]) => a.localeCompare(b)),
+  );
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+  packageJson.dependencies = dependencies;
+  writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+  console.log(
+    `Set ${Object.keys(dependencies).length} type dependencies in package.json.`,
+  );
 }
 
 function copyMappedDtsFiles({ outputDir, sourceByRelPath }) {
@@ -332,7 +498,6 @@ function main() {
   const keepClone = Boolean(args['keep-clone']);
   const skipInstall = Boolean(args['skip-install']);
   const skipGenerate = Boolean(args['skip-generate']);
-  const syncRootTypes = Boolean(args['sync-root-types']);
   const clean = Boolean(args.clean);
   const dryRun = Boolean(args['dry-run']);
   const verbose = Boolean(args.verbose);
@@ -359,12 +524,9 @@ function main() {
 
     const { emittedDir, emittedFiles } = emitUnbundledDtsFromJavascript({
       cloneDir,
-      verbose,
     });
     const repoDtsFiles = collectDtsFiles(cloneDir)
-      .filter((relPath) =>
-        shouldIncludeDeclarationPath(relPath, { syncRootTypes }),
-      )
+      .filter(shouldIncludeDeclarationPath)
       .sort((a, b) => a.localeCompare(b));
     if (repoDtsFiles.length === 0) {
       throw new Error('No .d.ts files were produced. Aborting sync.');
@@ -374,9 +536,7 @@ function main() {
     for (const relPath of repoDtsFiles) {
       sourceByRelPath.set(relPath, join(cloneDir, relPath));
     }
-    for (const relPath of emittedFiles.filter((path) =>
-      shouldIncludeDeclarationPath(path, { syncRootTypes }),
-    )) {
+    for (const relPath of emittedFiles.filter(shouldIncludeDeclarationPath)) {
       sourceByRelPath.set(relPath, join(emittedDir, relPath));
     }
 
@@ -394,13 +554,16 @@ function main() {
       );
     } else {
       if (clean) {
-        cleanOutputDirectory(outputDir, {
-          preserveRootTypes: !syncRootTypes,
-        });
+        cleanOutputDirectory(outputDir);
       } else {
         mkdirSync(outputDir, { recursive: true });
       }
       copyMappedDtsFiles({ outputDir, sourceByRelPath });
+      composeRootTypes({
+        bundledPath: join(cloneDir, ROOT_TYPES),
+        outputDir,
+      });
+      syncTypeDependencies({ cloneDir, outputDir });
       console.log(`Synced ${sourceByRelPath.size} files into ${outputDir}.`);
     }
 

@@ -2,6 +2,9 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const {
+  normalizeWebpackPath,
+} = require('@module-federation/sdk/normalize-webpack-path');
 
 const packageRoot = path.resolve(__dirname, '../../../..');
 const tmp =
@@ -35,7 +38,8 @@ if (!process.argv[2]) {
   );
 }
 
-const webpack = require(require.resolve('webpack', { paths: [packageRoot] }));
+// The same webpack that the enhanced copies load.
+const webpack = require(normalizeWebpackPath('webpack'));
 
 const compile = (ModuleFederationPlugin, name) =>
   new Promise((resolve) => {
