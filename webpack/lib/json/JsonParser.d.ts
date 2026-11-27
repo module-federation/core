@@ -1,28 +1,35 @@
 export = JsonParser;
-declare class JsonParser extends Parser {
-  /**
-   * @param {JsonModulesPluginParserOptions} options parser options
-   */
-  constructor(options: JsonModulesPluginParserOptions);
-  options: import('../../declarations/plugins/JsonModulesPluginParser').JsonModulesPluginParserOptions;
+/** @import { BuiltJsonModule } from "./JsonModule" */
+/** @import { JsonParserOptions } from "../../declarations/WebpackOptions" */
+/** @import { ParserState, PreparsedAst } from "../module/Parser" */
+/** @import { JsonValue } from "../fs/fs" */
+/** @typedef {(input: string) => Buffer | JsonValue} ParseFn */
+/**
+ * Defines the function returning type used by this module.
+ * @template T
+ * @typedef {import("../util/memoize").FunctionReturning<T>} FunctionReturning
+ */
+/**
+ * @extends {Parser<BuiltJsonModule>}
+ */
+declare class JsonParser extends Parser<BuiltJsonModule> {
+    /**
+     * Creates an instance of JsonParser.
+     * @param {JsonParserOptions} options parser options
+     */
+    constructor(options?: JsonParserOptions);
+    /** @type {JsonParserOptions} */
+    options: JsonParserOptions;
 }
 declare namespace JsonParser {
-  export {
-    JsonModulesPluginParserOptions,
-    BuildInfo,
-    BuildMeta,
-    ParserState,
-    PreparsedAst,
-    JsonValue,
-    ParseFn,
-  };
+    export { ParseFn, FunctionReturning };
 }
-import Parser = require('../Parser');
-type JsonModulesPluginParserOptions =
-  import('../../declarations/plugins/JsonModulesPluginParser').JsonModulesPluginParserOptions;
-type BuildInfo = import('../Module').BuildInfo;
-type BuildMeta = import('../Module').BuildMeta;
-type ParserState = import('../Parser').ParserState;
-type PreparsedAst = import('../Parser').PreparsedAst;
-type JsonValue = import('../util/fs').JsonValue;
+import type { BuiltJsonModule } from "./JsonModule";
+import Parser = require("../module/Parser");
+import type { JsonParserOptions } from "../../declarations/WebpackOptions";
 type ParseFn = (input: string) => Buffer | JsonValue;
+/**
+ * Defines the function returning type used by this module.
+ */
+type FunctionReturning<T> = import("../util/memoize").FunctionReturning<T>;
+import type { JsonValue } from "../fs/fs";

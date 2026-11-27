@@ -1,29 +1,17 @@
 declare namespace _exports {
-  export {
-    Constructor,
-    ObjectDeserializerContext,
-    ObjectSerializerContext,
-    SerializableClass,
-    SerializableClassConstructor,
-  };
+    export { SerializableClass, SerializableClassConstructor };
 }
-declare function _exports<T extends Constructor>(
-  Constructor: T,
-  request: string,
-  name?: (string | null) | undefined,
-): void;
+declare function _exports<T extends new (...params: never[]) => EXPECTED_OBJECT>(Constructor: T, request: string | (string | [string, string | null])[], name?: (string | null) | undefined): void;
 export = _exports;
-type Constructor = import('../serialization/ObjectMiddleware').Constructor;
-type ObjectDeserializerContext =
-  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
-type ObjectSerializerContext =
-  import('../serialization/ObjectMiddleware').ObjectSerializerContext;
 type SerializableClass = {
-  serialize: (context: ObjectSerializerContext) => void;
-  deserialize: (context: ObjectDeserializerContext) => void;
+    serialize: (context: ObjectSerializerContext) => void;
+    deserialize: (context: ObjectDeserializerContext) => void;
 };
-type SerializableClassConstructor<T extends SerializableClass> = (new (
-  ...params: EXPECTED_ANY[]
-) => T) & {
-  deserialize?: (context: ObjectDeserializerContext) => T;
+/**
+ * Defines the serializable class constructor type used by this module.
+ */
+type SerializableClassConstructor<T extends SerializableClass> = (new (...params: never[]) => T) & {
+    deserialize?: (context: ObjectDeserializerContext) => T;
 };
+import type { ObjectSerializerContext } from "../serialization/ObjectMiddleware";
+import type { ObjectDeserializerContext } from "../serialization/ObjectMiddleware";

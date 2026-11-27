@@ -1,8 +1,13 @@
 export = ProvideForSharedDependency;
 declare class ProvideForSharedDependency extends ModuleDependency {
-  /**
-   * @param {string} request request string
-   */
-  constructor(request: string);
+    /**
+     * Creates an instance of ProvideForSharedDependency.
+     * @param {string} request request string
+     */
+    constructor(request: string);
 }
-import ModuleDependency = require('../dependencies/ModuleDependency');
+declare namespace ProvideForSharedDependency {
+    let KINDS: Set<keyof DependencyKinds>;
+}
+import ModuleDependency = require("../dependencies/core/ModuleDependency");
+import type { DependencyKinds } from "../graph/Dependency";

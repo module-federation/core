@@ -1,0 +1,173 @@
+# Vite
+
+`@module-federation/vite` lleva Module Federation a Vite 5, 6, 7 y 8:
+
+- Puede hacer el build de módulos que cumplen las especificaciones de carga de `Module Federation`.
+- Puede consumir, mediante alias, módulos que siguen las especificaciones de `Module Federation`.
+- Puede configurar dependencias shared para los módulos, de modo que, si el entorno host del módulo cargado ya tiene la dependencia correspondiente, no se vuelva a cargar.
+- Cuando un módulo tiene tipos remotos, descarga y consume automáticamente esos tipos.
+- Puede actualizar en caliente los módulos remotos dentro del host durante el desarrollo.
+- Puede renderizar módulos remotos en el servidor para hosts con SSR.
+
+:::tip Frameworks
+¿Usas Nuxt, TanStack Start o Vinext? Consulta las guías de [Nuxt](/integrations/framework/nuxt.html), [TanStack](/integrations/framework/tanstack.html) y [Vinext](/integrations/framework/vinext.html) para ver la configuración específica de cada framework, incluido SSR.
+:::
+
+## Inicio rápido
+
+### Instalación
+
+Puedes instalar el plugin con los siguientes comandos:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/vite --save',
+    yarn: 'yarn add @module-federation/vite --save',
+    pnpm: 'pnpm add @module-federation/vite --save',
+    bun: 'bun add @module-federation/vite --save',
+  }}
+/>
+
+### Crear module-federation.config.ts
+
+Crea el archivo `module-federation.config.ts` con el siguiente contenido:
+
+import CreateConfig from '@docs/_snippets/vite/create-config';
+
+<CreateConfig />
+
+### Registrar el plugin
+
+En `Vite`, puedes añadir el plugin mediante la opción de configuración `plugins` del archivo `vite.config.ts`:
+
+import RegisterPlugin from '@docs/_snippets/vite/register-plugin';
+
+<RegisterPlugin />
+
+Los remotes definidos como objeto que omiten `type` mantienen el valor por defecto heredado `"var"` y muestran una advertencia. Usa `type: 'module'` para remotes de Vite, y `type: 'var'` solo para remotes en formato global, como contenedores de Webpack o Rspack, o la salida `varFilename` de un remote de Vite.
+
+## Configurar el plugin de build
+
+- Tipo: `federation(options: ModuleFederationOptions)`
+
+- La estructura de configuración del plugin de Module Federation es la siguiente:
+
+```ts
+type ModuleFederationOptions = {
+  name: string;
+  filename?: string;
+  exposes?: Record<string, string | { import: string }>;
+  remotes?: Record<string, string | RemoteObjectConfig>;
+  shared?: ShareInfos;
+  // ...plus the Vite-specific options below
+};
+```
+
+Encontrarás explicaciones detalladas de las opciones de configuración comunes en la página [Descripción general de la configuración](/configure/index.html). Las siguientes opciones son específicas del plugin de Vite:
+
+| Opción | Tipo | Valor por defecto | Descripción |
+| --- | --- | --- | --- |
+| `hostInitInjectLocation` | `'html' \| 'entry'` | `'html'` | Dónde se inyecta el script de inicialización del host. Usa `'entry'` para aplicaciones sin `index.html`, como los hosts con SSR. |
+| `varFilename` | `string` | | Emite un remote entry `var` adicional para hosts heredados que cargan remotes con `type: 'var'`. |
+| `ssrFilename` | `string` | `<filename base>.ssr.js` | Nombre de archivo del remote entry de SSR. |
+| `bundleAllCSS` | `boolean` | `false` | Añade todos los assets CSS del bundle a cada módulo expuesto. |
+| `moduleParseTimeout` | `number` | `10` | Tiempo máximo, en segundos, de espera para el análisis de módulos durante el build. |
+| `moduleParseIdleTimeout` | `number` | | Igual que `moduleParseTimeout`, pero se reinicia con cada módulo analizado. Es preferible en bases de código grandes. |
+| `target` | `'web' \| 'node'` | `'web'`, o `'node'` cuando `build.ssr` está habilitado | Entorno de destino, usado para aplicar tree shaking al runtime de federation. |
+| `disableRemote` | `boolean` | `false` | Elimina del runtime el soporte para consumir remotes. No lo habilites cuando haya `remotes` configurados. |
+| `disableShared` | `boolean` | `false` | Elimina del runtime el soporte para dependencias shared. No lo habilites cuando haya `shared` configurado. |
+| `disableSnapshot` | `boolean` | `true` en builds de Node/SSR; en otro caso, `false` | Elimina el soporte de snapshots, incluidos los remotes basados en manifest, el preload, las sugerencias de tipos dinámicas, HMR y la integración con devtools. |
+| `ssrEntryLoader` | `SsrEntryLoaderConfig` | | Controla cómo cargan los remote entries los hosts con SSR. Consulta [Renderizado en el servidor](#server-side-rendering). |
+| `ssrExternals` | `string[]` | | Paquetes adicionales exclusivos de Node que se mantienen como externos en el remote entry de SSR. Los paquetes shared y de runtime son externos por defecto. |
+
+La opción `manifest` también acepta un objeto con `fileName`, `filePath`, `disableAssetsAnalyze` y un hook `additionalData` para modificar los archivos `mf-manifest.json` y `mf-stats.json` generados.
+
+## Actualizaciones en caliente entre remotes
+
+Habilita `dev.remoteHmr` en el host para actualizar en caliente los módulos remotos mientras ambas aplicaciones se ejecutan en desarrollo:
+
+```ts title="vite.config.ts"
+federation({
+  name: 'host',
+  remotes: {
+    // ...
+  },
+  dev: {
+    remoteHmr: true,
+  },
+});
+```
+
+Con `true`, los remotes de React (`@vitejs/plugin-react` o `@vitejs/plugin-react-swc`) y Vue (`@vitejs/plugin-vue` o `@vitejs/plugin-vue-jsx`) usan el HMR nativo de su framework, y el resto de frameworks recurren a recargas completas de la página. Establécelo en `'full-reload'` para recargar siempre la página. `remoteHmr` está deshabilitado por defecto. Las demás opciones de `dev` se describen en [dev](/configure/dev.html).
+
+## Renderizado en el servidor {#server-side-rendering}
+
+Un remote emite un entry de servidor junto a su entry de navegador, llamado `<filename base>.ssr.js` por defecto o `ssrFilename` si está definido, y lo anuncia como `metaData.ssrRemoteEntry` en `mf-manifest.json`. Los hosts con SSR que consumen remotes a través de su manifest eligen automáticamente el entry de navegador o el de servidor.
+
+`ssrEntryLoader` controla cómo evalúa el host los remote entries durante el build y el preview:
+
+```ts title="vite.config.ts"
+federation({
+  name: 'host',
+  remotes: {
+    // ...
+  },
+  ssrEntryLoader: {
+    strategy: 'temp-file', // or 'vm'
+    maxAgeMs: 60_000,
+    fetchTimeoutMs: 5_000,
+    fetchMaxBytes: 5 * 1024 * 1024,
+  },
+});
+```
+
+- `'temp-file'` (por defecto) obtiene el grafo del remote, reescribe los imports para que apunten a los paquetes shared del host, escribe archivos temporales y los carga con `import()`.
+- `'vm'` evalúa el grafo en memoria con `vm.SourceTextModule`. Requiere ejecutar Node.js con `--experimental-vm-modules` y, si falta ese flag, recurre a `'temp-file'` con una advertencia.
+- `maxAgeMs` vuelve a comprobar el manifest de cada remote una vez transcurrido el tiempo indicado, de modo que se detecta un remote redesplegado en la misma URL. Omítelo para mantener la caché hasta que termine el proceso.
+- `fetchTimeoutMs` y `fetchMaxBytes` limitan cada petición; por defecto, 10 segundos y 10 MiB. `0` desactiva el límite.
+
+En desarrollo, Vite 8 usa el `ModuleRunner` de Vite, por lo que estas opciones afectan sobre todo al build y al preview.
+
+El entry de SSR mantiene `@module-federation/runtime`, `@module-federation/runtime-core` y `@module-federation/sdk` como externos para que Node los resuelva desde el host. Si el host no puede resolver esos paquetes, por ejemplo un host que solo usa `@module-federation/enhanced`, establece `ssr.noExternal` de Vite en el remote para generar un entry autocontenido.
+
+## Experimentos
+
+### Runtime externo
+
+Comparte una única instancia de `@module-federation/runtime-core` desde el host para que los remotes no incluyan su propia copia en el bundle. Establece `experiments.provideExternalRuntime: true` en el host y `experiments.externalRuntime: true` en cada remote. Exactamente un contenedor de la página debe proporcionar el runtime, y debe cargarse antes que cualquier remote que lo use.
+
+### El host proporciona todas las dependencias shared
+
+Cuando un único host proporciona todas las dependencias shared y los remotes solo las consumen, `experiments.hostProvidesAllShared: true` resuelve las dependencias shared mediante un import map nativo del navegador en lugar del runtime de federation. Establécelo en el host y en cada remote:
+
+```ts title="remote/vite.config.ts"
+federation({
+  name: 'remote',
+  exposes: { './Button': './src/Button.tsx' },
+  shared: { react: {}, 'react-dom': {}, 'react/jsx-runtime': {} },
+  experiments: { hostProvidesAllShared: true },
+});
+```
+
+```ts title="host/vite.config.ts"
+federation({
+  name: 'host',
+  remotes: { remote: 'https://cdn.example.com/remote/mf-manifest.json' },
+  shared: { react: {}, 'react-dom': {}, 'react/jsx-runtime': {} },
+  experiments: { hostProvidesAllShared: true },
+});
+```
+
+Los módulos shared se convierten en imports ES estáticos normales, por lo que el código que lee un valor shared mientras se evalúan los módulos funciona sin `eager`. Este modo no carga el runtime de federation, así que no admite negociación de versiones, `import: false`, plugins de runtime, SSR, `loadRemote` ni interoperabilidad con contenedores de Webpack y Rspack.
+
+### Islas de React con SSR
+
+`experiments.ssrMode: 'ISLAND'` permite que un remote que no comparte React se renderice en el servidor y se hidrate con su propio React, fuera del árbol de React del host. Consulta [Islas de React aisladas](/integrations/framework/vinext.html#isolated-react-islands).
+
+## Chunking
+
+El plugin gestiona la división en chunks para que el runtime de federation y los wrappers de las dependencias shared se carguen en el orden correcto. Si se establece `codeSplitting` en `false`, se ignora con una advertencia.
+
+En Vite 8, tus `build.rolldownOptions.output.codeSplitting.groups` se mantienen por debajo de los grupos de federation, y `manualChunks` se ignora con una advertencia; traslada esa agrupación a `codeSplitting.groups`. En Vite 5 a 7, una función `manualChunks` sigue ejecutándose para los módulos que el plugin no reclama, mientras que la forma de objeto se ignora.

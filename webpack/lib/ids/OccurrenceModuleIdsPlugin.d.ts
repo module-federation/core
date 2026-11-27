@@ -1,21 +1,26 @@
 export = OccurrenceModuleIdsPlugin;
 declare class OccurrenceModuleIdsPlugin {
-  /**
-   * @param {OccurrenceModuleIdsPluginOptions=} options options object
-   */
-  constructor(options?: OccurrenceModuleIdsPluginOptions | undefined);
-  options: import('../../declarations/plugins/ids/OccurrenceModuleIdsPlugin').OccurrenceModuleIdsPluginOptions;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Creates an instance of OccurrenceModuleIdsPlugin.
+     * @param {OccurrenceModuleIdsPluginOptions=} options options object
+     */
+    constructor(options?: OccurrenceModuleIdsPluginOptions | undefined);
+    /** @type {OccurrenceModuleIdsPluginOptions} */
+    options: OccurrenceModuleIdsPluginOptions;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace OccurrenceModuleIdsPlugin {
-  export { OccurrenceModuleIdsPluginOptions, Compiler, Module };
+    export { OccurrenceModuleIdsPluginOptions };
 }
-type OccurrenceModuleIdsPluginOptions =
-  import('../../declarations/plugins/ids/OccurrenceModuleIdsPlugin').OccurrenceModuleIdsPluginOptions;
-type Compiler = import('../Compiler');
-type Module = import('../Module');
+import type Compiler from "../Compiler";
+type OccurrenceModuleIdsPluginOptions = {
+    /**
+     * Prioritise initial size over total size.
+     */
+    prioritiseInitial?: boolean | undefined;
+};
