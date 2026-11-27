@@ -1,37 +1,34 @@
 export = WebAssemblyJavascriptGenerator;
-/** @typedef {import("webpack-sources").Source} Source */
-/** @typedef {import("../Generator").GenerateContext} GenerateContext */
-/** @typedef {import("../Module")} Module */
-/** @typedef {import("../Module").SourceType} SourceType */
-/** @typedef {import("../Module").SourceTypes} SourceTypes */
-/** @typedef {import("../NormalModule")} NormalModule */
-declare class WebAssemblyJavascriptGenerator extends Generator {
-  /**
-   * @param {Error} error the error
-   * @param {NormalModule} module module for which the code should be generated
-   * @param {GenerateContext} generateContext context for generate
-   * @returns {Source | null} generated code
-   */
-  generateError(
-    error: Error,
-    module: NormalModule,
-    generateContext: GenerateContext,
-  ): Source | null;
+/** @import { SyncWasmNormalModule } from "./SyncWasmModule" */
+/** @import { Source } from "webpack-sources" */
+/** @import { GenerateContext } from "../module/Generator" */
+/** @import ModuleDependency from "../dependencies/core/ModuleDependency" */
+/** @import Module, { SourceType, SourceTypes } from "../module/Module" */
+/**
+ * The module type the JSDoc inherited from `Generator` names.
+ * @typedef {SyncWasmNormalModule} TModule
+ */
+/**
+ * @extends {Generator<TModule>}
+ */
+declare class WebAssemblyJavascriptGenerator extends Generator<SyncWasmNormalModule> {
+    constructor();
+    /**
+     * Generates fallback output for the provided error condition.
+     * @param {Error} error the error
+     * @param {TModule} module module for which the code should be generated
+     * @param {GenerateContext} generateContext context for generate
+     * @returns {Source | null} generated code
+     */
+    generateError(error: Error, module: TModule, generateContext: Generator.GenerateContext): Source | null;
 }
 declare namespace WebAssemblyJavascriptGenerator {
-  export {
-    Source,
-    GenerateContext,
-    Module,
-    SourceType,
-    SourceTypes,
-    NormalModule,
-  };
+    export { TModule };
 }
-import Generator = require('../Generator');
-type Source = import('webpack-sources').Source;
-type GenerateContext = import('../Generator').GenerateContext;
-type Module = import('../Module');
-type SourceType = import('../Module').SourceType;
-type SourceTypes = import('../Module').SourceTypes;
-type NormalModule = import('../NormalModule');
+import type { SyncWasmNormalModule } from "./SyncWasmModule";
+import Generator = require("../module/Generator");
+import type { Source } from "webpack-sources";
+/**
+ * The module type the JSDoc inherited from `Generator` names.
+ */
+type TModule = SyncWasmNormalModule;

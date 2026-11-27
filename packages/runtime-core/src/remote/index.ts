@@ -23,6 +23,7 @@ import {
   RemoteEntryExports,
   CallFrom,
   GlobalShareScopeMap,
+  ShareScopeMap,
   ResourceLoadContext,
 } from '../type';
 import { ModuleFederation } from '../core';
@@ -47,7 +48,11 @@ import {
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
-import { getGlobalShareScope } from '../utils/share';
+import {
+  getAllSharedVersions,
+  getGlobalShareScope,
+  removeSharedVersion,
+} from '../utils/share';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
 import {
   resolveRemoteRuntimeInstance,
@@ -801,48 +806,51 @@ export class RemoteHandler {
     const instanceId = instance.options.id || producerName;
 
     let isAllSharedNotUsed = true;
-    const needDeleteKeys: Array<[string, string, string, string]> = [];
+    const needDeleteKeys: Array<
+      [ShareScopeMap[string], string, string | undefined, string]
+    > = [];
     Object.keys(globalShareScopeMap).forEach((instId) => {
       const shareScopeMap = globalShareScopeMap[instId];
       shareScopeMap &&
         Object.keys(shareScopeMap).forEach((shareScope) => {
           const shareScopeVal = shareScopeMap[shareScope];
           shareScopeVal &&
-            Object.keys(shareScopeVal).forEach((shareName) => {
-              const sharedPkgs = shareScopeVal[shareName];
-              sharedPkgs &&
-                Object.keys(sharedPkgs).forEach((shareVersion) => {
-                  const shared = sharedPkgs[shareVersion];
-                  if (
-                    shared &&
-                    typeof shared === 'object' &&
-                    shared.from === producerName
-                  ) {
-                    if (shared.loaded || shared.loading) {
-                      shared.useIn = shared.useIn.filter(
-                        (usedHostName) => usedHostName !== producerName,
-                      );
-                      if (shared.useIn.length) {
-                        isAllSharedNotUsed = false;
+            getAllSharedVersions(shareScopeVal).forEach(
+              ({ pkgName, layer, versions: sharedPkgs }) => {
+                sharedPkgs &&
+                  Object.keys(sharedPkgs).forEach((shareVersion) => {
+                    const shared = sharedPkgs[shareVersion];
+                    if (
+                      shared &&
+                      typeof shared === 'object' &&
+                      shared.from === producerName
+                    ) {
+                      if (shared.loaded || shared.loading) {
+                        shared.useIn = shared.useIn.filter(
+                          (usedHostName) => usedHostName !== producerName,
+                        );
+                        if (shared.useIn.length) {
+                          isAllSharedNotUsed = false;
+                        } else {
+                          needDeleteKeys.push([
+                            shareScopeVal,
+                            pkgName,
+                            layer,
+                            shareVersion,
+                          ]);
+                        }
                       } else {
                         needDeleteKeys.push([
-                          instId,
-                          shareScope,
-                          shareName,
+                          shareScopeVal,
+                          pkgName,
+                          layer,
                           shareVersion,
                         ]);
                       }
-                    } else {
-                      needDeleteKeys.push([
-                        instId,
-                        shareScope,
-                        shareName,
-                        shareVersion,
-                      ]);
                     }
-                  }
-                });
-            });
+                  });
+              },
+            );
         });
     });
 
@@ -850,10 +858,8 @@ export class RemoteHandler {
       instance.shareScopeMap = {};
       delete globalShareScopeMap[instanceId];
     }
-    needDeleteKeys.forEach(([insId, shareScope, shareName, shareVersion]) => {
-      delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
-        shareVersion
-      ];
+    needDeleteKeys.forEach(([scope, pkgName, layer, shareVersion]) => {
+      removeSharedVersion(scope, pkgName, layer, shareVersion);
     });
   }
 

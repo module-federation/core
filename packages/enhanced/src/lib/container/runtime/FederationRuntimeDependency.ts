@@ -2,7 +2,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
-) as typeof import('webpack/lib/dependencies/ModuleDependency');
+) as typeof import('webpack/lib/dependencies/core/ModuleDependency');
 
 class FederationRuntimeDependency extends ModuleDependency {
   constructor(request: string) {

@@ -1,17 +1,20 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compilation, Dependency } from 'webpack';
 import type {
-  CodeGenerationResult,
+  Compilation,
+  Dependency,
   InputFileSystem,
-  LibIdentOptions,
-  NeedBuildContext,
   ObjectDeserializerContext,
   ObjectSerializerContext,
-  RequestShortener,
-  ResolverWithOptions,
-  WebpackOptions,
-} from 'webpack/lib/Module';
-import type WebpackError from 'webpack/lib/WebpackError';
+  WebpackError,
+  WebpackOptionsNormalized as WebpackOptions,
+} from 'webpack';
+import type {
+  CodeGenerationResult,
+  LibIdentOptions,
+  NeedBuildContext,
+} from 'webpack/lib/module/Module';
+import type { ResolverWithOptions } from 'webpack/lib/resolve/ResolverFactory';
+import type RequestShortener from 'webpack/lib/util/RequestShortener';
 import SharedDependency from './SharedDependency';
 import { getFederationGlobalScope } from '../../../container/runtime/utils';
 
@@ -24,7 +27,7 @@ const {
 } = require(normalizeWebpackPath('webpack')) as typeof import('webpack');
 const StaticExportsDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
-) as typeof import('webpack/lib/dependencies/StaticExportsDependency');
+) as typeof import('webpack/lib/dependencies/core/StaticExportsDependency');
 
 const SOURCE_TYPES = new Set(['javascript']);
 
@@ -47,8 +50,8 @@ class SharedEntryModule extends Module {
    * @param {string} name shared name
    * @param {string} request request
    */
-  constructor(name: string, request: string) {
-    super('shared-entry-module', null);
+  constructor(name: string, request: string, layer?: string) {
+    super('shared-entry-module', null, layer);
     // super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
     this._request = request;
@@ -75,7 +78,7 @@ class SharedEntryModule extends Module {
    * @returns {string} a unique identifier of the module
    */
   override identifier(): string {
-    return `shared module ${this._name} ${this._request}`;
+    return `shared module ${this._name} ${this._request}${this.layer === null ? '' : `|${this.layer}`}`;
   }
   /**
    * @param {RequestShortener} requestShortener the request shortener

@@ -5,6 +5,7 @@ import {
   Global,
   setGlobalFederationInstance,
 } from '../src/index';
+import { getSharedVersions } from '../src/utils/share';
 
 describe('ModuleFederation', () => {
   it('registers new remotes and loads them correctly', async () => {
@@ -250,6 +251,31 @@ describe('ModuleFederation', () => {
 
       expect(shareScope[BUILD_NAME]?.default?.react?.['18.0.0']).toBe(shared);
       expect(shared.useIn).toEqual([HOST_NAME]);
+    });
+
+    it('releases aliased remote shares in each layer while retaining shares used by the host', async () => {
+      const alias = '@register-remotes/app1-layered-alias';
+      const FM = await loadApp1(alias, BUILD_NAME);
+      const remoteInstance = addInstance(BUILD_NAME);
+      const scope = {};
+      Global.__FEDERATION__.__SHARE__[HOST_NAME] = { default: scope };
+      const unloaded = makeShared(BUILD_NAME, [], false);
+      const consumed = makeShared(BUILD_NAME, [HOST_NAME, BUILD_NAME], true);
+      const unrelated = makeShared('@register-remotes/unrelated', [], false);
+      getSharedVersions(scope, 'react', 'server', true)!['18.0.0'] = unloaded;
+      getSharedVersions(scope, 'react', 'client', true)!['18.0.0'] = consumed;
+      getSharedVersions(scope, 'react', undefined, true)!['18.0.0'] = unrelated;
+
+      const warnings = forceReRegister(FM, alias, BUILD_NAME);
+
+      expect(getSharedVersions(scope, 'react', 'server')).toBeUndefined();
+      expect(getSharedVersions(scope, 'react', 'client')?.['18.0.0']).toBe(
+        consumed,
+      );
+      expect(consumed.useIn).toEqual([HOST_NAME]);
+      expect(getSharedVersions(scope, 'react')?.['18.0.0']).toBe(unrelated);
+      expect(instances()).not.toContain(remoteInstance);
+      expect(warnings).toEqual([]);
     });
 
     it('removes nothing and warns about ambiguity when two unversioned instances share the name', async () => {
