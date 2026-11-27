@@ -1,4 +1,5 @@
 import { destroyNodeInstance, getNodeInstanceLifecycle } from '../lifecycle';
+import { matchesDebugNamespaces } from '../lifecycle/debug';
 import { describe, it, expect, rs } from '@rstest/core';
 import { ModuleFederation } from './runtimeTestUtils';
 import { ModuleFederation as CoreFederation } from '../../../runtime-core/src';
@@ -220,8 +221,8 @@ describe('instance disposal', () => {
       await destroyNodeInstance(silentA);
       await destroyNodeInstance(silentB);
 
-      // 2. usedElsewhere with DEBUG=modern-js:mf-ssr includes holders and no Stack trace
-      process.env.DEBUG = 'modern-js:mf-ssr';
+      // 2. usedElsewhere with DEBUG=mf:node:lifecycle,-modern-js:mf-ssr includes holders and no Stack trace
+      process.env.DEBUG = 'mf:node:lifecycle,-modern-js:mf-ssr';
       const hostA = new ModuleFederation({
         name: 'host-a',
         remotes: [
@@ -378,6 +379,58 @@ describe('instance disposal', () => {
       ).toBe(true);
       delete CurrentGlobal.__FEDERATION__.__SHARE__['bare-remote'];
       await destroyNodeInstance(hostD);
+
+      // 5. Negated DEBUG pattern and decoupled downstream namespace stay silent
+      debugSpy.mockClear();
+      delete process.env.FEDERATION_DEBUG;
+      for (const debugValue of ['*,-mf:node:lifecycle', 'modern-js:mf-ssr']) {
+        process.env.DEBUG = debugValue;
+        const mutedA = new ModuleFederation({
+          name: `muted-a-${debugValue}`,
+          remotes: [
+            { name: 'muted-remote', entry: 'https://example.test/m.js' },
+          ],
+        });
+        const mutedB = new ModuleFederation({
+          name: `muted-b-${debugValue}`,
+          remotes: [
+            { name: 'muted-remote', entry: 'https://example.test/m.js' },
+          ],
+        });
+        setGlobalFederationInstance(mutedA);
+        setGlobalFederationInstance(mutedB);
+        const mutedExports = { init: () => {}, get: async () => () => ({}) };
+        const mutedInfo = {
+          name: 'muted-remote',
+          entry: 'https://example.test/m.js',
+          type: 'global',
+          entryGlobalName: 'muted_remote',
+          shareScope: 'default',
+        } as any;
+        mutedA.moduleCache.set('muted-remote', {
+          remoteInfo: mutedInfo,
+          remoteEntryExports: mutedExports,
+        } as any);
+        mutedB.moduleCache.set('muted-remote', {
+          remoteInfo: mutedInfo,
+          remoteEntryExports: mutedExports,
+        } as any);
+        await mutedA.removeRemote('muted-remote');
+        await destroyNodeInstance(mutedA);
+        await destroyNodeInstance(mutedB);
+      }
+      expect(debugSpy).not.toHaveBeenCalled();
+
+      // Independent per-namespace negation check
+      expect(
+        matchesDebugNamespaces('mf:node:lifecycle,-modern-js:mf-ssr', [
+          'mf:node:lifecycle',
+          'modern-js:mf-ssr',
+        ]),
+      ).toBe(true);
+      expect(
+        matchesDebugNamespaces('*,-mf:node:lifecycle', ['mf:node:lifecycle']),
+      ).toBe(false);
     } finally {
       if (previousFedDebug === undefined) delete process.env.FEDERATION_DEBUG;
       else process.env.FEDERATION_DEBUG = previousFedDebug;
