@@ -8,7 +8,11 @@ const root =
   process.env.MF_REPRO_BUILD_ROOT || path.resolve(__dirname, '../..');
 const legacy = process.env.MF_REPRO_LEGACY === '1';
 const publicPathControl = process.argv.includes('--public-path-control');
-const webpack = require(require.resolve('webpack', { paths: [root] }));
+// Match the compiler selected by the enhanced compatibility suites.
+const webpack = require(
+  process.env.FEDERATION_WEBPACK_PATH ||
+    require.resolve('webpack', { paths: [root] }),
+);
 const { ModuleFederationPlugin } = require(
   path.join(root, 'packages/enhanced'),
 );
