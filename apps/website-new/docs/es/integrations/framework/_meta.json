@@ -1,0 +1,45 @@
+[
+  {
+    "type": "dir",
+    "name": "modernjs",
+    "label": "Modern.js",
+    "collapsible": true,
+    "collapsed": true
+  },
+  {
+    "type": "dir",
+    "name": "nextjs",
+    "label": "Next.js",
+    "collapsible": true,
+    "collapsed": true
+  },
+  {
+    "type": "dir",
+    "name": "angular",
+    "label": "Angular",
+    "collapsible": true,
+    "collapsed": true
+  },
+  {
+    "type": "file",
+    "name": "nuxt",
+    "label": "Nuxt"
+  },
+  {
+    "type": "file",
+    "name": "tanstack",
+    "label": "TanStack"
+  },
+  {
+    "type": "file",
+    "name": "vinext",
+    "label": "Vinext"
+  },
+  {
+    "type": "dir",
+    "name": "monorepos",
+    "label": "Monorepos",
+    "collapsible": true,
+    "collapsed": true
+  }
+]

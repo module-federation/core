@@ -1,5 +1,57 @@
 # @module-federation/modern-js-v3
 
+## 2.9.4
+
+### Patch Changes
+
+- Updated dependencies [28187fb]
+- Updated dependencies [28187fb]
+- Updated dependencies [28187fb]
+  - @module-federation/enhanced@2.9.4
+  - @module-federation/sdk@2.9.4
+  - @module-federation/node@2.7.54
+  - @module-federation/rsbuild-plugin@2.9.4
+  - @module-federation/bridge-react@2.9.4
+  - @module-federation/cli@2.9.4
+  - @module-federation/runtime@2.9.4
+
+## 2.9.3
+
+### Patch Changes
+
+- Updated dependencies [9135b23]
+- Updated dependencies [ee32a0d]
+- Updated dependencies [caafd8d]
+- Updated dependencies [edf1219]
+- Updated dependencies [b4b5477]
+- Updated dependencies [543eba3]
+- Updated dependencies [fdaeb75]
+- Updated dependencies [020fa27]
+- Updated dependencies [06cb964]
+  - @module-federation/runtime@2.9.3
+  - @module-federation/sdk@2.9.3
+  - @module-federation/enhanced@2.9.3
+  - @module-federation/bridge-react@2.9.3
+  - @module-federation/node@2.7.53
+  - @module-federation/cli@2.9.3
+  - @module-federation/rsbuild-plugin@2.9.3
+
+## 2.9.2
+
+### Patch Changes
+
+- Updated dependencies [412f62e]
+- Updated dependencies [c130946]
+- Updated dependencies [4364cb6]
+- Updated dependencies [923b55d]
+  - @module-federation/enhanced@2.9.2
+  - @module-federation/bridge-react@2.9.2
+  - @module-federation/node@2.7.52
+  - @module-federation/rsbuild-plugin@2.9.2
+  - @module-federation/runtime@2.9.2
+  - @module-federation/cli@2.9.2
+  - @module-federation/sdk@2.9.2
+
 ## 2.9.1
 
 ### Patch Changes

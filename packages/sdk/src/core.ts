@@ -19,4 +19,5 @@ export type { Logger, InfrastructureLogger } from './logger';
 export * from './env';
 export * from './dom';
 export * from './normalizeOptions';
+export { disambiguateSharedScopes } from './disambiguateSharedScopes';
 export { createModuleFederationConfig } from './createModuleFederationConfig';

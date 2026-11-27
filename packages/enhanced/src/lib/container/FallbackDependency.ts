@@ -8,12 +8,10 @@
 import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
-} from 'webpack/lib/Dependency';
+} from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-);
+import makeSerializable from '../makeSerializable';
 const { Dependency } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');

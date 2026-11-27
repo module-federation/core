@@ -6,38 +6,38 @@
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type {
-  WebpackOptions,
   Compilation,
-  UpdateHashContext,
+  InputFileSystem,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  WebpackError,
+  WebpackOptionsNormalized as WebpackOptions,
+} from 'webpack';
+import type {
   CodeGenerationContext,
   CodeGenerationResult,
   LibIdentOptions,
   NeedBuildContext,
-  RequestShortener,
-  ResolverWithOptions,
-  WebpackError,
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
-  Hash,
-  InputFileSystem,
-} from 'webpack/lib/Module';
+} from 'webpack/lib/module/Module';
+import type { UpdateHashContext } from 'webpack/lib/graph/Dependency';
+import type { ResolverWithOptions } from 'webpack/lib/resolve/ResolverFactory';
+import type Hash from 'webpack/lib/util/Hash';
+import type RequestShortener from 'webpack/lib/util/RequestShortener';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import { normalizeConsumeShareOptions } from './utils';
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
 import type { ConsumeOptions } from '@module-federation/sdk';
 
-const { rangeToString, stringifyHoley } = require(
+const { stringifyHoley } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/util/semver');
+) as typeof import('webpack/lib/sharing/semver');
 const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const { sources: webpackSources } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
+import makeSerializable from '../makeSerializable';
 
 /**
  * @typedef {Object} ConsumeOptions
@@ -45,7 +45,7 @@ const makeSerializable = require(
  * @property {string=} importResolved resolved fallback request
  * @property {string} shareKey global share key
  * @property {string} shareScope share scope
- * @property {SemVerRange | false | undefined} requiredVersion version requirement
+ * @property {string | false | undefined} requiredVersion version requirement
  * @property {string} packageName package name to determine required version automatically
  * @property {boolean} strictVersion don't use shared version even if version isn't valid
  * @property {boolean} singleton use single global version
@@ -97,7 +97,7 @@ class ConsumeSharedModule extends Module {
       : shareScope;
 
     return `${WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE}|${normalizedShareScope}|${shareKey}|${
-      requiredVersion && rangeToString(requiredVersion)
+      requiredVersion
     }|${strictVersion}|${importResolved}|${singleton}|${eager}|${layer}`;
   }
 
@@ -121,7 +121,7 @@ class ConsumeSharedModule extends Module {
       : shareScope;
 
     return `consume shared module (${normalizedShareScope}) ${shareKey}@${
-      requiredVersion ? rangeToString(requiredVersion) : '*'
+      requiredVersion || '*'
     }${strictVersion ? ' (strict)' : ''}${singleton ? ' (singleton)' : ''}${
       importResolved
         ? ` (fallback: ${requestShortener.shorten(importResolved)})`

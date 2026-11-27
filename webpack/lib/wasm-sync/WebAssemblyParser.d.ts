@@ -1,11 +1,9 @@
 export = WebAssemblyParser;
-declare class WebAssemblyParser extends Parser {}
-declare namespace WebAssemblyParser {
-  export { ModuleImport, BuildInfo, BuildMeta, ParserState, PreparsedAst };
+/**
+ * @extends {Parser<BuiltSyncWasmModule>}
+ */
+declare class WebAssemblyParser extends Parser<BuiltSyncWasmModule> {
+    constructor();
 }
-import Parser = require('../Parser');
-type ModuleImport = any;
-type BuildInfo = import('../Module').BuildInfo;
-type BuildMeta = import('../Module').BuildMeta;
-type ParserState = import('../Parser').ParserState;
-type PreparsedAst = import('../Parser').PreparsedAst;
+import type { BuiltSyncWasmModule } from "./SyncWasmModule";
+import Parser = require("../module/Parser");

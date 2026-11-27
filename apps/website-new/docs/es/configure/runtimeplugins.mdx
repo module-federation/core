@@ -1,0 +1,101 @@
+# runtimePlugins
+
+- Tipo: `string[] | Array<[string, Record<string, unknown>]>`
+- Obligatorio: No
+- Valor por defecto: `undefined`
+
+La configuración `runtimePlugins` se usa para añadir plugins adicionales necesarios en tiempo de ejecución. El valor puede ser:
+- Un string que representa la ruta al plugin concreto (ruta absoluta / relativa o nombre de paquete)
+- Un array en el que cada elemento puede ser un string o una tupla con [ruta como string, objeto de opciones]
+
+Para una guía orientada a tareas sobre cómo elegir Hooks y crear plugins, consulta [Plugins de runtime](/guide/runtime/runtime-plugins.html). Para la referencia completa de Hooks, consulta [Hooks de runtime](/guide/runtime/runtime-hooks.html). Para detalles de más bajo nivel sobre la creación de plugins, consulta el [Sistema de plugins](/plugin/dev/index.html).
+
+Una vez configurados, los plugins de runtime se inyectan y usan automáticamente durante el proceso de build.
+
+**Uso básico:**
+Para crear un archivo de plugin de runtime, puedes llamarlo `custom-runtime-plugin.ts`:
+
+```ts title="custom-runtime-plugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (): ModuleFederationRuntimePlugin {
+  return {
+    name: 'custom-plugin-build',
+    beforeInit(args) {
+      console.log('[build time inject] beforeInit: ', args);
+      return args;
+    },
+    beforeLoadShare(args) {
+      console.log('[build time inject] beforeLoadShare: ', args);
+      return args;
+    },
+  };
+}
+```
+
+Después, aplica este plugin en tu configuración de build:
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+      },
+      runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
+    }),
+  ],
+};
+```
+
+**Con opciones:**
+También puedes pasar opciones a los plugins de runtime usando el formato de tupla:
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+      },
+      runtimePlugins: [
+        path.resolve(__dirname, './custom-runtime-plugin.ts'),
+        [
+          path.resolve(__dirname, './another-plugin.ts'),
+          {
+            debug: true,
+            timeout: 5000,
+            customConfig: 'value'
+          }
+        ]
+      ],
+    }),
+  ],
+};
+```
+
+El plugin puede acceder después a estas opciones:
+
+```ts title="another-plugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (options: any): ModuleFederationRuntimePlugin {
+  console.log('Plugin options:', options);
+
+  return {
+    name: 'another-plugin',
+    beforeInit(args) {
+      if (options.debug) {
+        console.log('[debug] beforeInit: ', args);
+      }
+      return args;
+    },
+  };
+}
+```

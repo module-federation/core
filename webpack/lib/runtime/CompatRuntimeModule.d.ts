@@ -1,14 +1,8 @@
 export = CompatRuntimeModule;
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../ChunkGraph")} ChunkGraph */
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Chunk from "../graph/Chunk" */
+/** @import ChunkGraph from "../graph/ChunkGraph" */
+/** @import Compilation from "../Compilation" */
 declare class CompatRuntimeModule extends RuntimeModule {
-  constructor();
+    constructor();
 }
-declare namespace CompatRuntimeModule {
-  export { Chunk, ChunkGraph, Compilation };
-}
-import RuntimeModule = require('../RuntimeModule');
-type Chunk = import('../Chunk');
-type ChunkGraph = import('../ChunkGraph');
-type Compilation = import('../Compilation');
+import RuntimeModule = require("./RuntimeModule");

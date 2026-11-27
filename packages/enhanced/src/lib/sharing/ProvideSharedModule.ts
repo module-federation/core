@@ -3,29 +3,29 @@
   Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compilation } from 'webpack';
-import type WebpackError from 'webpack/lib/WebpackError';
+import type {
+  Compilation,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  WebpackError,
+} from 'webpack';
 import type {
   CodeGenerationContext,
   CodeGenerationResult,
   LibIdentOptions,
   NeedBuildContext,
-  RequestShortener,
-  ResolverWithOptions,
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
-} from 'webpack/lib/Module';
+} from 'webpack/lib/module/Module';
+import type { ResolverWithOptions } from 'webpack/lib/resolve/ResolverFactory';
+import type RequestShortener from 'webpack/lib/util/RequestShortener';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import { WEBPACK_MODULE_TYPE_PROVIDE } from '../Constants';
-import type { InputFileSystem } from 'webpack/lib/util/fs';
+import type { InputFileSystem } from 'webpack/lib/fs/fs';
 import type { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
 
 const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
+import makeSerializable from '../makeSerializable';
 
 const TYPES = new Set(['share-init']);
 

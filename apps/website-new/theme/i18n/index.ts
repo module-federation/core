@@ -1,10 +1,12 @@
 import { withBase, useLang } from '@rspress/core/runtime';
 import { EN_US } from './enUS';
+import { ES_ES } from './esES';
 import { PT_BR } from './ptBR';
 import { ZH_CN } from './zhCN';
 
 const translations = {
   en: EN_US,
+  es: ES_ES,
   'pt-BR': PT_BR,
   zh: ZH_CN,
 } as const;

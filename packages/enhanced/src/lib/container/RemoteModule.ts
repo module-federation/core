@@ -3,20 +3,23 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compilation, WebpackOptionsNormalized } from 'webpack';
+import type {
+  Compilation,
+  InputFileSystem,
+  WebpackError,
+  WebpackOptionsNormalized,
+} from 'webpack';
 import type {
   CodeGenerationContext,
   CodeGenerationResult,
   LibIdentOptions,
   NeedBuildContext,
-  WebpackError,
-} from 'webpack/lib/Module';
+} from 'webpack/lib/module/Module';
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { WEBPACK_MODULE_TYPE_REMOTE } from '../Constants';
-import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
-import type { InputFileSystem } from 'webpack/lib/FileSystemInfo';
-import type { RequestShortener } from 'webpack/lib/RuntimeModule';
+import type { ResolverWithOptions } from 'webpack/lib/resolve/ResolverFactory';
+import type RequestShortener from 'webpack/lib/util/RequestShortener';
 import type { ObjectDeserializerContext } from 'webpack/lib/serialization/ObjectMiddleware';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 
@@ -26,9 +29,7 @@ const { sources: webpackSources } = require(
 const { Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
+import makeSerializable from '../makeSerializable';
 
 const TYPES: Set<string> = new Set(['remote', 'share-init']);
 const JAVASCRIPT_TYPES = new Set(['javascript']);
