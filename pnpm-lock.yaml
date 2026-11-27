@@ -12864,8 +12864,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66}
+  '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
+    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
     version: 2.3.3
     cpu: [arm64]
     os: [darwin]
@@ -13190,6 +13190,12 @@ packages:
     cpu: [x64]
     os: [linux]
 
+  '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
+    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
+    version: 2.3.3
+    cpu: [x64]
+    os: [linux]
+
   '@rspack/binding-linux-x64-musl@0.7.5':
     resolution: {integrity: sha512-dDgi/ThikMy1m4llxPeEXDCA2I8F8ezFS/eCPLZGU2/J1b4ALwDjuRsMmo+VXSlFCKgIt98V6h1woeg7nu96yg==}
     cpu: [x64]
@@ -13486,6 +13492,12 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@rspack/binding-win32-x64-msvc@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
+    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
+    version: 2.3.3
+    cpu: [x64]
+    os: [win32]
+
   '@rspack/binding@0.7.5':
     resolution: {integrity: sha512-XcdOvaCz1mWWwr5vmEY9zncdInrjINEh60EWkYdqtCA67v7X7rB1fe6n4BeAI1+YLS2Eacj+lytlr+n7I+DYVg==}
 
@@ -13525,8 +13537,8 @@ packages:
   '@rspack/binding@2.3.3':
     resolution: {integrity: sha512-wwF++36a3rqYi0G9zj+rUavn/GIMzbzXehelGS1jkYeKPHyPXrVYwRHqwEKNKMD9z+FdW4YJKQcfFkPlHEiwUg==}
 
-  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66}
+  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
+    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
     version: 2.3.3
 
   '@rspack/cli@2.1.10':
@@ -13675,7 +13687,7 @@ packages:
         optional: true
 
   '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
-    resolution: {tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
+    resolution: {integrity: sha512-mdgJi64IyGq/BCOiFQyGAG47kGiSl3h/Ixuy7qguccdcDbYeMKseg3A8roRxRxwA+ODv1zWUIFJEQQDcfnx7MA==, tarball: https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6}
     version: 2.3.3
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
@@ -41691,7 +41703,7 @@ snapshots:
   '@rspack/binding-darwin-arm64@2.3.3':
     optional: true
 
-  '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66':
+  '@rspack/binding-darwin-arm64@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
     optional: true
 
   '@rspack/binding-darwin-x64@0.7.5':
@@ -41884,6 +41896,9 @@ snapshots:
     optional: true
 
   '@rspack/binding-linux-x64-gnu@2.3.3':
+    optional: true
+
+  '@rspack/binding-linux-x64-gnu@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
     optional: true
 
   '@rspack/binding-linux-x64-musl@0.7.5':
@@ -42097,6 +42112,9 @@ snapshots:
   '@rspack/binding-win32-x64-msvc@2.3.3':
     optional: true
 
+  '@rspack/binding-win32-x64-msvc@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
+    optional: true
+
   '@rspack/binding@0.7.5':
     optionalDependencies:
       '@rspack/binding-darwin-arm64': 0.7.5
@@ -42274,9 +42292,11 @@ snapshots:
       '@rspack/binding-win32-ia32-msvc': 2.3.3
       '@rspack/binding-win32-x64-msvc': 2.3.3
 
-  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66':
+  '@rspack/binding@https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6':
     optionalDependencies:
-      '@rspack/binding-darwin-arm64': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66
+      '@rspack/binding-darwin-arm64': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-darwin-arm64@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6
+      '@rspack/binding-linux-x64-gnu': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-linux-x64-gnu@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6
+      '@rspack/binding-win32-x64-msvc': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding-win32-x64-msvc@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6
 
   '@rspack/cli@2.1.10(@rspack/core@2.1.10(@module-federation/runtime-tools@2.9.4)(@swc/helpers@0.5.13))(@rspack/dev-server@2.2.1(@rspack/core@2.1.10(@module-federation/runtime-tools@2.9.4)(@swc/helpers@0.5.13))(selfsigned@5.5.0))':
     dependencies:
@@ -42445,7 +42465,7 @@ snapshots:
 
   '@rspack/core@https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)':
     dependencies:
-      '@rspack/binding': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66
+      '@rspack/binding': https://pkg.pr.new/web-infra-dev/rspack/@rspack/binding@de68d66cfdd4a4e2d473140ded9ab19bdce76fc6
     optionalDependencies:
       '@module-federation/runtime-tools': link:packages/runtime-tools
       '@swc/helpers': 0.5.23
