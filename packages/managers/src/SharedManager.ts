@@ -97,7 +97,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
     sharedConfig: moduleFederationPlugin.SharedConfig,
   ): moduleFederationPlugin.SharedConfig {
     const defaultSharedConfig: moduleFederationPlugin.SharedConfig = {
-      singleton: true,
+      singleton: false,
       requiredVersion: undefined,
       shareScope: this.options?.shareScope ?? 'default',
     };
