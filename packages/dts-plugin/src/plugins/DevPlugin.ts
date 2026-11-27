@@ -267,10 +267,21 @@ export class DevPlugin implements WebpackPluginInstance {
       remote.tsConfigPath = normalizedDtsOptions.tsConfigPath;
     }
 
+    let closed = false;
+    const close = () => {
+      closed = true;
+      // Stopping a worker that is still starting rejects its startup call.
+      this._devWorker?.controlledPromise.catch(() => undefined);
+      this._devWorker?.exit();
+      this._devWorker = undefined;
+    };
+    compiler.hooks.shutdown?.tap(this.name, close);
+
     Promise.all([
       this.generateTypesPromise,
       this.fetchRemoteTypeUrlsPromise,
     ]).then(([_, remoteTypeUrls]) => {
+      if (closed) return;
       this._devWorker = createDevWorker({
         name,
         remote: remote,
