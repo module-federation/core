@@ -71,16 +71,13 @@ function getBundlePath(bundlePath: string, bundleOrigin?: string) {
   return joinComponents(bundleOrigin, bundlePath);
 }
 
-function buildLoadBundleAsyncWrapper() {
+function buildLoadBundleAsyncWrapper(
+  getLoadBundleAsync: () => typeof globalThis.__loadBundleAsync,
+) {
   const registry = require('mf:remote-module-registry');
 
-  const __loadBundleAsync =
-    globalThis[`${__METRO_GLOBAL_PREFIX__ ?? ''}__loadBundleAsync`];
-
-  const loadBundleAsync =
-    __loadBundleAsync as typeof globalThis.__loadBundleAsync;
-
   return async (originalBundlePath: string): Promise<void> => {
+    const loadBundleAsync = getLoadBundleAsync();
     const scope = globalThis.__FEDERATION__.__NATIVE__[__METRO_GLOBAL_PREFIX__];
 
     // entry is always in the root directory of assets associated with remote
@@ -147,19 +144,41 @@ function buildLoadBundleAsyncWrapper() {
   };
 }
 
-// load expo async require if outside expo
-if (!process.env.EXPO_OS) {
-  // @expo/metro-runtime/src/async-require/fetchAsync.native.ts requires
-  // process.env.EXPO_OS to be set but since expo is optional, we set it
-  // to an empty string as a fallback to prevent reference errors
-  process.env.EXPO_OS = '';
+const loaderKey = `${__METRO_GLOBAL_PREFIX__ ?? ''}__loadBundleAsync`;
 
-  const {
-    buildAsyncRequire,
-  } = require('@expo/metro-runtime/src/async-require/buildAsyncRequire');
+// Expo assigns its own loader to this key from `expo`'s side effects: after
+// this module in a host, and never in a remote that does not bundle `expo`.
+// The wrapper stays installed, and whatever is assigned becomes the loader
+// underneath it.
+let underlyingLoader = globalThis[loaderKey] as
+  | typeof globalThis.__loadBundleAsync
+  | undefined;
 
-  global[`${__METRO_GLOBAL_PREFIX__}__loadBundleAsync`] = buildAsyncRequire();
+function getUnderlyingLoader() {
+  if (!underlyingLoader) {
+    // @expo/metro-runtime/src/async-require/fetchAsync.native.ts requires
+    // process.env.EXPO_OS to be set but since expo is optional, we set it
+    // to an empty string as a fallback to prevent reference errors
+    if (!process.env.EXPO_OS) {
+      process.env.EXPO_OS = '';
+    }
+
+    const {
+      buildAsyncRequire,
+    } = require('@expo/metro-runtime/src/async-require/buildAsyncRequire');
+
+    underlyingLoader = buildAsyncRequire();
+  }
+  return underlyingLoader;
 }
 
-global[`${__METRO_GLOBAL_PREFIX__}__loadBundleAsync`] =
-  buildLoadBundleAsyncWrapper();
+const loadBundleAsyncWrapper = buildLoadBundleAsyncWrapper(getUnderlyingLoader);
+
+Object.defineProperty(globalThis, loaderKey, {
+  configurable: true,
+  enumerable: true,
+  get: () => loadBundleAsyncWrapper,
+  set: (loader) => {
+    underlyingLoader = loader;
+  },
+});
