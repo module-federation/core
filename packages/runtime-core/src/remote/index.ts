@@ -55,7 +55,6 @@ import {
 } from '../plugins/snapshot/SnapshotHandler';
 import {
   getAllSharedVersions,
-  getGlobalShareScope,
   removeSharedVersion,
 } from '../utils/share';
 
