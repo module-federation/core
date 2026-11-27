@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  background: #f3f5f7;
+  color: #172b3a;
+  font-family: system-ui, sans-serif;
+}
+main {
+  max-width: 1080px;
+  margin: 40px auto;
+  padding: 0 24px;
+}
+.case {
+  background: white;
+  border: 1px solid #cad3dd;
+  border-radius: 8px;
+  margin: 18px 0;
+  padding: 20px;
+}
+h2 {
+  font-size: 18px;
+}
+small {
+  color: #526676;
+}
+button {
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.controls {
+  display: flex;
+  gap: 12px;
+}
