@@ -314,6 +314,13 @@ async function loadEntryNode({
 
         return;
       },
+      fetch: async ([url, init]) =>
+        loaderHook.lifecycle.fetch.emit(
+          url,
+          init,
+          remoteInfo,
+          resourceContext ? { ...resourceContext, url } : undefined,
+        ),
     },
   })
     .then(() => {

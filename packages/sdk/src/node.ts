@@ -36,7 +36,7 @@ const lazyLoaderHookFetch = async (
   loaderHook?: any,
 ): Promise<Response> => {
   const hook = (url: RequestInfo | URL, init: RequestInit) => {
-    return loaderHook.lifecycle.fetch.emit(url, init);
+    return loaderHook.fetch([url, init]);
   };
 
   const res = await hook(input, init || {});
@@ -209,6 +209,7 @@ export const loadScriptNode =
           attrs?: Record<string, any>;
           loaderHook?: {
             createScriptHook?: CreateScriptHookNode;
+            fetch?: FetchHook;
           };
         },
       ) => {
@@ -238,6 +239,7 @@ export const loadScriptNode =
           attrs?: Record<string, any>;
           loaderHook?: {
             createScriptHook?: CreateScriptHookNode;
+            fetch?: FetchHook;
           };
         },
       ) => {
