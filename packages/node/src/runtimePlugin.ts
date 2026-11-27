@@ -43,7 +43,7 @@ export const nodeRuntimeImportCache = new Map<string, Promise<any>>();
 const CHUNK_PREVIEW_LENGTH = 240;
 type ChunkResolutionSource = 'public-path' | 'remote-entry-fallback';
 type ChunkLocationSource = 'filesystem' | 'remote-url';
-type ChunkUrlMetadata = {
+type ChunkResolutionMetadata = {
   chunkName: string;
   publicPath?: string;
   remoteName?: string;
@@ -51,68 +51,190 @@ type ChunkUrlMetadata = {
   resolvedFrom: ChunkResolutionSource;
   remoteEntryUrl?: string;
 };
+type ChunkFetchContext = {
+  chunkName: string;
+  location: string;
+  hostName?: string;
+  chunkResolution?: ChunkResolutionMetadata;
+};
+type FetchResponseLike = {
+  ok?: boolean;
+  status?: number;
+  statusText?: string;
+  text: () => Promise<string>;
+};
 
-const getChunkPreview = (content: string): string =>
-  content.slice(0, CHUNK_PREVIEW_LENGTH).replace(/\s+/g, ' ').trim();
+const getChunkPreview = (chunkText: string): string =>
+  chunkText.slice(0, CHUNK_PREVIEW_LENGTH).replace(/\s+/g, ' ').trim();
 
-const enrichChunkExecutionError = (
-  error: unknown,
-  options: {
-    chunkName: string;
-    location: string;
-    source: ChunkLocationSource;
-    content: string;
-    hostName?: string;
-    resolution?: ChunkUrlMetadata;
-  },
-): Error => {
-  const normalizedError =
-    error instanceof Error ? error : new Error(String(error));
-  const preview = getChunkPreview(options.content);
-  const details = [
-    `Federated chunk execution failed.`,
-    `chunk: ${options.chunkName}`,
-    `source: ${options.source}`,
-    `location: ${options.location}`,
-  ];
-
-  if (options.hostName) {
-    details.push(`host: ${options.hostName}`);
+const isSuccessfulHttpResponse = (response: FetchResponseLike): boolean => {
+  if (typeof response.ok === 'boolean') {
+    return response.ok;
   }
 
-  if (options.resolution) {
-    details.push(`resolved-from: ${options.resolution.resolvedFrom}`);
+  const status = Number(response.status);
+  return (
+    !Number.isFinite(status) || status === 0 || (status >= 200 && status < 300)
+  );
+};
 
-    if (options.resolution.remoteName) {
-      details.push(`remote: ${options.resolution.remoteName}`);
+const formatHttpStatus = (response: FetchResponseLike): string => {
+  const status = Number(response.status);
+  const statusText =
+    typeof response.statusText === 'string' ? response.statusText.trim() : '';
+
+  if (!Number.isFinite(status) || status === 0) {
+    return 'non-ok HTTP response';
+  }
+
+  return `HTTP ${status}${statusText ? ` ${statusText}` : ''}`;
+};
+
+const createChunkFetchError = (
+  response: FetchResponseLike,
+  context: ChunkFetchContext & { responseText: string },
+): Error => {
+  const preview = getChunkPreview(context.responseText);
+  const messageLines = [
+    `Federated chunk fetch failed.`,
+    `chunk: ${context.chunkName}`,
+    `location: ${context.location}`,
+    `status: ${formatHttpStatus(response)}`,
+  ];
+
+  if (context.hostName) {
+    messageLines.push(`host: ${context.hostName}`);
+  }
+
+  if (context.chunkResolution) {
+    messageLines.push(`resolved-from: ${context.chunkResolution.resolvedFrom}`);
+
+    if (context.chunkResolution.remoteName) {
+      messageLines.push(`remote: ${context.chunkResolution.remoteName}`);
     }
 
-    if (options.resolution.publicPath) {
-      details.push(`public-path: ${options.resolution.publicPath}`);
+    if (context.chunkResolution.publicPath) {
+      messageLines.push(`public-path: ${context.chunkResolution.publicPath}`);
     }
 
-    if (options.resolution.rootOutputDir) {
-      details.push(`root-output-dir: ${options.resolution.rootOutputDir}`);
+    if (context.chunkResolution.rootOutputDir) {
+      messageLines.push(
+        `root-output-dir: ${context.chunkResolution.rootOutputDir}`,
+      );
     }
 
-    if (options.resolution.remoteEntryUrl) {
-      details.push(`remote-entry: ${options.resolution.remoteEntryUrl}`);
+    if (context.chunkResolution.remoteEntryUrl) {
+      messageLines.push(
+        `remote-entry: ${context.chunkResolution.remoteEntryUrl}`,
+      );
     }
   }
 
   if (preview) {
-    details.push(`preview: ${preview}`);
+    messageLines.push(`preview: ${preview}`);
   }
 
-  normalizedError.message = `${normalizedError.message}\n${details.join('\n')}`;
+  const error = new Error(messageLines.join('\n'));
+  Object.assign(error, {
+    chunkName: context.chunkName,
+    chunkLocation: context.location,
+    chunkSource: 'remote-url',
+    chunkPreview: preview,
+    chunkHostName: context.hostName,
+    chunkResolution: context.chunkResolution,
+    status: response.status,
+    statusText: response.statusText,
+  });
+
+  return error;
+};
+
+const readValidatedChunkResponseText = async (
+  response: FetchResponseLike,
+  chunkFetchContext: ChunkFetchContext,
+): Promise<string> => {
+  const responseText = await response.text();
+
+  if (!isSuccessfulHttpResponse(response)) {
+    throw createChunkFetchError(response, {
+      ...chunkFetchContext,
+      responseText,
+    });
+  }
+
+  return responseText;
+};
+
+const enrichChunkExecutionError = (
+  error: unknown,
+  executionContext: {
+    chunkName: string;
+    location: string;
+    source: ChunkLocationSource;
+    chunkCode: string;
+    hostName?: string;
+    chunkResolution?: ChunkResolutionMetadata;
+  },
+): Error => {
+  const normalizedError =
+    error instanceof Error ? error : new Error(String(error));
+  const preview = getChunkPreview(executionContext.chunkCode);
+  const messageLines = [
+    `Federated chunk execution failed.`,
+    `chunk: ${executionContext.chunkName}`,
+    `source: ${executionContext.source}`,
+    `location: ${executionContext.location}`,
+  ];
+
+  if (executionContext.hostName) {
+    messageLines.push(`host: ${executionContext.hostName}`);
+  }
+
+  if (executionContext.chunkResolution) {
+    messageLines.push(
+      `resolved-from: ${executionContext.chunkResolution.resolvedFrom}`,
+    );
+
+    if (executionContext.chunkResolution.remoteName) {
+      messageLines.push(
+        `remote: ${executionContext.chunkResolution.remoteName}`,
+      );
+    }
+
+    if (executionContext.chunkResolution.publicPath) {
+      messageLines.push(
+        `public-path: ${executionContext.chunkResolution.publicPath}`,
+      );
+    }
+
+    if (executionContext.chunkResolution.rootOutputDir) {
+      messageLines.push(
+        `root-output-dir: ${executionContext.chunkResolution.rootOutputDir}`,
+      );
+    }
+
+    if (executionContext.chunkResolution.remoteEntryUrl) {
+      messageLines.push(
+        `remote-entry: ${executionContext.chunkResolution.remoteEntryUrl}`,
+      );
+    }
+  }
+
+  if (preview) {
+    messageLines.push(`preview: ${preview}`);
+  }
+
+  normalizedError.message = `${normalizedError.message}\n${messageLines.join(
+    '\n',
+  )}`;
 
   Object.assign(normalizedError, {
-    chunkName: options.chunkName,
-    chunkLocation: options.location,
-    chunkSource: options.source,
+    chunkName: executionContext.chunkName,
+    chunkLocation: executionContext.location,
+    chunkSource: executionContext.source,
     chunkPreview: preview,
-    chunkHostName: options.hostName,
-    chunkResolution: options.resolution,
+    chunkHostName: executionContext.hostName,
+    chunkResolution: executionContext.chunkResolution,
   });
 
   return normalizedError;
@@ -187,12 +309,12 @@ export const loadFromFs = (
   const vm = __non_webpack_require__('vm') as typeof import('vm');
 
   if (fs.existsSync(filename)) {
-    fs.readFile(filename, 'utf-8', (err, content) => {
+    fs.readFile(filename, 'utf-8', (err, chunkCode) => {
       if (err) return callback(err, null);
       const chunk = {};
       try {
         const script = new vm.Script(
-          `(function(exports, require, __dirname, __filename) {${content}\n})`,
+          `(function(exports, require, __dirname, __filename) {${chunkCode}\n})`,
           {
             filename,
             importModuleDynamically:
@@ -213,7 +335,7 @@ export const loadFromFs = (
             chunkName: path.basename(filename),
             location: filename,
             source: 'filesystem',
-            content,
+            chunkCode,
           }),
           null,
         );
@@ -231,6 +353,17 @@ export const fetchAndRun = (
   callback: (err: Error | null, chunk: any) => void,
   args: any,
 ): void => {
+  const hostName = args?.origin?.options?.name || args?.origin?.name;
+  const chunkResolution = (
+    url as URL & { mfMetadata?: ChunkResolutionMetadata }
+  ).mfMetadata;
+  const chunkFetchContext = {
+    chunkName,
+    location: url.href,
+    hostName,
+    chunkResolution,
+  };
+
   (typeof fetch === 'undefined'
     ? importNodeModule<typeof import('node-fetch')>('node-fetch').then(
         (mod) => mod.default,
@@ -242,18 +375,19 @@ export const fetchAndRun = (
         .emit(url.href, {})
         .then((res: Response | null) => {
           if (!res || !(res instanceof Response)) {
-            return fetchFunction(url.href).then((response) => response.text());
+            return fetchFunction(url.href).then((response) =>
+              readValidatedChunkResponseText(response, chunkFetchContext),
+            );
           }
-          return res.text();
+          return readValidatedChunkResponseText(res, chunkFetchContext);
         });
     })
-    .then((data) => {
+    .then((chunkCode) => {
       const chunk = {};
-      const hostName = args?.origin?.options?.name || args?.origin?.name;
-      const resolution = (url as URL & { mfMetadata?: ChunkUrlMetadata })
-        .mfMetadata;
       try {
-        eval(`(function(exports, require, __dirname, __filename) {${data}\n})`)(
+        eval(
+          `(function(exports, require, __dirname, __filename) {${chunkCode}\n})`,
+        )(
           chunk,
           __non_webpack_require__,
           url.pathname.split('/').slice(0, -1).join('/'),
@@ -266,9 +400,9 @@ export const fetchAndRun = (
             chunkName,
             location: url.href,
             source: 'remote-url',
-            content: data,
+            chunkCode,
             hostName,
-            resolution,
+            chunkResolution,
           }),
           null,
         );
