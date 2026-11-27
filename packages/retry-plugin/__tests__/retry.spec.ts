@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, rs } from '@rstest/core';
 import { fetchRetry } from '../src/fetch-retry';
-import { RetryPlugin } from '../src';
+import RetryPluginDefault, { RetryPlugin } from '../src';
 import { scriptRetry } from '../src/script-retry';
 import { ERROR_ABANDONED, RUNTIME_008 } from '../src/constant';
 
@@ -90,6 +90,10 @@ describe('Retry Plugin', () => {
       expect(result).toEqual({
         url: 'https://example.com/remoteEntry.js',
       });
+    });
+
+    it('is also the default export', () => {
+      expect(RetryPluginDefault).toBe(RetryPlugin);
     });
   });
 

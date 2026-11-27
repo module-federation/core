@@ -89,6 +89,15 @@ export default () =>
   });
 ```
 
+If your options are plain JSON (no functions such as `addQuery` or `onRetry`), you can skip the wrapper file and list the package itself:
+
+```ts
+new ModuleFederationPlugin({
+  name: 'host',
+  runtimePlugins: [[require.resolve('@module-federation/retry-plugin'), { retryTimes: 3, retryDelay: 1000 }]],
+});
+```
+
 ## Configuration Options
 
 ### CommonRetryOptions
