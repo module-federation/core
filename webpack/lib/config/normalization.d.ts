@@ -1,37 +1,33 @@
-export type CacheOptions =
-  import('../../declarations/WebpackOptions').CacheOptionsNormalized;
-export type EntryDescriptionNormalized =
-  import('../../declarations/WebpackOptions').EntryDescriptionNormalized;
-export type EntryStatic =
-  import('../../declarations/WebpackOptions').EntryStatic;
-export type EntryStaticNormalized =
-  import('../../declarations/WebpackOptions').EntryStaticNormalized;
-export type Externals = import('../../declarations/WebpackOptions').Externals;
-export type LibraryName =
-  import('../../declarations/WebpackOptions').LibraryName;
-export type LibraryOptions =
-  import('../../declarations/WebpackOptions').LibraryOptions;
-export type ModuleOptionsNormalized =
-  import('../../declarations/WebpackOptions').ModuleOptionsNormalized;
-export type OptimizationNormalized =
-  import('../../declarations/WebpackOptions').OptimizationNormalized;
-export type OptimizationRuntimeChunk =
-  import('../../declarations/WebpackOptions').OptimizationRuntimeChunk;
-export type OptimizationRuntimeChunkNormalized =
-  import('../../declarations/WebpackOptions').OptimizationRuntimeChunkNormalized;
-export type OutputNormalized =
-  import('../../declarations/WebpackOptions').OutputNormalized;
-export type PluginsNormalized =
-  import('../../declarations/WebpackOptions').PluginsNormalized;
-export type WebpackOptions =
-  import('../../declarations/WebpackOptions').WebpackOptions;
-export type WebpackOptionsNormalized =
-  import('../../declarations/WebpackOptions').WebpackOptionsNormalized;
-export type WebpackError = import('../WebpackError');
 /**
+ * Defines the webpack options interception type used by this module.
+ */
+export type WebpackOptionsInterception = {
+    devtool?: WebpackOptionsNormalized["devtool"] | undefined;
+};
+export type NormalizedBuildDependencyItem = {
+    /**
+     * request to resolve
+     */
+    dependency: string;
+    /**
+     * when true the dependency may be missing
+     */
+    optional: boolean;
+};
+/**
+ * Apply webpack options interception.
+ * @param {WebpackOptionsNormalized} options options to be intercepted
+ * @returns {{ options: WebpackOptionsNormalized, interception?: WebpackOptionsInterception }} options and interception
+ */
+export function applyWebpackOptionsInterception(options: WebpackOptionsNormalized): {
+    options: WebpackOptionsNormalized;
+    interception?: WebpackOptionsInterception;
+};
+/**
+ * Gets normalized webpack options.
  * @param {WebpackOptions} config input config
  * @returns {WebpackOptionsNormalized} normalized options
  */
-export function getNormalizedWebpackOptions(
-  config: WebpackOptions,
-): WebpackOptionsNormalized;
+export function getNormalizedWebpackOptions(config: WebpackOptions): WebpackOptionsNormalized;
+import type { WebpackOptionsNormalized } from "../../declarations/WebpackOptions";
+import type { WebpackOptions } from "../../declarations/WebpackOptions";

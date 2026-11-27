@@ -1,10 +1,6 @@
 export = GetFullHashRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Compilation from "../Compilation" */
 declare class GetFullHashRuntimeModule extends RuntimeModule {
-  constructor();
+    constructor();
 }
-declare namespace GetFullHashRuntimeModule {
-  export { Compilation };
-}
-import RuntimeModule = require('../RuntimeModule');
-type Compilation = import('../Compilation');
+import RuntimeModule = require("./RuntimeModule");

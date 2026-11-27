@@ -36,6 +36,8 @@ export type LoadShareExtraOptions = {
 export type SharedLoadTrigger = CallFrom | 'container-init';
 
 export interface SharedLoadContext {
+  // The calling build opts into matching array scopes for script remotes.
+  shareScopeDispatch?: 'declared';
   trigger?: SharedLoadTrigger;
   moduleId?: string | number;
   chunkId?: string | number;

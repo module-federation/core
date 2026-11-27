@@ -1,9 +1,5 @@
-import type {
-  WebpackPluginInstance,
-  Compiler,
-  Dependency,
-  dependencies,
-} from 'webpack';
+import type { WebpackPluginInstance, Compiler, Dependency } from 'webpack';
+import type ESMImportSpecifierDependency from 'webpack/lib/dependencies/esm/ESMImportSpecifierDependency';
 import {
   moduleFederationPlugin,
   type Stats,
@@ -21,8 +17,35 @@ export type CustomReferencedExports = { [sharedName: string]: string[] };
 
 function isHarmonyImportSpecifierDependency(
   dependency: Dependency,
-): dependency is dependencies.HarmonyImportSpecifierDependency {
+): dependency is ESMImportSpecifierDependency {
   return dependency.type === 'harmony import specifier';
+}
+
+type DestructuredProperty =
+  | string
+  | { id: string; pattern?: Iterable<DestructuredProperty> };
+
+// The property paths a destructuring reads, such as [['a'], ['b', 'c']] for
+// `const { a, b: { c } } = value`. Webpack before 5.95 records each property
+// as its name. Later versions record an object with an `id` and, for nested
+// patterns, a `pattern`.
+function getDestructuredPaths(
+  properties: Iterable<DestructuredProperty>,
+  prefix: string[] = [],
+): string[][] {
+  const paths: string[][] = [];
+  for (const property of properties) {
+    if (typeof property === 'string') {
+      paths.push([...prefix, property]);
+    } else if (property.pattern) {
+      paths.push(
+        ...getDestructuredPaths(property.pattern, [...prefix, property.id]),
+      );
+    } else {
+      paths.push([...prefix, property.id]);
+    }
+  }
+  return paths;
 }
 
 // dynamic import import('ui-lib')
@@ -123,15 +146,12 @@ export default class SharedUsedExportsOptimizerPlugin implements WebpackPluginIn
               const { ids, referencedPropertiesInDestructuring } = dependency;
               const getOriginalReferencedExports = () => {
                 if (referencedPropertiesInDestructuring) {
-                  /** @type {string[][]} */
-                  const refs = [];
-                  for (const key of referencedPropertiesInDestructuring) {
-                    refs.push({
-                      name: ids ? ids.concat([key]) : [key],
-                      canMangle: false,
-                    });
-                  }
-                  return refs;
+                  return getDestructuredPaths(
+                    referencedPropertiesInDestructuring,
+                  ).map((path) => ({
+                    name: ids ? [...ids, ...path] : path,
+                    canMangle: false,
+                  }));
                 }
                 return ids ? [ids] : [[]];
               };

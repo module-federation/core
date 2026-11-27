@@ -1,21 +1,34 @@
 export = MinChunkSizePlugin;
 declare class MinChunkSizePlugin {
-  /**
-   * @param {MinChunkSizePluginOptions} options options object
-   */
-  constructor(options: MinChunkSizePluginOptions);
-  options: import('../../declarations/plugins/optimize/MinChunkSizePlugin').MinChunkSizePluginOptions;
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler: Compiler): void;
+    /**
+     * Creates an instance of MinChunkSizePlugin.
+     * @param {MinChunkSizePluginOptions} options options object
+     */
+    constructor(options: MinChunkSizePluginOptions);
+    /** @type {MinChunkSizePluginOptions} */
+    options: MinChunkSizePluginOptions;
+    /**
+     * Applies the plugin by registering its hooks on the compiler.
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: Compiler): void;
 }
 declare namespace MinChunkSizePlugin {
-  export { MinChunkSizePluginOptions, Chunk, Compiler };
+    export { MinChunkSizePluginOptions };
 }
-type MinChunkSizePluginOptions =
-  import('../../declarations/plugins/optimize/MinChunkSizePlugin').MinChunkSizePluginOptions;
-type Chunk = import('../Chunk');
-type Compiler = import('../Compiler');
+import type Compiler from "../Compiler";
+type MinChunkSizePluginOptions = {
+    /**
+     * Constant overhead for a chunk.
+     */
+    chunkOverhead?: number | undefined;
+    /**
+     * Multiplicator for initial chunks.
+     */
+    entryChunkMultiplicator?: number | undefined;
+    /**
+     * Minimum number of characters.
+     */
+    minChunkSize: number;
+};

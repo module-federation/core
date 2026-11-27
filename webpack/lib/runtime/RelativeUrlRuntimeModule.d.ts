@@ -1,10 +1,6 @@
 export = RelativeUrlRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Compilation from "../Compilation" */
 declare class RelativeUrlRuntimeModule extends HelperRuntimeModule {
-  constructor();
+    constructor();
 }
-declare namespace RelativeUrlRuntimeModule {
-  export { Compilation };
-}
-import HelperRuntimeModule = require('./HelperRuntimeModule');
-type Compilation = import('../Compilation');
+import HelperRuntimeModule = require("./HelperRuntimeModule");

@@ -1,14 +1,15 @@
 export = AsyncModuleRuntimeModule;
-/** @typedef {import("../Compilation")} Compilation */
+/** @import Compilation from "../Compilation" */
+/** @import Chunk from "../graph/Chunk" */
 declare class AsyncModuleRuntimeModule extends HelperRuntimeModule {
-  /**
-   * @param {boolean=} deferInterop if defer import is used.
-   */
-  constructor(deferInterop?: boolean | undefined);
-  _deferInterop: boolean;
+    /**
+     * @param {boolean=} deferInterop if defer import is used.
+     * @param {boolean=} strictModuleErrorHandling if a recorded evaluation error is kept.
+     */
+    constructor(deferInterop?: boolean | undefined, strictModuleErrorHandling?: boolean | undefined);
+    /** @type {boolean} */
+    _deferInterop: boolean;
+    /** @type {boolean} */
+    _strictModuleErrorHandling: boolean;
 }
-declare namespace AsyncModuleRuntimeModule {
-  export { Compilation };
-}
-import HelperRuntimeModule = require('./HelperRuntimeModule');
-type Compilation = import('../Compilation');
+import HelperRuntimeModule = require("./HelperRuntimeModule");

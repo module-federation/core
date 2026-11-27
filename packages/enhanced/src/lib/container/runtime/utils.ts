@@ -6,7 +6,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import crypto from 'crypto';
 import { parseOptions } from '../options';
 import type webpack from 'webpack';
-import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import type RuntimeGlobals from 'webpack/lib/runtime/RuntimeGlobals';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { init } from '@module-federation/runtime-tools';
 
@@ -21,7 +21,7 @@ export interface NormalizedRuntimeInitOptionsWithOutShared {
 
 const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
-) as typeof import('webpack/lib/util/extractUrlAndGlobal');
+) as typeof import('webpack/lib/externals/extractUrlAndGlobal');
 
 type EntryStaticNormalized = Awaited<
   ReturnType<Extract<webpack.WebpackOptionsNormalized['entry'], () => any>>

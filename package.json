@@ -98,7 +98,7 @@
       },
       "next": {
         "dependencies": {
-          "webpack": "*"
+          "webpack": "5.104.1"
         }
       },
       "react-server-dom-webpack@19.2.4": {
@@ -148,7 +148,8 @@
       "@eslint/eslintrc>ajv": "6.14.0",
       "schema-utils@3.3.0>ajv": "6.14.0",
       "flatted": "3.4.2",
-      "@remix-run/router": "1.23.2"
+      "@remix-run/router": "1.23.2",
+      "webpack@5.104.1>enhanced-resolve": "5.20.1"
     },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
@@ -185,7 +186,7 @@
     "storybook": "8.6.17",
     "tapable": "2.3.0",
     "typedoc": "0.28.17",
-    "undici": "7.29.1",
+    "undici": "7.30.1",
     "unplugin": "3.0.0"
   },
   "devDependencies": {
@@ -202,7 +203,7 @@
     "@fontsource/roboto": "5.1.0",
     "@fontsource/roboto-mono": "5.1.0",
     "@mermaid-js/mermaid-cli": "11.16.0",
-    "@playwright/test": "1.57.0",
+    "@playwright/test": "1.64.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "@rollup/plugin-alias": "5.1.1",
     "@rollup/plugin-replace": "6.0.1",

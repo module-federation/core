@@ -17,7 +17,7 @@
     "@rstest/browser": "0.12.3",
     "@rstest/browser-react": "0.12.3",
     "@rstest/core": "0.12.3",
-    "playwright": "1.57.0",
+    "playwright": "1.64.1",
     "sirv": "3.0.2",
     "3010-rspack-provider": "workspace:*",
     "3011-rspack-manifest-provider": "workspace:*",

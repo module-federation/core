@@ -1,0 +1,17 @@
+export const RESERVED_IDENTIFIER: Set<string>;
+export const SAFE_IDENTIFIER: RegExp;
+/**
+ * Returns chain of property accesses.
+ * @param {readonly string[]} properties properties
+ * @param {number} start start index
+ * @returns {string} chain of property accesses
+ */
+export function propertyAccess(properties: readonly string[], start?: number): string;
+/**
+ * @summary Returns a valid JS property name for the given property.
+ * Certain strings like "default", "null", and names with whitespace are not
+ * valid JS property names, so they are returned as strings.
+ * @param {string} prop property name to analyze
+ * @returns {string} valid JS property name
+ */
+export function propertyName(prop: string): string;
