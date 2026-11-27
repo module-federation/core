@@ -22,3 +22,4 @@ export * from './node';
 export * from './normalizeOptions';
 export { getServiceUrl } from './getServiceUrl';
 export { createModuleFederationConfig } from './createModuleFederationConfig';
+export * from './deployment';
