@@ -1,4 +1,5 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import makeSerializable from '../../makeSerializable';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
@@ -6,9 +7,6 @@ const ModuleDependency = require(
 const NullDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/NullDependency'),
 ) as typeof import('webpack/lib/dependencies/NullDependency');
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
 
 class AsyncEntrypointRuntimeDependency extends ModuleDependency {
   static override Template = NullDependency.Template;
