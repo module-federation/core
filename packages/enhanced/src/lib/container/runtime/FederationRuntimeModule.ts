@@ -7,7 +7,11 @@ const { getUndoPath } = require(
 ) as typeof import('webpack/lib/util/identifier');
 // inspired by react-refresh-webpack-plugin
 import getFederationGlobal from './getFederationGlobal';
-import type { NormalizedRuntimeInitOptionsWithOutShared } from './utils';
+import { getDeclaredShareScopes } from '../../sharing/getDeclaredShareScopes';
+import {
+  getFederationGlobalScope,
+  type NormalizedRuntimeInitOptionsWithOutShared,
+} from './utils';
 
 const { RuntimeModule, RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -56,21 +60,38 @@ class FederationRuntimeModule extends RuntimeModule {
         } else {
           matcher = hasJsMatcher('chunkId');
         }
-        const outputName = this.compilation.getPath(
-          jsModulePlugin.getChunkFilenameTemplate(
-            this.chunk,
-            this.compilation.outputOptions,
-          ),
-          { chunk: this.chunk, contentHashType: 'javascript' },
-        );
-        rootOutputDir = getUndoPath(
-          outputName,
-          this.compilation.outputOptions.path || '',
-          false,
-        );
+        const { runtimeTemplate } = this.compilation;
+        // Webpack generates runtime modules for hashing before chunk hashes
+        // exist. From 5.110, chunkRootOutputDir avoids resolving the hash.
+        if (typeof runtimeTemplate.chunkRootOutputDir === 'function') {
+          rootOutputDir = runtimeTemplate.chunkRootOutputDir(this.chunk, false);
+        } else {
+          // Older webpack ignores an error in that first pass and generates
+          // again once hashes exist, so the real filename gives the real depth,
+          // even for a hash digest that contains `/`.
+          const outputName = this.compilation.getPath(
+            jsModulePlugin.getChunkFilenameTemplate(
+              this.chunk,
+              this.compilation.outputOptions,
+            ),
+            { chunk: this.chunk, contentHashType: 'javascript' },
+          );
+          rootOutputDir = getUndoPath(
+            outputName,
+            this.compilation.outputOptions.path || '',
+            false,
+          );
+        }
       }
     }
 
+    const results = this.compilation?.codeGenerationResults;
+    const scopes =
+      this.chunk &&
+      this.chunkGraph &&
+      results &&
+      getDeclaredShareScopes(this.chunk, this.chunkGraph, results);
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
     return Template.asString([
       getFederationGlobal(
         Template,
@@ -79,6 +100,14 @@ class FederationRuntimeModule extends RuntimeModule {
         rootOutputDir,
         this.initOptionsWithoutShared,
       ),
+      ...(scopes
+        ? [`${federationGlobal}.shareScopeDispatch = 'declared';`]
+        : []),
+      ...(scopes?.length
+        ? [
+            `${federationGlobal}.additionalShareScopeKeys = ${JSON.stringify(scopes)};`,
+          ]
+        : []),
     ]);
   }
 }

@@ -1,9 +1,10 @@
-import { Chunk, Compilation } from 'webpack';
+import { Chunk, ChunkGroup, Compilation } from 'webpack';
 import type {
   StatsCompilation,
   StatsModule,
 } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import path from 'path';
+import type { SharedManager } from '@module-federation/managers';
 import fs from 'fs';
 import {
   StatsAssets,
@@ -45,9 +46,162 @@ const collectAssets = (
   });
 };
 
-function getSharedModuleName(name: string): string {
-  const [_type, _shared, _module, _shareScope, sharedInfo] = name.split(' ');
-  return sharedInfo.split('@').slice(0, -1).join('@');
+/** Remove the optional `(layer)` segment without splitting spaces in its name. */
+export function splitSharedIdentifier(
+  identifier: string,
+  scopeTokenIndex: number,
+): { tokens: string[]; layer?: string } {
+  const tokens = identifier.split(' ');
+  if (!tokens[scopeTokenIndex]?.startsWith('(')) return { tokens };
+  const remainder = tokens.slice(scopeTokenIndex + 1).join(' ');
+  const layered = remainder.match(/^\((.*)\) (\S+@[\s\S]*)$/);
+  if (!layered) return { tokens };
+  return {
+    tokens: [...tokens.slice(0, scopeTokenIndex + 1), ...layered[2].split(' ')],
+    layer: layered[1],
+  };
+}
+
+export function createSharedOptionsLookup(
+  shared: SharedManager['normalizedOptions'],
+) {
+  const entries = Object.entries(shared)
+    .map(([request, options]) => ({
+      key: options.shareKey ?? request,
+      scope: JSON.stringify(options.shareScope ?? 'default'),
+      options,
+    }))
+    .sort((first, second) => second.key.length - first.key.length);
+  return (name: string, shareScope: string | string[], layer?: string) => {
+    const scope = JSON.stringify(shareScope);
+    const matches = entries.filter(
+      (entry) =>
+        entry.scope === scope &&
+        (entry.key === name ||
+          (entry.key.endsWith('/') && name.startsWith(entry.key))),
+    );
+    return (
+      matches.find((entry) => entry.options.layer === layer) ??
+      matches.find((entry) => entry.options.layer === undefined)
+    )?.options;
+  };
+}
+
+export function getSharedIdentityKey(
+  name: string,
+  shareScope: string | string[],
+  layer?: string,
+) {
+  const component = (value: string) => `${Buffer.byteLength(value)}:${value}`;
+  const scope = Array.isArray(shareScope)
+    ? `m${shareScope.length}:${shareScope.map(component).join('')}`
+    : `s${component(shareScope)}`;
+  return `${component(scope)}${layer === undefined ? 'n' : `l${component(layer)}`}${component(name)}`;
+}
+
+export function getSharedIdentity(
+  identifier: string,
+  scopeTokenIndex: number,
+  moduleLayer?: string | null,
+) {
+  const { tokens, layer: readableLayer } = splitSharedIdentifier(
+    identifier,
+    scopeTokenIndex,
+  );
+  const webpackConsume = identifier.startsWith('consume-shared-module|')
+    ? identifier.split('|')
+    : undefined;
+  // The layer is the last field. A `||` range or an array scope adds fields
+  // before it.
+  const webpackLayer = webpackConsume?.at(-1);
+  const layer = webpackConsume
+    ? (moduleLayer ??
+      (webpackLayer === 'undefined' || webpackLayer === 'null'
+        ? undefined
+        : webpackLayer))
+    : readableLayer;
+  const suffix = identifier.match(/ \[identity:(.*)\]$/)?.[1];
+  if (suffix) {
+    const bytes = Buffer.from(suffix);
+    let offset = 0;
+    const component = () => {
+      const end = bytes.indexOf(58, offset);
+      if (end < offset) throw new Error('Invalid shared identity');
+      const length = Number(bytes.toString('utf8', offset, end));
+      if (
+        !Number.isSafeInteger(length) ||
+        length < 0 ||
+        end + 1 + length > bytes.length
+      )
+        throw new Error('Invalid shared identity');
+      offset = end + 1 + length;
+      return bytes.toString('utf8', end + 1, offset);
+    };
+    try {
+      const scope = component();
+      const marker = String.fromCharCode(bytes[offset++]);
+      if (marker !== 'l' && marker !== 'n')
+        throw new Error('Invalid shared identity');
+      const parsedLayer = marker === 'l' ? component() : undefined;
+      const name = component();
+      if (offset !== bytes.length) throw new Error('Invalid shared identity');
+      const scopeBytes = Buffer.from(scope);
+      let cursor = scope.indexOf(':') + 1;
+      const scopes: string[] = [];
+      const count = scope[0] === 's' ? 1 : Number(scope.slice(1, cursor - 1));
+      if (scope[0] === 's') cursor = 1;
+      if (
+        (scope[0] !== 's' && scope[0] !== 'm') ||
+        !Number.isSafeInteger(count) ||
+        count < 0
+      )
+        throw new Error('Invalid shared scope');
+      for (let index = 0; index < count; index++) {
+        const end = scopeBytes.indexOf(58, cursor);
+        const length = Number(scopeBytes.toString('utf8', cursor, end));
+        if (
+          end < cursor ||
+          !Number.isSafeInteger(length) ||
+          length < 0 ||
+          end + 1 + length > scopeBytes.length
+        )
+          throw new Error('Invalid shared scope');
+        scopes.push(scopeBytes.toString('utf8', end + 1, end + 1 + length));
+        cursor = end + 1 + length;
+      }
+      if (cursor !== scopeBytes.length) throw new Error('Invalid shared scope');
+      return {
+        key: suffix,
+        name,
+        layer: parsedLayer,
+        shareScope: scope[0] === 's' ? scopes[0] : scopes,
+      };
+    } catch {
+      // Ignore unsupported suffixes and retain the readable-format fallback.
+    }
+  }
+  const shareScope =
+    webpackConsume?.[1] || tokens[scopeTokenIndex]?.slice(1, -1) || 'default';
+  const nameAndVersion = tokens[scopeTokenIndex + 1] || '';
+  const name =
+    webpackConsume?.[2] ||
+    nameAndVersion.slice(0, nameAndVersion.lastIndexOf('@'));
+  const key = getSharedIdentityKey(name, shareScope, layer);
+  return { key, name, layer, shareScope };
+}
+
+function getSharedModuleName(name: string, identifier?: string): string {
+  const identity = getSharedIdentity(
+    identifier?.includes(' [identity:') ||
+      identifier?.startsWith('consume-shared-module|') ||
+      identifier?.startsWith('consume shared module ')
+      ? identifier
+      : name,
+    3,
+  );
+  return identity.layer !== undefined || identity.shareScope !== 'default'
+    ? identity.key
+    : identity.name;
 }
 
 export function getAssetsByChunkIDs(
@@ -107,7 +261,10 @@ export function getSharedModules(
         for (const sharedModule of sharedModules) {
           if (sharedModule.name === module.issuerName) {
             entryContentModuleNames.push(sharedModule.name!);
-            sum.push([getSharedModuleName(module.issuerName!), module]);
+            sum.push([
+              getSharedModuleName(module.issuerName!, sharedModule.identifier),
+              module,
+            ]);
             return sum;
           }
         }
@@ -134,7 +291,10 @@ export function getSharedModules(
               for (const issueModule of module.reasons) {
                 if (issueModule.moduleName === entryReExportModule.name) {
                   sum.push([
-                    getSharedModuleName(entryReExportModule.name!),
+                    getSharedModuleName(
+                      entryReExportModule.name!,
+                      entryReExportModule.identifier,
+                    ),
                     module,
                   ]);
                   flag = true;
@@ -155,6 +315,8 @@ export function getSharedModules(
 export function getAssetsByChunk(
   chunk: Chunk,
   entryPointNames: Array<string>,
+  // Limits which groups of `chunk` add sync files.
+  includeGroup?: (group: ChunkGroup) => boolean,
 ): StatsAssets {
   const assesSet = {
     js: {
@@ -172,7 +334,11 @@ export function getAssetsByChunk(
     type: 'sync' | 'async',
   ): void => {
     [...targetChunk.groupsIterable].forEach((chunkGroup) => {
-      if (chunkGroup.name && !entryPointNames.includes(chunkGroup.name)) {
+      if (
+        chunkGroup.name &&
+        !entryPointNames.includes(chunkGroup.name) &&
+        (type === 'async' || !includeGroup || includeGroup(chunkGroup))
+      ) {
         collectAssets(
           chunkGroup.getFiles(),
           assesSet.js[type],
@@ -204,6 +370,32 @@ export function getAssetsByChunk(
   };
 
   return assets;
+}
+
+// The container loads one chunk group for an expose. Sync assets are that
+// group's files. Async assets are the files of the groups it can load later.
+export function getAssetsByChunkGroup(group: ChunkGroup): StatsAssets {
+  const sync = { js: new Set<string>(), css: new Set<string>() };
+  const async = { js: new Set<string>(), css: new Set<string>() };
+  collectAssets(group.getFiles(), sync.js, sync.css);
+  const seen = new Set<ChunkGroup>([group]);
+  const queue = [...group.childrenIterable];
+  for (const child of queue) {
+    if (seen.has(child)) continue;
+    seen.add(child);
+    collectAssets(child.getFiles(), async.js, async.css);
+    queue.push(...child.childrenIterable);
+  }
+  return {
+    js: {
+      sync: [...sync.js],
+      async: [...async.js].filter((file) => !sync.js.has(file)),
+    },
+    css: {
+      sync: [...sync.css],
+      async: [...async.css].filter((file) => !sync.css.has(file)),
+    },
+  };
 }
 
 export function assert(condition: any, msg: string): asserts condition {

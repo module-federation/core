@@ -4,6 +4,7 @@ import {
   ProviderModuleInfo,
   isManifestProvider,
   getResourceUrl,
+  disambiguateSharedScopes,
 } from '@module-federation/sdk/core';
 import {
   EntryAssets,
@@ -270,28 +271,28 @@ export function generatePreloadAssets(
 
       if (registeredShared && typeof registeredShared.lib === 'function') {
         snapshotShared.assets.js.sync.forEach((asset) => {
-          loadedSharedJsAssets.add(asset);
+          loadedSharedJsAssets.add(getResourceUrl(remoteSnapshot, asset));
         });
         snapshotShared.assets.css.sync.forEach((asset) => {
-          loadedSharedCssAssets.add(asset);
+          loadedSharedCssAssets.add(getResourceUrl(remoteSnapshot, asset));
         });
       }
     };
-    remoteSnapshot.shared.forEach((shared) => {
+    disambiguateSharedScopes(remoteSnapshot.shared).forEach((shared) => {
       const shareInfos = options.shared?.[shared.sharedName];
       if (!shareInfos) {
         return;
       }
-      // if no version, preload all shared
-      const sharedOptions = shared.version
-        ? shareInfos.find((s) => s.version === shared.version)
-        : shareInfos;
+      const snapshotScopes = arrayOptions(shared.shareScope || 'default');
+      const sharedOptions = shareInfos.filter(
+        (s) =>
+          (!shared.version || s.version === shared.version) &&
+          (s.shareConfig.layer ?? undefined) === shared.layer &&
+          (!shared.shareScope ||
+            s.scope.some((scope) => snapshotScopes.includes(scope))),
+      );
 
-      if (!sharedOptions) {
-        return;
-      }
-      const arrayShareInfo = arrayOptions(sharedOptions);
-      arrayShareInfo.forEach((s) => {
+      sharedOptions.forEach((s) => {
         collectSharedAssets(s, shared);
       });
     });

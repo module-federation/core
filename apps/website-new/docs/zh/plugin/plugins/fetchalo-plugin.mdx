@@ -1,0 +1,246 @@
+---
+title: Fetchalo 插件
+description: 通过你自己的 fetch 加载 remote 的 manifest、入口、chunk、CSS 和媒体资源，让每个请求都能携带 Authorization 等请求头。
+---
+
+import { PackageManagerTabs, Tabs, Tab } from '@theme';
+
+# Fetchalo 插件
+
+[fetchalo](https://github.com/gioboa/fetchalo) 是一个社区插件，它通过你自己的
+`fetch` 加载指定 origin 下的 JS、CSS 和媒体资源。这些 origin 的每个请求都可以携带
+`Authorization: Bearer …` 等请求头，无需 service worker。
+
+浏览器无法为 `<script type="module">`、`import()`、`<link>`、`<img>` 或 CSS
+`url()` 请求添加请求头。service worker 可以做到，但只能在安全上下文（HTTPS 或
+`localhost`）中使用，且每个 scope 只能有一个。fetchalo 在普通 HTTP 站点上同样可用，例如部署在局域网内、需要 API key 才能访问的 remote。
+
+在 Module Federation 中，`fetchalo/federation` 运行时插件会通过 fetchalo 加载 remote 的
+manifest、`module`/`esm` 类型的 remote 入口、chunk、CSS 和媒体资源。
+
+## 安装
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add fetchalo',
+    yarn: 'yarn add fetchalo',
+    pnpm: 'pnpm add fetchalo',
+    bun: 'bun add fetchalo',
+  }}
+/>
+
+Peer dependencies（均为可选）：`webpack` 5、`@rspack/core` 或 `vite` 5-8。
+
+## 配置
+
+该插件可以在编译时或运行时使用
+
+<Tabs>
+  <Tab label="Rspack">
+    <Tabs>
+      <Tab label="rspack.config.js">
+      ```js title="rspack.config.js"
+      const {ModuleFederationPlugin} = require('@module-federation/enhanced/rspack');
+      const {FetchaloPlugin} = require('fetchalo/rspack');
+
+      module.exports = {
+        plugins: [
+          new FetchaloPlugin('./src/fetchalo.config.js'),
+          new ModuleFederationPlugin({
+            // other options
+            runtimePlugins: [
+              require.resolve('fetchalo/federation')
+            ]
+          }),
+        ],
+      };
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.js">
+      ```js title="src/fetchalo.config.js"
+      /** @type {import('fetchalo').FetchaloConfig} */
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      };
+      ```
+      </Tab>
+    </Tabs>
+  </Tab>
+  <Tab label="Webpack">
+    <Tabs>
+      <Tab label="webpack.config.js">
+      ```js title="webpack.config.js"
+      const {ModuleFederationPlugin} = require('@module-federation/enhanced/webpack');
+      const {FetchaloPlugin} = require('fetchalo/webpack');
+
+      module.exports = {
+        plugins: [
+          new FetchaloPlugin('./src/fetchalo.config.js'),
+          new ModuleFederationPlugin({
+            // other options
+            runtimePlugins: [
+              require.resolve('fetchalo/federation')
+            ]
+          }),
+        ],
+      };
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.js">
+      ```js title="src/fetchalo.config.js"
+      /** @type {import('fetchalo').FetchaloConfig} */
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      };
+      ```
+      </Tab>
+    </Tabs>
+  </Tab>
+  <Tab label="Vite">
+    <Tabs>
+      <Tab label="vite.config.ts">
+      ```ts title="vite.config.ts"
+      import {defineConfig} from 'vite';
+      import {federation} from '@module-federation/vite';
+      import {fetchalo} from 'fetchalo';
+
+      export default defineConfig({
+        plugins: [
+          fetchalo('./src/fetchalo.config.ts'),
+          federation({
+            // other options
+            runtimePlugins: ['fetchalo/federation'],
+          }),
+        ],
+      });
+      ```
+      </Tab>
+      <Tab label="src/fetchalo.config.ts">
+      ```ts title="src/fetchalo.config.ts"
+      import type {FetchaloConfig} from 'fetchalo';
+
+      export default {
+        origins: ['https://remote.example'],
+        headers: async (url) => ({ Authorization: `Bearer ${await getToken()}` }),
+      } satisfies FetchaloConfig;
+      ```
+      </Tab>
+    </Tabs>
+  </Tab>
+  <Tab label="Module Federation Runtime">
+    ```ts title="app.ts"
+    import {createInstance} from '@module-federation/enhanced/runtime';
+    import fetchaloFederation from 'fetchalo/federation';
+
+    const mf = createInstance({
+      name: 'host',
+      remotes: [
+        {
+          name: 'remote1',
+          entry: 'https://remote.example/mf-manifest.json',
+          type: 'module',
+        },
+      ],
+      plugins: [
+        fetchaloFederation({
+          origins: ['https://remote.example'],
+          headers: (url) => ({ Authorization: `Bearer ${getToken()}` }),
+        }),
+      ],
+    });
+    ```
+  </Tab>
+</Tabs>
+
+使用 Rspack 或 webpack 时，`FetchaloPlugin` 会把 fetchalo 客户端、[配置文件](#配置文件)和
+es-module-shims 插入到每个入口之前，确保它们先于应用执行；使用 Vite 时，`fetchalo` 插件会把它们注入到
+`<head>` 顶部。两种情况下，`runtimePlugins` 中的 `fetchalo/federation` 都会通过 fetchalo 加载
+manifest 和 remote 入口。
+
+使用 Module Federation 运行时 API 时，直接把 origins 和 headers 传给
+`fetchalo/federation`，插件创建时会在页面中安装 fetchalo 和 es-module-shims。也可以使用
+`mf.registerPlugins([fetchaloFederation({ ... })])`，只要在第一个 remote 加载之前调用即可。多个实例会共用第一次的安装。在
+webpack 或 Rspack 宿主中，请改用构建插件：它可以避免打包工具解析 es-module-shims。
+
+使用 Vite 时，也可以不使用 Vite 插件，只通过 `runtimePlugins` 安装 fetchalo：传入一个你自己的文件，返回
+`fetchaloFederation({ origins, headers })`。此时在 federation 运行时启动之前应用请求的文件不会被覆盖。详见
+[fetchalo README](https://github.com/gioboa/fetchalo#usage)。
+
+## 配置文件
+
+构建插件接收一个配置文件（`.js` 或 `.ts`）的路径，并在应用之前于浏览器中加载它。它的默认导出包含：
+
+- `origins`：需要携带请求头的 origin 列表。
+- `headers`：每个请求都会调用，因此可以返回刷新后的 token。
+
+配置文件不能导入 `origins` 中的文件。它会和应用一起打包，因此可以读取构建期的值（Vite 中的
+`import.meta.env`，webpack/Rspack 中的 `DefinePlugin` 常量）。如果需要在浏览器中计算配置，可以导出一个返回配置（或配置 Promise）的函数：
+
+```ts title="src/fetchalo.config.ts"
+export default async (): Promise<FetchaloConfig> => ({
+  origins: await fetch('/api/remote-origins').then((res) => res.json()),
+  headers: (url) => ({ Authorization: `Bearer ${getToken()}` }),
+});
+```
+
+Module Federation Runtime 标签页中的 `fetchaloFederation()` 同样接受 `{ origins, headers }`
+的 Promise。在以 Promise 形式提供的配置 resolve 之前，发往这些 origin 的请求会等待它，配置就绪后
+`window.fetchalo.ready` 会 resolve。
+
+## API
+
+```ts
+// fetchalo/federation：传入配置时安装 fetchalo；不传时使用构建插件已安装的 fetchalo。
+fetchaloFederation(config?: FetchaloConfig | Promise<FetchaloConfig>);
+
+// 构建插件：配置文件的路径。
+new FetchaloPlugin(configPath: string); // fetchalo/webpack、fetchalo/rspack
+fetchalo(configPath: string); // Vite
+
+// 配置文件的默认导出：
+export default FetchaloConfig | (() => FetchaloConfig | Promise<FetchaloConfig>);
+
+type FetchaloConfig = {
+  origins: string[];
+  headers: (url: string) => HeadersInit | undefined | Promise<HeadersInit | undefined>;
+};
+```
+
+## CORS
+
+remote 服务端需要响应该请求头的 CORS 预检请求，返回 `Access-Control-Allow-Origin` 和
+`Access-Control-Allow-Headers: Authorization`。
+
+## 覆盖的请求
+
+对于配置的 `origins` 下的文件：
+
+| 请求                                                                      | 加载方式                                                                                       |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| JS 模块：入口、静态 import、`import()`                                    | [es-module-shims](https://github.com/guybedford/es-module-shims) 的 shim 模式及其 `fetch` 钩子 |
+| Module Federation manifest 和 remote 入口                                 | `fetchalo/federation` 运行时插件                                                               |
+| `<link rel="stylesheet">` 及其 `@import`                                  | fetch 后通过 `blob:` URL 提供                                                                  |
+| 上述样式表中的 `url()`、`<style>` 文本、CSSOM 规则（CSS-in-JS）和内联样式 | 改写为 `blob:` URL                                                                             |
+| `<img>`、`<source>`、`<video>`、`<audio>` 的 `src`、`srcset`、`poster`    | fetch 后通过 `blob:` URL 提供                                                                  |
+
+指向这些 origin 的 `<link rel="modulepreload|preload|prefetch">` 提示会被移除：模块由
+es-module-shims 获取，其他文件在使用时获取。
+
+## 限制
+
+- 仅支持浏览器，不支持 SSR。
+- 仅支持构建产物中的 `module`/`esm` 类型 remote。`var` 类型的 remote 通过 `<script>`
+  标签加载，无法携带请求头。
+- 不覆盖：页面 HTML 中直接写入的元素、SVG `<image>`、`<iframe>`、`<object>`、worker、
+  `adoptedStyleSheets`、通过 `innerHTML` 创建的元素，以及被加载代码自身发起的 `fetch()` 调用。
+- 媒体资源会被完整下载为 `blob:` URL：不支持流式加载和 range 请求。`blob:` URL 在页面生命周期内保留。
+- 它会修改 DOM 原型（`appendChild`、`setAttribute`、`insertRule`、媒体属性 setter），但只作用于配置的 origin。
+
+## 示例
+
+fetchalo 仓库提供了在 Chromium、Firefox 和 WebKit 中运行的
+[完整示例](https://github.com/gioboa/fetchalo/tree/main/examples)：一个只在携带
+`Authorization` 请求头时才返回文件的 remote，以及分别使用 webpack、Rspack、Vite 和 Module
+Federation 运行时 API 构建的宿主。

@@ -83,6 +83,11 @@ export default {
           description: 'Custom chunk name for the exposed module.',
           type: 'string',
         },
+        layer: {
+          description: 'Layer in which to build the exposed module.',
+          type: 'string',
+          minLength: 1,
+        },
       },
       required: ['import'],
     },

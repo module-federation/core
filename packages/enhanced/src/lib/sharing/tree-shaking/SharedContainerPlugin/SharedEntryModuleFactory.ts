@@ -4,11 +4,11 @@ import SharedEntryModule from './SharedEntryModule';
 
 const ModuleFactory = require(
   normalizeWebpackPath('webpack/lib/ModuleFactory'),
-) as typeof import('webpack/lib/ModuleFactory');
+) as typeof import('webpack/lib/module/ModuleFactory');
 import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
-} from 'webpack/lib/ModuleFactory';
+} from 'webpack/lib/module/ModuleFactory';
 
 export default class SharedEntryModuleFactory extends ModuleFactory {
   /**
@@ -28,7 +28,7 @@ export default class SharedEntryModuleFactory extends ModuleFactory {
 
     callback(null, {
       // @ts-ignore
-      module: new SharedEntryModule(dep.name, dep.request),
+      module: new SharedEntryModule(dep.name, dep.request, dep.layer),
     });
   }
 }

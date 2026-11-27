@@ -1,9 +1,8 @@
-/*
- * This file was automatically generated.
- * DO NOT MODIFY BY HAND.
- * Run `yarn fix:special` to update
- */
-declare const check: (
-  options: import('../../../declarations/plugins/sharing/ProvideSharedPlugin').ProvideSharedPluginOptions,
-) => boolean;
-export = check;
+export = o;
+declare function o(e: any, { instancePath: t, parentData, parentDataProperty, rootData }?: {
+    instancePath?: string;
+    rootData?: any;
+}): boolean;
+declare namespace o {
+    export { o as default };
+}

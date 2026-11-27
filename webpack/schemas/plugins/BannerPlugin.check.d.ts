@@ -1,9 +1,8 @@
-/*
- * This file was automatically generated.
- * DO NOT MODIFY BY HAND.
- * Run `yarn fix:special` to update
- */
-declare const check: (
-  options: import('../../declarations/plugins/BannerPlugin').BannerPluginArgument,
-) => boolean;
-export = check;
+export = s;
+declare function s(l: any, { instancePath: e, parentData, parentDataProperty, rootData }?: {
+    instancePath?: string;
+    rootData?: any;
+}): boolean;
+declare namespace s {
+    export { s as default };
+}
