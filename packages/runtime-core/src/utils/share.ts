@@ -20,6 +20,107 @@ import { satisfy } from './semver';
 import { SyncWaterfallHook } from './hooks';
 import { addUniqueItem, arrayOptions } from './tool';
 
+type SharedVersions = ShareScopeMap[string][string];
+const LAYERED_SHARES = Symbol.for('module-federation.share-scope.layers');
+type LayeredShareScope = ShareScopeMap[string] & {
+  [LAYERED_SHARES]?: Map<string, Map<string, SharedVersions>>;
+};
+
+export function getOwnEntry<T>(entries: Record<string, T>, key: string) {
+  return Object.prototype.hasOwnProperty.call(entries, key)
+    ? entries[key]
+    : undefined;
+}
+
+export function defineEntry<T>(
+  entries: Record<string, T>,
+  key: string,
+  value: T,
+) {
+  Object.defineProperty(entries, key, {
+    value,
+    enumerable: true,
+    configurable: true,
+    writable: true,
+  });
+  return value;
+}
+
+// Share scopes are exchanged by reference. Keep ordinary version entries
+// unchanged for older runtimes; layered-only packages must not create empty
+// enumerable package entries that those runtimes mistake for a provider.
+export function getSharedVersions(
+  scope: ShareScopeMap[string] | undefined,
+  pkgName: string,
+  layer?: string | null,
+  create = false,
+): SharedVersions | undefined {
+  if (!scope) return;
+  if (layer == null) {
+    return (
+      getOwnEntry(scope, pkgName) ??
+      (create ? defineEntry(scope, pkgName, {}) : undefined)
+    );
+  }
+  const layeredScope = scope as LayeredShareScope;
+  let packages = layeredScope[LAYERED_SHARES];
+  if (!packages && create) {
+    packages = new Map();
+    Object.defineProperty(scope, LAYERED_SHARES, {
+      value: packages,
+      configurable: true,
+    });
+  }
+  let layers = packages?.get(pkgName);
+  if (!layers && create) {
+    layers = new Map();
+    packages!.set(pkgName, layers);
+  }
+  let versions = layers?.get(layer);
+  if (!versions && create) {
+    versions = {};
+    layers!.set(layer, versions);
+  }
+  return versions;
+}
+
+export function getAllSharedVersions(scope: ShareScopeMap[string]) {
+  const entries = Object.entries(scope).map(([pkgName, versions]) => ({
+    pkgName,
+    layer: undefined as string | undefined,
+    versions,
+  }));
+  for (const [pkgName, layers] of (scope as LayeredShareScope)[
+    LAYERED_SHARES
+  ] || []) {
+    for (const [layer, versions] of layers)
+      entries.push({ pkgName, layer, versions });
+  }
+  return entries;
+}
+
+export function removeSharedVersion(
+  scope: ShareScopeMap[string],
+  pkgName: string,
+  layer: string | undefined,
+  version: string,
+) {
+  const versions = getSharedVersions(scope, pkgName, layer);
+  if (!versions) return;
+  delete versions[version];
+  if (Object.keys(versions).length) return;
+  if (layer === undefined) {
+    delete scope[pkgName];
+    return;
+  }
+  const layeredScope = scope as LayeredShareScope;
+  const packages = layeredScope[LAYERED_SHARES];
+  const layers = packages?.get(pkgName);
+  layers?.delete(layer);
+  if (!layers?.size) packages?.delete(pkgName);
+  if (!packages?.size) delete layeredScope[LAYERED_SHARES];
+}
+
 function formatShare(
   shareArgs: ShareArgs,
   from: string,
@@ -85,28 +186,31 @@ export function formatShareConfigs(
   const shareArgs = newOptions.shared || {};
   const from = newOptions.name;
 
-  const newShareInfos = Object.keys(shareArgs).reduce((res, pkgName) => {
-    const arrayShareArgs = arrayOptions(shareArgs[pkgName]);
-    res[pkgName] = res[pkgName] || [];
-    arrayShareArgs.forEach((shareConfig) => {
-      res[pkgName].push(
+  const newShareInfos: ShareInfos = {};
+  for (const [pkgName, args] of Object.entries(shareArgs)) {
+    defineEntry(
+      newShareInfos,
+      pkgName,
+      arrayOptions(args).map((shareConfig) =>
         formatShare(shareConfig, from, pkgName, newOptions.shareStrategy),
-      );
-    });
-    return res;
-  }, {} as ShareInfos);
+      ),
+    );
+  }
 
   const allShareInfos = {
     ...prevOptions.shared,
   };
 
   Object.keys(newShareInfos).forEach((shareKey) => {
-    if (!allShareInfos[shareKey]) {
-      allShareInfos[shareKey] = newShareInfos[shareKey];
+    if (!getOwnEntry(allShareInfos, shareKey)) {
+      defineEntry(allShareInfos, shareKey, newShareInfos[shareKey]);
     } else {
       newShareInfos[shareKey].forEach((newUserSharedOptions) => {
         const isSameVersion = allShareInfos[shareKey].find(
-          (sharedVal) => sharedVal.version === newUserSharedOptions.version,
+          (sharedVal) =>
+            sharedVal.version === newUserSharedOptions.version &&
+            (sharedVal.shareConfig.layer ?? undefined) ===
+              (newUserSharedOptions.shareConfig.layer ?? undefined),
         );
         if (!isSameVersion) {
           allShareInfos[shareKey].push(newUserSharedOptions);
@@ -231,15 +335,12 @@ const isMatchUsedExports = (
 };
 
 function findSingletonVersionOrderByVersion(
-  shareScopeMap: ShareScopeMap,
-  scope: string,
-  pkgName: string,
+  versions: SharedVersions,
   treeShaking?: TreeShakingArgs,
 ): {
   version: string;
   useTreesShaking: boolean;
 } {
-  const versions = shareScopeMap[scope][pkgName];
   let version = '';
   let useTreesShaking = shouldUseTreeShaking(treeShaking);
   // return false means use prev version
@@ -257,7 +358,7 @@ function findSingletonVersionOrderByVersion(
   };
 
   if (useTreesShaking) {
-    version = findVersion(shareScopeMap[scope][pkgName], callback);
+    version = findVersion(versions, callback);
     if (version) {
       return {
         version,
@@ -268,7 +369,7 @@ function findSingletonVersionOrderByVersion(
   }
 
   return {
-    version: findVersion(shareScopeMap[scope][pkgName], callback),
+    version: findVersion(versions, callback),
     useTreesShaking,
   };
 }
@@ -282,15 +383,12 @@ const isLoadingOrLoaded = (shared: {
 };
 
 function findSingletonVersionOrderByLoaded(
-  shareScopeMap: ShareScopeMap,
-  scope: string,
-  pkgName: string,
+  versions: SharedVersions,
   treeShaking?: TreeShakingArgs,
 ): {
   version: string;
   useTreesShaking: boolean;
 } {
-  const versions = shareScopeMap[scope][pkgName];
   let version = '';
   let useTreesShaking = shouldUseTreeShaking(treeShaking);
 
@@ -329,7 +427,7 @@ function findSingletonVersionOrderByLoaded(
   };
 
   if (useTreesShaking) {
-    version = findVersion(shareScopeMap[scope][pkgName], callback);
+    version = findVersion(versions, callback);
     if (version) {
       return {
         version,
@@ -340,7 +438,7 @@ function findSingletonVersionOrderByLoaded(
   }
 
   return {
-    version: findVersion(shareScopeMap[scope][pkgName], callback),
+    version: findVersion(versions, callback),
     useTreesShaking,
   };
 }
@@ -380,18 +478,24 @@ export function getRegisteredShare(
   const scopes = Array.isArray(scope) ? scope : [scope];
 
   for (const sc of scopes) {
-    if (
-      shareConfig &&
-      localShareScopeMap[sc] &&
-      localShareScopeMap[sc][pkgName]
-    ) {
+    const layer = shareConfig?.layer;
+    const scope = getOwnEntry(localShareScopeMap, sc);
+    const exactVersions = getSharedVersions(scope, pkgName, layer);
+    const versions =
+      exactVersions && Object.keys(exactVersions).length
+        ? exactVersions
+        : layer != null
+          ? getSharedVersions(scope, pkgName)
+          : exactVersions;
+    if (shareConfig && versions && Object.keys(versions).length) {
       const { requiredVersion } = shareConfig;
       const findShareFunction = getFindShareFunction(strategy);
       const { version: maxOrSingletonVersion, useTreesShaking } =
-        findShareFunction(localShareScopeMap, sc, pkgName, treeShaking);
+        findShareFunction(versions, treeShaking);
 
       const defaultResolver = () => {
-        const shared = localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+        const versions = params.shareScopeMap[sc][pkgName];
+        const shared = versions[maxOrSingletonVersion];
         if (shareConfig.singleton) {
           if (
             typeof requiredVersion === 'string' &&
@@ -429,9 +533,7 @@ export function getRegisteredShare(
 
           const _usedTreeShaking = shouldUseTreeShaking(treeShaking);
           if (_usedTreeShaking) {
-            for (const [versionKey, versionValue] of Object.entries(
-              localShareScopeMap[sc][pkgName],
-            )) {
+            for (const [versionKey, versionValue] of Object.entries(versions)) {
               if (
                 !shouldUseTreeShaking(
                   versionValue.treeShaking,
@@ -449,9 +551,7 @@ export function getRegisteredShare(
               }
             }
           }
-          for (const [versionKey, versionValue] of Object.entries(
-            localShareScopeMap[sc][pkgName],
-          )) {
+          for (const [versionKey, versionValue] of Object.entries(versions)) {
             if (satisfy(versionKey, requiredVersion)) {
               return {
                 shared: versionValue,
@@ -463,7 +563,13 @@ export function getRegisteredShare(
         return;
       };
       const params = {
-        shareScopeMap: localShareScopeMap,
+        shareScopeMap:
+          layer == null
+            ? localShareScopeMap
+            : {
+                ...localShareScopeMap,
+                [sc]: { ...localShareScopeMap[sc], [pkgName]: versions },
+              },
         scope: sc,
         pkgName,
         version: maxOrSingletonVersion,
@@ -492,7 +598,7 @@ export function getTargetSharedOptions(options: {
     if (!sharedOptions) {
       return undefined;
     }
-    const shareVersionMap: ShareScopeMap[string][string] = {};
+    const shareVersionMap: ShareScopeMap[string][string] = Object.create(null);
     sharedOptions.forEach((shared) => {
       shareVersionMap[shared.version] = shared;
     });
@@ -530,7 +636,17 @@ export function getTargetSharedOptions(options: {
     return out;
   };
 
-  return merge(resolver(shareInfos[pkgName]), extraOptions?.customShareInfo);
+  const layer = extraOptions?.customShareInfo?.shareConfig?.layer;
+  const candidates = shareInfos[pkgName];
+  const exact = candidates?.filter(
+    (shared) =>
+      (shared.shareConfig.layer ?? undefined) === (layer ?? undefined),
+  );
+  const matching =
+    exact?.length || layer == null
+      ? exact
+      : candidates?.filter((shared) => shared.shareConfig.layer == null);
+  return merge(resolver(matching), extraOptions?.customShareInfo);
 }
 
 export const addUseIn = (

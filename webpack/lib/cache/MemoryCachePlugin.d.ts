@@ -1,18 +1,12 @@
 export = MemoryCachePlugin;
-/** @typedef {import("../Cache").Data} Data */
-/** @typedef {import("../Cache").Etag} Etag */
-/** @typedef {import("../Compiler")} Compiler */
+/** @import { Data, Etag } from "./Cache" */
+/** @import Compiler from "../Compiler" */
 declare class MemoryCachePlugin {
     /**
-     * Apply the plugin
+     * Applies the plugin by registering its hooks on the compiler.
      * @param {Compiler} compiler the compiler instance
      * @returns {void}
      */
     apply(compiler: Compiler): void;
 }
-declare namespace MemoryCachePlugin {
-    export { Data, Etag, Compiler };
-}
-type Data = import("../Cache").Data;
-type Etag = import("../Cache").Etag;
-type Compiler = import("../Compiler");
+import type Compiler from "../Compiler";

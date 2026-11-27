@@ -32,3 +32,7 @@ new StatsPlugin(mfOptions, {
   bundler: 'webpack',
 }).apply(compiler);
 ```
+
+For Webpack, the plugin collects manifest data from the compilation graph. It
+reads `stats.toJson()` only when the compiler does not provide the federation
+metadata, for example with Webpack's built-in `ModuleFederationPlugin`.

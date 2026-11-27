@@ -3,8 +3,8 @@
  */
 
 import type { WebpackOptionsNormalized } from 'webpack';
-import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
-import type { InputFileSystem } from 'webpack/lib/util/fs';
+import type { ResolverWithOptions } from 'webpack/lib/resolve/ResolverFactory';
+import type { InputFileSystem } from 'webpack/lib/fs/fs';
 import { createMockCompilation, createWebpackMock } from './utils';
 
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()

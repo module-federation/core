@@ -1,4 +1,5 @@
 /**
+ * Generates javascript hmr.
  * @param {string} type unique identifier used for HMR runtime properties
  * @returns {string} HMR runtime code
  */

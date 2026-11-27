@@ -87,11 +87,7 @@ class AsyncEntryStartupPlugin {
       compilation,
     ).renderStartup.tap(
       'AsyncEntryStartupPlugin',
-      (
-        source: sources.Source,
-        _renderContext: Module,
-        upperContext: StartupRenderContext,
-      ) => {
+      (source, _renderContext, upperContext) => {
         const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
         if (upperContext?.chunk.id && isSingleRuntime) {
           if (upperContext?.chunk.hasRuntime()) {
@@ -336,14 +332,17 @@ class AsyncEntryStartupPlugin {
     source: sources.Source,
   ) {
     const { Template } = compiler.webpack;
-    const experiments = compiler.options?.experiments;
-    const experimentsRecord =
-      experiments && typeof experiments === 'object'
-        ? (experiments as Record<string, unknown>)
-        : null;
+    const { experiments, output } = compiler.options;
+    // Webpack 5.111 reports top-level await as an output capability. Before
+    // 5.102 it was an experiment. Between them it is always on for ESM output
+    // and has no setting.
     const hasTopLevelAwait =
-      !!experimentsRecord && !!experimentsRecord['topLevelAwait'];
-    if (hasTopLevelAwait && compiler.options?.experiments?.outputModule) {
+      output.environment?.topLevelAwait ??
+      (experiments as { topLevelAwait?: boolean } | undefined)?.topLevelAwait ??
+      true;
+    // Webpack 5.112 ignores experiments.outputModule. Older webpack derives
+    // output.module from it, so output.module is correct on every version.
+    if (hasTopLevelAwait && output.module) {
       return Template.asString([
         'var promiseTrack = [];',
         Template.asString(initialEntryModules),
