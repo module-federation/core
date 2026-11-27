@@ -10,11 +10,11 @@ Consulta aquí la lista de proyectos de ejemplo: [React i18n](https://github.com
 
 ## Descripción general
 
-En el ámbito de los micro-frontends, es fundamental que cada aplicación sea lo más autónoma posible. Sin embargo, surgen escenarios en los que la comunicación entre aplicaciones es inevitable. Un requisito habitual es sincronizar las preferencias de idioma entre micro-frontends, por ejemplo, cuando un usuario cambia la configuración de idioma en una aplicación y el cambio se propaga a todos los micro-frontends integrados. Esta documentación describe una estrategia para implementar la internacionalización con la biblioteca `react-i18next` dentro de una arquitectura micro-frontend basada en Module Federation.
+Cuando un usuario cambia de idioma, normalmente espera que cambie en toda la aplicación. Si usas micro-frontends, tienes que sincronizar esa preferencia entre ellos. En esta guía verás cómo hacerlo con `react-i18next` y Module Federation.
 
 ## Escenario
 
-Imagina dos aplicaciones: App A (la aplicación contenedora) y App B (la aplicación remota). Aunque App B funciona de forma independiente como aplicación autónoma, también está diseñada para integrarse dentro de App A en runtime. Nuestro objetivo es sincronizar sin fricciones la configuración de idioma entre App A y App B, de modo que ambas aplicaciones puedan gestionar y mostrar su contenido localizado.
+Imagina dos aplicaciones, App A y App B. App B puede funcionar por separado o cargarse dentro de App A como aplicación remota. Queremos que ambas muestren su contenido en el idioma que elija el usuario.
 
 ## Arquitectura e implementación
 
@@ -206,5 +206,5 @@ const App = () => {
 export default App;
 ```
 
-En este ejemplo, `LanguageSwitcher` solo se renderiza cuando App B no está integrada dentro de App A, según el estado `isRemote` que determina el hook `useIsRemote`. Este enfoque garantiza que componentes como los selectores de idioma solo se muestren en los contextos adecuados, lo que mejora la experiencia de usuario y mantiene la independencia de las aplicaciones micro-frontend.
+En este ejemplo, `LanguageSwitcher` solo aparece cuando App B se ejecuta por separado. Cuando se carga dentro de App A, usa el selector de idioma de App A.
 

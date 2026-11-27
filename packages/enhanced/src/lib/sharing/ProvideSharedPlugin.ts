@@ -26,7 +26,7 @@ import { createSchemaValidation } from '../../utils';
 import path from 'path';
 const { satisfy, parseRange } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
-) as typeof import('webpack/lib/util/semver');
+) as typeof import('webpack/lib/sharing/semver');
 import {
   addSingletonFilterWarning,
   testRequestFilters,

@@ -1,5 +1,5 @@
 /** @rstest-environment node */
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -10,7 +10,10 @@ import type { Manifest, Stats } from '@module-federation/sdk';
 const nativeRequire = process
   .getBuiltinModule('module')
   .createRequire(__filename);
-const webpack = nativeRequire('webpack');
+const { normalizeWebpackPath } = nativeRequire(
+  '@module-federation/sdk/normalize-webpack-path',
+);
+const webpack = nativeRequire(normalizeWebpackPath('webpack'));
 const manifestRequire = process
   .getBuiltinModule('module')
   .createRequire(nativeRequire.resolve('@module-federation/manifest'));
@@ -40,7 +43,9 @@ it.each([
 ] as const)(
   '%s host loads %s remote (layers: %s, separate scopes: %s, manifest: %s)',
   async (hostBundler, remoteBundler, layered, separateScopes, emitManifest) => {
-    const directory = await mkdtemp(path.join(tmpdir(), 'mf-layer-parity-'));
+    const directory = await realpath(
+      await mkdtemp(path.join(tmpdir(), 'mf-layer-parity-')),
+    );
     const requests: string[] = [];
     const server = createServer(async (request, response) => {
       requests.push(request.url!);

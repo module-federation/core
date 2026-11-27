@@ -1,24 +1,24 @@
-# Versión estable de MF 2.0: equilibrio entre productividad del desarrollador y rendimiento extremo
+# MF 2.0 ya tiene versión estable {#versión-estable-de-mf-20-equilibrio-entre-productividad-del-desarrollador-y-rendimiento-extremo}
 
-Hace un año liberamos como código abierto Module Federation 2.0 ([MF 2.0](https://module-federation.io/en/blog/announcement.html)) y, desde entonces, hemos recibido una gran cantidad de comentarios y sugerencias valiosas de la comunidad. Creemos que una solución de micro-frontends madura no solo debe mejorar la eficiencia del desarrollo colaborativo, sino también ofrecer un motor central que permita un rendimiento extremo. Con esto en mente, hemos dedicado el último año a pulir a fondo MF 2.0 y ampliar sus capacidades.
+Hace un año publicamos Module Federation 2.0 ([MF 2.0](https://module-federation.io/en/blog/announcement.html)) como código abierto. Desde entonces, los comentarios de la comunidad nos han ayudado a decidir qué mejorar. Hemos dedicado este año a reducir los tiempos de build y de carga, ampliar las integraciones y hacer más fácil trabajar con MF.
 
-Hoy nos complace anunciar que **MF 2.0 ya es oficialmente estable**. La versión estable ofrece potentes optimizaciones de rendimiento, cubre una gama más amplia de escenarios de despliegue y mejora significativamente la experiencia de desarrollo.
+**MF 2.0 ya es estable.** Aquí te contamos qué cambia y cómo puedes usar las nuevas funciones en tu proyecto.
 
-## Sistema de optimización de rendimiento de extremo a extremo
-MF 2.0 reestructura de forma sistemática el pipeline de rendimiento de las aplicaciones micro-frontend en cuatro etapas: **build, carga de recursos, renderizado y obtención de datos**.
+## Mejoras de rendimiento {#sistema-de-optimización-de-rendimiento-de-extremo-a-extremo}
+MF 2.0 incluye mejoras en cuatro etapas de una aplicación con micro-frontends: build, carga de recursos, renderizado y obtención de datos.
 
-Estas capacidades no existen de forma aislada; trabajan juntas para formar un sistema de optimización de rendimiento de extremo a extremo diseñado para escenarios de module federation.
+Puedes combinar estas funciones para mejorar el rendimiento en varias etapas.
 
-**Todas las capacidades admiten una adopción incremental**. Puedes habilitarlas de forma gradual según las necesites, sin reescribir de golpe tu arquitectura actual y sin comprometer la estabilidad de los sistemas existentes.
+Puedes activar cada función cuando la necesites, sin reescribir de golpe tu aplicación.
 
 ### Tree shaking para dependencias shared
-Las dependencias shared tradicionales evitan la carga duplicada, pero para garantizar su completitud, las bibliotecas compartidas suelen **empaquetarse y exponerse como paquetes completos**. Aunque solo uses una pequeña parte, sigues teniendo que cargar toda la biblioteca, lo que hace que el tamaño de los bundles crezca continuamente.
+Las dependencias shared tradicionales evitan cargar varias copias de una biblioteca, pero suelen empaquetarla entera. Aunque solo uses una pequeña parte, tienes que descargarla completa.
 
 En **MF 2.0**, este problema está resuelto:
 
 **Las dependencias shared ahora admiten tree shaking.**
 
-Con solo habilitar `treeShaking`, MF puede podar bajo demanda las dependencias shared sin sacrificar la naturaleza dinámica de module federation. Conserva únicamente los módulos que realmente es probable que se usen, lo que reduce significativamente el tamaño de los bundles shared sin perder compatibilidad con los proyectos existentes.
+Al activar `treeShaking`, MF puede generar bundles shared con solo los módulos que se prevé usar. Así reduce el tamaño de las dependencias sin perder la carga dinámica ni la compatibilidad con los proyectos existentes.
 
 ![](https://module-federation-assest.netlify.app/document/announcement/blog/v2-stable-version/enable-shared-tree-shaking.png)
 
@@ -26,7 +26,7 @@ MF 2.0 ofrece dos modos para adaptarse a distintos escenarios:
 
 - **runtime-infer**: sin dependencias externas y listo para usar. En runtime, MF intenta primero reutilizar los bundles shared con tree shaking que ya están cargados; si sus capacidades no son suficientes, recurre automáticamente a cargar la dependencia completa para garantizar la funcionalidad. Puedes mejorar la eficacia de la reutilización con `usedExports`.
 
-- **server-calc**: un modo en el que el servidor o el sistema de CI analiza el uso de dependencias en varias aplicaciones y produce un resultado de poda de shared óptimo a nivel global, adecuado para sistemas grandes.
+- **server-calc**: el servidor o el sistema de CI analiza qué partes de cada dependencia usan las aplicaciones y genera un bundle shared con lo que necesitan entre todas.
 
 También se incluye un **panel de análisis visual** que facilita ver cómo se usan las dependencias shared y cuánto tamaño de bundle ahorran.
 
@@ -37,20 +37,20 @@ En una biblioteca de componentes grande como **Ant Design**, cuando una aplicaci
 ![Resultado del análisis](https://module-federation-assest.netlify.app/document/announcement/blog/v2-stable-version/analyze-result.png)
 
 ### Renderizado del lado del servidor (SSR)
-SSR genera el HTML completo en el servidor y lo devuelve directamente al navegador, de modo que las páginas pueden renderizarse sin esperar a la hidratación en el cliente. Esto mejora de forma drástica el **rendimiento de la primera pantalla** y el **SEO**. Para aplicaciones web medianas y grandes, SSR se ha convertido prácticamente en una capacidad estándar.
+SSR genera el HTML en el servidor y lo envía al navegador. Así, el navegador puede mostrar el contenido antes de la hidratación en el cliente. Esto puede ayudar a mostrar antes la página y a que los buscadores accedan a su contenido.
 
-Sin embargo, en las arquitecturas de micro-frontends, SSR ha sido históricamente difícil de implementar. Las primeras versiones de MF no cubrían esta capacidad, lo que obligaba a los desarrolladores a elegir entre **flexibilidad arquitectónica** y **ventajas de rendimiento**.
+Integrar SSR con micro-frontends ha sido complicado, y las primeras versiones de MF no incluían soporte para ello.
 
-En **MF 2.0**, este compromiso desaparece.
+MF 2.0 añade soporte para SSR.
 
-Puedes usar **MF SSR** directamente dentro de **{ props.framework || 'Modern.js' }**, lo que también aporta capacidades de SSR de alto rendimiento a las aplicaciones micro-frontend.
+Puedes usar MF SSR en { props.framework || 'Modern.js' } para renderizar tus micro-frontends en el servidor.
 
 { props.ssr || '' }
 
 ### Precarga de datos isomórfica
-MF 2.0 introduce una nueva **solución isomórfica de obtención de datos** que admite escenarios tanto de **SSR como de CSR**. Ofrece las APIs integradas **`prefetch`** y **`cache`** para unificar la precarga de datos y la gestión de la caché, lo que garantiza un rendimiento estable y predecible en los distintos modos de renderizado.
+MF 2.0 permite obtener datos tanto al renderizar en el servidor, con SSR, como en el cliente, con CSR. Las APIs `prefetch` y `cache` te permiten precargar datos y guardar los resultados en caché.
 
-Gracias a la precarga y la caché, las páginas pueden preparar los datos críticos antes de renderizar, evitando solicitudes repetidas y cargas en cascada, lo que mejora significativamente tanto la carga inicial como la capacidad de respuesta interactiva.
+Así puedes preparar los datos antes de renderizar la página y evitar solicitudes repetidas o peticiones que esperan a que terminen otras.
 
 { props.dataSolution || '' }
 
@@ -58,18 +58,18 @@ Gracias a la precarga y la caché, las páginas pueden preparar los datos críti
 { props.serverPreload || '' }
 
 
-### Capacidades impulsadas por Rust
-En proyectos grandes, la **generación del manifest** suele convertirse en un cuello de botella de rendimiento durante la fase de build. MF 2.0 traslada esta capacidad central a una **implementación en Rust**, aprovechando el alto rendimiento y la seguridad de memoria de Rust para reducir sustancialmente el tiempo necesario para generar los manifests.
+### Generación del manifest e inicio asíncrono con Rust {#capacidades-impulsadas-por-rust}
+Generar el manifest puede ralentizar el build en proyectos grandes. MF 2.0 incorpora una implementación en Rust para reducir ese tiempo.
 
-Al mismo tiempo, **AsyncStartUp** también se ha reescrito en Rust. Ya no necesitas configurar entry points asíncronos para obtener capacidades equivalentes, y los riesgos de rendimiento de la primera pantalla asociados se eliminan de forma efectiva, lo que hace que la ruta de arranque de la aplicación sea más sencilla, estable y eficiente.
+AsyncStartUp también se ha reescrito en Rust. Se encarga del inicio asíncrono para que no tengas que configurar los entry points manualmente.
 
 { props.deploy || '' }
 
-## Un sistema de depuración más potente
-MF 2.0 construye un sistema de depuración completo en torno a la **observabilidad y la depurabilidad**. Hace que las dependencias shared, las relaciones entre módulos y los posibles efectos secundarios sean **visibles, rastreables y detectables de antemano**, lo que reduce enormemente la incertidumbre al desarrollar e integrar aplicaciones dinámicas.
+## Herramientas para depurar tu aplicación {#un-sistema-de-depuración-más-potente}
+Con las herramientas de depuración de MF 2.0 puedes ver qué dependencias se comparten, cómo se relacionan los módulos y qué efectos secundarios pueden tener antes de integrarlos.
 
 ### Escáner de efectos secundarios
-Antes de consumir un módulo remoto, los equipos suelen necesitar evaluar si contamina variables globales, registra listeners de eventos o afecta al alcance de los estilos: incertidumbres que aumentan significativamente el costo de adoptar micro-frontends.
+Antes de cargar un módulo remoto, conviene comprobar si modifica variables globales, registra listeners de eventos o cambia estilos de otras partes de la aplicación.
 
 MF 2.0 ofrece un **Side Effect Scanner** (escáner de efectos secundarios) que analiza estáticamente los resultados del build e identifica los siguientes efectos secundarios:
 
@@ -77,13 +77,13 @@ MF 2.0 ofrece un **Side Effect Scanner** (escáner de efectos secundarios) que a
 - Listeners de eventos
 - Alcance de impacto de los selectores CSS
 
-La **herramienta CLI** que lo acompaña puede realizar los análisis automáticamente y mostrar los resultados, lo que permite a los consumers conocer los riesgos antes de la integración y, por tanto, reducir significativamente el costo de incorporar módulos federados.
+Puedes ejecutar estos análisis con la CLI y revisar los resultados antes de integrar el módulo remoto.
 
 ### Extensión de Chrome para visualizar dependencias
-Hemos actualizado por completo la extensión de Chrome existente con una nueva interfaz y capacidades de depuración más potentes, haciendo que el estado en runtime de module federation sea **visible, consultable y verificable**.
+Hemos actualizado la interfaz de la extensión de Chrome y añadido herramientas para consultar el estado de Module Federation mientras se ejecuta la página.
 
-- **Sincronización inteligente de la barra lateral**
-El panel sigue automáticamente a la página actual sin necesidad de refrescar ni volver a conectar manualmente, lo que ofrece una experiencia de depuración más fluida.
+- **Actualización automática de la barra lateral**
+El panel sigue la página actual automáticamente, sin que tengas que actualizarlo ni volver a conectarlo.
 
 
 - **Visualización de dependencias shared**
@@ -103,9 +103,9 @@ Cuando hay muchos módulos, puedes habilitar el modo de recorte para reducir el 
 *Los datos recortados solo afectan al análisis de precarga, no al comportamiento real, por lo que es seguro habilitarlo.*
 
 
-## Un ecosistema más rico
+## Más herramientas compatibles {#un-ecosistema-más-rico}
 
-MF ahora es compatible con los principales **bundlers, frameworks de aplicación y stacks de UI**, y puede ejecutarse de forma fiable en distintos ecosistemas técnicos, lo que ayuda a los equipos a introducir module federation sin cambiar sus elecciones tecnológicas actuales.
+Puedes usar MF con los siguientes bundlers, frameworks y bibliotecas de UI:
 
 - **Bundler**: Webpack / Rspack / Rollup / Rolldown
 
@@ -117,16 +117,16 @@ MF ahora es compatible con los principales **bundlers, frameworks de aplicación
 
 ![Ecosistema de MF 2.0](https://module-federation-assest.netlify.app/document/announcement/blog/v2-stable-version/ecosystem.png)
 
-Además, MF 2.0 extiende las capacidades de module federation a más escenarios críticos de desarrollo y entrega:
+MF 2.0 también añade integraciones para el servidor, la documentación y las pruebas:
 
 ### Node.js
-Ahora module federation puede usarse directamente en el **runtime de Node.js**, de modo que los módulos remotos pueden consumirse no solo desde el navegador, sino también desde **SSR, BFF y las capas de servicio de Node**, lo que permite un modelo de entrega unificado de módulos entre frontend y backend.
+Ahora puedes cargar módulos remotos directamente en Node.js. Esto permite usarlos en SSR, en un backend para el frontend o BFF, y en otros servicios de Node, además del navegador.
 
 ### División de documentación en Rspress
-En **Rspress**, MF admite dividir y cargar módulos remotos por documento o por ruta, lo que permite **descomponer y publicar de forma independiente mediante module federation** sitios de documentación grandes, algo ideal para plataformas de documentación y conocimiento con varios equipos.
+En Rspress puedes dividir y cargar módulos remotos por documento o por ruta. Así, cada equipo puede publicar su parte de la documentación por separado.
 
 ### Rstest
-Dentro del sistema de testing de **Rstest**, module federation puede cargar módulos remotos tal como ocurre en un runtime real, lo que permite que las aplicaciones micro-frontend y MF realicen **pruebas de integración y pruebas de extremo a extremo que reflejan fielmente producción**, evitando la brecha entre las pruebas y el comportamiento real en runtime.
+Con Rstest puedes cargar módulos remotos durante las pruebas de integración y de extremo a extremo. Así puedes comprobar cómo se cargan e integran con tu aplicación en runtime.
 
 ## Cambios
 ### Cambios de versión (cambios menores)
@@ -139,10 +139,10 @@ Priorizamos la **estabilidad y la compatibilidad**, por lo que esta actualizaci�
 
 ## ¿Qué viene ahora?
 ### React Server Components
-Los React Server Components (RSC) suponen un avance revolucionario en el ecosistema de React. En comparación con MF x SSR, la combinación de MF x RSC puede ofrecer un rendimiento aún mejor (con bundles mucho más pequeños) y un manejo de datos más seguro. Ya hemos validado este enfoque en demos básicas y ofreceremos un soporte y una integración más sólidos en Modern.js.
+Estamos probando la combinación de MF con React Server Components, o RSC. Frente a MF con SSR, puede reducir el tamaño de los bundles y mantener más lógica de datos en el servidor. Ya tenemos demos básicas y planeamos ampliar el soporte y la integración en Modern.js.
 
 ### Diseño pensado para la IA
-Estamos enriqueciendo gradualmente MF con **la información contextual y los metadatos que la IA necesita para usar componentes y módulos**, incluidos los límites de capacidad, las restricciones de uso, los entornos de ejecución y las relaciones de dependencia. También planeamos introducir **mecanismos cuantitativos de puntuación y confianza** para que la IA pueda entender, evaluar y seleccionar los activos de componentes.
+Estamos añadiendo metadatos para que las herramientas de IA sepan qué hace cada componente, qué restricciones tiene, dónde puede ejecutarse y de qué depende. También planeamos añadir puntuaciones y niveles de confianza que les ayuden a elegir componentes.
 
 { props.aiFriendly || '' }
 

@@ -12,7 +12,7 @@ const { dependencies } = require(
 import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
-} from 'webpack/lib/dependencies/ModuleDependency';
+} from 'webpack';
 
 class ContainerExposedDependency extends dependencies.ModuleDependency {
   exposedName: string;

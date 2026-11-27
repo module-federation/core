@@ -32,6 +32,8 @@ export function updateConsumeOptions(
             getter: sharedFallback
               ? bundlerRuntime?.getSharedFallbackGetter({
                   shareKey: data.shareKey,
+                  scope: data.shareScope,
+                  layer: data.layer,
                   factory: data.fallback,
                   webpackRequire,
                   libraryType,
@@ -109,9 +111,11 @@ export function updateConsumeOptions(
             singleton,
             requiredVersion,
             strictVersion,
+            layer,
           } = stage;
           const shareConfig: SharedConfig = {
             requiredVersion: `^${version}`,
+            layer,
           };
           const isValidValue = function (
             val: unknown,

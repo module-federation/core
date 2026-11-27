@@ -1,5 +1,7 @@
 # @module-federation/error-codes
 
+## 2.9.4
+
 ## 2.9.3
 
 ### Patch Changes

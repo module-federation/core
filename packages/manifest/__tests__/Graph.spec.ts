@@ -1,8 +1,22 @@
 /** @jest-environment node */
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Stats } from 'webpack';
 import { StatsPlugin } from '../src/StatsPlugin';
+
+// The graph collector has no public switch. Wrap it so a build can run the
+// stats reader instead.
+jest.mock('../src/collectGraph', () => {
+  const actual = jest.requireActual('../src/collectGraph');
+  return { ...actual, collectGraph: jest.fn(actual.collectGraph) };
+});
+const { collectGraph: actualCollectGraph } = jest.requireActual(
+  '../src/collectGraph',
+);
+const collectGraph: jest.Mock = jest.requireMock(
+  '../src/collectGraph',
+).collectGraph;
+afterAll(() => collectGraph.mockImplementation(actualCollectGraph));
 
 const nodeRequire = process
   .getBuiltinModule('module')
@@ -19,33 +33,60 @@ it.each([
   'native-shared',
   'enhanced-shared',
   'enhanced-prefix',
+  'enhanced-exact',
   'remotes',
 ])(
-  'collects %s with multiple runtimes and supports explicit rollback',
+  'collects %s with multiple runtimes like the stats reader',
   async (mode) => {
     const directory = await mkdtemp(path.join(__dirname, 'mf-graph-'));
     const prefix = mode === 'enhanced-prefix';
-    const shared = mode.includes('shared') || prefix;
+    const exact = mode === 'enhanced-exact';
+    const shared = mode.includes('shared') || prefix || exact;
     const native = mode === 'native-shared';
+    const withCss = mode === 'enhanced-shared';
     try {
+      if (mode === 'remotes') {
+        await mkdir(path.join(directory, 'src'));
+        await writeFile(
+          path.join(directory, 'src/consumer.js'),
+          'module.exports = require("remote/nested/Button");',
+        );
+      }
+      if (withCss) {
+        await writeFile(path.join(directory, 'shared.css'), '.shared {}');
+        await writeFile(path.join(directory, 'entry.css'), '.entry {}');
+      }
       await writeFile(
         path.join(directory, 'entry.js'),
         prefix
           ? 'module.exports = require("prefix/subpath");'
-          : mode === 'remotes'
-            ? 'module.exports = require("remote/nested/Button");'
-            : 'module.exports = require("./shared.js");',
+          : exact
+            ? 'module.exports = require("missing-exact");'
+            : mode === 'remotes'
+              ? 'module.exports = require("./src/consumer.js");'
+              : `${withCss ? 'require("./entry.css");' : ''}module.exports = require("./shared.js");`,
       );
       await writeFile(
         path.join(directory, 'shared.js'),
-        'module.exports = "shared";',
+        `${withCss ? 'require("./shared.css");' : ''}module.exports = "shared";`,
       );
       await writeFile(
         path.join(directory, 'package.json'),
         JSON.stringify({ name: 'fixture', version: '1.0.0' }),
       );
       const artifacts = [];
-      for (const useLegacyStats of [undefined, false, true]) {
+      // The second graph build reads modules from the filesystem cache.
+      for (const [build, reader] of [
+        'graph',
+        'graph',
+        'stats',
+        'rollback',
+      ].entries()) {
+        const useStatsReader = reader === 'stats';
+        const useLegacyStats = reader === 'rollback';
+        collectGraph.mockImplementation(
+          useStatsReader ? () => undefined : actualCollectGraph,
+        );
         const additionalData = jest.fn(async ({ stats }) => stats);
         const options = {
           name: 'fixture',
@@ -69,19 +110,27 @@ it.each([
                   requiredVersion: '^1.0.0',
                 },
               }
-            : shared
+            : exact
               ? {
-                  './shared.js': {
-                    version: '1.0.0',
-                    requiredVersion: '^1.0.0',
+                  'missing-exact': {
+                    import: false as const,
+                    requiredVersion: '=1.2.3',
                   },
                 }
-              : {},
-          manifest: { useLegacyStats, additionalData },
+              : shared
+                ? {
+                    './shared.js': {
+                      version: '1.0.0',
+                      requiredVersion: '^1.0.0',
+                    },
+                  }
+                : {},
+          manifest: { additionalData, useLegacyStats },
         };
         const compiler = webpack({
           context: directory,
           mode: 'development',
+          experiments: { css: withCss },
           cache: {
             type: 'filesystem',
             cacheDirectory: path.join(directory, 'cache'),
@@ -114,7 +163,7 @@ it.each([
           .mockImplementation(async function (compiler, compilation) {
             const getStats = jest.spyOn(compilation, 'getStats');
             const identifiers =
-              !native && !useLegacyStats
+              !native && !useStatsReader && !useLegacyStats
                 ? [...compilation.modules].flatMap((module) => [
                     jest.spyOn(module, 'identifier').mockImplementation(() => {
                       throw new Error('identifier parsing');
@@ -149,7 +198,7 @@ it.each([
               }),
             );
           });
-          if (useLegacyStats === false) {
+          if (build === 1) {
             const modules =
               result.toJson({ all: false, modules: true, cachedModules: true })
                 .modules || [];
@@ -163,7 +212,9 @@ it.each([
         } finally {
           collect.mockRestore();
         }
-        expect(readerCalls).toBe(native || useLegacyStats ? 1 : 0);
+        expect(readerCalls).toBe(
+          native || useStatsReader || useLegacyStats ? 1 : 0,
+        );
         expect(additionalData).toHaveBeenCalledTimes(1);
         const stats = JSON.parse(
           await readFile(path.join(directory, 'mf-stats.json'), 'utf8'),
@@ -174,7 +225,18 @@ it.each([
         expect(stats.exposes).toHaveLength(1);
         expect(stats.exposes[0].assets.js.sync.length).toBeGreaterThan(0);
         expect(stats.shared).toHaveLength(shared ? 1 : 0);
-        if (shared) expect(stats.shared[0].version).toBe('1.0.0');
+        if (mode === 'remotes')
+          expect(stats.remotes).toContainEqual(
+            expect.objectContaining({ usedIn: ['src/consumer.js'] }),
+          );
+        if (withCss) {
+          expect(stats.shared[0].assets.css.sync).not.toHaveLength(0);
+          expect(stats.exposes[0].assets.css.sync).toContain('exposed.css');
+          for (const asset of stats.shared[0].assets.css.sync)
+            expect(stats.exposes[0].assets.css.async).not.toContain(asset);
+        }
+        if (shared)
+          expect(stats.shared[0].version).toBe(exact ? '1.2.3' : '1.0.0');
         expect(manifest.metaData.types).toEqual({
           path: '',
           name: '',
@@ -201,6 +263,7 @@ it.each([
 );
 
 it('keeps unnamed import groups out of rollback expose assets', async () => {
+  collectGraph.mockImplementation(actualCollectGraph);
   const directory = await mkdtemp(path.join(__dirname, 'mf-unnamed-group-'));
   try {
     await writeFile(path.join(directory, 'package.json'), '{}');

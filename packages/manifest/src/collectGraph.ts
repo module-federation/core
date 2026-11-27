@@ -1,7 +1,6 @@
-import type { Compilation, Module, Chunk } from 'webpack';
+import type { Compilation, Module } from 'webpack';
 import type DependenciesBlock from 'webpack/lib/DependenciesBlock';
 import type {
-  StatsAssets,
   StatsExpose,
   StatsRemote,
   StatsShared,
@@ -15,9 +14,10 @@ import type {
 import path from 'path';
 import { getExposeItem, getShareItem } from './ModuleHandler';
 import {
-  getAssetsByChunk,
+  getAssetsByChunkGroup,
   getAssetsByChunkIDs,
   getSharedIdentityKey,
+  createSharedOptionsLookup,
 } from './utils';
 
 type ProvideData = {
@@ -74,16 +74,6 @@ export function collectGraph(
   const sharedKeys = new Map<Module, string>();
   const entryNames = [...compilation.entrypoints.keys()];
 
-  const addAssets = (target: StatsAssets, chunks: Iterable<Chunk>) => {
-    for (const chunk of chunks) {
-      const assets = getAssetsByChunk(chunk, entryNames, true);
-      for (const type of ['js', 'css'] as const)
-        for (const loading of ['sync', 'async'] as const)
-          target[type][loading] = [
-            ...new Set([...target[type][loading], ...assets[type][loading]]),
-          ];
-    }
-  };
   const dependencies = function* (block: DependenciesBlock): Generator<Module> {
     for (const dependency of block.dependencies) {
       const module = moduleGraph.getModule(dependency);
@@ -100,9 +90,7 @@ export function collectGraph(
     });
   }
 
-  const configuredShared = Object.entries(shared).sort(
-    ([a, av], [b, bv]) => (bv.shareKey || b).length - (av.shareKey || a).length,
-  );
+  const findSharedOptions = createSharedOptionsLookup(shared);
   const providersFirst = [...sharedData].sort(
     ([a], [b]) =>
       Number(a.type === 'consume-shared-module') -
@@ -114,35 +102,36 @@ export function collectGraph(
     const scope = data.shareScope;
     const layer = data.shareConfig.layer ?? undefined;
     const layered = layer !== undefined || Array.isArray(scope);
-    const key = layered ? getSharedIdentityKey(name, scope, layer) : name;
-    const configured = configuredShared.filter(([key, value]) => {
-      const shareKey = value.shareKey || key;
-      return (
-        (shareKey === name ||
-          (shareKey.endsWith('/') && name.startsWith(shareKey))) &&
-        JSON.stringify(value.shareScope ?? 'default') === JSON.stringify(scope)
-      );
-    });
-    const normalized = (configured.find(([, value]) => value.layer === layer) ??
-      configured.find(([, value]) => value.layer === undefined))?.[1];
+    const key =
+      layered || scope !== 'default'
+        ? getSharedIdentityKey(name, scope, layer)
+        : name;
+    const normalized = findSharedOptions(name, scope, layer);
+    // A consume-only share that is not installed has no package version.
+    // Like the legacy reader, take the version from `requiredVersion: '=1.2.3'`.
+    const required = consume ? normalized?.requiredVersion : undefined;
+    const exactVersion =
+      typeof required === 'string' && required.startsWith('=')
+        ? required.slice(1)
+        : undefined;
     const version =
       'version' in data
         ? JSON.parse(data.version)
-        : (normalized?.version ?? sharedMap[key]?.version);
+        : (exactVersion ?? normalized?.version ?? sharedMap[key]?.version);
     if (!name || !version) continue;
     sharedKeys.set(module, key);
     if (!sharedMap[key]) {
       const row = getShareItem({
         pkgName: name,
         pkgVersion: version,
-        normalizedShareOptions: layered ? normalized : shared[name],
+        normalizedShareOptions: normalized,
         hostName,
       });
       if (layered) {
         row.id = `${hostName}:shared:${key}`;
         if (layer !== undefined) row.layer = layer;
-        if (scope !== 'default') row.shareScope = scope;
       }
+      if (scope !== 'default') row.shareScope = scope;
       sharedMap[key] = row;
     }
     if (consume) {
@@ -179,10 +168,9 @@ export function collectGraph(
       const resource = connection.originModule?.nameForCondition();
       if (resource)
         usedIn.add(
-          path.relative(
-            compilation.compiler.context || process.cwd(),
-            resource,
-          ),
+          path
+            .relative(compilation.compiler.context || process.cwd(), resource)
+            .replace(/\\/g, '/'),
         );
     }
     const row: StatsRemote = {
@@ -209,7 +197,17 @@ export function collectGraph(
       const expose = exposesMap[key];
       if (!expose) continue;
       const group = chunkGraph.getBlockChunkGroup(block);
-      if (group) addAssets(expose.assets, group.chunks);
+      if (group) {
+        const assets = getAssetsByChunkGroup(group);
+        for (const type of ['js', 'css'] as const)
+          for (const loading of ['sync', 'async'] as const)
+            expose.assets[type][loading] = [
+              ...new Set([
+                ...expose.assets[type][loading],
+                ...assets[type][loading],
+              ]),
+            ];
+      }
       for (const exposed of dependencies(block)) {
         for (const target of [exposed, ...dependencies(exposed)]) {
           const sharedKey = sharedKeys.get(target);

@@ -20,4 +20,5 @@ export * from './env';
 export * from './dom';
 export * from './node';
 export * from './normalizeOptions';
+export { disambiguateSharedScopes } from './disambiguateSharedScopes';
 export { createModuleFederationConfig } from './createModuleFederationConfig';

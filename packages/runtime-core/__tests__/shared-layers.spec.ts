@@ -1,5 +1,6 @@
 import { describe, expect, it } from '@rstest/core';
 import { ModuleFederation } from '../src/core';
+import { getSharedVersions } from '../src/utils/share';
 import type { ShareArgs } from '../src/type';
 import { setGlobalFederationInstance } from '../src/global';
 import { Module } from '../src/module';
@@ -27,6 +28,60 @@ const host = (shared: ShareArgs[], name = 'layer-host') =>
   new ModuleFederation({ name, remotes: [], shared: { pkg: shared } });
 
 describe('shared layer selection', () => {
+  it('creates an own version map instead of reusing an inherited package', () => {
+    const parent = { pkg: {} };
+    const scope = Object.create(parent);
+    expect(getSharedVersions(scope, 'pkg')).toBeUndefined();
+    const versions = getSharedVersions(scope, 'pkg', undefined, true);
+    expect(versions).not.toBe(parent.pkg);
+    expect(Object.keys(scope)).toEqual(['pkg']);
+    expect(getSharedVersions(scope, 'pkg')).toBe(versions);
+  });
+
+  it('registers a package and scope named like inherited object methods', () => {
+    const mf = new ModuleFederation({
+      name: 'own-share-entries',
+      remotes: [],
+      shared: { toString: { ...provider('own'), scope: 'valueOf' } },
+    });
+    expect(Object.keys(mf.shareScopeMap)).toEqual(['valueOf']);
+    expect(Object.keys(mf.shareScopeMap['valueOf'])).toEqual(['toString']);
+    expect(Object.keys(mf.shareScopeMap['valueOf']['toString'])).toEqual([
+      '1.0.0',
+    ]);
+  });
+
+  it.each([undefined, 'server'])(
+    'uses a hook-replaced version map for layer %s',
+    async (layer) => {
+      const mf = new ModuleFederation({
+        name: `hook-map-${layer}`,
+        remotes: [],
+        shared: {
+          pkg: [
+            provider('original', layer),
+            ...(layer ? [provider('unlayered')] : []),
+          ],
+        },
+        plugins: [
+          {
+            name: 'replace-version-map',
+            resolveShare(args) {
+              const previous =
+                args.shareScopeMap[args.scope][args.pkgName]['1.0.0'];
+              args.shareScopeMap[args.scope][args.pkgName] = {
+                '1.0.0': { ...previous, get: () => () => 'replacement' },
+              };
+              return args;
+            },
+          },
+        ],
+      });
+      const get = await mf.loadShare('pkg', consume(layer));
+      expect(get && get()).toBe('replacement');
+    },
+  );
+
   for (const asyncFactory of [false, true]) {
     it(`loads legacy scope entries without shareConfig (async=${asyncFactory})`, async () => {
       const mf = new ModuleFederation({ name: 'legacy-consumer', remotes: [] });
@@ -238,10 +293,17 @@ describe('shared layer selection', () => {
 
   it('only suppresses preload assets belonging to the loaded shared layer', () => {
     const mf = host([
-      provider('server', 'server'),
+      { ...provider('server', 'server'), scope: 'tenant' },
       provider('client', 'client'),
     ]);
-    expect(mf.loadShareSync('pkg', consume('server'))()).toBe('server');
+    expect(
+      mf.loadShareSync('pkg', {
+        customShareInfo: {
+          ...consume('server').customShareInfo,
+          scope: ['tenant'],
+        },
+      })(),
+    ).toBe('server');
     const asset = (layer: string) => `${layer}.js`;
     const assets = (sync: string[]) => ({
       js: { sync, async: [] },
@@ -257,17 +319,27 @@ describe('shared layer selection', () => {
       remoteTypes: '',
       remoteTypesZip: '',
       remotesInfo: {},
-      shared: ['server', 'client'].map((layer) => ({
+      shared: (
+        [
+          ['server', undefined, 'default-server'],
+          ['server', 'tenant', 'server'],
+          ['client', 'default', 'client'],
+        ] as const
+      ).map(([layer, shareScope, file]) => ({
         sharedName: 'pkg',
         version: '1.0.0',
         layer,
-        shareScope: 'default',
-        assets: assets([asset(layer)]),
+        shareScope,
+        assets: assets([asset(file)]),
       })),
       modules: [
         {
           moduleName: 'view',
-          assets: assets([asset('server'), asset('client')]),
+          assets: assets([
+            asset('server'),
+            asset('default-server'),
+            asset('client'),
+          ]),
         },
       ],
     };
@@ -292,6 +364,7 @@ describe('shared layer selection', () => {
       snapshot,
     );
     expect(result.jsAssetsWithoutEntry).toEqual([
+      'https://remote.test/default-server.js',
       'https://remote.test/client.js',
     ]);
   });
