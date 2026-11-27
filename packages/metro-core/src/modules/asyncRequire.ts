@@ -150,9 +150,12 @@ const loaderKey = `${__METRO_GLOBAL_PREFIX__ ?? ''}__loadBundleAsync`;
 // this module in a host, and never in a remote that does not bundle `expo`.
 // The wrapper stays installed, and whatever is assigned becomes the loader
 // underneath it.
-let underlyingLoader = globalThis[loaderKey] as
-  | typeof globalThis.__loadBundleAsync
-  | undefined;
+// Outside Expo, a loader already at this key is React Native's dev loader. It
+// prepends the dev server URL to every path, so it cannot load a remote's
+// entry, and a loader is built in its place.
+let underlyingLoader = process.env.EXPO_OS
+  ? (globalThis[loaderKey] as typeof globalThis.__loadBundleAsync | undefined)
+  : undefined;
 
 function getUnderlyingLoader() {
   if (!underlyingLoader) {

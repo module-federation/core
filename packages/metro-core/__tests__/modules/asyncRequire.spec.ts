@@ -67,6 +67,10 @@ describe('federation bundle loader', () => {
       },
     },
   });
+  const requireBuilding = (builtLoader: unknown) => (name: string) =>
+    name === '@expo/metro-runtime/src/async-require/buildAsyncRequire'
+      ? { buildAsyncRequire: () => builtLoader }
+      : {};
 
   it('stays installed when Expo assigns its loader afterwards, and loads through it', async () => {
     const { context } = loadAsyncRequire({ __FEDERATION__: federation() });
@@ -84,14 +88,28 @@ describe('federation bundle loader', () => {
     const builtLoader = rs.fn(async () => undefined);
     const { context } = loadAsyncRequire({
       __FEDERATION__: federation(),
-      require: (name: string) =>
-        name === '@expo/metro-runtime/src/async-require/buildAsyncRequire'
-          ? { buildAsyncRequire: () => builtLoader }
-          : {},
+      require: requireBuilding(builtLoader),
     });
 
     await context.test__loadBundleAsync(remoteEntry);
 
     expect(builtLoader).toHaveBeenCalledWith(remoteEntry);
+  });
+
+  it("builds a loader in place of React Native's dev loader outside Expo", async () => {
+    const reactNativeLoader = rs.fn(async () => undefined);
+    const builtLoader = rs.fn(async () => undefined);
+    const { context } = loadAsyncRequire({
+      __FEDERATION__: federation(),
+      process: { env: {} },
+      // react-native's setUpDeveloperTools installs it before this module runs
+      test__loadBundleAsync: reactNativeLoader,
+      require: requireBuilding(builtLoader),
+    });
+
+    await context.test__loadBundleAsync(remoteEntry);
+
+    expect(builtLoader).toHaveBeenCalledWith(remoteEntry);
+    expect(reactNativeLoader).not.toHaveBeenCalled();
   });
 });
