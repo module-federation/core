@@ -10,6 +10,8 @@ Controla la estrategia de carga de las dependencias shared:
 
 - `'loaded-first'`: prioriza la reutilización de las dependencias shared ya cargadas. Los remotes se cargan bajo demanda en lugar de durante la inicialización. Se recomienda esta estrategia cuando quieres reutilizar dependencias ya cargadas para mejorar el rendimiento.
 
+Cuando varios contenedores registran la misma versión de una dependencia shared, un solo registro la proporciona a todos los consumidores. Un registro eager tiene prioridad sobre uno que no lo es; en otro caso, la proporciona el contenedor cuyo nombre queda último en orden. Cuando un consumidor empieza a cargar esa versión, su proveedor ya no cambia, así que todos los consumidores obtienen la misma instancia. Una versión registrada con `'loaded-first'` conserva su primer proveedor.
+
 :::warning Consideraciones sobre remotes sin conexión
 
 La estrategia `'version-first'` carga automáticamente los archivos de entrada de los remotes durante el arranque de la aplicación para inicializar las dependencias shared. Si algún remote está sin conexión o es inaccesible, se activará el hook `errorLoadRemote` con `lifecycle: 'beforeLoadShare'` durante el arranque. Sin un manejo de errores adecuado, esto puede provocar fallos en la inicialización de la aplicación.

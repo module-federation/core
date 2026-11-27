@@ -382,6 +382,12 @@ export class SharedHandler {
               ? (targetShared as TreeShakingArgs)
               : undefined,
           });
+          this.clearLoadingOnFailure({
+            pkgName,
+            shared: registeredShared,
+            loading,
+            treeShaking: useTreesShaking,
+          });
           const factory = await loading;
           this.emitAfterLoadShare({
             lifecycle: 'loadShare',
@@ -440,6 +446,12 @@ export class SharedHandler {
           treeShaking: _useTreeShaking
             ? (targetShared as TreeShakingArgs)
             : undefined,
+        });
+        this.clearLoadingOnFailure({
+          pkgName,
+          shared: resolvedShareOptions,
+          loading,
+          treeShaking: _useTreeShaking,
         });
         const factory = await loading;
         this.emitAfterLoadShare({
@@ -516,10 +528,12 @@ export class SharedHandler {
         (('eager' in activeVersion && activeVersion.eager) ||
           ('shareConfig' in activeVersion && activeVersion.shareConfig?.eager)),
       );
+      // A module that a consumer has started loading stays registered, so that later consumers get the same instance
       const shouldReplace = Boolean(
         !activeVersion ||
         (activeVersion.strategy !== 'loaded-first' &&
           !activeVersion.loaded &&
+          !activeVersion.loading &&
           (Boolean(!eager) !== !activeVersionEager
             ? eager
             : hostName > activeVersion.from)),
@@ -834,6 +848,36 @@ export class SharedHandler {
       if (from && registeredShared.from !== from) {
         registeredShared.from = from;
       }
+    });
+  }
+
+  // A registered module whose factory failed to load stops counting as loading, so that it can be replaced or
+  // loaded again. The entries are collected now: a share scope can be replaced while the load is in flight.
+  private clearLoadingOnFailure({
+    pkgName,
+    shared,
+    loading,
+    treeShaking,
+  }: {
+    pkgName: string;
+    shared: Shared;
+    loading: Promise<unknown>;
+    treeShaking?: boolean;
+  }): void {
+    const { version, scope = 'default' } = shared;
+    const scopes: string[] = Array.isArray(scope) ? scope : [scope];
+    const loadingEntries = scopes
+      .map((sc) => {
+        const registeredShared = this.shareScopeMap[sc]?.[pkgName]?.[version];
+        return treeShaking ? registeredShared?.treeShaking : registeredShared;
+      })
+      .filter((targetShared) => targetShared?.loading === loading);
+    loading.catch(() => {
+      loadingEntries.forEach((targetShared) => {
+        if (targetShared && targetShared.loading === loading) {
+          targetShared.loading = null;
+        }
+      });
     });
   }
 
