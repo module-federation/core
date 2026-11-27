@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
 import crypto from 'crypto';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
 import {
@@ -251,6 +251,24 @@ const resolveCompilerCommand = (
   remoteOptions: Required<RemoteOptions>,
   tempTsConfigJsonPath: string,
 ) => {
+  const { compilerInstance } = remoteOptions;
+  // An absolute path to an existing file is one executable, not a command line.
+  // On Windows only .exe qualifies: scripts and batch files need a shell.
+  if (
+    isAbsolute(compilerInstance) &&
+    existsSync(compilerInstance) &&
+    statSync(compilerInstance).isFile() &&
+    (process.platform !== 'win32' || /\.exe$/i.test(compilerInstance))
+  ) {
+    const args = ['--project', tempTsConfigJsonPath];
+    return {
+      executable: compilerInstance,
+      args,
+      displayCommand: formatCommandForDisplay(compilerInstance, args),
+      shell: false,
+    };
+  }
+
   const compilerArgs = splitCommandArgs(remoteOptions.compilerInstance);
   const resolvedCompilerArgs =
     compilerArgs.length > 0 ? compilerArgs : [remoteOptions.compilerInstance];
