@@ -158,7 +158,6 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
           if (match.name === target.name)
             delete host.remoteHandler.idToRemoteMap[id];
       };
-      const debugEnabled = isNodeLifecycleDebugEnabled();
       const holdsTarget = (other: ModuleFederation) =>
         other !== host &&
         [...other.moduleCache.values()].some(
@@ -173,20 +172,20 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
         );
       const usedElsewhere = instances.some(holdsTarget);
       if (usedElsewhere) {
-        if (debugEnabled) {
+        debugNodeLifecycle(() => {
           const holders = [
             ...new Set(instances.filter(holdsTarget).map((other) => other.name)),
           ];
-          debugNodeLifecycle(
-            `retain remote=${target.name} host=${host.name} reason=usedElsewhere holders=${holders.join(',')}`,
-          );
-        }
+          return `retain remote=${target.name} host=${host.name} reason=usedElsewhere holders=${holders.join(',')}`;
+        });
         return releaseLocal();
       }
 
       const scopes = helpers.share.getGlobalShareScope();
       let preserveShared = false;
-      const retainedShared = debugEnabled ? ([] as string[]) : undefined;
+      const retainedShared = isNodeLifecycleDebugEnabled()
+        ? ([] as string[])
+        : undefined;
       const releaseShared: Array<() => void> = [];
       forEachSharedRecord(scopes, (shared, versions, version, _id, pkgName) => {
         if (!ownership.owns(shared)) return;
@@ -226,10 +225,10 @@ export function captureNodeRemoteRemoval(host: NodeFederation, target: Remote) {
       delete globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__[
         helpers.utils.getRemoteEntryUniqueKey(info)
       ];
-      if (debugEnabled && preserveShared) {
+      if (preserveShared && retainedShared) {
         const providerField = provider ? ` provider=${provider.name}` : '';
         debugNodeLifecycle(
-          `retain remote=${target.name} host=${host.name}${providerField} reason=preserveShared shared=${retainedShared!.join(',')}`,
+          `retain remote=${target.name} host=${host.name}${providerField} reason=preserveShared shared=${retainedShared.join(',')}`,
         );
       }
       if (provider) {

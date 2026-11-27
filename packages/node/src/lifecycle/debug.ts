@@ -45,6 +45,8 @@ export function isNodeLifecycleDebugEnabled(): boolean {
   return matchesDebugNamespaces(debugEnv) || isDebugMode();
 }
 
-export function debugNodeLifecycle(message: string): void {
-  console.debug(`[MF Node Lifecycle] ${message}`);
+export function debugNodeLifecycle(message: string | (() => string)): void {
+  if (!isNodeLifecycleDebugEnabled()) return;
+  const resolved = typeof message === 'function' ? message() : message;
+  console.debug(`[MF Node Lifecycle] ${resolved}`);
 }
