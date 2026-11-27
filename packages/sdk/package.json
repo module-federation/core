@@ -46,7 +46,7 @@
         "default": "./dist/core.js"
       },
       "require": {
-        "types": "./dist/core.d.ts",
+        "types": "./dist/core.d.cts",
         "default": "./dist/index.cjs"
       }
     },
@@ -56,7 +56,7 @@
         "default": "./dist/node.js"
       },
       "require": {
-        "types": "./dist/node.d.ts",
+        "types": "./dist/node.d.cts",
         "default": "./dist/node.cjs"
       }
     },
