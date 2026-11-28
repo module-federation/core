@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": "./src",
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
