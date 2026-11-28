@@ -32,7 +32,7 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@rstest/core": "^0.10.6",
+    "@rstest/core": "^0.12.3",
     "@types/node": "^20.19.5",
     "@types/react": "^18.3.11",
     "react": "^18",

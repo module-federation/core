@@ -76,7 +76,7 @@
   },
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",
-    "@rstest/core": "^0.10.6",
+    "@rstest/core": "^0.12.3",
     "@types/ws": "8.5.12",
     "@vue/tsconfig": "^0.7.0",
     "directory-tree": "3.5.2",
