@@ -564,8 +564,21 @@ class FederationRuntimePlugin {
               undefined,
               composition,
             );
+            const entryPath = FederationRuntimePlugin.entryFilePathFor(
+              options,
+              source,
+            );
+            if (!options.virtualRuntimeEntry) {
+              // A changed template gets a different path. Mark this exact file
+              // immutable before Compilation snapshots a file created in make.
+              compiler.immutablePaths.add(
+                new RegExp(
+                  `^${entryPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
+                ),
+              );
+            }
             return {
-              path: FederationRuntimePlugin.entryFilePathFor(options, source),
+              path: entryPath,
               source,
             };
           },

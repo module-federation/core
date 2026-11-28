@@ -66,7 +66,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         optionsWithPlugins,
         'bundler-runtime.js',
-        {},
       );
 
       // 验证生成的模板中包含插件调用
@@ -88,7 +87,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         optionsWithPlugins,
         'bundler-runtime.js',
-        {},
       );
 
       // 验证生成的模板中包含带参数的插件调用
@@ -102,7 +100,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         mockOptions,
         'bundler-runtime.js',
-        {},
       );
 
       // 验证生成的模板中不包含插件调用相关代码
@@ -120,7 +117,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         optionsWithEmptyPlugins,
         'bundler-runtime.js',
-        {},
       );
 
       // 验证生成的模板中不包含插件调用相关代码
@@ -138,7 +134,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         optionsWithAbsolutePlugins,
         'bundler-runtime.js',
-        {},
       );
 
       expect(template).toContain('from "/absolute/path/plugin1.js";');
@@ -154,7 +149,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         optionsWithRelativePlugins,
         'bundler-runtime.js',
-        {},
       );
 
       expect(template).toContain('from "/test/path/relative/path/plugin1.js";');
@@ -170,7 +164,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         { ...mockOptions, runtimePlugins: ['./rt.js'] },
         'bundler-runtime.js',
-        {},
       );
 
       const expected = path.join(cwd, 'rt.js').replace(/\\/g, '/');
@@ -184,7 +177,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         { ...mockOptions, runtimePlugins: [pluginPath] },
         bundlerRuntimePath,
-        {},
       );
 
       expect(template).toContain(
@@ -203,7 +195,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         optionsWithFalsyPlugins,
         'bundler-runtime.js',
-        {},
       );
 
       // 验证生成的模板中包含filter(Boolean)调用
@@ -220,7 +211,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         optionsWithPlugins,
         'bundler-runtime.js',
-        {},
       );
 
       // 验证生成的模板中包含正确的插件调用语法

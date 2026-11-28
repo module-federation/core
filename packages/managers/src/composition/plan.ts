@@ -132,6 +132,8 @@ export function plannedImports(plan: CompositionPlan): PlannedImport[] {
   if (plan.remote) {
     capability('remote', './remote');
     if (plan.snapshot) capability('snapshot', './snapshot');
+  }
+  if (plan.remote || plan.shared) {
     capability(plan.platform, `./platform/${plan.platform}`, 'platform');
   }
   return imports;
