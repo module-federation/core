@@ -16,6 +16,7 @@ const imports = {
   [`${CORE}/snapshot`]: `${C}/snapshot.js`,
   [`${CORE}/platform/web`]: `${C}/platform/web.js`,
   [`${CORE}/platform/node`]: `${C}/platform/node.js`,
+  [`${CORE}/platform/universal`]: `${C}/platform/universal.js`,
 };
 
 describe('renderComposition', () => {
@@ -73,6 +74,27 @@ export default federation;
     );
   });
 
+  it.each(['web', 'node', 'universal'] as const)(
+    'keeps the %s platform for shared fallback entries when remotes are disabled',
+    (platform) => {
+      const plan = planComposition(
+        [{ kind: 'options', disable: { remote: true }, needs: ['consumes'] }],
+        platform,
+      );
+
+      const source = renderComposition(plan, imports, 'shared-host:1.0.0');
+
+      expect(source).toContain(
+        `import { ${platform} } from '/core/dist/platform/${platform}.js';`,
+      );
+      expect(source).toContain(
+        `capabilities: { shared, platform: ${platform} }`,
+      );
+      expect(source).not.toContain("from '/core/dist/remote.js'");
+      expect(source).not.toContain("from '/core/dist/snapshot.js'");
+    },
+  );
+
   it('renders a node host with remotes and shared', () => {
     const plan = planComposition(
       [{ kind: 'options', disable: {}, needs: ['remotes', 'consumes'] }],
@@ -118,8 +140,9 @@ export default federation;
   });
 
   it('throws when an import the plan needs was not resolved', () => {
+    const { [`${CORE}/platform/universal`]: _, ...missingPlatform } = imports;
     expect(() =>
-      renderComposition(planComposition([], 'universal'), imports),
+      renderComposition(planComposition([], 'universal'), missingPlatform),
     ).toThrow(`${CORE}/platform/universal`);
   });
 });

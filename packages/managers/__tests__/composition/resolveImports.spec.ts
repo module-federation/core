@@ -1,9 +1,12 @@
 /**
  * @jest-environment node
  */
+import fs from 'node:fs';
+import path from 'node:path';
 import { resolveRuntimeFamily } from '../../src/composition/family';
 import { planComposition } from '../../src/composition/plan';
 import { resolveImports } from '../../src/composition/resolveImports';
+import { selectMode } from '../../src/composition/selectMode';
 import {
   composableFamily,
   dualExports,
@@ -84,5 +87,37 @@ describe('resolveImports', () => {
     expect(imports[`${CORE}/platform/web`]).toBe(
       `${nested}/dist/platform/web.js`,
     );
+  });
+
+  it('reuses selected imports within a family and refreshes them for a new family', async () => {
+    const root = composableFamily(tempDir());
+    const family = resolveRuntimeFamily(root);
+    const plan = planComposition([], 'web');
+    expect(await selectMode(family, {})).toEqual({ mode: 'composed' });
+
+    const wbr = packageDir(root, WBR);
+    const manifest = path.join(wbr, 'package.json');
+    const data = JSON.parse(fs.readFileSync(manifest, 'utf-8'));
+    data.exports['./compose'].import = './dist/compose-updated.js';
+    fs.writeFileSync(path.join(wbr, 'dist/compose-updated.js'), '');
+    fs.writeFileSync(manifest, JSON.stringify(data));
+
+    expect(resolveImports(plan, family)[`${WBR}/compose`]).toBe(
+      `${wbr}/dist/compose.js`,
+    );
+    expect(
+      resolveImports(plan, resolveRuntimeFamily(root))[`${WBR}/compose`],
+    ).toBe(`${wbr}/dist/compose-updated.js`);
+  });
+
+  it('propagates invalid package metadata instead of treating it as an unsupported export', async () => {
+    const root = composableFamily(tempDir());
+    const family = resolveRuntimeFamily(root);
+    fs.writeFileSync(
+      path.join(packageDir(root, WBR), 'package.json'),
+      '{invalid',
+    );
+
+    await expect(selectMode(family, {})).rejects.toThrow(/JSON|package\.json/);
   });
 });

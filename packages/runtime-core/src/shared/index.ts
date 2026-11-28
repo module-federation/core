@@ -37,10 +37,12 @@ import {
   directShare,
   shouldUseTreeShaking,
   addUseIn,
+} from '../utils/share';
+import {
   getSharedVersions,
   getOwnEntry,
   defineEntry,
-} from '../utils/share';
+} from '../utils/shareRegistry';
 import {
   assert,
   error,
