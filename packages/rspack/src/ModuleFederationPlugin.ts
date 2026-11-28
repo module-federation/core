@@ -18,6 +18,7 @@ import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
 import { RemoteEntryPlugin } from './RemoteEntryPlugin';
+import { ComposedRuntimePlugin } from './ComposedRuntimePlugin';
 import logger from './logger';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
@@ -85,6 +86,7 @@ export function resolveRspackRuntimeImplementation(
   );
 }
 
+/** @deprecated The wrapper no longer aliases `@module-federation/runtime$`. */
 export function resolveRspackRuntimeAlias(
   implementation: string,
   resolve: ResolveFn = require.resolve,
@@ -109,7 +111,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     this._options = options;
   }
 
-  private _patchBundlerConfig(compiler: Compiler): void {
+  private _patchBundlerConfig(
+    compiler: Compiler,
+  ): Record<string, string | boolean> {
     const { name, experiments, exposes } = this._options;
     const definePluginOptions: Record<string, string | boolean> = {};
     if (name) {
@@ -145,7 +149,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
     // No inference for ENV_TARGET. If not manually set and valid, it's not defined.
 
-    new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
+    if (!experiments?.composedRuntime) {
+      new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
+    }
+    return definePluginOptions;
   }
 
   private _checkSingleton(compiler: Compiler): void {
@@ -176,7 +183,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       throw new Error('[ ModuleFederationPlugin ]: name is required');
     }
     this._checkSingleton(compiler);
-    this._patchBundlerConfig(compiler);
+    const defines = this._patchBundlerConfig(compiler);
     const containerManager = new ContainerManager();
     containerManager.init(options);
 
@@ -236,22 +243,24 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
 
-    let runtimePath: string;
-    try {
-      runtimePath = resolveRspackRuntimeAlias(implementationPath);
-    } catch (err) {
-      const detail = err instanceof Error ? err.message : String(err);
-      throw new Error(
-        `[ ModuleFederationPlugin ]: Unable to resolve runtime entry (paths: [${implementationPath}]): ${detail}`,
-      );
+    if (options.experiments?.composedRuntime) {
+      new ComposedRuntimePlugin(
+        options,
+        {
+          runtimeTools: implementationPath,
+          // The same resolutions as rspack's native plugin, which imports bundlerRuntime.
+          bundlerRuntime: require.resolve(
+            '@module-federation/webpack-bundler-runtime',
+            { paths: [implementationPath] },
+          ),
+          runtime: require.resolve('@module-federation/runtime', {
+            paths: [implementationPath],
+          }),
+        },
+        composeKeyWithSeparator(options.name, utils.getBuildVersion()),
+        defines,
+      ).apply(compiler);
     }
-
-    compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
-      compiler.options.resolve.alias = {
-        ...compiler.options.resolve.alias,
-        '@module-federation/runtime$': runtimePath,
-      };
-    });
 
     if (!disableManifest) {
       this._statsPlugin = new StatsPlugin(options, {

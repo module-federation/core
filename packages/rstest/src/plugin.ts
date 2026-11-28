@@ -66,7 +66,7 @@ const createRspackPatcher = (
       createFederationExternalBypass(() => {
         remoteNames ??= collectRemoteNames(moduleFederationOptions.remotes);
         return remoteNames;
-      }),
+      }, moduleFederationOptions.experiments?.composedRuntime === true),
       ...toArray(rspackConfig.externals),
     ];
   };
