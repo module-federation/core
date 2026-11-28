@@ -33,6 +33,7 @@ const resolveAnyEntry = enhancedResolve.create.sync({
   conditionNames: ['node', 'require', 'import', 'default'],
   exportsFields: ['exports'],
   mainFields: ['main', 'module'],
+  fileSystem: fs,
 });
 
 export type FamilyPackage = keyof typeof RUNTIME_FAMILY;

@@ -1,11 +1,15 @@
 import { execFile } from 'child_process';
 import fs from 'fs';
+import http from 'http';
 import { createRequire } from 'module';
 import os from 'os';
 import path from 'path';
 import { promisify } from 'util';
+import {
+  MIN_RUNTIME_VERSION,
+  resolveRuntimeFamily,
+} from '@module-federation/managers';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { MIN_RUNTIME_VERSION } from '@module-federation/managers';
 import ModuleFederationPlugin from '../../../src/lib/container/ModuleFederationPlugin';
 import ContainerReferencePlugin from '../../../src/lib/container/ContainerReferencePlugin';
 import { COVERED_BY_OPTIONS } from '../../../src/lib/container/runtime/FederationCompositionPlugin';
@@ -47,8 +51,46 @@ function fixture(files: Record<string, string>) {
   return dir;
 }
 
+function customRuntime(
+  context: string,
+  composition: 'require-only' | 'missing',
+) {
+  const family = resolveRuntimeFamily(__dirname);
+  for (const [name, member] of Object.entries(family.members)) {
+    const target = path.join(context, 'node_modules', name);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    if (
+      name !== '@module-federation/runtime-tools' &&
+      name !== '@module-federation/webpack-bundler-runtime'
+    ) {
+      fs.symlinkSync(member.root, target, 'junction');
+      continue;
+    }
+    fs.mkdirSync(target, { recursive: true });
+    fs.cpSync(path.join(member.root, 'dist'), path.join(target, 'dist'), {
+      recursive: true,
+    });
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(member.root, 'package.json'), 'utf8'),
+    );
+    if (name === '@module-federation/webpack-bundler-runtime') {
+      manifest.exports['./compose'] =
+        composition === 'require-only'
+          ? { require: manifest.exports['./compose'].require }
+          : { import: './dist/missing-compose.js' };
+    }
+    fs.writeFileSync(
+      path.join(target, 'package.json'),
+      JSON.stringify(manifest),
+    );
+  }
+  return path.join(context, 'node_modules/@module-federation/runtime-tools');
+}
+
 function compile(context: string, config: Record<string, unknown>) {
-  const outputPath = path.join(context, `dist-${dirs.length}-${Math.random()}`);
+  const outputPath =
+    (config.output as { path?: string })?.path ??
+    path.join(context, `dist-${dirs.length}-${Math.random()}`);
   return new Promise<{
     stats: any;
     output: Record<string, string>;
@@ -64,8 +106,12 @@ function compile(context: string, config: Record<string, unknown>) {
         target: 'async-node',
         entry: './index.js',
         optimization: { minimize: false },
-        output: { path: outputPath, uniqueName: 'composition-unit' },
         ...config,
+        output: {
+          path: outputPath,
+          uniqueName: 'composition-unit',
+          ...(config.output as object),
+        },
       },
       (err, stats) => {
         if (err) return reject(err);
@@ -124,6 +170,64 @@ describe('FederationCompositionPlugin', () => {
       ...extra,
     });
 
+  it('restores a newly generated composed bootstrap from the next disk cache build', async () => {
+    const context = fixture({ 'index.js': 'export default 1;' });
+    // A unique name prevents a previous test run from pre-creating the entry.
+    const name = `cold_cache_${path.basename(context)}`;
+    const entries: { resource: string; built: boolean }[] = [];
+    const recordEntries = {
+      apply(compiler) {
+        compiler.hooks.done.tap(
+          'record composed entry cache',
+          ({ compilation }) => {
+            for (const module of compilation.modules) {
+              if (
+                module.resource?.includes(
+                  `${path.sep}.federation${path.sep}entry.`,
+                )
+              ) {
+                entries.push({
+                  resource: module.resource,
+                  built: compilation.builtModules.has(module),
+                });
+              }
+            }
+          },
+        );
+      },
+    };
+    const build = (disableShared = false) =>
+      compile(context, {
+        mode: 'development',
+        cache: {
+          type: 'filesystem',
+          cacheDirectory: path.join(context, 'cache'),
+        },
+        output: { path: path.join(context, 'dist') },
+        plugins: [
+          host({ optimization: { disableShared } }, { name, remotes: {} }),
+          recordEntries,
+        ],
+      });
+
+    const cold = await build();
+    const warm = await build();
+    expect(messages(cold.stats.errors)).toEqual([]);
+    expect(messages(warm.stats.errors)).toEqual([]);
+    expect(cold.output['main.js']).toContain(name);
+    expect(warm.output).toEqual(cold.output);
+    expect(entries).toHaveLength(2);
+    expect(entries).toEqual([
+      { resource: expect.any(String), built: true },
+      { resource: entries[0].resource, built: false },
+    ]);
+
+    const changed = await build(true);
+    expect(messages(changed.stats.errors)).toEqual([]);
+    expect(entries[2].built).toBe(true);
+    expect(entries[2].resource).not.toBe(entries[0].resource);
+  });
+
   it('fails the build for an older runtime family and names the minimum version', async () => {
     const context = fixture({ 'index.js': 'export default 1;' });
     const { stats } = await compile(context, {
@@ -147,6 +251,24 @@ describe('FederationCompositionPlugin', () => {
     expect(messages(stats.warnings)).toEqual([]);
     expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(false);
   });
+
+  it.each(['require-only', 'missing'] as const)(
+    'fails the build for a %s composition target',
+    async (composition) => {
+      const context = fixture({ 'index.js': 'export default 1;' });
+      const implementation = customRuntime(context, composition);
+      const { stats } = await compile(context, {
+        plugins: [host(undefined, { implementation })],
+      });
+
+      expect(messages(stats.errors)).toEqual([
+        expect.stringMatching(
+          /^The federation runtime cannot be composed: @module-federation\/webpack-bundler-runtime\/compose cannot be imported for composition/,
+        ),
+      ]);
+      expect(messages(stats.warnings)).toEqual([]);
+    },
+  );
 
   it('selects legacy when a function external names runtime-core', async () => {
     const context = fixture({ 'index.js': 'export default 1;' });
@@ -401,5 +523,87 @@ describe('FederationCompositionPlugin', () => {
 
     expect(messages(stats.errors)).toEqual([]);
     expect(moduleNames(stats).some((name) => COMPOSE.test(name))).toBe(true);
+  });
+
+  it('loads an independent shared fallback with remote loading disabled', async () => {
+    let outputPath: string;
+    const requests: string[] = [];
+    const server = http.createServer((request, response) => {
+      requests.push(request.url!);
+      const file = path.join(
+        outputPath,
+        new URL(request.url!, 'http://host').pathname,
+      );
+      if (!fs.existsSync(file)) {
+        response.writeHead(404).end();
+        return;
+      }
+      response.writeHead(200, { 'content-type': 'text/javascript' });
+      response.end(fs.readFileSync(file));
+    });
+    await new Promise<void>((resolve) =>
+      server.listen(0, '127.0.0.1', resolve),
+    );
+
+    try {
+      const { port } = server.address() as { port: number };
+      const context = fixture({
+        'index.js': `module.exports = import('./app').then(async () => {
+          const federation = __webpack_require__.federation;
+          const getter = federation.bundlerRuntime.getSharedFallbackGetter({
+            shareKey: 'ui-lib',
+            version: '1.0.0',
+            factory: () => { throw new Error('No independent shared fallback'); },
+            webpackRequire: __webpack_require__,
+            libraryType: 'commonjs-module',
+          });
+          return (await getter())().a;
+        });`,
+        'app.js': 'import { a } from "ui-lib"; export default a;',
+        'node_modules/ui-lib/package.json': JSON.stringify({
+          name: 'ui-lib',
+          version: '1.0.0',
+          main: 'index.js',
+        }),
+        'node_modules/ui-lib/index.js':
+          'export const a = "shared-fallback-loaded";',
+      });
+      const result = await compile(context, {
+        output: {
+          library: { type: 'commonjs2' },
+          publicPath: `http://127.0.0.1:${port}/`,
+        },
+        plugins: [
+          host(
+            {
+              optimization: { disableRemote: true, target: 'node' },
+            },
+            {
+              remotes: {},
+              library: { type: 'commonjs-module', name: 'composition_host' },
+              shared: {
+                'ui-lib': {
+                  requiredVersion: '*',
+                  treeShaking: { mode: 'runtime-infer' },
+                },
+              },
+            },
+          ),
+        ],
+      });
+      outputPath = result.outputPath;
+      expect(messages(result.stats.errors)).toEqual([]);
+      const { stdout } = await promisify(execFile)(process.execPath, [
+        '-e',
+        `require(${JSON.stringify(path.join(outputPath, 'main.js'))})
+          .then(value => console.log(JSON.stringify(value)));`,
+      ]);
+      expect(JSON.parse(stdout)).toBe('shared-fallback-loaded');
+      expect(requests).toEqual([
+        expect.stringMatching(/^\/independent-packages\/.*\/share-entry\.js$/),
+      ]);
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
   });
 });

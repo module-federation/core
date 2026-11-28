@@ -20,6 +20,12 @@ if (!process.argv[2]) {
     path.join(packageRoot, 'package.json'),
     path.join(secondCopy, 'package.json'),
   );
+  // Give the copied installation the dependencies declared in its manifest.
+  fs.symlinkSync(
+    path.join(packageRoot, 'node_modules'),
+    path.join(secondCopy, 'node_modules'),
+    'junction',
+  );
 
   fs.mkdirSync(src);
   fs.writeFileSync(

@@ -5,12 +5,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   MIN_RUNTIME_VERSION,
+  RUNTIME_FAMILY,
   resolveRuntimeFamily,
 } from '../../src/composition/family';
 import { selectMode, type ModeInputs } from '../../src/composition/selectMode';
-import { composableFamily, packageDir, tempDir } from './fixtures';
+import { composableFamily, dualExports, packageDir, tempDir } from './fixtures';
 
 const RUNTIME = '@module-federation/runtime';
+const WBR = '@module-federation/webpack-bundler-runtime';
 const composable = () => resolveRuntimeFamily(composableFamily(tempDir()));
 const legacyReason = async (inputs: ModeInputs, family = composable()) => {
   const mode = await selectMode(family, inputs);
@@ -24,6 +26,47 @@ const unsupportedReason = async (family: ReturnType<typeof composable>) => {
 describe('selectMode', () => {
   it('composes a family that exports every required subpath', async () => {
     expect(await selectMode(composable(), {})).toEqual({ mode: 'composed' });
+  });
+
+  it.each([
+    ['require-only', { require: './dist/compose.cjs' }],
+    ['node-only', { node: './dist/compose.js' }],
+    ['disabled', false],
+    ['null', null],
+  ])('rejects a %s composition export', async (_, target) => {
+    const root = composableFamily(tempDir(), {
+      [WBR]: {
+        exports: { ...dualExports(RUNTIME_FAMILY[WBR]), './compose': target },
+      },
+    });
+
+    expect(require.resolve(WBR, { paths: [root] })).toMatch(/index\.cjs$/);
+    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
+      /webpack-bundler-runtime\/compose.*cannot be imported for composition/,
+    );
+  });
+
+  it('rejects a composition export that points to a missing file', async () => {
+    const root = composableFamily(tempDir());
+    fs.unlinkSync(path.join(packageDir(root, WBR), 'dist/compose.js'));
+
+    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
+      /webpack-bundler-runtime\/compose.*cannot be imported for composition/,
+    );
+  });
+
+  it('checks capabilities outside the selected platform as part of the whole family', async () => {
+    const root = composableFamily(tempDir());
+    fs.unlinkSync(
+      path.join(
+        packageDir(root, '@module-federation/runtime-core'),
+        'dist/platform/node.js',
+      ),
+    );
+
+    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
+      /runtime-core\/platform\/node.*cannot be imported for composition/,
+    );
   });
 
   it('rejects the older runtime-tools in the pnpm store and names the minimum version', async () => {

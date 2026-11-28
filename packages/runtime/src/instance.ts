@@ -53,6 +53,13 @@ export function initInstance<T extends ModuleFederation>(
   options: UserOptions,
   construct: (options: UserOptions) => T,
 ): T {
+  // A global reset or remote removal can unregister the cached instance.
+  if (
+    bundleInstance &&
+    !CurrentGlobal.__FEDERATION__.__INSTANCES__.includes(bundleInstance)
+  ) {
+    bundleInstance = null;
+  }
   const instance = getGlobalFederationInstance(
     options.name,
     options.version,
