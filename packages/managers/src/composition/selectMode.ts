@@ -1,4 +1,5 @@
 import { FAMILY_PACKAGES, RUNTIME_FAMILY, type RuntimeFamily } from './family';
+import { resolveRuntimeImport } from './resolveRuntimeImport';
 
 type ExternalCallback = (err?: Error | null, value?: unknown) => void;
 type ExternalFunction = (...args: any[]) => unknown;
@@ -47,7 +48,8 @@ export async function selectMode(
     : { mode: 'legacy', reason };
 }
 
-function familyProblem({ anchor, members }: RuntimeFamily): string | undefined {
+function familyProblem(family: RuntimeFamily): string | undefined {
+  const { anchor, members } = family;
   let from = anchor;
   for (const pkg of FAMILY_PACKAGES) {
     const member = members[pkg];
@@ -59,6 +61,10 @@ function familyProblem({ anchor, members }: RuntimeFamily): string | undefined {
       (key) => !declaresExportKey(member.exports, key),
     );
     if (missing) return `${pkg} at ${member.root} does not export "${missing}"`;
+    for (const subpath of RUNTIME_FAMILY[pkg]) {
+      const resolved = resolveRuntimeImport(family, pkg, subpath);
+      if (resolved.type === 'unavailable') return resolved.reason;
+    }
     from = member.root;
   }
   return undefined;
