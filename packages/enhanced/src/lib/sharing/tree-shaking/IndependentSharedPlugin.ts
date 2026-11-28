@@ -142,7 +142,12 @@ export default class IndependentSharedPlugin {
         );
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'OptimizeDependencyReferencedExportsPlugin',
-          (chunk) => {
+          (chunk, runtimeRequirements) => {
+            if (Object.keys(this.buildAssets).length) {
+              runtimeRequirements.add(
+                compiler.webpack.RuntimeGlobals.publicPath,
+              );
+            }
             compilation.addRuntimeModule(
               chunk,
               new IndependentSharedRuntimeModule(

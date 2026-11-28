@@ -16,6 +16,9 @@ import type {
 } from 'webpack';
 import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import FederationCompositionPlugin, {
+  type CoveredByOptions,
+} from './runtime/FederationCompositionPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
 import type {
@@ -36,8 +39,13 @@ const PLUGIN_NAME = 'ContainerPlugin';
 class ContainerPlugin {
   _options: containerPlugin.ContainerPluginOptions;
   name: string;
+  private _covered?: CoveredByOptions;
 
-  constructor(options: containerPlugin.ContainerPluginOptions) {
+  constructor(
+    options: containerPlugin.ContainerPluginOptions,
+    covered?: CoveredByOptions,
+  ) {
+    this._covered = covered;
     // validate(options);
     this.name = PLUGIN_NAME;
 
@@ -167,6 +175,12 @@ class ContainerPlugin {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
 
+    if (!this._covered) {
+      FederationCompositionPlugin.register(compiler, {
+        kind: 'needs',
+        needs: ['container'],
+      });
+    }
     const federationRuntimePluginInstance = new FederationRuntimePlugin();
     federationRuntimePluginInstance.apply(compiler);
 

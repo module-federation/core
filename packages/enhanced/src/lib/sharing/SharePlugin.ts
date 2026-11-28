@@ -20,6 +20,7 @@ import ConsumeSharedPlugin from './ConsumeSharedPlugin';
 import ProvideSharedPlugin from './ProvideSharedPlugin';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { createSchemaValidation } from '../../utils';
+import type { CoveredByOptions } from '../container/runtime/FederationCompositionPlugin';
 
 const validate = createSchemaValidation(
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -110,8 +111,13 @@ class SharePlugin {
   private _shareScope: string | string[];
   private _consumes: Record<string, ConsumesConfig>[];
   private _provides: Record<string, ProvidesConfig>[];
+  private _covered?: CoveredByOptions;
 
-  constructor(options: sharePlugin.SharePluginOptions) {
+  constructor(
+    options: sharePlugin.SharePluginOptions,
+    covered?: CoveredByOptions,
+  ) {
+    this._covered = covered;
     validate(options);
 
     const sharedOptions: [string, SharedConfig][] = normalizeSharedOptions(
@@ -134,15 +140,21 @@ class SharePlugin {
   apply(compiler: Compiler): void {
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
-    new ConsumeSharedPlugin({
-      shareScope: this._shareScope,
-      consumes: this._consumes,
-    }).apply(compiler);
+    new ConsumeSharedPlugin(
+      {
+        shareScope: this._shareScope,
+        consumes: this._consumes,
+      },
+      this._covered,
+    ).apply(compiler);
 
-    new ProvideSharedPlugin({
-      shareScope: this._shareScope,
-      provides: this._provides,
-    }).apply(compiler);
+    new ProvideSharedPlugin(
+      {
+        shareScope: this._shareScope,
+        provides: this._provides,
+      },
+      this._covered,
+    ).apply(compiler);
   }
 }
 

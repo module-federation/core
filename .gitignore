@@ -62,6 +62,8 @@ packages/chrome-devtools/test-results/
 
 # test cases
 !packages/enhanced/test/configCases/**/**/node_modules
+# written by the tree-shaking config case at test time
+packages/enhanced/test/configCases/tree-shaking-share/local-provided-version/node_modules
 packages/enhanced/test/js
 .ignored
 **/.mf

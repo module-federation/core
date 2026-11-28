@@ -35,6 +35,9 @@ import ConsumeSharedModule from './ConsumeSharedModule';
 import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
+import FederationCompositionPlugin, {
+  type CoveredByOptions,
+} from '../container/runtime/FederationCompositionPlugin';
 import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/sharing/semver';
 import type { InputFileSystem } from 'webpack/lib/fs/fs';
@@ -102,8 +105,10 @@ function getPackageVersion(
 
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
+  private _covered?: CoveredByOptions;
 
-  constructor(options: ConsumeSharedPluginOptions) {
+  constructor(options: ConsumeSharedPluginOptions, covered?: CoveredByOptions) {
+    this._covered = covered;
     if (typeof options !== 'string') {
       validate(options);
     }
@@ -413,6 +418,12 @@ class ConsumeSharedPlugin {
   }
 
   apply(compiler: Compiler): void {
+    if (!this._covered) {
+      FederationCompositionPlugin.register(compiler, {
+        kind: 'needs',
+        needs: ['consumes'],
+      });
+    }
     new FederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);

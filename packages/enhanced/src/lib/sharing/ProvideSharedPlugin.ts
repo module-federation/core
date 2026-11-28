@@ -22,6 +22,9 @@ type ProvideSharedPluginOptions =
   provideSharedPlugin.ProvideSharedPluginOptions;
 type ProvidesConfig = provideSharedPlugin.ProvidesConfig;
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
+import FederationCompositionPlugin, {
+  type CoveredByOptions,
+} from '../container/runtime/FederationCompositionPlugin';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
 const { satisfy, parseRange } = require(
@@ -73,11 +76,13 @@ const validate = createSchemaValidation(
 
 class ProvideSharedPlugin {
   private _provides: [string, ProvidesConfig][];
+  private _covered?: CoveredByOptions;
 
   /**
    * @param {ProvideSharedPluginOptions} options options
    */
-  constructor(options: ProvideSharedPluginOptions) {
+  constructor(options: ProvideSharedPluginOptions, covered?: CoveredByOptions) {
+    this._covered = covered;
     validate(options);
 
     this._provides = parseOptions(
@@ -134,6 +139,12 @@ class ProvideSharedPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
+    if (!this._covered) {
+      FederationCompositionPlugin.register(compiler, {
+        kind: 'needs',
+        needs: ['share-scope'],
+      });
+    }
     new FederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
