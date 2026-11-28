@@ -1,5 +1,5 @@
 import { assert, describe, test, it } from '@rstest/core';
-import { ModuleFederation } from '../src/core';
+import { ModuleFederation } from '../src';
 import { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
 import { Global, addGlobalSnapshot } from '../src/global';

@@ -1,5 +1,5 @@
 import { describe, expect, it, rs } from '@rstest/core';
-import { ModuleFederation } from '../src/core';
+import { ModuleFederation } from '../src/index';
 import type { SharedLoadContext } from '../src/type';
 
 const declared = { shareScopeDispatch: 'declared' } as const;

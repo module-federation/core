@@ -1,0 +1,1 @@
+export { snapshot } from './index';

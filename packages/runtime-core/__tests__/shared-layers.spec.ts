@@ -1,5 +1,7 @@
 import { describe, expect, it } from '@rstest/core';
-import { ModuleFederation } from '../src/core';
+import { ModuleFederation } from '../src/index';
+import { FederationKernel } from '../src/kernel';
+import { remote as remoteCapability } from '../src/remote/capability';
 import { getSharedVersions } from '../src/utils/share';
 import type { ShareArgs } from '../src/type';
 import { setGlobalFederationInstance } from '../src/global';
@@ -288,6 +290,68 @@ describe('shared layer selection', () => {
     );
     expect(consumer.loadShareSync('pkg', consume('client'))()).toBe(
       'new-client',
+    );
+  });
+
+  it('lets a remote-only host remove unused providers while retaining a layer used elsewhere', async () => {
+    const producer = host(
+      [
+        provider('generic'),
+        provider('server', 'server'),
+        provider('client', 'client'),
+      ],
+      'registry-producer',
+    );
+    setGlobalFederationInstance(producer);
+    expect(producer.loadShareSync('pkg', consume('server'))()).toBe('server');
+    const scope = producer.shareScopeMap.default;
+    const activeConsumer = new ModuleFederation({ name: 'active-consumer' });
+    activeConsumer.initShareScopeMap('default', scope);
+    expect(activeConsumer.loadShareSync('pkg', consume('client'))()).toBe(
+      'client',
+    );
+    const clientVersions = getSharedVersions(scope, 'pkg', 'client');
+
+    const remote = {
+      name: producer.name,
+      entry: 'https://remote.test/registry-old.js',
+      type: 'global' as const,
+      entryGlobalName: 'registry_producer',
+    };
+    const consumer = new FederationKernel(
+      {
+        name: 'remote-only-consumer',
+        remotes: [remote],
+        shareStrategy: 'loaded-first',
+      },
+      {
+        remote: remoteCapability,
+        platform: {
+          isBrowser: () => true,
+          loadScript: async () => undefined,
+          loadEntry: async () => ({
+            init: async () => undefined,
+            get: async () => () => 'remote-module',
+          }),
+        },
+      },
+    );
+    expect(await consumer.loadRemote(`${producer.name}/view`)).toBe(
+      'remote-module',
+    );
+    consumer.registerRemotes(
+      [{ ...remote, entry: 'https://remote.test/registry-new.js' }],
+      { force: true },
+    );
+
+    expect(getSharedVersions(scope, 'pkg')).toBeUndefined();
+    expect(getSharedVersions(scope, 'pkg', 'server')).toBeUndefined();
+    expect(getSharedVersions(scope, 'pkg', 'client')).toBe(clientVersions);
+    expect(activeConsumer.loadShareSync('pkg', consume('client'))()).toBe(
+      'client',
+    );
+    expect(() => consumer.loadShareSync('pkg')).toThrow(
+      'Shared dependency loading is disabled',
     );
   });
 

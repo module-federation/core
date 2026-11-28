@@ -27,6 +27,13 @@ const buildConfig = createDualFormatConfig({
   entry: {
     index: 'src/index.ts',
     types: 'src/types.ts',
+    kernel: 'src/kernel.ts',
+    'shared/capability': 'src/shared/capability.ts',
+    'remote/capability': 'src/remote/capability.ts',
+    'plugins/snapshot/capability': 'src/plugins/snapshot/capability.ts',
+    'platform/web': 'src/platform/web.ts',
+    'platform/node': 'src/platform/node.ts',
+    'platform/universal': 'src/platform/universal.ts',
   },
   external: ['@module-federation/*'],
   dts: {

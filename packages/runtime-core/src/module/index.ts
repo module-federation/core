@@ -5,7 +5,7 @@ import {
   optionsToMFContext,
   composeRemoteRequestId,
 } from '../utils';
-import { safeToString, ModuleInfo } from '@module-federation/sdk';
+import { safeToString, ModuleInfo } from '@module-federation/sdk/core';
 import {
   RUNTIME_002,
   RUNTIME_014,
@@ -13,7 +13,7 @@ import {
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { getRemoteEntry } from '../utils/load';
-import { ModuleFederation } from '../core';
+import type { ModuleFederation } from '../index';
 import {
   RemoteEntryExports,
   RemoteInfo,
