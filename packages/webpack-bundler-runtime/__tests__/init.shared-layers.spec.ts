@@ -1,13 +1,16 @@
 import { TreeShakingStatus } from '@module-federation/sdk';
-import { init } from '../src/init';
+import { bundlerRuntime } from '../src';
+
 import type { WebpackRequire } from '../src/types';
 import type { ShareArgs } from '@module-federation/runtime/types';
-import helpers from '@module-federation/runtime/helpers';
+import { getGlobalSnapshotInfoByModuleInfo } from '@module-federation/runtime-core/kernel';
 import { createInstance } from '@module-federation/runtime';
 
-jest.mock('@module-federation/runtime/helpers', () => ({
-  __esModule: true,
-  default: { global: { getGlobalSnapshotInfoByModuleInfo: jest.fn() } },
+const { init } = bundlerRuntime;
+
+jest.mock('@module-federation/runtime-core/kernel', () => ({
+  ...jest.requireActual('@module-federation/runtime-core/kernel'),
+  getGlobalSnapshotInfoByModuleInfo: jest.fn(),
 }));
 
 describe('layered tree-shaking snapshot matching', () => {
@@ -26,40 +29,38 @@ describe('layered tree-shaking snapshot matching', () => {
         get: () => () => 'client',
       },
     ];
-    jest
-      .mocked(helpers.global.getGlobalSnapshotInfoByModuleInfo)
-      .mockReturnValue({
-        shared: [
-          {
-            sharedName: 'pkg',
-            version: '2.0.0',
-            layer: 'server',
-            shareScope: 'default',
-            treeShakingStatus: TreeShakingStatus.NO_USE,
-          },
-          {
-            sharedName: 'pkg',
-            version: '1.0.0',
-            layer: 'server',
-            shareScope: 'other',
-            treeShakingStatus: TreeShakingStatus.NO_USE,
-          },
-          {
-            sharedName: 'pkg',
-            version: '1.0.0',
-            layer: 'server',
-            shareScope: 'default',
-            treeShakingStatus: TreeShakingStatus.CALCULATED,
-          },
-          {
-            sharedName: 'pkg',
-            version: '1.0.0',
-            layer: 'client',
-            shareScope: 'default',
-            treeShakingStatus: TreeShakingStatus.NO_USE,
-          },
-        ],
-      } as any);
+    jest.mocked(getGlobalSnapshotInfoByModuleInfo).mockReturnValue({
+      shared: [
+        {
+          sharedName: 'pkg',
+          version: '2.0.0',
+          layer: 'server',
+          shareScope: 'default',
+          treeShakingStatus: TreeShakingStatus.NO_USE,
+        },
+        {
+          sharedName: 'pkg',
+          version: '1.0.0',
+          layer: 'server',
+          shareScope: 'other',
+          treeShakingStatus: TreeShakingStatus.NO_USE,
+        },
+        {
+          sharedName: 'pkg',
+          version: '1.0.0',
+          layer: 'server',
+          shareScope: 'default',
+          treeShakingStatus: TreeShakingStatus.CALCULATED,
+        },
+        {
+          sharedName: 'pkg',
+          version: '1.0.0',
+          layer: 'client',
+          shareScope: 'default',
+          treeShakingStatus: TreeShakingStatus.NO_USE,
+        },
+      ],
+    } as any);
     const initOptions = { name: 'host', shared: { pkg: configs } };
     const webpackRequire = {
       federation: {
@@ -115,17 +116,15 @@ describe('unlayered tree-shaking snapshot matching', () => {
         get: localGet,
         shareConfig: { requiredVersion: false },
       };
-      jest
-        .mocked(helpers.global.getGlobalSnapshotInfoByModuleInfo)
-        .mockReturnValue({
-          shared: [
-            {
-              sharedName: 'pkg',
-              ...metadata,
-              treeShakingStatus: TreeShakingStatus.NO_USE,
-            },
-          ],
-        } as any);
+      jest.mocked(getGlobalSnapshotInfoByModuleInfo).mockReturnValue({
+        shared: [
+          {
+            sharedName: 'pkg',
+            ...metadata,
+            treeShakingStatus: TreeShakingStatus.NO_USE,
+          },
+        ],
+      } as any);
       const webpackRequire = {
         federation: {
           initOptions: { name: 'unlayered-host', shared: { pkg: shared } },
@@ -186,18 +185,16 @@ describe('unlayered tree-shaking snapshot matching', () => {
         get: localGet,
         shareConfig: { singleton: true, requiredVersion: false },
       };
-      jest
-        .mocked(helpers.global.getGlobalSnapshotInfoByModuleInfo)
-        .mockReturnValue({
-          shared: [
-            {
-              sharedName: 'pkg',
-              version: snapshotVersion,
-              shareScope: scope,
-              treeShakingStatus: TreeShakingStatus.NO_USE,
-            },
-          ],
-        } as any);
+      jest.mocked(getGlobalSnapshotInfoByModuleInfo).mockReturnValue({
+        shared: [
+          {
+            sharedName: 'pkg',
+            version: snapshotVersion,
+            shareScope: scope,
+            treeShakingStatus: TreeShakingStatus.NO_USE,
+          },
+        ],
+      } as any);
       const webpackRequire = {
         federation: {
           initOptions: {

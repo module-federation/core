@@ -1,18 +1,20 @@
-import { getRemoteEntry } from '@module-federation/runtime';
-import helpers from '@module-federation/runtime/helpers';
+import {
+  getRemoteEntry,
+  getGlobalSnapshotInfoByModuleInfo,
+} from '@module-federation/runtime-core/kernel';
 import type { ShareArgs } from '@module-federation/runtime/types';
 import { TreeShakingStatus } from '@module-federation/sdk';
 import { getSharedFallbackGetter } from '../src/getSharedFallbackGetter';
-import { init } from '../src/init';
+import { bundlerRuntime } from '../src';
+
 import type { WebpackRequire } from '../src/types';
 
-jest.mock('@module-federation/runtime', () => ({
-  getRemoteEntry: jest.fn(),
-}));
+const { init } = bundlerRuntime;
 
-jest.mock('@module-federation/runtime/helpers', () => ({
-  __esModule: true,
-  default: { global: { getGlobalSnapshotInfoByModuleInfo: jest.fn() } },
+jest.mock('@module-federation/runtime-core/kernel', () => ({
+  ...jest.requireActual('@module-federation/runtime-core/kernel'),
+  getRemoteEntry: jest.fn(),
+  getGlobalSnapshotInfoByModuleInfo: jest.fn(),
 }));
 
 const runtimeGlobal = globalThis as typeof globalThis & {
@@ -51,30 +53,34 @@ describe('unlayered snapshot fallback execution', () => {
       get: jest.fn(() => () => secondaryValue),
     };
     const loadFullEntry = jest.fn(async () => fullEntry);
-    jest.mocked(getRemoteEntry).mockResolvedValue(secondaryEntry);
     jest
-      .mocked(helpers.global.getGlobalSnapshotInfoByModuleInfo)
-      .mockReturnValue({
-        shared: [
-          ...(shareScope
-            ? [
-                {
-                  sharedName: 'pkg',
-                  version,
-                  treeShakingStatus: TreeShakingStatus.NO_USE,
-                },
-              ]
-            : []),
-          {
-            sharedName: 'pkg',
-            version,
-            shareScope,
-            treeShakingStatus: TreeShakingStatus.CALCULATED,
-            secondarySharedTreeShakingName: 'pkg_secondary',
-            secondarySharedTreeShakingEntry: '/secondary.js',
-          },
-        ],
-      } as ReturnType<typeof helpers.global.getGlobalSnapshotInfoByModuleInfo>);
+      .mocked(getRemoteEntry)
+      .mockImplementation(async (options) =>
+        options.remoteInfo.entry === '/secondary.js'
+          ? secondaryEntry
+          : loadFullEntry(options),
+      );
+    jest.mocked(getGlobalSnapshotInfoByModuleInfo).mockReturnValue({
+      shared: [
+        ...(shareScope
+          ? [
+              {
+                sharedName: 'pkg',
+                version,
+                treeShakingStatus: TreeShakingStatus.NO_USE,
+              },
+            ]
+          : []),
+        {
+          sharedName: 'pkg',
+          version,
+          shareScope,
+          treeShakingStatus: TreeShakingStatus.CALCULATED,
+          secondarySharedTreeShakingName: 'pkg_secondary',
+          secondarySharedTreeShakingEntry: '/secondary.js',
+        },
+      ],
+    } as ReturnType<typeof getGlobalSnapshotInfoByModuleInfo>);
     const origin = { name: 'snapshot-host' };
     const webpackRequire = {
       p: '/assets/',

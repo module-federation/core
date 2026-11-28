@@ -1,4 +1,4 @@
-import * as runtime from '@module-federation/runtime';
+import type * as runtime from '@module-federation/runtime';
 import type {
   Remote,
   RemoteEntryInitOptions,
@@ -270,4 +270,14 @@ export interface Federation {
       ]
     >
   >;
+}
+
+export type BundlerRuntime = NonNullable<Federation['bundlerRuntime']>;
+
+export interface Adapter {
+  bundlerRuntime: Partial<BundlerRuntime>;
+  beforeInit?: (
+    webpackRequire: WebpackRequire,
+    initOptions: InitOptions,
+  ) => void;
 }

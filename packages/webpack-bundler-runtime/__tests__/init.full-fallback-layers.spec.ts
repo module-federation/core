@@ -1,8 +1,17 @@
+import { getRemoteEntry } from '@module-federation/runtime-core/kernel';
 import { createInstance } from '@module-federation/runtime';
 import { TreeShakingStatus } from '@module-federation/sdk';
-import { init } from '../src/init';
+import { bundlerRuntime } from '../src';
+
 import { getSharedFallbackGetter } from '../src/getSharedFallbackGetter';
 import type { Federation, WebpackRequire } from '../src/types';
+
+const { init } = bundlerRuntime;
+
+jest.mock('@module-federation/runtime-core/kernel', () => ({
+  ...jest.requireActual('@module-federation/runtime-core/kernel'),
+  getRemoteEntry: jest.fn(),
+}));
 
 it.each([false, true])(
   'loads full fallbacks by scope, layer and version (reverse=%s)',
@@ -27,6 +36,7 @@ it.each([false, true])(
       init: async () => undefined,
       get: () => () => remoteInfo.entry,
     }));
+    jest.mocked(getRemoteEntry).mockImplementation(loadEntry);
     const localGet = jest.fn(() => () => 'tree-shaken');
     const webpackRequire = {
       p: '/assets/',
@@ -84,6 +94,9 @@ it('keeps legacy unlayered fallback tuples executable', async () => {
       },
     },
   } as unknown as WebpackRequire;
+  jest
+    .mocked(getRemoteEntry)
+    .mockImplementation(webpackRequire.federation.runtime!.getRemoteEntry);
   const get = getSharedFallbackGetter({
     shareKey: 'pkg',
     version: '1.0.0',
@@ -118,6 +131,9 @@ it.each([false, true])(
         },
       },
     } as unknown as WebpackRequire;
+    jest
+      .mocked(getRemoteEntry)
+      .mockImplementation(webpackRequire.federation.runtime!.getRemoteEntry);
     for (const [scope, expected] of [
       ['default', '/scalar.js'],
       [['default'], '/ordered.js'],
