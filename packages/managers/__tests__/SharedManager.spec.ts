@@ -73,18 +73,21 @@ describe('SharedManager', () => {
     sharedManager.init(options);
 
     expect(
-      Object.keys(sharedManager.sharedPluginOptions.shared['react']).every(
-        (key) =>
-          [
-            'singleton',
-            'requiredVersion',
-            'shareScope',
-            'name',
-            'version',
-            'eager',
-            'import',
-            'treeShaking',
-          ].includes(key),
+      Object.keys(
+        (sharedManager.sharedPluginOptions.shared as Record<string, object>)[
+          'react'
+        ],
+      ).every((key) =>
+        [
+          'singleton',
+          'requiredVersion',
+          'shareScope',
+          'name',
+          'version',
+          'eager',
+          'import',
+          'treeShaking',
+        ].includes(key),
       ),
     ).toEqual(true);
 
