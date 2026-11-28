@@ -2,7 +2,7 @@ import type { Rspack } from '@rsbuild/core';
 
 import { NODE_RUNTIME_PLUGIN } from './runtime-plugin';
 
-const DATA_JAVASCRIPT_REQUEST = /!=!data:text\/javascript(?:;|,)/i;
+const DATA_JAVASCRIPT_REQUEST = /(?:^|!=!)data:text\/javascript(?:;|,)/i;
 // Rspack's native plugin imports this path, and the rspack wrapper aliases it to a virtual module.
 const BUNDLER_RUNTIME_REQUEST =
   /[\\/]webpack-bundler-runtime[\\/]dist[\\/]index\.c?js$/;
@@ -32,17 +32,15 @@ const isFederationRemoteRequest = (
 export const shouldKeepBundledForFederation = (
   request: string,
   remoteNames?: Set<string>,
-  composedRuntime = false,
 ): boolean => {
   if (DATA_JAVASCRIPT_REQUEST.test(request)) {
     return true;
   }
 
-  if (request === NODE_RUNTIME_PLUGIN) {
-    return true;
-  }
-
-  if (composedRuntime && BUNDLER_RUNTIME_REQUEST.test(request)) {
+  if (
+    request === NODE_RUNTIME_PLUGIN ||
+    BUNDLER_RUNTIME_REQUEST.test(request)
+  ) {
     return true;
   }
 
@@ -59,7 +57,6 @@ export const shouldKeepBundledForFederation = (
 
 export const createFederationExternalBypass = (
   getRemoteNames: () => Set<string>,
-  composedRuntime = false,
 ): ((
   data: Rspack.ExternalItemFunctionData,
   callback: (
@@ -71,11 +68,7 @@ export const createFederationExternalBypass = (
   return function federationExternalBypass({ request }, callback) {
     if (
       !request ||
-      !shouldKeepBundledForFederation(
-        request,
-        getRemoteNames(),
-        composedRuntime,
-      )
+      !shouldKeepBundledForFederation(request, getRemoteNames())
     ) {
       return callback();
     }

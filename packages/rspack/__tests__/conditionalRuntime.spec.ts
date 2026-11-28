@@ -63,7 +63,6 @@ async function buildRemote(name: string, family: string) {
                 family,
                 'runtime-tools/dist/bundler.js',
               ),
-              experiments: { composedRuntime: true },
             },
           },
         ],
@@ -77,7 +76,6 @@ async function buildRemote(name: string, family: string) {
     warnings: string[];
     modules: string[];
   }[] = JSON.parse(result.slice('RESULT '.length));
-  expect(build.errors).toEqual([]);
   return build;
 }
 
@@ -106,6 +104,7 @@ describe('conditional runtime exports in a real Rspack build', () => {
     const family = copyRuntimeFamily('supported');
     const build = await buildRemote('supported', family);
 
+    expect(build.errors).toEqual([]);
     expect(
       build.modules.filter((module) => COMPOSED_ENTRY.test(module)),
     ).toHaveLength(1);
@@ -117,7 +116,7 @@ describe('conditional runtime exports in a real Rspack build', () => {
   });
 
   it.each(['require-only', 'missing-target'])(
-    'keeps a working full runtime when the composition export is %s',
+    'fails the build when the composition export is %s',
     async (condition) => {
       const family = copyRuntimeFamily(condition);
       const bundlerRuntime = path.join(family, 'webpack-bundler-runtime');
@@ -132,19 +131,12 @@ describe('conditional runtime exports in a real Rspack build', () => {
 
       const build = await buildRemote(condition, family);
 
-      expect(build.modules.some((module) => COMPOSED_ENTRY.test(module))).toBe(
-        false,
-      );
-      expect(build.modules.some((module) => LEGACY_ENTRY.test(module))).toBe(
-        true,
-      );
-      expect(build.warnings).toEqual([
+      expect(build.errors).toEqual([
         expect.stringContaining(
-          `${BUNDLER_RUNTIME}/compose cannot be imported for composition`,
+          `The federation runtime cannot be composed: ${BUNDLER_RUNTIME}/compose cannot be imported for composition`,
         ),
       ]);
-      expect(build.warnings[0]).toContain('full federation runtime');
-      await expectRemoteWorks(condition);
+      expect(build.warnings).toEqual([]);
     },
   );
 });

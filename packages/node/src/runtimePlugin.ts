@@ -20,7 +20,6 @@ type WebpackRequire = {
     chunkId: string,
   ) => void;
   federation: {
-    runtime?: { loadScriptNode?: LoadScriptNode };
     instance: ModuleFederation;
     chunkMatcher?: (chunkId: string) => boolean;
     rootOutputDir?: string;
@@ -373,7 +372,7 @@ export const deleteChunk = (
 };
 
 // Hoisted function to set up webpack script loader
-const NO_NODE_LOADER_MESSAGE =
+const NO_NODE_LOADER =
   'No Node script loader: the federation instance needs a node or universal platform to load remote entries in Node.';
 
 export const setupScriptLoader = (): void => {
@@ -385,17 +384,24 @@ export const setupScriptLoader = (): void => {
   ): void => {
     if (!key || chunkId)
       throw new Error(`__webpack_require__.l name is required for ${url}`);
-    const { instance, runtime } = __webpack_require__.federation;
-    const platform = instance?.platform as
-      | (ModuleFederation['platform'] & { loadScriptNode?: LoadScriptNode })
-      | undefined;
-    const info = { attrs: { globalName: key } };
-    (platform?.loadScriptNode
-      ? platform.loadScriptNode(url, info)
-      : runtime?.loadScriptNode
-        ? runtime.loadScriptNode(url, info)
-        : Promise.reject(new Error(NO_NODE_LOADER_MESSAGE))
-    )
+    const { instance } = __webpack_require__.federation;
+    if (!instance) {
+      done(
+        new Error(
+          `Cannot load ${url}: there is no federation instance; the federation runtime has not been initialized.`,
+        ),
+      );
+      return;
+    }
+    const platform = instance.platform as ModuleFederation['platform'] & {
+      loadScriptNode?: LoadScriptNode;
+    };
+    if (!platform.loadScriptNode) {
+      done(new Error(NO_NODE_LOADER));
+      return;
+    }
+    platform
+      .loadScriptNode(url, { attrs: { globalName: key } })
       .then((res) => {
         const enhancedRemote =
           __webpack_require__.federation.instance.initRawContainer(

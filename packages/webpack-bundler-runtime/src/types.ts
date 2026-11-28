@@ -222,7 +222,7 @@ export interface Federation {
   // The build opts into ordered dispatch on its own federation object.
   shareScopeDispatch?: 'declared';
   additionalShareScopeKeys?: string[];
-  runtime?: typeof runtime;
+  runtime?: { init: typeof runtime.init };
   instance?: runtime.ModuleFederation;
   initOptions?: InitOptions;
   installInitialConsumes?: (options: InstallInitialConsumesOptions) => any;

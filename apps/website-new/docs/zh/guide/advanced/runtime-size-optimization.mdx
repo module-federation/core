@@ -56,48 +56,26 @@ export default {
 
 上面的组合适用于一个非常精简的纯生产者：它只对外提供模块，不消费其他 Remote、不使用共享依赖，也不依赖 Manifest / Snapshot。实际项目应从默认值开始，只打开已经确认安全的选项。
 
-### 纯 Runtime 项目通过环境变量配置
+### 不使用 ModuleFederationPlugin 时按需组合 Runtime
 
-如果项目直接打包 `@module-federation/runtime` 或 `@module-federation/runtime-core`，没有使用上面的 `ModuleFederationPlugin`，可以用环境变量控制构建，并在打包配置中把环境变量替换为编译期布尔值。
+如果项目不使用 `ModuleFederationPlugin`，而是直接打包 Runtime，请从 `@module-federation/runtime/compose` 只导入项目用到的能力。没有导入的能力不会进入模块图，与优化模式无关。
 
-例如，一个不消费 Remote、不使用共享依赖和 Snapshot，也不包含 `exposes` 的项目可以这样构建：
+例如，一个只消费 Remote 的 Web Host：
 
-```bash
-FEDERATION_OPTIMIZE_NO_REMOTE=true \
-FEDERATION_OPTIMIZE_NO_SHARED=true \
-FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN=true \
-FEDERATION_HAS_EXPOSES=false \
-pnpm build
+```ts
+import { init } from '@module-federation/runtime/compose';
+import { remote } from '@module-federation/runtime-core/remote';
+import { web } from '@module-federation/runtime-core/platform/web';
+
+const host = init({ name: 'host', remotes }, { remote, platform: web });
+await host.loadRemote('shop/Button');
 ```
 
-Webpack 配置需要显式完成替换：
+构建需要时，再从 `@module-federation/runtime-core/shared` 导入 `shared`，从 `@module-federation/runtime-core/snapshot` 导入 `snapshot`。`import { init } from '@module-federation/runtime'` 仍然提供完整的 Runtime。
 
-```ts title="webpack.config.ts"
-import webpack from 'webpack';
-
-const federationDefines = {
-  FEDERATION_OPTIMIZE_NO_REMOTE: JSON.stringify(
-    process.env.FEDERATION_OPTIMIZE_NO_REMOTE === 'true',
-  ),
-  FEDERATION_OPTIMIZE_NO_SHARED: JSON.stringify(
-    process.env.FEDERATION_OPTIMIZE_NO_SHARED === 'true',
-  ),
-  FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: JSON.stringify(
-    process.env.FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'true',
-  ),
-  FEDERATION_HAS_EXPOSES: JSON.stringify(
-    process.env.FEDERATION_HAS_EXPOSES !== 'false',
-  ),
-};
-
-export default {
-  plugins: [new webpack.DefinePlugin(federationDefines)],
-};
-```
-
-Rspack 使用 `rspack.DefinePlugin` 传入同一份 `federationDefines`。Vite 可以把它传给顶层 `define` 配置。
-
-环境变量不能直接作为字符串留在运行时代码中，必须在构建时替换成 `true` 或 `false`，压缩工具才能删除对应代码。没有显式配置时，上述能力都会保持开启，兼容现有行为。
+:::info
+`FEDERATION_OPTIMIZE_NO_REMOTE`、`FEDERATION_OPTIMIZE_NO_SHARED`、`FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` 和 `FEDERATION_HAS_EXPOSES` 已被移除，Runtime 不再读取它们。
+:::
 
 ## 每个开关会移除什么
 

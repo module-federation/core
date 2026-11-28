@@ -24,7 +24,6 @@ module.exports = [
         library: { type: 'commonjs-module' },
         remotes: { remote: './remote/remoteEntry.js' },
         experiments: {
-          composedRuntime: true,
           optimization: {
             disableShared: true,
             disableSnapshot: true,

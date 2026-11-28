@@ -241,7 +241,6 @@ export function isLegallyVersion(version: string): boolean {
 interface BundlerRuntimeIntegration {
   // 1. Create bundler-specific runtime bridge
   createBundlerRuntime(): {
-    runtime: typeof runtime;
     instance?: ModuleFederation;
     bundlerRuntime: {
       remotes: (options: BundlerRemoteOptions) => Promise<any>;
@@ -289,7 +288,7 @@ class ViteBundlerRuntime implements BundlerRuntimeIntegration {
 
 ### Build-Time Responsibilities
 The build-time layer handles:
-- **DefinePlugin Integration**: Defines `FEDERATION_BUILD_IDENTIFIER` and `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` flags
+- **Bootstrap Generation**: Generates a bootstrap that imports only the runtime capabilities and adapters the build uses, and passes the build id
 - **Bundle Generation**: Creates remote entry files and module manifests
 - **Static Analysis**: Determines shared dependencies and remote configurations
 - **Code Splitting**: Separates remote modules from host bundles
@@ -306,13 +305,12 @@ The runtime layer handles:
 
 ### Critical Integration Points
 ```typescript
-// Build-time defines these globals, runtime consumes them
-declare const FEDERATION_BUILD_IDENTIFIER: string;
-declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
-
-// Runtime uses build-time generated information
-const buildId = getBuilderId(); // Reads FEDERATION_BUILD_IDENTIFIER
-const useSnapshot = !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN; // Feature flag
+// The generated bootstrap passes the build's capabilities, adapters, and id
+var federation = createFederation({
+  buildId: 'host:1.0.0',
+  capabilities: { remote, snapshot, platform: web }, // no snapshot: no snapshot plugins
+  adapters: [remotes, shareScope],
+});
 
 // Build-time generates manifest, runtime consumes it
 const manifest = await fetch('./mf-manifest.json');

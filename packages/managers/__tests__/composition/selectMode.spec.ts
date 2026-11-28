@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  MIN_RUNTIME_VERSION,
   RUNTIME_FAMILY,
   resolveRuntimeFamily,
 } from '../../src/composition/family';
@@ -17,6 +18,10 @@ const legacyReason = async (inputs: ModeInputs, family = composable()) => {
   const mode = await selectMode(family, inputs);
   return mode.mode === 'legacy' ? mode.reason : undefined;
 };
+const unsupportedReason = async (family: ReturnType<typeof composable>) => {
+  const mode = await selectMode(family, {});
+  return mode.mode === 'unsupported' ? mode.reason : undefined;
+};
 
 describe('selectMode', () => {
   it('composes a family that exports every required subpath', async () => {
@@ -28,7 +33,7 @@ describe('selectMode', () => {
     ['node-only', { node: './dist/compose.js' }],
     ['disabled', false],
     ['null', null],
-  ])('selects legacy for a %s composition export', async (_, target) => {
+  ])('rejects a %s composition export', async (_, target) => {
     const root = composableFamily(tempDir(), {
       [WBR]: {
         exports: { ...dualExports(RUNTIME_FAMILY[WBR]), './compose': target },
@@ -36,16 +41,16 @@ describe('selectMode', () => {
     });
 
     expect(require.resolve(WBR, { paths: [root] })).toMatch(/index\.cjs$/);
-    expect(await legacyReason({}, resolveRuntimeFamily(root))).toMatch(
+    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
       /webpack-bundler-runtime\/compose.*cannot be imported for composition/,
     );
   });
 
-  it('selects legacy when a composition export points to a missing file', async () => {
+  it('rejects a composition export that points to a missing file', async () => {
     const root = composableFamily(tempDir());
     fs.unlinkSync(path.join(packageDir(root, WBR), 'dist/compose.js'));
 
-    expect(await legacyReason({}, resolveRuntimeFamily(root))).toMatch(
+    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
       /webpack-bundler-runtime\/compose.*cannot be imported for composition/,
     );
   });
@@ -59,12 +64,12 @@ describe('selectMode', () => {
       ),
     );
 
-    expect(await legacyReason({}, resolveRuntimeFamily(root))).toMatch(
+    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
       /runtime-core\/platform\/node.*cannot be imported for composition/,
     );
   });
 
-  it('selects legacy for the older runtime-tools in the pnpm store', async () => {
+  it('rejects the older runtime-tools in the pnpm store and names the minimum version', async () => {
     const store = path.resolve(__dirname, '../../../../node_modules/.pnpm');
     const [older] = fs
       .readdirSync(store)
@@ -73,8 +78,7 @@ describe('selectMode', () => {
       );
     expect(older).toBeDefined();
 
-    const reason = await legacyReason(
-      {},
+    const reason = await unsupportedReason(
       resolveRuntimeFamily(
         path.join(
           store,
@@ -87,6 +91,10 @@ describe('selectMode', () => {
     expect(reason).toMatch(
       /@module-federation\/webpack-bundler-runtime at .* does not export "\.\/compose"/,
     );
+    expect(reason).toContain(
+      `the installed runtime family lacks the subpath exports this build needs; update the @module-federation runtime packages to the release that added them (${MIN_RUNTIME_VERSION})`,
+    );
+    expect(reason).not.toContain('or newer');
   });
 
   it('does not count a "./*" pattern as the required key', async () => {
@@ -95,33 +103,35 @@ describe('selectMode', () => {
         exports: { '.': './dist/index.js', './*': './dist/*.js' },
       },
     });
-    expect(await legacyReason({}, resolveRuntimeFamily(root))).toMatch(
+    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
       /runtime-core at .* does not export "\.\/kernel"/,
     );
   });
 
-  it('selects legacy when a member has another name', async () => {
+  it('rejects a member with another name', async () => {
     const root = composableFamily(tempDir(), {
       '@module-federation/runtime-core': { name: 'runtime-core-fork' },
     });
-    expect(await legacyReason({}, resolveRuntimeFamily(root))).toMatch(
-      /is named "runtime-core-fork"/,
-    );
+    const reason = await unsupportedReason(resolveRuntimeFamily(root));
+    expect(reason).toMatch(/is named "runtime-core-fork"/);
+    expect(reason).not.toContain(MIN_RUNTIME_VERSION);
   });
 
-  it('selects legacy when a member does not resolve', async () => {
+  it('rejects a member that does not resolve', async () => {
     const root = composableFamily(tempDir());
     fs.rmSync(packageDir(root, '@module-federation/sdk'), { recursive: true });
-    expect(await legacyReason({}, resolveRuntimeFamily(root))).toMatch(
+    const reason = await unsupportedReason(resolveRuntimeFamily(root));
+    expect(reason).toMatch(
       /@module-federation\/sdk could not be resolved from/,
     );
+    expect(reason).not.toContain(MIN_RUNTIME_VERSION);
   });
 
-  it('selects legacy for an exports string with no subpath keys', async () => {
+  it('rejects an exports string with no subpath keys', async () => {
     const root = composableFamily(tempDir(), {
       '@module-federation/runtime': { exports: './dist/index.js' as never },
     });
-    expect(await legacyReason({}, resolveRuntimeFamily(root))).toMatch(
+    expect(await unsupportedReason(resolveRuntimeFamily(root))).toMatch(
       /runtime at .* does not export "\.\/compose"/,
     );
   });
@@ -130,7 +140,11 @@ describe('selectMode', () => {
     ['externalRuntime', { externalRuntime: true }],
     ['provideExternalRuntime', { provideExternalRuntime: true }],
   ])('selects legacy on experiments.%s', async (_, experiments) => {
-    expect(await legacyReason({ experiments })).toMatch(/experiments\./);
+    expect(await selectMode(composable(), { experiments })).toEqual({
+      mode: 'legacy',
+      reason: expect.stringMatching(/experiments\./),
+      requested: true,
+    });
   });
 
   describe('externals', () => {

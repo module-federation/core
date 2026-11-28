@@ -13,7 +13,6 @@ module.exports = {
         },
       },
       experiments: {
-        composedRuntime: true,
         optimization: {
           disableRemote: true,
           disableSnapshot: true,

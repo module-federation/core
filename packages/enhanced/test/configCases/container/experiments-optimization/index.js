@@ -77,29 +77,37 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
     expect(nodeRemoteEntryEsm).toContain('attrs:{name');
   });
 
-  it('should eliminate the complete remote consumption path', () => {
+  it('should eliminate the remote handler but keep the remotes adapter its remote modules call', () => {
     expect(noRemote.length).toBeLessThan(fullCapabilities.length);
     expect(fullCapabilities).toContain('availableExposes');
     expect(fullCapabilities).toContain('mf_module_id');
-    expect(fullCapabilities).toContain('Container missing');
     expect(noRemote).not.toContain('availableExposes');
     expect(noRemote).not.toContain('mf_module_id');
-    expect(noRemote).not.toContain('Container missing');
+    expect(noRemote).toContain('Container missing');
   });
 
-  it('should eliminate the complete shared consumption path', () => {
-    const sharedRuntimeMarkers = [
+  it('should eliminate the shared handler but keep the share scope its container and remotes initialize', () => {
+    const sharedHandlerMarkers = ['afterRegisterShare', 'errorLoadShare'];
+    const shareScopeMarkers = [
       'Initialization of sharing external failed',
       'Shared module is not available for eager consumption',
-      'No fallback item found for shareKey',
-      'tree-shake-plugin',
     ];
 
     expect(noShared.length).toBeLessThan(fullCapabilities.length);
-    sharedRuntimeMarkers.forEach((marker) => {
+    sharedHandlerMarkers.forEach((marker) => {
       expect(fullCapabilities).toContain(marker);
       expect(noShared).not.toContain(marker);
     });
+    shareScopeMarkers.forEach((marker) => {
+      expect(noShared).toContain(marker);
+    });
+    // No build here configures shared, so no plan includes the consumes adapter.
+    ['No fallback item found for shareKey', 'tree-shake-plugin'].forEach(
+      (marker) => {
+        expect(fullCapabilities).not.toContain(marker);
+        expect(noShared).not.toContain(marker);
+      },
+    );
   });
 
   it('should eliminate container initialization from the consumer entry without exposes', () => {

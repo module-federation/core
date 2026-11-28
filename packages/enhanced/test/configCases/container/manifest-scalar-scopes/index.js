@@ -1,3 +1,6 @@
+import { createInstance } from '../../../../../runtime/dist/compose.js';
+import { shared } from '../../../../../runtime-core/dist/shared/capability.js';
+
 const fs = __non_webpack_require__('fs');
 const path = __non_webpack_require__('path');
 
@@ -8,10 +11,13 @@ it('retains and selects both same-version singletons in scalar scopes', async ()
   expect(a).not.toBe(b);
 
   // A consumer without local fallbacks verifies that both providers registered.
-  const consumer = new __webpack_require__.federation.instance.constructor({
-    name: `scalar_scopes_${TEST_PREFIX}consumer`,
-    remotes: [],
-  });
+  const consumer = createInstance(
+    {
+      name: `scalar_scopes_${TEST_PREFIX}consumer`,
+      remotes: [],
+    },
+    { shared },
+  );
   const registered = [];
   for (const scope of ['a', 'default']) {
     consumer.initShareScopeMap(scope, __webpack_share_scopes__[scope]);

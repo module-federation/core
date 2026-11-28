@@ -143,7 +143,10 @@ export class SharedHandler {
     this.host = host;
     this.shareScopeMap = {};
     this.initTokens = Object.create(null);
-    this._setGlobalShareScopeMap(host.options);
+    // A beforeInit plugin may set the id, so register once the options are final.
+    host.hooks.lifecycle.init.on(({ options }) =>
+      this._setGlobalShareScopeMap(options),
+    );
   }
 
   private emitAfterRegisterShare(

@@ -8,12 +8,10 @@ import { DtsPlugin } from '@module-federation/dts-plugin';
 import {
   ContainerManager,
   optionsParticipant,
-  utils,
 } from '@module-federation/managers';
 import { StatsPlugin } from '@module-federation/manifest';
 import {
   bindLoggerToCompiler,
-  composeKeyWithSeparator,
   type moduleFederationPlugin,
   infrastructureLogger,
 } from '@module-federation/sdk';
@@ -27,7 +25,6 @@ import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import FederationCompositionPlugin, {
   COVERED_BY_OPTIONS,
-  composedEntryOf,
 } from './runtime/FederationCompositionPlugin';
 import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
@@ -105,44 +102,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   }
 
   private _patchBundlerConfig(compiler: Compiler): void {
-    const { name, experiments, exposes } = this._options;
+    const { experiments } = this._options;
     const definePluginOptions: Record<string, string | boolean> = {};
-
-    const MFPluginNum = compiler.options.plugins.filter(
-      (p): p is WebpackPluginInstance =>
-        !!p && (p as any).name === 'ModuleFederationPlugin',
-    ).length;
-
-    if (name && MFPluginNum < 2) {
-      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
-        composeKeyWithSeparator(name, utils.getBuildVersion()),
-      );
-    }
-
-    const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
-      disableSnapshot;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_REMOTE'] =
-      experiments?.optimization?.disableRemote ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_SHARED'] =
-      experiments?.optimization?.disableShared ?? false;
-    definePluginOptions['FEDERATION_HAS_EXPOSES'] =
-      hasExposes(exposes) ||
-      compiler.options.plugins.some((plugin) => {
-        if (!plugin || typeof plugin !== 'object') {
-          return false;
-        }
-
-        const namedPlugin = plugin as WebpackPluginInstance & {
-          name?: string;
-          _options?: moduleFederationPlugin.ModuleFederationPluginOptions;
-        };
-        if (namedPlugin.name !== 'ModuleFederationPlugin') {
-          return false;
-        }
-
-        return hasExposes(namedPlugin._options?.exposes);
-      });
 
     // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
     if (
@@ -163,16 +124,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     // No inference for ENV_TARGET. If not manually set and valid, it's not defined.
 
     new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
-
-    if (experiments?.composedRuntime) {
-      // DefinePlugin reads its definitions per compilation, after the plan picked a mode.
-      compiler.hooks.compile.tap('ModuleFederationPlugin', () => {
-        if (!composedEntryOf(compiler)) return;
-        for (const key of Object.keys(definePluginOptions)) {
-          if (key !== 'ENV_TARGET') delete definePluginOptions[key];
-        }
-      });
-    }
   }
 
   /**

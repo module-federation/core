@@ -13,6 +13,7 @@ import {
   type GraphModule,
   type Participant,
   type RuntimeFamily,
+  type RuntimeMode,
 } from '@module-federation/managers';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
@@ -37,14 +38,12 @@ export class ComposedRuntimePlugin {
       runtime: string;
     },
     private readonly _buildId: string,
-    private readonly _defines: Record<string, string | boolean>,
   ) {}
 
   apply(compiler: Compiler): void {
     let composition: Composition | undefined;
-    let deciding: Promise<string | undefined> | undefined;
-    let legacyReason: string | undefined;
-    let composed = false;
+    let deciding: Promise<RuntimeMode> | undefined;
+    let mode: RuntimeMode | undefined;
 
     // VirtualModulesPlugin reads its modules in afterEnvironment.
     compiler.hooks.environment.tap(PLUGIN_NAME, () => {
@@ -53,23 +52,29 @@ export class ComposedRuntimePlugin {
     // rspack reads resolve.alias and its builtin plugins when it creates its native
     // compiler, after beforeRun and watchRun.
     const decide = async () => {
-      deciding ??= this._decide(compiler, composition!).then((reason) => {
-        this._applyDefines(compiler, reason === undefined);
-        return reason;
-      });
-      legacyReason = await deciding;
-      composed = legacyReason === undefined;
+      deciding ??= this._decide(compiler, composition!);
+      mode = await deciding;
     };
     compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, decide);
     compiler.hooks.watchRun.tapPromise(PLUGIN_NAME, decide);
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-      if (legacyReason !== undefined) {
-        compilation.warnings.push(
-          new compiler.webpack.WebpackError(
-            `experiments.composedRuntime is set, but this build uses the full federation runtime because ${legacyReason}.`,
+      const { WebpackError } = compiler.webpack;
+      if (mode?.mode === 'unsupported') {
+        compilation.errors.push(
+          new WebpackError(
+            `The federation runtime cannot be composed: ${mode.reason}.`,
           ),
         );
-      } else if (composed) {
+        return;
+      }
+      if (mode?.mode === 'legacy' && !mode.requested) {
+        compilation.warnings.push(
+          new WebpackError(
+            `This build uses the full federation runtime because ${mode.reason}.`,
+          ),
+        );
+      }
+      if (mode?.mode === 'composed') {
         compilation.hooks.finishModules.tap(PLUGIN_NAME, (modules) =>
           checkGraph(compilation, modules, composition!),
         );
@@ -113,7 +118,7 @@ export class ComposedRuntimePlugin {
   private async _decide(
     compiler: Compiler,
     { family, bootstrapPath, renderError }: Composition,
-  ): Promise<string | undefined> {
+  ): Promise<RuntimeMode> {
     const { resolve } = compiler.options;
     const alias = (resolve.alias ?? {}) as Record<string, unknown>;
     const mode = await selectMode(family, {
@@ -124,10 +129,13 @@ export class ComposedRuntimePlugin {
       aliasExemptions: [this._native.runtimeTools, this._native.runtime],
       virtualModulesPlugin: Boolean(virtualModulesPluginOf(compiler)),
     });
-    if (mode.mode === 'legacy') return mode.reason;
+    if (mode.mode !== 'composed') return mode;
     if (!bootstrapPath) throw renderError;
     if (alias[this._native.bundlerRuntime] !== undefined) {
-      return `resolve.alias already maps ${this._native.bundlerRuntime}`;
+      return {
+        mode: 'legacy',
+        reason: `resolve.alias already maps ${this._native.bundlerRuntime}`,
+      };
     }
     const runtime = alias[RUNTIME];
     resolve.alias = {
@@ -137,15 +145,7 @@ export class ComposedRuntimePlugin {
         [RUNTIME]: resolveRuntimeEsm(family),
       }),
     } as typeof resolve.alias;
-    return undefined;
-  }
-
-  private _applyDefines(compiler: Compiler, composed: boolean) {
-    const { DefinePlugin } = compiler.webpack;
-    if (!composed) return new DefinePlugin(this._defines).apply(compiler);
-    const { ENV_TARGET } = this._defines;
-    if (ENV_TARGET !== undefined)
-      new DefinePlugin({ ENV_TARGET }).apply(compiler);
+    return mode;
   }
 }
 

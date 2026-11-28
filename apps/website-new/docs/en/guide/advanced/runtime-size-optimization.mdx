@@ -56,48 +56,26 @@ For Webpack, change the import to `@module-federation/enhanced/webpack`.
 
 This combination is suitable for a minimal producer that only exposes modules, does not consume other Remotes, does not use shared dependencies, and does not depend on Manifest / Snapshot data. Start from the defaults and enable only options that are safe for your build.
 
-### Configure a runtime-only project with environment variables
+### Compose the runtime in a project without ModuleFederationPlugin
 
-If your project bundles `@module-federation/runtime` or `@module-federation/runtime-core` directly without `ModuleFederationPlugin`, use environment variables and replace them with build-time booleans in your bundler configuration.
+If your project bundles the runtime directly without `ModuleFederationPlugin`, import only the capabilities it uses from `@module-federation/runtime/compose`. A capability that you do not import is not in the module graph, in any optimization mode.
 
-For example, a project that does not consume Remotes, use shared dependencies or Snapshot data, and has no `exposes` can build with:
+For example, a web host that only consumes Remotes:
 
-```bash
-FEDERATION_OPTIMIZE_NO_REMOTE=true \
-FEDERATION_OPTIMIZE_NO_SHARED=true \
-FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN=true \
-FEDERATION_HAS_EXPOSES=false \
-pnpm build
+```ts
+import { init } from '@module-federation/runtime/compose';
+import { remote } from '@module-federation/runtime-core/remote';
+import { web } from '@module-federation/runtime-core/platform/web';
+
+const host = init({ name: 'host', remotes }, { remote, platform: web });
+await host.loadRemote('shop/Button');
 ```
 
-Webpack must replace the values explicitly:
+Add `shared` from `@module-federation/runtime-core/shared` and `snapshot` from `@module-federation/runtime-core/snapshot` when the build needs them. `import { init } from '@module-federation/runtime'` still gives the full runtime.
 
-```ts title="webpack.config.ts"
-import webpack from 'webpack';
-
-const federationDefines = {
-  FEDERATION_OPTIMIZE_NO_REMOTE: JSON.stringify(
-    process.env.FEDERATION_OPTIMIZE_NO_REMOTE === 'true',
-  ),
-  FEDERATION_OPTIMIZE_NO_SHARED: JSON.stringify(
-    process.env.FEDERATION_OPTIMIZE_NO_SHARED === 'true',
-  ),
-  FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: JSON.stringify(
-    process.env.FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'true',
-  ),
-  FEDERATION_HAS_EXPOSES: JSON.stringify(
-    process.env.FEDERATION_HAS_EXPOSES !== 'false',
-  ),
-};
-
-export default {
-  plugins: [new webpack.DefinePlugin(federationDefines)],
-};
-```
-
-With Rspack, pass the same `federationDefines` object to `rspack.DefinePlugin`. With Vite, pass it to the top-level `define` option.
-
-Leaving environment variables as runtime strings is not enough. The bundler must replace them with `true` or `false` at build time so the minifier can remove the corresponding code. All capabilities remain enabled when no value is provided, preserving existing behavior.
+:::info
+The `FEDERATION_OPTIMIZE_NO_REMOTE`, `FEDERATION_OPTIMIZE_NO_SHARED`, `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN`, and `FEDERATION_HAS_EXPOSES` defines were removed. The runtime no longer reads them.
+:::
 
 ## What each option removes
 

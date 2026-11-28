@@ -1,12 +1,16 @@
 import { getRemoteEntry } from '@module-federation/runtime-core/kernel';
 import { createInstance } from '@module-federation/runtime';
 import { TreeShakingStatus } from '@module-federation/sdk';
-import { bundlerRuntime } from '../src';
+import { consumes } from '../src/adapters/consumes';
 
 import { getSharedFallbackGetter } from '../src/getSharedFallbackGetter';
 import type { Federation, WebpackRequire } from '../src/types';
 
-const { init } = bundlerRuntime;
+const init = ({ webpackRequire }: { webpackRequire: WebpackRequire }) => {
+  const { initOptions, runtime } = webpackRequire.federation;
+  consumes.beforeInit!(webpackRequire, initOptions!);
+  return runtime!.init(initOptions!);
+};
 
 jest.mock('@module-federation/runtime-core/kernel', () => ({
   ...jest.requireActual('@module-federation/runtime-core/kernel'),

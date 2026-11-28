@@ -474,7 +474,6 @@ sequenceDiagram
 ```typescript
 // Pattern for any bundler
 interface BundlerRuntimeBridge {
-  runtime: typeof coreRuntime;        // Core runtime reference
   instance?: ModuleFederation;        // Runtime instance
   bundlerRuntime: {                   // Bundler-specific implementations
     remotes: (options) => Promise<Module>;
@@ -726,7 +725,7 @@ graph TB
 
     subgraph "Snapshot Handler"
         SnapshotHandler[SnapshotHandler]
-        OptCheck["Optimization Check<br/>FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN"]
+        OptCheck["Snapshot Capability<br/>runtime-core/snapshot"]
         ManifestGen["Manifest Generation<br/>generateSnapshotFromManifest"]
     end
 

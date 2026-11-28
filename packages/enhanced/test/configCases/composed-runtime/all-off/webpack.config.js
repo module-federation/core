@@ -6,7 +6,6 @@ module.exports = {
     new ModuleFederationPlugin({
       name: 'composed_all_off',
       experiments: {
-        composedRuntime: true,
         optimization: {
           disableRemote: true,
           disableShared: true,

@@ -14,7 +14,7 @@ import type {
 
 export type ComposedFederation = Omit<
   Federation,
-  'runtime' | 'instance' | 'bundlerRuntime'
+  'instance' | 'bundlerRuntime' | 'runtime'
 > & {
   instance?: FederationKernel;
   bundlerRuntime: Partial<BundlerRuntime> & {

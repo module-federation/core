@@ -14,6 +14,7 @@ import {
   type GraphModule,
   type Participant,
   type RuntimeFamily,
+  type RuntimeMode,
 } from '@module-federation/managers';
 import {
   composeKeyWithSeparator,
@@ -36,8 +37,8 @@ export interface ComposedEntry {
 
 interface Outcome {
   family?: RuntimeFamily;
+  mode: RuntimeMode;
   entry?: ComposedEntry;
-  legacyReason?: string;
 }
 
 export interface CompositionSlot {
@@ -55,6 +56,21 @@ export type CoveredByOptions = typeof COVERED_BY_OPTIONS;
 function slotOf(compiler: Compiler): CompositionSlot {
   const target = compiler as SlotCompiler;
   return (target[SLOT] ??= { participants: [], sealed: false });
+}
+
+/** The build id both bootstraps pass as options.id: only with one ModuleFederationPlugin. */
+export function buildIdOf(
+  compiler: Compiler,
+  { name }: { name?: string },
+): string | undefined {
+  const federationPlugins = compiler.options.plugins.filter(
+    (plugin) =>
+      !!plugin &&
+      (plugin as { name?: unknown }).name === 'ModuleFederationPlugin',
+  ).length;
+  return name && federationPlugins < 2
+    ? composeKeyWithSeparator(name, utils.getBuildVersion())
+    : undefined;
 }
 
 export const composedEntryOf = (compiler: Compiler) =>
@@ -114,8 +130,11 @@ class FederationCompositionPlugin {
     const plan = this._plan;
     if (!plan) {
       return {
-        legacyReason:
-          'the federation plan never ran: ModuleFederationPlugin was applied after afterResolvers or to a child compiler',
+        mode: {
+          mode: 'legacy',
+          reason:
+            'the federation plan never ran: ModuleFederationPlugin was applied after afterResolvers or to a child compiler',
+        },
       };
     }
     const family = resolveRuntimeFamily(
@@ -128,36 +147,29 @@ class FederationCompositionPlugin {
       alias: compiler.options.resolve.alias as never,
       aliasExemptions: this._aliasTargets,
     });
-    if (mode.mode === 'legacy') return { family, legacyReason: mode.reason };
+    if (mode.mode !== 'composed') return { family, mode };
     const composition = renderComposition(
       plan,
       resolveImports(plan, family),
-      this._buildId(compiler),
+      buildIdOf(compiler, this._options),
     );
     slot.entry = { ...this._createEntry(composition), adapters: plan.adapters };
-    return { family, entry: slot.entry };
+    return { family, mode, entry: slot.entry };
   }
 
-  private _buildId(compiler: Compiler): string | undefined {
-    const federationPlugins = compiler.options.plugins.filter(
-      (plugin) =>
-        !!plugin &&
-        (plugin as { name?: unknown }).name === 'ModuleFederationPlugin',
-    ).length;
-    const { name } = this._options;
-    return name && federationPlugins < 2
-      ? composeKeyWithSeparator(name, utils.getBuildVersion())
-      : undefined;
-  }
-
-  private _check(
-    compilation: Compilation,
-    { family, entry, legacyReason }: Outcome,
-  ) {
-    if (legacyReason !== undefined) {
+  private _check(compilation: Compilation, { family, mode, entry }: Outcome) {
+    if (mode.mode === 'unsupported') {
+      compilation.errors.push(
+        new WebpackError(
+          `The federation runtime cannot be composed: ${mode.reason}.`,
+        ),
+      );
+      return;
+    }
+    if (mode.mode === 'legacy' && !mode.requested) {
       compilation.warnings.push(
         new WebpackError(
-          `experiments.composedRuntime is set, but this build uses the full federation runtime because ${legacyReason}.`,
+          `This build uses the full federation runtime because ${mode.reason}.`,
         ),
       );
     }
