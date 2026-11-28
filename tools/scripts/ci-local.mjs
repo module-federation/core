@@ -211,10 +211,10 @@ const jobs = [
     name: 'e2e-runtime',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps('runtime'),
-      step('E2E Test for Runtime Demo', (ctx) =>
+      ...e2eSetupSteps('runtime', { cypress: false }),
+      step('Rstest runtime federation tests', (ctx) =>
         runWhenAffected(ctx, () =>
-          runCommand('pnpm', ['run', 'e2e:runtime'], ctx),
+          runCommand('pnpm', ['run', 'test:runtime:federation'], ctx),
         ),
       ),
     ],
@@ -223,15 +223,10 @@ const jobs = [
     name: 'e2e-manifest',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps('manifest'),
-      step('E2E Test for Manifest Demo (dev)', (ctx) =>
+      ...e2eSetupSteps('manifest', { cypress: false }),
+      step('Rstest manifest federation tests', (ctx) =>
         runWhenAffected(ctx, () =>
-          runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
-        ),
-      ),
-      step('E2E Test for Manifest Demo (prod)', (ctx) =>
-        runWhenAffected(ctx, () =>
-          runCommand('pnpm', ['run', 'e2e:manifest:prod'], ctx),
+          runCommand('pnpm', ['run', 'test:manifest:federation'], ctx),
         ),
       ),
     ],
@@ -240,10 +235,10 @@ const jobs = [
     name: 'e2e-node',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps('node'),
-      step('E2E Node Federation', (ctx) =>
+      ...e2eSetupSteps('node', { cypress: false }),
+      step('Rstest Node federation tests', (ctx) =>
         runWhenAffected(ctx, () =>
-          runCommand('pnpm', ['run', 'e2e:node'], ctx),
+          runCommand('pnpm', ['run', 'test:node:federation'], ctx),
         ),
       ),
     ],
@@ -252,7 +247,7 @@ const jobs = [
     name: 'e2e-rstest',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps('rstest'),
+      ...e2eSetupSteps('rstest', { cypress: false }),
       step('E2E Rstest Federation', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand(
@@ -324,10 +319,10 @@ const jobs = [
     name: 'e2e-router',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps('router'),
+      ...e2eSetupSteps('router', { cypress: false }),
       step('E2E Test for Router', (ctx) =>
         runWhenAffected(ctx, () =>
-          runCommand('pnpm', ['run', 'e2e:router'], ctx),
+          runCommand('pnpm', ['run', 'test:router:federation'], ctx),
         ),
       ),
     ],
@@ -486,6 +481,9 @@ const jobs = [
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
       step('Build packages (current)', (ctx) => runPackagesBuild(ctx)),
+      step('Test bundle-size component', (ctx) =>
+        runCommand('pnpm', ['run', 'test:bundle-size'], ctx),
+      ),
       step('Measure bundle sizes (current)', (ctx) =>
         runCommand(
           'node',

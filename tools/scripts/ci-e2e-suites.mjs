@@ -9,7 +9,7 @@ export const E2E_SUITE_DEFINITIONS = {
     ],
     inputs: [
       '.github/workflows/e2e-manifest.yml',
-      'tools/scripts/run-manifest-e2e.mjs',
+      'apps/manifest-demo/webpack-host/rstest.config.ts',
     ],
   },
   metro: {
@@ -69,7 +69,8 @@ export const E2E_SUITE_DEFINITIONS = {
     ],
     inputs: [
       '.github/workflows/e2e-node.yml',
-      'tools/scripts/run-node-e2e.mjs',
+      'apps/node-host-e2e/remotes.ts',
+      'apps/node-host-e2e/rstest.config.ts',
     ],
   },
   rstest: {
@@ -94,14 +95,17 @@ export const E2E_SUITE_DEFINITIONS = {
     ],
     inputs: [
       '.github/workflows/e2e-router.yml',
-      'tools/scripts/run-router-e2e.mjs',
+      'apps/router-demo/router-host-2000/rstest.config.ts',
+      'tools/rstest/expected-errors.ts',
+      'apps/router-demo/router-host-2000/module-federation.config.ts',
     ],
   },
   runtime: {
     appNames: ['runtime-host', 'runtime-remote1', 'runtime-remote2'],
     inputs: [
       '.github/workflows/e2e-runtime.yml',
-      'tools/scripts/run-runtime-e2e.mjs',
+      'apps/runtime-demo/3005-runtime-host/rstest.config.ts',
+      'tools/rstest/expected-errors.ts',
     ],
   },
   sharedTreeShaking: {

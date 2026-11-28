@@ -1,5 +1,5 @@
 # .github/workflows/e2e-node.yml
-name: E2E Node Federation
+name: Rstest Node federation tests
 
 on:
   workflow_call:
@@ -39,11 +39,8 @@ jobs:
             ${{ runner.os }}-turbo-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-
 
-      - name: Install Cypress
-        run: npx cypress install
-
       - name: Build shared packages
         run: pnpm run build:packages
 
-      - name: E2E Node Federation
-        run: pnpm run e2e:node
+      - name: Rstest Node federation tests
+        run: pnpm run test:node:federation

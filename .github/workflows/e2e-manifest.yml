@@ -39,14 +39,8 @@ jobs:
             ${{ runner.os }}-turbo-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-
 
-      - name: Install Cypress
-        run: npx cypress install
-
       - name: Build shared packages
         run: pnpm run build:packages
 
-      - name: E2E Test for Manifest Demo (dev)
-        run: pnpm exec turbo run test:e2e --filter=3008-webpack-host
-
-      - name: E2E Test for Manifest Demo (prod)
-        run: pnpm exec turbo run test:e2e:production --filter=3008-webpack-host
+      - name: Rstest manifest federation tests
+        run: pnpm run test:manifest:federation

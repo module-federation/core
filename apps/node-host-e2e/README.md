@@ -1,34 +1,19 @@
-# node-host-e2e
+# Node federation tests
 
-This is the example application for Module Federation core.
+This Rstest suite loads webpack-built Node remotes. It checks a static local CommonJS import, an HTTP remote import, a dynamically registered remote with axios, and forced replacement of that remote.
 
-## Troubleshooting
+Run from the repository root:
 
-Clear `.nx` cache if you encounter unexpected build issues.
-
-## Installation
-
-```bash
-pnpm install
+```sh
+pnpm run test:node:federation
 ```
 
-## Usage
+The command builds the Rstest plugin and four remotes, then runs the tests. Rstest starts three static remote servers and closes them after the run. A separate webpack consumer reuses the demo host's configuration to verify `asyncStartup`. It does not start Express or webpack dev servers.
 
-Run the development server and navigate to the provided localhost URL.
+After building the remotes, rerun only the tests:
 
-## Description
+```sh
+pnpm --filter node-host-e2e run test
+```
 
-This package demonstrates a specific use case of Module Federation within the ecosystem.
-
-## Scripts
-
-- `pnpm start`: Start dev server
-- `pnpm build`: Build production bundle
-
-## Configuration
-
-Check `webpack.config.js` or `next.config.js` for federation settings.
-
-## Links
-
-- [Module Federation Docs](https://module-federation.io/)
+The Express routes and HTTP response shape in `apps/node-host` are outside this suite's coverage.
